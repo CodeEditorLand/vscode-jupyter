@@ -1,5 +1,30 @@
 {
-    "name": "eslint-plugin-local-rules",
-    "version": "1.0.0",
-    "main": "index.js"
+  "name": "eslint-plugin-local-rules",
+  "version": "0.0.1",
+  "main": "index.js",
+  "homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
+  "bugs": {
+    "url": "https://github.com/CodeEditorLand/CodeEditorLand/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeEditorLand/CodeEditorLand.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "private": "false",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "Nikola Hristov",
+    "email": "nikola@nikolahristov.tech",
+    "url": "https://nikolahristov.tech"
+  },
+  "scripts": {
+    "prepublishOnly": "TypeScriptESBuild Source/**/*.ts"
+  },
+  "devDependencies": {
+    "typescript-esbuild": "0.3.1"
   }
+}
