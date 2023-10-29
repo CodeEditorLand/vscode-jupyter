@@ -2,40 +2,14 @@
   "name": "jupyter",
   "displayName": "Jupyter",
   "version": "0.0.1",
+  "private": "false",
   "description": "Jupyter notebook support, interactive programming and computing that supports Intellisense, debugging and more.",
-  "publisher": "ms-toolsai",
-  "author": {
-    "name": "Nikola Hristov",
-    "email": "nikola@nikolahristov.tech",
-    "url": "https://nikolahristov.tech"
-  },
-  "extensionPack": [
-    "ms-toolsai.jupyter-keymap",
-    "ms-toolsai.jupyter-renderers",
-    "ms-toolsai.vscode-jupyter-slideshow",
-    "ms-toolsai.vscode-jupyter-cell-tags"
-  ],
-  "license": "MIT",
-  "homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CodeEditorLand/CodeEditorLand.git"
-  },
-  "bugs": {
-    "url": "https://github.com/CodeEditorLand/CodeEditorLand/issues"
-  },
-  "qna": "https://github.com/microsoft/vscode-jupyter/discussions",
-  "icon": "icon.png",
-  "galleryBanner": {
-    "color": "#ffffff",
-    "theme": "light"
-  },
-  "engines": {
-    "vscode": "1.83.0"
-  },
-  "l10n": "./l10n",
-  "extensionKind": [
-    "workspace"
+  "categories": [
+    "Extension Packs",
+    "Data Science",
+    "Machine Learning",
+    "Notebooks",
+    "Visualization"
   ],
   "keywords": [
     "jupyter",
@@ -45,211 +19,81 @@
     "python",
     "interactive"
   ],
-  "categories": [
-    "Extension Packs",
-    "Data Science",
-    "Machine Learning",
-    "Notebooks",
-    "Visualization"
-  ],
-  "activationEvents": [
-    "onLanguage:python",
-    "onLanguage:jupyter",
-    "onNotebook:jupyter-notebook",
-    "onNotebook:interactive",
-    "onWebviewPanel:jupyter-variables",
-    "onWebviewPanel:jupyter"
-  ],
+  "homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
+  "bugs": {
+    "url": "https://github.com/CodeEditorLand/CodeEditorLand/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeEditorLand/CodeEditorLand.git"
+  },
+  "license": "MIT",
+  "qna": "https://github.com/microsoft/vscode-jupyter/discussions",
+  "author": {
+    "name": "Nikola Hristov",
+    "email": "nikola@nikolahristov.tech",
+    "url": "https://nikolahristov.tech"
+  },
+  "publisher": "playform",
+  "type": "module",
   "main": "./out/extension.node.js",
   "browser": "./out/extension.web.bundle.js",
-  "capabilities": {
-    "virtualWorkspaces": true,
-    "untrustedWorkspaces": {
-      "supported": "limited",
-      "description": "%capabilities.untrustedWorkspace.description%"
-    }
+  "scripts": {
+    "checkDependencies": "gulp checkDependencies",
+    "clean": "gulp clean",
+    "compile": "tsc -watch -p ./",
+    "compile-no-watch": "tsc -p ./",
+    "compile-viewers": "npx tsx build/esbuild/build.ts",
+    "compile-viewers-release": "npx tsx build/esbuild/build.ts --production",
+    "compile-viewers-watch": "npx tsx build/esbuild/build.ts --watch",
+    "compile-web": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js",
+    "compile-web-test": "cross-env VSC_TEST_BUNDLE=true npm run compile-web",
+    "compile-web-test-watch": "cross-env VSC_TEST_BUNDLE=true npm run compile-web-watch",
+    "compile-web-watch": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js --stats-error-details --watch --progress",
+    "compiled": "deemon npm run compile",
+    "createNycFolder": "gulp createNycFolder",
+    "download-api": "npx vscode-dts dev",
+    "postdownload-api": "npx vscode-dts main",
+    "generateTelemetry": "gulp generateTelemetry",
+    "postinstall": "npm run download-api && node ./build/ci/postInstall.js",
+    "installPythonLibs": "gulp installPythonLibs",
+    "kill-compiled": "deemon --kill npm run compile",
+    "launchWebExtension": "node ./build/launchWeb.js",
+    "lint": "eslint -c .eslintrc.js --ext .ts --ext .tsx src",
+    "openInBrowser": "vscode-test-web --extensionDevelopmentPath=. ./src/test/datascience",
+    "package": "gulp clean && gulp prePublishBundle && vsce package -o ms-toolsai-jupyter-insiders.vsix",
+    "packagePreRelease": "gulp clean && gulp prePublishBundle && vsce package --pre-release -o ms-toolsai-jupyter-insiders.vsix",
+    "prePublishBundlePreRelease": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=true gulp prePublishBundle",
+    "prePublishBundleStable": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=false gulp prePublishBundle",
+    "prePublishNonBundle": "gulp clean && gulp prePublishNonBundle",
+    "preTestJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js",
+    "prepublishOnly": "TypeScriptESBuild Source/**/*.ts",
+    "prettier-fix": "prettier 'src/**/*.ts*' --write && prettier 'build/**/*.js' --write",
+    "printTestResults": "gulp printTestResults",
+    "setup-precommit-hook": "husky install",
+    "startJupyterServer": "node build/preDebugWebTest.js",
+    "stopJupyterServer": "node build/postDebugWebTest.js",
+    "test:cover:report": "nyc report --reporter=text --reporter=html --reporter=text-summary --reporter=cobertura",
+    "test:unittests": "mocha --config ./build/.mocha.unittests.js.json ./out/**/*.unit.test.js",
+    "testJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js && cross-env CODE_TESTS_WORKSPACE=src/test VSC_JUPYTER_CI_TEST_GREP='Language Server:' node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js && node ./out/test/languageServers/jedi/lspTeardown.node.js",
+    "testNativeNotebooksAndWebviews": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=webview-test node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+    "pretestNativeNotebooksInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
+    "testNativeNotebooksInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+    "testNativeNotebooksInVSCodeWithoutTestSuffix": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+    "pretestNativeNotebooksWithoutPythonInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
+    "testNativeNotebooksWithoutPythonInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=@nonPython VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+    "testSmoke": "node ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
+    "testSmokeLogged": "cross-env VSC_JUPYTER_FORCE_LOGGING=true node --no-force-async-hooks-checks ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
+    "testWebExtension": "node ./build/launchWebTest.js",
+    "updateBuildNumber": "gulp updateBuildNumber",
+    "validateTelemetry": "gulp validateTelemetry",
+    "validateTranslationFiles": "gulp validateTranslationFiles",
+    "verifyUnhandledErrors": "gulp verifyUnhandledErrors",
+    "webpack": "webpack",
+    "webpack-analyze:node": "npx webpack --json --config build/webpack/webpack.extension.node.config.js > out/stats-node.json && yarn webpack-bundle-analyzer out/stats-node.json",
+    "webpack-analyze:web": "npx webpack --json --config build/webpack/webpack.extension.web.config.js > out/stats-web.json && yarn webpack-bundle-analyzer out/stats-web.json"
   },
   "contributes": {
-    "walkthroughs": [
-      {
-        "id": "jupyterWelcome",
-        "title": "%contributes.walkthroughs.jupyterWelcome.title%",
-        "description": "%contributes.walkthroughs.jupyterWelcome.description%",
-        "when": "workspacePlatform != webworker",
-        "steps": [
-          {
-            "id": "ipynb.newUntitledIpynb",
-            "title": "%contributes.walkthroughs.jupyterWelcome.steps.ipynb.newUntitledIpynb.title%",
-            "description": "%contributes.walkthroughs.jupyterWelcome.steps.ipynb.newUntitledIpynb.description%",
-            "media": {
-              "svg": "resources/walkthroughs/opennotebook.svg",
-              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.ipynb.newUntitledIpynb.media.altText%"
-            },
-            "completionEvents": [
-              "onCommand:ipynb.newUntitledIpynb",
-              "onCommand:jupyter.createnewinteractive",
-              "onCommand:workbench.action.files.openFolder",
-              "onCommand:workbench.action.files.openFileFolder"
-            ]
-          },
-          {
-            "id": "jupyter.selectKernel",
-            "title": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.selectKernel.title%",
-            "description": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.selectKernel.description%",
-            "media": {
-              "svg": "resources/walkthroughs/kernel.svg",
-              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.selectKernel.media.altText%"
-            },
-            "completionEvents": [
-              "onCommand:notebook.selectKernel"
-            ]
-          },
-          {
-            "id": "jupyter.exploreAndDebug",
-            "title": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.exploreAndDebug.title%",
-            "description": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.exploreAndDebug.description%",
-            "media": {
-              "svg": "resources/walkthroughs/data.svg",
-              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.exploreAndDebug.media.altText%"
-            }
-          },
-          {
-            "id": "jupyter.dataScienceLearnMore",
-            "title": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.dataScienceLearnMore.title%",
-            "description": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.dataScienceLearnMore.description%",
-            "media": {
-              "svg": "resources/walkthroughs/learnmore.svg",
-              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.dataScienceLearnMore.media.altText%"
-            }
-          }
-        ]
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "jupyter.execSelectionInteractive",
-        "key": "shift+enter",
-        "when": "editorTextFocus && editorLangId == python && !findInputFocussed && !replaceInputFocussed && jupyter.ownsSelection && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.runcurrentcelladvance",
-        "key": "shift+enter",
-        "when": "editorTextFocus && !editorHasSelection && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.runcurrentcell",
-        "key": "ctrl+enter",
-        "when": "editorTextFocus && !editorHasSelection && jupyter.hascodecells && !notebookEditorFocused && !jupyter.havenativecells"
-      },
-      {
-        "command": "jupyter.runcurrentcellandaddbelow",
-        "key": "alt+enter",
-        "when": "editorTextFocus && !editorHasSelection && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "key": "shift+enter",
-        "when": "activeEditor == 'workbench.editor.interactive' && notebookKernel =~ /^ms-toolsai.jupyter\\// || activeEditor == 'workbench.editor.interactive' && !notebookKernel",
-        "command": "interactive.execute"
-      },
-      {
-        "key": "escape",
-        "when": "activeEditor == 'workbench.editor.interactive' && !editorHoverVisible && !suggestWidgetVisible && !isComposing && !inSnippetMode && !exceptionWidgetVisible && !selectionAnchorSet && !LinkedEditingInputVisible && !renameInputVisible && !editorHasSelection && !accessibilityHelpWidgetVisible && !breakpointWidgetVisible && !findWidgetVisible && !markersNavigationVisible && !parameterHintsVisible && !editorHasMultipleSelections && !notificationToastsVisible",
-        "command": "interactive.input.clear"
-      },
-      {
-        "command": "jupyter.insertCellBelowPosition",
-        "key": "ctrl+; s",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.insertCellBelow",
-        "key": "ctrl+; b",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.insertCellAbove",
-        "key": "ctrl+; a",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.deleteCells",
-        "key": "ctrl+; x",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.extendSelectionByCellAbove",
-        "key": "ctrl+alt+shift+[",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.extendSelectionByCellBelow",
-        "key": "ctrl+alt+shift+]",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.moveCellsUp",
-        "key": "ctrl+; u",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.moveCellsDown",
-        "key": "ctrl+; d",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.changeCellToMarkdown",
-        "key": "ctrl+; m",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.changeCellToCode",
-        "key": "ctrl+; c",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.gotoNextCellInFile",
-        "key": "ctrl+alt+]",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.gotoPrevCellInFile",
-        "key": "ctrl+alt+[",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.selectCellContents",
-        "key": "ctrl+alt+\\",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.selectCell",
-        "key": "ctrl+alt+shift+\\",
-        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
-      },
-      {
-        "command": "jupyter.refreshDataViewer",
-        "key": "ctrl+r",
-        "mac": "cmd+r",
-        "when": "jupyter.dataViewerActive"
-      },
-      {
-        "command": "jupyter.runAndDebugCell",
-        "key": "ctrl+alt+shift+enter",
-        "mac": "ctrl+shift+enter"
-      },
-      {
-        "command": "jupyter.runByLine",
-        "key": "f10"
-      },
-      {
-        "command": "jupyter.runByLineNext",
-        "key": "f10"
-      },
-      {
-        "command": "jupyter.runByLineStop",
-        "key": "ctrl+enter"
-      }
-    ],
     "commands": [
       {
         "command": "dataScience.ClearCache",
@@ -811,10 +655,671 @@
         "category": "Jupyter"
       }
     ],
-    "submenus": [
+    "configuration": {
+      "type": "object",
+      "title": "Jupyter",
+      "properties": {
+        "jupyter.experiments.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.experiments.enabled.description%",
+          "scope": "machine"
+        },
+        "jupyter.showVariableViewWhenDebugging": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.showVariableViewWhenDebugging.description%",
+          "scope": "resource"
+        },
+        "jupyter.logging.level": {
+          "type": "string",
+          "default": "debug",
+          "enum": [
+            "off",
+            "error",
+            "warn",
+            "info",
+            "debug",
+            "verbose"
+          ],
+          "description": "%jupyter.configuration.jupyter.logging.level.description%"
+        },
+        "jupyter.experiments.optInto": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "enum": []
+          },
+          "markdownDescription": "%jupyter.configuration.jupyter.experiments.optInto.markdownDescription%",
+          "scope": "application"
+        },
+        "jupyter.experiments.optOutFrom": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "enum": []
+          },
+          "markdownDescription": "%jupyter.configuration.jupyter.experiments.optOutFrom.markdownDescription%",
+          "scope": "application"
+        },
+        "jupyter.widgetScriptSources": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string",
+            "enum": [
+              "jsdelivr.com",
+              "unpkg.com"
+            ],
+            "enumDescriptions": [
+              "%jupyter.configuration.jupyter.widgetScriptSources.items.enumDescriptions.0%",
+              "%jupyter.configuration.jupyter.widgetScriptSources.items.enumDescriptions.1%"
+            ]
+          },
+          "uniqueItems": true,
+          "markdownDescription": "%jupyter.configuration.jupyter.widgetScriptSources.markdownDescription%",
+          "scope": "resource"
+        },
+        "jupyter.askForLargeDataFrames": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.askForLargeDataFrames.description%",
+          "scope": "application"
+        },
+        "jupyter.askForKernelRestart": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.askForKernelRestart.description%"
+        },
+        "jupyter.exportWithOutputEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.exportWithOutputEnabled.description%",
+          "scope": "resource"
+        },
+        "jupyter.jupyterLaunchTimeout": {
+          "type": "number",
+          "default": 60000,
+          "description": "%jupyter.configuration.jupyter.jupyterLaunchTimeout.description%"
+        },
+        "jupyter.jupyterLaunchRetries": {
+          "type": "number",
+          "default": 3,
+          "description": "%jupyter.configuration.jupyter.jupyterLaunchRetries.description%"
+        },
+        "jupyter.jupyterCommandLineArguments": {
+          "type": "array",
+          "default": [],
+          "description": "%jupyter.configuration.jupyter.jupyterCommandLineArguments.description%",
+          "scope": "resource"
+        },
+        "jupyter.notebookFileRoot": {
+          "type": "string",
+          "default": "${fileDirname}",
+          "markdownDescription": "%jupyter.configuration.jupyter.notebookFileRoot.description%",
+          "scope": "resource"
+        },
+        "jupyter.searchForJupyter": {
+          "type": "boolean",
+          "default": true,
+          "deprecationMessage": "%jupyter.configuration.jupyter.searchForJupyter.deprecationMessage%",
+          "description": "%jupyter.configuration.jupyter.searchForJupyter.description%",
+          "scope": "resource"
+        },
+        "jupyter.useDefaultConfigForJupyter": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.useDefaultConfigForJupyter.description%"
+        },
+        "jupyter.jupyterInterruptTimeout": {
+          "type": "number",
+          "default": 10000,
+          "description": "%jupyter.configuration.jupyter.jupyterInterruptTimeout.description%"
+        },
+        "jupyter.sendSelectionToInteractiveWindow": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.sendSelectionToInteractiveWindow.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.sendSelectionToInteractiveWindow.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.textEditor.executeSelection": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.sendSelectionToInteractiveWindow.description%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.textEditor.normalizeSelection": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.normalizeSelectionForInteractiveWindow.description%",
+          "scope": "resource"
+        },
+        "jupyter.variableExplorerExclude": {
+          "type": "string",
+          "default": "module;function;builtin_function_or_method;ABCMeta;type;ModelMetaclass",
+          "description": "%jupyter.configuration.jupyter.variableExplorerExclude.description%",
+          "scope": "resource"
+        },
+        "jupyter.codeRegularExpression": {
+          "type": "string",
+          "default": "^(#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
+          "description": "%jupyter.configuration.jupyter.codeRegularExpression.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.codeRegularExpression.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.cellMarker.codeRegex": {
+          "type": "string",
+          "default": "^(#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
+          "description": "%jupyter.configuration.jupyter.codeRegularExpression.description%",
+          "scope": "resource"
+        },
+        "jupyter.defaultCellMarker": {
+          "type": "string",
+          "default": "# %%",
+          "description": "%jupyter.configuration.jupyter.defaultCellMarker.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.defaultCellMarker.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.cellMarker.default": {
+          "type": "string",
+          "default": "# %%",
+          "description": "%jupyter.configuration.jupyter.defaultCellMarker.description%",
+          "scope": "resource"
+        },
+        "jupyter.markdownRegularExpression": {
+          "type": "string",
+          "default": "^(#\\s*%%\\s*\\[markdown\\]|#\\s*\\<markdowncell\\>)",
+          "description": "%jupyter.configuration.jupyter.markdownRegularExpression.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.markdownRegularExpression.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.cellMarker.markdownRegex": {
+          "type": "string",
+          "default": "^(#\\s*%%\\s*\\[markdown\\]|#\\s*\\<markdowncell\\>)",
+          "description": "%jupyter.configuration.jupyter.markdownRegularExpression.description%",
+          "scope": "resource"
+        },
+        "jupyter.ignoreVscodeTheme": {
+          "type": "boolean",
+          "default": false,
+          "deprecationMessage": "%jupyter.configuration.jupyter.ignoreVscodeTheme.deprecationMessage%",
+          "description": "%jupyter.configuration.jupyter.ignoreVscodeTheme.description%"
+        },
+        "jupyter.themeMatplotlibPlots": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.themeMatplotlibPlots.description%"
+        },
+        "jupyter.decorateCells": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.decorateCells.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.decorateCells.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.cellMarker.decorateCells": {
+          "type": "string",
+          "enum": [
+            "currentCell",
+            "allCells",
+            "None"
+          ],
+          "default": "currentCell",
+          "description": "%jupyter.configuration.jupyter.decorateCells.description%",
+          "scope": "resource"
+        },
+        "jupyter.enableCellCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.enableCellCodeLens.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.enableCellCodeLens.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.codeLens.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.enableCellCodeLens.description%",
+          "scope": "resource"
+        },
+        "jupyter.enableAutoMoveToNextCell": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.enableAutoMoveToNextCell.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.enableAutoMoveToNextCell.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.textEditor.autoMoveToNextCell": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.enableAutoMoveToNextCell.description%",
+          "scope": "resource"
+        },
+        "jupyter.allowUnauthorizedRemoteConnection": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.allowUnauthorizedRemoteConnection.description%"
+        },
+        "jupyter.generateSVGPlots": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.generateSVGPlots.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.generateSVGPlots.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.codeLenses": {
+          "type": "string",
+          "default": "jupyter.runcell, jupyter.runallcellsabove, jupyter.debugcell",
+          "description": "%jupyter.configuration.jupyter.codeLenses.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.codeLenses.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.codeLens.commands": {
+          "type": "string",
+          "default": "jupyter.runcell, jupyter.runallcellsabove, jupyter.debugcell",
+          "description": "%jupyter.configuration.jupyter.codeLenses.description%",
+          "scope": "resource"
+        },
+        "jupyter.debugCodeLenses": {
+          "type": "string",
+          "default": "jupyter.debugcontinue, jupyter.debugstop, jupyter.debugstepover",
+          "description": "%jupyter.configuration.jupyter.debugCodeLenses.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.debugCodeLenses.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.codeLes.debugCommands": {
+          "type": "string",
+          "default": "jupyter.debugcontinue, jupyter.debugstop, jupyter.debugstepover",
+          "description": "%jupyter.configuration.jupyter.debugCodeLenses.description%",
+          "scope": "resource"
+        },
+        "jupyter.debugpyDistPath": {
+          "type": "string",
+          "default": "",
+          "description": "%jupyter.configuration.jupyter.debugpyDistPath.description%",
+          "scope": "resource"
+        },
+        "jupyter.stopOnFirstLineWhileDebugging": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.stopOnFirstLineWhileDebugging.description%",
+          "scope": "resource"
+        },
+        "jupyter.remoteDebuggerPort": {
+          "type": "number",
+          "default": -1,
+          "description": "%jupyter.configuration.jupyter.remoteDebuggerPort.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.remoteDebuggerPort.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.disableJupyterAutoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.disableJupyterAutoStart.description%"
+        },
+        "jupyter.addGotoCodeLenses": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.addGotoCodeLenses.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.addGotoCodeLenses.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.codeLens.enableGotoCell": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.addGotoCodeLenses.description%",
+          "scope": "resource"
+        },
+        "jupyter.variableQueries": {
+          "type": "array",
+          "markdownDescription": "%jupyter.configuration.jupyter.variableQueries.markdownDescription%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.variableQueries.deprecationMessage%",
+          "scope": "machine",
+          "examples": [
+            [
+              {
+                "language": "python",
+                "query": "_rwho_ls = %who_ls\\nprint(_rwho_ls)",
+                "parseExpr": "'(\\w+)'"
+              },
+              {
+                "language": "julia",
+                "query": "whos",
+                "parseExpr": "'(\\w+)'"
+              }
+            ]
+          ]
+        },
+        "jupyter.kernels.excludePythonEnvironments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "%jupyter.configuration.jupyter.kernels.filter.markdownDescription%",
+          "scope": "machine-overridable",
+          "examples": [
+            [
+              "~/miniconda3/envs/tf/scripts/python.exe",
+              "~/miniconda3/envs/ds"
+            ]
+          ]
+        },
+        "jupyter.kernels.trusted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "%jupyter.configuration.jupyter.kernels.trusted.markdownDescription%",
+          "scope": "machine"
+        },
+        "jupyter.interactiveWindowMode": {
+          "type": "string",
+          "enum": [
+            "perFile",
+            "single",
+            "multiple"
+          ],
+          "scope": "resource",
+          "description": "%jupyter.configuration.jupyter.interactiveWindowMode.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.interactiveWindowMode.deprecationMessage%",
+          "default": "multiple"
+        },
+        "jupyter.interactiveWindow.creationMode": {
+          "type": "string",
+          "enum": [
+            "perFile",
+            "single",
+            "multiple"
+          ],
+          "scope": "resource",
+          "description": "%jupyter.configuration.jupyter.interactiveWindowMode.description%",
+          "default": "multiple"
+        },
+        "jupyter.pythonCellFolding": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.pythonCellFolding.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.pythonCellFolding.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.textEditor.cellFolding": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.pythonCellFolding.description%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindowViewColumn": {
+          "type": "string",
+          "enum": [
+            "beside",
+            "active",
+            "secondGroup"
+          ],
+          "scope": "resource",
+          "description": "%jupyter.configuration.jupyter.interactiveWindowViewColumn.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.interactiveWindowViewColumn.deprecationMessage%",
+          "default": "secondGroup"
+        },
+        "jupyter.interactiveWindow.viewColumn": {
+          "type": "string",
+          "enum": [
+            "beside",
+            "active",
+            "secondGroup"
+          ],
+          "scope": "resource",
+          "description": "%jupyter.configuration.jupyter.interactiveWindowViewColumn.description%",
+          "default": "secondGroup"
+        },
+        "jupyter.magicCommandsAsComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.magicCommandsAsComments.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.magicCommandsAsComments.deprecationMessage%"
+        },
+        "jupyter.interactiveWindow.textEditor.magicCommandsAsComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.magicCommandsAsComments.description%"
+        },
+        "jupyter.pythonExportMethod": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "commentMagics",
+            "nbconvert"
+          ],
+          "default": "direct",
+          "description": "%jupyter.configuration.jupyter.pythonExportMethod.description%",
+          "scope": "application"
+        },
+        "jupyter.runStartupCommands": {
+          "type": "array",
+          "default": "",
+          "description": "%jupyter.configuration.jupyter.runStartupCommands.description%",
+          "scope": "application"
+        },
+        "jupyter.debugJustMyCode": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.debugJustMyCode.description%",
+          "scope": "resource"
+        },
+        "jupyter.showOutlineButtonInNotebookToolbar": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.showOutlineButtonInNotebookToolbar.description%"
+        },
+        "jupyter.newCellOnRunLast": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.newCellOnRunLast.description%",
+          "deprecationMessage": "%jupyter.configuration.jupyter.newCellOnRunLast.deprecationMessage%",
+          "scope": "resource"
+        },
+        "jupyter.interactiveWindow.textEditor.autoAddNewCell": {
+          "type": "boolean",
+          "default": true,
+          "description": "%jupyter.configuration.jupyter.newCellOnRunLast.description%",
+          "scope": "resource"
+        },
+        "jupyter.pythonCompletionTriggerCharacters": {
+          "type": "string",
+          "default": ".%'\"",
+          "description": "%jupyter.configuration.jupyter.pythonCompletionTriggerCharacters.description%",
+          "scope": "application"
+        },
+        "jupyter.logKernelOutputSeparately": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.logKernelOutputSeparately.description%"
+        },
+        "jupyter.excludeUserSitePackages": {
+          "type": "boolean",
+          "default": false,
+          "description": "%jupyter.configuration.jupyter.excludeUserSitePackages.description%",
+          "scope": "application"
+        },
+        "jupyter.enableExtendedKernelCompletions": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%jupyter.configuration.jupyter.enableExtendedKernelCompletions.markdownDescription%",
+          "scope": "application"
+        },
+        "jupyter.executionAnalysis.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Experimental feature to enable execution analysis in notebooks",
+          "scope": "application"
+        }
+      }
+    },
+    "debuggers": [
       {
-        "id": "editor.interactiveWindow.context",
-        "label": "Run in Interactive Window"
+        "type": "Python Kernel Debug Adapter",
+        "label": "%jupyter.debuggers.kernel%"
+      },
+      {
+        "type": "Python Interactive Window Debug Adapter",
+        "label": "%jupyter.debuggers.interactive%"
+      }
+    ],
+    "jupyterVariableViewers": [
+      {
+        "command": "jupyter.showDataViewer",
+        "title": "%jupyter.command.jupyter.showDataViewer.title%",
+        "dataTypes": [
+          "DataFrame",
+          "list",
+          "dict",
+          "ndarray",
+          "Series",
+          "Tensor",
+          "EagerTensor",
+          "DataArray"
+        ]
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "jupyter.execSelectionInteractive",
+        "key": "shift+enter",
+        "when": "editorTextFocus && editorLangId == python && !findInputFocussed && !replaceInputFocussed && jupyter.ownsSelection && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.runcurrentcelladvance",
+        "key": "shift+enter",
+        "when": "editorTextFocus && !editorHasSelection && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.runcurrentcell",
+        "key": "ctrl+enter",
+        "when": "editorTextFocus && !editorHasSelection && jupyter.hascodecells && !notebookEditorFocused && !jupyter.havenativecells"
+      },
+      {
+        "command": "jupyter.runcurrentcellandaddbelow",
+        "key": "alt+enter",
+        "when": "editorTextFocus && !editorHasSelection && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "key": "shift+enter",
+        "when": "activeEditor == 'workbench.editor.interactive' && notebookKernel =~ /^ms-toolsai.jupyter\\// || activeEditor == 'workbench.editor.interactive' && !notebookKernel",
+        "command": "interactive.execute"
+      },
+      {
+        "key": "escape",
+        "when": "activeEditor == 'workbench.editor.interactive' && !editorHoverVisible && !suggestWidgetVisible && !isComposing && !inSnippetMode && !exceptionWidgetVisible && !selectionAnchorSet && !LinkedEditingInputVisible && !renameInputVisible && !editorHasSelection && !accessibilityHelpWidgetVisible && !breakpointWidgetVisible && !findWidgetVisible && !markersNavigationVisible && !parameterHintsVisible && !editorHasMultipleSelections && !notificationToastsVisible",
+        "command": "interactive.input.clear"
+      },
+      {
+        "command": "jupyter.insertCellBelowPosition",
+        "key": "ctrl+; s",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.insertCellBelow",
+        "key": "ctrl+; b",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.insertCellAbove",
+        "key": "ctrl+; a",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.deleteCells",
+        "key": "ctrl+; x",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.extendSelectionByCellAbove",
+        "key": "ctrl+alt+shift+[",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.extendSelectionByCellBelow",
+        "key": "ctrl+alt+shift+]",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.moveCellsUp",
+        "key": "ctrl+; u",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.moveCellsDown",
+        "key": "ctrl+; d",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.changeCellToMarkdown",
+        "key": "ctrl+; m",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.changeCellToCode",
+        "key": "ctrl+; c",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.gotoNextCellInFile",
+        "key": "ctrl+alt+]",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.gotoPrevCellInFile",
+        "key": "ctrl+alt+[",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.selectCellContents",
+        "key": "ctrl+alt+\\",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.selectCell",
+        "key": "ctrl+alt+shift+\\",
+        "when": "editorTextFocus && jupyter.hascodecells && !notebookEditorFocused"
+      },
+      {
+        "command": "jupyter.refreshDataViewer",
+        "key": "ctrl+r",
+        "mac": "cmd+r",
+        "when": "jupyter.dataViewerActive"
+      },
+      {
+        "command": "jupyter.runAndDebugCell",
+        "key": "ctrl+alt+shift+enter",
+        "mac": "ctrl+shift+enter"
+      },
+      {
+        "command": "jupyter.runByLine",
+        "key": "f10"
+      },
+      {
+        "command": "jupyter.runByLineNext",
+        "key": "f10"
+      },
+      {
+        "command": "jupyter.runByLineStop",
+        "key": "ctrl+enter"
+      }
+    ],
+    "languages": [
+      {
+        "id": "raw"
+      },
+      {
+        "id": "julia",
+        "aliases": [
+          "Julia",
+          "julia"
+        ],
+        "extensions": [
+          ".jl"
+        ]
       }
     ],
     "menus": {
@@ -1457,522 +1962,6 @@
         }
       ]
     },
-    "configuration": {
-      "type": "object",
-      "title": "Jupyter",
-      "properties": {
-        "jupyter.experiments.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.experiments.enabled.description%",
-          "scope": "machine"
-        },
-        "jupyter.showVariableViewWhenDebugging": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.showVariableViewWhenDebugging.description%",
-          "scope": "resource"
-        },
-        "jupyter.logging.level": {
-          "type": "string",
-          "default": "debug",
-          "enum": [
-            "off",
-            "error",
-            "warn",
-            "info",
-            "debug",
-            "verbose"
-          ],
-          "description": "%jupyter.configuration.jupyter.logging.level.description%"
-        },
-        "jupyter.experiments.optInto": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "enum": []
-          },
-          "markdownDescription": "%jupyter.configuration.jupyter.experiments.optInto.markdownDescription%",
-          "scope": "application"
-        },
-        "jupyter.experiments.optOutFrom": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "enum": []
-          },
-          "markdownDescription": "%jupyter.configuration.jupyter.experiments.optOutFrom.markdownDescription%",
-          "scope": "application"
-        },
-        "jupyter.widgetScriptSources": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "type": "string",
-            "enum": [
-              "jsdelivr.com",
-              "unpkg.com"
-            ],
-            "enumDescriptions": [
-              "%jupyter.configuration.jupyter.widgetScriptSources.items.enumDescriptions.0%",
-              "%jupyter.configuration.jupyter.widgetScriptSources.items.enumDescriptions.1%"
-            ]
-          },
-          "uniqueItems": true,
-          "markdownDescription": "%jupyter.configuration.jupyter.widgetScriptSources.markdownDescription%",
-          "scope": "resource"
-        },
-        "jupyter.askForLargeDataFrames": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.askForLargeDataFrames.description%",
-          "scope": "application"
-        },
-        "jupyter.askForKernelRestart": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.askForKernelRestart.description%"
-        },
-        "jupyter.exportWithOutputEnabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.exportWithOutputEnabled.description%",
-          "scope": "resource"
-        },
-        "jupyter.jupyterLaunchTimeout": {
-          "type": "number",
-          "default": 60000,
-          "description": "%jupyter.configuration.jupyter.jupyterLaunchTimeout.description%"
-        },
-        "jupyter.jupyterLaunchRetries": {
-          "type": "number",
-          "default": 3,
-          "description": "%jupyter.configuration.jupyter.jupyterLaunchRetries.description%"
-        },
-        "jupyter.jupyterCommandLineArguments": {
-          "type": "array",
-          "default": [],
-          "description": "%jupyter.configuration.jupyter.jupyterCommandLineArguments.description%",
-          "scope": "resource"
-        },
-        "jupyter.notebookFileRoot": {
-          "type": "string",
-          "default": "${fileDirname}",
-          "markdownDescription": "%jupyter.configuration.jupyter.notebookFileRoot.description%",
-          "scope": "resource"
-        },
-        "jupyter.searchForJupyter": {
-          "type": "boolean",
-          "default": true,
-          "deprecationMessage": "%jupyter.configuration.jupyter.searchForJupyter.deprecationMessage%",
-          "description": "%jupyter.configuration.jupyter.searchForJupyter.description%",
-          "scope": "resource"
-        },
-        "jupyter.useDefaultConfigForJupyter": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.useDefaultConfigForJupyter.description%"
-        },
-        "jupyter.jupyterInterruptTimeout": {
-          "type": "number",
-          "default": 10000,
-          "description": "%jupyter.configuration.jupyter.jupyterInterruptTimeout.description%"
-        },
-        "jupyter.sendSelectionToInteractiveWindow": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.sendSelectionToInteractiveWindow.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.sendSelectionToInteractiveWindow.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.textEditor.executeSelection": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.sendSelectionToInteractiveWindow.description%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.textEditor.normalizeSelection": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.normalizeSelectionForInteractiveWindow.description%",
-          "scope": "resource"
-        },
-        "jupyter.variableExplorerExclude": {
-          "type": "string",
-          "default": "module;function;builtin_function_or_method;ABCMeta;type;ModelMetaclass",
-          "description": "%jupyter.configuration.jupyter.variableExplorerExclude.description%",
-          "scope": "resource"
-        },
-        "jupyter.codeRegularExpression": {
-          "type": "string",
-          "default": "^(#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
-          "description": "%jupyter.configuration.jupyter.codeRegularExpression.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.codeRegularExpression.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.cellMarker.codeRegex": {
-          "type": "string",
-          "default": "^(#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
-          "description": "%jupyter.configuration.jupyter.codeRegularExpression.description%",
-          "scope": "resource"
-        },
-        "jupyter.defaultCellMarker": {
-          "type": "string",
-          "default": "# %%",
-          "description": "%jupyter.configuration.jupyter.defaultCellMarker.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.defaultCellMarker.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.cellMarker.default": {
-          "type": "string",
-          "default": "# %%",
-          "description": "%jupyter.configuration.jupyter.defaultCellMarker.description%",
-          "scope": "resource"
-        },
-        "jupyter.markdownRegularExpression": {
-          "type": "string",
-          "default": "^(#\\s*%%\\s*\\[markdown\\]|#\\s*\\<markdowncell\\>)",
-          "description": "%jupyter.configuration.jupyter.markdownRegularExpression.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.markdownRegularExpression.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.cellMarker.markdownRegex": {
-          "type": "string",
-          "default": "^(#\\s*%%\\s*\\[markdown\\]|#\\s*\\<markdowncell\\>)",
-          "description": "%jupyter.configuration.jupyter.markdownRegularExpression.description%",
-          "scope": "resource"
-        },
-        "jupyter.ignoreVscodeTheme": {
-          "type": "boolean",
-          "default": false,
-          "deprecationMessage": "%jupyter.configuration.jupyter.ignoreVscodeTheme.deprecationMessage%",
-          "description": "%jupyter.configuration.jupyter.ignoreVscodeTheme.description%"
-        },
-        "jupyter.themeMatplotlibPlots": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.themeMatplotlibPlots.description%"
-        },
-        "jupyter.decorateCells": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.decorateCells.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.decorateCells.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.cellMarker.decorateCells": {
-          "type": "string",
-          "enum": [
-            "currentCell",
-            "allCells",
-            "None"
-          ],
-          "default": "currentCell",
-          "description": "%jupyter.configuration.jupyter.decorateCells.description%",
-          "scope": "resource"
-        },
-        "jupyter.enableCellCodeLens": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.enableCellCodeLens.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.enableCellCodeLens.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.codeLens.enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.enableCellCodeLens.description%",
-          "scope": "resource"
-        },
-        "jupyter.enableAutoMoveToNextCell": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.enableAutoMoveToNextCell.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.enableAutoMoveToNextCell.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.textEditor.autoMoveToNextCell": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.enableAutoMoveToNextCell.description%",
-          "scope": "resource"
-        },
-        "jupyter.allowUnauthorizedRemoteConnection": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.allowUnauthorizedRemoteConnection.description%"
-        },
-        "jupyter.generateSVGPlots": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.generateSVGPlots.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.generateSVGPlots.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.codeLenses": {
-          "type": "string",
-          "default": "jupyter.runcell, jupyter.runallcellsabove, jupyter.debugcell",
-          "description": "%jupyter.configuration.jupyter.codeLenses.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.codeLenses.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.codeLens.commands": {
-          "type": "string",
-          "default": "jupyter.runcell, jupyter.runallcellsabove, jupyter.debugcell",
-          "description": "%jupyter.configuration.jupyter.codeLenses.description%",
-          "scope": "resource"
-        },
-        "jupyter.debugCodeLenses": {
-          "type": "string",
-          "default": "jupyter.debugcontinue, jupyter.debugstop, jupyter.debugstepover",
-          "description": "%jupyter.configuration.jupyter.debugCodeLenses.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.debugCodeLenses.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.codeLes.debugCommands": {
-          "type": "string",
-          "default": "jupyter.debugcontinue, jupyter.debugstop, jupyter.debugstepover",
-          "description": "%jupyter.configuration.jupyter.debugCodeLenses.description%",
-          "scope": "resource"
-        },
-        "jupyter.debugpyDistPath": {
-          "type": "string",
-          "default": "",
-          "description": "%jupyter.configuration.jupyter.debugpyDistPath.description%",
-          "scope": "resource"
-        },
-        "jupyter.stopOnFirstLineWhileDebugging": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.stopOnFirstLineWhileDebugging.description%",
-          "scope": "resource"
-        },
-        "jupyter.remoteDebuggerPort": {
-          "type": "number",
-          "default": -1,
-          "description": "%jupyter.configuration.jupyter.remoteDebuggerPort.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.remoteDebuggerPort.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.disableJupyterAutoStart": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.disableJupyterAutoStart.description%"
-        },
-        "jupyter.addGotoCodeLenses": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.addGotoCodeLenses.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.addGotoCodeLenses.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.codeLens.enableGotoCell": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.addGotoCodeLenses.description%",
-          "scope": "resource"
-        },
-        "jupyter.variableQueries": {
-          "type": "array",
-          "markdownDescription": "%jupyter.configuration.jupyter.variableQueries.markdownDescription%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.variableQueries.deprecationMessage%",
-          "scope": "machine",
-          "examples": [
-            [
-              {
-                "language": "python",
-                "query": "_rwho_ls = %who_ls\\nprint(_rwho_ls)",
-                "parseExpr": "'(\\w+)'"
-              },
-              {
-                "language": "julia",
-                "query": "whos",
-                "parseExpr": "'(\\w+)'"
-              }
-            ]
-          ]
-        },
-        "jupyter.kernels.excludePythonEnvironments": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "markdownDescription": "%jupyter.configuration.jupyter.kernels.filter.markdownDescription%",
-          "scope": "machine-overridable",
-          "examples": [
-            [
-              "~/miniconda3/envs/tf/scripts/python.exe",
-              "~/miniconda3/envs/ds"
-            ]
-          ]
-        },
-        "jupyter.kernels.trusted": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "markdownDescription": "%jupyter.configuration.jupyter.kernels.trusted.markdownDescription%",
-          "scope": "machine"
-        },
-        "jupyter.interactiveWindowMode": {
-          "type": "string",
-          "enum": [
-            "perFile",
-            "single",
-            "multiple"
-          ],
-          "scope": "resource",
-          "description": "%jupyter.configuration.jupyter.interactiveWindowMode.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.interactiveWindowMode.deprecationMessage%",
-          "default": "multiple"
-        },
-        "jupyter.interactiveWindow.creationMode": {
-          "type": "string",
-          "enum": [
-            "perFile",
-            "single",
-            "multiple"
-          ],
-          "scope": "resource",
-          "description": "%jupyter.configuration.jupyter.interactiveWindowMode.description%",
-          "default": "multiple"
-        },
-        "jupyter.pythonCellFolding": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.pythonCellFolding.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.pythonCellFolding.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.textEditor.cellFolding": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.pythonCellFolding.description%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindowViewColumn": {
-          "type": "string",
-          "enum": [
-            "beside",
-            "active",
-            "secondGroup"
-          ],
-          "scope": "resource",
-          "description": "%jupyter.configuration.jupyter.interactiveWindowViewColumn.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.interactiveWindowViewColumn.deprecationMessage%",
-          "default": "secondGroup"
-        },
-        "jupyter.interactiveWindow.viewColumn": {
-          "type": "string",
-          "enum": [
-            "beside",
-            "active",
-            "secondGroup"
-          ],
-          "scope": "resource",
-          "description": "%jupyter.configuration.jupyter.interactiveWindowViewColumn.description%",
-          "default": "secondGroup"
-        },
-        "jupyter.magicCommandsAsComments": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.magicCommandsAsComments.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.magicCommandsAsComments.deprecationMessage%"
-        },
-        "jupyter.interactiveWindow.textEditor.magicCommandsAsComments": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.magicCommandsAsComments.description%"
-        },
-        "jupyter.pythonExportMethod": {
-          "type": "string",
-          "enum": [
-            "direct",
-            "commentMagics",
-            "nbconvert"
-          ],
-          "default": "direct",
-          "description": "%jupyter.configuration.jupyter.pythonExportMethod.description%",
-          "scope": "application"
-        },
-        "jupyter.runStartupCommands": {
-          "type": "array",
-          "default": "",
-          "description": "%jupyter.configuration.jupyter.runStartupCommands.description%",
-          "scope": "application"
-        },
-        "jupyter.debugJustMyCode": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.debugJustMyCode.description%",
-          "scope": "resource"
-        },
-        "jupyter.showOutlineButtonInNotebookToolbar": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.showOutlineButtonInNotebookToolbar.description%"
-        },
-        "jupyter.newCellOnRunLast": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.newCellOnRunLast.description%",
-          "deprecationMessage": "%jupyter.configuration.jupyter.newCellOnRunLast.deprecationMessage%",
-          "scope": "resource"
-        },
-        "jupyter.interactiveWindow.textEditor.autoAddNewCell": {
-          "type": "boolean",
-          "default": true,
-          "description": "%jupyter.configuration.jupyter.newCellOnRunLast.description%",
-          "scope": "resource"
-        },
-        "jupyter.pythonCompletionTriggerCharacters": {
-          "type": "string",
-          "default": ".%'\"",
-          "description": "%jupyter.configuration.jupyter.pythonCompletionTriggerCharacters.description%",
-          "scope": "application"
-        },
-        "jupyter.logKernelOutputSeparately": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.logKernelOutputSeparately.description%"
-        },
-        "jupyter.excludeUserSitePackages": {
-          "type": "boolean",
-          "default": false,
-          "description": "%jupyter.configuration.jupyter.excludeUserSitePackages.description%",
-          "scope": "application"
-        },
-        "jupyter.enableExtendedKernelCompletions": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "%jupyter.configuration.jupyter.enableExtendedKernelCompletions.markdownDescription%",
-          "scope": "application"
-        },
-        "jupyter.executionAnalysis.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Experimental feature to enable execution analysis in notebooks",
-          "scope": "application"
-        }
-      }
-    },
-    "languages": [
-      {
-        "id": "raw"
-      },
-      {
-        "id": "julia",
-        "aliases": [
-          "Julia",
-          "julia"
-        ],
-        "extensions": [
-          ".jl"
-        ]
-      }
-    ],
     "notebookPreload": [
       {
         "type": "jupyter-notebook",
@@ -2000,6 +1989,22 @@
         "requiresMessaging": "always"
       }
     ],
+    "submenus": [
+      {
+        "id": "editor.interactiveWindow.context",
+        "label": "Run in Interactive Window"
+      }
+    ],
+    "views": {
+      "jupyter-variables": [
+        {
+          "type": "webview",
+          "id": "jupyterViewVariables",
+          "name": "Variables",
+          "when": "jupyter.hasNativeNotebookOrInteractiveWindowOpen"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -2016,112 +2021,70 @@
         }
       ]
     },
-    "views": {
-      "jupyter-variables": [
-        {
-          "type": "webview",
-          "id": "jupyterViewVariables",
-          "name": "Variables",
-          "when": "jupyter.hasNativeNotebookOrInteractiveWindowOpen"
-        }
-      ]
-    },
-    "debuggers": [
+    "walkthroughs": [
       {
-        "type": "Python Kernel Debug Adapter",
-        "label": "%jupyter.debuggers.kernel%"
-      },
-      {
-        "type": "Python Interactive Window Debug Adapter",
-        "label": "%jupyter.debuggers.interactive%"
-      }
-    ],
-    "jupyterVariableViewers": [
-      {
-        "command": "jupyter.showDataViewer",
-        "title": "%jupyter.command.jupyter.showDataViewer.title%",
-        "dataTypes": [
-          "DataFrame",
-          "list",
-          "dict",
-          "ndarray",
-          "Series",
-          "Tensor",
-          "EagerTensor",
-          "DataArray"
+        "id": "jupyterWelcome",
+        "title": "%contributes.walkthroughs.jupyterWelcome.title%",
+        "description": "%contributes.walkthroughs.jupyterWelcome.description%",
+        "when": "workspacePlatform != webworker",
+        "steps": [
+          {
+            "id": "ipynb.newUntitledIpynb",
+            "title": "%contributes.walkthroughs.jupyterWelcome.steps.ipynb.newUntitledIpynb.title%",
+            "description": "%contributes.walkthroughs.jupyterWelcome.steps.ipynb.newUntitledIpynb.description%",
+            "media": {
+              "svg": "resources/walkthroughs/opennotebook.svg",
+              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.ipynb.newUntitledIpynb.media.altText%"
+            },
+            "completionEvents": [
+              "onCommand:ipynb.newUntitledIpynb",
+              "onCommand:jupyter.createnewinteractive",
+              "onCommand:workbench.action.files.openFolder",
+              "onCommand:workbench.action.files.openFileFolder"
+            ]
+          },
+          {
+            "id": "jupyter.selectKernel",
+            "title": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.selectKernel.title%",
+            "description": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.selectKernel.description%",
+            "media": {
+              "svg": "resources/walkthroughs/kernel.svg",
+              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.selectKernel.media.altText%"
+            },
+            "completionEvents": [
+              "onCommand:notebook.selectKernel"
+            ]
+          },
+          {
+            "id": "jupyter.exploreAndDebug",
+            "title": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.exploreAndDebug.title%",
+            "description": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.exploreAndDebug.description%",
+            "media": {
+              "svg": "resources/walkthroughs/data.svg",
+              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.exploreAndDebug.media.altText%"
+            }
+          },
+          {
+            "id": "jupyter.dataScienceLearnMore",
+            "title": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.dataScienceLearnMore.title%",
+            "description": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.dataScienceLearnMore.description%",
+            "media": {
+              "svg": "resources/walkthroughs/learnmore.svg",
+              "altText": "%contributes.walkthroughs.jupyterWelcome.steps.jupyter.dataScienceLearnMore.media.altText%"
+            }
+          }
         ]
       }
     ]
   },
-  "enabledApiProposals": [
-    "notebookDeprecated",
-    "notebookMessaging",
-    "notebookMime",
-    "notebookCellExecutionState",
-    "contribNotebookStaticPreloads",
-    "portsAttributes",
-    "quickPickSortByLabel",
-    "notebookKernelSource",
-    "interactiveWindow",
-    "notebookControllerAffinityHidden",
-    "quickPickItemTooltip",
-    "notebookExecution"
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:jupyter",
+    "onNotebook:jupyter-notebook",
+    "onNotebook:interactive",
+    "onWebviewPanel:jupyter-variables",
+    "onWebviewPanel:jupyter"
   ],
-  "scripts": {
-    "package": "gulp clean && gulp prePublishBundle && vsce package -o ms-toolsai-jupyter-insiders.vsix",
-    "packagePreRelease": "gulp clean && gulp prePublishBundle && vsce package --pre-release -o ms-toolsai-jupyter-insiders.vsix",
-    "prePublishBundleStable": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=false gulp prePublishBundle",
-    "prePublishBundlePreRelease": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=true gulp prePublishBundle",
-    "prePublishNonBundle": "gulp clean && gulp prePublishNonBundle",
-    "createNycFolder": "gulp createNycFolder",
-    "validateTranslationFiles": "gulp validateTranslationFiles",
-    "compile": "tsc -watch -p ./",
-    "compile-no-watch": "tsc -p ./",
-    "compiled": "deemon npm run compile",
-    "kill-compiled": "deemon --kill npm run compile",
-    "compile-web": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js",
-    "compile-web-watch": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js --stats-error-details --watch --progress",
-    "compile-web-test": "cross-env VSC_TEST_BUNDLE=true npm run compile-web",
-    "compile-web-test-watch": "cross-env VSC_TEST_BUNDLE=true npm run compile-web-watch",
-    "compile-viewers": "npx tsx build/esbuild/build.ts",
-    "compile-viewers-release": "npx tsx build/esbuild/build.ts --production",
-    "compile-viewers-watch": "npx tsx build/esbuild/build.ts --watch",
-    "checkDependencies": "gulp checkDependencies",
-    "postinstall": "npm run download-api && node ./build/ci/postInstall.js",
-    "installPythonLibs": "gulp installPythonLibs",
-    "test:unittests": "mocha --config ./build/.mocha.unittests.js.json ./out/**/*.unit.test.js",
-    "test:cover:report": "nyc report --reporter=text --reporter=html --reporter=text-summary --reporter=cobertura",
-    "preTestJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js",
-    "testJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js && cross-env CODE_TESTS_WORKSPACE=src/test VSC_JUPYTER_CI_TEST_GREP='Language Server:' node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js && node ./out/test/languageServers/jedi/lspTeardown.node.js",
-    "pretestNativeNotebooksInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
-    "testNativeNotebooksInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-    "testNativeNotebooksInVSCodeWithoutTestSuffix": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-    "pretestNativeNotebooksWithoutPythonInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
-    "testNativeNotebooksWithoutPythonInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=@nonPython VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-    "testNativeNotebooksAndWebviews": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=webview-test node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-    "testWebExtension": "node ./build/launchWebTest.js",
-    "launchWebExtension": "node ./build/launchWeb.js",
-    "testSmoke": "node ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
-    "testSmokeLogged": "cross-env VSC_JUPYTER_FORCE_LOGGING=true node --no-force-async-hooks-checks ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
-    "lint": "eslint -c .eslintrc.js --ext .ts --ext .tsx src",
-    "prettier-fix": "prettier 'src/**/*.ts*' --write && prettier 'build/**/*.js' --write",
-    "clean": "gulp clean",
-    "updateBuildNumber": "gulp updateBuildNumber",
-    "webpack": "webpack",
-    "download-api": "npx vscode-dts dev",
-    "postdownload-api": "npx vscode-dts main",
-    "generateTelemetry": "gulp generateTelemetry",
-    "openInBrowser": "vscode-test-web --extensionDevelopmentPath=. ./src/test/datascience",
-    "startJupyterServer": "node build/preDebugWebTest.js",
-    "stopJupyterServer": "node build/postDebugWebTest.js",
-    "validateTelemetry": "gulp validateTelemetry",
-    "verifyUnhandledErrors": "gulp verifyUnhandledErrors",
-    "printTestResults": "gulp printTestResults",
-    "setup-precommit-hook": "husky install",
-    "webpack-analyze:node": "npx webpack --json --config build/webpack/webpack.extension.node.config.js > out/stats-node.json && yarn webpack-bundle-analyzer out/stats-node.json",
-    "webpack-analyze:web": "npx webpack --json --config build/webpack/webpack.extension.web.config.js > out/stats-web.json && yarn webpack-bundle-analyzer out/stats-web.json",
-    "prepublishOnly": "TypeScriptESBuild Source/**/*.ts"
-  },
   "dependencies": {
     "@enonic/fnv-plus": "1.3.0",
     "@fluentui/react": "8.112.4",
@@ -2351,6 +2314,7 @@
     "tsx": "3.14.0",
     "typemoq": "2.1.0",
     "typescript": "5.2.2",
+    "typescript-esbuild": "0.3.1",
     "unicode-properties": "1.4.1",
     "utf-8-validate": "6.0.3",
     "util": "0.12.5",
@@ -2359,13 +2323,54 @@
     "webpack-bundle-analyzer": "4.9.1",
     "webpack-cli": "5.1.4",
     "yargs": "17.7.2",
-    "yargs-parser": "21.1.1",
-    "typescript-esbuild": "0.3.1"
+    "yargs-parser": "21.1.1"
   },
   "optionalDependencies": {
     "canvas": "2.11.2",
     "fsevents": "2.3.3"
   },
+  "extensionPack": [
+    "ms-toolsai.jupyter-keymap",
+    "ms-toolsai.jupyter-renderers",
+    "ms-toolsai.vscode-jupyter-cell-tags",
+    "ms-toolsai.vscode-jupyter-slideshow"
+  ],
+  "engines": {
+    "vscode": "1.83.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#ffffff",
+    "theme": "light"
+  },
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "%capabilities.untrustedWorkspace.description%"
+    }
+  },
+  "enabledApiProposals": [
+    "notebookDeprecated",
+    "notebookMessaging",
+    "notebookMime",
+    "notebookCellExecutionState",
+    "contribNotebookStaticPreloads",
+    "portsAttributes",
+    "quickPickSortByLabel",
+    "notebookKernelSource",
+    "interactiveWindow",
+    "notebookControllerAffinityHidden",
+    "quickPickItemTooltip",
+    "notebookExecution"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "l10n": "./l10n",
   "overrides": {
     "json5": "2.2.2",
     "string_decoder": "1.3.0",
@@ -2383,10 +2388,5 @@
       "url-parse": "$url-parse"
     },
     "d3-color": "3.1.0"
-  },
-  "type": "module",
-  "private": "false",
-  "publishConfig": {
-    "access": "public"
   }
 }
