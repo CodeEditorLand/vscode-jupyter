@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from '../../platform/common/utils/localize';
-import { getDisplayNameOrNameOfKernelConnection } from '../helpers';
-import { KernelConnectionMetadata, KernelInterpreterDependencyResponse } from '../types';
-import { BaseKernelError } from './types';
+import { DataScience } from "../../platform/common/utils/localize";
+import { getDisplayNameOrNameOfKernelConnection } from "../helpers";
+import {
+	KernelConnectionMetadata,
+	KernelInterpreterDependencyResponse,
+} from "../types";
+import { BaseKernelError } from "./types";
 
 /**
  * Control flow exception to indicate a dependency is missing in a kernel.
@@ -16,14 +19,16 @@ import { BaseKernelError } from './types';
  * Specific error message is shown in the cell telling the user how to fix the problem.
  */
 export class JupyterKernelDependencyError extends BaseKernelError {
-    constructor(
-        public reason: KernelInterpreterDependencyResponse,
-        kernelConnectionMetadata: KernelConnectionMetadata
-    ) {
-        super(
-            'noipykernel',
-            DataScience.kernelInvalid(getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)),
-            kernelConnectionMetadata
-        );
-    }
+	constructor(
+		public reason: KernelInterpreterDependencyResponse,
+		kernelConnectionMetadata: KernelConnectionMetadata
+	) {
+		super(
+			"noipykernel",
+			DataScience.kernelInvalid(
+				getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)
+			),
+			kernelConnectionMetadata
+		);
+	}
 }

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from '../../platform/common/utils/localize';
-import { KernelConnectionMetadata } from '../types';
-import { BaseKernelError } from './types';
+import { DataScience } from "../../platform/common/utils/localize";
+import { KernelConnectionMetadata } from "../types";
+import { BaseKernelError } from "./types";
 
 /**
  * Thrown when debugpy cannot be loaded into the kernel.
@@ -15,8 +15,14 @@ import { BaseKernelError } from './types';
  * Error is shown in the cell the user is trying to debug.
  */
 export class JupyterDebuggerNotInstalledError extends BaseKernelError {
-    constructor(debuggerPkg: string, message: string | undefined, kernelConnectionMetadata: KernelConnectionMetadata) {
-        const errorMessage = message ? message : DataScience.jupyterDebuggerNotInstalledError(debuggerPkg);
-        super('notinstalled', errorMessage, kernelConnectionMetadata);
-    }
+	constructor(
+		debuggerPkg: string,
+		message: string | undefined,
+		kernelConnectionMetadata: KernelConnectionMetadata
+	) {
+		const errorMessage = message
+			? message
+			: DataScience.jupyterDebuggerNotInstalledError(debuggerPkg);
+		super("notinstalled", errorMessage, kernelConnectionMetadata);
+	}
 }

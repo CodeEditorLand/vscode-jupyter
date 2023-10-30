@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { KernelConnectionMetadata } from '../types';
-import { WrappedKernelError } from './types';
+import { KernelConnectionMetadata } from "../types";
+import { WrappedKernelError } from "./types";
 
 /***
  * Thrown when a kernel dies during startup
@@ -14,12 +14,12 @@ import { WrappedKernelError } from './types';
  * Showing the stderr of the kernel in the first cell.
  */
 export class KernelDiedError extends WrappedKernelError {
-    constructor(
-        message: string,
-        public override readonly stdErr: string,
-        originalException: Error | undefined,
-        kernelConnectionMetadata: KernelConnectionMetadata
-    ) {
-        super(message, originalException, kernelConnectionMetadata);
-    }
+	constructor(
+		message: string,
+		public override readonly stdErr: string,
+		originalException: Error | undefined,
+		kernelConnectionMetadata: KernelConnectionMetadata
+	) {
+		super(message, originalException, kernelConnectionMetadata);
+	}
 }

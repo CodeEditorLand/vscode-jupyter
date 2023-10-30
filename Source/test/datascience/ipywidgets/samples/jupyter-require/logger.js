@@ -9,18 +9,18 @@
  * @since  0.3.2
  */
 
-define( [ "js-logger" ], function ( Logger ) {
-    'use strict';
+define(["js-logger"], function (Logger) {
+	"use strict";
 
-    Logger.useDefaults( {
-        defaultLevel: Logger.DEBUG,
-        formatter: function ( messages, context ) {
-            const name = context.name || "requirejs"
-            const date = new Date().toUTCString()
+	Logger.useDefaults({
+		defaultLevel: Logger.DEBUG,
+		formatter: function (messages, context) {
+			const name = context.name || "requirejs";
+			const date = new Date().toUTCString();
 
-            messages.unshift( `${ date } [${ name }] ${ context.level.name }:` )
-        }
-    } )
+			messages.unshift(`${date} [${name}] ${context.level.name}:`);
+		},
+	});
 
-    return ( name ) => _.isUndefined( name ) ? Logger : Logger.get( name )
-} )
+	return (name) => (_.isUndefined(name) ? Logger : Logger.get(name));
+});

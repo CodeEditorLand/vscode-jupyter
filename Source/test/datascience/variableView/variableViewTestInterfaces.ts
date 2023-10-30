@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { IVariableViewProvider } from '../../../webviews/extension-side/variablesView/types';
-import { VariableView } from '../../../webviews/extension-side/variablesView/variableView';
+import { IVariableViewProvider } from "../../../webviews/extension-side/variablesView/types";
+import { VariableView } from "../../../webviews/extension-side/variablesView/variableView";
 
 export interface ITestVariableViewProvider extends IVariableViewProvider {
-    readonly activeVariableView: Promise<VariableView>;
+	readonly activeVariableView: Promise<VariableView>;
 }

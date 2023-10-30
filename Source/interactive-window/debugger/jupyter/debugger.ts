@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Debugger } from '../../../notebooks/debugger/debugger';
-import { createDeferred } from '../../../platform/common/utils/async';
+import { Debugger } from "../../../notebooks/debugger/debugger";
+import { createDeferred } from "../../../platform/common/utils/async";
 
 export class IWDebugger extends Debugger {
-    private readonly _ready = createDeferred<void>();
-    public readonly ready = this._ready.promise;
+	private readonly _ready = createDeferred<void>();
+	public readonly ready = this._ready.promise;
 
-    public resolve() {
-        this._ready.resolve();
-    }
+	public resolve() {
+		this._ready.resolve();
+	}
 }
