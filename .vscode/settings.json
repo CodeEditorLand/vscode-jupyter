@@ -1,7 +1,8 @@
 // Place your settings in this file to overwrite default and user settings.
 {
     "files.exclude": {
-        "out": false, // set this to true to hide the "out" folder with the compiled JS files
+        "out": false,
+        "dist": false,
         "**/*.pyc": true,
         ".nyc_output": true,
         "obj": true,
@@ -17,7 +18,8 @@
         "**/.ropeproject/**": true
     },
     "search.exclude": {
-        "out": true, // set this to false to include "out" folder in search results
+        "out": true,
+        "dist": true,
         "**/node_modules": true,
         "coverage": true,
         "**/.venv/**": true,
@@ -30,19 +32,23 @@
     },
     "[typescript]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[javascript]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "git.branchProtection": ["main", "release*"],
+    "git.branchProtection": [
+        "main",
+        "release*"
+    ],
     "git.branchProtectionPrompt": "alwaysCommitToNewBranch",
     "typescript.tsdk": "./node_modules/typescript/lib", // we want to use the TS server from our node_modules folder to control its version
-    "python.linting.enabled": false,
     "python.testing.promptToConfigure": false,
     "python.workspaceSymbols.enabled": false,
-    "python.formatting.provider": "black",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+    },
     "typescript.preferences.quoteStyle": "single",
     "javascript.preferences.quoteStyle": "single",
     "typescriptHero.imports.stringQuoteStyle": "'",
@@ -54,15 +60,11 @@
     },
     "python.languageServer": "Pylance",
     "python.analysis.logLevel": "Trace",
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Args": [
-        // Match what black does.
-        "--max-line-length=88"
-    ],
     "typescript.preferences.importModuleSpecifier": "relative",
     "mochaExplorer.files": "./out/test/**/*.unit.test.js",
     "mochaExplorer.configFile": "./build/.mocha.unittests.js.json",
     "mochaExplorer.ui": "tdd",
-    "mochaExplorer.nodeArgv": ["--enable-source-maps"]
+    "mochaExplorer.nodeArgv": [
+        "--enable-source-maps"
+    ]
 }
