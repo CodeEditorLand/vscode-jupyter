@@ -10,11 +10,11 @@
  * @prop pythonExecutable - the path the the Python executable
  */
 export type PythonExecInfo = {
-	command: string;
-	args: string[];
+    command: string;
+    args: string[];
 
-	python: string[];
-	pythonExecutable: string;
+    python: string[];
+    pythonExecutable: string;
 };
 
 /**
@@ -23,30 +23,27 @@ export type PythonExecInfo = {
  * @param python - the path (or command + arguments) to use to invoke Python
  * @param pythonArgs - any extra arguments to use when running Python
  */
-export function buildPythonExecInfo(
-	python: string | string[],
-	pythonArgs?: string[]
-): PythonExecInfo {
-	if (Array.isArray(python)) {
-		const args = python.slice(1);
-		if (pythonArgs) {
-			args.push(...pythonArgs);
-		}
-		return {
-			args,
-			command: python[0],
-			python: [...python],
-			// It isn't necessarily the last item but our supported
-			// cases it currently is.
-			pythonExecutable: python[python.length - 1],
-		};
-	}
-	return {
-		command: python,
-		args: pythonArgs || [],
-		python: [python],
-		pythonExecutable: python,
-	};
+export function buildPythonExecInfo(python: string | string[], pythonArgs?: string[]): PythonExecInfo {
+    if (Array.isArray(python)) {
+        const args = python.slice(1);
+        if (pythonArgs) {
+            args.push(...pythonArgs);
+        }
+        return {
+            args,
+            command: python[0],
+            python: [...python],
+            // It isn't necessarily the last item but our supported
+            // cases it currently is.
+            pythonExecutable: python[python.length - 1],
+        };
+    }
+    return {
+        command: python,
+        args: pythonArgs || [],
+        python: [python],
+        pythonExecutable: python,
+    };
 }
 
 /**
@@ -55,23 +52,20 @@ export function buildPythonExecInfo(
  * @param orig - the object to copy
  * @param extraPythonArgs - any arguments to add to the end of `orig.args`
  */
-export function copyPythonExecInfo(
-	orig: PythonExecInfo,
-	extraPythonArgs?: string[]
-): PythonExecInfo {
-	const info = {
-		command: orig.command,
-		args: [...orig.args],
-		python: [...orig.python],
-		pythonExecutable: orig.pythonExecutable,
-	};
-	if (extraPythonArgs) {
-		info.args.push(...extraPythonArgs);
-	}
-	if (info.pythonExecutable === undefined) {
-		// It isn't necessarily the last item but our supported
-		// cases it currently is.
-		info.pythonExecutable = info.python[info.python.length - 1];
-	}
-	return info;
+export function copyPythonExecInfo(orig: PythonExecInfo, extraPythonArgs?: string[]): PythonExecInfo {
+    const info = {
+        command: orig.command,
+        args: [...orig.args],
+        python: [...orig.python],
+        pythonExecutable: orig.pythonExecutable,
+    };
+    if (extraPythonArgs) {
+        info.args.push(...extraPythonArgs);
+    }
+    if (info.pythonExecutable === undefined) {
+        // It isn't necessarily the last item but our supported
+        // cases it currently is.
+        info.pythonExecutable = info.python[info.python.length - 1];
+    }
+    return info;
 }

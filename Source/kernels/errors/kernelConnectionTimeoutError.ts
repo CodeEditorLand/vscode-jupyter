@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from "../../platform/common/utils/localize";
-import { getDisplayNameOrNameOfKernelConnection } from "../helpers";
-import { KernelConnectionMetadata } from "../types";
-import { BaseKernelError } from "./types";
+import { DataScience } from '../../platform/common/utils/localize';
+import { getDisplayNameOrNameOfKernelConnection } from '../helpers';
+import { KernelConnectionMetadata } from '../types';
+import { BaseKernelError } from './types';
 
 /**
  * Thrown when a raw kernel times out trying to connect to one of its ports.
@@ -16,13 +16,11 @@ import { BaseKernelError } from "./types";
  * Showing a message in the first cell.
  */
 export class KernelConnectionTimeoutError extends BaseKernelError {
-	constructor(kernelConnection: KernelConnectionMetadata) {
-		super(
-			"timeout",
-			DataScience.rawKernelStartFailedDueToTimeout(
-				getDisplayNameOrNameOfKernelConnection(kernelConnection)
-			),
-			kernelConnection
-		);
-	}
+    constructor(kernelConnection: KernelConnectionMetadata) {
+        super(
+            'timeout',
+            DataScience.rawKernelStartFailedDueToTimeout(getDisplayNameOrNameOfKernelConnection(kernelConnection)),
+            kernelConnection
+        );
+    }
 }

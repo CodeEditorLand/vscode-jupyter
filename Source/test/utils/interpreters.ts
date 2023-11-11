@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Uri } from "vscode";
-import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
+import { Uri } from 'vscode';
+import { PythonEnvironment } from '../../platform/pythonEnvironments/info';
 
 /**
  * Creates a PythonInterpreter object for testing purposes, with unique name, version and path.
@@ -12,16 +12,14 @@ import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
  * @param {Partial<PythonEnvironment>} [info]
  * @returns {PythonEnvironment}
  */
-export function createPythonInterpreter(
-	info?: Partial<PythonEnvironment>
-): PythonEnvironment {
-	const rnd = new Date().getTime().toString();
-	return {
-		displayName: `Something${rnd}`,
-		id: Uri.file(`somePath${rnd}`).path,
-		uri: Uri.file(`somePath${rnd}`),
-		sysPrefix: `someSysPrefix${rnd}`,
-		sysVersion: `1.1.1`,
-		...(info || {}),
-	};
+export function createPythonInterpreter(info?: Partial<PythonEnvironment>): PythonEnvironment {
+    const rnd = new Date().getTime().toString();
+    return {
+        displayName: `Something${rnd}`,
+        id: Uri.file(`somePath${rnd}`).path,
+        uri: Uri.file(`somePath${rnd}`),
+        sysPrefix: `someSysPrefix${rnd}`,
+        sysVersion: `1.1.1`,
+        ...(info || {})
+    };
 }

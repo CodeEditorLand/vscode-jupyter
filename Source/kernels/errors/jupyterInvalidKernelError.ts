@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from "../../platform/common/utils/localize";
-import { getDisplayNameOrNameOfKernelConnection } from "../helpers";
-import { KernelConnectionMetadata } from "../types";
-import { BaseKernelError } from "./types";
+import { DataScience } from '../../platform/common/utils/localize';
+import { getDisplayNameOrNameOfKernelConnection } from '../helpers';
+import { KernelConnectionMetadata } from '../types';
+import { BaseKernelError } from './types';
 
 /**
  * Thrown when kernel cannot be used & we have no idea why (applies to non-zmq cases).
@@ -18,13 +18,11 @@ import { BaseKernelError } from "./types";
  * tab for more information (hopefully the reason the kernel died).
  */
 export class JupyterInvalidKernelError extends BaseKernelError {
-	constructor(kernelConnectionMetadata: KernelConnectionMetadata) {
-		super(
-			"invalidkernel",
-			DataScience.kernelInvalid(
-				getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)
-			),
-			kernelConnectionMetadata
-		);
-	}
+    constructor(kernelConnectionMetadata: KernelConnectionMetadata) {
+        super(
+            'invalidkernel',
+            DataScience.kernelInvalid(getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)),
+            kernelConnectionMetadata
+        );
+    }
 }

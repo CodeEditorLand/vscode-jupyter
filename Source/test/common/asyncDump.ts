@@ -3,5 +3,5 @@
 
 // Call this function to debug async hangs. It should print out stack traces of still running promises.
 export function asyncDump() {
-	require("why-is-node-running")();
+    require('why-is-node-running')();
 }

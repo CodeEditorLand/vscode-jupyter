@@ -20,216 +20,211 @@
  * For details please refer to: https://github.com/CermakM/jupyter-require
  */
 
-define(["underscore"], function (_) {
-	// mime types
-	const MIME_JAVASCRIPT = "application/javascript";
-	const MIME_HTML = "text/html";
-	const MIME_TEXT = "text/plain";
 
-	const mime_types = {
-		MIME_JAVASCRIPT: MIME_JAVASCRIPT,
-		MIME_HTML: MIME_HTML,
-		MIME_TEXT: MIME_TEXT,
-	};
+define(['underscore'], function(_) {
 
-	/**
-	 * Object storing output display data and metadata
-	 *
-	 * @param js {Function} - function to be executed in cell context or safe script
-	 * @param html {Element} - DOM element to be appended
-	 * @returns {Object}
-	 */
-	function DisplayData(js, html) {
-		this.data = {};
-		this.metadata = {};
-		this.output_type = "display_data";
+    // mime types
+    const MIME_JAVASCRIPT = 'application/javascript';
+    const MIME_HTML = 'text/html';
+    const MIME_TEXT = 'text/plain';
 
-		if (_.isString(js)) {
-			// treated as safe script
-			this.data[MIME_JAVASCRIPT] = js;
-			this.data[MIME_TEXT] = "<JupyterRequire.display.SafeScript object>";
+    const mime_types = {
+        MIME_JAVASCRIPT: MIME_JAVASCRIPT,
+        MIME_HTML: MIME_HTML,
+        MIME_TEXT: MIME_TEXT,
+    };
 
-			this.metadata.finalized = true;
-		} else {
-			this.metadata.display = {
-				element: html,
-			};
-			this.metadata.execute = js;
+    /**
+     * Object storing output display data and metadata
+     *
+     * @param js {Function} - function to be executed in cell context or safe script
+     * @param html {Element} - DOM element to be appended
+     * @returns {Object}
+     */
+    function DisplayData(js, html) {
+        this.data = {};
+        this.metadata = {};
+        this.output_type = 'display_data';
 
-			this.metadata.finalized = false;
+        if (_.isString(js)) {
+            // treated as safe script
+            this.data[MIME_JAVASCRIPT] = js;
+            this.data[MIME_TEXT] = "<JupyterRequire.display.SafeScript object>";
 
-			this.metadata.frozen = false;
-			this.metadata.frozen_output = undefined;
-		}
-	}
+            this.metadata.finalized = true;
 
-	/**
-	 * Freeze the output and store it in the data
-	 *
-	 * The data object can be then be serialized into JSON and persists
-	 * after notebook is saved.
-	 *
-	 */
-	DisplayData.prototype.freeze_output = function () {
-		let frozen_output = {};
+        } else {
 
-		let display = this.metadata.display;
-		if (display === undefined || this.metadata.finalized) return;
+            this.metadata.display = {
+                element: html,
+            };
+            this.metadata.execute = js;
 
-		let elt = display.element;
-		if (_.isElement(elt.get(0))) {
-			let html = $(elt).addClass("output_frozen").html();
-			if (html.length > 0)
-				frozen_output = {
-					[MIME_HTML]: html,
-					[MIME_TEXT]: "<JupyterRequire.display.FrozenOutput object>",
-				};
-		}
+            this.metadata.finalized = false;
 
-		this.metadata.frozen = true;
-		this.metadata.frozen_output = frozen_output;
-	};
+            this.metadata.frozen = false;
+            this.metadata.frozen_output = undefined;
 
-	/**
-	 * Finalize the output
-	 *
-	 * The cell can no longer interact with JupyterRequire after
-	 * the output has been finalized. This is both safety measure
-	 * and convenience for storing the notebook.
-	 *
-	 * This function is triggered before notebook shutdown.
-	 *
-	 */
-	DisplayData.prototype.finalize_output = function () {
-		if (this.metadata.finalized) return;
+        }
+    }
 
-		if (this.metadata.frozen !== true) this.freeze_output();
+    /**
+     * Freeze the output and store it in the data
+     *
+     * The data object can be then be serialized into JSON and persists
+     * after notebook is saved.
+     *
+     */
+    DisplayData.prototype.freeze_output = function() {
+        let frozen_output = {};
 
-		this.data = this.metadata.frozen_output;
-		this.metadata = {
-			frozen: true,
-			finalized: true,
-		};
-	};
+        let display = this.metadata.display;
+        if (display === undefined || this.metadata.finalized)
+            return;
 
-	let create_output_subarea = function (output_area, toinsert) {
-		if (toinsert === undefined) {
-			toinsert = output_area.create_output_subarea(
-				{},
-				"output_javascript rendered_html",
-				MIME_JAVASCRIPT
-			);
-		}
+        let elt = display.element;
+        if (_.isElement(elt.get(0))) {
+            let html = $(elt).addClass('output_frozen').html();
+            if (html.length > 0)
+                frozen_output = {
+                    [MIME_HTML]: html,
+                    [MIME_TEXT]: "<JupyterRequire.display.FrozenOutput object>",
+                }
+        }
 
-		output_area.keyboard_manager.register_events(toinsert);
+        this.metadata.frozen = true;
+        this.metadata.frozen_output = frozen_output;
+    };
 
-		// preset width for user's comfort
-		// dry-run append to get the current output-area width
-		let output = output_area.create_output_area();
+    /**
+     * Finalize the output
+     *
+     * The cell can no longer interact with JupyterRequire after
+     * the output has been finalized. This is both safety measure
+     * and convenience for storing the notebook.
+     *
+     * This function is triggered before notebook shutdown.
+     *
+     */
+    DisplayData.prototype.finalize_output = function() {
+        if (this.metadata.finalized) return;
 
-		output.append(toinsert);
-		output_area.element.append(output);
+        if (this.metadata.frozen !== true)
+            this.freeze_output();
 
-		toinsert.css("width", toinsert.width());
+        this.data = this.metadata.frozen_output;
+        this.metadata = {
+            frozen: true,
+            finalized: true,
+        };
+    };
 
-		// clean up
-		output_area.element.empty();
 
-		return toinsert;
-	};
+    let create_output_subarea = function(output_area, toinsert) {
+        if (toinsert === undefined) {
+            toinsert = output_area.create_output_subarea(
+                {}, "output_javascript rendered_html", MIME_JAVASCRIPT);
+        }
 
-	let append_javascript = async function (js, output_area, context) {
-		let toinsert = await js(output_area, context);
-		let display_data = append_display_data(js, toinsert, output_area);
+        output_area.keyboard_manager.register_events(toinsert);
 
-		return append_output(
-			MIME_JAVASCRIPT,
-			display_data,
-			toinsert,
-			output_area
-		);
-	};
+        // preset width for user's comfort
+        // dry-run append to get the current output-area width
+        let output = output_area.create_output_area();
 
-	let append_output = function (type, display_data, toinsert, output_area) {
-		return new Promise((resolve) => {
-			let md = display_data.md;
+        output.append(toinsert);
+        output_area.element.append(output);
 
-			let output = output_area.create_output_area();
-			output.append(toinsert);
+        toinsert.css('width', toinsert.width());
 
-			output_area.element.append(output);
-			output_area.events.trigger("output_appended.OutputArea", [
-				type,
-				display_data,
-				md,
-				toinsert,
-			]);
+        // clean up
+        output_area.element.empty();
 
-			resolve({ output_area: output_area, output: display_data });
-		});
-	};
+        return toinsert;
+    };
 
-	let append_display_data = function (js, html, output_area) {
-		let display_data = new DisplayData(js, html);
+    let append_javascript = async function(js, output_area, context) {
+        let toinsert = await js(output_area, context);
+        let display_data = append_display_data(js, toinsert, output_area);
 
-		output_area.outputs.push(display_data);
+        return append_output(MIME_JAVASCRIPT, display_data, toinsert, output_area);
+    };
 
-		output_area.events.trigger("output_added.OutputArea", {
-			output_area: output_area,
-			output: display_data,
-		});
+    let append_output = function(type, display_data, toinsert, output_area) {
+        return new Promise((resolve) => {
+            let md = display_data.md;
 
-		return display_data;
-	};
+            let output = output_area.create_output_area();
+            output.append(toinsert);
 
-	let freeze_cell_outputs = function (cell) {
-		return new Promise((resolve) => {
-			if (cell.cell_type !== "code") resolve();
+            output_area.element.append(output);
+            output_area.events.trigger('output_appended.OutputArea', [type, display_data, md, toinsert]);
 
-			let outputs = cell.output_area.outputs;
+            resolve({output_area: output_area, output: display_data});
+        });
+    };
 
-			outputs.forEach((output) => {
-				if (output instanceof DisplayData) output.freeze_output();
-			});
+    let append_display_data = function(js, html, output_area){
+        let display_data = new DisplayData(js, html);
 
-			resolve();
-		});
-	};
+        output_area.outputs.push(display_data);
 
-	let finalize_cell_outputs = function (cell) {
-		return new Promise((resolve) => {
-			if (cell.cell_type !== "code") resolve();
+        output_area.events.trigger('output_added.OutputArea', {
+            output_area: output_area,
+            output: display_data
+        });
 
-			let outputs = cell.output_area.outputs;
+        return display_data;
+    };
 
-			outputs.forEach((output) => {
-				if (output instanceof DisplayData) {
-					output.freeze_output();
-					output.finalize_output();
-				}
-			});
+    let freeze_cell_outputs = function(cell) {
+        return new Promise((resolve) => {
+            if (cell.cell_type !== 'code') resolve();
 
-			// get rid of empty outputs, if any
-			cell.output_area.outputs = outputs.filter(
-				(d) => !_.isEmpty(d.data)
-			);
+            let outputs = cell.output_area.outputs;
 
-			resolve();
-		});
-	};
+            outputs.forEach((output) => {
+                if (output instanceof DisplayData)
+                    output.freeze_output();
+            });
 
-	return {
-		DisplayData: DisplayData,
+            resolve();
+        })
+    };
 
-		mime_types: mime_types,
+    let finalize_cell_outputs = function(cell) {
+        return new Promise((resolve) => {
+            if (cell.cell_type !== 'code') resolve();
 
-		create_output_subarea: create_output_subarea,
+            let outputs = cell.output_area.outputs;
 
-		append_display_data: append_display_data,
-		append_javascript: append_javascript,
-		append_output: append_output,
+            outputs.forEach((output) => {
+                if (output instanceof DisplayData) {
+                    output.freeze_output();
+                    output.finalize_output();
+                }
+            });
 
-		freeze_cell_outputs: freeze_cell_outputs,
-		finalize_cell_outputs: finalize_cell_outputs,
-	};
+            // get rid of empty outputs, if any
+            cell.output_area.outputs = outputs.filter((d) => !_.isEmpty(d.data));
+
+            resolve();
+        })
+    };
+
+
+    return {
+        DisplayData           : DisplayData,
+
+        mime_types            : mime_types,
+
+        create_output_subarea : create_output_subarea,
+
+        append_display_data   : append_display_data,
+        append_javascript     : append_javascript,
+        append_output         : append_output,
+
+        freeze_cell_outputs   : freeze_cell_outputs,
+        finalize_cell_outputs : finalize_cell_outputs,
+    }
 });

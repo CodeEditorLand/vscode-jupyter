@@ -3,11 +3,11 @@
 
 /* eslint-disable  */
 export class vscMockTelemetryReporter {
-	constructor() {
-		//
-	}
+    constructor() {
+        //
+    }
 
-	public sendTelemetryEvent(): void {
-		//
-	}
+    public sendTelemetryEvent(): void {
+        //
+    }
 }

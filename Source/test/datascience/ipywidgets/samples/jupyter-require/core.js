@@ -20,260 +20,250 @@
  * For details please refer to: https://github.com/CermakM/jupyter-require
  */
 
-define([
-	"underscore",
-	"base/js/namespace",
-	"base/js/events",
-	"notebook/js/codecell",
-	"services/kernels/comm",
-	"./logger",
-	"./display",
-], function (_, Jupyter, events, codecell, comms, Logger, display) {
-	"use strict";
 
-	const log = Logger();
+define( [
+    'underscore',
+    'base/js/namespace',
+    'base/js/events',
+    'notebook/js/codecell',
+    'services/kernels/comm',
+    './logger',
+    './display'
+], function ( _, Jupyter, events, codecell, comms, Logger, display ) {
+    'use strict';
 
-	let CodeCell = codecell.CodeCell;
-	let Notebook = Jupyter.Notebook;
+    const log = Logger()
 
-	let comm_manager;
-	let comm;
+    let CodeCell = codecell.CodeCell
+    let Notebook = Jupyter.Notebook;
 
-	const get_callbacks = CodeCell.prototype.get_callbacks;
+    let comm_manager;
+    let comm;
 
-	let _init_comm_manager = function (kernel) {
-		// define in the outer scope
-		comm_manager = kernel.comm_manager;
-		comm = new comms.Comm(
-			"communicate",
-			`communicate.JupyterRequire#${_.now()}`
-		);
+    const get_callbacks = CodeCell.prototype.get_callbacks
 
-		comm_manager.register_comm(comm);
-	};
 
-	if (Jupyter.notebook.kernel) {
-		_init_comm_manager(Jupyter.notebook.kernel);
-	} else {
-		// kernel is not ready yet
-		events.one("kernel_created.Session", (e, d) =>
-			_init_comm_manager(d.kernel)
-		);
-	}
+    let _init_comm_manager = function ( kernel ) {
+        // define in the outer scope
+        comm_manager = kernel.comm_manager;
+        comm = new comms.Comm( 'communicate', `communicate.JupyterRequire#${ _.now() }` );
 
-	CodeCell.prototype.get_callbacks = function () {
-		const callbacks = get_callbacks.apply(this, arguments);
+        comm_manager.register_comm( comm );
+    };
 
-		const cell = this;
-		const iopub_callback = callbacks.iopub.output;
-		const shell_callback = callbacks.shell.reply;
+    if ( Jupyter.notebook.kernel ) {
+        _init_comm_manager( Jupyter.notebook.kernel );
+    } else {
+        // kernel is not ready yet
+        events.one( 'kernel_created.Session', ( e, d ) => _init_comm_manager( d.kernel ) );
+    }
 
-		callbacks.iopub.output = function (msg) {
-			if (
-				_.includes(["error", "execute_result"], msg.msg_type) &&
-				msg.parent_header.msg_id === cell.last_msg_id
-			) {
-				cell.running = false;
-			}
+    CodeCell.prototype.get_callbacks = function () {
+        const callbacks = get_callbacks.apply( this, arguments );
 
-			return iopub_callback(msg);
-		};
+        const cell = this;
+        const iopub_callback = callbacks.iopub.output;
+        const shell_callback = callbacks.shell.reply;
 
-		callbacks.shell.reply = function (msg) {
-			if (
-				_.includes(["execute_reply"], msg.msg_type) &&
-				msg.parent_header.msg_id === cell.last_msg_id
-			) {
-				cell.running = false;
-			}
+        callbacks.iopub.output = function ( msg ) {
 
-			return shell_callback(msg);
-		};
+            if (
+                ( _.includes( [ 'error', 'execute_result' ], msg.msg_type ) ) &&
+                ( msg.parent_header.msg_id === cell.last_msg_id )
+            ) {
+                cell.running = false;
+            }
 
-		return callbacks;
-	};
+            return iopub_callback( msg );
+        };
 
-	/**
-	 * Get running cells
-	 */
-	Notebook.prototype.get_running_cells = function () {
-		let cells = this.get_cells();
+        callbacks.shell.reply = function ( msg ) {
 
-		return cells.filter((c) => c.running);
-	};
+            if (
+                ( _.includes( [ 'execute_reply' ], msg.msg_type ) ) &&
+                ( msg.parent_header.msg_id === cell.last_msg_id )
+            ) {
+                cell.running = false;
+            }
 
-	/**
-	 * Get running cell indices
-	 */
-	Notebook.prototype.get_running_cells_indices = function () {
-		let cells = this.get_cells();
+            return shell_callback( msg );
+        };
 
-		return cells.filter((c) => c.running).map((c, i) => i);
-	};
+        return callbacks;
+    }
 
-	/**
-	 * Get currently executed cell
-	 *
-	 * @returns {CodeCell}
-	 */
-	Notebook.prototype.get_executed_cell = function () {
-		let cell = Jupyter.notebook.get_running_cells()[0];
+    /**
+     * Get running cells
+     */
+    Notebook.prototype.get_running_cells = function () {
+        let cells = this.get_cells();
 
-		if (!cell) {
-			// fallback, may select wrong cell but better than die out
-			let selected_cell = Jupyter.notebook.get_selected_cell();
-			let prev_cell = Jupyter.notebook.get_prev_cell(selected_cell);
+        return cells.filter( ( c ) => c.running );
+    };
 
-			cell =
-				selected_cell.cell_type === "code" ? selected_cell : prev_cell;
-		}
+    /**
+     * Get running cell indices
+     */
+    Notebook.prototype.get_running_cells_indices = function () {
+        let cells = this.get_cells();
 
-		return cell;
-	};
+        return cells.filter( ( c ) => c.running ).map( ( c, i ) => i );
+    };
 
-	/**
-	 * Get notebook requireJS config
-	 *
-	 * @returns {Object} - requirejs configuration object
-	 */
-	function get_notebook_config() {
-		return Jupyter.notebook.metadata.require || {};
-	}
 
-	/**
-	 * Set notebook requireJS config
-	 *
-	 * @param config {Object} - requirejs configuration object
-	 */
-	function set_notebook_config(config) {
-		Jupyter.notebook.metadata.require = config;
-	}
+    /**
+     * Get currently executed cell
+     *
+     * @returns {CodeCell}
+     */
+    Notebook.prototype.get_executed_cell = function () {
+        let cell = Jupyter.notebook.get_running_cells()[ 0 ];
 
-	/**
-	 * Get cell requirement metadata
-	 *
-	 * @param cell {CodeCell} - notebook cell
-	 */
-	function get_cell_requirements(cell) {
-		return cell.metadata.require || [];
-	}
+        if ( !cell ) {
+            // fallback, may select wrong cell but better than die out
+            let selected_cell = Jupyter.notebook.get_selected_cell();
+            let prev_cell = Jupyter.notebook.get_prev_cell( selected_cell );
 
-	/**
-	 * Set cell requirement metadata
-	 *
-	 * @param cell {CodeCell} - notebook cell to update metadata
-	 * @param required {Object} - requirements config object
-	 */
-	function set_cell_requirements(cell, required) {
-		cell.metadata.require = required;
-	}
+            cell = selected_cell.cell_type === 'code' ? selected_cell : prev_cell;
+        }
 
-	/**
-	 *  Check cell requirements
-	 * @param required {Array} - array of requirements
-	 * @returns {Array}
-	 */
-	function check_requirements(required) {
-		log.debug("Checking required libraries: ", required);
+        return cell;
+    }
 
-		let defined = []; // array of promises
+    /**
+     * Get notebook requireJS config
+     *
+     * @returns {Object} - requirejs configuration object
+     */
+    function get_notebook_config() { return Jupyter.notebook.metadata.require || {}; }
 
-		required.forEach((lib) => {
-			let p = new Promise((resolve, reject) => {
-				let iid, tid;
+    /**
+     * Set notebook requireJS config
+     *
+     * @param config {Object} - requirejs configuration object
+     */
+    function set_notebook_config( config ) { Jupyter.notebook.metadata.require = config; }
 
-				let callback = function () {
-					clearTimeout(tid);
-					clearInterval(iid);
 
-					resolve(`${lib}: Success.`);
-				};
-				let errback = function () {
-					clearInterval(iid);
+    /**
+     * Get cell requirement metadata
+     *
+     * @param cell {CodeCell} - notebook cell
+     */
+    function get_cell_requirements( cell ) { return cell.metadata.require || []; }
 
-					reject(
-						new Error(
-							`${lib}: Timeout. Library '${lib}' is not loaded.`
-						)
-					);
-				};
 
-				tid = setTimeout(errback, 10000);
-				iid = setInterval(() => require([lib], callback), 250);
-			});
+    /**
+     * Set cell requirement metadata
+     *
+     * @param cell {CodeCell} - notebook cell to update metadata
+     * @param required {Object} - requirements config object
+     */
+    function set_cell_requirements( cell, required ) { cell.metadata.require = required; }
 
-			defined.push(p);
-		});
 
-		return defined;
-	}
+    /**
+     *  Check cell requirements
+     * @param required {Array} - array of requirements
+     * @returns {Array}
+     */
+    function check_requirements( required ) {
+        log.debug( "Checking required libraries: ", required );
 
-	/**
-	 * Handle error and output it to the notebook cell
-	 * @param error
-	 * @param silent {boolean}
-	 */
-	function handle_error(error, silent = false) {
-		log.error(error);
+        let defined = [];  // array of promises
 
-		if (silent) return;
+        required.forEach( ( lib ) => {
 
-		let json = "JupyterRequireError:\n" + JSON.stringify(error, null, 4);
-		let traceback = error.stack
-			? error.stack.split("\n")
-			: json.split("\n");
+            let p = new Promise( ( resolve, reject ) => {
 
-		const output_error = {
-			ename: "JupyterRequireError",
-			evalue: error.message || json,
-			traceback: traceback,
-			output_type: "error",
-		};
-		let cell = Jupyter.notebook.get_executed_cell();
+                let iid, tid;
 
-		// append stack trace to the cell output element
-		cell.output_area.append_output(output_error);
-	}
+                let callback = function () {
+                    clearTimeout( tid );
+                    clearInterval( iid );
 
-	/**
-	 * Load required libraries
-	 *
-	 * This function pauses execution of Jupyter kernel
-	 * until require libraries are loaded
-	 *
-	 * @param config {Object}  - requirejs configuration object
-	 */
-	async function load_required_libraries(config) {
-		log.debug("Require config: ", config);
+                    resolve( `${ lib }: Success.` );
+                };
+                let errback = function () {
+                    clearInterval( iid );
 
-		let libs = config.paths;
+                    reject( new Error( `${ lib }: Timeout. Library '${ lib }' is not loaded.` ) );
+                };
 
-		if ($.isEmptyObject(libs)) {
-			return Promise.resolve("No libraries to load.");
-		}
+                tid = setTimeout( errback, 10000 );
+                iid = setInterval( () => require( [ lib ], callback ), 250 );
 
-		log.log("Loading required libraries:", libs);
+            } );
 
-		require.config(config);
+            defined.push( p );
+        } );
 
-		log.log("Linking required libraries:", libs);
+        return defined;
+    }
 
-		let defined = check_requirements(Object.keys(libs));
+    /**
+     * Handle error and output it to the notebook cell
+     * @param error
+     * @param silent {boolean}
+     */
+    function handle_error( error, silent = false ) {
+        log.error( error );
 
-		return await Promise.all(defined)
-			.then((values) => {
-				log.log("Success: ", values);
-				events.trigger("config.JupyterRequire", { config: config });
-			})
-			.catch(handle_error);
-	}
+        if ( silent ) return
 
-	/**
-	 * Asynchronous Function constructor
-	 */
-	let AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+        let json = 'JupyterRequireError:\n' + JSON.stringify( error, null, 4 );
+        let traceback = error.stack ? error.stack.split( '\n' ) : json.split( '\n' );
 
-	/**
+        const output_error = {
+            ename: 'JupyterRequireError',
+            evalue: error.message || json,
+            traceback: traceback,
+            output_type: 'error'
+        };
+        let cell = Jupyter.notebook.get_executed_cell();
+
+        // append stack trace to the cell output element
+        cell.output_area.append_output( output_error );
+    }
+
+    /**
+     * Load required libraries
+     *
+     * This function pauses execution of Jupyter kernel
+     * until require libraries are loaded
+     *
+     * @param config {Object}  - requirejs configuration object
+     */
+    async function load_required_libraries( config ) {
+        log.debug( 'Require config: ', config );
+
+        let libs = config.paths;
+
+        if ( $.isEmptyObject( libs ) ) {
+            return Promise.resolve( "No libraries to load." );
+        }
+
+        log.log( "Loading required libraries:", libs );
+
+        require.config( config );
+
+        log.log( "Linking required libraries:", libs );
+
+        let defined = check_requirements( Object.keys( libs ) );
+
+        return await Promise.all( defined ).then(
+            ( values ) => {
+                log.log( 'Success: ', values );
+                events.trigger( 'config.JupyterRequire', { config: config } );
+            } ).catch( handle_error );
+    }
+
+    /**
+     * Asynchronous Function constructor
+     */
+    let AsyncFunction = Object.getPrototypeOf( async function () { } ).constructor;
+
+    /**
      * Execute the function as safe script
      *
      * Safe scripts are executed on cell creation
@@ -288,265 +278,238 @@ define([
      * @param output_area {OutputArea} - current code cell's output area
      * @returns {Promise<any>}
      */
-	let safe_execute = function (script, output_area) {
-		return new Promise((resolve, reject) => {
-			const json = new display.DisplayData(script);
+    let safe_execute = function ( script, output_area ) {
+        return new Promise( ( resolve, reject ) => {
+            const json = new display.DisplayData( script );
 
-			let n_outputs = output_area.outputs.length;
+            let n_outputs = output_area.outputs.length;
 
-			// safe script can use the native evaluation
-			output_area.append_output(json);
+            // safe script can use the native evaluation
+            output_area.append_output( json );
 
-			// a little hack since OutputArea.prototype.append_output
-			// does not return promise
-			let t = setInterval(() => {
-				if (output_area.outputs.length > n_outputs) resolve();
-			}, 50);
+            // a little hack since OutputArea.prototype.append_output
+            // does not return promise
+            let t = setInterval( () => {
+                if ( output_area.outputs.length > n_outputs ) resolve();
+            }, 50 );
 
-			setTimeout(() => {
-				clearInterval(t);
-				reject(new Error("Script execution timeout."));
-			}, 5000);
-		});
-	};
+            setTimeout( () => {
+                clearInterval( t ); reject( new Error( "Script execution timeout." ) );
+            }, 5000 );
+        } );
+    };
 
-	/**
-	 * Execute function with requirements in an output_area context
-	 *
-	 * @param func {Function} - expression to execute
-	 * @param required {Array} - required libraries
-	 * @param silent {boolean} - whether the script should be executed in the silent mode
-	 * @param output_area {OutputArea} - current code cell's output area
-	 * @returns {Promise<any>}
-	 */
-	let execute_with_requirements = function (
-		func,
-		required,
-		silent,
-		context,
-		output_area
-	) {
-		return new Promise(async (resolve, reject) => {
-			let element = silent
-				? undefined
-				: display.create_output_subarea(output_area);
+    /**
+     * Execute function with requirements in an output_area context
+     *
+     * @param func {Function} - expression to execute
+     * @param required {Array} - required libraries
+     * @param silent {boolean} - whether the script should be executed in the silent mode
+     * @param output_area {OutputArea} - current code cell's output area
+     * @returns {Promise<any>}
+     */
+    let execute_with_requirements = function ( func, required, silent, context, output_area ) {
+        return new Promise( async ( resolve, reject ) => {
+            let element = silent ? undefined : display.create_output_subarea( output_area );
 
-			try {
-				requirejs(required, (...args) => {
-					func.apply(output_area, [...args, element, context])
-						.then(() => {
-							resolve(element);
-						})
-						.catch(reject);
-				});
-			} catch (err) {
-				// catch any exception thrown by RequireJS (like "Mismatched anonymous define() module")
-				// to avoid deadlocking the interpreter
-				reject(err);
-			}
-			setTimeout(reject, 5000, new Error("Script execution timeout."));
-		});
-	};
+            try {
+                requirejs( required, ( ...args ) => {
+                    func.apply( output_area, [ ...args, element, context ] )
+                        .then( () => {
+                            resolve( element );
+                        } ).catch( reject );
+                } );
+            } catch ( err ) {
+                // catch any exception thrown by RequireJS (like "Mismatched anonymous define() module")
+                // to avoid deadlocking the interpreter
+                reject( err );
+            }
+            setTimeout( reject, 5000, new Error( "Script execution timeout." ) );
+        } );
+    };
 
-	/**
-	 * Wrap and Execute JS script in output_area context
-	 *
-	 * This function pauses execution of Jupyter kernel
-	 * until required libraries are loaded
-	 *
-	 * @returns {Function} - wrapped execution partial function
-	 */
-	let execute_script = async function (
-		script,
-		required,
-		params,
-		silent = false
-	) {
-		// get rid of invalid characters
-		params = params
-			.map((p) => p.replace(/[|&$%@"<>()+-.,;]/g, ""))
-			.filter((d) => d.trim().length);
-		// expose element to the user script
-		params.push("element");
+    /**
+     * Wrap and Execute JS script in output_area context
+     *
+     * This function pauses execution of Jupyter kernel
+     * until required libraries are loaded
+     *
+     * @returns {Function} - wrapped execution partial function
+     */
+    let execute_script = async function ( script, required, params, silent = false ) {
 
-		const context = silent
-			? {}
-			: {
-					cell: this, // current CodeCell
-					output_area: this.output_area,
-			  };
-		params.push("context");
+        // get rid of invalid characters
+        params = params
+            .map( ( p ) => p.replace( /[|&$%@"<>()+-.,;]/g, "" ) )
+            .filter( ( d ) => d.trim().length );
+        // expose element to the user script
+        params.push( 'element' );
 
-		try {
-			let wrapped = new AsyncFunction(...params, script.toString());
-			let execute = _.partial(
-				execute_with_requirements,
-				wrapped,
-				required,
-				silent,
-				context
-			);
+        const context = silent ? {} : {
+            cell: this,  // current CodeCell
+            output_area: this.output_area
+        }
+        params.push( 'context' )
 
-			await Promise.all(check_requirements(required))
-				.then(async (r) => {
-					log.debug(r);
-					if (!silent) {
-						await display
-							.append_javascript(
-								execute,
-								context.output_area,
-								context
-							)
-							.then((r) => log.debug("Output appended.", r));
-						events.trigger("require.JupyterRequire", {
-							cell: this,
-							require: required,
-							context: context,
-						});
-					} else {
-						await execute();
-					}
-				})
-				.catch(handle_error);
-		} catch (err) {
-			// This error occurs mainly when user provides invalid script
-			// when wrapping to an AsyncFunction
-			handle_error(err, silent); // handle to append it to the cell output
-		}
-	};
+        try {
+            let wrapped = new AsyncFunction( ...params, script.toString() );
+            let execute = _.partial( execute_with_requirements, wrapped, required, silent, context );
 
-	/**
-	 * Register comms for messages from Python kernel
-	 *
-	 */
-	let register_targets = function () {
-		let _execute = new Promise((resolve) => {
-			comm_manager.register_target("execute", (comm, msg) => {
-				log.debug("Comm: ", comm, "initial message: ", msg);
+            await Promise.all( check_requirements( required ) )
+                .then( async ( r ) => {
+                    log.debug( r );
+                    if ( !silent ) {
+                        await display.append_javascript( execute, context.output_area, context ).then(
+                            ( r ) => log.debug( "Output appended.", r )
+                        );
+                        events.trigger( 'require.JupyterRequire', { cell: this, require: required, context: context } );
+                    } else {
+                        await execute()
+                    }
+                } )
+                .catch( handle_error );
+        } catch ( err ) {
+            // This error occurs mainly when user provides invalid script
+            // when wrapping to an AsyncFunction
+            handle_error( err, silent );  // handle to append it to the cell output
+        }
+    };
 
-				comm.on_msg(async (msg) => {
-					log.debug("Comm: ", comm, "message: ", msg);
+    /**
+     * Register comms for messages from Python kernel
+     *
+     */
+    let register_targets = function () {
+        let _execute = new Promise( ( resolve ) => {
+            comm_manager.register_target( 'execute',
+                ( comm, msg ) => {
+                    log.debug( 'Comm: ', comm, 'initial message: ', msg );
 
-					// get running cell or fall back to current cell
-					let cell = Jupyter.notebook.get_executed_cell();
+                    comm.on_msg( async ( msg ) => {
+                        log.debug( 'Comm: ', comm, 'message: ', msg );
 
-					const d = msg.content.data;
-					return await execute_script.call(
-						cell,
-						d.script,
-						d.require,
-						d.parameters,
-						d.silent
-					);
-				});
-			});
+                        // get running cell or fall back to current cell
+                        let cell = Jupyter.notebook.get_executed_cell();
 
-			resolve(`Comm 'execute' registered.`);
-		});
+                        const d = msg.content.data;
+                        return await execute_script.call( cell, d.script, d.require, d.parameters, d.silent );
+                    } );
+                }
+            );
 
-		let _safe_execute = new Promise((resolve) => {
-			comm_manager.register_target("safe_execute", (comm, msg) => {
-				log.debug("Comm: ", comm, "initial message: ", msg);
+            resolve( `Comm 'execute' registered.` );
+        } );
 
-				comm.on_msg(async (msg) => {
-					log.debug("Comm: ", comm, "message: ", msg);
+        let _safe_execute = new Promise( ( resolve ) => {
+            comm_manager.register_target( 'safe_execute',
+                ( comm, msg ) => {
+                    log.debug( 'Comm: ', comm, 'initial message: ', msg );
 
-					// get running cell or fall back to current cell
-					let cell = Jupyter.notebook.get_executed_cell();
-					let output_area = cell.output_area;
+                    comm.on_msg( async ( msg ) => {
+                        log.debug( 'Comm: ', comm, 'message: ', msg );
 
-					const script = msg.content.data.script;
+                        // get running cell or fall back to current cell
+                        let cell = Jupyter.notebook.get_executed_cell();
+                        let output_area = cell.output_area;
 
-					log.debug("Executing safe script: ", script);
+                        const script = msg.content.data.script;
 
-					return await safe_execute(script, output_area)
-						.then(() => log.debug("Success."))
-						.catch(handle_error);
-				});
-			});
+                        log.debug( "Executing safe script: ", script );
 
-			resolve(`Comm 'safe_execute' registered.`);
-		});
+                        return await safe_execute( script, output_area )
+                            .then( () => log.debug( "Success." ) )
+                            .catch( handle_error );
+                    } );
 
-		let _config = new Promise((resolve) => {
-			comm_manager.register_target("config", (comm, msg) => {
-				log.debug("Comm: ", comm, "initial message: ", msg);
+                }
+            );
 
-				comm.on_msg(async (msg) => {
-					log.debug("Comm: ", comm, "message: ", msg);
-					return await load_required_libraries(msg.content.data)
-						.then((values) => log.debug(values))
-						.catch(log.error);
-				});
-			});
+            resolve( `Comm 'safe_execute' registered.` );
+        } );
 
-			resolve(`Comm 'config' registered.`);
-		});
+        let _config = new Promise( ( resolve ) => {
+            comm_manager.register_target( 'config',
+                ( comm, msg ) => {
+                    log.debug( 'Comm: ', comm, 'initial message: ', msg );
 
-		return Promise.all([_execute, _safe_execute, _config]).then((r) => {
-			events.trigger("comms_registered.JupyterRequire", {
-				timestamp: _.now(),
-			});
+                    comm.on_msg( async ( msg ) => {
+                        log.debug( 'Comm: ', comm, 'message: ', msg );
+                        return await load_required_libraries( msg.content.data )
+                            .then( ( values ) => log.debug( values ) )
+                            .catch( log.error );
+                    } );
 
-			return r;
-		});
-	};
+                } );
 
-	/**
-	 * Communicate events to Jupyter Require kernel
-	 *
-	 */
-	let communicate = function (evt, data) {
-		log.debug("Communication requested by event: ", evt);
+            resolve( `Comm 'config' registered.` );
+        } );
 
-		if (_.isUndefined(comm)) {
-			log.warn(
-				"Communication comm has not been initialized yet. " +
-					"Is the kernel ready? Interrupting..."
-			);
-			return;
-		}
+        return Promise.all( [ _execute, _safe_execute, _config ] )
+            .then( ( r ) => {
+                events.trigger(
+                    'comms_registered.JupyterRequire', { timestamp: _.now() } );
 
-		const event = _.pick(evt, "data", "namespace", "timeStamp", "type");
+                return r;
+            } );
+    };
 
-		comm.open({ "event_type": evt.type });
-		let p = new Promise((resolve, reject) => {
-			log.debug("Sending event to kernel.", event, data);
+    /**
+     * Communicate events to Jupyter Require kernel
+     *
+     */
+    let communicate = function ( evt, data ) {
+        log.debug( "Communication requested by event: ", evt );
 
-			comm.send({ event: event, event_data: data });
-			comm.on_msg((r) => {
-				log.debug("Kernel response received: ", r);
-				resolve();
-			});
+        if ( _.isUndefined( comm ) ) {
+            log.warn(
+                "Communication comm has not been initialized yet. " +
+                "Is the kernel ready? Interrupting..." );
+            return;
+        }
 
-			setTimeout(reject, 5000, new Error("Script execution timeout."));
-		});
+        const event = _.pick( evt, 'data', 'namespace', 'timeStamp', 'type' );
 
-		return p.then(comm.close).catch((err) => {
-			comm.close();
-			throw err instanceof Error ? err : new Error(err);
-		});
-	};
+        comm.open( { 'event_type': evt.type } );
+        let p = new Promise( ( resolve, reject ) => {
+            log.debug( "Sending event to kernel.", event, data );
 
-	return {
-		AsyncFunction: AsyncFunction,
+            comm.send( { event: event, event_data: data } );
+            comm.on_msg( ( r ) => {
+                log.debug( "Kernel response received: ", r );
+                resolve();
+            } );
 
-		communicate: communicate,
+            setTimeout( reject, 5000, new Error( "Script execution timeout." ) );
+        } );
 
-		get_cell_requirements: get_cell_requirements,
-		set_cell_requirements: set_cell_requirements,
+        return p.then( comm.close ).catch( ( err ) => {
+            comm.close();
+            throw err instanceof Error ? err : new Error( err );
+        } );
+    };
 
-		get_notebook_config: get_notebook_config,
-		set_notebook_config: set_notebook_config,
 
-		check_requirements: check_requirements,
 
-		execute_script: execute_script,
-		execute_with_requirements: execute_with_requirements,
-		safe_execute: safe_execute,
+    return {
+        AsyncFunction: AsyncFunction,
 
-		load_required_libraries: load_required_libraries,
+        communicate: communicate,
 
-		register_targets: register_targets,
-	};
-});
+        get_cell_requirements: get_cell_requirements,
+        set_cell_requirements: set_cell_requirements,
+
+        get_notebook_config: get_notebook_config,
+        set_notebook_config: set_notebook_config,
+
+        check_requirements: check_requirements,
+
+        execute_script: execute_script,
+        execute_with_requirements: execute_with_requirements,
+        safe_execute: safe_execute,
+
+        load_required_libraries: load_required_libraries,
+
+        register_targets: register_targets,
+    };
+
+} );
