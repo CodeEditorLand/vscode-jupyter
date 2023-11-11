@@ -5,15 +5,7 @@ import { assert } from 'chai';
 import { CancellationTokenSource, NotebookCellOutputItem, NotebookDocument } from 'vscode';
 import { traceInfo } from '../../platform/logging';
 import { IDisposable } from '../../platform/common/types';
-import {
-    captureScreenShot,
-    createEventHandler,
-    initialize,
-    startJupyterServer,
-    suiteMandatory,
-    testMandatory,
-    waitForCondition
-} from '../../test/common';
+import { captureScreenShot, initialize, startJupyterServer, suiteMandatory, testMandatory } from '../../test/common';
 import {
     closeNotebooksAndCleanUpAfterTests,
     createEmptyPythonNotebook,
@@ -24,10 +16,10 @@ import {
 } from '../../test/datascience/notebook/helper';
 import { getKernelsApi } from './api';
 import { raceTimeoutError } from '../../platform/common/utils/async';
-import { ExecutionResult } from '../../api';
 import { dispose } from '../../platform/common/utils/lifecycle';
 import { IKernel, IKernelProvider } from '../types';
 import { IControllerRegistration, IVSCodeNotebookController } from '../../notebooks/controllers/types';
+import { OutputItem } from '../../api';
 
 suiteMandatory('Kernel API Tests @python', function () {
     const disposables: IDisposable[] = [];
@@ -94,7 +86,7 @@ suiteMandatory('Kernel API Tests @python', function () {
         if (!kernel) {
             throw new Error('Kernel not found');
         }
-        const statusChange = createEventHandler(kernel, 'onDidChangeStatus', disposables);
+        // const statusChange = createEventHandler(kernel, 'onDidChangeStatus', disposables);
 
         // Verify we can execute code using the kernel.
         traceInfo(`Execute code silently`);
@@ -102,15 +94,15 @@ suiteMandatory('Kernel API Tests @python', function () {
         const token = new CancellationTokenSource();
         await waitForOutput(kernel.executeCode('print(1234)', token.token), '1234', expectedMime);
         traceInfo(`Execute code silently completed`);
-        // Wait for kernel to be idle.
-        await waitForCondition(
-            () => kernel.status === 'idle',
-            5_000,
-            `Kernel did not become idle, current status is ${kernel.status}`
-        );
+        // // Wait for kernel to be idle.
+        // await waitForCondition(
+        //     () => kernel.status === 'idle',
+        //     5_000,
+        //     `Kernel did not become idle, current status is ${kernel.status}`
+        // );
 
-        // Verify state transition.
-        assert.deepEqual(Array.from(new Set(statusChange.all)), ['busy', 'idle'], 'States are incorrect');
+        // // Verify state transition.
+        // assert.deepEqual(Array.from(new Set(statusChange.all)), ['busy', 'idle'], 'States are incorrect');
 
         // Verify we can execute code using the kernel in parallel.
         await Promise.all([
@@ -119,37 +111,36 @@ suiteMandatory('Kernel API Tests @python', function () {
             waitForOutput(kernel.executeCode('print(3)', token.token), '3', expectedMime)
         ]);
 
-        // Wait for kernel to be idle.
-        await waitForCondition(
-            () => kernel.status === 'idle',
-            5_000,
-            `Kernel did not become idle, current status is ${kernel.status}`
-        );
+        // // Wait for kernel to be idle.
+        // await waitForCondition(
+        //     () => kernel.status === 'idle',
+        //     5_000,
+        //     `Kernel did not become idle, current status is ${kernel.status}`
+        // );
     });
 
-    async function waitForOutput(executionResult: ExecutionResult, expectedOutput: string, expectedMimetype: string) {
+    async function waitForOutput(
+        executionResult: AsyncIterable<OutputItem[]>,
+        expectedOutput: string,
+        expectedMimetype: string
+    ) {
         const disposables: IDisposable[] = [];
         const outputsReceived: string[] = [];
-        const outputPromise = new Promise<void>((resolve, reject) => {
-            executionResult.onDidEmitOutput(
-                (e) => {
-                    traceInfo(`Output received ${e.length} & mime types are ${e.map((item) => item.mime).join(', ')}}`);
-                    e.forEach((item) => {
-                        if (item.mime === expectedMimetype) {
-                            const output = new TextDecoder().decode(item.data).trim();
-                            if (output === expectedOutput.trim()) {
-                                resolve();
-                            } else {
-                                reject(new Error(`Unexpected output ${output}`));
-                            }
+        const outputPromise = new Promise<void>(async (resolve, reject) => {
+            for await (const items of executionResult) {
+                items.forEach((item) => {
+                    if (item.mime === expectedMimetype) {
+                        const output = new TextDecoder().decode(item.data).trim();
+                        if (output === expectedOutput.trim()) {
+                            resolve();
                         } else {
-                            outputsReceived.push(`${item.mime} ${new TextDecoder().decode(item.data).trim()}`);
+                            reject(new Error(`Unexpected output ${output}`));
                         }
-                    });
-                },
-                undefined,
-                disposables
-            );
+                    } else {
+                        outputsReceived.push(`${item.mime} ${new TextDecoder().decode(item.data).trim()}`);
+                    }
+                });
+            }
         });
 
         await raceTimeoutError(

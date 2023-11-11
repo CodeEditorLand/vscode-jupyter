@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { l10n, CancellationToken, Event, EventEmitter, ProgressLocation, extensions, window, Disposable } from 'vscode';
-import { ExecutionResult, Kernel } from '../../api';
+import { l10n, CancellationToken, ProgressLocation, extensions, window, Disposable, Event } from 'vscode';
+import { Kernel, OutputItem } from '../../api';
 import { ServiceContainer } from '../../platform/ioc/container';
 import { IKernel, IKernelProvider, INotebookKernelExecution } from '../types';
 import { getDisplayNameOrNameOfKernelConnection } from '../helpers';
@@ -31,16 +31,13 @@ class KernelExecutionProgressIndicator {
     private deferred?: Deferred<void>;
     private disposable?: IDisposable;
     private readonly title: string;
+    private displayInProgress?: boolean;
     constructor(
         private readonly extensionDisplayName: string,
         kernel: IKernel
     ) {
         this.controllerDisplayName = getDisplayNameOrNameOfKernelConnection(kernel.kernelConnectionMetadata);
-        this.title = l10n.t(
-            `Executing code against kernel '{0}' on behalf of the extension {1}`,
-            this.controllerDisplayName,
-            this.extensionDisplayName
-        );
+        this.title = l10n.t(`Executing code in {0} from {1}`, this.controllerDisplayName, this.extensionDisplayName);
     }
     dispose() {
         this.disposable?.dispose();
@@ -54,17 +51,17 @@ class KernelExecutionProgressIndicator {
             return (this.disposable = new Disposable(() => this.deferred?.resolve()));
         }
 
-        this.showProgress().catch(noop);
-
         this.deferred = createDeferred<void>();
+        this.showProgress().catch(noop);
         return (this.disposable = new Disposable(() => this.deferred?.resolve()));
     }
     private async showProgress() {
         // Give a grace period of 500ms to avoid too many progress indicators.
         await sleep(500);
-        if (!this.deferred || this.deferred.completed) {
+        if (!this.deferred || this.deferred.completed || this.displayInProgress) {
             return;
         }
+        this.displayInProgress = true;
         await window.withProgress({ location: ProgressLocation.Notification, title: this.title }, async () => {
             let deferred = this.deferred;
             while (deferred && !deferred.completed) {
@@ -72,6 +69,7 @@ class KernelExecutionProgressIndicator {
                 deferred = this.deferred;
             }
         });
+        this.displayInProgress = false;
     }
 }
 
@@ -100,13 +98,13 @@ class KernelExecutionProgressIndicator {
  */
 class WrappedKernelPerExtension implements Kernel {
     get status(): 'unknown' | 'starting' | 'idle' | 'busy' | 'terminating' | 'restarting' | 'autorestarting' | 'dead' {
-        sendApiTelemetry(this.extensionId, this.kernel, 'status', this.execution.executionCount).catch(noop);
+        // sendApiTelemetry(this.extensionId, this.kernel, 'status', this.execution.executionCount).catch(noop);
         return this.kernel.status;
     }
     get onDidChangeStatus(): Event<
         'unknown' | 'starting' | 'idle' | 'busy' | 'terminating' | 'restarting' | 'autorestarting' | 'dead'
     > {
-        sendApiTelemetry(this.extensionId, this.kernel, 'onDidChangeStatus', this.execution.executionCount).catch(noop);
+        // sendApiTelemetry(this.extensionId, this.kernel, 'onDidChangeStatus', this.execution.executionCount).catch(noop);
         return this.kernel.onStatusChanged;
     }
 
@@ -123,7 +121,7 @@ class WrappedKernelPerExtension implements Kernel {
         once(kernel.onDisposed)(() => this.progress.dispose());
     }
 
-    executeCode(code: string, token: CancellationToken): ExecutionResult {
+    async *executeCode(code: string, token: CancellationToken): AsyncGenerator<OutputItem[], void, unknown> {
         this.previousProgress?.dispose();
         let completed = false;
         const measures = {
@@ -156,7 +154,7 @@ class WrappedKernelPerExtension implements Kernel {
         if (!this.kernel.session?.kernel) {
             properties.failed = true;
             sendApiExecTelemetry(this.kernel, measures, properties).catch(noop);
-            if (this.status === 'dead' || this.status === 'terminating') {
+            if (this.kernel.status === 'dead' || this.kernel.status === 'terminating') {
                 throw new Error('Kernel is dead or terminating');
             }
             throw new Error('Kernel connection not available to execute 3rd party code');
@@ -164,8 +162,6 @@ class WrappedKernelPerExtension implements Kernel {
 
         const disposables: IDisposable[] = [];
         const done = createDeferred<void>();
-        const onDidEmitOutput = new EventEmitter<{ mime: string; data: Uint8Array }[]>();
-        disposables.push(onDidEmitOutput);
         disposables.push({
             dispose: () => {
                 measures.duration = stopwatch.elapsedTime;
@@ -179,6 +175,8 @@ class WrappedKernelPerExtension implements Kernel {
         const kernelExecution = ServiceContainer.instance
             .get<IKernelProvider>(IKernelProvider)
             .getKernelExecution(this.kernel);
+        const outputs: OutputItem[][] = [];
+        let outputsReceieved = createDeferred<void>();
         kernelExecution
             .executeCode(code, this.extensionId, token)
             .then((codeExecution) => {
@@ -206,7 +204,7 @@ class WrappedKernelPerExtension implements Kernel {
                 codeExecution.onDidEmitOutput(
                     (e) => {
                         e.forEach((item) => mimeTypes.add(item.mime));
-                        onDidEmitOutput.fire(e);
+                        outputs.push(e);
                     },
                     this,
                     disposables
@@ -232,10 +230,18 @@ class WrappedKernelPerExtension implements Kernel {
             this,
             disposables
         );
-        return {
-            done: done.promise,
-            onDidEmitOutput: onDidEmitOutput.event
-        };
+        while (true) {
+            await Promise.race([outputsReceieved.promise, done.promise]);
+            if (outputsReceieved.completed) {
+                outputsReceieved = createDeferred<void>();
+            }
+            while (outputs.length) {
+                yield outputs.shift()!;
+            }
+            if (done.completed) {
+                break;
+            }
+        }
     }
 }
 

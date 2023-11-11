@@ -22,6 +22,7 @@ import {
 } from '../../api';
 import { stripCodicons } from '../../platform/common/helpers';
 import { jupyterServerUriToCollection } from '../../kernels/jupyter/connection/jupyterServerProviderRegistry';
+import { requestKernelAccess } from '../../kernels/api/api';
 
 export const IExportedKernelServiceFactory = Symbol('IExportedKernelServiceFactory');
 export interface IExportedKernelServiceFactory {
@@ -213,9 +214,7 @@ export function buildApi(
                 extensions.determineExtensionFromCallStack().extensionId
             );
         },
-        getKernelApi() {
-            return Promise.resolve(undefined);
-        }
+        requestKernelAccess: () => requestKernelAccess(extensions.determineExtensionFromCallStack().extensionId)
     };
 
     // In test/dev environment return the DI Container.
