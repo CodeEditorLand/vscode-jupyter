@@ -22,6 +22,7 @@ import {
 } from '../../api';
 import { stripCodicons } from '../../platform/common/helpers';
 import { jupyterServerUriToCollection } from '../../kernels/jupyter/connection/jupyterServerProviderRegistry';
+import { getKernelsApi } from '../../kernels/api/api';
 
 export const IExportedKernelServiceFactory = Symbol('IExportedKernelServiceFactory');
 export interface IExportedKernelServiceFactory {
@@ -213,8 +214,8 @@ export function buildApi(
                 extensions.determineExtensionFromCallStack().extensionId
             );
         },
-        getKernelApi() {
-            return Promise.resolve(undefined);
+        get kernels() {
+            return getKernelsApi(extensions.determineExtensionFromCallStack().extensionId);
         }
     };
 

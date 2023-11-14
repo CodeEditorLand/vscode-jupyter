@@ -140,7 +140,7 @@ export async function activate(context: IExtensionContext): Promise<IExtensionAp
             createJupyterServerCollection: () => {
                 throw new Error('Not Implemented');
             },
-            getKernelApi: () => Promise.resolve(undefined)
+            kernels: { findKernel: () => Promise.resolve(undefined) }
         };
     }
 }
