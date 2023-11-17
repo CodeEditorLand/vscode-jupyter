@@ -3,182 +3,235 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import dedent from 'dedent';
-import { assert } from 'chai';
-import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito';
-import { Uri, WorkspaceFolder } from 'vscode';
-import { IApplicationShell, ICommandManager, IWorkspaceService } from '../../platform/common/application/types';
-import { getDisplayPath } from '../../platform/common/platform/fs-paths';
-import { Common, DataScience } from '../../platform/common/utils/localize';
-import { IBrowserService, IConfigurationService, IExtensions } from '../../platform/common/types';
+import dedent from "dedent";
+import { assert } from "chai";
 import {
-    IKernelDependencyService,
-    KernelConnectionMetadata,
-    KernelInterpreterDependencyResponse,
-    PythonKernelConnectionMetadata,
-    RemoteKernelSpecConnectionMetadata
-} from '../types';
-import { PythonEnvironment, EnvironmentType } from '../../platform/pythonEnvironments/info';
-import { JupyterInterpreterService } from '../jupyter/interpreter/jupyterInterpreterService.node';
-import { DataScienceErrorHandler } from './kernelErrorHandler';
-import { JupyterConnectError } from '../../platform/errors/jupyterConnectError';
-import { JupyterInstallError } from '../../platform/errors/jupyterInstallError';
-import { JupyterSelfCertsError } from '../../platform/errors/jupyterSelfCertsError';
-import { KernelDiedError } from './kernelDiedError';
+	anything,
+	capture,
+	deepEqual,
+	instance,
+	mock,
+	verify,
+	when,
+} from "ts-mockito";
+import { Uri, WorkspaceFolder } from "vscode";
 import {
-    IJupyterInterpreterDependencyManager,
-    IJupyterServerProviderRegistry,
-    IJupyterServerUriStorage,
-    JupyterInterpreterDependencyResponse,
-    JupyterServerProviderHandle
-} from '../jupyter/types';
-import { getDisplayNameOrNameOfKernelConnection } from '../helpers';
-import { getOSType, OSType } from '../../platform/common/utils/platform';
-import { RemoteJupyterServerConnectionError } from '../../platform/errors/remoteJupyterServerConnectionError';
-import { generateIdFromRemoteProvider } from '../jupyter/jupyterUtils';
-import { RemoteJupyterServerUriProviderError } from './remoteJupyterServerUriProviderError';
-import { IReservedPythonNamedProvider } from '../../platform/interpreter/types';
-import { DataScienceErrorHandlerNode } from './kernelErrorHandler.node';
-import { IFileSystem } from '../../platform/common/platform/types';
-import { IInterpreterService } from '../../platform/interpreter/contracts';
-import { JupyterServer, JupyterServerCollection, JupyterServerProvider } from '../../api';
+	IApplicationShell,
+	ICommandManager,
+	IWorkspaceService,
+} from "../../platform/common/application/types";
+import { getDisplayPath } from "../../platform/common/platform/fs-paths";
+import { Common, DataScience } from "../../platform/common/utils/localize";
+import {
+	IBrowserService,
+	IConfigurationService,
+	IExtensions,
+} from "../../platform/common/types";
+import {
+	IKernelDependencyService,
+	KernelConnectionMetadata,
+	KernelInterpreterDependencyResponse,
+	PythonKernelConnectionMetadata,
+	RemoteKernelSpecConnectionMetadata,
+} from "../types";
+import {
+	PythonEnvironment,
+	EnvironmentType,
+} from "../../platform/pythonEnvironments/info";
+import { JupyterInterpreterService } from "../jupyter/interpreter/jupyterInterpreterService.node";
+import { DataScienceErrorHandler } from "./kernelErrorHandler";
+import { JupyterConnectError } from "../../platform/errors/jupyterConnectError";
+import { JupyterInstallError } from "../../platform/errors/jupyterInstallError";
+import { JupyterSelfCertsError } from "../../platform/errors/jupyterSelfCertsError";
+import { KernelDiedError } from "./kernelDiedError";
+import {
+	IJupyterInterpreterDependencyManager,
+	IJupyterServerProviderRegistry,
+	IJupyterServerUriStorage,
+	JupyterInterpreterDependencyResponse,
+	JupyterServerProviderHandle,
+} from "../jupyter/types";
+import { getDisplayNameOrNameOfKernelConnection } from "../helpers";
+import { getOSType, OSType } from "../../platform/common/utils/platform";
+import { RemoteJupyterServerConnectionError } from "../../platform/errors/remoteJupyterServerConnectionError";
+import { generateIdFromRemoteProvider } from "../jupyter/jupyterUtils";
+import { RemoteJupyterServerUriProviderError } from "./remoteJupyterServerUriProviderError";
+import { IReservedPythonNamedProvider } from "../../platform/interpreter/types";
+import { DataScienceErrorHandlerNode } from "./kernelErrorHandler.node";
+import { IFileSystem } from "../../platform/common/platform/types";
+import { IInterpreterService } from "../../platform/interpreter/contracts";
+import {
+	JupyterServer,
+	JupyterServerCollection,
+	JupyterServerProvider,
+} from "../../api";
 
-suite('Error Handler Unit Tests', () => {
-    let applicationShell: IApplicationShell;
-    let dataScienceErrorHandler: DataScienceErrorHandler;
-    let dependencyManager: IJupyterInterpreterDependencyManager;
-    let workspaceService: IWorkspaceService;
-    let browser: IBrowserService;
-    let configuration: IConfigurationService;
-    let jupyterInterpreterService: JupyterInterpreterService;
-    let kernelDependencyInstaller: IKernelDependencyService;
-    let uriStorage: IJupyterServerUriStorage;
-    let jupyterUriProviderRegistration: IJupyterServerProviderRegistry;
-    let cmdManager: ICommandManager;
-    let extensions: IExtensions;
-    let reservedPythonNames: IReservedPythonNamedProvider;
-    let fs: IFileSystem;
-    let interpreterService: IInterpreterService;
-    const jupyterInterpreter: PythonEnvironment = {
-        displayName: 'Hello',
-        uri: Uri.file('Some Path'),
-        id: Uri.file('Some Path').fsPath,
-        sysPrefix: ''
-    };
+suite("Error Handler Unit Tests", () => {
+	let applicationShell: IApplicationShell;
+	let dataScienceErrorHandler: DataScienceErrorHandler;
+	let dependencyManager: IJupyterInterpreterDependencyManager;
+	let workspaceService: IWorkspaceService;
+	let browser: IBrowserService;
+	let configuration: IConfigurationService;
+	let jupyterInterpreterService: JupyterInterpreterService;
+	let kernelDependencyInstaller: IKernelDependencyService;
+	let uriStorage: IJupyterServerUriStorage;
+	let jupyterUriProviderRegistration: IJupyterServerProviderRegistry;
+	let cmdManager: ICommandManager;
+	let extensions: IExtensions;
+	let reservedPythonNames: IReservedPythonNamedProvider;
+	let fs: IFileSystem;
+	let interpreterService: IInterpreterService;
+	const jupyterInterpreter: PythonEnvironment = {
+		displayName: "Hello",
+		uri: Uri.file("Some Path"),
+		id: Uri.file("Some Path").fsPath,
+		sysPrefix: "",
+	};
 
-    setup(() => {
-        applicationShell = mock<IApplicationShell>();
-        workspaceService = mock<IWorkspaceService>();
-        dependencyManager = mock<IJupyterInterpreterDependencyManager>();
-        configuration = mock<IConfigurationService>();
-        browser = mock<IBrowserService>();
-        uriStorage = mock<IJupyterServerUriStorage>();
-        cmdManager = mock<ICommandManager>();
-        jupyterInterpreterService = mock<JupyterInterpreterService>();
-        jupyterUriProviderRegistration = mock<IJupyterServerProviderRegistry>();
-        extensions = mock<IExtensions>();
-        extensions = mock<IExtensions>();
-        interpreterService = mock<IInterpreterService>();
-        fs = mock<IFileSystem>();
-        when(dependencyManager.installMissingDependencies(anything())).thenResolve();
-        when(workspaceService.workspaceFolders).thenReturn([]);
-        kernelDependencyInstaller = mock<IKernelDependencyService>();
-        when(kernelDependencyInstaller.areDependenciesInstalled(anything(), anything(), anything())).thenResolve(true);
-        when(extensions.getExtension(anything())).thenReturn({ packageJSON: { displayName: '' } } as any);
-        when(fs.exists(anything())).thenResolve(true);
-        reservedPythonNames = mock<IReservedPythonNamedProvider>();
-        when(reservedPythonNames.isReserved(anything())).thenResolve(false);
-        when(interpreterService.refreshInterpreters(anything())).thenResolve();
-        dataScienceErrorHandler = new DataScienceErrorHandlerNode(
-            instance(applicationShell),
-            instance(dependencyManager),
-            instance(browser),
-            instance(configuration),
-            instance(kernelDependencyInstaller),
-            instance(workspaceService),
-            instance(uriStorage),
-            false,
-            instance(extensions),
-            instance(jupyterUriProviderRegistration),
-            instance(reservedPythonNames),
-            instance(fs),
-            instance(interpreterService)
-        );
-        when(applicationShell.showErrorMessage(anything())).thenResolve();
-        when(applicationShell.showErrorMessage(anything(), anything())).thenResolve();
-        when(applicationShell.showErrorMessage(anything(), anything(), anything())).thenResolve();
-    });
-    const message = 'Test error message.';
+	setup(() => {
+		applicationShell = mock<IApplicationShell>();
+		workspaceService = mock<IWorkspaceService>();
+		dependencyManager = mock<IJupyterInterpreterDependencyManager>();
+		configuration = mock<IConfigurationService>();
+		browser = mock<IBrowserService>();
+		uriStorage = mock<IJupyterServerUriStorage>();
+		cmdManager = mock<ICommandManager>();
+		jupyterInterpreterService = mock<JupyterInterpreterService>();
+		jupyterUriProviderRegistration = mock<IJupyterServerProviderRegistry>();
+		extensions = mock<IExtensions>();
+		extensions = mock<IExtensions>();
+		interpreterService = mock<IInterpreterService>();
+		fs = mock<IFileSystem>();
+		when(
+			dependencyManager.installMissingDependencies(anything())
+		).thenResolve();
+		when(workspaceService.workspaceFolders).thenReturn([]);
+		kernelDependencyInstaller = mock<IKernelDependencyService>();
+		when(
+			kernelDependencyInstaller.areDependenciesInstalled(
+				anything(),
+				anything(),
+				anything()
+			)
+		).thenResolve(true);
+		when(extensions.getExtension(anything())).thenReturn({
+			packageJSON: { displayName: "" },
+		} as any);
+		when(fs.exists(anything())).thenResolve(true);
+		reservedPythonNames = mock<IReservedPythonNamedProvider>();
+		when(reservedPythonNames.isReserved(anything())).thenResolve(false);
+		when(interpreterService.refreshInterpreters(anything())).thenResolve();
+		dataScienceErrorHandler = new DataScienceErrorHandlerNode(
+			instance(applicationShell),
+			instance(dependencyManager),
+			instance(browser),
+			instance(configuration),
+			instance(kernelDependencyInstaller),
+			instance(workspaceService),
+			instance(uriStorage),
+			false,
+			instance(extensions),
+			instance(jupyterUriProviderRegistration),
+			instance(reservedPythonNames),
+			instance(fs),
+			instance(interpreterService)
+		);
+		when(applicationShell.showErrorMessage(anything())).thenResolve();
+		when(
+			applicationShell.showErrorMessage(anything(), anything())
+		).thenResolve();
+		when(
+			applicationShell.showErrorMessage(
+				anything(),
+				anything(),
+				anything()
+			)
+		).thenResolve();
+	});
+	const message = "Test error message.";
 
-    test('Default error', async () => {
-        when(applicationShell.showErrorMessage(anything())).thenResolve();
+	test("Default error", async () => {
+		when(applicationShell.showErrorMessage(anything())).thenResolve();
 
-        const err = new Error(message);
-        await dataScienceErrorHandler.handleError(err);
+		const err = new Error(message);
+		await dataScienceErrorHandler.handleError(err);
 
-        verify(applicationShell.showErrorMessage(anything())).once();
-    });
+		verify(applicationShell.showErrorMessage(anything())).once();
+	});
 
-    test('Jupyter Self Certificates Error', async () => {
-        when(applicationShell.showErrorMessage(anything(), anything(), anything())).thenResolve(message as any);
+	test("Jupyter Self Certificates Error", async () => {
+		when(
+			applicationShell.showErrorMessage(
+				anything(),
+				anything(),
+				anything()
+			)
+		).thenResolve(message as any);
 
-        const err = new JupyterSelfCertsError(message);
-        await dataScienceErrorHandler.handleError(err);
+		const err = new JupyterSelfCertsError(message);
+		await dataScienceErrorHandler.handleError(err);
 
-        verify(applicationShell.showErrorMessage(anything())).never();
-        verify(
-            applicationShell.showErrorMessage(
-                err.message,
-                DataScience.jupyterSelfCertEnable,
-                DataScience.jupyterSelfCertClose
-            )
-        ).never();
-    });
+		verify(applicationShell.showErrorMessage(anything())).never();
+		verify(
+			applicationShell.showErrorMessage(
+				err.message,
+				DataScience.jupyterSelfCertEnable,
+				DataScience.jupyterSelfCertClose
+			)
+		).never();
+	});
 
-    test('Jupyter Install Error', async () => {
-        when(
-            applicationShell.showInformationMessage(
-                anything(),
-                DataScience.jupyterInstall,
-                DataScience.notebookCheckForImportNo,
-                anything()
-            )
-        ).thenResolve(DataScience.jupyterInstall as any);
+	test("Jupyter Install Error", async () => {
+		when(
+			applicationShell.showInformationMessage(
+				anything(),
+				DataScience.jupyterInstall,
+				DataScience.notebookCheckForImportNo,
+				anything()
+			)
+		).thenResolve(DataScience.jupyterInstall as any);
 
-        const err = new JupyterInstallError(message);
-        await dataScienceErrorHandler.handleError(err);
+		const err = new JupyterInstallError(message);
+		await dataScienceErrorHandler.handleError(err);
 
-        verify(dependencyManager.installMissingDependencies(err)).once();
-    });
+		verify(dependencyManager.installMissingDependencies(err)).once();
+	});
 
-    suite('Kernel startup errors', () => {
-        let kernelConnection: KernelConnectionMetadata;
-        const uri = generateIdFromRemoteProvider({ id: '1', handle: 'a', extensionId: '' });
-        const serverProviderHandle: JupyterServerProviderHandle = {
-            handle: '1',
-            id: 'a',
-            extensionId: ''
-        };
-        setup(() => {
-            when(applicationShell.showErrorMessage(anything(), Common.learnMore)).thenResolve(Common.learnMore as any);
-            kernelConnection = PythonKernelConnectionMetadata.create({
-                id: '',
-                interpreter: {
-                    uri: Uri.file('Hello There'),
-                    id: Uri.file('Hello There').fsPath,
-                    sysPrefix: 'Something else',
-                    displayName: 'Hello (Some Path)'
-                },
-                kernelSpec: {
-                    argv: [],
-                    display_name: '',
-                    name: '',
-                    executable: ''
-                }
-            });
-        });
-        const stdErrorMessages = {
-            userOverridingRandomPyFile_Unix: dedent`
+	suite("Kernel startup errors", () => {
+		let kernelConnection: KernelConnectionMetadata;
+		const uri = generateIdFromRemoteProvider({
+			id: "1",
+			handle: "a",
+			extensionId: "",
+		});
+		const serverProviderHandle: JupyterServerProviderHandle = {
+			handle: "1",
+			id: "a",
+			extensionId: "",
+		};
+		setup(() => {
+			when(
+				applicationShell.showErrorMessage(anything(), Common.learnMore)
+			).thenResolve(Common.learnMore as any);
+			kernelConnection = PythonKernelConnectionMetadata.create({
+				id: "",
+				interpreter: {
+					uri: Uri.file("Hello There"),
+					id: Uri.file("Hello There").fsPath,
+					sysPrefix: "Something else",
+					displayName: "Hello (Some Path)",
+				},
+				kernelSpec: {
+					argv: [],
+					display_name: "",
+					name: "",
+					executable: "",
+				},
+			});
+		});
+		const stdErrorMessages = {
+			userOverridingRandomPyFile_Unix: dedent`
                 Info 14:45:47: KernelProcess Exit Exit - 1 Traceback (most recent call last):
                 File "/home/xyz/.pyenv/versions/3.8.12/lib/python3.8/runpy.py", line 194, in _run_module_as_main
                     return _run_code(code, main_globals, None,
@@ -210,7 +263,7 @@ suite('Error Handler Unit Tests', () => {
                     from string import Template
                 ImportError: cannot import name 'Template' from 'string' (/home/xyz/samples/pySamples/sample/kernel_crash/no_start/string.py)
                 `,
-            userOverridingRandomPyFile_Windows: `
+			userOverridingRandomPyFile_Windows: `
                 Info 14:16:26: Cancel pending cells
                 Info 14:16:26: KernelProcess Exit Exit - 1 Traceback (most recent call last):
                     File "C:\\Python39\\lib\\runpy.py", line 197, in _run_module_as_main
@@ -241,7 +294,7 @@ suite('Error Handler Unit Tests', () => {
                     from random import Random as _Random
                 ImportError: cannot import name 'Random' from 'random' (c:\\Development\\samples\\pySamples\\sample1\\kernel_issues\\start\\random.py)
                 `,
-            userOverridingXmlPyFile_Linux: `
+			userOverridingXmlPyFile_Linux: `
                 Info 14:16:26: Cancel pending cells
                 Info 14:16:26: KernelProcess Exit Exit - 1 Traceback (most recent call last):\n' +
                 '  File "/opt/homebrew/Cellar/python@3.9/3.9.13_1/Frameworks/Python.framework/Versions/3.9/lib/python3.9/runpy.py", line 197, in _run_module_as_main\n' +
@@ -276,7 +329,7 @@ suite('Error Handler Unit Tests', () => {
                 '    import xml.dom.minidom as minidom\n' +
                 "ModuleNotFoundError: No module named 'xml.dom'; 'xml' is not a package\n"
                 `,
-            failureToStartJupyter: `namespace, args = self._parse_known_args(args, namespace)
+			failureToStartJupyter: `namespace, args = self._parse_known_args(args, namespace)
                 File "/home/don/miniconda3/envs/tf/lib/python3.9/argparse.py", line 2062, in _parse_known_args
                     start_index = consume_optional(start_index)
                 File "/home/don/miniconda3/envs/tf/lib/python3.9/argparse.py", line 2002, in consume_optional
@@ -286,7 +339,7 @@ suite('Error Handler Unit Tests', () => {
                 File "/home/don/samples/pySamples/sample/.venvJupyter/lib/python3.9/site-packages/traitlets/config/loader.py", line 913, in __call__
                     raise NotImplementedError("subclasses must implement __call__")
                 NotImplementedError: subclasses must implement __call__`,
-            failureToStartJupyterDueToOutdatedTraitlets: `namespace, args = self._parse_known_args(args, namespace)
+			failureToStartJupyterDueToOutdatedTraitlets: `namespace, args = self._parse_known_args(args, namespace)
                 File "/home/don/miniconda3/envs/tf/lib/python3.9/argparse.py", line 2062, in _parse_known_args
                     start_index = consume_optional(start_index)
                 File "/home/don/miniconda3/envs/tf/lib/python3.9/argparse.py", line 2002, in consume_optional
@@ -295,740 +348,1018 @@ suite('Error Handler Unit Tests', () => {
                     action(self, namespace, argument_values, option_string)
                 File "/home/don/samples/pySamples/sample/.venvJupyter/lib/python3.9/site-packages/traitlets/config/loader.py", line 913, in __call__
                     raise NotImplementedError("subclasses must implement __call__")
-                AttributeError: 'Namespace' object has no attribute '_flags'`
-        };
-        test('Unable to import <name> from user overriding module (windows)', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingRandomPyFile_Windows,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+                AttributeError: 'Namespace' object has no attribute '_flags'`,
+		};
+		test("Unable to import <name> from user overriding module (windows)", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingRandomPyFile_Windows,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToImportFailureFromFile(
-                'Random',
-                'c:\\Development\\samples\\pySamples\\sample1\\kernel_issues\\start\\random.py'
-            );
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToImportFailureFromFile(
+					"Random",
+					"c:\\Development\\samples\\pySamples\\sample1\\kernel_issues\\start\\random.py"
+				);
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresModuleImportErrFromFile');
-        });
-        test('Unable to import <name> from user overriding module in workspace folder (windows)', async () => {
-            const workspaceFolders: WorkspaceFolder[] = [
-                {
-                    index: 0,
-                    name: '',
-                    uri: Uri.file('c:\\Development\\samples\\pySamples\\sample1\\kernel_issues')
-                }
-            ];
-            when(workspaceService.workspaceFolders).thenReturn(workspaceFolders);
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingRandomPyFile_Windows,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresModuleImportErrFromFile"
+			);
+		});
+		test("Unable to import <name> from user overriding module in workspace folder (windows)", async () => {
+			const workspaceFolders: WorkspaceFolder[] = [
+				{
+					index: 0,
+					name: "",
+					uri: Uri.file(
+						"c:\\Development\\samples\\pySamples\\sample1\\kernel_issues"
+					),
+				},
+			];
+			when(workspaceService.workspaceFolders).thenReturn(
+				workspaceFolders
+			);
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingRandomPyFile_Windows,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.fileSeemsToBeInterferingWithKernelStartup(
-                getDisplayPath(
-                    Uri.file('c:\\Development\\samples\\pySamples\\sample1\\kernel_issues\\start\\random.py'),
-                    workspaceFolders
-                )
-            );
+			const expectedMessage =
+				DataScience.fileSeemsToBeInterferingWithKernelStartup(
+					getDisplayPath(
+						Uri.file(
+							"c:\\Development\\samples\\pySamples\\sample1\\kernel_issues\\start\\random.py"
+						),
+						workspaceFolders
+					)
+				);
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresOverridingBuiltInModules');
-        });
-        test('Module not found due to user file overriding overriding a module', async () => {
-            const workspaceFolders: WorkspaceFolder[] = [
-                {
-                    index: 0,
-                    name: '',
-                    uri: Uri.file('/Users/MyUserName/sample/kernel_issues')
-                }
-            ];
-            when(workspaceService.workspaceFolders).thenReturn(workspaceFolders);
-            when(reservedPythonNames.getUriOverridingReservedPythonNames(anything())).thenResolve([
-                { uri: Uri.file('/Users/MyUserName/sample/kernel_issues/xml.py'), type: 'file' }
-            ]);
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingXmlPyFile_Linux,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                Uri.file('/Users/MyUserName/sample/kernel_issues'),
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresOverridingBuiltInModules"
+			);
+		});
+		test("Module not found due to user file overriding overriding a module", async () => {
+			const workspaceFolders: WorkspaceFolder[] = [
+				{
+					index: 0,
+					name: "",
+					uri: Uri.file("/Users/MyUserName/sample/kernel_issues"),
+				},
+			];
+			when(workspaceService.workspaceFolders).thenReturn(
+				workspaceFolders
+			);
+			when(
+				reservedPythonNames.getUriOverridingReservedPythonNames(
+					anything()
+				)
+			).thenResolve([
+				{
+					uri: Uri.file(
+						"/Users/MyUserName/sample/kernel_issues/xml.py"
+					),
+					type: "file",
+				},
+			]);
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingXmlPyFile_Linux,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				Uri.file("/Users/MyUserName/sample/kernel_issues"),
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.fileSeemsToBeInterferingWithKernelStartup('xml.py');
+			const expectedMessage =
+				DataScience.fileSeemsToBeInterferingWithKernelStartup("xml.py");
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresOverridingBuiltInModules');
-        });
-        test('Module not found due to user module with __init__.py overriding overriding a module', async () => {
-            const workspaceFolders: WorkspaceFolder[] = [
-                {
-                    index: 0,
-                    name: '',
-                    uri: Uri.file('/Users/MyUserName/sample/kernel_issues')
-                }
-            ];
-            when(workspaceService.workspaceFolders).thenReturn(workspaceFolders);
-            when(reservedPythonNames.getUriOverridingReservedPythonNames(anything())).thenResolve([
-                { uri: Uri.file('/Users/MyUserName/sample/kernel_issues/xml/__init__.py'), type: '__init__' }
-            ]);
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingXmlPyFile_Linux,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                Uri.file('/Users/MyUserName/sample/kernel_issues'),
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresOverridingBuiltInModules"
+			);
+		});
+		test("Module not found due to user module with __init__.py overriding overriding a module", async () => {
+			const workspaceFolders: WorkspaceFolder[] = [
+				{
+					index: 0,
+					name: "",
+					uri: Uri.file("/Users/MyUserName/sample/kernel_issues"),
+				},
+			];
+			when(workspaceService.workspaceFolders).thenReturn(
+				workspaceFolders
+			);
+			when(
+				reservedPythonNames.getUriOverridingReservedPythonNames(
+					anything()
+				)
+			).thenResolve([
+				{
+					uri: Uri.file(
+						"/Users/MyUserName/sample/kernel_issues/xml/__init__.py"
+					),
+					type: "__init__",
+				},
+			]);
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingXmlPyFile_Linux,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				Uri.file("/Users/MyUserName/sample/kernel_issues"),
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToMissingModule('xml.dom');
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToMissingModule("xml.dom");
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresMissingModule');
-        });
-        test('Module not found and missing module is not overridden by user files', async () => {
-            const workspaceFolders: WorkspaceFolder[] = [
-                {
-                    index: 0,
-                    name: '',
-                    uri: Uri.file('/Users/MyUserName/sample/kernel_issues')
-                }
-            ];
-            when(workspaceService.workspaceFolders).thenReturn(workspaceFolders);
-            // Lets mark everything as not being reserved, in this case, we should not
-            // treat files such as xml.py as overriding the builtin python modules
-            when(reservedPythonNames.getUriOverridingReservedPythonNames(anything())).thenResolve([]);
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingXmlPyFile_Linux,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                Uri.file('/Users/MyUserName/sample/kernel_issues'),
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresMissingModule"
+			);
+		});
+		test("Module not found and missing module is not overridden by user files", async () => {
+			const workspaceFolders: WorkspaceFolder[] = [
+				{
+					index: 0,
+					name: "",
+					uri: Uri.file("/Users/MyUserName/sample/kernel_issues"),
+				},
+			];
+			when(workspaceService.workspaceFolders).thenReturn(
+				workspaceFolders
+			);
+			// Lets mark everything as not being reserved, in this case, we should not
+			// treat files such as xml.py as overriding the builtin python modules
+			when(
+				reservedPythonNames.getUriOverridingReservedPythonNames(
+					anything()
+				)
+			).thenResolve([]);
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingXmlPyFile_Linux,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				Uri.file("/Users/MyUserName/sample/kernel_issues"),
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToMissingModule('xml.dom');
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToMissingModule("xml.dom");
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresMissingModule');
-        });
-        test('Unable to import <name> from user overriding module (linux)', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingRandomPyFile_Unix,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresMissingModule"
+			);
+		});
+		test("Unable to import <name> from user overriding module (linux)", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingRandomPyFile_Unix,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToImportFailureFromFile(
-                'Template',
-                '/home/xyz/samples/pySamples/sample/kernel_crash/no_start/string.py' // Not using getDisplayPath under the covers
-            );
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToImportFailureFromFile(
+					"Template",
+					"/home/xyz/samples/pySamples/sample/kernel_crash/no_start/string.py" // Not using getDisplayPath under the covers
+				);
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresModuleImportErrFromFile');
-        });
-        test('Unable to import <name> from user overriding module in workspace folder (unix)', async function () {
-            if (getOSType() == OSType.Windows) {
-                // Patsh get converted to `\` when using `Uri.file` as values for Workspace folder.
-                return this.skip();
-            }
-            const workspaceFolders: WorkspaceFolder[] = [
-                {
-                    index: 0,
-                    name: '',
-                    uri: Uri.file('/home/xyz/samples/pySamples/sample/')
-                }
-            ];
-            when(workspaceService.workspaceFolders).thenReturn(workspaceFolders);
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    stdErrorMessages.userOverridingRandomPyFile_Unix,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresModuleImportErrFromFile"
+			);
+		});
+		test("Unable to import <name> from user overriding module in workspace folder (unix)", async function () {
+			if (getOSType() == OSType.Windows) {
+				// Patsh get converted to `\` when using `Uri.file` as values for Workspace folder.
+				return this.skip();
+			}
+			const workspaceFolders: WorkspaceFolder[] = [
+				{
+					index: 0,
+					name: "",
+					uri: Uri.file("/home/xyz/samples/pySamples/sample/"),
+				},
+			];
+			when(workspaceService.workspaceFolders).thenReturn(
+				workspaceFolders
+			);
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					stdErrorMessages.userOverridingRandomPyFile_Unix,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.fileSeemsToBeInterferingWithKernelStartup(
-                getDisplayPath(
-                    Uri.file('/home/xyz/samples/pySamples/sample/kernel_crash/no_start/string.py'),
-                    workspaceFolders
-                )
-            );
+			const expectedMessage =
+				DataScience.fileSeemsToBeInterferingWithKernelStartup(
+					getDisplayPath(
+						Uri.file(
+							"/home/xyz/samples/pySamples/sample/kernel_crash/no_start/string.py"
+						),
+						workspaceFolders
+					)
+				);
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresOverridingBuiltInModules');
-        });
-        test('Win32api Errors', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    `
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresOverridingBuiltInModules"
+			);
+		});
+		test("Win32api Errors", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					`
 import win32api
 ImportError: No module named 'win32api'
 `,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToWin32APIFailure;
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToWin32APIFailure;
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresWin32Api');
-        });
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresWin32Api"
+			);
+		});
 
-        test('Unable to import xyz', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    `
+		test("Unable to import xyz", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					`
 import xyz
 ImportError: No module named 'xyz'
 `,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToImportFailure('xyz');
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToImportFailure("xyz");
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresModuleImportErr');
-        });
-        test('pyzmq errors', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError(
-                    'Hello',
-                    `ImportError: cannot import name 'constants' from partially initialized module 'zmq.backend.cython' (most likely due to a circular import) (C:\\Users\\<user>\\AppData\\Roaming\\Python\\Python38\\site-packages\\zmq\\backend\\cython\\__init__.py)`,
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresModuleImportErr"
+			);
+		});
+		test("pyzmq errors", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					`ImportError: cannot import name 'constants' from partially initialized module 'zmq.backend.cython' (most likely due to a circular import) (C:\\Users\\<user>\\AppData\\Roaming\\Python\\Python38\\site-packages\\zmq\\backend\\cython\\__init__.py)`,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToPyZmqFailure;
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToPyZmqFailure;
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresPyzmq');
-        });
-        test('Unknown Dll load failure', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError('Hello', `ImportError: DLL load failed`, undefined, kernelConnection),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresPyzmq"
+			);
+		});
+		test("Unknown Dll load failure", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					`ImportError: DLL load failed`,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToUnknownDllLoadFailure;
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToUnknownDllLoadFailure;
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresDllLoad');
-        });
-        test('Dll load failure', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new KernelDiedError('Hello', `import XYZ\nImportError: DLL load failed`, undefined, kernelConnection),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresDllLoad"
+			);
+		});
+		test("Dll load failure", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new KernelDiedError(
+					"Hello",
+					`import XYZ\nImportError: DLL load failed`,
+					undefined,
+					kernelConnection
+				),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            const expectedMessage = DataScience.failedToStartKernelDueToDllLoadFailure('XYZ');
+			const expectedMessage =
+				DataScience.failedToStartKernelDueToDllLoadFailure("XYZ");
 
-            verifyErrorMessage(expectedMessage, 'https://aka.ms/kernelFailuresDllLoad');
-        });
+			verifyErrorMessage(
+				expectedMessage,
+				"https://aka.ms/kernelFailuresDllLoad"
+			);
+		});
 
-        async function verifyJupyterErrors(stdError: string, expectedMessage: string, expectedLink?: string) {
-            when(jupyterInterpreterService.getSelectedInterpreter()).thenResolve(jupyterInterpreter);
-            when(jupyterInterpreterService.getSelectedInterpreter(anything())).thenResolve(jupyterInterpreter);
-            await dataScienceErrorHandler.handleKernelError(
-                new JupyterConnectError(stdError, `xyz`),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
+		async function verifyJupyterErrors(
+			stdError: string,
+			expectedMessage: string,
+			expectedLink?: string
+		) {
+			when(
+				jupyterInterpreterService.getSelectedInterpreter()
+			).thenResolve(jupyterInterpreter);
+			when(
+				jupyterInterpreterService.getSelectedInterpreter(anything())
+			).thenResolve(jupyterInterpreter);
+			await dataScienceErrorHandler.handleKernelError(
+				new JupyterConnectError(stdError, `xyz`),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
 
-            verifyErrorMessage(expectedMessage, expectedLink);
-        }
-        test('Failure to start Jupyter Server (unable to extract python error message)', async () => {
-            const envDisplayName = getDisplayNameOrNameOfKernelConnection(kernelConnection);
-            const expectedMessage = DataScience.failedToStartJupyter(envDisplayName);
-            await verifyJupyterErrors('Kaboom', expectedMessage);
-        });
-        test('Failure to start Jupyter Server (unable to extract python error message), (without failure about jupyter error, without daemon)', async () => {
-            const envDisplayName = getDisplayNameOrNameOfKernelConnection(kernelConnection);
-            const expectedMessage = DataScience.failedToStartJupyter(envDisplayName);
-            await verifyJupyterErrors('kaboom', expectedMessage);
-        });
-        test('Failure to start Jupyter Server', async () => {
-            const stdError = `${stdErrorMessages.failureToStartJupyter}
+			verifyErrorMessage(expectedMessage, expectedLink);
+		}
+		test("Failure to start Jupyter Server (unable to extract python error message)", async () => {
+			const envDisplayName =
+				getDisplayNameOrNameOfKernelConnection(kernelConnection);
+			const expectedMessage =
+				DataScience.failedToStartJupyter(envDisplayName);
+			await verifyJupyterErrors("Kaboom", expectedMessage);
+		});
+		test("Failure to start Jupyter Server (unable to extract python error message), (without failure about jupyter error, without daemon)", async () => {
+			const envDisplayName =
+				getDisplayNameOrNameOfKernelConnection(kernelConnection);
+			const expectedMessage =
+				DataScience.failedToStartJupyter(envDisplayName);
+			await verifyJupyterErrors("kaboom", expectedMessage);
+		});
+		test("Failure to start Jupyter Server", async () => {
+			const stdError = `${stdErrorMessages.failureToStartJupyter}
 
 Failed to run jupyter as observable with args notebook --no-browser --notebook-dir="/home/don/samples/pySamples/sample" --config=/tmp/40aa74ae-d668-4225-8201-4570c9a0ac4a/jupyter_notebook_config.py --NotebookApp.iopub_data_rate_limit=10000000000.0`;
-            const envDisplayName = getDisplayNameOrNameOfKernelConnection(kernelConnection);
-            const pythonError = 'NotImplementedError: subclasses must implement __call__';
-            const expectedMessage = DataScience.failedToStartJupyterWithErrorInfo(envDisplayName, pythonError);
-            await verifyJupyterErrors(stdError, expectedMessage);
-        });
-        test('Failure to start Jupyter Server (without failure about jupyter error, without daemon)', async () => {
-            const stdError = stdErrorMessages.failureToStartJupyter;
-            const envDisplayName = getDisplayNameOrNameOfKernelConnection(kernelConnection);
-            const pythonError = 'NotImplementedError: subclasses must implement __call__';
-            const expectedMessage = DataScience.failedToStartJupyterWithErrorInfo(envDisplayName, pythonError);
-            await verifyJupyterErrors(stdError, expectedMessage);
-        });
-        test('Failure to start Jupyter Server due to outdated traitlets', async () => {
-            const stdError = `${stdErrorMessages.failureToStartJupyterDueToOutdatedTraitlets}
+			const envDisplayName =
+				getDisplayNameOrNameOfKernelConnection(kernelConnection);
+			const pythonError =
+				"NotImplementedError: subclasses must implement __call__";
+			const expectedMessage =
+				DataScience.failedToStartJupyterWithErrorInfo(
+					envDisplayName,
+					pythonError
+				);
+			await verifyJupyterErrors(stdError, expectedMessage);
+		});
+		test("Failure to start Jupyter Server (without failure about jupyter error, without daemon)", async () => {
+			const stdError = stdErrorMessages.failureToStartJupyter;
+			const envDisplayName =
+				getDisplayNameOrNameOfKernelConnection(kernelConnection);
+			const pythonError =
+				"NotImplementedError: subclasses must implement __call__";
+			const expectedMessage =
+				DataScience.failedToStartJupyterWithErrorInfo(
+					envDisplayName,
+					pythonError
+				);
+			await verifyJupyterErrors(stdError, expectedMessage);
+		});
+		test("Failure to start Jupyter Server due to outdated traitlets", async () => {
+			const stdError = `${stdErrorMessages.failureToStartJupyterDueToOutdatedTraitlets}
 
 Failed to run jupyter as observable with args notebook --no-browser --notebook-dir="/home/don/samples/pySamples/sample" --config=/tmp/40aa74ae-d668-4225-8201-4570c9a0ac4a/jupyter_notebook_config.py --NotebookApp.iopub_data_rate_limit=10000000000.0`;
-            const envDisplayName = getDisplayNameOrNameOfKernelConnection(kernelConnection);
-            const pythonError = "AttributeError: 'Namespace' object has no attribute '_flags'";
-            const expectedMessage = DataScience.failedToStartJupyterDueToOutdatedTraitlets(envDisplayName, pythonError);
+			const envDisplayName =
+				getDisplayNameOrNameOfKernelConnection(kernelConnection);
+			const pythonError =
+				"AttributeError: 'Namespace' object has no attribute '_flags'";
+			const expectedMessage =
+				DataScience.failedToStartJupyterDueToOutdatedTraitlets(
+					envDisplayName,
+					pythonError
+				);
 
-            await verifyJupyterErrors(
-                stdError,
-                expectedMessage,
-                'https://aka.ms/kernelFailuresJupyterTrailtletsOutdated'
-            );
-        });
-        test('Failure to start Jupyter Server due to outdated traitlets (without failure about jupyter error, without daemon)', async () => {
-            const stdError = stdErrorMessages.failureToStartJupyterDueToOutdatedTraitlets;
-            const envDisplayName = getDisplayNameOrNameOfKernelConnection(kernelConnection);
-            const pythonError = "AttributeError: 'Namespace' object has no attribute '_flags'";
-            const expectedMessage = DataScience.failedToStartJupyterDueToOutdatedTraitlets(envDisplayName, pythonError);
-            await verifyJupyterErrors(
-                stdError,
-                expectedMessage,
-                'https://aka.ms/kernelFailuresJupyterTrailtletsOutdated'
-            );
-        });
-        test('Check Jupyter dependencies when JupyterInstall error is thrown', async () => {
-            await dataScienceErrorHandler.handleKernelError(
-                new JupyterInstallError('foo'),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
-            verify(dependencyManager.installMissingDependencies(anything())).once();
-        });
-        test('When JupyterInstall error is thrown and Jupyter dependencies are installed, then return ok', async () => {
-            when(dependencyManager.installMissingDependencies(anything())).thenResolve(
-                JupyterInterpreterDependencyResponse.ok
-            );
-            const result = await dataScienceErrorHandler.handleKernelError(
-                new JupyterInstallError('foo'),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
-            verify(dependencyManager.installMissingDependencies(anything())).once();
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.ok);
-        });
-        test('When JupyterInstall error is thrown and Jupyter dependencies are not installed, then return cancel', async () => {
-            when(dependencyManager.installMissingDependencies(anything())).thenResolve(
-                JupyterInterpreterDependencyResponse.cancel
-            );
-            const result = await dataScienceErrorHandler.handleKernelError(
-                new JupyterInstallError('foo'),
-                'start',
-                kernelConnection,
-                undefined,
-                'jupyterExtension'
-            );
-            verify(dependencyManager.installMissingDependencies(anything())).once();
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.cancel);
-        });
-        test('Verify error message for conda install of ipykernel', async () => {
-            when(kernelDependencyInstaller.areDependenciesInstalled(anything(), anything(), anything())).thenResolve(
-                false
-            );
-            when(dependencyManager.installMissingDependencies(anything())).thenResolve(
-                JupyterInterpreterDependencyResponse.cancel
-            );
-            const result = await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
-                new KernelDiedError('Kaboom', 'hello word does not have attribute named abc', undefined, {
-                    ...kernelConnection,
-                    interpreter: {
-                        ...kernelConnection.interpreter!,
-                        envType: EnvironmentType.Conda,
-                        envName: 'condaEnv1'
-                    }
-                }),
-                'start',
-                undefined
-            );
-            assert.strictEqual(
-                result,
-                [
-                    "Running cells with 'Hello (Some Path)' requires the ipykernel package.",
-                    "Run the following command to install 'ipykernel' into the Python environment. ",
-                    `Command: 'conda install -n condaEnv1 ipykernel --update-deps --force-reinstall'`
-                ].join('\n')
-            );
-        });
-        test('Verify error message for pip install of ipykernel', async () => {
-            when(kernelDependencyInstaller.areDependenciesInstalled(anything(), anything(), anything())).thenResolve(
-                false
-            );
-            when(dependencyManager.installMissingDependencies(anything())).thenResolve(
-                JupyterInterpreterDependencyResponse.cancel
-            );
-            const result = await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
-                new KernelDiedError(
-                    'Kaboom',
-                    'hello word does not have attribute named abc',
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                undefined
-            );
-            const command =
-                getOSType() === OSType.Windows
-                    ? `Command: '"Hello There" -m pip install ipykernel -U --force-reinstall'`
-                    : `Command: '"/Hello There" -m pip install ipykernel -U --force-reinstall'`;
+			await verifyJupyterErrors(
+				stdError,
+				expectedMessage,
+				"https://aka.ms/kernelFailuresJupyterTrailtletsOutdated"
+			);
+		});
+		test("Failure to start Jupyter Server due to outdated traitlets (without failure about jupyter error, without daemon)", async () => {
+			const stdError =
+				stdErrorMessages.failureToStartJupyterDueToOutdatedTraitlets;
+			const envDisplayName =
+				getDisplayNameOrNameOfKernelConnection(kernelConnection);
+			const pythonError =
+				"AttributeError: 'Namespace' object has no attribute '_flags'";
+			const expectedMessage =
+				DataScience.failedToStartJupyterDueToOutdatedTraitlets(
+					envDisplayName,
+					pythonError
+				);
+			await verifyJupyterErrors(
+				stdError,
+				expectedMessage,
+				"https://aka.ms/kernelFailuresJupyterTrailtletsOutdated"
+			);
+		});
+		test("Check Jupyter dependencies when JupyterInstall error is thrown", async () => {
+			await dataScienceErrorHandler.handleKernelError(
+				new JupyterInstallError("foo"),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
+			verify(
+				dependencyManager.installMissingDependencies(anything())
+			).once();
+		});
+		test("When JupyterInstall error is thrown and Jupyter dependencies are installed, then return ok", async () => {
+			when(
+				dependencyManager.installMissingDependencies(anything())
+			).thenResolve(JupyterInterpreterDependencyResponse.ok);
+			const result = await dataScienceErrorHandler.handleKernelError(
+				new JupyterInstallError("foo"),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
+			verify(
+				dependencyManager.installMissingDependencies(anything())
+			).once();
+			assert.strictEqual(result, KernelInterpreterDependencyResponse.ok);
+		});
+		test("When JupyterInstall error is thrown and Jupyter dependencies are not installed, then return cancel", async () => {
+			when(
+				dependencyManager.installMissingDependencies(anything())
+			).thenResolve(JupyterInterpreterDependencyResponse.cancel);
+			const result = await dataScienceErrorHandler.handleKernelError(
+				new JupyterInstallError("foo"),
+				"start",
+				kernelConnection,
+				undefined,
+				"jupyterExtension"
+			);
+			verify(
+				dependencyManager.installMissingDependencies(anything())
+			).once();
+			assert.strictEqual(
+				result,
+				KernelInterpreterDependencyResponse.cancel
+			);
+		});
+		test("Verify error message for conda install of ipykernel", async () => {
+			when(
+				kernelDependencyInstaller.areDependenciesInstalled(
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve(false);
+			when(
+				dependencyManager.installMissingDependencies(anything())
+			).thenResolve(JupyterInterpreterDependencyResponse.cancel);
+			const result =
+				await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
+					new KernelDiedError(
+						"Kaboom",
+						"hello word does not have attribute named abc",
+						undefined,
+						{
+							...kernelConnection,
+							interpreter: {
+								...kernelConnection.interpreter!,
+								envType: EnvironmentType.Conda,
+								envName: "condaEnv1",
+							},
+						}
+					),
+					"start",
+					undefined
+				);
+			assert.strictEqual(
+				result,
+				[
+					"Running cells with 'Hello (Some Path)' requires the ipykernel package.",
+					"Run the following command to install 'ipykernel' into the Python environment. ",
+					`Command: 'conda install -n condaEnv1 ipykernel --update-deps --force-reinstall'`,
+				].join("\n")
+			);
+		});
+		test("Verify error message for pip install of ipykernel", async () => {
+			when(
+				kernelDependencyInstaller.areDependenciesInstalled(
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve(false);
+			when(
+				dependencyManager.installMissingDependencies(anything())
+			).thenResolve(JupyterInterpreterDependencyResponse.cancel);
+			const result =
+				await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
+					new KernelDiedError(
+						"Kaboom",
+						"hello word does not have attribute named abc",
+						undefined,
+						kernelConnection
+					),
+					"start",
+					undefined
+				);
+			const command =
+				getOSType() === OSType.Windows
+					? `Command: '"Hello There" -m pip install ipykernel -U --force-reinstall'`
+					: `Command: '"/Hello There" -m pip install ipykernel -U --force-reinstall'`;
 
-            assert.strictEqual(
-                result,
-                [
-                    "Running cells with 'Hello (Some Path)' requires the ipykernel package.",
-                    "Run the following command to install 'ipykernel' into the Python environment. ",
-                    command
-                ].join('\n')
-            );
-        });
-        test('Ensure we provide some context to startup failures', async () => {
-            when(dependencyManager.installMissingDependencies(anything())).thenResolve(
-                JupyterInterpreterDependencyResponse.cancel
-            );
-            const result = await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
-                new KernelDiedError(
-                    'Kaboom',
-                    'hello word does not have attribute named abc',
-                    undefined,
-                    kernelConnection
-                ),
-                'start',
-                undefined
-            );
-            assert.strictEqual(
-                result,
-                [
-                    'Failed to start the Kernel. ',
-                    'hello word does not have attribute named abc. ',
-                    'View Jupyter [log](command:jupyter.viewOutput) for further details.'
-                ].join('\n')
-            );
-        });
-        test('Ensure we provide some context to re-start failures', async () => {
-            when(dependencyManager.installMissingDependencies(anything())).thenResolve(
-                JupyterInterpreterDependencyResponse.cancel
-            );
-            const result = await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
-                new KernelDiedError(
-                    'Kaboom',
-                    'hello word does not have attribute named abc',
-                    undefined,
-                    kernelConnection
-                ),
-                'restart',
-                undefined
-            );
-            assert.strictEqual(
-                result,
-                [
-                    'Failed to restart the Kernel. ',
-                    'hello word does not have attribute named abc. ',
-                    'View Jupyter [log](command:jupyter.viewOutput) for further details.'
-                ].join('\n')
-            );
-        });
-        test('Select another kernel when connection to remote jupyter server fails and provider does not exist', async () => {
-            const error = new RemoteJupyterServerConnectionError(
-                uri,
-                serverProviderHandle,
-                new Error('ECONNRESET error')
-            );
-            const connection = RemoteKernelSpecConnectionMetadata.create({
-                baseUrl: 'http://hello:1234/',
-                id: '1',
-                kernelSpec: {
-                    argv: [],
-                    display_name: '',
-                    name: '',
-                    executable: ''
-                },
-                serverProviderHandle
-            });
-            when(
-                applicationShell.showErrorMessage(anything(), anything(), anything(), anything(), anything())
-            ).thenResolve();
-            const server = mock<JupyterServer>();
-            when(server.id).thenReturn(serverProviderHandle.handle);
-            when(server.label).thenReturn('Hello Server');
-            when(server.connectionInformation).thenReturn({
-                baseUrl: Uri.parse('http://localhost:1234/'),
-                token: ''
-            });
-            const collection = mock<JupyterServerCollection>();
-            when(collection.extensionId).thenReturn(serverProviderHandle.extensionId);
-            when(collection.id).thenReturn(serverProviderHandle.id);
-            const serverProvider = mock<JupyterServerProvider>();
-            when(serverProvider.provideJupyterServers(anything())).thenResolve([instance(server)] as any);
-            when(collection.serverProvider).thenReturn(instance(serverProvider));
-            when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([instance(collection)]);
+			assert.strictEqual(
+				result,
+				[
+					"Running cells with 'Hello (Some Path)' requires the ipykernel package.",
+					"Run the following command to install 'ipykernel' into the Python environment. ",
+					command,
+				].join("\n")
+			);
+		});
+		test("Ensure we provide some context to startup failures", async () => {
+			when(
+				dependencyManager.installMissingDependencies(anything())
+			).thenResolve(JupyterInterpreterDependencyResponse.cancel);
+			const result =
+				await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
+					new KernelDiedError(
+						"Kaboom",
+						"hello word does not have attribute named abc",
+						undefined,
+						kernelConnection
+					),
+					"start",
+					undefined
+				);
+			assert.strictEqual(
+				result,
+				[
+					"Failed to start the Kernel. ",
+					"hello word does not have attribute named abc. ",
+					"View Jupyter [log](command:jupyter.viewOutput) for further details.",
+				].join("\n")
+			);
+		});
+		test("Ensure we provide some context to re-start failures", async () => {
+			when(
+				dependencyManager.installMissingDependencies(anything())
+			).thenResolve(JupyterInterpreterDependencyResponse.cancel);
+			const result =
+				await dataScienceErrorHandler.getErrorMessageForDisplayInCell(
+					new KernelDiedError(
+						"Kaboom",
+						"hello word does not have attribute named abc",
+						undefined,
+						kernelConnection
+					),
+					"restart",
+					undefined
+				);
+			assert.strictEqual(
+				result,
+				[
+					"Failed to restart the Kernel. ",
+					"hello word does not have attribute named abc. ",
+					"View Jupyter [log](command:jupyter.viewOutput) for further details.",
+				].join("\n")
+			);
+		});
+		test("Select another kernel when connection to remote jupyter server fails and provider does not exist", async () => {
+			const error = new RemoteJupyterServerConnectionError(
+				uri,
+				serverProviderHandle,
+				new Error("ECONNRESET error")
+			);
+			const connection = RemoteKernelSpecConnectionMetadata.create({
+				baseUrl: "http://hello:1234/",
+				id: "1",
+				kernelSpec: {
+					argv: [],
+					display_name: "",
+					name: "",
+					executable: "",
+				},
+				serverProviderHandle,
+			});
+			when(
+				applicationShell.showErrorMessage(
+					anything(),
+					anything(),
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve();
+			const server = mock<JupyterServer>();
+			when(server.id).thenReturn(serverProviderHandle.handle);
+			when(server.label).thenReturn("Hello Server");
+			when(server.connectionInformation).thenReturn({
+				baseUrl: Uri.parse("http://localhost:1234/"),
+				token: "",
+			});
+			const collection = mock<JupyterServerCollection>();
+			when(collection.extensionId).thenReturn(
+				serverProviderHandle.extensionId
+			);
+			when(collection.id).thenReturn(serverProviderHandle.id);
+			const serverProvider = mock<JupyterServerProvider>();
+			when(serverProvider.provideJupyterServers(anything())).thenResolve([
+				instance(server),
+			] as any);
+			when(collection.serverProvider).thenReturn(
+				instance(serverProvider)
+			);
+			when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([
+				instance(collection),
+			]);
 
-            const result = await dataScienceErrorHandler.handleKernelError(
-                error,
-                'start',
-                connection,
-                undefined,
-                'jupyterExtension'
-            );
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.selectDifferentKernel);
-            verify(
-                applicationShell.showErrorMessage(
-                    DataScience.remoteJupyterConnectionFailedWithServer(error.baseUrl),
-                    deepEqual({ detail: error.originalError.message || '', modal: true }),
-                    DataScience.removeRemoteJupyterConnectionButtonText,
-                    DataScience.changeRemoteJupyterConnectionButtonText,
-                    DataScience.selectDifferentKernel
-                )
-            ).never();
-            verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
-        });
-        test('Display error when connection to remote jupyter server fails due to 3rd party extension', async () => {
-            const error = new RemoteJupyterServerUriProviderError(serverProviderHandle, new Error('invalid handle'));
-            const connection = RemoteKernelSpecConnectionMetadata.create({
-                baseUrl: 'http://hello:1234/',
-                id: '1',
-                kernelSpec: {
-                    argv: [],
-                    display_name: '',
-                    name: '',
-                    executable: ''
-                },
-                serverProviderHandle
-            });
-            when(
-                applicationShell.showErrorMessage(anything(), anything(), anything(), anything(), anything())
-            ).thenResolve();
-            const collection = mock<JupyterServerCollection>();
-            when(collection.extensionId).thenReturn(serverProviderHandle.extensionId);
-            when(collection.id).thenReturn(serverProviderHandle.id);
-            when(collection.label).thenReturn('Hello Server');
-            const serverProvider = mock<JupyterServerProvider>();
-            when(serverProvider.provideJupyterServers(anything())).thenReject(new Error('Kaboom'));
-            when(collection.serverProvider).thenReturn(instance(serverProvider));
-            when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([instance(collection)]);
+			const result = await dataScienceErrorHandler.handleKernelError(
+				error,
+				"start",
+				connection,
+				undefined,
+				"jupyterExtension"
+			);
+			assert.strictEqual(
+				result,
+				KernelInterpreterDependencyResponse.selectDifferentKernel
+			);
+			verify(
+				applicationShell.showErrorMessage(
+					DataScience.remoteJupyterConnectionFailedWithServer(
+						error.baseUrl
+					),
+					deepEqual({
+						detail: error.originalError.message || "",
+						modal: true,
+					}),
+					DataScience.removeRemoteJupyterConnectionButtonText,
+					DataScience.changeRemoteJupyterConnectionButtonText,
+					DataScience.selectDifferentKernel
+				)
+			).never();
+			verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
+		});
+		test("Display error when connection to remote jupyter server fails due to 3rd party extension", async () => {
+			const error = new RemoteJupyterServerUriProviderError(
+				serverProviderHandle,
+				new Error("invalid handle")
+			);
+			const connection = RemoteKernelSpecConnectionMetadata.create({
+				baseUrl: "http://hello:1234/",
+				id: "1",
+				kernelSpec: {
+					argv: [],
+					display_name: "",
+					name: "",
+					executable: "",
+				},
+				serverProviderHandle,
+			});
+			when(
+				applicationShell.showErrorMessage(
+					anything(),
+					anything(),
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve();
+			const collection = mock<JupyterServerCollection>();
+			when(collection.extensionId).thenReturn(
+				serverProviderHandle.extensionId
+			);
+			when(collection.id).thenReturn(serverProviderHandle.id);
+			when(collection.label).thenReturn("Hello Server");
+			const serverProvider = mock<JupyterServerProvider>();
+			when(serverProvider.provideJupyterServers(anything())).thenReject(
+				new Error("Kaboom")
+			);
+			when(collection.serverProvider).thenReturn(
+				instance(serverProvider)
+			);
+			when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([
+				instance(collection),
+			]);
 
-            const result = await dataScienceErrorHandler.handleKernelError(
-                error,
-                'start',
-                connection,
-                undefined,
-                'jupyterExtension'
-            );
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.cancel);
-            verify(
-                applicationShell.showErrorMessage(
-                    DataScience.remoteJupyterConnectionFailedWithServer('Hello Server'),
-                    deepEqual({ detail: error.originalError.message || '', modal: true }),
-                    DataScience.removeRemoteJupyterConnectionButtonText,
-                    DataScience.changeRemoteJupyterConnectionButtonText,
-                    DataScience.selectDifferentKernel
-                )
-            ).once();
-            verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
-        });
-        test('Remove remote Uri if user choses to do so, when connection to remote jupyter server fails', async () => {
-            const error = new RemoteJupyterServerConnectionError(
-                uri,
-                serverProviderHandle,
-                new Error('ECONNRESET error')
-            );
-            const connection = RemoteKernelSpecConnectionMetadata.create({
-                baseUrl: 'http://hello:1234/',
-                id: '1',
-                kernelSpec: {
-                    argv: [],
-                    display_name: '',
-                    name: '',
-                    executable: '' // Send nothing for argv[0]
-                },
-                serverProviderHandle
-            });
-            when(
-                applicationShell.showErrorMessage(anything(), anything(), anything(), anything(), anything())
-            ).thenResolve(DataScience.removeRemoteJupyterConnectionButtonText as any);
-            when(uriStorage.remove(anything())).thenResolve();
-            const server = mock<JupyterServer>();
-            when(server.id).thenReturn(serverProviderHandle.handle);
-            when(server.label).thenReturn('Hello Server');
-            when(server.connectionInformation).thenReturn({
-                baseUrl: Uri.parse('http://localhost:1234/'),
-                token: ''
-            });
-            const collection = mock<JupyterServerCollection>();
-            when(collection.extensionId).thenReturn(serverProviderHandle.extensionId);
-            when(collection.id).thenReturn(serverProviderHandle.id);
-            const serverProvider = mock<JupyterServerProvider>();
-            when(serverProvider.provideJupyterServers(anything())).thenReject(new Error('Kaboom'));
-            when(collection.serverProvider).thenReturn(instance(serverProvider));
-            when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([instance(collection)]);
+			const result = await dataScienceErrorHandler.handleKernelError(
+				error,
+				"start",
+				connection,
+				undefined,
+				"jupyterExtension"
+			);
+			assert.strictEqual(
+				result,
+				KernelInterpreterDependencyResponse.cancel
+			);
+			verify(
+				applicationShell.showErrorMessage(
+					DataScience.remoteJupyterConnectionFailedWithServer(
+						"Hello Server"
+					),
+					deepEqual({
+						detail: error.originalError.message || "",
+						modal: true,
+					}),
+					DataScience.removeRemoteJupyterConnectionButtonText,
+					DataScience.changeRemoteJupyterConnectionButtonText,
+					DataScience.selectDifferentKernel
+				)
+			).once();
+			verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
+		});
+		test("Remove remote Uri if user choses to do so, when connection to remote jupyter server fails", async () => {
+			const error = new RemoteJupyterServerConnectionError(
+				uri,
+				serverProviderHandle,
+				new Error("ECONNRESET error")
+			);
+			const connection = RemoteKernelSpecConnectionMetadata.create({
+				baseUrl: "http://hello:1234/",
+				id: "1",
+				kernelSpec: {
+					argv: [],
+					display_name: "",
+					name: "",
+					executable: "", // Send nothing for argv[0]
+				},
+				serverProviderHandle,
+			});
+			when(
+				applicationShell.showErrorMessage(
+					anything(),
+					anything(),
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve(
+				DataScience.removeRemoteJupyterConnectionButtonText as any
+			);
+			when(uriStorage.remove(anything())).thenResolve();
+			const server = mock<JupyterServer>();
+			when(server.id).thenReturn(serverProviderHandle.handle);
+			when(server.label).thenReturn("Hello Server");
+			when(server.connectionInformation).thenReturn({
+				baseUrl: Uri.parse("http://localhost:1234/"),
+				token: "",
+			});
+			const collection = mock<JupyterServerCollection>();
+			when(collection.extensionId).thenReturn(
+				serverProviderHandle.extensionId
+			);
+			when(collection.id).thenReturn(serverProviderHandle.id);
+			const serverProvider = mock<JupyterServerProvider>();
+			when(serverProvider.provideJupyterServers(anything())).thenReject(
+				new Error("Kaboom")
+			);
+			when(collection.serverProvider).thenReturn(
+				instance(serverProvider)
+			);
+			when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([
+				instance(collection),
+			]);
 
-            const result = await dataScienceErrorHandler.handleKernelError(
-                error,
-                'start',
-                connection,
-                undefined,
-                'jupyterExtension'
-            );
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.cancel);
-            verify(uriStorage.remove(deepEqual(serverProviderHandle))).once();
-        });
-        test('Change remote Uri if user choses to do so, when connection to remote jupyter server fails', async () => {
-            const error = new RemoteJupyterServerConnectionError(
-                uri,
-                serverProviderHandle,
-                new Error('ECONNRESET error')
-            );
-            const connection = RemoteKernelSpecConnectionMetadata.create({
-                baseUrl: 'http://hello:1234/',
-                id: '1',
-                kernelSpec: {
-                    argv: [],
-                    display_name: '',
-                    name: '',
-                    executable: ''
-                },
-                serverProviderHandle
-            });
-            when(
-                applicationShell.showErrorMessage(anything(), anything(), anything(), anything(), anything())
-            ).thenResolve(DataScience.changeRemoteJupyterConnectionButtonText as any);
-            when(cmdManager.executeCommand(anything(), anything(), anything(), anything())).thenResolve();
-            const collection = mock<JupyterServerCollection>();
-            when(collection.extensionId).thenReturn(serverProviderHandle.extensionId);
-            when(collection.id).thenReturn(serverProviderHandle.id);
-            const serverProvider = mock<JupyterServerProvider>();
-            when(serverProvider.provideJupyterServers(anything())).thenReject(new Error('Kaboom'));
-            when(collection.serverProvider).thenReturn(instance(serverProvider));
-            when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([instance(collection)]);
+			const result = await dataScienceErrorHandler.handleKernelError(
+				error,
+				"start",
+				connection,
+				undefined,
+				"jupyterExtension"
+			);
+			assert.strictEqual(
+				result,
+				KernelInterpreterDependencyResponse.cancel
+			);
+			verify(uriStorage.remove(deepEqual(serverProviderHandle))).once();
+		});
+		test("Change remote Uri if user choses to do so, when connection to remote jupyter server fails", async () => {
+			const error = new RemoteJupyterServerConnectionError(
+				uri,
+				serverProviderHandle,
+				new Error("ECONNRESET error")
+			);
+			const connection = RemoteKernelSpecConnectionMetadata.create({
+				baseUrl: "http://hello:1234/",
+				id: "1",
+				kernelSpec: {
+					argv: [],
+					display_name: "",
+					name: "",
+					executable: "",
+				},
+				serverProviderHandle,
+			});
+			when(
+				applicationShell.showErrorMessage(
+					anything(),
+					anything(),
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve(
+				DataScience.changeRemoteJupyterConnectionButtonText as any
+			);
+			when(
+				cmdManager.executeCommand(
+					anything(),
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve();
+			const collection = mock<JupyterServerCollection>();
+			when(collection.extensionId).thenReturn(
+				serverProviderHandle.extensionId
+			);
+			when(collection.id).thenReturn(serverProviderHandle.id);
+			const serverProvider = mock<JupyterServerProvider>();
+			when(serverProvider.provideJupyterServers(anything())).thenReject(
+				new Error("Kaboom")
+			);
+			when(collection.serverProvider).thenReturn(
+				instance(serverProvider)
+			);
+			when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([
+				instance(collection),
+			]);
 
-            const result = await dataScienceErrorHandler.handleKernelError(
-                error,
-                'start',
-                connection,
-                undefined,
-                'jupyterExtension'
-            );
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.cancel);
-            verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
-        });
-        test('Select different kernel user choses to do so, when connection to remote jupyter server fails', async () => {
-            const error = new RemoteJupyterServerConnectionError(
-                uri,
-                serverProviderHandle,
-                new Error('ECONNRESET error')
-            );
-            const connection = RemoteKernelSpecConnectionMetadata.create({
-                baseUrl: 'http://hello:1234/',
-                id: '1',
-                kernelSpec: {
-                    argv: [],
-                    display_name: '',
-                    name: '',
-                    executable: ''
-                },
-                serverProviderHandle
-            });
-            when(
-                applicationShell.showErrorMessage(anything(), anything(), anything(), anything(), anything())
-            ).thenResolve(DataScience.selectDifferentKernel as any);
-            const server = mock<JupyterServer>();
-            when(server.id).thenReturn(serverProviderHandle.handle);
-            when(server.label).thenReturn('Hello Server');
-            when(server.connectionInformation).thenReturn({
-                baseUrl: Uri.parse('http://localhost:1234/'),
-                token: ''
-            });
-            const collection = mock<JupyterServerCollection>();
-            when(collection.extensionId).thenReturn(serverProviderHandle.extensionId);
-            when(collection.id).thenReturn(serverProviderHandle.id);
-            const serverProvider = mock<JupyterServerProvider>();
-            when(serverProvider.provideJupyterServers(anything())).thenResolve([instance(server)] as any);
-            when(collection.serverProvider).thenReturn(instance(serverProvider));
-            when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([instance(collection)]);
-            const result = await dataScienceErrorHandler.handleKernelError(
-                error,
-                'start',
-                connection,
-                undefined,
-                'jupyterExtension'
-            );
-            assert.strictEqual(result, KernelInterpreterDependencyResponse.selectDifferentKernel);
-            verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
-        });
-        function verifyErrorMessage(message: string, linkInfo?: string) {
-            message = message.includes('command:jupyter.viewOutput')
-                ? message
-                : `${message} \n${DataScience.viewJupyterLogForFurtherInfo}`;
-            if (linkInfo) {
-                verify(applicationShell.showErrorMessage(anything(), Common.learnMore)).once;
-            } else {
-                verify(applicationShell.showErrorMessage(anything())).once();
-            }
-            const displayedMessage = capture(applicationShell.showErrorMessage).first();
-            assert.strictEqual(displayedMessage[0], message);
-            if (linkInfo) {
-                verify(browser.launch(anything())).once();
-                assert.strictEqual(capture(browser.launch).first()[0], linkInfo);
-            }
-        }
-    });
+			const result = await dataScienceErrorHandler.handleKernelError(
+				error,
+				"start",
+				connection,
+				undefined,
+				"jupyterExtension"
+			);
+			assert.strictEqual(
+				result,
+				KernelInterpreterDependencyResponse.cancel
+			);
+			verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
+		});
+		test("Select different kernel user choses to do so, when connection to remote jupyter server fails", async () => {
+			const error = new RemoteJupyterServerConnectionError(
+				uri,
+				serverProviderHandle,
+				new Error("ECONNRESET error")
+			);
+			const connection = RemoteKernelSpecConnectionMetadata.create({
+				baseUrl: "http://hello:1234/",
+				id: "1",
+				kernelSpec: {
+					argv: [],
+					display_name: "",
+					name: "",
+					executable: "",
+				},
+				serverProviderHandle,
+			});
+			when(
+				applicationShell.showErrorMessage(
+					anything(),
+					anything(),
+					anything(),
+					anything(),
+					anything()
+				)
+			).thenResolve(DataScience.selectDifferentKernel as any);
+			const server = mock<JupyterServer>();
+			when(server.id).thenReturn(serverProviderHandle.handle);
+			when(server.label).thenReturn("Hello Server");
+			when(server.connectionInformation).thenReturn({
+				baseUrl: Uri.parse("http://localhost:1234/"),
+				token: "",
+			});
+			const collection = mock<JupyterServerCollection>();
+			when(collection.extensionId).thenReturn(
+				serverProviderHandle.extensionId
+			);
+			when(collection.id).thenReturn(serverProviderHandle.id);
+			const serverProvider = mock<JupyterServerProvider>();
+			when(serverProvider.provideJupyterServers(anything())).thenResolve([
+				instance(server),
+			] as any);
+			when(collection.serverProvider).thenReturn(
+				instance(serverProvider)
+			);
+			when(jupyterUriProviderRegistration.jupyterCollections).thenReturn([
+				instance(collection),
+			]);
+			const result = await dataScienceErrorHandler.handleKernelError(
+				error,
+				"start",
+				connection,
+				undefined,
+				"jupyterExtension"
+			);
+			assert.strictEqual(
+				result,
+				KernelInterpreterDependencyResponse.selectDifferentKernel
+			);
+			verify(uriStorage.remove(deepEqual(serverProviderHandle))).never();
+		});
+		function verifyErrorMessage(message: string, linkInfo?: string) {
+			message = message.includes("command:jupyter.viewOutput")
+				? message
+				: `${message} \n${DataScience.viewJupyterLogForFurtherInfo}`;
+			if (linkInfo) {
+				verify(
+					applicationShell.showErrorMessage(
+						anything(),
+						Common.learnMore
+					)
+				).once;
+			} else {
+				verify(applicationShell.showErrorMessage(anything())).once();
+			}
+			const displayedMessage = capture(
+				applicationShell.showErrorMessage
+			).first();
+			assert.strictEqual(displayedMessage[0], message);
+			if (linkInfo) {
+				verify(browser.launch(anything())).once();
+				assert.strictEqual(
+					capture(browser.launch).first()[0],
+					linkInfo
+				);
+			}
+		}
+	});
 });

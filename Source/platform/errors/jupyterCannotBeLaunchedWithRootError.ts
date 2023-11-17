@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { PythonEnvironment } from '../pythonEnvironments/info';
-import { BaseError } from './types';
+import { PythonEnvironment } from "../pythonEnvironments/info";
+import { BaseError } from "./types";
 
 /**
  * Error thrown when Jupyter Notebook cannot be launched as `root`.
@@ -12,11 +12,14 @@ import { BaseError } from './types';
  * ```
  */
 export class JupyterCannotBeLaunchedWithRootError extends BaseError {
-    constructor(
-        message: string,
-        stderr: string | string,
-        public readonly interpreter?: PythonEnvironment
-    ) {
-        super('jupytercannotbelaunchedwitheroot', message + (stderr ? `\n${stderr}` : ''));
-    }
+	constructor(
+		message: string,
+		stderr: string | string,
+		public readonly interpreter?: PythonEnvironment
+	) {
+		super(
+			"jupytercannotbelaunchedwitheroot",
+			message + (stderr ? `\n${stderr}` : "")
+		);
+	}
 }

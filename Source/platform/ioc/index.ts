@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { IServiceContainer } from './types';
+import { IServiceContainer } from "./types";
 
 let container: IServiceContainer;
 export function getServiceContainer() {
-    return container;
+	return container;
 }
 export function setServiceContainer(serviceContainer: IServiceContainer) {
-    container = serviceContainer;
+	container = serviceContainer;
 }

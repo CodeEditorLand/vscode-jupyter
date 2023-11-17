@@ -1,22 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-
-import { Uri } from 'vscode';
-import { PythonVersion } from './pythonVersion';
+import { Uri } from "vscode";
+import { PythonVersion } from "./pythonVersion";
 
 /**
  * The supported Python environment types.
  */
 export enum EnvironmentType {
-    Unknown = 'Unknown',
-    Conda = 'Conda',
-    VirtualEnv = 'VirtualEnv',
-    Pipenv = 'PipEnv',
-    Pyenv = 'Pyenv',
-    Venv = 'Venv',
-    Poetry = 'Poetry',
-    VirtualEnvWrapper = 'VirtualEnvWrapper',
+	Unknown = "Unknown",
+	Conda = "Conda",
+	VirtualEnv = "VirtualEnv",
+	Pipenv = "PipEnv",
+	Pyenv = "Pyenv",
+	Venv = "Venv",
+	Poetry = "Poetry",
+	VirtualEnvWrapper = "VirtualEnvWrapper",
 }
 
 export type InterpreterId = string;
@@ -29,11 +28,11 @@ export type InterpreterId = string;
  * @prop sysPrefix - the environment's install root (`sys.prefix`)
  */
 export type InterpreterInformation = {
-    id: InterpreterId;
-    uri: Uri;
-    version?: PythonVersion;
-    sysVersion?: string;
-    sysPrefix: string;
+	id: InterpreterId;
+	uri: Uri;
+	version?: PythonVersion;
+	sysVersion?: string;
+	sysPrefix: string;
 };
 
 /**
@@ -41,17 +40,17 @@ export type InterpreterInformation = {
  * @prop envType - the kind of Python environment
  */
 export type PythonEnvironment = InterpreterInformation & {
-    displayName?: string;
-    envType?: EnvironmentType;
-    envName?: string;
-    /**
-     * Directory of the Python environment.
-     */
-    envPath?: Uri;
-    /**
-     * This contains the path to the environment.
-     * Used for display purposes only (in kernel picker or other places).
-     */
-    displayPath?: Uri;
-    isCondaEnvWithoutPython?: boolean;
+	displayName?: string;
+	envType?: EnvironmentType;
+	envName?: string;
+	/**
+	 * Directory of the Python environment.
+	 */
+	envPath?: Uri;
+	/**
+	 * This contains the path to the environment.
+	 * Used for display purposes only (in kernel picker or other places).
+	 */
+	displayPath?: Uri;
+	isCondaEnvWithoutPython?: boolean;
 };

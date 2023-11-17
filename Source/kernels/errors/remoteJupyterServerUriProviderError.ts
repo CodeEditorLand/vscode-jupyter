@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { BaseError } from '../../platform/errors/types';
+import { BaseError } from "../../platform/errors/types";
 
 /**
  * Thrown when a 3rd party extension has trouble computing a jupyter server URI
@@ -17,10 +17,17 @@ import { BaseError } from '../../platform/errors/types';
  * The URI entry box when picking a server. It should put up a dialog or input validation problem. If the error occurs later (like on timeout), it will be swallowed.
  */
 export class RemoteJupyterServerUriProviderError extends BaseError {
-    constructor(
-        public readonly serverProviderHandle: { id: string; handle: string; extensionId: string },
-        public readonly originalError: Error
-    ) {
-        super('remotejupyterserveruriprovider', originalError.message || originalError.toString());
-    }
+	constructor(
+		public readonly serverProviderHandle: {
+			id: string;
+			handle: string;
+			extensionId: string;
+		},
+		public readonly originalError: Error
+	) {
+		super(
+			"remotejupyterserveruriprovider",
+			originalError.message || originalError.toString()
+		);
+	}
 }

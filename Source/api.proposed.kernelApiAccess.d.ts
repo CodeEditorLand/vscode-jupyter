@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 // @ts-ignore Bogus import required for compiler to work
-import type { CancellationToken } from 'vscode';
+import type { CancellationToken } from "vscode";
 
-declare module './api' {
-    export interface Jupyter {
-        /**
-         * Request access to Kernels.
-         * As Kernels can be used to execute code on local or remote machines, user consent will be required.
-         */
-        requestKernelAccess(): Thenable<Kernels>;
-    }
+declare module "./api" {
+	export interface Jupyter {
+		/**
+		 * Request access to Kernels.
+		 * As Kernels can be used to execute code on local or remote machines, user consent will be required.
+		 */
+		requestKernelAccess(): Thenable<Kernels>;
+	}
 }
