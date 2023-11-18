@@ -2291,7 +2291,6 @@
 		"postcss-import": "15.1.0",
 		"postcss-loader": "7.3.3",
 		"postcss-preset-env": "9.3.0",
-		"prettier": "3.1.0",
 		"relative": "3.0.2",
 		"rewiremock": "3.14.5",
 		"rimraf": "5.0.5",
