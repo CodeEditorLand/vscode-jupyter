@@ -2,6 +2,7 @@
   "name": "jupyter",
   "displayName": "Jupyter",
   "version": "0.0.1",
+  "private": "false",
   "description": "Jupyter notebook support, interactive programming and computing that supports Intellisense, debugging and more.",
   "homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
   "bugs": {
@@ -19,6 +20,7 @@
     "url": "https://nikolahristov.tech"
   },
   "publisher": "playform",
+  "type": "module",
   "main": "./dist/extension.node.proxy.js",
   "browser": "./dist/extension.web.bundle.js",
   "scripts": {
@@ -53,6 +55,7 @@
     "preprePublishNonBundle": "gulp clean",
     "prePublishNonBundle": "npm run compile-no-watch",
     "preTestJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js",
+    "prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'",
     "printTestResults": "gulp printTestResults",
     "setup-precommit-hook": "husky install",
     "startJupyterServer": "node build/preDebugWebTest.js",
@@ -76,8 +79,7 @@
     "verifyUnhandledErrors": "gulp verifyUnhandledErrors",
     "webpack": "webpack",
     "webpack-dev": "gulp webpack-dependencies",
-    "webpack-release": "gulp webpack-dependencies",
-    "prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'"
+    "webpack-release": "gulp webpack-dependencies"
   },
   "contributes": {
     "commands": [
@@ -2293,13 +2295,13 @@
     "tsx": "4.2.0",
     "typemoq": "2.1.0",
     "typescript": "5.3.2",
+    "typescript-esbuild": "0.3.1",
     "unicode-properties": "1.4.1",
     "utf-8-validate": "6.0.3",
     "util": "0.12.5",
     "uuid-to-hex": "1.1.1",
     "webpack": "5.89.0",
-    "webpack-cli": "5.1.4",
-    "typescript-esbuild": "0.3.1"
+    "webpack-cli": "5.1.4"
   },
   "optionalDependencies": {
     "canvas": "2.11.2",
@@ -2311,6 +2313,9 @@
     "ms-toolsai.vscode-jupyter-cell-tags",
     "ms-toolsai.vscode-jupyter-slideshow"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "icon": "icon.png",
   "galleryBanner": {
     "color": "#ffffff",
@@ -2357,10 +2362,5 @@
       "url-parse": "$url-parse"
     },
     "d3-color": "3.1.0"
-  },
-  "type": "module",
-  "private": "false",
-  "publishConfig": {
-    "access": "public"
   }
 }
