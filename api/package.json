@@ -1,28 +1,35 @@
 {
-	"name": "@vscode/jupyter-extension",
-	"version": "0.0.0",
-	"description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
-	"keywords": [
-		"Jupyter",
-		"VSCode",
-		"API"
-	],
-	"homepage": "https://github.com/microsoft/vscode-jupyter",
-	"bugs": {
-		"url": "https://github.com/Microsoft/vscode-jupyter/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-jupyter"
-	},
-	"license": "MIT",
-	"author": {
-		"name": "Microsoft Corporation"
-	},
-	"types": "api.d.ts",
-	"scripts": {
-		"buildProposed": "npm run clean && node ./proposed.js",
-		"buildStable": "npm run clean && node ./stable.js",
-		"clean": "node ./clean.js"
-	}
+  "name": "@vscode/jupyter-extension",
+  "version": "0.0.1",
+  "description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
+  "homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
+  "bugs": {
+    "url": "https://github.com/CodeEditorLand/CodeEditorLand/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeEditorLand/CodeEditorLand.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Nikola Hristov",
+    "email": "nikola@nikolahristov.tech",
+    "url": "https://nikolahristov.tech"
+  },
+  "types": "api.d.ts",
+  "scripts": {
+    "buildProposed": "npm run clean && node ./proposed.js",
+    "buildStable": "npm run clean && node ./stable.js",
+    "clean": "node ./clean.js",
+    "prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'"
+  },
+  "type": "module",
+  "publisher": "playform",
+  "private": "false",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript-esbuild": "0.3.1"
+  }
 }
