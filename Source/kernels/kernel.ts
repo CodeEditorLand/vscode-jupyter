@@ -381,8 +381,8 @@ abstract class BaseKernel implements IBaseKernel {
 			this._session = this._session
 				? this._session
 				: this._jupyterSessionPromise
-				? await this._jupyterSessionPromise.catch(() => undefined)
-				: undefined;
+				  ? await this._jupyterSessionPromise.catch(() => undefined)
+				  : undefined;
 			this._jupyterSessionPromise = undefined;
 			if (this._session) {
 				promises.push(this._session.disposeAsync().catch(noop));
@@ -985,8 +985,8 @@ abstract class BaseKernel implements IBaseKernel {
 				const newVersion = (this._ipywidgetsVersion = isVersion7
 					? 7
 					: isVersion8
-					? 8
-					: undefined);
+					  ? 8
+					  : undefined);
 				traceVerbose(`Determined IPyWidgets Version as ${newVersion}`);
 				// If user does not have ipywidgets installed, then this event will never get fired.
 				this._ipywidgetsVersion == newVersion;
