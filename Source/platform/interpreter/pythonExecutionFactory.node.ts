@@ -62,8 +62,8 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		options.resource = options.resource
 			? options.resource
 			: this.workspace.workspaceFolders?.length
-			? this.workspace.workspaceFolders[0].uri
-			: undefined;
+			  ? this.workspace.workspaceFolders[0].uri
+			  : undefined;
 
 		// This should never happen, but if it does ensure we never run code accidentally in untrusted workspaces.
 		if (!this.workspace.isTrusted) {

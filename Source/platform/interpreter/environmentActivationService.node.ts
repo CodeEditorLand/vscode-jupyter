@@ -231,8 +231,8 @@ export class EnvironmentActivationService
 		resource = resource
 			? resource
 			: this.workspace.workspaceFolders?.length
-			? this.workspace.workspaceFolders[0].uri
-			: undefined;
+			  ? this.workspace.workspaceFolders[0].uri
+			  : undefined;
 		const stopWatch = new StopWatch();
 		// We'll need this later.
 		const customEnvVarsPromise = this.customEnvVarsService

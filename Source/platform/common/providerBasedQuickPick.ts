@@ -526,8 +526,8 @@ export class BaseProviderBasedQuickPick<
 		const activeItems = selectedQuickPickItem
 			? [selectedQuickPickItem]
 			: quickPick.activeItems.length
-			? [quickPick.activeItems[0]]
-			: [];
+			  ? [quickPick.activeItems[0]]
+			  : [];
 		if (activeItems.length && !items.includes(activeItems[0])) {
 			const oldActiveItem = activeItems[0];
 			const newActiveQuickPickItem =

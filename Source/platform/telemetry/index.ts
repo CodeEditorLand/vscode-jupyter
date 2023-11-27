@@ -110,8 +110,8 @@ function sanitizeProperties(eventName: string, data: Record<string, any>) {
 				typeof data[prop] === "string"
 					? data[prop]
 					: typeof data[prop] === "object"
-					? "object"
-					: data[prop].toString();
+					  ? "object"
+					  : data[prop].toString();
 		} catch (ex) {
 			traceError(`Failed to serialize ${prop} for ${eventName}`, ex);
 		}

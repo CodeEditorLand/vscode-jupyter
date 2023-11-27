@@ -857,9 +857,9 @@ export class UserJupyterServerUrlProvider
 						previousStep = isInsecureConnection
 							? "Check Insecure Connections"
 							: requiresPassword &&
-							  jupyterServerUri.token.length === 0
-							? "Check Passwords"
-							: "Get Url";
+							    jupyterServerUri.token.length === 0
+							  ? "Check Passwords"
+							  : "Get Url";
 						if (previousStep === "Get Url") {
 							// If we were given a Url, then back should get out of this flow.
 							previousStep =

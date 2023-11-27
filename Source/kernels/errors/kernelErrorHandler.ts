@@ -502,8 +502,8 @@ export abstract class DataScienceErrorHandler
 				err instanceof InvalidRemoteJupyterServerUriHandleError
 					? ""
 					: err instanceof RemoteJupyterServerConnectionError
-					? err.originalError.message || ""
-					: err.originalError?.message || err.message;
+					  ? err.originalError.message || ""
+					  : err.originalError?.message || err.message;
 
 			const extensionId = err.serverProviderHandle.extensionId;
 			const id = err.serverProviderHandle.id;

@@ -788,17 +788,17 @@ export class InterpreterService implements IInterpreterService {
 								pythonPath
 						  )
 						: typeof pythonPath === "string"
-						? item.id === pythonPath
-						: areInterpreterPathsSame(
-								Uri.file(item.path),
-								Uri.file(pythonPath.path)
-						  );
+						  ? item.id === pythonPath
+						  : areInterpreterPathsSame(
+									Uri.file(item.path),
+									Uri.file(pythonPath.path)
+						    );
 				});
 				const pythonPathForLogging = isUri(pythonPath)
 					? getDisplayPath(pythonPath)
 					: typeof pythonPath === "string"
-					? pythonPath
-					: getDisplayPath(Uri.file(pythonPath.path));
+					  ? pythonPath
+					  : getDisplayPath(Uri.file(pythonPath.path));
 				if (matchedPythonEnv) {
 					const env =
 						await api.environments.resolveEnvironment(
@@ -828,8 +828,8 @@ export class InterpreterService implements IInterpreterService {
 					isUri(pythonPath)
 						? pythonPath.fsPath
 						: typeof pythonPath == "string"
-						? pythonPath
-						: pythonPath.path
+						  ? pythonPath
+						  : pythonPath.path
 				);
 				return this.trackResolvedEnvironment(env);
 			});
