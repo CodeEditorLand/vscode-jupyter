@@ -1,35 +1,35 @@
 {
-  "name": "@vscode/jupyter-extension",
-  "version": "0.0.1",
-  "private": "false",
-  "description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
-  "homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
-  "bugs": {
-    "url": "https://github.com/CodeEditorLand/CodeEditorLand/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CodeEditorLand/CodeEditorLand.git"
-  },
-  "license": "MIT",
-  "author": {
-    "name": "Nikola Hristov",
-    "email": "nikola@nikolahristov.tech",
-    "url": "https://nikolahristov.tech"
-  },
-  "publisher": "playform",
-  "type": "module",
-  "types": "api.d.ts",
-  "scripts": {
-    "buildProposed": "npm run clean && node ./proposed.js",
-    "buildStable": "npm run clean && node ./stable.js",
-    "clean": "node ./clean.js",
-    "prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'"
-  },
-  "devDependencies": {
-    "typescript-esbuild": "0.3.1"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@vscode/jupyter-extension",
+	"version": "0.0.1",
+	"private": "false",
+	"description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
+	"homepage": "https://github.com/CodeEditorLand/CodeEditorLand#readme",
+	"bugs": {
+		"url": "https://github.com/CodeEditorLand/CodeEditorLand/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CodeEditorLand/CodeEditorLand.git"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "Nikola Hristov",
+		"email": "nikola@nikolahristov.tech",
+		"url": "https://nikolahristov.tech"
+	},
+	"publisher": "playform",
+	"type": "module",
+	"types": "api.d.ts",
+	"scripts": {
+		"buildProposed": "npm run clean && node ./proposed.js",
+		"buildStable": "npm run clean && node ./stable.js",
+		"clean": "node ./clean.js",
+		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'"
+	},
+	"devDependencies": {
+		"typescript-esbuild": "0.3.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }
