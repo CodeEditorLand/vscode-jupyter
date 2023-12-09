@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from "../common/utils/localize";
-import { BaseError } from "./types";
+import { DataScience } from '../common/utils/localize';
+import { BaseError } from './types';
 
 /**
  * Generic error when the local jupyter server fails to start. Local means we started it.
@@ -14,12 +14,10 @@ import { BaseError } from "./types";
  * First cell to be run should show the connection error.
  */
 export class LocalJupyterServerConnectionError extends BaseError {
-	constructor(public readonly originalError: Error) {
-		super(
-			"localjupyterserverconnection",
-			DataScience.jupyterNotebookFailure(
-				originalError.message || originalError.toString()
-			)
-		);
-	}
+    constructor(public readonly originalError: Error) {
+        super(
+            'localjupyterserverconnection',
+            DataScience.jupyterNotebookFailure(originalError.message || originalError.toString())
+        );
+    }
 }

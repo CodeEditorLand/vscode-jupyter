@@ -1,12 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { CancellationToken, Event, Uri } from "vscode";
+import type { CancellationToken, Uri } from "vscode";
 
 declare module "./api" {
 	interface OutputItem {
 		/**
-		 * The mime type of the output
+		 * The mime type of the output.
+		 * Includes standard mime types (but not limited to) `text/plain`, `application/json`, `text/html`, etc.
+		 *
+		 * Special mime types are:
+		 * - `application/x.notebook.stream.stdout`: The output is a stream of stdout. (same as `NotebookCellOutputItem.stdout('').mime`)
+		 * - `application/x.notebook.stream.stderr`: The output is a stream of stderr. (same as `NotebookCellOutputItem.stderr('').mime`)
+		 * - `application/vnd.code.notebook.error`: The output is a stream of stderr. (same as `NotebookCellOutputItem.error(...).mime`)
+		 *
 		 */
 		mime: string;
 		/**
@@ -18,6 +25,11 @@ declare module "./api" {
 	 * Represents a Jupyter Kernel.
 	 */
 	export interface Kernel {
+		/**
+		 * Language of the kernel.
+		 * E.g. python, r, julia, etc.
+		 */
+		language: string;
 		/**
 		 * Executes code in the kernel without affecting the execution count & execution history.
 		 *
@@ -34,7 +46,7 @@ declare module "./api" {
 		/**
 		 * Gets an the kernel associated with a given resource.
 		 * For instance if the resource is a notebook, then get the kernel associated with the given Notebook document.
-		 * Only kernels which have already been started by the user will be returned.
+		 * Only kernels which have already been started by the user and belonging to Notebooks that are currently opened will be returned.
 		 */
 		getKernel(uri: Uri): Thenable<Kernel | undefined>;
 	}

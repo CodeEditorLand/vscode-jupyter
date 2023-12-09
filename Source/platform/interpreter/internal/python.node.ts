@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { traceVerbose } from "../../logging";
+import { traceVerbose } from '../../logging';
 
 // "python" contains functions corresponding to the various ways that
 // the extension invokes a Python executable internally.  Each function
@@ -16,38 +16,33 @@ import { traceVerbose } from "../../logging";
 // string as the stdout text and returns the relevant data.
 
 export function execModule(name: string, moduleArgs: string[]): string[] {
-	const args = ["-m", name, ...moduleArgs];
-	// "code" isn't specific enough to know how to parse it,
-	// so we only return the args.
-	return args;
+    const args = ['-m', name, ...moduleArgs];
+    // "code" isn't specific enough to know how to parse it,
+    // so we only return the args.
+    return args;
 }
 
 export function getExecutable(): [string[], (out: string) => string] {
-	const args = ["-c", "import sys;print(sys.executable)"];
+    const args = ['-c', 'import sys;print(sys.executable)'];
 
-	function parse(out: string): string {
-		return out.trim();
-	}
+    function parse(out: string): string {
+        return out.trim();
+    }
 
-	return [args, parse];
+    return [args, parse];
 }
 
-export function isModuleInstalled(
-	name: string
-): [string[], (out: string) => boolean] {
-	const args = [
-		"-c",
-		`import ${name};print('6af208d0-cb9c-427f-b937-ff563e17efdf')`,
-	];
+export function isModuleInstalled(name: string): [string[], (out: string) => boolean] {
+    const args = ['-c', `import ${name};print('6af208d0-cb9c-427f-b937-ff563e17efdf')`];
 
-	function parse(out: string): boolean {
-		if (out.includes("6af208d0-cb9c-427f-b937-ff563e17efdf")) {
-			return true;
-		} else {
-			traceVerbose(`Module ${name} is not installed. Output ${out}`);
-			return false;
-		}
-	}
+    function parse(out: string): boolean {
+        if (out.includes('6af208d0-cb9c-427f-b937-ff563e17efdf')) {
+            return true;
+        } else {
+            traceVerbose(`Module ${name} is not installed. Output ${out}`);
+            return false;
+        }
+    }
 
-	return [args, parse];
+    return [args, parse];
 }

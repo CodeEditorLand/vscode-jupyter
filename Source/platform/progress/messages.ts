@@ -1,24 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from "../common/utils/localize";
-import { ReportableAction } from "./types";
+import { DataScience } from '../common/utils/localize';
+import { ReportableAction } from './types';
 
 const progressMessages = {
-	[ReportableAction.JupyterSessionWaitForIdleSession]:
-		DataScience.waitingForJupyterSessionToBeIdle,
-	[ReportableAction.KernelsGetKernelForRemoteConnection]:
-		DataScience.gettingListOfKernelsForRemoteConnection,
-	[ReportableAction.KernelsGetKernelSpecs]:
-		DataScience.gettingListOfKernelSpecs,
-	[ReportableAction.KernelsRegisterKernel]: DataScience.registeringKernel,
-	[ReportableAction.NotebookConnect]: DataScience.connectingToJupyter,
-	[ReportableAction.NotebookStart]: DataScience.startingJupyterNotebook,
-	[ReportableAction.InstallingMissingDependencies]:
-		DataScience.installingMissingDependencies,
-	[ReportableAction.ExportNotebookToPython]:
-		DataScience.exportNotebookToPython,
-	[ReportableAction.PerformingExport]: DataScience.performingExport,
+    [ReportableAction.JupyterSessionWaitForIdleSession]: DataScience.waitingForJupyterSessionToBeIdle,
+    [ReportableAction.KernelsGetKernelForRemoteConnection]: DataScience.gettingListOfKernelsForRemoteConnection,
+    [ReportableAction.KernelsGetKernelSpecs]: DataScience.gettingListOfKernelSpecs,
+    [ReportableAction.KernelsRegisterKernel]: DataScience.registeringKernel,
+    [ReportableAction.NotebookConnect]: DataScience.connectingToJupyter,
+    [ReportableAction.NotebookStart]: DataScience.startingJupyterNotebook,
+    [ReportableAction.InstallingMissingDependencies]: DataScience.installingMissingDependencies,
+    [ReportableAction.ExportNotebookToPython]: DataScience.exportNotebookToPython,
+    [ReportableAction.PerformingExport]: DataScience.performingExport
 };
 
 /**
@@ -28,8 +23,6 @@ const progressMessages = {
  * @param {ReportableAction} action
  * @returns {(string | undefined)}
  */
-export function getUserMessageForAction(
-	action: ReportableAction
-): string | undefined {
-	return progressMessages[action];
+export function getUserMessageForAction(action: ReportableAction): string | undefined {
+    return progressMessages[action];
 }

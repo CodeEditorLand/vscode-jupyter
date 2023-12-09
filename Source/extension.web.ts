@@ -102,6 +102,7 @@ import {
 	PylanceExtension,
 	PythonExtension,
 	STANDARD_OUTPUT_CHANNEL,
+	Telemetry,
 } from "./platform/common/constants";
 import { getJupyterOutputChannel } from "./standalone/devTools/jupyterOutputChannel";
 import { registerLogger, setLoggingLevel } from "./platform/logging";
@@ -111,6 +112,8 @@ import { ServiceManager } from "./platform/ioc/serviceManager";
 import { OutputChannelLogger } from "./platform/logging/outputChannelLogger";
 import { ConsoleLogger } from "./platform/logging/consoleLogger";
 import { initializeGlobals as initializeTelemetryGlobals } from "./platform/telemetry/telemetry";
+import { setDisposableTracker } from "./platform/common/utils/lifecycle";
+import { sendTelemetryEvent } from "./telemetry";
 
 durations.codeLoadingTime = stopWatch.elapsedTime;
 
@@ -126,19 +129,15 @@ let activatedServiceContainer: IServiceContainer | undefined;
 export async function activate(
 	context: IExtensionContext
 ): Promise<IExtensionApi> {
+	setDisposableTracker(context.subscriptions);
 	context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
 	try {
 		let api: IExtensionApi;
 		let ready: Promise<void>;
-		let serviceContainer: IServiceContainer;
-		[api, ready, serviceContainer] = await activateUnsafe(
-			context,
-			stopWatch,
-			durations
-		);
+		[api, ready] = await activateUnsafe(context, stopWatch, durations);
 		// Send the "success" telemetry only if activation did not fail.
 		// Otherwise Telemetry is send via the error handler.
-		sendStartupTelemetry(ready, durations, stopWatch, serviceContainer)
+		sendStartupTelemetry(ready, durations, stopWatch)
 			// Run in the background.
 			.catch(noop);
 		await ready;
@@ -245,7 +244,7 @@ async function handleError(ex: Error, startupDurations: typeof durations) {
 	// Possible logger hasn't initialized either.
 	console.error("extension activation failed", ex);
 	traceError("extension activation failed", ex);
-	await sendErrorTelemetry(ex, startupDurations, activatedServiceContainer);
+	await sendErrorTelemetry(ex, startupDurations);
 }
 
 function notifyUser(msg: string) {
@@ -385,7 +384,10 @@ async function activateLegacy(
 	const experimentService =
 		serviceContainer.get<IExperimentService>(IExperimentService);
 	// This must be done first, this guarantees all experiment information has loaded & all telemetry will contain experiment info.
+	const stopWatch = new StopWatch();
 	await experimentService.activate();
+	const duration = stopWatch.elapsedTime;
+	sendTelemetryEvent(Telemetry.ExperimentLoad, { duration });
 
 	const applicationEnv = serviceManager.get<IApplicationEnvironment>(
 		IApplicationEnvironment

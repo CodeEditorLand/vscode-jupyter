@@ -62,7 +62,8 @@ type EventTag =
 	| "Remote"
 	| "Widgets"
 	| "KernelStartup"
-	| "IntelliSense";
+	| "IntelliSense"
+	| "Code Execution";
 type EventSource = "User Action" | "N/A";
 type IGdprEventData = {
 	owner: Owner;
@@ -504,12 +505,21 @@ export class IEventNamePropertyMapping {
 		 * Time taken to activate the extension.
 		 */
 		totalActivateTime: number;
+		/**
+		 * Total time to load the modules.
+		 */
+		codeLoadingTime: number;
 	}> = {
 		owner: "donjayamanne",
 		feature: "N/A",
 		source: "N/A",
 		measures: {
 			totalActivateTime: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
+			},
+			codeLoadingTime: {
 				classification: "SystemMetaData",
 				purpose: "PerformanceAndHealth",
 				isMeasurement: true,
@@ -521,6 +531,16 @@ export class IEventNamePropertyMapping {
 			},
 		},
 	};
+	/**
+	 * Telemetry event sent with perf measures related to loading experiments.
+	 */
+	public [Telemetry.ExperimentLoad]: TelemetryEventInfo<DurationMeasurement> =
+		{
+			owner: "donjayamanne",
+			feature: "N/A",
+			source: "N/A",
+			measures: commonClassificationForDurationProperties(),
+		};
 	/**
 	 * Telemetry event sent when substituting Environment variables to calculate value of variables.
 	 * E.g. user has a a .env file with tokens that need to be replaced with env variables.
@@ -2652,18 +2672,70 @@ export class IEventNamePropertyMapping {
 	/**
 	 * Sent when a user executes a cell.
 	 */
-	[Telemetry.ExecuteCell]: TelemetryEventInfo<ResourceSpecificTelemetryProperties> =
-		{
-			owner: "donjayamanne",
-			feature: ["Notebook", "InteractiveWindow"],
-			source: "User Action",
-			tags: ["Cell Execution"],
-			properties: {
-				...commonClassificationForResourceSpecificTelemetryProperties()
-					.properties,
-				...commonClassificationForErrorProperties(),
+	[Telemetry.ExecuteCell]: TelemetryEventInfo<
+		DurationMeasurement &
+			ResourceSpecificTelemetryProperties & {
+				/**
+				 * Total number of inspect requests (before the cell was executed).
+				 */
+				pendingInspectRequestsBefore: number;
+				/**
+				 * Total number of inspect requests (after the cell was executed).
+				 */
+				pendingInspectRequestsAfter: number;
+			}
+	> = {
+		owner: "donjayamanne",
+		feature: ["Notebook", "InteractiveWindow"],
+		source: "User Action",
+		tags: ["Cell Execution"],
+		measures: {
+			...commonClassificationForDurationProperties(),
+			pendingInspectRequestsBefore: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
 			},
-		};
+			pendingInspectRequestsAfter: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
+			},
+		},
+		properties: {
+			...commonClassificationForResourceSpecificTelemetryProperties()
+				.properties,
+			...commonClassificationForErrorProperties(),
+		},
+	};
+
+	/**
+	 * Sent when a some code is executed against the kernel
+	 */
+	[Telemetry.ExecuteCode]: TelemetryEventInfo<
+		DurationMeasurement &
+			ResourceSpecificTelemetryProperties & {
+				/**
+				 * Extension Id that's attempting to use the API.
+				 */
+				extensionId: string;
+			}
+	> = {
+		owner: "donjayamanne",
+		feature: ["Notebook", "InteractiveWindow"],
+		source: "User Action",
+		tags: ["Code Execution"],
+		measures: commonClassificationForDurationProperties(),
+		properties: {
+			...commonClassificationForResourceSpecificTelemetryProperties()
+				.properties,
+			...commonClassificationForErrorProperties(),
+			extensionId: {
+				classification: "SystemMetaData",
+				purpose: "FeatureInsight",
+			},
+		},
+	};
 
 	/**
 	 * Sent when we resume execution of a cell (e.g. when reloading VS Code while a cell was executing).
@@ -3362,6 +3434,284 @@ export class IEventNamePropertyMapping {
 			},
 		},
 	};
+	/**
+	 * Telemetry sent with the total time taken to provide completions from a kernel.
+	 */
+	[Telemetry.KernelCodeCompletion]: TelemetryEventInfo<
+		DurationMeasurement & {
+			/**
+			 * Hash of the Kernel Connection id.
+			 */
+			kernelId: string;
+			/**
+			 * What kind of kernel spec did we fail to create.
+			 */
+			kernelConnectionType:
+				| "startUsingPythonInterpreter"
+				| "startUsingLocalKernelSpec"
+				| "startUsingRemoteKernelSpec"
+				| "connectToLiveRemoteKernel";
+			/**
+			 * Language of the kernel spec.
+			 */
+			kernelLanguage: string | undefined;
+			/**
+			 * Translated Monaco Language.
+			 */
+			monacoLanguage: string | undefined;
+			/**
+			 * Whether the completion request was cancelled or not.
+			 */
+			cancelled: boolean;
+			/**
+			 * Whether we send the request to resolve the completion item.
+			 */
+			requestSent: boolean;
+			/**
+			 * Whether we completed the request.
+			 */
+			completed: boolean;
+			/**
+			 * Number of items returned.
+			 */
+			completionItems: number;
+			/**
+			 * Total time taken to complete the request.
+			 */
+			requestDuration: number;
+			/**
+			 * Status of the kernel at the time we make a request for the resolve completion information
+			 */
+			kernelStatusBeforeRequest?: string;
+			/**
+			 * Status of the kernel at the time we make a request for the resolve completion information
+			 */
+			kernelStatusAfterRequest?: string;
+		}
+	> = {
+		owner: "donjayamanne",
+		feature: "N/A",
+		source: "N/A",
+		measures: {
+			...commonClassificationForDurationProperties(),
+			requestDuration: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
+			},
+			completionItems: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
+			},
+		},
+		properties: {
+			kernelConnectionType: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelLanguage: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			monacoLanguage: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelId: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			cancelled: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			completed: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelStatusAfterRequest: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelStatusBeforeRequest: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			requestSent: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+		},
+	};
+	/**
+	 * Telemetry sent with the total time taken to provide completions from a kernel.
+	 */
+	[Telemetry.KernelCodeCompletionResolve]: TelemetryEventInfo<
+		DurationMeasurement & {
+			/**
+			 * Hash of the Kernel Connection id.
+			 */
+			kernelId: string;
+			/**
+			 * What kind of kernel spec did we fail to create.
+			 */
+			kernelConnectionType:
+				| "startUsingPythonInterpreter"
+				| "startUsingLocalKernelSpec"
+				| "startUsingRemoteKernelSpec"
+				| "connectToLiveRemoteKernel";
+			/**
+			 * Language of the kernel spec.
+			 */
+			kernelLanguage: string | undefined;
+			/**
+			 * Translated Monaco Language.
+			 */
+			monacoLanguage: string | undefined;
+			/**
+			 * Whether we timedout waiting for the request to complete.
+			 */
+			requestTimedout?: boolean;
+			/**
+			 * Whether the completion request was cancelled or not.
+			 */
+			cancelled?: boolean;
+			/**
+			 * Whether we send the request to resolve the completion item.
+			 */
+			requestSent: boolean;
+			/**
+			 * Whether we resolved the documentation or not.
+			 */
+			completed: boolean;
+			/**
+			 * Total time taken to resolve the documentation.
+			 */
+			requestDuration: number;
+			/**
+			 * Total number of pending requests.
+			 */
+			pendingRequests: number;
+			/**
+			 * Whether the kernel completion resolve request returned any data.
+			 */
+			completedWithData?: boolean;
+			/**
+			 * Status of the kernel at the time we make a request for the resolve completion information
+			 */
+			kernelStatusBeforeRequest?: string;
+			/**
+			 * Status of the kernel at the time we make a request for the resolve completion information
+			 */
+			kernelStatusAfterRequest?: string;
+		}
+	> = {
+		owner: "donjayamanne",
+		feature: "N/A",
+		source: "N/A",
+		measures: {
+			...commonClassificationForDurationProperties(),
+			requestDuration: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
+			},
+			pendingRequests: {
+				classification: "SystemMetaData",
+				purpose: "PerformanceAndHealth",
+				isMeasurement: true,
+			},
+		},
+		properties: {
+			kernelConnectionType: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelLanguage: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			monacoLanguage: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelId: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			cancelled: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelStatusBeforeRequest: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelStatusAfterRequest: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			requestTimedout: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			completedWithData: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			requestSent: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			completed: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+		},
+	};
+
+	/**
+	 * Telemetry sent when we the kernel does not reply back with a response for requestInspect message.
+	 * The requestInspect request is used to resolve completion items in auto complete lists.
+	 */
+	[Telemetry.KernelCodeCompletionCannotResolve]: TelemetryEventInfo<{
+		/**
+		 * Hash of the Kernel Connection id.
+		 */
+		kernelId: string;
+		/**
+		 * What kind of kernel spec did we fail to create.
+		 */
+		kernelConnectionType:
+			| "startUsingPythonInterpreter"
+			| "startUsingLocalKernelSpec"
+			| "startUsingRemoteKernelSpec"
+			| "connectToLiveRemoteKernel";
+		/**
+		 * Language of the kernel spec.
+		 */
+		kernelLanguage: string | undefined;
+	}> = {
+		owner: "donjayamanne",
+		feature: "N/A",
+		source: "N/A",
+		properties: {
+			kernelConnectionType: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelLanguage: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+			kernelId: {
+				classification: "PublicNonPersonalData",
+				purpose: "FeatureInsight",
+			},
+		},
+	};
+
 	/**
 	 * Telemetry sent when an extension uses our 3rd party Kernel API.
 	 */
