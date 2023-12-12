@@ -15,7 +15,8 @@ import {
     notebooks
 } from 'vscode';
 import { IContributedKernelFinder } from '../../../kernels/internalTypes';
-import { JupyterServerSelector } from '../../../kernels/jupyter/connection/serverSelector';
+// eslint-disable-next-line import/no-restricted-paths
+import { CodespacesJupyterServerSelector } from '../../../codespaces/codeSpacesServerSelector';
 import {
     IJupyterServerUriStorage,
     IRemoteKernelFinder,
@@ -86,7 +87,7 @@ export class RemoteNotebookKernelSourceSelector implements IRemoteNotebookKernel
     constructor(
         @inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
         @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage,
-        @inject(JupyterServerSelector) private readonly serverSelector: JupyterServerSelector,
+        @inject(CodespacesJupyterServerSelector) private readonly serverSelector: CodespacesJupyterServerSelector,
         @inject(JupyterConnection) private readonly jupyterConnection: JupyterConnection,
         @inject(IConnectionDisplayDataProvider) private readonly displayDataProvider: IConnectionDisplayDataProvider,
         @inject(IRemoteKernelFinderController)
@@ -161,26 +162,19 @@ export class RemoteNotebookKernelSourceSelector implements IRemoteNotebookKernel
               )
             : Promise.resolve([]);
         const handledServerIds = new Set<string>();
-        const [jupyterServers] = await Promise.all([
-            serversPromise,
-            Promise.all(
-                servers
-                    .filter((s) => s.serverProviderHandle.id === provider.id)
-                    .map(async (server) => {
-                        // remote server
-                        const lastUsedTime = (await this.serverUriStorage.getAll()).find(
-                            (item) =>
-                                generateIdFromRemoteProvider(item.provider) ===
-                                generateIdFromRemoteProvider(server.serverProviderHandle)
-                        );
-                        if (token.isCancellationRequested) {
-                            return;
-                        }
-                        handledServerIds.add(generateIdFromRemoteProvider(server.serverProviderHandle));
-                        serversAndTimes.push({ server, time: lastUsedTime?.time });
-                    })
-            )
-        ]);
+        const jupyterServers = await serversPromise;
+        servers
+            .filter((s) => s.serverProviderHandle.id === provider.id)
+            .map((server) => {
+                // remote server
+                const lastUsedTime = this.serverUriStorage.all.find(
+                    (item) =>
+                        generateIdFromRemoteProvider(item.provider) ===
+                        generateIdFromRemoteProvider(server.serverProviderHandle)
+                );
+                handledServerIds.add(generateIdFromRemoteProvider(server.serverProviderHandle));
+                serversAndTimes.push({ server, time: lastUsedTime?.time });
+            });
         serversAndTimes.sort((a, b) => {
             if (!a.time && !b.time) {
                 return a.server.displayName.localeCompare(b.server.displayName);

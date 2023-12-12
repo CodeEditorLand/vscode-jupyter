@@ -3,7 +3,7 @@
 
 import * as path from '../../../platform/vscode-path/path';
 import * as uriPath from '../../../platform/vscode-path/resources';
-import { CancellationToken, CancellationTokenSource, env, Uri, workspace } from 'vscode';
+import { CancellationToken, CancellationTokenSource, env, EventEmitter, Uri } from 'vscode';
 import {
     createInterpreterKernelSpec,
     getKernelId,
@@ -21,18 +21,17 @@ import { LocalKernelSpecFinder } from './localKernelSpecFinderBase.node';
 import { baseKernelPath, JupyterPaths } from './jupyterPaths.node';
 import { IPythonExtensionChecker } from '../../../platform/api/types';
 import { PYTHON_LANGUAGE, Telemetry } from '../../../platform/common/constants';
-import { traceVerbose, traceError, traceWarning, traceInfo } from '../../../platform/logging';
-import { getDisplayPath, getDisplayPathFromLocalFile } from '../../../platform/common/platform/fs-paths.node';
+import { traceVerbose, traceError, traceWarning } from '../../../platform/logging';
+import { getDisplayPath } from '../../../platform/common/platform/fs-paths.node';
 import { IInterpreterService } from '../../../platform/interpreter/contracts';
 import { areInterpreterPathsSame } from '../../../platform/pythonEnvironments/info/interpreter';
 import { PythonEnvironment } from '../../../platform/pythonEnvironments/info';
 import { ITrustedKernelPaths } from './types';
 import { IDisposable } from '../../../platform/common/types';
-import { dispose } from '../../../platform/common/utils/lifecycle';
-import { raceCancellation } from '../../../platform/common/cancellation';
+import { DisposableBase, dispose } from '../../../platform/common/utils/lifecycle';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { getTelemetrySafeHashedString } from '../../../platform/telemetry/helpers';
-import { isKernelLaunchedViaLocalPythonIPyKernel } from '../../helpers.node';
+import { isKernelLaunchedViaLocalPythonIPyKernel, isLikelyAPythonExecutable } from '../../helpers.node';
 import { LocalKnownPathKernelSpecFinder } from './localKnownPathKernelSpecFinder.node';
 import { areObjectsWithUrisTheSame, noop } from '../../../platform/common/utils/misc';
 
@@ -45,13 +44,14 @@ export async function findKernelSpecsInInterpreter(
     interpreter: PythonEnvironment,
     cancelToken: CancellationToken,
     jupyterPaths: JupyterPaths,
-    kernelSpecFinder: LocalKernelSpecFinder
-): Promise<IJupyterKernelSpec[]> {
+    kernelSpecFinder: LocalKernelSpecFinder,
+    emitter: EventEmitter<IJupyterKernelSpec>
+): Promise<void> {
     // Find all the possible places to look for this resource
     const kernelSearchPath = Uri.file(path.join(interpreter.sysPrefix, baseKernelPath));
     const rootSpecPaths = await jupyterPaths.getKernelSpecRootPaths(cancelToken);
     if (cancelToken.isCancellationRequested) {
-        return [];
+        return;
     }
     // Exclude the global paths from the list.
     // What could happens is, we could have a global python interpreter and that returns a global path.
@@ -59,28 +59,11 @@ export async function findKernelSpecsInInterpreter(
     // We already have a way of identifying the interpreter associated with a global kernel spec.
     // Hence exclude global paths from the list of interpreter specific paths (as global paths are NOT interpreter specific).
     if (rootSpecPaths.some((uri) => uriPath.isEqual(uri, kernelSearchPath))) {
-        return [];
+        return;
     }
     const kernelSpecs = await kernelSpecFinder.findKernelSpecsInPaths(kernelSearchPath, cancelToken);
     if (cancelToken.isCancellationRequested) {
-        return [];
-    }
-
-    let results: IJupyterKernelSpec[] = [];
-    await Promise.all(
-        kernelSpecs.map(async (kernelSpecFile) => {
-            if (cancelToken.isCancellationRequested) {
-                return;
-            }
-            // Add these into our path cache to speed up later finds
-            const kernelSpec = await kernelSpecFinder.loadKernelSpec(kernelSpecFile, cancelToken, interpreter);
-            if (kernelSpec) {
-                results.push(kernelSpec);
-            }
-        })
-    );
-    if (cancelToken.isCancellationRequested) {
-        return [];
+        return;
     }
 
     // Filter out duplicates. This can happen when
@@ -88,31 +71,47 @@ export async function findKernelSpecsInInterpreter(
     // 2) Same kernel is registered in the global location
     // We should have extra metadata on the global location pointing to the original
     const originalSpecFiles = new Set<string>();
-    results.forEach((r) => {
-        if (r.metadata?.originalSpecFile) {
-            originalSpecFiles.add(r.metadata.originalSpecFile);
-        }
-    });
-    results = results.filter((r) => !r.specFile || !originalSpecFiles.has(r.specFile));
-    if (results.length) {
-        traceVerbose(`Kernel Specs found in interpreter ${interpreter.id} are ${JSON.stringify(results)}`);
-    }
+
     // There was also an old bug where the same item would be registered more than once. Eliminate these dupes
     // too.
-    const uniqueKernelSpecs: IJupyterKernelSpec[] = [];
     const byDisplayName = new Map<string, IJupyterKernelSpec>();
-    results.forEach((r) => {
-        const existing = byDisplayName.get(r.display_name);
-        if (existing && existing.executable !== r.executable) {
-            // This item is a dupe but has a different path to start the exe
-            uniqueKernelSpecs.push(r);
-        } else if (!existing) {
-            uniqueKernelSpecs.push(r);
-            byDisplayName.set(r.display_name, r);
-        }
-    });
 
-    return uniqueKernelSpecs;
+    await Promise.all(
+        kernelSpecs.map(async (kernelSpecFile) => {
+            try {
+                // Add these into our path cache to speed up later finds
+                const kernelSpec = await kernelSpecFinder.loadKernelSpec(kernelSpecFile, cancelToken, interpreter);
+                if (cancelToken.isCancellationRequested) {
+                    return;
+                }
+                if (!kernelSpec) {
+                    return;
+                }
+                if (kernelSpec.metadata?.originalSpecFile) {
+                    if (originalSpecFiles.has(kernelSpec.metadata.originalSpecFile)) {
+                        return;
+                    }
+                    originalSpecFiles.add(kernelSpec.metadata.originalSpecFile);
+                }
+                if (kernelSpec.specFile) {
+                    if (originalSpecFiles.has(kernelSpec.specFile)) {
+                        return;
+                    }
+                    originalSpecFiles.add(kernelSpec.specFile);
+                }
+                const existing = byDisplayName.get(kernelSpec.display_name);
+                if (existing && existing.executable !== kernelSpec.executable) {
+                    // This item has dupe name but has a different path to start the exe
+                    emitter.fire(kernelSpec);
+                } else if (!existing) {
+                    byDisplayName.set(kernelSpec.display_name, kernelSpec);
+                    emitter.fire(kernelSpec);
+                }
+            } catch (ex) {
+                traceError(`Failed to load kernel spec ${kernelSpecFile}`, ex);
+            }
+        })
+    );
 }
 
 /**
@@ -121,10 +120,17 @@ export async function findKernelSpecsInInterpreter(
  * I.e. first activate the python environment, then attempt to start those non-python environments.
  * This is because some python environments setup environment variables required by these non-python kernels (e.g. path to Java executable or the like.
  */
-export class InterpreterSpecificKernelSpecsFinder implements IDisposable {
-    private readonly disposables: IDisposable[] = [];
+export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
     private cancelToken = new CancellationTokenSource();
-    private kernelSpecPromise?: Promise<LocalKernelConnectionMetadata[]>;
+    private kernelSpecPromise?: Promise<void>;
+    private _kernels = new Map<string, PythonKernelConnectionMetadata | LocalKernelConnectionMetadata>();
+    private _onDidChangeKernels = this._register(
+        new EventEmitter<{
+            added: LocalKernelConnectionMetadata[];
+            removed: LocalKernelConnectionMetadata[];
+        }>()
+    );
+    public onDidChangeKernels = this._onDidChangeKernels.event;
     constructor(
         public readonly interpreter: PythonEnvironment,
         private readonly interpreterService: IInterpreterService,
@@ -132,12 +138,11 @@ export class InterpreterSpecificKernelSpecsFinder implements IDisposable {
         private readonly extensionChecker: IPythonExtensionChecker,
         private readonly kernelSpecFinder: LocalKernelSpecFinder
     ) {
-        this.interpreterService.onDidChangeInterpreter(this.clearCacheWhenInterpretersChange, this, this.disposables);
-        this.interpreterService.onDidChangeInterpreters(this.clearCacheWhenInterpretersChange, this, this.disposables);
-    }
-    dispose() {
-        dispose(this.disposables);
-        this.cancelToken.dispose();
+        super();
+        this._register({ dispose: () => this.cancelToken.cancel() });
+        this._register(this.cancelToken);
+        this._register(this.interpreterService.onDidChangeInterpreter(this.clearCacheWhenInterpretersChange, this));
+        this._register(this.interpreterService.onDidChangeInterpreters(this.clearCacheWhenInterpretersChange, this));
     }
     public async listKernelSpecs(refresh?: boolean) {
         if (!this.extensionChecker.isPythonExtensionInstalled) {
@@ -147,15 +152,14 @@ export class InterpreterSpecificKernelSpecsFinder implements IDisposable {
             return this.kernelSpecPromise;
         }
         this.cancelToken.cancel();
-        this.cancelToken = new CancellationTokenSource();
+        this.cancelToken.dispose();
+        this.cancelToken = this._register(new CancellationTokenSource());
         this.kernelSpecPromise = this.listKernelSpecsImpl();
-        this.kernelSpecPromise
-            .then((kernels) => {
-                traceVerbose(
-                    `Kernels for interpreter ${this.interpreter.id} are ${kernels.map((k) => k.id).join(', ')}`
-                );
-            })
-            .catch(noop);
+        void this.kernelSpecPromise.then(() =>
+            traceVerbose(
+                `Kernels for interpreter ${this.interpreter.id} are ${Array.from(this._kernels.keys()).join(', ')}`
+            )
+        );
         return this.kernelSpecPromise;
     }
 
@@ -178,15 +182,6 @@ export class InterpreterSpecificKernelSpecsFinder implements IDisposable {
         const cancelToken = this.cancelToken.token;
 
         traceVerbose(`Search for KernelSpecs in Interpreter ${getDisplayPath(this.interpreter.uri)}`);
-        const [kernelSpecsBelongingToPythonEnvironment, tempDirForKernelSpecs] = await Promise.all([
-            findKernelSpecsInInterpreter(this.interpreter, cancelToken, this.jupyterPaths, this.kernelSpecFinder),
-            this.jupyterPaths.getKernelSpecTempRegistrationFolder()
-        ]);
-        if (cancelToken.isCancellationRequested) {
-            return [];
-        }
-        // Update spec to have a default spec file
-        const interpreterSpecificKernelSpec = createInterpreterKernelSpec(this.interpreter, tempDirForKernelSpecs);
 
         // If the user has interpreters, then don't display the default kernel specs such as `python`, `python3`.
         // Such kernel specs are ambiguous, and we have absolutely no idea what interpreters they point to.
@@ -195,44 +190,74 @@ export class InterpreterSpecificKernelSpecsFinder implements IDisposable {
 
         // Then go through all of the kernels and generate their metadata
         const distinctKernelMetadata = new Map<string, LocalKernelConnectionMetadata>();
+        const onFound = new EventEmitter<IJupyterKernelSpec>();
+        const disposable = onFound.event((jupyterKernelSpec) => {
+            if (cancelToken.isCancellationRequested) {
+                return;
+            }
 
-        for (const k of kernelSpecsBelongingToPythonEnvironment) {
             if (
-                k.language === PYTHON_LANGUAGE &&
+                jupyterKernelSpec.language === PYTHON_LANGUAGE &&
                 // Hide default kernel specs only if env variables are empty.
                 // If not empty, then user has modified them.
-                (!k.env || Object.keys(k.env).length === 0) &&
-                isDefaultKernelSpec(k)
+                (!jupyterKernelSpec.env || Object.keys(jupyterKernelSpec.env).length === 0) &&
+                isDefaultKernelSpec(jupyterKernelSpec)
             ) {
                 traceVerbose(
-                    `Hiding default kernel spec '${k.display_name}', '${k.name}', ${getDisplayPath(
-                        k.argv[0]
-                    )} for interpreter ${getDisplayPath(k.interpreterPath)} and spec ${getDisplayPath(k.specFile)}`
+                    `Hiding default kernel spec '${jupyterKernelSpec.display_name}', '${
+                        jupyterKernelSpec.name
+                    }', ${getDisplayPath(jupyterKernelSpec.argv[0])} for interpreter ${getDisplayPath(
+                        jupyterKernelSpec.interpreterPath
+                    )} and spec ${getDisplayPath(jupyterKernelSpec.specFile)}`
                 );
-                continue;
+                return;
             }
-            const kernelSpec = isKernelLaunchedViaLocalPythonIPyKernel(k)
+            const kernelSpec = isKernelLaunchedViaLocalPythonIPyKernel(jupyterKernelSpec)
                 ? PythonKernelConnectionMetadata.create({
-                      kernelSpec: k,
+                      kernelSpec: jupyterKernelSpec,
                       interpreter: this.interpreter,
-                      id: getKernelId(k, this.interpreter)
+                      id: getKernelId(jupyterKernelSpec, this.interpreter)
                   })
                 : LocalKernelSpecConnectionMetadata.create({
-                      kernelSpec: k,
+                      kernelSpec: jupyterKernelSpec,
                       interpreter: this.interpreter,
-                      id: getKernelId(k, this.interpreter)
+                      id: getKernelId(jupyterKernelSpec, this.interpreter)
                   });
 
             // Check if we have already seen this.
+            if (kernelSpec && !this._kernels.has(kernelSpec.id)) {
+                this._kernels.set(kernelSpec.id, kernelSpec);
+                this._onDidChangeKernels.fire({ added: [kernelSpec], removed: [] });
+            }
             if (kernelSpec && !distinctKernelMetadata.has(kernelSpec.id)) {
                 distinctKernelMetadata.set(kernelSpec.id, kernelSpec);
             }
+        });
+
+        const [tempDirForKernelSpecs] = await Promise.all([
+            this.jupyterPaths.getKernelSpecTempRegistrationFolder(),
+            findKernelSpecsInInterpreter(
+                this.interpreter,
+                cancelToken,
+                this.jupyterPaths,
+                this.kernelSpecFinder,
+                onFound
+            )
+        ]);
+
+        onFound.dispose();
+        disposable.dispose();
+
+        if (cancelToken.isCancellationRequested) {
+            return;
         }
+        // Update spec to have a default spec file
+        const interpreterSpecificKernelSpec = createInterpreterKernelSpec(this.interpreter, tempDirForKernelSpecs);
 
         // Update spec to have a default spec file
         const spec = await interpreterSpecificKernelSpec;
         if (cancelToken.isCancellationRequested) {
-            return [];
+            return;
         }
 
         const result = PythonKernelConnectionMetadata.create({
@@ -240,10 +265,20 @@ export class InterpreterSpecificKernelSpecsFinder implements IDisposable {
             interpreter: this.interpreter,
             id: getKernelId(spec, this.interpreter)
         });
+        if (!this._kernels.has(result.id)) {
+            this._kernels.set(result.id, result);
+            this._onDidChangeKernels.fire({ added: [result], removed: [] });
+        }
         if (!distinctKernelMetadata.has(result.id)) {
             distinctKernelMetadata.set(result.id, result);
         }
-        return Array.from(distinctKernelMetadata.values());
+
+        // Find out which kernelspecs have been removed.
+        const removedKernels = Array.from(this._kernels.keys())
+            .filter((k) => !distinctKernelMetadata.has(k))
+            .map((k) => this._kernels.get(k)!);
+        removedKernels.forEach((k) => this._kernels.delete(k.id));
+        this._onDidChangeKernels.fire({ added: [], removed: removedKernels });
     }
 }
 
@@ -301,7 +336,8 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
     }
     public async findMatchingInterpreter(
         kernelSpec: IJupyterKernelSpec,
-        kernelConnectionType: KernelConnectionMetadata['kind']
+        kernelConnectionType: KernelConnectionMetadata['kind'],
+        cancelToken?: CancellationToken
     ): Promise<PythonEnvironment | undefined> {
         const interpreters = this.extensionChecker.isPythonExtensionInstalled
             ? this.interpreterService.resolvedEnvironments
@@ -314,8 +350,6 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
         const isCreatedByUs = getKernelRegistrationInfo(kernelSpec) ? true : false;
         // If we know for a fact that the kernel spec is a Non-Python kernel, then return nothing.
         if (kernelSpec.language && kernelSpec.language !== PYTHON_LANGUAGE) {
-            traceVerbose(`Kernel ${kernelSpec.name} is not python based so does not have an interpreter.`);
-
             // We could be dealing with a powershell kernel where kernelspec looks like
             // { "argv": ["python", "-m", "powershell_kernel", "-f", "{connection_file}" ], "display_name": "PowerShell", "language": "powershell" }
             if (!isCreatedByUs && pathInArgv && kernelSpec.specFile && isLikelyAPythonExecutable(pathInArgv)) {
@@ -336,7 +370,9 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
                 kernelSpec.metadata?.interpreter?.path &&
                 areInterpreterPathsSame(Uri.file(kernelSpec.metadata.interpreter.path), i.uri)
             ) {
-                traceVerbose(`Kernel ${kernelSpec.name} matches ${i.displayName} based on metadata path.`);
+                traceVerbose(
+                    `Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on metadata.interpreter.`
+                );
                 return true;
             }
             return false;
@@ -359,7 +395,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
             const pathInArgVUri = Uri.file(pathInArgv);
             const exactMatchBasedOnArgv = interpreters.find((i) => {
                 if (areInterpreterPathsSame(pathInArgVUri, i.uri)) {
-                    traceVerbose(`Kernel ${kernelSpec.name} matches ${i.displayName} based on path in argv.`);
+                    traceVerbose(`Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on argv.`);
                     return true;
                 }
                 return false;
@@ -383,7 +419,13 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
             // & in the list of interpreters we have `/usr/bin/python3`, they are both the same.
             // Hence we need to ensure we take that into account (just get the interpreter info from Python extension).
             if (!kernelSpec.specFile || this.trustedKernels.isTrusted(Uri.file(kernelSpec.specFile))) {
-                const interpreterInArgv = await this.interpreterService.getInterpreterDetails(pathInArgVUri);
+                const interpreterInArgv = await this.interpreterService.getInterpreterDetails(
+                    pathInArgVUri,
+                    cancelToken
+                );
+                if (cancelToken?.isCancellationRequested) {
+                    return;
+                }
                 if (interpreterInArgv) {
                     if (kernelSpec.specFile && !isCreatedByUs) {
                         sendTelemetryEvent(Telemetry.AmbiguousGlobalKernelSpec, undefined, {
@@ -427,7 +469,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
             const kernelSpecInterpreterPath = Uri.file(kernelSpec.interpreterPath);
             const matchBasedOnInterpreterPath = interpreters.find((i) => {
                 if (kernelSpec.interpreterPath && areInterpreterPathsSame(kernelSpecInterpreterPath, i.uri)) {
-                    traceVerbose(`Kernel ${kernelSpec.name} matches ${i.displayName} based on interpreter path.`);
+                    traceVerbose(`Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on interpreterPath.`);
                     return true;
                 }
                 return false;
@@ -438,17 +480,32 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
             // Possible we still haven't discovered this interpreter, hence get the details from the Python extension.
             if (!kernelSpec.specFile || this.trustedKernels.isTrusted(Uri.file(kernelSpec.specFile))) {
                 const interpreterInInterpreterPath = await this.interpreterService.getInterpreterDetails(
-                    kernelSpecInterpreterPath
+                    kernelSpecInterpreterPath,
+                    cancelToken
                 );
                 if (interpreterInInterpreterPath) {
                     return interpreterInInterpreterPath;
                 }
             }
         }
+        if (cancelToken?.isCancellationRequested) {
+            return;
+        }
+
         return interpreters.find((i) => {
             // 4. Check display name
             if (kernelSpec.display_name === i.displayName) {
-                traceVerbose(`Kernel ${kernelSpec.name} matches ${i.displayName} based on display name.`);
+                traceVerbose(`Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on display name`);
+                // This is a bad one, matching by name is never going to be accurate
+                sendTelemetryEvent(Telemetry.AmbiguousGlobalKernelSpec, undefined, {
+                    kernelSpecHash,
+                    kernelConnectionType,
+                    pythonPathDefined: true,
+                    argv0: pathInArgv ? path.basename(pathInArgv) : '',
+                    pythonEnvFound: 'matchDisplayName',
+                    language: kernelSpecLanguage,
+                    isCreatedByUs
+                });
                 return true;
             }
             return false;
@@ -478,20 +535,25 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
         );
     }
     private async listKernelSpecsImpl() {
-        const cancelToken = this.cancelToken.token;
-        const globalPythonKernelSpecs = this.listGlobalPythonKernelSpecs();
-        const activeInterpreterInAWorkspacePromise = Promise.all(
-            (workspace.workspaceFolders || []).map((folder) => this.interpreterService.getActiveInterpreter(folder.uri))
-        );
-
         traceVerbose(`Finding Global Python KernelSpecs`);
-        const activeInterpreters = await raceCancellation(cancelToken, [], activeInterpreterInAWorkspacePromise);
-        if (cancelToken.isCancellationRequested) {
-            return [];
-        }
-        const globalPythonKernelSpecsRegisteredByUs = globalPythonKernelSpecs.filter((item) =>
-            getKernelRegistrationInfo(item.kernelSpec)
+        const cancelToken = this.cancelToken.token;
+        const globalPythonKernelSpecs = this.listGlobalPythonKernelSpecs().filter(
+            // Its impossible to have kernels registered by us that are in global.
+            // Only way thats possible is with old kernelspecs registered by old versions of the extension.
+            (item) => !getKernelRegistrationInfo(item.kernelSpec)
         );
+        // const activeInterpreterInAWorkspacePromise = Promise.all(
+        //     (workspace.workspaceFolders || []).map((folder) => this.interpreterService.getActiveInterpreter(folder.uri))
+        // );
+
+        // traceVerbose(`Finding Global Python KernelSpecs`);
+        // const activeInterpreters = await raceCancellation(cancelToken, [], activeInterpreterInAWorkspacePromise);
+        // if (cancelToken.isCancellationRequested) {
+        //     return [];
+        // }
+        // const globalPythonKernelSpecsRegisteredByUs = globalPythonKernelSpecs.filter((item) =>
+        //     getKernelRegistrationInfo(item.kernelSpec)
+        // );
         // Possible there are Python kernels (language=python, but not necessarily using ipykernel).
         // E.g. cadabra2 is one such kernel (similar to powershell kernel but language is still python).
         const usingNonIpyKernelLauncher = (item: LocalKernelConnectionMetadata) => {
@@ -544,8 +606,12 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
                     // Its something special, hence ignore if we cannot find a matching interpreter.
                     const matchingInterpreter = await this.findMatchingInterpreter(
                         item.kernelSpec,
-                        'startUsingLocalKernelSpec'
+                        'startUsingLocalKernelSpec',
+                        cancelToken
                     );
+                    if (cancelToken.isCancellationRequested) {
+                        return;
+                    }
                     if (!matchingInterpreter) {
                         // If we cannot find a matching interpreter, then we cannot start this kernelspec.
                         // However users can have kernelspecs that have `/bin/bash` as the first argument in argv.
@@ -572,179 +638,181 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
             return [];
         }
 
-        await Promise.all(
-            globalPythonKernelSpecsRegisteredByUs
-                .map((item) => item.kernelSpec)
+        //         await Promise.all(
+        //             globalPythonKernelSpecsRegisteredByUs
+        //                 .map((item) => item.kernelSpec)
 
-                .filter((kernelSpec) => {
-                    if (
-                        kernelSpec.language === PYTHON_LANGUAGE &&
-                        // Hide default kernel specs only if env variables are empty.
-                        // If not empty, then user has modified them.
-                        (!kernelSpec.env || Object.keys(kernelSpec.env).length === 0) &&
-                        isDefaultKernelSpec(kernelSpec)
-                    ) {
-                        traceVerbose(
-                            `Hiding default kernel spec '${kernelSpec.display_name}', '${
-                                kernelSpec.name
-                            }', ${getDisplayPath(kernelSpec.argv[0])} for interpreter ${getDisplayPath(
-                                kernelSpec.interpreterPath
-                            )} and spec ${getDisplayPath(kernelSpec.specFile)}`
-                        );
-                        return false;
-                    }
-                    if (kernelSpec.specFile && globalKernelSpecsLoadedForPython.has(kernelSpec.specFile)) {
-                        traceVerbose(
-                            `Global kernel spec ${kernelSpec.name}${getDisplayPath(
-                                kernelSpec.specFile
-                            )} already found with a matching Python Env`
-                        );
-                        return false;
-                    }
-                    return true;
-                })
-                .map(async (k) => {
-                    // Find the interpreter that matches. If we find one, we want to use
-                    // this to start the kernel.
-                    const matchingInterpreter = await this.findMatchingInterpreter(k, 'startUsingPythonInterpreter');
-                    if (matchingInterpreter && isKernelLaunchedViaLocalPythonIPyKernel(k)) {
-                        const result = isKernelLaunchedViaLocalPythonIPyKernel(k)
-                            ? PythonKernelConnectionMetadata.create({
-                                  kernelSpec: k,
-                                  interpreter: matchingInterpreter,
-                                  id: getKernelId(k, matchingInterpreter)
-                              })
-                            : LocalKernelSpecConnectionMetadata.create({
-                                  kernelSpec: k,
-                                  interpreter: matchingInterpreter,
-                                  id: getKernelId(k, matchingInterpreter)
-                              });
+        //                 .filter((kernelSpec) => {
+        //                     if (
+        // kernelSpec.language === PYTHON_LANGUAGE &&
+        //                         // Hide default kernel specs only if env variables are empty.
+        //                         // If not empty, then user has modified them.
+        //                         (!kernelSpec.env || Object.keys(kernelSpec.env).length === 0) &&
+        //                         isDefaultKernelSpec(kernelSpec)
+        //                     ) {
+        //                         traceVerbose(
+        //                             `Hiding default kernel spec '${kernelSpec.display_name}', '${
+        //                                 kernelSpec.name
+        //                             }', ${getDisplayPath(kernelSpec.argv[0])} for interpreter ${getDisplayPath(
+        //                                 kernelSpec.interpreterPath
+        //                             )} and spec ${getDisplayPath(kernelSpec.specFile)}`
+        //                         );
+        //                         return false;
+        //                     }
+        //                     if (kernelSpec.specFile && globalKernelSpecsLoadedForPython.has(kernelSpec.specFile)) {
+        //                         traceVerbose(
+        //                             `Global kernel spec ${kernelSpec.name}${getDisplayPath(
+        //                                 kernelSpec.specFile
+        //                             )} already found with a matching Python Env`
+        //                         );
+        //                         return false;
+        //                     }
+        //                     // Check if this is a kernelspec registered by an old version of the extension.
+        //                     if (getKernelRegistrationInfo(kernelSpec) === 'registeredByOldVersionOfExt') {
+        //                         traceVerbose(
+        //                             `Ignoring Global Python KernelSpec '${kernelSpec.display_name}', '${
+        //                                 kernelSpec.name
+        //                             }' (${getDisplayPath(kernelSpec.specFile)}) registered by an old version of the extension`
+        //                         );
+        //                         return false;
+        //                     }
 
-                        // Check if this is a kernelspec registered by an old version of the extension.
-                        const kernelSpecKind = getKernelRegistrationInfo(result.kernelSpec);
-                        if (kernelSpecKind === 'registeredByOldVersionOfExt') {
-                            traceVerbose(
-                                `Ignoring Global Python KernelSpec '${k.display_name}', '${k.name}' (${getDisplayPath(
-                                    k.specFile
-                                )}) registered by an old version of the extension`
-                            );
-                            return;
-                        }
-                        traceInfo(
-                            `Using interpreter ${getDisplayPath(matchingInterpreter.id)} for Global Python kernel '${
-                                k.display_name
-                            }', ${k.name} (${getDisplayPath(k.specFile)})`
-                        );
-                        return result;
-                    } else {
-                        // NOTE: Defaulting to the active interpreter (of any random workspace folder, even if user has multiple folders open) is hacky, but this is the only fall back we have.
-                        // See here https://github.com/microsoft/vscode-jupyter/issues/12278
-                        const activeInterpreterOfAWorkspaceFolder = activeInterpreters.find((i) => !!i);
-                        let kernelInterpreter = activeInterpreterOfAWorkspaceFolder;
-                        // If the interpreter information is stored in kernel spec.json then use that to determine the interpreter.
-                        // This can happen under the following circumstances:
-                        // 1. Open workspace folder XYZ, and create a virtual environment named venvA
-                        // 2. Now assume we don't have raw kernels, and a kernel gets registered for venvA in kernelspecs folder.
-                        // 3. The kernel spec will contain metadata pointing to venvA.
-                        // 4. Now open a different folder (e.g. a sub directory of XYZ or a completely different folder).
-                        // 5. Now venvA will not be listed as an interpreter as Python will not discover this.
-                        // 6. However the kernel we registered against venvA will be in global kernels folder
-                        // In such an instance the interpreter information is stored in the kernelspec.json file.
-                        let foundRightInterpreter = false;
-                        const kernelSpecInterpreterPath = k.metadata?.interpreter?.path
-                            ? Uri.file(k.metadata.interpreter.path)
-                            : undefined;
-                        if (kernelSpecInterpreterPath) {
-                            const interpreterInKernelSpec = activeInterpreters.find((item) =>
-                                areInterpreterPathsSame(kernelSpecInterpreterPath, item?.uri)
-                            );
-                            if (interpreterInKernelSpec) {
-                                // Found the exact interpreter as defined in metadata.
-                                kernelInterpreter = interpreterInKernelSpec;
-                                foundRightInterpreter = true;
-                            } else {
-                                try {
-                                    // Get the interpreter details as defined in the metadata.
-                                    // Possible the kernel spec points to an interpreter in a different workspace folder or the like.
-                                    kernelInterpreter = await this.interpreterService.getInterpreterDetails(
-                                        kernelSpecInterpreterPath
-                                    );
-                                    foundRightInterpreter = true;
-                                } catch (ex) {
-                                    traceError(
-                                        `Failed to get interpreter details for Kernel Spec '${k.display_name}', '${
-                                            k.name
-                                        }' ${getDisplayPathFromLocalFile(
-                                            k.specFile
-                                        )} with interpreter path ${getDisplayPath(kernelSpecInterpreterPath)}`,
-                                        ex
-                                    );
-                                    return;
-                                }
-                            }
-                        }
-                        if (
-                            activeInterpreterOfAWorkspaceFolder &&
-                            activeInterpreterOfAWorkspaceFolder === kernelInterpreter &&
-                            !foundRightInterpreter
-                        ) {
-                            traceWarning(
-                                `Kernel might not start correctly: Fully qualified Python exe not defined (or not found) in Kernel Spec ${
-                                    k.id
-                                } (${getDisplayPathFromLocalFile(
-                                    k.specFile
-                                )}, kernelspec.argv[0] = ${getDisplayPathFromLocalFile(
-                                    k.argv[0]
-                                )}), hence falling back to using the Active Interpreter ${getDisplayPathFromLocalFile(
-                                    kernelInterpreter.id
-                                )}`
-                            );
-                        } else if (!foundRightInterpreter) {
-                            traceWarning(
-                                `Kernel might not start correctly: Fully qualified Python exe not defined (or not found) in Kernel Spec ${
-                                    k.id
-                                } (${getDisplayPathFromLocalFile(
-                                    k.specFile
-                                )}, kernelspec.argv[0] = ${getDisplayPathFromLocalFile(k.argv[0])}).`
-                            );
-                        }
-                        const result = LocalKernelSpecConnectionMetadata.create({
-                            kernelSpec: k,
-                            interpreter: kernelInterpreter,
-                            id: getKernelId(k, kernelInterpreter)
-                        });
-                        traceVerbose(`Interpreter for Local kernel ${result.id} is ${kernelInterpreter?.id}`);
+        //                     return true;
+        //                 })
+        //                 .map(async (k) => {
+        //                     // Find the interpreter that matches. If we find one, we want to use
+        //                     // this to start the kernel.
+        //                     const matchingInterpreter = await this.findMatchingInterpreter(
+        //                         k,
+        //                         'startUsingPythonInterpreter',
+        //                         cancelToken
+        //                     );
+        //                     if (cancelToken.isCancellationRequested) {
+        //                         return;
+        //                     }
+        //                     if (matchingInterpreter) {
+        //                         const result = isKernelLaunchedViaLocalPythonIPyKernel(k)
+        //                             ? PythonKernelConnectionMetadata.create({
+        //                                   kernelSpec: k,
+        //                                   interpreter: matchingInterpreter,
+        //                                   id: getKernelId(k, matchingInterpreter)
+        //                               })
+        //                             : LocalKernelSpecConnectionMetadata.create({
+        //                                   kernelSpec: k,
+        //                                   interpreter: matchingInterpreter,
+        //                                   id: getKernelId(k, matchingInterpreter)
+        //                               });
 
-                        return result;
-                    }
-                })
-                .map(async (item) => {
-                    if (cancelToken.isCancellationRequested) {
-                        return [];
-                    }
+        //                         traceInfo(
+        //                             `Using interpreter ${getDisplayPath(matchingInterpreter.id)} for Global Python kernel '${
+        //                                 k.display_name
+        //                             }', ${k.name} (${getDisplayPath(k.specFile)})`
+        //                         );
+        //                         return result;
+        //                     } else {
+        //                         // TODO: How can this happen in the code?
+        //                         // Telemetry to see, and fix this invalid code paths, clearly code is complicated
 
-                    const kernelSpec = await item;
-                    traceVerbose(`Found kernel spec at end of discovery ${kernelSpec?.id}`);
-                    // Check if we have already seen this.
-                    if (kernelSpec && !distinctKernelMetadata.has(kernelSpec.id)) {
-                        distinctKernelMetadata.set(kernelSpec.id, kernelSpec);
-                    }
-                })
-        );
+        //                         // NOTE: Defaulting to the active interpreter (of any random workspace folder, even if user has multiple folders open) is hacky, but this is the only fall back we have.
+        //                         // See here https://github.com/microsoft/vscode-jupyter/issues/12278
+        //                         const activeInterpreterOfAWorkspaceFolder = activeInterpreters.find((i) => !!i);
+        //                         let kernelInterpreter = activeInterpreterOfAWorkspaceFolder;
+        //                         // If the interpreter information is stored in kernel spec.json then use that to determine the interpreter.
+        //                         // This can happen under the following circumstances:
+        //                         // 1. Open workspace folder XYZ, and create a virtual environment named venvA
+        //                         // 2. Now assume we don't have raw kernels, and a kernel gets registered for venvA in kernelspecs folder.
+        //                         // 3. The kernel spec will contain metadata pointing to venvA.
+        //                         // 4. Now open a different folder (e.g. a sub directory of XYZ or a completely different folder).
+        //                         // 5. Now venvA will not be listed as an interpreter as Python will not discover this.
+        //                         // 6. However the kernel we registered against venvA will be in global kernels folder
+        //                         // In such an instance the interpreter information is stored in the kernelspec.json file.
+        //                         let foundRightInterpreter = false;
+        //                         const kernelSpecInterpreterPath = k.metadata?.interpreter?.path
+        //                             ? Uri.file(k.metadata.interpreter.path)
+        //                             : undefined;
+        //                         const interpreterInKernelSpec =
+        //                             kernelSpecInterpreterPath &&
+        //                             activeInterpreters.find((item) =>
+        //                                 areInterpreterPathsSame(kernelSpecInterpreterPath, item?.uri)
+        //                             );
+
+        //                         if (kernelSpecInterpreterPath && interpreterInKernelSpec) {
+        //                             // Found the exact interpreter as defined in metadata.
+        //                             kernelInterpreter = interpreterInKernelSpec;
+        //                             foundRightInterpreter = true;
+        //                         } else if (kernelSpecInterpreterPath) {
+        //                             try {
+        //                                 // Get the interpreter details as defined in the metadata.
+        //                                 // Possible the kernel spec points to an interpreter in a different workspace folder or the like.
+        //                                 kernelInterpreter = await this.interpreterService.getInterpreterDetails(
+        //                                     kernelSpecInterpreterPath,
+        //                                     cancelToken
+        //                                 );
+        //                                 foundRightInterpreter = !!kernelInterpreter;
+        //                             } catch (ex) {
+        //                                 traceError(
+        //                                     `Failed to get interpreter details for Kernel Spec '${k.display_name}', '${
+        //                                         k.name
+        //                                     }' ${getDisplayPathFromLocalFile(
+        //                                         k.specFile
+        //                                     )} with interpreter path ${getDisplayPath(kernelSpecInterpreterPath)}`,
+        //                                     ex
+        //                                 );
+        //                                 return;
+        //                             }
+        //                         }
+        //                         if (
+        //                             activeInterpreterOfAWorkspaceFolder &&
+        //                             activeInterpreterOfAWorkspaceFolder === kernelInterpreter &&
+        //                             !foundRightInterpreter
+        //                         ) {
+        //                             traceWarning(
+        //                                 `Kernel might not start correctly: Fully qualified Python exe not defined (or not found) in Kernel Spec ${
+        //                                     k.id
+        //                                 } (${getDisplayPathFromLocalFile(
+        //                                     k.specFile
+        //                                 )}, kernelspec.argv[0] = ${getDisplayPathFromLocalFile(
+        //                                     k.argv[0]
+        //                                 )}), hence falling back to using the Active Interpreter ${getDisplayPathFromLocalFile(
+        //                                     kernelInterpreter.id
+        //                                 )}`
+        //                             );
+        //                         } else if (!foundRightInterpreter) {
+        //                             traceWarning(
+        //                                 `Kernel might not start correctly: Fully qualified Python exe not defined (or not found) in Kernel Spec ${
+        //                                     k.id
+        //                                 } (${getDisplayPathFromLocalFile(
+        //                                     k.specFile
+        //                                 )}, kernelspec.argv[0] = ${getDisplayPathFromLocalFile(k.argv[0])}).`
+        //                             );
+        //                         }
+        //                         const result = LocalKernelSpecConnectionMetadata.create({
+        //                             kernelSpec: k,
+        //                             interpreter: kernelInterpreter,
+        //                             id: getKernelId(k, kernelInterpreter)
+        //                         });
+        //                         traceVerbose(`Interpreter for Local kernel ${result.id} is ${kernelInterpreter?.id}`);
+
+        //                         return result;
+        //                     }
+        //                 })
+        //                 .map(async (item) => {
+        //                     if (cancelToken.isCancellationRequested) {
+        //                         return [];
+        //                     }
+
+        //                     const kernelSpec = await item;
+        //                     traceVerbose(`Found kernel spec at end of discovery ${kernelSpec?.id}`);
+        //                     // Check if we have already seen this.
+        //                     if (kernelSpec && !distinctKernelMetadata.has(kernelSpec.id)) {
+        //                         distinctKernelMetadata.set(kernelSpec.id, kernelSpec);
+        //                     }
+        //                 })
+        //         );
         if (cancelToken.isCancellationRequested) {
             return [];
         }
 
         return Array.from(distinctKernelMetadata.values());
     }
-}
-
-function isLikelyAPythonExecutable(executable: string) {
-    executable = path.basename(executable).trim().toLowerCase();
-    return (
-        executable === 'python' ||
-        executable === 'python3' ||
-        executable === 'python.exe' ||
-        executable === 'python3.exe'
-    );
 }

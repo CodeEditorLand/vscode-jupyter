@@ -3,8 +3,6 @@ trigger:
     include:
       - main
 pr: none
-# Do not change this name, it is used by gulp file to generate the build number.
-name: $(Date:yyyyMMdd)_$(Hours)_$(Minutes)_$(Rev:r)
 
 parameters:
   - name: publishExtension
@@ -77,9 +75,6 @@ extends:
 
       - script: npm run clean
         displayName: Clean
-
-      - script: python -m pip --disable-pip-version-check install -t ./pythonFiles/lib/python --no-cache-dir --implementation py --no-deps --upgrade -r ./requirements.txt
-        displayName: Install Python libs
 
       - script: npm run prePublishBundleStable
         displayName: Build
