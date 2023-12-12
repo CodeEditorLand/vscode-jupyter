@@ -2,15 +2,13 @@
 // Licensed under the MIT License.
 
 import type { KernelMessage } from '@jupyterlab/services';
-import { Event, EventEmitter, NotebookDocument, Uri, env, window } from 'vscode';
-import { IApplicationShell, ICommandManager } from '../../../../platform/common/application/types';
+import { Event, EventEmitter, NotebookDocument, Uri, commands, env, window } from 'vscode';
 import { STANDARD_OUTPUT_CHANNEL, WIDGET_VERSION_NON_PYTHON_KERNELS } from '../../../../platform/common/constants';
 import { traceVerbose, traceError, traceInfo, traceInfoIfCI } from '../../../../platform/logging';
 import {
     IDisposableRegistry,
     IOutputChannel,
     IConfigurationService,
-    IsWebExtension,
     IDisposable
 } from '../../../../platform/common/types';
 import { Common, DataScience } from '../../../../platform/common/utils/localize';
@@ -58,8 +56,6 @@ export class CommonMessageCoordinator {
     }
     private ipyWidgetMessageDispatcher?: IIPyWidgetMessageDispatcher;
     private ipyWidgetScriptSource?: IPyWidgetScriptSource;
-    private appShell: IApplicationShell;
-    private commandManager: ICommandManager;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly postEmitter = new EventEmitter<{ message: string; payload: any }>();
     private disposables: IDisposableRegistry;
@@ -76,8 +72,6 @@ export class CommonMessageCoordinator {
     ) {
         this.disposables = this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry);
         this.jupyterOutput = this.serviceContainer.get<IOutputChannel>(IOutputChannel, STANDARD_OUTPUT_CHANNEL);
-        this.appShell = this.serviceContainer.get<IApplicationShell>(IApplicationShell, IApplicationShell);
-        this.commandManager = this.serviceContainer.get<ICommandManager>(ICommandManager);
         this.configService = this.serviceContainer.get<IConfigurationService>(IConfigurationService);
         this.initialize();
     }
@@ -268,18 +262,18 @@ export class CommonMessageCoordinator {
             const key = `${payload.moduleName}:${payload.moduleVersion}`;
             if (!payload.isOnline) {
                 errorMessage = DataScience.loadClassFailedWithNoInternet(payload.moduleName, payload.moduleVersion);
-                this.appShell.showErrorMessage(errorMessage).then(noop, noop);
+                window.showErrorMessage(errorMessage).then(noop, noop);
             } else if (!cdnsEnabled && !this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.has(key)) {
                 this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.add(key);
                 const moreInfo = Common.moreInfo;
                 const enableDownloads = DataScience.enableCDNForWidgetsButton;
                 errorMessage = DataScience.enableCDNForWidgetsSetting(payload.moduleName, payload.moduleVersion);
-                this.appShell
+                window
                     .showErrorMessage(errorMessage, { modal: true }, ...[enableDownloads, moreInfo])
                     .then((selection) => {
                         switch (selection) {
                             case moreInfo:
-                                this.appShell.openUrl('https://aka.ms/PVSCIPyWidgets');
+                                void env.openExternal(Uri.parse('https://aka.ms/PVSCIPyWidgets'));
                                 break;
                             case enableDownloads:
                                 this.enableCDNForWidgets(webview).catch(noop);
@@ -303,7 +297,7 @@ export class CommonMessageCoordinator {
     }
     @swallowExceptions()
     private async enableCDNForWidgets(webview: IWebviewCommunication) {
-        await this.commandManager.executeCommand(Commands.EnableLoadingWidgetsFrom3rdPartySource);
+        await commands.executeCommand(Commands.EnableLoadingWidgetsFrom3rdPartySource);
         await webview.postMessage({ type: IPyWidgetMessages.IPyWidgets_AttemptToDownloadFailedWidgetsAgain });
     }
     private async sendUnsupportedWidgetVersionFailureTelemetry(
@@ -364,7 +358,6 @@ export class CommonMessageCoordinator {
                 this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry),
                 this.serviceContainer.get<IConfigurationService>(IConfigurationService),
                 this.serviceContainer.get<IWidgetScriptSourceProviderFactory>(IWidgetScriptSourceProviderFactory),
-                this.serviceContainer.get<boolean>(IsWebExtension),
                 this.serviceContainer.get<CDNWidgetScriptSourceProvider>(CDNWidgetScriptSourceProvider)
             );
             this.disposables.push(this.ipyWidgetScriptSource.postMessage(this.cacheOrSend, this));

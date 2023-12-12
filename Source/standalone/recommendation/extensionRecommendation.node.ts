@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, named } from 'inversify';
-import { Memento, NotebookDocument, workspace } from 'vscode';
+import { Memento, NotebookDocument, commands, window, workspace } from 'vscode';
 import { IExtensionSyncActivationService } from '../../platform/activation/types';
-import { IApplicationShell, ICommandManager } from '../../platform/common/application/types';
 import { dispose } from '../../platform/common/utils/lifecycle';
 import { GLOBAL_MEMENTO, IDisposable, IDisposableRegistry, IMemento } from '../../platform/common/types';
 import { Common, DataScience } from '../../platform/common/utils/localize';
@@ -49,9 +48,7 @@ export class ExtensionRecommendationService implements IExtensionSyncActivationS
     constructor(
         @inject(IControllerRegistration) private readonly controllerManager: IControllerRegistration,
         @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento,
-        @inject(IApplicationShell) private readonly appShell: IApplicationShell,
-        @inject(ICommandManager) private readonly commandManager: ICommandManager
+        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento
     ) {
         disposables.push(this);
     }
@@ -110,7 +107,7 @@ export class ExtensionRecommendationService implements IExtensionSyncActivationS
             language
         );
         sendTelemetryEvent(Telemetry.RecommendExtension, undefined, { extensionId, action: 'displayed' });
-        const selection = await this.appShell.showInformationMessage(
+        const selection = await window.showInformationMessage(
             message,
             Common.bannerLabelYes,
             Common.bannerLabelNo,
@@ -119,7 +116,7 @@ export class ExtensionRecommendationService implements IExtensionSyncActivationS
         switch (selection) {
             case Common.bannerLabelYes: {
                 sendTelemetryEvent(Telemetry.RecommendExtension, undefined, { extensionId, action: 'ok' });
-                this.commandManager.executeCommand('extension.open', extensionId).then(noop, noop);
+                commands.executeCommand('extension.open', extensionId).then(noop, noop);
                 break;
             }
             case Common.bannerLabelNo: {

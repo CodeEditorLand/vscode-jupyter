@@ -1,13 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ApplicationEnvironment } from './common/application/applicationEnvironment.web';
-import { ApplicationShell } from './common/application/applicationShell';
-import { CommandManager } from './common/application/commandManager';
 import {
-    ICommandManager,
     IWorkspaceService,
-    IApplicationShell,
     IApplicationEnvironment,
     IWebviewViewProvider,
     IWebviewPanelProvider
@@ -29,12 +24,11 @@ import { KernelProgressReporter } from './progress/kernelProgressReporter';
 import { WebviewPanelProvider } from './webviews/webviewPanelProvider';
 import { WebviewViewProvider } from './webviews/webviewViewProvider';
 import { WorkspaceInterpreterTracker } from './interpreter/workspaceInterpreterTracker';
+import { ApplicationEnvironment } from './common/application/applicationEnvironment';
 
 export function registerTypes(serviceManager: IServiceManager) {
     serviceManager.addSingleton<IFileSystem>(IFileSystem, FileSystem);
-    serviceManager.addSingleton<ICommandManager>(ICommandManager, CommandManager);
     serviceManager.addSingleton<IWorkspaceService>(IWorkspaceService, WorkspaceService);
-    serviceManager.addSingleton<IApplicationShell>(IApplicationShell, ApplicationShell);
     serviceManager.addSingleton<IApplicationEnvironment>(IApplicationEnvironment, ApplicationEnvironment);
     serviceManager.addSingleton<IConfigurationService>(IConfigurationService, ConfigurationService);
     serviceManager.addSingleton<IDataScienceCommandListener>(IDataScienceCommandListener, OutputCommandListener);

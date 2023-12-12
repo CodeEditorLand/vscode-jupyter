@@ -3,8 +3,7 @@
 
 import type { ServerConnection } from '@jupyterlab/services';
 import * as path from '../../platform/vscode-path/path';
-import { ConfigurationTarget, Uri } from 'vscode';
-import { IApplicationShell } from '../../platform/common/application/types';
+import { ConfigurationTarget, Uri, window } from 'vscode';
 import { IJupyterConnection } from '../types';
 import { getJupyterConnectionDisplayName } from './helpers';
 import { IConfigurationService, IDisposable, IWatchableJupyterSettings, Resource } from '../../platform/common/types';
@@ -35,15 +34,11 @@ export function expandWorkingDir(
     return process.cwd();
 }
 
-export async function handleSelfCertsError(
-    appShell: IApplicationShell,
-    config: IConfigurationService,
-    message: string
-): Promise<boolean> {
+export async function handleSelfCertsError(config: IConfigurationService, message: string): Promise<boolean> {
     // On a self cert error, warn the user and ask if they want to change the setting
     const enableOption: string = DataScience.jupyterSelfCertEnable;
     const closeOption: string = DataScience.jupyterSelfCertClose;
-    const value = await appShell.showErrorMessage(
+    const value = await window.showErrorMessage(
         DataScience.jupyterSelfCertFail(message),
         { modal: true },
         enableOption,
@@ -59,15 +54,11 @@ export async function handleSelfCertsError(
     return false;
 }
 
-export async function handleExpiredCertsError(
-    appShell: IApplicationShell,
-    config: IConfigurationService,
-    message: string
-): Promise<boolean> {
+export async function handleExpiredCertsError(config: IConfigurationService, message: string): Promise<boolean> {
     // On a self cert error, warn the user and ask if they want to change the setting
     const enableOption: string = DataScience.jupyterSelfCertEnable;
     const closeOption: string = DataScience.jupyterSelfCertClose;
-    const value = await appShell.showErrorMessage(
+    const value = await window.showErrorMessage(
         DataScience.jupyterExpiredCertFail(message),
         { modal: true },
         enableOption,
@@ -95,13 +86,11 @@ export function createJupyterConnectionInfo(
     const baseUrl = serverUri.baseUrl;
     const token = serverUri.token;
     const hostName = new URL(serverUri.baseUrl).hostname;
-    const webSocketProtocols = (serverUri?.webSocketProtocols || []).length ? serverUri?.webSocketProtocols || [] : [];
     const authHeader =
         serverUri.authorizationHeader && Object.keys(serverUri?.authorizationHeader ?? {}).length > 0
             ? serverUri.authorizationHeader
             : undefined;
     const getAuthHeader = authHeader ? () => authHeader : undefined;
-    const getWebsocketProtocols = webSocketProtocols ? () => webSocketProtocols : () => [];
 
     let serverSettings: Partial<ServerConnection.ISettings> = {
         baseUrl,
@@ -142,8 +131,7 @@ export function createJupyterConnectionInfo(
             : (requestCreator.getWebsocketCtor(
                   undefined,
                   allowUnauthorized,
-                  getAuthHeader,
-                  getWebsocketProtocols
+                  getAuthHeader
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ) as any),
         fetch: serverUri.fetch || requestCreator.getFetchMethod(),
@@ -166,7 +154,6 @@ export function createJupyterConnectionInfo(
         // For remote jupyter servers that are managed by us, we can provide the auth header.
         // Its crucial this is set to undefined, else password retrieval will not be attempted.
         getAuthHeader,
-        getWebsocketProtocols,
         settings: ServerConnection.makeSettings(serverSettings)
     };
     return connection;

@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { Disposable, EventEmitter, WorkspaceConfiguration, workspace } from 'vscode';
-import { IApplicationShell, ICommandManager } from './application/types';
+import { Disposable, EventEmitter, WorkspaceConfiguration, commands, window, workspace } from 'vscode';
 import { traceVerbose } from '../logging';
 import { openInBrowser } from './net/browser';
 import { Deprecated } from './utils/localize';
@@ -55,11 +54,7 @@ export class FeatureManager implements IFeaturesManager {
     }
 
     private disposables: Disposable[] = [];
-    constructor(
-        @inject(IPersistentStateFactory) private persistentStateFactory: IPersistentStateFactory,
-        @inject(ICommandManager) private cmdMgr: ICommandManager,
-        @inject(IApplicationShell) private appShell: IApplicationShell
-    ) {
+    constructor(@inject(IPersistentStateFactory) private persistentStateFactory: IPersistentStateFactory) {
         this._updateFeatures();
 
         this.disposables.push(
@@ -85,7 +80,7 @@ export class FeatureManager implements IFeaturesManager {
         if (Array.isArray(deprecatedInfo.commands)) {
             deprecatedInfo.commands.forEach((cmd) => {
                 this.disposables.push(
-                    this.cmdMgr.registerCommand(cmd, () => this.notifyDeprecation(deprecatedInfo), this)
+                    commands.registerCommand(cmd, () => this.notifyDeprecation(deprecatedInfo), this)
                 );
             });
         }
@@ -104,7 +99,7 @@ export class FeatureManager implements IFeaturesManager {
         }
         const moreInfo = 'Learn more';
         const doNotShowAgain = 'Never show again';
-        const option = await this.appShell.showInformationMessage(deprecatedInfo.message, moreInfo, doNotShowAgain);
+        const option = await window.showInformationMessage(deprecatedInfo.message, moreInfo, doNotShowAgain);
         if (!option) {
             return;
         }

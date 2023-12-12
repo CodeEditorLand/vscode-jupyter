@@ -3,8 +3,7 @@
 
 import { inject, injectable, optional } from 'inversify';
 import { Uri } from 'vscode';
-import { IApplicationShell } from '../../platform/common/application/types';
-import { IConfigurationService, IsWebExtension, Resource } from '../../platform/common/types';
+import { IConfigurationService, Resource } from '../../platform/common/types';
 import { DataScience, Common } from '../../platform/common/utils/localize';
 import { IKernelDependencyService } from '../types';
 import {
@@ -26,7 +25,6 @@ import { IInterpreterService } from '../../platform/interpreter/contracts';
 @injectable()
 export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
     constructor(
-        @inject(IApplicationShell) applicationShell: IApplicationShell,
         @inject(IJupyterInterpreterDependencyManager)
         @optional()
         dependencyManager: IJupyterInterpreterDependencyManager | undefined,
@@ -35,20 +33,17 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
         @optional()
         kernelDependency: IKernelDependencyService | undefined,
         @inject(IJupyterServerUriStorage) serverUriStorage: IJupyterServerUriStorage,
-        @inject(IsWebExtension) isWebExtension: boolean,
         @inject(IJupyterServerProviderRegistry) jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
         @inject(IReservedPythonNamedProvider) private readonly reservedPythonNames: IReservedPythonNamedProvider,
         @inject(IFileSystem) fs: IFileSystem,
         @inject(IInterpreterService) interpreterService: IInterpreterService
     ) {
         super(
-            applicationShell,
             dependencyManager,
             configuration,
             kernelDependency,
             serverUriStorage,
             jupyterUriProviderRegistration,
-            isWebExtension,
             fs,
             interpreterService
         );

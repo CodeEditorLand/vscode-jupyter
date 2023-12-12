@@ -3,8 +3,6 @@
 
 import { assert } from 'chai';
 import { anything, instance, mock, when } from 'ts-mockito';
-import { ApplicationShell } from '../../../platform/common/application/applicationShell';
-import { IApplicationShell } from '../../../platform/common/application/types';
 import { DataViewerDependencyService } from './dataViewerDependencyService';
 import { IKernel, IKernelSession } from '../../../kernels/types';
 import { Common, DataScience } from '../../../platform/common/utils/localize';
@@ -13,23 +11,24 @@ import * as sinon from 'sinon';
 import { kernelGetPandasVersion } from './kernelDataViewerDependencyImplementation';
 import { pandasMinimumVersionSupportedByVariableViewer } from './constants';
 import { Kernel } from '@jupyterlab/services';
+import { mockedVSCodeNamespaces, resetVSCodeMocks } from '../../../test/vscode-mock';
 
 suite('DataViewerDependencyService (IKernel, Web)', () => {
     let dependencyService: DataViewerDependencyService;
-    let appShell: IApplicationShell;
     let kernel: IKernel;
     let session: IKernelSession;
 
     setup(async () => {
-        appShell = mock(ApplicationShell);
+        resetVSCodeMocks();
         session = mock<IKernelSession>();
         when(session.kernel).thenReturn(instance(mock<Kernel.IKernelConnection>()));
         kernel = mock<IKernel>();
         when(kernel.session).thenReturn(instance(session));
-        dependencyService = new DataViewerDependencyService(instance(appShell), false);
+        dependencyService = new DataViewerDependencyService();
     });
 
     teardown(() => {
+        resetVSCodeMocks();
         sinon.restore();
     });
 
@@ -48,7 +47,11 @@ suite('DataViewerDependencyService (IKernel, Web)', () => {
     test('All ok, if pandas is installed and version is > 1.20', async () => {
         const version = '3.3.3';
         const stub = sinon.stub(helpers, 'executeSilently');
-        stub.returns(Promise.resolve([{ ename: 'stdout', output_type: 'stream', text: version }]));
+        stub.returns(
+            Promise.resolve([
+                { ename: 'stdout', output_type: 'stream', text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d` }
+            ])
+        );
 
         const result = await dependencyService.checkAndInstallMissingDependencies(instance(kernel));
         assert.equal(result, undefined);
@@ -62,7 +65,11 @@ suite('DataViewerDependencyService (IKernel, Web)', () => {
         const version = '1.4.2\n';
 
         const stub = sinon.stub(helpers, 'executeSilently');
-        stub.returns(Promise.resolve([{ ename: 'stdout', output_type: 'stream', text: version }]));
+        stub.returns(
+            Promise.resolve([
+                { ename: 'stdout', output_type: 'stream', text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d` }
+            ])
+        );
 
         const result = await dependencyService.checkAndInstallMissingDependencies(instance(kernel));
         assert.equal(result, undefined);
@@ -76,7 +83,11 @@ suite('DataViewerDependencyService (IKernel, Web)', () => {
         const version = '0.20.0';
 
         const stub = sinon.stub(helpers, 'executeSilently');
-        stub.returns(Promise.resolve([{ ename: 'stdout', output_type: 'stream', text: version }]));
+        stub.returns(
+            Promise.resolve([
+                { ename: 'stdout', output_type: 'stream', text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d` }
+            ])
+        );
 
         const resultPromise = dependencyService.checkAndInstallMissingDependencies(instance(kernel));
         await assert.isRejected(
@@ -94,7 +105,11 @@ suite('DataViewerDependencyService (IKernel, Web)', () => {
         const version = '0.10.0';
 
         const stub = sinon.stub(helpers, 'executeSilently');
-        stub.returns(Promise.resolve([{ ename: 'stdout', output_type: 'stream', text: version }]));
+        stub.returns(
+            Promise.resolve([
+                { ename: 'stdout', output_type: 'stream', text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d` }
+            ])
+        );
 
         const resultPromise = dependencyService.checkAndInstallMissingDependencies(instance(kernel));
         await assert.isRejected(
@@ -113,7 +128,9 @@ suite('DataViewerDependencyService (IKernel, Web)', () => {
         stub.returns(Promise.resolve([{ ename: 'stdout', output_type: 'stream', text: '' }]));
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        when(appShell.showErrorMessage(anything(), anything(), anything())).thenResolve(Common.install as any);
+        when(mockedVSCodeNamespaces.window.showErrorMessage(anything(), anything(), anything())).thenResolve(
+            Common.install as any
+        );
 
         const resultPromise = dependencyService.checkAndInstallMissingDependencies(instance(kernel));
         assert.equal(await resultPromise, undefined);
@@ -127,7 +144,7 @@ suite('DataViewerDependencyService (IKernel, Web)', () => {
         const stub = sinon.stub(helpers, 'executeSilently');
         stub.returns(Promise.resolve([{ ename: 'stdout', output_type: 'stream', text: '' }]));
 
-        when(appShell.showErrorMessage(anything(), anything(), anything())).thenResolve();
+        when(mockedVSCodeNamespaces.window.showErrorMessage(anything(), anything(), anything())).thenResolve();
 
         const resultPromise = dependencyService.checkAndInstallMissingDependencies(instance(kernel));
         await assert.isRejected(

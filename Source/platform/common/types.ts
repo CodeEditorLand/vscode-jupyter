@@ -5,12 +5,9 @@ import type * as nbformat from '@jupyterlab/nbformat';
 import { ConfigurationTarget, Disposable, Event, ExtensionContext, OutputChannel, Uri, Range } from 'vscode';
 import { PythonEnvironment } from '../pythonEnvironments/info';
 import { CommandIds } from '../../commands';
-import { ICommandManager } from './application/types';
 import { ISystemVariables } from './variables/types';
 
-export const IsCodeSpace = Symbol('IsCodeSpace');
 export const IsDevMode = Symbol('IsDevMode');
-export const IsWebExtension = Symbol('IsWebExtension');
 export const IOutputChannel = Symbol('IOutputChannel');
 export interface IOutputChannel extends OutputChannel {}
 export const IsWindows = Symbol('IS_WINDOWS');
@@ -263,7 +260,8 @@ export interface IAsyncDisposableRegistry extends IAsyncDisposable {
 
 export enum Experiments {
     DataViewerContribution = 'DataViewerContribution',
-    KernelCompletions = 'KernelCompletions'
+    KernelCompletions = 'KernelCompletions',
+    DoNotWaitForZmqPortsToBeUsed = 'DoNotWaitForZmqPortsToBeUsed'
 }
 
 /**
@@ -280,7 +278,7 @@ export type InterpreterUri = Resource | PythonEnvironment;
 
 export const IDataScienceCommandListener = Symbol('IDataScienceCommandListener');
 export interface IDataScienceCommandListener {
-    register(commandManager: ICommandManager): void;
+    register(): void;
 }
 
 export interface IDisplayOptions {

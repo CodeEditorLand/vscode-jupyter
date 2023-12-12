@@ -3,13 +3,18 @@
 
 import { CancellationToken, CancellationTokenSource } from 'vscode';
 import { IInstaller, Product, InstallerResponse } from '../../../platform/interpreter/installer/types';
-import { IApplicationShell } from '../../../platform/common/application/types';
 import { raceCancellation } from '../../../platform/common/cancellation';
 import { IInterpreterService } from '../../../platform/interpreter/contracts';
 import { IPythonExecutionFactory } from '../../../platform/interpreter/types.node';
 import { PythonEnvironment } from '../../../platform/pythonEnvironments/info';
 import { sendTelemetryEvent, Telemetry } from '../../../telemetry';
 import { BaseDataViewerDependencyImplementation } from './baseDataViewerDependencyImplementation';
+import { traceWarning } from '../../../platform/logging';
+import { DataScience } from '../../../platform/common/utils/localize';
+import { splitLines } from '../../../platform/common/helpers';
+
+const separator = '5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d';
+export const kernelGetPandasVersion = `import pandas;print(pandas.__version__);print("${separator}")`;
 
 /**
  * Uses the Python interpreter to manage dependencies of a Data Viewer.
@@ -18,11 +23,9 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
     constructor(
         private readonly installer: IInstaller,
         private pythonFactory: IPythonExecutionFactory,
-        private interpreterService: IInterpreterService,
-        applicationShell: IApplicationShell,
-        isCodeSpace: boolean
+        private interpreterService: IInterpreterService
     ) {
-        super(applicationShell, isCodeSpace);
+        super();
     }
 
     protected async _getVersion(
@@ -33,11 +36,19 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
             resource: undefined,
             interpreter
         });
-        const result = await launcher.exec(['-c', 'import pandas;print(pandas.__version__)'], {
+        const result = await launcher.exec(['-c', kernelGetPandasVersion], {
             throwOnStdErr: true,
             token
         });
-        return result.stdout;
+        const output = result.stdout;
+
+        if (!output?.includes(separator)) {
+            traceWarning(DataScience.failedToGetVersionOfPandas, `Output is ${output}`);
+            return '';
+        }
+        const items = splitLines(output.trim());
+        const indexOfSeparator = items.indexOf(separator);
+        return indexOfSeparator >= 0 ? items[indexOfSeparator - 1] : '';
     }
 
     protected async _doInstall(interpreter: PythonEnvironment, tokenSource: CancellationTokenSource): Promise<void> {

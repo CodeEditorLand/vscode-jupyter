@@ -12,11 +12,11 @@ import {
     NotebookEditor,
     Uri,
     ViewColumn,
+    commands,
     window,
     workspace
 } from 'vscode';
 
-import { IApplicationShell, ICommandManager } from '../platform/common/application/types';
 import { traceInfo, traceVerbose } from '../platform/logging';
 import { IFileSystem } from '../platform/common/platform/types';
 
@@ -83,7 +83,6 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         @inject(IConfigurationService) private readonly configService: IConfigurationService,
         @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento,
         @inject(IMemento) @named(WORKSPACE_MEMENTO) private workspaceMemento: Memento,
-        @inject(IApplicationShell) private readonly appShell: IApplicationShell,
         @inject(INotebookEditorProvider) private readonly notebookEditorProvider: INotebookEditorProvider,
         @inject(IInteractiveControllerHelper) private readonly controllerHelper: IInteractiveControllerHelper
     ) {
@@ -194,8 +193,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
                 )}' with controller '${initialController?.id}'`
             );
 
-            const commandManager = this.serviceContainer.get<ICommandManager>(ICommandManager);
-            const [inputUri, editor] = await this.createEditor(initialController, resource, mode, commandManager);
+            const [inputUri, editor] = await this.createEditor(initialController, resource, mode);
             if (initialController) {
                 initialController.controller.updateNotebookAffinity(
                     editor.notebook,
@@ -243,13 +241,12 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
     private async createEditor(
         preferredController: IVSCodeNotebookController | undefined,
         resource: Resource,
-        mode: InteractiveWindowMode,
-        commandManager: ICommandManager
+        mode: InteractiveWindowMode
     ): Promise<[Uri, NotebookEditor]> {
         const controllerId = preferredController ? `${JVSC_EXTENSION_ID}/${preferredController.id}` : undefined;
         const hasOwningFile = resource !== undefined;
         let viewColumn = this.getInteractiveViewColumn(resource);
-        const { inputUri, notebookEditor } = (await commandManager.executeCommand(
+        const { inputUri, notebookEditor } = (await commands.executeCommand(
             'interactive.open',
             // Keep focus on the owning file if there is one
             { viewColumn: viewColumn, preserveFocus: hasOwningFile },
@@ -299,7 +296,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
                 localize.DataScience.interactiveWindowModeBannerSwitchNo
             ];
             // Ask user if they'd like to switch to per file or not.
-            const response = await this.appShell.showInformationMessage(
+            const response = await window.showInformationMessage(
                 localize.DataScience.interactiveWindowModeBannerTitle,
                 ...questions
             );

@@ -2,23 +2,29 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { NotebookCellExecutionState, NotebookCellExecutionStateChangeEvent, UIKind, notebooks } from 'vscode';
+import {
+    NotebookCellExecutionState,
+    NotebookCellExecutionStateChangeEvent,
+    UIKind,
+    env,
+    notebooks,
+    window
+} from 'vscode';
 import { IExtensionSyncActivationService } from '../../platform/activation/types';
-import { IApplicationEnvironment, IApplicationShell } from '../../platform/common/application/types';
 import { traceError } from '../../platform/logging';
 import {
     BannerType,
     IDisposableRegistry,
     IJupyterExtensionBanner,
     IPersistentState,
-    IPersistentStateFactory,
-    IsCodeSpace
+    IPersistentStateFactory
 } from '../../platform/common/types';
 import * as localize from '../../platform/common/utils/localize';
-import { MillisecondsInADay } from '../../platform/constants.node';
+import { MillisecondsInADay, isCodeSpace } from '../../platform/constants.node';
 import { isJupyterNotebook } from '../../platform/common/utils';
 import { noop } from '../../platform/common/utils/misc';
 import { openInBrowser } from '../../platform/common/net/browser';
+import { getVSCodeChannel } from '../../platform/common/application/applicationEnvironment';
 
 export const ISurveyBanner = Symbol('ISurveyBanner');
 export interface ISurveyBanner extends IExtensionSyncActivationService, IJupyterExtensionBanner {}
@@ -61,12 +67,12 @@ export class DataScienceSurveyBanner implements IJupyterExtensionBanner, IExtens
     public isEnabled(type: BannerType): boolean {
         switch (type) {
             case BannerType.InsidersNotebookSurvey:
-                if (this.applicationEnvironment.channel === 'insiders') {
+                if (getVSCodeChannel() === 'insiders') {
                     return this.isEnabledInternal(type);
                 }
                 break;
             case BannerType.ExperimentNotebookSurvey:
-                if (this.applicationEnvironment.channel === 'stable') {
+                if (getVSCodeChannel() === 'stable') {
                     return this.isEnabledInternal(type);
                 }
                 break;
@@ -77,7 +83,7 @@ export class DataScienceSurveyBanner implements IJupyterExtensionBanner, IExtens
         return false;
     }
     private isEnabledInternal(type: BannerType): boolean {
-        if (this.applicationEnvironment.uiKind !== UIKind.Desktop) {
+        if (env.uiKind !== UIKind.Desktop) {
             return false;
         }
 
@@ -97,10 +103,7 @@ export class DataScienceSurveyBanner implements IJupyterExtensionBanner, IExtens
     private readonly NotebookExecutionThreshold = 250; // Cell executions before showing survey
 
     constructor(
-        @inject(IApplicationShell) private appShell: IApplicationShell,
         @inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory,
-        @inject(IApplicationEnvironment) private applicationEnvironment: IApplicationEnvironment,
-        @inject(IsCodeSpace) private readonly isCodeSpace: boolean,
         @inject(IDisposableRegistry) private disposables: IDisposableRegistry
     ) {
         this.setPersistentState(BannerType.InsidersNotebookSurvey, InsidersNotebookSurveyStateKeys.ShowBanner);
@@ -131,7 +134,7 @@ export class DataScienceSurveyBanner implements IJupyterExtensionBanner, IExtens
         // Disable for the current session.
         this.disabledInCurrentSession = true;
 
-        const response = await this.appShell.showInformationMessage(this.getBannerMessage(type), ...this.bannerLabels);
+        const response = await window.showInformationMessage(this.getBannerMessage(type), ...this.bannerLabels);
         switch (response) {
             case this.bannerLabels[DSSurveyLabelIndex.Yes]: {
                 await this.launchSurvey(type);
@@ -148,7 +151,7 @@ export class DataScienceSurveyBanner implements IJupyterExtensionBanner, IExtens
 
     private shouldShowBanner(type: BannerType) {
         if (
-            this.isCodeSpace ||
+            isCodeSpace() ||
             !this.isEnabled(type) ||
             this.disabledInCurrentSession ||
             !DataScienceSurveyBanner.surveyDelay

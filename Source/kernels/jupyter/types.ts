@@ -163,10 +163,6 @@ export interface IJupyterServerUriStorage {
      * Updates MRU list marking this server as the most recently used.
      */
     update(serverProviderHandle: JupyterServerProviderHandle): Promise<void>;
-    /**
-     * @deprecated Use `all` and `onDidLoad` instead.
-     */
-    getAll(): Promise<IJupyterServerUriEntry[]>;
     remove(serverProviderHandle: JupyterServerProviderHandle): Promise<void>;
     clear(): Promise<void>;
     add(serverProviderHandle: JupyterServerProviderHandle, options?: { time: number }): Promise<void>;
@@ -204,8 +200,7 @@ export interface IJupyterRequestCreator {
     getWebsocketCtor(
         cookieString?: string,
         allowUnauthorized?: boolean,
-        getAuthHeaders?: () => Record<string, string>,
-        getWebSocketProtocols?: () => string | string[] | undefined
+        getAuthHeaders?: () => Record<string, string>
     ): ClassType<WebSocket>;
     wrapWebSocketCtor(websocketCtor: ClassType<WebSocketIsomorphic>): ClassType<WebSocketIsomorphic>;
     getRequestInit(): RequestInit;

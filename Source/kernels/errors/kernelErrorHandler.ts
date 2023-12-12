@@ -4,17 +4,16 @@
 import { inject, optional } from 'inversify';
 import { JupyterInstallError } from '../../platform/errors/jupyterInstallError';
 import { JupyterSelfCertsError } from '../../platform/errors/jupyterSelfCertsError';
-import { CancellationTokenSource, ConfigurationTarget, Uri, env, extensions, workspace } from 'vscode';
+import { CancellationTokenSource, ConfigurationTarget, Uri, env, extensions, window, workspace } from 'vscode';
 import { KernelConnectionTimeoutError } from './kernelConnectionTimeoutError';
 import { KernelDiedError } from './kernelDiedError';
 import { KernelPortNotUsedTimeoutError } from './kernelPortNotUsedTimeoutError';
 import { KernelProcessExitedError } from './kernelProcessExitedError';
-import { IApplicationShell } from '../../platform/common/application/types';
 import { traceError, traceWarning } from '../../platform/logging';
-import { IConfigurationService, IsWebExtension, Resource } from '../../platform/common/types';
+import { IConfigurationService, Resource } from '../../platform/common/types';
 import { DataScience, Common } from '../../platform/common/utils/localize';
 import { sendTelemetryEvent, Telemetry } from '../../telemetry';
-import { Commands } from '../../platform/common/constants';
+import { Commands, isWebExtension } from '../../platform/common/constants';
 import { getDisplayNameOrNameOfKernelConnection } from '../helpers';
 import { translateProductToModule } from '../../platform/interpreter/installer/utils';
 import { ProductNames } from '../../platform/interpreter/installer/productNames';
@@ -69,7 +68,6 @@ import { getJupyterDisplayName } from '../jupyter/connection/jupyterServerProvid
  */
 export abstract class DataScienceErrorHandler implements IDataScienceErrorHandler {
     constructor(
-        @inject(IApplicationShell) private readonly applicationShell: IApplicationShell,
         @inject(IJupyterInterpreterDependencyManager)
         @optional()
         private readonly dependencyManager: IJupyterInterpreterDependencyManager | undefined,
@@ -80,7 +78,6 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
         @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage,
         @inject(IJupyterServerProviderRegistry)
         private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
-        @inject(IsWebExtension) private readonly isWebExtension: boolean,
         @inject(IFileSystem) private readonly fs: IFileSystem,
         @inject(IInterpreterService) @optional() private readonly interpreterService: IInterpreterService | undefined
     ) {}
@@ -96,35 +93,33 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
         if (err instanceof JupyterInstallError) {
             await this.dependencyManager?.installMissingDependencies(err);
         } else if (err instanceof JupyterSelfCertsError) {
-            await handleSelfCertsError(this.applicationShell, this.configuration, err.message);
+            await handleSelfCertsError(this.configuration, err.message);
         } else if (err instanceof JupyterExpiredCertsError) {
-            await handleExpiredCertsError(this.applicationShell, this.configuration, err.message);
+            await handleExpiredCertsError(this.configuration, err.message);
         } else if (isCancellationError(err)) {
             // Don't show the message for cancellation errors
         } else if (err instanceof KernelConnectionTimeoutError || err instanceof KernelPortNotUsedTimeoutError) {
-            this.applicationShell.showErrorMessage(err.message).then(noop, noop);
+            window.showErrorMessage(err.message).then(noop, noop);
         } else if (
             err instanceof KernelDiedError ||
             err instanceof KernelProcessExitedError ||
             err instanceof JupyterNotebookNotInstalled ||
             err instanceof JupyterConnectError
         ) {
-            this.applicationShell.showErrorMessage(getUserFriendlyErrorMessage(err)).then(noop, noop);
-        } else if (err instanceof RemoteJupyterServerConnectionError && this.isWebExtension) {
+            window.showErrorMessage(getUserFriendlyErrorMessage(err)).then(noop, noop);
+        } else if (err instanceof RemoteJupyterServerConnectionError && isWebExtension()) {
             // Special case for a failure on web
-            this.applicationShell
-                .showErrorMessage(DataScience.jupyterNotebookRemoteConnectFailedWeb(err.baseUrl))
-                .then(noop, noop);
+            window.showErrorMessage(DataScience.jupyterNotebookRemoteConnectFailedWeb(err.baseUrl)).then(noop, noop);
         } else if (err instanceof RemoteJupyterServerConnectionError) {
             const message = await this.handleJupyterServerConnectionError(err, undefined);
-            this.applicationShell.showErrorMessage(message).then(noop, noop);
+            window.showErrorMessage(message).then(noop, noop);
         } else if (err instanceof RemoteJupyterServerUriProviderError) {
             const message = await this.handleJupyterServerUriProviderError(err, undefined);
-            this.applicationShell.showErrorMessage(message).then(noop, noop);
+            window.showErrorMessage(message).then(noop, noop);
         } else {
             // Some errors have localized and/or formatted error messages.
             const message = getCombinedErrorMessage(err.message || err.toString());
-            this.applicationShell.showErrorMessage(message).then(noop, noop);
+            window.showErrorMessage(message).then(noop, noop);
         }
     }
     public async getErrorMessageForDisplayInCell(error: Error, errorContext: KernelAction, resource: Resource) {
@@ -140,9 +135,9 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
             return getIPyKernelMissingErrorMessageForCell(error.kernelConnectionMetadata) || error.message;
         } else if (error instanceof JupyterInstallError) {
             return getJupyterMissingErrorMessageForCell(error) || error.message;
-        } else if (error instanceof RemoteJupyterServerConnectionError && !this.isWebExtension) {
+        } else if (error instanceof RemoteJupyterServerConnectionError && !isWebExtension()) {
             return error.message;
-        } else if (error instanceof RemoteJupyterServerConnectionError && this.isWebExtension) {
+        } else if (error instanceof RemoteJupyterServerConnectionError && isWebExtension()) {
             return DataScience.jupyterNotebookRemoteConnectFailedWeb(error.baseUrl);
         } else if (isCancellationError(error)) {
             // Don't show the message for cancellation errors
@@ -359,7 +354,7 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
                     : '';
             const options = actionSource === 'jupyterExtension' ? [DataScience.selectDifferentKernel] : [];
 
-            const selection = await this.applicationShell.showErrorMessage(
+            const selection = await window.showErrorMessage(
                 err instanceof InvalidRemoteJupyterServerUriHandleError
                     ? DataScience.remoteJupyterServerProvidedBy3rdPartyExtensionNoLongerValid(extensionName)
                     : DataScience.remoteJupyterConnectionFailedWithServer(serverName),
@@ -388,7 +383,7 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
             // On a self cert error, warn the user and ask if they want to change the setting
             const enableOption: string = DataScience.jupyterSelfCertEnable;
             const closeOption: string = DataScience.jupyterSelfCertClose;
-            this.applicationShell
+            window
                 .showErrorMessage(DataScience.jupyterSelfCertFail(err.message), enableOption, closeOption)
                 .then((value) => {
                     if (value === enableOption) {
@@ -445,7 +440,7 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
                 })
                 .catch(noop);
             this.sendKernelTelemetry(err, errorContext, resource, KernelFailureReason.pythonEnvironmentMissing);
-            this.applicationShell
+            window
                 .showErrorMessage(
                     DataScience.failedToStartKernelDueToMissingPythonEnv(
                         kernelConnection.interpreter.displayName ||
@@ -532,7 +527,7 @@ export abstract class DataScienceErrorHandler implements IDataScienceErrorHandle
             message = `${message} \n${DataScience.viewJupyterLogForFurtherInfo}`;
         }
         const buttons = moreInfoLink ? [Common.learnMore] : [];
-        await this.applicationShell.showErrorMessage(message, ...buttons).then((selection) => {
+        await window.showErrorMessage(message, ...buttons).then((selection) => {
             if (selection === Common.learnMore && moreInfoLink) {
                 void env.openExternal(Uri.parse(moreInfoLink));
             }

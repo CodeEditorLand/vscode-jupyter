@@ -2,12 +2,11 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, named } from 'inversify';
-import { CancellationToken, CancellationTokenSource, Memento } from 'vscode';
-import { IApplicationShell } from '../platform/common/application/types';
+import { CancellationToken, CancellationTokenSource, Memento, Uri, env, window } from 'vscode';
 import { raceCancellation } from '../platform/common/cancellation';
 import { traceInfo, traceError, traceInfoIfCI, traceDecoratorVerbose, logValue } from '../platform/logging';
 import { getDisplayPath } from '../platform/common/platform/fs-paths';
-import { IMemento, GLOBAL_MEMENTO, IsCodeSpace, Resource, IDisplayOptions } from '../platform/common/types';
+import { IMemento, GLOBAL_MEMENTO, Resource, IDisplayOptions } from '../platform/common/types';
 import { DataScience, Common } from '../platform/common/utils/localize';
 import { IServiceContainer } from '../platform/ioc/types';
 import { EnvironmentType, PythonEnvironment } from '../platform/pythonEnvironments/info';
@@ -33,6 +32,7 @@ import { getComparisonKey } from '../platform/vscode-path/resources';
 import { isModulePresentInEnvironment } from '../platform/interpreter/installer/productInstaller.node';
 import { sendKernelTelemetryEvent } from './telemetry/sendKernelTelemetryEvent';
 import { isPythonKernelConnection } from './helpers';
+import { isCodeSpace } from '../platform/constants';
 
 /**
  * Responsible for managing dependencies of a Python interpreter required to run as a Jupyter Kernel.
@@ -42,10 +42,8 @@ import { isPythonKernelConnection } from './helpers';
 export class KernelDependencyService implements IKernelDependencyService {
     private installPromises = new Map<string, Promise<KernelInterpreterDependencyResponse>>();
     constructor(
-        @inject(IApplicationShell) private readonly appShell: IApplicationShell,
         @inject(IInstaller) private readonly installer: IInstaller,
         @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly memento: Memento,
-        @inject(IsCodeSpace) private readonly isCodeSpace: boolean,
         @inject(IRawNotebookSupportedService) private readonly rawSupport: IRawNotebookSupportedService,
         @inject(IServiceContainer) protected serviceContainer: IServiceContainer // @inject(IInteractiveWindowProvider) private readonly interactiveWindowProvider: IInteractiveWindowProvider
     ) {}
@@ -269,7 +267,7 @@ export class KernelDependencyService implements IKernelDependencyService {
         options.push(moreInfoOption);
 
         try {
-            if (!this.isCodeSpace || !installWithoutPrompting) {
+            if (!isCodeSpace() || !installWithoutPrompting) {
                 sendKernelTelemetryEvent(resource, Telemetry.PythonModuleInstall, undefined, {
                     action: 'prompted',
                     moduleName: productNameForTelemetry,
@@ -281,11 +279,11 @@ export class KernelDependencyService implements IKernelDependencyService {
             let selection;
             do {
                 selection =
-                    this.isCodeSpace || installWithoutPrompting
+                    isCodeSpace() || installWithoutPrompting
                         ? installOption
                         : await raceCancellation(
                               cancelTokenSource.token,
-                              this.appShell.showInformationMessage(message, { modal: true }, ...options)
+                              window.showInformationMessage(message, { modal: true }, ...options)
                           );
 
                 if (selection === moreInfoOption) {
@@ -299,7 +297,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 
                     // Link to our wiki page on jupyter kernels + ipykernel
                     // https://github.com/microsoft/vscode-jupyter/wiki/Jupyter-Kernels-and-the-Jupyter-Extension#python-extension-and-ipykernel
-                    this.appShell.openUrl('https://aka.ms/AAhi594');
+                    void env.openExternal(Uri.parse('https://aka.ms/AAhi594'));
                 }
                 // "More Info" isn't a full valid response here, so reprompt after showing it
             } while (selection === moreInfoOption);

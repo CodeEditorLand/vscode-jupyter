@@ -10,10 +10,10 @@ import {
     NotebookEdit,
     NotebookRange,
     Uri,
+    commands,
     window,
     workspace
 } from 'vscode';
-import { ICommandManager, IApplicationShell } from '../platform/common/application/types';
 import { IConfigurationService, IDataScienceCommandListener, IDisposableRegistry } from '../platform/common/types';
 import { Commands } from '../platform/common/constants';
 import { noop } from '../platform/common/utils/misc';
@@ -40,9 +40,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
     private kernelInterruptedDontAskToRestart: boolean = false;
     constructor(
         @inject(IDisposableRegistry) private disposableRegistry: IDisposableRegistry,
-        @inject(ICommandManager) private commandManager: ICommandManager,
         @inject(NotebookCellLanguageService) private readonly languageService: NotebookCellLanguageService,
-        @inject(IApplicationShell) private applicationShell: IApplicationShell,
         @inject(IConfigurationService) private configurationService: IConfigurationService,
         @inject(IKernelProvider) private kernelProvider: IKernelProvider,
         @inject(IControllerRegistration) private controllerRegistration: IControllerRegistration,
@@ -51,31 +49,31 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
         @inject(IServiceContainer) private serviceContainer: IServiceContainer
     ) {}
 
-    public register(commandManager: ICommandManager): void {
+    public register(): void {
         this.disposableRegistry.push(
-            commandManager.registerCommand(Commands.NotebookEditorRemoveAllCells, () => this.removeAllCells())
+            commands.registerCommand(Commands.NotebookEditorRemoveAllCells, () => this.removeAllCells())
         );
         this.disposableRegistry.push(
-            commandManager.registerCommand(Commands.NotebookEditorRunAllCells, () => this.runAllCells())
+            commands.registerCommand(Commands.NotebookEditorRunAllCells, () => this.runAllCells())
         );
         this.disposableRegistry.push(
-            commandManager.registerCommand(Commands.NotebookEditorAddCellBelow, () => this.addCellBelow())
+            commands.registerCommand(Commands.NotebookEditorAddCellBelow, () => this.addCellBelow())
         );
         this.disposableRegistry.push(
-            this.commandManager.registerCommand(Commands.NotebookEditorCollapseAllCells, () => this.collapseAll())
+            commands.registerCommand(Commands.NotebookEditorCollapseAllCells, () => this.collapseAll())
         );
         this.disposableRegistry.push(
-            this.commandManager.registerCommand(Commands.NotebookEditorExpandAllCells, () => this.expandAll())
+            commands.registerCommand(Commands.NotebookEditorExpandAllCells, () => this.expandAll())
         );
         this.disposableRegistry.push(
             // TODO: if contributed anywhere, add context support
-            this.commandManager.registerCommand(Commands.RestartKernelAndRunUpToSelectedCell, () =>
+            commands.registerCommand(Commands.RestartKernelAndRunUpToSelectedCell, () =>
                 this.restartKernelAndRunUpToSelectedCell()
             )
         );
 
         this.disposableRegistry.push(
-            commandManager.registerCommand(
+            commands.registerCommand(
                 Commands.RestartKernel,
                 (context?: { notebookEditor: { notebookUri: Uri } } | Uri) => {
                     if (context && 'notebookEditor' in context) {
@@ -87,14 +85,12 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
             )
         );
         this.disposableRegistry.push(
-            commandManager.registerCommand(
-                Commands.InterruptKernel,
-                (context?: { notebookEditor: { notebookUri: Uri } }) =>
-                    this.interruptKernel(context?.notebookEditor?.notebookUri)
+            commands.registerCommand(Commands.InterruptKernel, (context?: { notebookEditor: { notebookUri: Uri } }) =>
+                this.interruptKernel(context?.notebookEditor?.notebookUri)
             )
         );
         this.disposableRegistry.push(
-            commandManager.registerCommand(
+            commands.registerCommand(
                 Commands.RestartKernelAndRunAllCells,
                 (context?: { notebookEditor: { notebookUri: Uri } }) => {
                     if (context && 'notebookEditor' in context) {
@@ -109,13 +105,13 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
     private runAllCells() {
         if (window.activeNotebookEditor) {
-            this.commandManager.executeCommand('notebook.execute').then(noop, noop);
+            commands.executeCommand('notebook.execute').then(noop, noop);
         }
     }
 
     private addCellBelow() {
         if (window.activeNotebookEditor) {
-            this.commandManager.executeCommand('notebook.cell.insertCodeCellBelow').then(noop, noop);
+            commands.executeCommand('notebook.cell.insertCodeCellBelow').then(noop, noop);
         }
     }
 
@@ -187,7 +183,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
         if (activeNBE) {
             await this.restartKernel(activeNBE.notebook.uri);
-            this.commandManager
+            commands
                 .executeCommand('notebook.cell.execute', {
                     ranges: [{ start: 0, end: activeNBE.selection.end }],
                     document: activeNBE.notebook.uri
@@ -214,12 +210,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
                 const yes = DataScience.restartKernelMessageYes;
                 const dontAskAgain = DataScience.restartKernelMessageDontAskAgain;
 
-                const response = await this.applicationShell.showInformationMessage(
-                    message,
-                    { modal: true },
-                    yes,
-                    dontAskAgain
-                );
+                const response = await window.showInformationMessage(message, { modal: true }, yes, dontAskAgain);
                 if (response === dontAskAgain) {
                     await this.disableAskForRestart(document.uri);
                     this.wrapKernelMethod('restart', kernel).catch(noop);
@@ -267,7 +258,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
                         false
                     );
                 } else {
-                    this.applicationShell.showErrorMessage(ex.toString()).then(noop, noop);
+                    window.showErrorMessage(ex.toString()).then(noop, noop);
                 }
             }
         })();

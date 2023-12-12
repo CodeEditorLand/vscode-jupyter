@@ -8,7 +8,6 @@ import { IJupyterServerUriStorage, JupyterServerProviderHandle } from '../../ker
 import { IKernelFinder, IKernelProvider, isRemoteConnection, KernelConnectionMetadata } from '../../kernels/types';
 import { IExtensionSyncActivationService } from '../../platform/activation/types';
 import { IPythonExtensionChecker } from '../../platform/api/types';
-import { ICommandManager, IApplicationShell } from '../../platform/common/application/types';
 import { isCancellationError } from '../../platform/common/cancellation';
 import { isCI, JupyterNotebookView, InteractiveWindowView } from '../../platform/common/constants';
 import {
@@ -352,13 +351,11 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
                         metadata,
                         id,
                         viewType,
-                        this.serviceContainer.get<ICommandManager>(ICommandManager),
                         this.serviceContainer.get<IKernelProvider>(IKernelProvider),
                         this.serviceContainer.get<IExtensionContext>(IExtensionContext),
                         this.disposables,
                         this.serviceContainer.get<NotebookCellLanguageService>(NotebookCellLanguageService),
                         this.serviceContainer.get<IConfigurationService>(IConfigurationService),
-                        this.serviceContainer.get<IApplicationShell>(IApplicationShell),
                         this.extensionChecker,
                         this.serviceContainer,
                         this.serviceContainer.get<IConnectionDisplayDataProvider>(IConnectionDisplayDataProvider)

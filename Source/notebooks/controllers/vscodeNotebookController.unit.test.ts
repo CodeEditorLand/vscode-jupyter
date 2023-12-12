@@ -11,7 +11,6 @@ import { NotebookDocument, EventEmitter, NotebookController, Uri, Disposable } f
 import { VSCodeNotebookController } from './vscodeNotebookController';
 import { IKernel, IKernelProvider, KernelConnectionMetadata, LocalKernelConnectionMetadata } from '../../kernels/types';
 import { anything, instance, mock, verify, when } from 'ts-mockito';
-import { IApplicationShell, ICommandManager } from '../../platform/common/application/types';
 import {
     IConfigurationService,
     IDisposable,
@@ -37,11 +36,9 @@ import { mockedVSCodeNamespaces, resetVSCodeMocks } from '../../test/vscode-mock
 suite(`Notebook Controller`, function () {
     let controller: NotebookController;
     let kernelConnection: KernelConnectionMetadata;
-    let commandManager: ICommandManager;
     let context: IExtensionContext;
     let languageService: NotebookCellLanguageService;
     let configService: IConfigurationService;
-    let appShell: IApplicationShell;
     let serviceContainer: IServiceContainer;
     let providerRegistry: IJupyterServerProviderRegistry;
     let platform: IPlatformService;
@@ -64,11 +61,9 @@ suite(`Notebook Controller`, function () {
         resetVSCodeMocks();
         disposables.push(new Disposable(() => resetVSCodeMocks()));
         kernelConnection = mock<KernelConnectionMetadata>();
-        commandManager = mock<ICommandManager>();
         context = mock<IExtensionContext>();
         languageService = mock<NotebookCellLanguageService>();
         configService = mock<IConfigurationService>();
-        appShell = mock<IApplicationShell>();
         serviceContainer = mock<IServiceContainer>();
         providerRegistry = mock<IJupyterServerProviderRegistry>();
         platform = mock<IPlatformService>();
@@ -140,13 +135,11 @@ suite(`Notebook Controller`, function () {
             instance(kernelConnection),
             '1',
             viewType,
-            instance(commandManager),
             instance(kernelProvider),
             instance(context),
             disposables,
             instance(languageService),
             instance(configService),
-            instance(appShell),
             instance(extensionChecker),
             instance(serviceContainer),
             displayDataProvider

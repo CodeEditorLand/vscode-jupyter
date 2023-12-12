@@ -2,11 +2,17 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { NotebookCell, NotebookCellExecutionState, NotebookCellExecutionStateChangeEvent, notebooks } from 'vscode';
+import {
+    NotebookCell,
+    NotebookCellExecutionState,
+    NotebookCellExecutionStateChangeEvent,
+    commands,
+    notebooks,
+    window
+} from 'vscode';
 import { IDataScienceErrorHandler } from '../../../kernels/errors/types';
 import { IExtensionSyncActivationService } from '../../../platform/activation/types';
 import { IPythonApiProvider, IPythonExtensionChecker } from '../../../platform/api/types';
-import { IApplicationShell, ICommandManager } from '../../../platform/common/application/types';
 import { Commands, JupyterNotebookView, Telemetry } from '../../../platform/common/constants';
 import { IDisposableRegistry } from '../../../platform/common/types';
 import { raceTimeout } from '../../../platform/common/utils/async';
@@ -25,8 +31,6 @@ export class InstallPythonControllerCommands implements IExtensionSyncActivation
     private executingCells: WeakSet<NotebookCell> = new WeakSet<NotebookCell>();
     constructor(
         @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(ICommandManager) private readonly commandManager: ICommandManager,
-        @inject(IApplicationShell) private readonly appShell: IApplicationShell,
         @inject(IPythonExtensionChecker) private readonly extensionChecker: IPythonExtensionChecker,
         @inject(ProgressReporter) private readonly progressReporter: ProgressReporter,
         @inject(IPythonApiProvider) private readonly pythonApi: IPythonApiProvider,
@@ -38,18 +42,14 @@ export class InstallPythonControllerCommands implements IExtensionSyncActivation
         );
         // Register our commands that will handle installing the python extension or python via the kernel picker
         this.disposables.push(
-            this.commandManager.registerCommand(
+            commands.registerCommand(
                 Commands.InstallPythonExtensionViaKernelPicker,
                 this.installPythonExtensionViaKernelPicker,
                 this
             )
         );
         this.disposables.push(
-            this.commandManager.registerCommand(
-                Commands.InstallPythonViaKernelPicker,
-                this.installPythonViaKernelPicker,
-                this
-            )
+            commands.registerCommand(Commands.InstallPythonViaKernelPicker, this.installPythonViaKernelPicker, this)
         );
     }
 
@@ -75,20 +75,16 @@ export class InstallPythonControllerCommands implements IExtensionSyncActivation
     private async installPythonViaKernelPicker(): Promise<void> {
         sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, { action: 'displayed' });
         const buttons = this.installedOnceBefore ? [Common.install, Common.reload] : [Common.install];
-        const selection = await this.appShell.showErrorMessage(
-            DataScience.pythonNotInstalled,
-            { modal: true },
-            ...buttons
-        );
+        const selection = await window.showErrorMessage(DataScience.pythonNotInstalled, { modal: true }, ...buttons);
 
         if (selection === Common.install) {
             this.installedOnceBefore = true;
             sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, { action: 'download' });
             // Activate the python extension command to show how to install python
-            await this.commandManager.executeCommand('python.installPython');
+            await commands.executeCommand('python.installPython');
         } else if (selection === Common.reload) {
             sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, { action: 'reload' });
-            await this.commandManager.executeCommand('jupyter.reloadVSCode', DataScience.reloadRequired);
+            await commands.executeCommand('jupyter.reloadVSCode', DataScience.reloadRequired);
         } else {
             sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, { action: 'dismissed' });
         }
