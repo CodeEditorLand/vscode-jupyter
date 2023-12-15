@@ -12,7 +12,7 @@ const common = require("./common");
 // tslint:disable-next-line:no-var-requires no-require-imports
 const configFileName = path.join(
 	constants.ExtensionRootDir,
-	"src/tsconfig.extension.node.json"
+	"src/tsconfig.extension.node.json",
 );
 // Some modules will be pre-generated and stored in out/.. dir and they'll be referenced via NormalModuleReplacementPlugin
 // We need to ensure they do not get bundled into the output (as they are large).
@@ -41,8 +41,8 @@ function shouldCopyFileFromZmqFolder(parentFolder, resourcePath) {
 					path
 						.join(parentFolder, folder)
 						.replace(/\\/g, "/")
-						.toLowerCase()
-				)
+						.toLowerCase(),
+				),
 		)
 	) {
 		console.log("Ignore file (1)", resourcePath);
@@ -62,7 +62,7 @@ function shouldCopyFileFromZmqFolder(parentFolder, resourcePath) {
 			path
 				.join(parentFolder, "prebuilds")
 				.replace(/\\/g, "/")
-				.toLowerCase()
+				.toLowerCase(),
 		)
 	) {
 		// We do not ship any other sub directory.
@@ -72,7 +72,7 @@ function shouldCopyFileFromZmqFolder(parentFolder, resourcePath) {
 				.join(parentFolder, "prebuilds")
 				.replace(/\\/g, "/")
 				.toLowerCase()}`,
-			resourcePath
+			resourcePath,
 		);
 		return false;
 	}
@@ -90,7 +90,7 @@ function shouldCopyFileFromZmqFolder(parentFolder, resourcePath) {
 	// Use path.sep as the delimiter, as we do not want linux-arm64 to get compiled with search criteria is linux-arm.
 	if (
 		preBuildsFoldersToCopy.some((folder) =>
-			resourcePath.includes(`${folder.toLowerCase()}/`)
+			resourcePath.includes(`${folder.toLowerCase()}/`),
 		)
 	) {
 		return true;
@@ -118,7 +118,7 @@ const config = {
 						loader: path.join(
 							__dirname,
 							"loaders",
-							"fixNodeFetch.js"
+							"fixNodeFetch.js",
 						),
 					},
 				],
@@ -130,7 +130,7 @@ const config = {
 						loader: path.join(
 							__dirname,
 							"loaders",
-							"externalizeDependencies.js"
+							"externalizeDependencies.js",
 						),
 					},
 				],
@@ -238,9 +238,9 @@ const config = {
 							path.join(
 								constants.ExtensionRootDir,
 								"node_modules",
-								"zeromq"
+								"zeromq",
 							),
-							filepath
+							filepath,
 						),
 				},
 			],
@@ -255,9 +255,9 @@ const config = {
 							path.join(
 								constants.ExtensionRootDir,
 								"node_modules",
-								"zeromqold"
+								"zeromqold",
 							),
-							filepath
+							filepath,
 						),
 				},
 				{ from: "./node_modules/node-gyp-build/**/*" },
@@ -268,7 +268,7 @@ const config = {
 				typeof process.env
 					.IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION === "string"
 					? process.env.IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION
-					: "true"
+					: "true",
 			),
 		}),
 	],

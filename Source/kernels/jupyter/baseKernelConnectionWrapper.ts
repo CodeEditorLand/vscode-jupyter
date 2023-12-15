@@ -54,7 +54,7 @@ export abstract class BaseKernelConnectionWrapper
 		IIOPubMessage<IOPubMessageType>
 	>(this);
 	public readonly unhandledMessage = new Signal<this, IMessage<MessageType>>(
-		this
+		this,
 	);
 	public readonly anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
 	public get serverSettings() {
@@ -69,7 +69,7 @@ export abstract class BaseKernelConnectionWrapper
 	private getKernelConnection(): Kernel.IKernelConnection {
 		if (!this.possibleKernelConnection) {
 			throw new Error(
-				`Kernel connection is not available, status = ${this.status}, connection = ${this.connectionStatus}`
+				`Kernel connection is not available, status = ${this.status}, connection = ${this.connectionStatus}`,
 			);
 		}
 		return this.possibleKernelConnection;
@@ -78,7 +78,7 @@ export abstract class BaseKernelConnectionWrapper
 
 	constructor(
 		private _previousKernelConnection: Kernel.IKernelConnection,
-		disposables: IDisposable[]
+		disposables: IDisposable[],
 	) {
 		this.originalKernel = _previousKernelConnection;
 		this.startHandleKernelMessages(_previousKernelConnection);
@@ -86,10 +86,10 @@ export abstract class BaseKernelConnectionWrapper
 			new Disposable(() => {
 				if (this.possibleKernelConnection) {
 					this.stopHandlingKernelMessages(
-						this.possibleKernelConnection
+						this.possibleKernelConnection,
 					);
 				}
-			})
+			}),
 		);
 	}
 	abstract shutdown(): Promise<void>;
@@ -146,18 +146,18 @@ export abstract class BaseKernelConnectionWrapper
 	sendShellMessage<T extends ShellMessageType>(
 		msg: IShellMessage<T>,
 		expectReply?: boolean,
-		disposeOnDone?: boolean
+		disposeOnDone?: boolean,
 	): Kernel.IShellFuture<IShellMessage<T>, IShellMessage<ShellMessageType>> {
 		return this.getKernelConnection().sendShellMessage(
 			msg,
 			expectReply,
-			disposeOnDone
+			disposeOnDone,
 		);
 	}
 	sendControlMessage<T extends ControlMessageType>(
 		msg: IControlMessage<T>,
 		expectReply?: boolean,
-		disposeOnDone?: boolean
+		disposeOnDone?: boolean,
 	): Kernel.IControlFuture<
 		IControlMessage<T>,
 		IControlMessage<ControlMessageType>
@@ -165,7 +165,7 @@ export abstract class BaseKernelConnectionWrapper
 		return this.getKernelConnection().sendControlMessage(
 			msg,
 			expectReply,
-			disposeOnDone
+			disposeOnDone,
 		);
 	}
 	reconnect(): Promise<void> {
@@ -191,7 +191,7 @@ export abstract class BaseKernelConnectionWrapper
 		content:
 			| IHistoryRequestRange
 			| IHistoryRequestSearch
-			| IHistoryRequestTail
+			| IHistoryRequestTail,
 	): Promise<IHistoryReplyMsg> {
 		return this.getKernelConnection().requestHistory(content);
 	}
@@ -205,13 +205,13 @@ export abstract class BaseKernelConnectionWrapper
 			stop_on_error?: boolean | undefined;
 		},
 		disposeOnDone?: boolean,
-		metadata?: JSONObject
+		metadata?: JSONObject,
 	): Kernel.IShellFuture<IExecuteRequestMsg, IExecuteReplyMsg> {
 		return this.chainingExecute.requestExecute(
 			this.getKernelConnection(),
 			content,
 			disposeOnDone,
-			metadata
+			metadata,
 		);
 	}
 	requestDebug(
@@ -222,7 +222,7 @@ export abstract class BaseKernelConnectionWrapper
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			arguments?: any;
 		},
-		disposeOnDone?: boolean
+		disposeOnDone?: boolean,
 	): Kernel.IControlFuture<IDebugRequestMsg, IDebugReplyMsg> {
 		return this.getKernelConnection().requestDebug(content, disposeOnDone);
 	}
@@ -235,7 +235,7 @@ export abstract class BaseKernelConnectionWrapper
 		return this.getKernelConnection().requestCommInfo(content);
 	}
 	sendInputReply(
-		content: IReplyErrorContent | IReplyAbortContent | IInputReply
+		content: IReplyErrorContent | IReplyAbortContent | IInputReply,
 	): void {
 		return this.getKernelConnection().sendInputReply(content);
 	}
@@ -249,39 +249,39 @@ export abstract class BaseKernelConnectionWrapper
 		targetName: string,
 		callback: (
 			comm: Kernel.IComm,
-			msg: ICommOpenMsg<"iopub" | "shell">
-		) => void | PromiseLike<void>
+			msg: ICommOpenMsg<"iopub" | "shell">,
+		) => void | PromiseLike<void>,
 	): void {
 		return this.getKernelConnection().registerCommTarget(
 			targetName,
-			callback
+			callback,
 		);
 	}
 	removeCommTarget(
 		targetName: string,
 		callback: (
 			comm: Kernel.IComm,
-			msg: ICommOpenMsg<"iopub" | "shell">
-		) => void | PromiseLike<void>
+			msg: ICommOpenMsg<"iopub" | "shell">,
+		) => void | PromiseLike<void>,
 	): void {
 		return this.getKernelConnection().removeCommTarget(
 			targetName,
-			callback
+			callback,
 		);
 	}
 	registerMessageHook(
 		msgId: string,
 		hook: (
-			msg: IIOPubMessage<IOPubMessageType>
-		) => boolean | PromiseLike<boolean>
+			msg: IIOPubMessage<IOPubMessageType>,
+		) => boolean | PromiseLike<boolean>,
 	): void {
 		return this.getKernelConnection().registerMessageHook(msgId, hook);
 	}
 	removeMessageHook(
 		msgId: string,
 		hook: (
-			msg: IIOPubMessage<IOPubMessageType>
-		) => boolean | PromiseLike<boolean>
+			msg: IIOPubMessage<IOPubMessageType>,
+		) => boolean | PromiseLike<boolean>,
 	): void {
 		return this.getKernelConnection().removeMessageHook(msgId, hook);
 	}
@@ -290,33 +290,33 @@ export abstract class BaseKernelConnectionWrapper
 		_options?: Pick<
 			Kernel.IKernelConnection.IOptions,
 			"clientId" | "username" | "handleComms"
-		>
+		>,
 	): Kernel.IKernelConnection {
 		throw new Error("Method not implemented.");
 	}
 	protected startHandleKernelMessages(
-		kernelConnection: Kernel.IKernelConnection
+		kernelConnection: Kernel.IKernelConnection,
 	) {
 		kernelConnection.anyMessage.connect(this.onAnyMessage, this);
 		kernelConnection.iopubMessage.connect(this.onIOPubMessage, this);
 		kernelConnection.unhandledMessage.connect(
 			this.onUnhandledMessage,
-			this
+			this,
 		);
 	}
 	protected stopHandlingKernelMessages(
-		kernelConnection: Kernel.IKernelConnection
+		kernelConnection: Kernel.IKernelConnection,
 	) {
 		kernelConnection.anyMessage.disconnect(this.onAnyMessage, this);
 		kernelConnection.iopubMessage.disconnect(this.onIOPubMessage, this);
 		kernelConnection.unhandledMessage.disconnect(
 			this.onUnhandledMessage,
-			this
+			this,
 		);
 	}
 	private onAnyMessage(
 		connection: Kernel.IKernelConnection,
-		msg: Kernel.IAnyMessageArgs
+		msg: Kernel.IAnyMessageArgs,
 	) {
 		if (connection === this.possibleKernelConnection) {
 			this.anyMessage.emit(msg);
@@ -324,7 +324,7 @@ export abstract class BaseKernelConnectionWrapper
 	}
 	private onIOPubMessage(
 		connection: Kernel.IKernelConnection,
-		msg: IIOPubMessage
+		msg: IIOPubMessage,
 	) {
 		if (connection === this.possibleKernelConnection) {
 			this.iopubMessage.emit(msg);
@@ -332,7 +332,7 @@ export abstract class BaseKernelConnectionWrapper
 	}
 	private onUnhandledMessage(
 		connection: Kernel.IKernelConnection,
-		msg: IMessage<MessageType>
+		msg: IMessage<MessageType>,
 	) {
 		if (connection === this.possibleKernelConnection) {
 			this.unhandledMessage.emit(msg);

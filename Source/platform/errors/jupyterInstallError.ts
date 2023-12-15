@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { BaseError } from './types';
+import { BaseError } from "./types";
 
 /**
  * Error thrown when we can't run jupyter
@@ -15,7 +15,7 @@ import { BaseError } from './types';
  * KernelErrorHandler uses this to figure out it needs to tell the user to install jupyter. It will show a message in the cell.
  */
 export class JupyterInstallError extends BaseError {
-    constructor(message: string) {
-        super('jupyterinstall', message);
-    }
+	constructor(message: string) {
+		super("jupyterinstall", message);
+	}
 }

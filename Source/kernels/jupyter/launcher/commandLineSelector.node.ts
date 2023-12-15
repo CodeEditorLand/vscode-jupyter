@@ -32,7 +32,7 @@ export class JupyterCommandLineSelector {
 			const reload = DataScience.jupyterCommandLineReloadAnswer;
 			const item = await this.appShell.showInformationMessage(
 				DataScience.jupyterCommandLineReloadQuestion,
-				reload
+				reload,
 			);
 			if (item === reload) {
 				this.commandManager

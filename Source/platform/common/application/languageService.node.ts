@@ -19,7 +19,7 @@ export class LanguageService implements ILanguageService {
 		return languages.registerCompletionItemProvider(
 			selector,
 			provider,
-			...triggerCharacters
+			...triggerCharacters,
 		);
 	}
 }

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
-import { Uri, NotebookEditor, window, workspace } from 'vscode';
-import { Resource } from '../platform/common/types';
-import { getResourceType } from '../platform/common/utils';
-import { getComparisonKey } from '../platform/vscode-path/resources';
-import { IEmbedNotebookEditorProvider, INotebookEditorProvider } from './types';
-import { getOSType, OSType } from '../platform/common/utils/platform';
+import { injectable } from "inversify";
+import { Uri, NotebookEditor, window, workspace } from "vscode";
+import { Resource } from "../platform/common/types";
+import { getResourceType } from "../platform/common/utils";
+import { getComparisonKey } from "../platform/vscode-path/resources";
+import { IEmbedNotebookEditorProvider, INotebookEditorProvider } from "./types";
+import { getOSType, OSType } from "../platform/common/utils/platform";
 
 /**
  * Notebook Editor provider used by other parts of DS code.
@@ -18,58 +18,67 @@ import { getOSType, OSType } from '../platform/common/utils/platform';
  */
 @injectable()
 export class NotebookEditorProvider implements INotebookEditorProvider {
-    private providers: Set<IEmbedNotebookEditorProvider> = new Set();
+	private providers: Set<IEmbedNotebookEditorProvider> = new Set();
 
-    registerEmbedNotebookProvider(provider: IEmbedNotebookEditorProvider): void {
-        this.providers.add(provider);
-    }
+	registerEmbedNotebookProvider(
+		provider: IEmbedNotebookEditorProvider,
+	): void {
+		this.providers.add(provider);
+	}
 
-    findNotebookEditor(resource: Resource) {
-        const key = resource ? getComparisonKey(resource, true) : 'false';
-        const notebook =
-            getResourceType(resource) === 'notebook'
-                ? workspace.notebookDocuments.find((item) => getComparisonKey(item.uri, true) === key)
-                : undefined;
-        const targetNotebookEditor =
-            notebook && window.activeNotebookEditor?.notebook === notebook ? window.activeNotebookEditor : undefined;
+	findNotebookEditor(resource: Resource) {
+		const key = resource ? getComparisonKey(resource, true) : "false";
+		const notebook =
+			getResourceType(resource) === "notebook"
+				? workspace.notebookDocuments.find(
+						(item) => getComparisonKey(item.uri, true) === key,
+				  )
+				: undefined;
+		const targetNotebookEditor =
+			notebook && window.activeNotebookEditor?.notebook === notebook
+				? window.activeNotebookEditor
+				: undefined;
 
-        if (targetNotebookEditor) {
-            return targetNotebookEditor;
-        }
+		if (targetNotebookEditor) {
+			return targetNotebookEditor;
+		}
 
-        for (let provider of this.providers) {
-            const editor = provider.findNotebookEditor(resource);
+		for (let provider of this.providers) {
+			const editor = provider.findNotebookEditor(resource);
 
-            if (editor) {
-                return editor;
-            }
-        }
-    }
+			if (editor) {
+				return editor;
+			}
+		}
+	}
 
-    get activeNotebookEditor(): NotebookEditor | undefined {
-        return (
-            this.findNotebookEditor(window.activeNotebookEditor?.notebook.uri) ||
-            this.findNotebookEditor(window.activeTextEditor?.document.uri)
-        );
-    }
+	get activeNotebookEditor(): NotebookEditor | undefined {
+		return (
+			this.findNotebookEditor(
+				window.activeNotebookEditor?.notebook.uri,
+			) || this.findNotebookEditor(window.activeTextEditor?.document.uri)
+		);
+	}
 
-    findAssociatedNotebookDocument(uri: Uri) {
-        const ignoreCase = getOSType() === OSType.Windows;
-        let notebook = workspace.notebookDocuments.find((n) => {
-            // Use the path part of the URI. It should match the path for the notebook
-            return ignoreCase ? n.uri.path.toLowerCase() === uri.path.toLowerCase() : n.uri.path === uri.path;
-        });
+	findAssociatedNotebookDocument(uri: Uri) {
+		const ignoreCase = getOSType() === OSType.Windows;
+		let notebook = workspace.notebookDocuments.find((n) => {
+			// Use the path part of the URI. It should match the path for the notebook
+			return ignoreCase
+				? n.uri.path.toLowerCase() === uri.path.toLowerCase()
+				: n.uri.path === uri.path;
+		});
 
-        if (notebook) {
-            return notebook;
-        }
+		if (notebook) {
+			return notebook;
+		}
 
-        for (let provider of this.providers) {
-            const document = provider.findAssociatedNotebookDocument(uri);
+		for (let provider of this.providers) {
+			const document = provider.findAssociatedNotebookDocument(uri);
 
-            if (document) {
-                return document;
-            }
-        }
-    }
+			if (document) {
+				return document;
+			}
+		}
+	}
 }

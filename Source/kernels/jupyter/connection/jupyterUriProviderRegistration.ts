@@ -75,7 +75,7 @@ export class JupyterUriProviderRegistration
 	}
 	public async getProvider(
 		extensionId: string,
-		id: string
+		id: string,
 	): Promise<IInternalJupyterUriProvider | undefined> {
 		this.loadOtherExtensions().catch(noop);
 		const provider = this._providers.get(getProviderId(extensionId, id));
@@ -93,7 +93,7 @@ export class JupyterUriProviderRegistration
 
 	public registerProvider(
 		provider: IJupyterUriProvider,
-		extensionId: string
+		extensionId: string,
 	) {
 		const id = getProviderId(extensionId, provider.id);
 		if (!this._providers.has(id)) {
@@ -101,7 +101,7 @@ export class JupyterUriProviderRegistration
 			this._providers.set(
 				id,
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define, @typescript-eslint/no-use-before-define
-				new JupyterUriProviderWrapper(provider, extensionId)
+				new JupyterUriProviderWrapper(provider, extensionId),
 			);
 		} else {
 			throw new Error(`IJupyterUriProvider already exists with id ${id}`);
@@ -120,28 +120,28 @@ export class JupyterUriProviderRegistration
 	}
 	public async getJupyterServerUri(
 		providerHandle: JupyterServerProviderHandle,
-		doNotPromptForAuthInfo?: boolean
+		doNotPromptForAuthInfo?: boolean,
 	): Promise<IJupyterServerUri> {
 		const id = getProviderId(providerHandle.extensionId, providerHandle.id);
 		if (!this._providers.get(id)) {
 			await this.loadExtension(
 				providerHandle.extensionId,
-				providerHandle.id
+				providerHandle.id,
 			);
 		}
 		const provider = this._providers.get(id);
 		if (!provider) {
 			throw new Error(
-				`Provider Id=${id} and handle=${providerHandle.handle} not registered. Did you uninstall the extension ${providerHandle.extensionId}?`
+				`Provider Id=${id} and handle=${providerHandle.handle} not registered. Did you uninstall the extension ${providerHandle.extensionId}?`,
 			);
 		}
 		const server = await provider.getServerUri(
 			providerHandle.handle,
-			doNotPromptForAuthInfo
+			doNotPromptForAuthInfo,
 		);
 		this.cachedDisplayNames.set(
 			generateIdFromRemoteProvider(providerHandle),
-			server.displayName
+			server.displayName,
 		);
 		return server;
 	}
@@ -150,35 +150,35 @@ export class JupyterUriProviderRegistration
 	 * We need a way to get the displayName of the Server.
 	 */
 	public async getDisplayNameIfProviderIsLoaded(
-		providerHandle: JupyterServerProviderHandle
+		providerHandle: JupyterServerProviderHandle,
 	): Promise<string | undefined> {
 		if (
 			this.cachedDisplayNames.has(
-				generateIdFromRemoteProvider(providerHandle)
+				generateIdFromRemoteProvider(providerHandle),
 			)
 		) {
 			return this.cachedDisplayNames.get(
-				generateIdFromRemoteProvider(providerHandle)
+				generateIdFromRemoteProvider(providerHandle),
 			)!;
 		}
 		const id = getProviderId(providerHandle.extensionId, providerHandle.id);
 		if (!this._providers.get(id)) {
 			await this.loadExtension(
 				providerHandle.extensionId,
-				providerHandle.id
+				providerHandle.id,
 			);
 		}
 		const provider = this._providers.get(id);
 		if (!provider) {
 			traceVerbose(
-				`Provider Id=${id} and handle=${providerHandle.handle} not registered. Extension ${providerHandle.extensionId} may not have yet loaded or provider not yet registered?`
+				`Provider Id=${id} and handle=${providerHandle.handle} not registered. Extension ${providerHandle.extensionId} may not have yet loaded or provider not yet registered?`,
 			);
 			return;
 		}
 		const server = await provider.getServerUri(providerHandle.handle, true);
 		this.cachedDisplayNames.set(
 			generateIdFromRemoteProvider(providerHandle),
-			server.displayName
+			server.displayName,
 		);
 		return server.displayName;
 	}
@@ -190,7 +190,7 @@ export class JupyterUriProviderRegistration
 		const ext = this.extensions.getExtension(extensionId);
 		if (!ext) {
 			throw new Error(
-				`Extension '${extensionId}' that provides Jupyter Server '${providerId}' not found`
+				`Extension '${extensionId}' that provides Jupyter Server '${providerId}' not found`,
 			);
 		}
 		if (!ext.isActive) {
@@ -210,7 +210,7 @@ export class JupyterUriProviderRegistration
 		this.globalMemento
 			.get<{ extensionId: string }[]>(
 				REGISTRATION_ID_EXTENSION_OWNER_MEMENTO_KEY,
-				[]
+				[],
 			)
 			.forEach((item) => extensionIds.add(item.extensionId));
 
@@ -218,31 +218,31 @@ export class JupyterUriProviderRegistration
 			.filter(
 				(e) =>
 					e.packageJSON?.contributes?.pythonRemoteServerProvider ||
-					extensionIds.has(e.id)
+					extensionIds.has(e.id),
 			)
 			.filter((e) => e.id !== JVSC_EXTENSION_ID);
 		await Promise.all(
 			extensions.map((e) =>
-				e.isActive ? Promise.resolve() : e.activate().then(noop, noop)
-			)
+				e.isActive ? Promise.resolve() : e.activate().then(noop, noop),
+			),
 		);
 	}
 
 	@swallowExceptions()
 	private async trackExtensionWithProvider(
-		extensionId: string
+		extensionId: string,
 	): Promise<void> {
 		this.loadListOfExtensionsWithProviders();
 		this.extensionIdsThatHaveProviders.add(extensionId);
 
 		const items = Array.from(
-			this.extensionIdsThatHaveProviders.values()
+			this.extensionIdsThatHaveProviders.values(),
 		).map((extensionId) => ({
 			extensionId,
 		}));
 		await this.globalMemento.update(
 			REGISTRATION_ID_EXTENSION_OWNER_MEMENTO_KEY,
-			items
+			items,
 		);
 	}
 	private loadListOfExtensionsWithProviders() {
@@ -250,7 +250,7 @@ export class JupyterUriProviderRegistration
 			{ extensionId: string }[]
 		>(REGISTRATION_ID_EXTENSION_OWNER_MEMENTO_KEY, []);
 		registeredList.forEach((item) =>
-			this.extensionIdsThatHaveProviders.add(item.extensionId)
+			this.extensionIdsThatHaveProviders.add(item.extensionId),
 		);
 	}
 }
@@ -285,7 +285,7 @@ class JupyterUriProviderWrapper
 
 	constructor(
 		private readonly provider: IJupyterUriProvider,
-		public extensionId: string
+		public extensionId: string,
 	) {
 		super();
 		this.id = this.provider.id;
@@ -295,7 +295,7 @@ class JupyterUriProviderWrapper
 		}
 	}
 	public async getQuickPickEntryItems(
-		value?: string
+		value?: string,
 	): Promise<QuickPickItem[]> {
 		if (!this.provider.getQuickPickEntryItems) {
 			return [];
@@ -314,7 +314,7 @@ class JupyterUriProviderWrapper
 		item: QuickPickItem & {
 			original: QuickPickItem & { command?: JupyterServerCommand };
 		},
-		back: boolean
+		back: boolean,
 	): Promise<string | "back" | undefined> {
 		if (!this.provider.handleQuickPick) {
 			return;
@@ -327,7 +327,7 @@ class JupyterUriProviderWrapper
 
 	public async getServerUri(
 		handle: string,
-		doNotPromptForAuthInfo?: boolean
+		doNotPromptForAuthInfo?: boolean,
 	): Promise<IJupyterServerUri> {
 		const provider = this.provider as IInternalJupyterUriProvider;
 		if (
@@ -367,7 +367,7 @@ class JupyterUriProviderWrapper
 					providerId: this.id,
 					extensionId: this.extensionId,
 					pemUsed,
-				}
+				},
 			);
 		}
 		return server;
@@ -377,11 +377,11 @@ class JupyterUriProviderWrapper
 export async function getJupyterDisplayName(
 	serverHandle: JupyterServerProviderHandle,
 	jupyterUriProviderRegistration: IJupyterUriProviderRegistration,
-	defaultValue?: string
+	defaultValue?: string,
 ) {
 	const displayName =
 		await jupyterUriProviderRegistration.getDisplayNameIfProviderIsLoaded(
-			serverHandle
+			serverHandle,
 		);
 	return (
 		displayName ||

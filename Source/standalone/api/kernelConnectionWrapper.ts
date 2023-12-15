@@ -29,10 +29,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 		}
 	}
 
-	constructor(
-		readonly kernel: IBaseKernel,
-		disposables: IDisposable[]
-	) {
+	constructor(readonly kernel: IBaseKernel, disposables: IDisposable[]) {
 		super(kernel.session!.kernel!, disposables);
 		const emiStatusChangeEvents = () => {
 			this.statusChanged.emit(kernel.status);
@@ -51,7 +48,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 				this.disposed.emit();
 			},
 			this,
-			disposables
+			disposables,
 		);
 		kernel.onStarted(emiStatusChangeEvents, this, disposables);
 		kernel.onRestarted(emiStatusChangeEvents, this, disposables);
@@ -98,7 +95,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 		this.startHandleKernelMessages(this.kernel.session.kernel);
 	}
 	protected override startHandleKernelMessages(
-		kernelConnection: Kernel.IKernelConnection
+		kernelConnection: Kernel.IKernelConnection,
 	) {
 		this._kernelConnection = kernelConnection;
 		super.startHandleKernelMessages(kernelConnection);

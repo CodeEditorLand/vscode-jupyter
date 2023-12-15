@@ -68,16 +68,16 @@ export class DocumentManager implements IDocumentManager {
 	public showTextDocument(
 		document: TextDocument,
 		column?: ViewColumn,
-		preserveFocus?: boolean
+		preserveFocus?: boolean,
 	): Thenable<TextEditor>;
 	public showTextDocument(
 		document: TextDocument | Uri,
-		options?: TextDocumentShowOptions
+		options?: TextDocumentShowOptions,
 	): Thenable<TextEditor>;
 	public showTextDocument(
 		uri: any,
 		options?: any,
-		preserveFocus?: any
+		preserveFocus?: any,
 	): Thenable<TextEditor> {
 		return window.showTextDocument(uri, options, preserveFocus);
 	}
@@ -95,7 +95,7 @@ export class DocumentManager implements IDocumentManager {
 		return workspace.applyEdit(edit);
 	}
 	public createTextEditorDecorationType(
-		options: DecorationRenderOptions
+		options: DecorationRenderOptions,
 	): TextEditorDecorationType {
 		return window.createTextEditorDecorationType(options);
 	}
