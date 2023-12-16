@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { BaseError } from "./types";
+import { BaseError } from './types';
 
 /**
  * Error thrown when we can't find a module during execing a module
@@ -14,7 +14,7 @@ import { BaseError } from "./types";
  *
  */
 export class ModuleNotInstalledError extends BaseError {
-	constructor(public readonly moduleName: string) {
-		super("notinstalled", `Module '${moduleName}' not installed.`);
-	}
+    constructor(public readonly moduleName: string) {
+        super('notinstalled', `Module '${moduleName}' not installed.`);
+    }
 }

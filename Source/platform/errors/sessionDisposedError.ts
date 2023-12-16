@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from "../common/utils/localize";
-import { BaseError } from "./types";
+import { DataScience } from '../common/utils/localize';
+import { BaseError } from './types';
 
 /**
  * Error thrown when we attempt to use a jupyter session but it's already been shutdown.
@@ -15,7 +15,7 @@ import { BaseError } from "./types";
  * User should be shown this in the executing cell (if there is one), otherwise a notification will pop up.
  */
 export class SessionDisposedError extends BaseError {
-	constructor() {
-		super("sessionDisposed", DataScience.sessionDisposed);
-	}
+    constructor() {
+        super('sessionDisposed', DataScience.sessionDisposed);
+    }
 }

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { PythonEnvironment } from "../pythonEnvironments/info";
-import { BaseError } from "./types";
+import { PythonEnvironment } from '../pythonEnvironments/info';
+import { BaseError } from './types';
 
 /**
  * Error thrown when Jupyter Notebook dependency has not been installed or not found by the python interpreter.
@@ -34,14 +34,11 @@ import { BaseError } from "./types";
  * ```
  */
 export class JupyterNotebookNotInstalled extends BaseError {
-	constructor(
-		message: string,
-		stderr: string | string,
-		public readonly interpreter?: PythonEnvironment,
-	) {
-		super(
-			"jupyternotebooknotinstalled",
-			message + (stderr ? `\n${stderr}` : ""),
-		);
-	}
+    constructor(
+        message: string,
+        stderr: string | string,
+        public readonly interpreter?: PythonEnvironment
+    ) {
+        super('jupyternotebooknotinstalled', message + (stderr ? `\n${stderr}` : ''));
+    }
 }

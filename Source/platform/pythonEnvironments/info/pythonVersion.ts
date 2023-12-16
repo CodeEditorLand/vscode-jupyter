@@ -12,8 +12,8 @@
 // Note that this is currently compatible with SemVer objects,
 // but we may change it to match the format of sys.version_info.
 export type PythonVersion = {
-	raw: string;
-	major: number;
-	minor: number;
-	patch: number;
+    raw: string;
+    major: number;
+    minor: number;
+    patch: number;
 };
