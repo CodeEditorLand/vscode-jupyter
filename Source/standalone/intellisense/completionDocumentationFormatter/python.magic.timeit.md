@@ -19,21 +19,21 @@ module. This function can be used both as a line and cell magic:
 ## Options:
 
 -   -n<N>: execute the given statement <N> times in a loop. If <N> is not  
-    provided, <N> is determined so as to get sufficient accuracy.  
+    provided, <N> is determined so as to get sufficient accuracy.
 
 -   -r<R>: number of repeats <R>, each consisting of <N> loops, and take the  
     average result.  
-    Default: 7  
+    Default: 7
 
 -   -t: use time.time to measure the time, which is the default on Unix.  
-    This function measures wall time.  
+    This function measures wall time.
 
 -   -c: use time.clock to measure the time, which is the default on  
     Windows and measures wall time. On Unix, resource.getrusage is used  
-    instead and returns the CPU user time.  
+    instead and returns the CPU user time.
 
 -   -p<P>: use a precision of <P> digits to display the timing result.  
-    Default: 3  
+    Default: 3
 
 -   -q: Quiet, do not print result.
 -   -o: return a TimeitResult that can be stored in a variable to inspect  
