@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const path = require("path");
 const constants = require("../constants");

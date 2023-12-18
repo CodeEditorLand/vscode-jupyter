@@ -1,34 +1,34 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { injectable } from "inversify";
 import { QuickPickItem, commands, extensions, l10n, window } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
+import { toPromise } from "../../platform/common/utils/events";
 import {
 	DisposableStore,
 	dispose,
 } from "../../platform/common/utils/lifecycle";
-import { toPromise } from "../../platform/common/utils/events";
+import { ServiceContainer } from "../../platform/ioc/container";
 import {
 	getExtensionAccessListForManagement,
 	updateListOfExtensionsAllowedToAccessApi,
 } from "./apiAccess";
-import { ServiceContainer } from "../../platform/ioc/container";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { injectable } from "inversify";
 
 @injectable()
 export class KernelApi implements IExtensionSyncActivationService {
 	activate(): void {
 		const disposables =
 			ServiceContainer.instance.get<IDisposableRegistry>(
-				IDisposableRegistry
+				IDisposableRegistry,
 			);
 		const disposableStore = new DisposableStore();
 		disposables.push(disposableStore);
 		disposables.push(
 			commands.registerCommand("jupyter.manageAccessToKernels", () =>
-				manageKernelAccess(disposableStore)
-			)
+				manageKernelAccess(disposableStore),
+			),
 		);
 	}
 }
@@ -59,11 +59,11 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	>();
 	quickPick.title = l10n.t("Manage Access To Jupyter Kernels");
 	quickPick.placeholder = l10n.t(
-		"Choose which extensions can access Jupyter Kernels"
+		"Choose which extensions can access Jupyter Kernels",
 	);
 	quickPick.items = quickPickItems;
 	quickPick.selectedItems = quickPickItems.filter(
-		(item) => accessInfo.get(item.extensionId) === true
+		(item) => accessInfo.get(item.extensionId) === true,
 	);
 	quickPick.canSelectMany = true;
 	quickPick.ignoreFocusOut = false;
@@ -72,7 +72,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	quickPick.show();
 	await Promise.race([
 		toPromise(quickPick.onDidAccept, undefined, disposables).then(
-			() => (accepted = true)
+			() => (accepted = true),
 		),
 		toPromise(quickPick.onDidHide, undefined, disposables),
 	]);
@@ -80,7 +80,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 		return;
 	}
 	await updateListOfExtensionsAllowedToAccessApi(
-		quickPick.selectedItems.map((item) => item.extensionId)
+		quickPick.selectedItems.map((item) => item.extensionId),
 	);
 	disposables = dispose(disposables);
 }

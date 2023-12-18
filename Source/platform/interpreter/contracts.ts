@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Event, Uri, CancellationToken } from "vscode";
-import { PythonEnvironment } from "../pythonEnvironments/info";
 import { Environment, ResolvedEnvironment } from "@vscode/python-extension";
+import { CancellationToken, Event, Uri } from "vscode";
+import { PythonEnvironment } from "../pythonEnvironments/info";
 type InterpreterId = string;
 export const IInterpreterService = Symbol("IInterpreterService");
 export interface IInterpreterService {
 	// #region New API
 	readonly known: readonly Environment[];
 	resolveEnvironment(
-		id: string | Environment
+		id: string | Environment,
 	): Promise<ResolvedEnvironment | undefined>;
 	// #endregion
 
@@ -33,7 +33,7 @@ export interface IInterpreterService {
 	onDidRemoveInterpreter: Event<{ id: string }>;
 	refreshInterpreters(forceRefresh?: boolean): Promise<void>;
 	getActiveInterpreter(
-		resource?: Uri
+		resource?: Uri,
 	): Promise<PythonEnvironment | undefined>;
 	/**
 	 * Gets the details of a Python Environment
@@ -47,7 +47,7 @@ export interface IInterpreterService {
 					path: string;
 			  }
 			| InterpreterId,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<undefined | PythonEnvironment>;
 	getInterpreterHash(id: string): string | undefined;
 	// #endregion

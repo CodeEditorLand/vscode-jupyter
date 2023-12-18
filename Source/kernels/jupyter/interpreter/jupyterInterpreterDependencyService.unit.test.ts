@@ -3,27 +3,27 @@
 
 import { assert } from "chai";
 import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito";
+import { Disposable, Uri } from "vscode";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { DataScience } from "../../../platform/common/utils/localize";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { ProductInstaller } from "../../../platform/interpreter/installer/productInstaller.node";
 import {
 	IInstaller,
-	Product,
 	InstallerResponse,
+	Product,
 } from "../../../platform/interpreter/installer/types";
-import {
-	JupyterCommandFactory,
-	InterpreterJupyterKernelSpecCommand,
-} from "./jupyterCommand.node";
-import { JupyterInterpreterDependencyService } from "./jupyterInterpreterDependencyService.node";
-import { JupyterInterpreterDependencyResponse } from "../types";
-import { IJupyterCommand, IJupyterCommandFactory } from "../types.node";
-import { Disposable, Uri } from "vscode";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import {
 	mockedVSCodeNamespaces,
 	resetVSCodeMocks,
 } from "../../../test/vscode-mock";
-import { dispose } from "../../../platform/common/utils/lifecycle";
+import { JupyterInterpreterDependencyResponse } from "../types";
+import { IJupyterCommand, IJupyterCommandFactory } from "../types.node";
+import {
+	InterpreterJupyterKernelSpecCommand,
+	JupyterCommandFactory,
+} from "./jupyterCommand.node";
+import { JupyterInterpreterDependencyService } from "./jupyterInterpreterDependencyService.node";
 
 /* eslint-disable , @typescript-eslint/no-explicit-any */
 
@@ -54,23 +54,23 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenReturn(instance(command));
 		when(command.exec(anything(), anything())).thenResolve({ stdout: "" });
 
 		configuration = new JupyterInterpreterDependencyService(
 			instance(installer),
-			instance(commandFactory)
+			instance(commandFactory),
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
 	test("Return ok if all dependencies are installed", async () => {
 		when(
-			installer.isInstalled(Product.jupyter, pythonInterpreter)
+			installer.isInstalled(Product.jupyter, pythonInterpreter),
 		).thenResolve(true);
 		when(
-			installer.isInstalled(Product.notebook, pythonInterpreter)
+			installer.isInstalled(Product.notebook, pythonInterpreter),
 		).thenResolve(true);
 
 		const response =
@@ -80,21 +80,21 @@ suite("Jupyter Interpreter Configuration", () => {
 	});
 	async function testPromptIfModuleNotInstalled(
 		jupyterInstalled: boolean,
-		notebookInstalled: boolean
+		notebookInstalled: boolean,
 	): Promise<void> {
 		when(
-			installer.isInstalled(Product.jupyter, pythonInterpreter)
+			installer.isInstalled(Product.jupyter, pythonInterpreter),
 		).thenResolve(jupyterInstalled);
 		when(
-			installer.isInstalled(Product.notebook, pythonInterpreter)
+			installer.isInstalled(Product.notebook, pythonInterpreter),
 		).thenResolve(notebookInstalled);
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 
 		const response =
@@ -105,8 +105,8 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				deepEqual({ modal: true }),
 				DataScience.jupyterInstall,
-				DataScience.selectDifferentJupyterInterpreter
-			)
+				DataScience.selectDifferentJupyterInterpreter,
+			),
 		).once();
 		assert.equal(response, JupyterInterpreterDependencyResponse.cancel);
 	}
@@ -118,30 +118,30 @@ suite("Jupyter Interpreter Configuration", () => {
 		testPromptIfModuleNotInstalled(false, false));
 	test("Reinstall Jupyter if jupyter and notebook are installed but kernelspec is not found", async () => {
 		when(
-			installer.isInstalled(Product.jupyter, pythonInterpreter)
+			installer.isInstalled(Product.jupyter, pythonInterpreter),
 		).thenResolve(true);
 		when(
-			installer.isInstalled(Product.notebook, pythonInterpreter)
+			installer.isInstalled(Product.notebook, pythonInterpreter),
 		).thenResolve(true);
 		when(installer.isInstalled(Product.pip, pythonInterpreter)).thenResolve(
-			true
+			true,
 		);
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			DataScience.jupyterInstall as any
+			DataScience.jupyterInstall as any,
 		);
 		when(command.exec(anything(), anything())).thenReject(
-			new Error("Not found")
+			new Error("Not found"),
 		);
 		when(
-			installer.install(anything(), anything(), anything(), anything())
+			installer.install(anything(), anything(), anything(), anything()),
 		).thenResolve(InstallerResponse.Installed);
 		const response =
 			await configuration.installMissingDependencies(pythonInterpreter);
@@ -153,8 +153,8 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		verify(
 			installer.install(
@@ -162,40 +162,40 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				deepEqual({ modal: true }),
 				DataScience.jupyterInstall,
-				DataScience.selectDifferentJupyterInterpreter
-			)
+				DataScience.selectDifferentJupyterInterpreter,
+			),
 		).once();
 		assert.equal(response, JupyterInterpreterDependencyResponse.cancel);
 	});
 
 	async function testInstallationOfJupyter(
 		installerResponse: InstallerResponse,
-		expectedConfigurationReponse: JupyterInterpreterDependencyResponse
+		expectedConfigurationReponse: JupyterInterpreterDependencyResponse,
 	): Promise<void> {
 		when(
-			installer.isInstalled(Product.jupyter, pythonInterpreter)
+			installer.isInstalled(Product.jupyter, pythonInterpreter),
 		).thenResolve(false);
 		when(
-			installer.isInstalled(Product.notebook, pythonInterpreter)
+			installer.isInstalled(Product.notebook, pythonInterpreter),
 		).thenResolve(true);
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			DataScience.jupyterInstall as any
+			DataScience.jupyterInstall as any,
 		);
 		when(
 			installer.install(
@@ -203,8 +203,8 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(installerResponse);
 
 		const response =
@@ -216,32 +216,32 @@ suite("Jupyter Interpreter Configuration", () => {
 				pythonInterpreter,
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		assert.equal(response, expectedConfigurationReponse);
 	}
 	async function testInstallationOfJupyterAndNotebook(
 		jupyterInstallerResponse: InstallerResponse,
 		notebookInstallationResponse: InstallerResponse,
-		expectedConfigurationReponse: JupyterInterpreterDependencyResponse
+		expectedConfigurationReponse: JupyterInterpreterDependencyResponse,
 	): Promise<void> {
 		when(
-			installer.isInstalled(Product.jupyter, pythonInterpreter)
+			installer.isInstalled(Product.jupyter, pythonInterpreter),
 		).thenResolve(false);
 		when(
-			installer.isInstalled(Product.notebook, pythonInterpreter)
+			installer.isInstalled(Product.notebook, pythonInterpreter),
 		).thenResolve(false);
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			DataScience.jupyterInstall as any
+			DataScience.jupyterInstall as any,
 		);
 		when(
 			installer.install(
@@ -249,8 +249,8 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(jupyterInstallerResponse);
 		when(
 			installer.install(
@@ -258,8 +258,8 @@ suite("Jupyter Interpreter Configuration", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(notebookInstallationResponse);
 
 		const response =
@@ -271,8 +271,8 @@ suite("Jupyter Interpreter Configuration", () => {
 				pythonInterpreter,
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		verify(
 			installer.install(
@@ -280,36 +280,36 @@ suite("Jupyter Interpreter Configuration", () => {
 				pythonInterpreter,
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		assert.equal(response, expectedConfigurationReponse);
 	}
 	test("Install Jupyter and return ok if installed successfully", async () =>
 		testInstallationOfJupyter(
 			InstallerResponse.Installed,
-			JupyterInterpreterDependencyResponse.ok
+			JupyterInterpreterDependencyResponse.ok,
 		));
 	test("Install Jupyter & notebook and return ok if both are installed successfully", async () =>
 		testInstallationOfJupyterAndNotebook(
 			InstallerResponse.Installed,
 			InstallerResponse.Installed,
-			JupyterInterpreterDependencyResponse.ok
+			JupyterInterpreterDependencyResponse.ok,
 		));
 	test("Install Jupyter & notebook and return cancel if notebook is not installed", async () =>
 		testInstallationOfJupyterAndNotebook(
 			InstallerResponse.Installed,
 			InstallerResponse.Ignore,
-			JupyterInterpreterDependencyResponse.cancel
+			JupyterInterpreterDependencyResponse.cancel,
 		));
 	test("Install Jupyter and return cancel if installation is disabled", async () =>
 		testInstallationOfJupyter(
 			InstallerResponse.Disabled,
-			JupyterInterpreterDependencyResponse.cancel
+			JupyterInterpreterDependencyResponse.cancel,
 		));
 	test("Install Jupyter and return cancel if installation is ignored", async () =>
 		testInstallationOfJupyter(
 			InstallerResponse.Ignore,
-			JupyterInterpreterDependencyResponse.cancel
+			JupyterInterpreterDependencyResponse.cancel,
 		));
 });

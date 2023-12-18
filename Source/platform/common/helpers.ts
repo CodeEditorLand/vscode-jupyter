@@ -11,7 +11,7 @@ export function splitLines(
 	splitOptions: { trim: boolean; removeEmptyEntries?: boolean } = {
 		removeEmptyEntries: true,
 		trim: true,
-	}
+	},
 ): string[] {
 	value = value || "";
 	let lines = value.split(/\r?\n/g);
@@ -68,13 +68,13 @@ export function trimQuotes(value: string): string {
  */
 export function format(value: string, ...args: string[]) {
 	return value.replace(/{(\d+)}/g, (match, number) =>
-		args[number] === undefined ? match : args[number]
+		args[number] === undefined ? match : args[number],
 	);
 }
 
 export function createPublicAPIProxy<T extends object>(
 	target: T,
-	membersToHide: (keyof T)[]
+	membersToHide: (keyof T)[],
 ): T {
 	const membersToHideList = membersToHide as (string | symbol)[];
 	return new Proxy(target, {
@@ -86,7 +86,7 @@ export function createPublicAPIProxy<T extends object>(
 		},
 		ownKeys(target) {
 			return Reflect.ownKeys(target).filter(
-				(key) => !membersToHideList.includes(key)
+				(key) => !membersToHideList.includes(key),
 			);
 		},
 		getOwnPropertyDescriptor(target, p) {

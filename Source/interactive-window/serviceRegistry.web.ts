@@ -4,94 +4,94 @@
 import { ITracebackFormatter } from "../kernels/types";
 import { IExtensionSyncActivationService } from "../platform/activation/types";
 import { IServiceManager } from "../platform/ioc/types";
+import { InteractiveControllerHelper } from "./InteractiveControllerHelper";
 import { CommandRegistry } from "./commands/commandRegistry";
+import { InteractiveWindowDebuggingManager } from "./debugger/jupyter/debuggingManager";
+import { InteractiveWindowDebuggingStartupCodeProvider } from "./debugger/startupCodeProvider";
+import { CodeGeneratorFactory } from "./editor-integration/codeGeneratorFactory";
 import { CodeLensFactory } from "./editor-integration/codeLensFactory";
+import { CodeLensProviderActivator } from "./editor-integration/codelensProviderActivator";
 import { DataScienceCodeLensProvider } from "./editor-integration/codelensprovider";
 import { CodeWatcher } from "./editor-integration/codewatcher";
 import { Decorator } from "./editor-integration/decorator";
+import { GeneratedCodeStorageFactory } from "./editor-integration/generatedCodeStorageFactory";
+import { PythonCellFoldingProvider } from "./editor-integration/pythonCellFoldingProvider";
 import {
-	ICodeWatcher,
-	ICodeLensFactory,
-	IDataScienceCodeLensProvider,
 	ICodeGeneratorFactory,
+	ICodeLensFactory,
+	ICodeWatcher,
+	IDataScienceCodeLensProvider,
 } from "./editor-integration/types";
+import { IGeneratedCodeStorageFactory } from "./editor-integration/types";
+import { GeneratedCodeStorageManager } from "./generatedCodeStoreManager";
 import { InteractiveWindowProvider } from "./interactiveWindowProvider";
+import { InteractiveWindowTracebackFormatter } from "./outputs/tracebackFormatter";
 import {
 	IInteractiveControllerHelper,
 	IInteractiveWindowDebuggingManager,
 	IInteractiveWindowProvider,
 } from "./types";
-import { CodeGeneratorFactory } from "./editor-integration/codeGeneratorFactory";
-import { GeneratedCodeStorageFactory } from "./editor-integration/generatedCodeStorageFactory";
-import { IGeneratedCodeStorageFactory } from "./editor-integration/types";
-import { GeneratedCodeStorageManager } from "./generatedCodeStoreManager";
-import { InteractiveWindowTracebackFormatter } from "./outputs/tracebackFormatter";
-import { InteractiveWindowDebuggingManager } from "./debugger/jupyter/debuggingManager";
-import { InteractiveWindowDebuggingStartupCodeProvider } from "./debugger/startupCodeProvider";
-import { PythonCellFoldingProvider } from "./editor-integration/pythonCellFoldingProvider";
-import { CodeLensProviderActivator } from "./editor-integration/codelensProviderActivator";
-import { InteractiveControllerHelper } from "./InteractiveControllerHelper";
 
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IInteractiveWindowProvider>(
 		IInteractiveWindowProvider,
-		InteractiveWindowProvider
+		InteractiveWindowProvider,
 	);
 	serviceManager.addSingleton<IInteractiveControllerHelper>(
 		IInteractiveControllerHelper,
-		InteractiveControllerHelper
+		InteractiveControllerHelper,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CommandRegistry
+		CommandRegistry,
 	);
 	serviceManager.add<ICodeWatcher>(ICodeWatcher, CodeWatcher);
 	serviceManager.addSingleton<ICodeLensFactory>(
 		ICodeLensFactory,
-		CodeLensFactory
+		CodeLensFactory,
 	);
 	serviceManager.addSingleton<IDataScienceCodeLensProvider>(
 		IDataScienceCodeLensProvider,
-		DataScienceCodeLensProvider
+		DataScienceCodeLensProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodeLensProviderActivator
+		CodeLensProviderActivator,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonCellFoldingProvider
+		PythonCellFoldingProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		Decorator
+		Decorator,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GeneratedCodeStorageManager
+		GeneratedCodeStorageManager,
 	);
 	serviceManager.addSingleton<ICodeGeneratorFactory>(
 		ICodeGeneratorFactory,
 		CodeGeneratorFactory,
 		undefined,
-		[IExtensionSyncActivationService]
+		[IExtensionSyncActivationService],
 	);
 	serviceManager.addSingleton<IGeneratedCodeStorageFactory>(
 		IGeneratedCodeStorageFactory,
-		GeneratedCodeStorageFactory
+		GeneratedCodeStorageFactory,
 	);
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
-		InteractiveWindowTracebackFormatter
+		InteractiveWindowTracebackFormatter,
 	);
 	serviceManager.addSingleton<IInteractiveWindowDebuggingManager>(
 		IInteractiveWindowDebuggingManager,
 		InteractiveWindowDebuggingManager,
 		undefined,
-		[IExtensionSyncActivationService]
+		[IExtensionSyncActivationService],
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InteractiveWindowDebuggingStartupCodeProvider
+		InteractiveWindowDebuggingStartupCodeProvider,
 	);
 }

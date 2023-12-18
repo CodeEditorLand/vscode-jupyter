@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { IJupyterRequestCreator } from "../types";
-import * as nodeFetch from "node-fetch";
-import { ClassType } from "../../../platform/ioc/types";
-import WebSocketIsomorphic from "isomorphic-ws";
-import { traceError } from "../../../platform/logging";
-import { noop } from "../../../platform/common/utils/misc";
-import { KernelSocketWrapper } from "../../common/kernelSocketWrapper";
 import { injectable } from "inversify";
+import WebSocketIsomorphic from "isomorphic-ws";
+import * as nodeFetch from "node-fetch";
+import { noop } from "../../../platform/common/utils/misc";
+import { ClassType } from "../../../platform/ioc/types";
+import { traceError } from "../../../platform/logging";
+import { KernelSocketWrapper } from "../../common/kernelSocketWrapper";
 import { KernelSocketMap } from "../../kernelSocket";
+import { IJupyterRequestCreator } from "../types";
 
 // Function for creating node Request object that prevents jupyterlab services from writing its own
 // authorization header.
@@ -19,13 +19,13 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 	public getRequestCtor(
 		_cookieString?: string,
 		_allowUnauthorized?: boolean,
-		getAuthHeader?: () => any
+		getAuthHeader?: () => any,
 	) {
 		// Only need the authorizing part. Cookie and rejectUnauthorized are set in the websocket ctor for node.
 		class AuthorizingRequest extends nodeFetch.Request {
 			constructor(
 				input: nodeFetch.RequestInfo,
-				init?: nodeFetch.RequestInit
+				init?: nodeFetch.RequestInit,
 			) {
 				super(input, init);
 
@@ -34,7 +34,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				const authorizationHeader = getAuthHeader!();
 				const keys = Object.keys(authorizationHeader);
 				keys.forEach((k) =>
-					origHeaders.append(k, authorizationHeader[k].toString())
+					origHeaders.append(k, authorizationHeader[k].toString()),
 				);
 				origHeaders.set("Content-Type", "application/json");
 
@@ -58,7 +58,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 	public getWebsocketCtor(
 		cookieString?: string,
 		allowUnauthorized?: boolean,
-		getAuthHeaders?: () => Record<string, string>
+		getAuthHeaders?: () => Record<string, string>,
 	): ClassType<WebSocket> {
 		const generateOptions = (): WebSocketIsomorphic.ClientOptions => {
 			let co: WebSocketIsomorphic.ClientOptions = {};
@@ -86,14 +86,14 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 			return co;
 		};
 		class JupyterWebSocket extends KernelSocketWrapper(
-			WebSocketIsomorphic
+			WebSocketIsomorphic,
 		) {
 			private kernelId: string | undefined;
 			private timer: NodeJS.Timeout | number;
 
 			constructor(
 				url: string,
-				protocols?: string | string[] | undefined
+				protocols?: string | string[] | undefined,
 			) {
 				super(url, protocols, generateOptions());
 				let timer: NodeJS.Timeout | undefined = undefined;
@@ -114,7 +114,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					});
 				} else {
 					traceError(
-						"KernelId not extracted from Kernel WebSocket URL"
+						"KernelId not extracted from Kernel WebSocket URL",
 					);
 				}
 
@@ -125,7 +125,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 		return JupyterWebSocket as any;
 	}
 	public wrapWebSocketCtor(
-		websocketCtor: ClassType<WebSocketIsomorphic>
+		websocketCtor: ClassType<WebSocketIsomorphic>,
 	): ClassType<WebSocketIsomorphic> {
 		class JupyterWebSocket extends KernelSocketWrapper(websocketCtor) {
 			private kernelId: string | undefined;
@@ -134,7 +134,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 			constructor(
 				url: string,
 				protocols?: string | string[] | undefined,
-				options?: unknown
+				options?: unknown,
 			) {
 				super(url, protocols, options);
 				let timer: NodeJS.Timeout | undefined = undefined;
@@ -155,7 +155,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					});
 				} else {
 					traceError(
-						"KernelId not extracted from Kernel WebSocket URL"
+						"KernelId not extracted from Kernel WebSocket URL",
 					);
 				}
 
@@ -168,7 +168,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 	public getFetchMethod(): (
 		input: RequestInfo,
-		init?: RequestInit
+		init?: RequestInit,
 	) => Promise<Response> {
 		return nodeFetch.default as any;
 	}

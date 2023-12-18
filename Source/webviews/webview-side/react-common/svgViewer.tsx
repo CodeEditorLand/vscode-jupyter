@@ -90,10 +90,12 @@ export class SvgViewer extends React.Component<
 							customMiniature={this.renderMiniature}
 							SVGBackground={"transparent"}
 							background={plotBackground}
-							detectWheel={true}>
+							detectWheel={true}
+						>
 							<svg
 								width={this.props.size.width}
-								height={this.props.size.height}>
+								height={this.props.size.height}
+							>
 								<SvgLoader svgXML={this.props.svg} />
 							</svg>
 						</ReactSVGPanZoom>

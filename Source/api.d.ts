@@ -1,13 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type {
-	CancellationToken,
-	ProviderResult,
-	CancellationError,
-	Event,
-	Uri,
-} from "vscode";
+import type { CancellationToken, Event, ProviderResult, Uri } from "vscode";
 
 export interface Jupyter {
 	/**
@@ -23,7 +17,7 @@ export interface Jupyter {
 	createJupyterServerCollection(
 		id: string,
 		label: string,
-		serverProvider: JupyterServerProvider
+		serverProvider: JupyterServerProvider,
 	): JupyterServerCollection;
 }
 
@@ -86,7 +80,7 @@ export interface JupyterServerProvider {
 	 * signaled by returning `undefined` or `null`.
 	 */
 	provideJupyterServers(
-		token: CancellationToken
+		token: CancellationToken,
 	): ProviderResult<JupyterServer[]>;
 	/**
 	 * Returns the connection information for the Jupyter server.
@@ -94,7 +88,7 @@ export interface JupyterServerProvider {
 	 */
 	resolveJupyterServer(
 		server: JupyterServer,
-		token: CancellationToken
+		token: CancellationToken,
 	): ProviderResult<JupyterServer>;
 }
 
@@ -132,7 +126,7 @@ export interface JupyterServerCommandProvider {
 	 */
 	provideCommands(
 		value: string | undefined,
-		token: CancellationToken
+		token: CancellationToken,
 	): ProviderResult<JupyterServerCommand[]>;
 	/**
 	 * Invoked when a {@link JupyterServerCommand command} has been selected.
@@ -147,7 +141,7 @@ export interface JupyterServerCommandProvider {
 	 */
 	handleCommand(
 		command: JupyterServerCommand,
-		token: CancellationToken
+		token: CancellationToken,
 	): ProviderResult<JupyterServer>;
 }
 

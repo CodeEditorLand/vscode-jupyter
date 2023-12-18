@@ -4,6 +4,10 @@
 import { inject, injectable, multiInject, named } from "inversify";
 import { Memento, NotebookDocument, Uri } from "vscode";
 import {
+	InteractiveWindowView,
+	JupyterNotebookView,
+} from "../platform/common/constants";
+import {
 	IAsyncDisposableRegistry,
 	IConfigurationService,
 	IDisposableRegistry,
@@ -11,27 +15,23 @@ import {
 	IMemento,
 	WORKSPACE_MEMENTO,
 } from "../platform/common/types";
+import { IJupyterServerUriStorage } from "./jupyter/types";
+import { Kernel, ThirdPartyKernel } from "./kernel";
+import { NotebookKernelExecution } from "./kernelExecution";
 import {
 	BaseCoreKernelProvider,
 	BaseThirdPartyKernelProvider,
 } from "./kernelProvider.base";
+import { createKernelSettings } from "./kernelSettings";
 import {
-	InteractiveWindowView,
-	JupyterNotebookView,
-} from "../platform/common/constants";
-import { Kernel, ThirdPartyKernel } from "./kernel";
-import {
-	IThirdPartyKernel,
 	IKernel,
+	IKernelSessionFactory,
+	IStartupCodeProviders,
+	IThirdPartyKernel,
 	ITracebackFormatter,
 	KernelOptions,
 	ThirdPartyKernelOptions,
-	IStartupCodeProviders,
-	IKernelSessionFactory,
 } from "./types";
-import { IJupyterServerUriStorage } from "./jupyter/types";
-import { createKernelSettings } from "./kernelSettings";
-import { NotebookKernelExecution } from "./kernelExecution";
 
 /**
  * Node version of a kernel provider. Needed in order to create the node version of a kernel.
@@ -67,7 +67,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
 
 	public getOrCreate(
 		notebook: NotebookDocument,
-		options: KernelOptions
+		options: KernelOptions,
 	): IKernel {
 		const existingKernelInfo = this.getInternal(notebook);
 		if (
@@ -97,29 +97,29 @@ export class KernelProvider extends BaseCoreKernelProvider {
 			settings,
 			options.controller,
 			this.startupCodeProviders.getProviders(notebookType),
-			this.workspaceStorage
+			this.workspaceStorage,
 		);
 		kernel.onRestarted(
 			() => this._onDidRestartKernel.fire(kernel),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onDisposed(
 			() => {
 				this._onDidDisposeKernel.fire(kernel);
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onStarted(
 			() => this._onDidStartKernel.fire(kernel),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onStatusChanged(
 			(status) => this._onKernelStatusChanged.fire({ kernel, status }),
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		this.executions.set(
@@ -128,8 +128,8 @@ export class KernelProvider extends BaseCoreKernelProvider {
 				kernel,
 				this.context,
 				this.formatters,
-				notebook
-			)
+				notebook,
+			),
 		);
 		this.asyncDisposables.push(kernel);
 		this.storeKernel(notebook, options, kernel);
@@ -159,7 +159,7 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 
 	public getOrCreate(
 		uri: Uri,
-		options: ThirdPartyKernelOptions
+		options: ThirdPartyKernelOptions,
 	): IThirdPartyKernel {
 		const existingKernelInfo = this.getInternal(uri);
 		if (
@@ -182,29 +182,29 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 			this.sessionCreator,
 			settings,
 			this.startupCodeProviders.getProviders(notebookType),
-			this.workspaceStorage
+			this.workspaceStorage,
 		);
 		kernel.onRestarted(
 			() => this._onDidRestartKernel.fire(kernel),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onDisposed(
 			() => {
 				this._onDidDisposeKernel.fire(kernel);
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onStarted(
 			() => this._onDidStartKernel.fire(kernel),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onStatusChanged(
 			(status) => this._onKernelStatusChanged.fire({ kernel, status }),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.asyncDisposables.push(kernel);
 		this.storeKernel(uri, options, kernel);

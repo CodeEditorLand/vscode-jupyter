@@ -11,18 +11,18 @@ import {
 	IJupyterServerUriStorage,
 	JupyterServerProviderHandle,
 } from "../../../kernels/jupyter/types";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import { IDisposable, IExtensionContext } from "../../../platform/common/types";
-import { JupyterServerUriStorage, StorageMRUItem } from "./serverUriStorage";
 import {
 	JVSC_EXTENSION_ID,
 	Settings,
 	UserJupyterServerPickerProviderId,
 } from "../../../platform/common/constants";
+import { IDisposable, IExtensionContext } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { TestEventHandler, createEventHandler } from "../../../test/common";
-import { generateIdFromRemoteProvider } from "../jupyterUtils";
 import { sleep } from "../../../test/core";
 import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
+import { generateIdFromRemoteProvider } from "../jupyterUtils";
+import { JupyterServerUriStorage, StorageMRUItem } from "./serverUriStorage";
 
 suite("Server Uri Storage", async () => {
 	let serverUriStorage: IJupyterServerUriStorage;
@@ -30,7 +30,7 @@ suite("Server Uri Storage", async () => {
 	let onDidRemoveUris: EventEmitter<IJupyterServerUriEntry[]>;
 	let disposables: IDisposable[] = [];
 	let context: IExtensionContext;
-	let globalStorageUri = Uri.file("GlobalStorage");
+	const globalStorageUri = Uri.file("GlobalStorage");
 	let onDidRemoveEvent: TestEventHandler<JupyterServerProviderHandle[]>;
 	let onDidChangeEvent: TestEventHandler<void>;
 	let onDidAddEvent: TestEventHandler<IJupyterServerUriEntry>;
@@ -55,8 +55,8 @@ suite("Server Uri Storage", async () => {
 		verify(
 			memento.update(
 				mementoKeyForStoringUsedJupyterProviders,
-				deepEqual([])
-			)
+				deepEqual([]),
+			),
 		).once();
 
 		// Event should be triggered indicating items have been removed
@@ -67,10 +67,13 @@ suite("Server Uri Storage", async () => {
 	test("Clear without any data", async () => {
 		generateDummyData(0);
 		when(memento.get(mementoKeyForStoringUsedJupyterProviders)).thenReturn(
-			[]
+			[],
 		);
 		when(
-			memento.update(mementoKeyForStoringUsedJupyterProviders, anything())
+			memento.update(
+				mementoKeyForStoringUsedJupyterProviders,
+				anything(),
+			),
 		).thenResolve();
 
 		await serverUriStorage.clear();
@@ -78,8 +81,8 @@ suite("Server Uri Storage", async () => {
 		verify(
 			memento.update(
 				mementoKeyForStoringUsedJupyterProviders,
-				deepEqual([])
-			)
+				deepEqual([]),
+			),
 		).once();
 		assert.equal(onDidRemoveEvent.count, 0, "Event should not be fired");
 	});
@@ -97,7 +100,7 @@ suite("Server Uri Storage", async () => {
 					};
 				})
 				.sort((a, b) =>
-					(a.displayName || "").localeCompare(b.displayName || "")
+					(a.displayName || "").localeCompare(b.displayName || ""),
 				),
 			itemsInNewStorage
 				.map((a) => {
@@ -108,8 +111,8 @@ suite("Server Uri Storage", async () => {
 					};
 				})
 				.sort((a, b) =>
-					(a.displayName || "").localeCompare(b.displayName || "")
-				)
+					(a.displayName || "").localeCompare(b.displayName || ""),
+				),
 		);
 	});
 
@@ -143,7 +146,7 @@ suite("Server Uri Storage", async () => {
 						handle: "NewHandle1",
 						extensionId: JVSC_EXTENSION_ID,
 					}),
-				})
+				}),
 		);
 
 		assert.equal(onDidRemoveEvent.count, 0, "Event should not be fired");
@@ -158,14 +161,14 @@ suite("Server Uri Storage", async () => {
 				id: "NewId1",
 				extensionId: JVSC_EXTENSION_ID,
 			},
-			{ time: 1234 }
+			{ time: 1234 },
 		);
 		const all = serverUriStorage.all;
 
 		assert.strictEqual(
 			all.find((a) => a.provider.handle === "NewHandle1")?.time,
 			1234,
-			"Incorrect time"
+			"Incorrect time",
 		);
 	});
 	test("Add three new entries", async () => {
@@ -222,7 +225,7 @@ suite("Server Uri Storage", async () => {
 						extensionId: JVSC_EXTENSION_ID,
 					}),
 				})
-				.sort((a, b) => a.uri.localeCompare(b.uri))
+				.sort((a, b) => a.uri.localeCompare(b.uri)),
 		);
 
 		assert.equal(onDidRemoveEvent.count, 0, "Event should not be fired");
@@ -230,10 +233,10 @@ suite("Server Uri Storage", async () => {
 		assert.equal(
 			onDidChangeEvent.count,
 			3,
-			"Event should be fired 3 times"
+			"Event should be fired 3 times",
 		);
 	});
-	test("Add three new entries (without waiting)", async function () {
+	test("Add three new entries (without waiting)", async () => {
 		const itemsInNewStorage = generateDummyData(2).slice();
 		await Promise.all([
 			serverUriStorage.add({
@@ -289,7 +292,7 @@ suite("Server Uri Storage", async () => {
 						extensionId: JVSC_EXTENSION_ID,
 					}),
 				})
-				.sort((a, b) => a.uri.localeCompare(b.uri))
+				.sort((a, b) => a.uri.localeCompare(b.uri)),
 		);
 
 		assert.equal(onDidRemoveEvent.count, 0, "Event should not be fired");
@@ -297,10 +300,10 @@ suite("Server Uri Storage", async () => {
 		assert.equal(
 			onDidChangeEvent.count,
 			3,
-			"Event should be fired 3 times"
+			"Event should be fired 3 times",
 		);
 	});
-	test("Add three new entries (without waiting) & then remove one", async function () {
+	test("Add three new entries (without waiting) & then remove one", async () => {
 		const itemsInNewStorage = generateDummyData(2).slice();
 		await Promise.all([
 			serverUriStorage.add({
@@ -354,7 +357,7 @@ suite("Server Uri Storage", async () => {
 						extensionId: JVSC_EXTENSION_ID,
 					}),
 				})
-				.sort((a, b) => a.uri.localeCompare(b.uri))
+				.sort((a, b) => a.uri.localeCompare(b.uri)),
 		);
 
 		assert.equal(onDidRemoveEvent.count, 1, "Event should be fired once");
@@ -362,10 +365,10 @@ suite("Server Uri Storage", async () => {
 		assert.equal(
 			onDidChangeEvent.count,
 			3,
-			"Event should be fired 4 times (3 for add, one for remove)"
+			"Event should be fired 4 times (3 for add, one for remove)",
 		);
 	});
-	test("Add three new entries & then remove one", async function () {
+	test("Add three new entries & then remove one", async () => {
 		const itemsInNewStorage = generateDummyData(2).slice();
 		await serverUriStorage.add({
 			handle: "NewHandle1",
@@ -417,7 +420,7 @@ suite("Server Uri Storage", async () => {
 						extensionId: JVSC_EXTENSION_ID,
 					}),
 				})
-				.sort((a, b) => a.uri.localeCompare(b.uri))
+				.sort((a, b) => a.uri.localeCompare(b.uri)),
 		);
 
 		assert.equal(onDidRemoveEvent.count, 1, "Event should be fired once");
@@ -425,10 +428,10 @@ suite("Server Uri Storage", async () => {
 		assert.equal(
 			onDidChangeEvent.count,
 			3,
-			"Event should be fired 4 times (3 for add, one for remove)"
+			"Event should be fired 4 times (3 for add, one for remove)",
 		);
 	});
-	test("Add three new entries (without waiting) & then remove all", async function () {
+	test("Add three new entries (without waiting) & then remove all", async () => {
 		generateDummyData(2);
 		await Promise.all([
 			serverUriStorage.add({
@@ -479,16 +482,16 @@ suite("Server Uri Storage", async () => {
 		assert.equal(
 			onDidRemoveEvent.count,
 			6,
-			"Event should be fired 5 + 1 (extra for a debt issue, even if noting is removed we need to fire an event) times"
+			"Event should be fired 5 + 1 (extra for a debt issue, even if noting is removed we need to fire an event) times",
 		);
 		assert.equal(onDidAddEvent.count, 3, "Event should be fired 3 times");
 		assert.equal(
 			onDidChangeEvent.count,
 			3,
-			"Event should be fired 4 times (3 for add, one for remove)"
+			"Event should be fired 4 times (3 for add, one for remove)",
 		);
 	});
-	test("Add three new entries (without waiting) & then remove all (without waiting)", async function () {
+	test("Add three new entries (without waiting) & then remove all (without waiting)", async () => {
 		generateDummyData(2);
 		await Promise.all([
 			serverUriStorage.add({
@@ -538,7 +541,7 @@ suite("Server Uri Storage", async () => {
 
 		assert.strictEqual(all.length, 0);
 	});
-	test("Add three new entries & then update one and remove one", async function () {
+	test("Add three new entries & then update one and remove one", async () => {
 		generateDummyData(2);
 		await serverUriStorage.add({
 			handle: "NewHandle1",
@@ -557,7 +560,7 @@ suite("Server Uri Storage", async () => {
 		});
 		const beforeUpdate = serverUriStorage.all;
 		const timeOfNewHandle2BeforeUpdate = beforeUpdate.find(
-			(item) => item.provider.handle === "NewHandle2"
+			(item) => item.provider.handle === "NewHandle2",
 		)!;
 		assert.ok(timeOfNewHandle2BeforeUpdate);
 		await sleep(10);
@@ -568,13 +571,13 @@ suite("Server Uri Storage", async () => {
 		});
 		const afterUpdate = serverUriStorage.all;
 		const timeOfNewHandle2AfterUpdate = afterUpdate.find(
-			(item) => item.provider.handle === "NewHandle2"
+			(item) => item.provider.handle === "NewHandle2",
 		)!;
 		assert.ok(timeOfNewHandle2BeforeUpdate);
 		assert.ok(
 			timeOfNewHandle2AfterUpdate.time >
 				timeOfNewHandle2BeforeUpdate.time,
-			`time ${timeOfNewHandle2AfterUpdate.time} should be greater than ${timeOfNewHandle2BeforeUpdate.time}`
+			`time ${timeOfNewHandle2AfterUpdate.time} should be greater than ${timeOfNewHandle2BeforeUpdate.time}`,
 		);
 		await serverUriStorage.remove({
 			handle: "NewHandle1",
@@ -589,10 +592,10 @@ suite("Server Uri Storage", async () => {
 		assert.equal(
 			onDidChangeEvent.count,
 			4,
-			"Event should be fired 4 times (3 for add, once for add)"
+			"Event should be fired 4 times (3 for add, once for add)",
 		);
 	});
-	test("Add three new entries & then remove all", async function () {
+	test("Add three new entries & then remove all", async () => {
 		generateDummyData(2);
 		await serverUriStorage.add({
 			handle: "NewHandle1",
@@ -638,7 +641,7 @@ suite("Server Uri Storage", async () => {
 
 		assert.strictEqual(all.length, 0);
 	});
-	test("Add 10 new entries & add 11th, and add more and remove", async function () {
+	test("Add 10 new entries & add 11th, and add more and remove", async () => {
 		generateDummyData(8);
 
 		await serverUriStorage.add({
@@ -657,7 +660,7 @@ suite("Server Uri Storage", async () => {
 		assert.strictEqual(
 			onDidRemoveEvent.count,
 			0,
-			"Event should not be fired"
+			"Event should not be fired",
 		);
 		assert.strictEqual(onDidAddEvent.count, 2, "Added 2 items");
 
@@ -676,17 +679,17 @@ suite("Server Uri Storage", async () => {
 		assert.strictEqual(
 			onDidRemoveEvent.count,
 			1,
-			"One should be automatically removed"
+			"One should be automatically removed",
 		);
 		assert.strictEqual(onDidAddEvent.count, 1, "Added 1 items");
 		assert.strictEqual(onDidRemoveEvent.first[0].handle, "handle1");
 		assert.strictEqual(
 			onDidRemoveEvent.first[0].id,
-			UserJupyterServerPickerProviderId
+			UserJupyterServerPickerProviderId,
 		);
 		assert.strictEqual(
 			onDidRemoveEvent.first[0].handle,
-			oldest.provider.handle
+			oldest.provider.handle,
 		);
 		assert.strictEqual(onDidRemoveEvent.first[0].id, oldest.provider.id);
 
@@ -709,7 +712,7 @@ suite("Server Uri Storage", async () => {
 		assert.strictEqual(
 			onDidRemoveEvent.count,
 			0,
-			"One should be automatically removed"
+			"One should be automatically removed",
 		);
 
 		// Add another new item, then another will get removed automatically.
@@ -727,28 +730,28 @@ suite("Server Uri Storage", async () => {
 		assert.strictEqual(
 			onDidRemoveEvent.count,
 			1,
-			"One should be automatically removed"
+			"One should be automatically removed",
 		);
 		assert.strictEqual(onDidAddEvent.count, 1, "Added 1 items");
 		assert.strictEqual(onDidRemoveEvent.first[0].handle, "handle2");
 		assert.strictEqual(
 			onDidRemoveEvent.first[0].id,
-			UserJupyterServerPickerProviderId
+			UserJupyterServerPickerProviderId,
 		);
 		assert.strictEqual(
 			onDidRemoveEvent.first[0].handle,
-			oldest.provider.handle
+			oldest.provider.handle,
 		);
 		assert.strictEqual(onDidRemoveEvent.first[0].id, oldest.provider.id);
 	});
-	test("Can get existing items", async function () {
+	test("Can get existing items", async () => {
 		generateDummyData(8);
 		// Should exist.
 		const time = serverUriStorage.all.find(
 			(item) =>
 				item.provider.id === UserJupyterServerPickerProviderId &&
 				item.provider.extensionId === JVSC_EXTENSION_ID &&
-				item.provider.handle === "handle1"
+				item.provider.handle === "handle1",
 		);
 
 		assert.ok(time);
@@ -765,8 +768,8 @@ suite("Server Uri Storage", async () => {
 				(item) =>
 					item.provider.id === UserJupyterServerPickerProviderId &&
 					item.provider.extensionId === JVSC_EXTENSION_ID &&
-					item.provider.handle === "handle1"
-			)
+					item.provider.handle === "handle1",
+			),
 		);
 
 		// Bogus
@@ -774,7 +777,7 @@ suite("Server Uri Storage", async () => {
 			(item) =>
 				item.provider.id === "Bogus" &&
 				item.provider.extensionId === JVSC_EXTENSION_ID &&
-				item.provider.handle === "handle1"
+				item.provider.handle === "handle1",
 		);
 		assert.isUndefined(noTime);
 
@@ -789,14 +792,14 @@ suite("Server Uri Storage", async () => {
 			(item) =>
 				item.provider.id === "NewId11" &&
 				item.provider.extensionId === JVSC_EXTENSION_ID &&
-				item.provider.handle === "NewHandle11"
+				item.provider.handle === "NewHandle11",
 		);
 
 		assert.isOk(hastTime);
 	});
 
-	function generateDummyData(numberOfEntries: number = 2) {
-		let data: StorageMRUItem[] = [];
+	function generateDummyData(numberOfEntries = 2) {
+		const data: StorageMRUItem[] = [];
 		const uris: string[] = [];
 		const itemsInNewStorage: StorageMRUItem[] = [];
 		for (let index = 0; index < numberOfEntries; index += 1) {
@@ -807,7 +810,7 @@ suite("Server Uri Storage", async () => {
 			});
 			const displayName = `displayName${index}`;
 			uris.push(
-				`${uri}${Settings.JupyterServerRemoteLaunchNameSeparator}${displayName}`
+				`${uri}${Settings.JupyterServerRemoteLaunchNameSeparator}${displayName}`,
 			);
 			data.push({
 				displayName,
@@ -829,10 +832,13 @@ suite("Server Uri Storage", async () => {
 			});
 		}
 		when(
-			memento.get(mementoKeyForStoringUsedJupyterProviders, anything())
+			memento.get(mementoKeyForStoringUsedJupyterProviders, anything()),
 		).thenReturn(data);
 		when(
-			memento.update(mementoKeyForStoringUsedJupyterProviders, anything())
+			memento.update(
+				mementoKeyForStoringUsedJupyterProviders,
+				anything(),
+			),
 		).thenCall((_, dataToStore) => {
 			data.length = 0;
 			data.push(...dataToStore);
@@ -841,22 +847,22 @@ suite("Server Uri Storage", async () => {
 
 		serverUriStorage = new JupyterServerUriStorage(
 			instance(memento),
-			disposables
+			disposables,
 		);
 		onDidRemoveEvent = createEventHandler(
 			serverUriStorage,
 			"onDidRemove",
-			disposables
+			disposables,
 		);
 		onDidChangeEvent = createEventHandler(
 			serverUriStorage,
 			"onDidChange",
-			disposables
+			disposables,
 		);
 		onDidAddEvent = createEventHandler(
 			serverUriStorage,
 			"onDidAdd",
-			disposables
+			disposables,
 		);
 		return itemsInNewStorage;
 	}

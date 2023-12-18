@@ -4,12 +4,12 @@
 import type * as nbformat from "@jupyterlab/nbformat";
 import { assert } from "chai";
 import { Uri } from "vscode";
-import { updateNotebookMetadata } from "./helpers";
-import { IJupyterKernelSpec, PythonKernelConnectionMetadata } from "../types";
 import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../platform/pythonEnvironments/info";
+import { IJupyterKernelSpec, PythonKernelConnectionMetadata } from "../types";
+import { updateNotebookMetadata } from "./helpers";
 
 // Function return type
 // type updateNotebookMetadataReturn = { changed: boolean; kernelId: string | undefined };
@@ -65,7 +65,7 @@ suite(`UpdateNotebookMetadata`, () => {
 		});
 		const value = await updateNotebookMetadata(
 			notebookMetadata,
-			kernelConnection
+			kernelConnection,
 		);
 
 		// Verify lang info added
@@ -93,7 +93,7 @@ suite(`UpdateNotebookMetadata`, () => {
 		});
 		const value = await updateNotebookMetadata(
 			notebookMetadata,
-			kernelConnection
+			kernelConnection,
 		);
 
 		// Verify version updated 3.6 => 3.7
@@ -126,7 +126,7 @@ suite(`UpdateNotebookMetadata`, () => {
 		});
 		const value = await updateNotebookMetadata(
 			notebookMetadata,
-			kernelConnection
+			kernelConnection,
 		);
 
 		// Verify kernel_spec name updated JUNK => python3
@@ -173,7 +173,7 @@ suite(`UpdateNotebookMetadata`, () => {
 		});
 		const value = await updateNotebookMetadata(
 			notebookMetadata,
-			kernelConnection
+			kernelConnection,
 		);
 
 		// Verify display_name updated due to interpreter hash change
@@ -244,7 +244,7 @@ suite(`UpdateNotebookMetadata`, () => {
 		});
 		const value = await updateNotebookMetadata(
 			notebookMetadata,
-			kernelConnection
+			kernelConnection,
 		);
 
 		// Verify display_name updated due to interpreter hash change
@@ -265,7 +265,7 @@ suite(`UpdateNotebookMetadata`, () => {
 
 function verifyMetadata(
 	actualMetadata: nbformat.INotebookMetadata,
-	targetMetadata: nbformat.INotebookMetadata
+	targetMetadata: nbformat.INotebookMetadata,
 ) {
 	assert.deepEqual(actualMetadata, targetMetadata);
 }

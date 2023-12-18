@@ -52,13 +52,13 @@ export type IWebSocketLike = {
  * @returns
  */
 export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
-	SuperClass: T
+	SuperClass: T,
 ) {
 	return class BaseKernelSocket extends SuperClass implements IKernelSocket {
 		private receiveHooks: ((data: WebSocketWS.Data) => Promise<void>)[];
 		private sendHooks: ((
 			data: any,
-			cb?: (err?: Error) => void
+			cb?: (err?: Error) => void,
 		) => Promise<void>)[];
 		private msgChain: Promise<any>;
 		private sendChain: Promise<any>;
@@ -77,7 +77,7 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 		}
 
 		protected patchSuperEmit(
-			patch: (event: string | symbol, ...args: any[]) => boolean
+			patch: (event: string | symbol, ...args: any[]) => boolean,
 		) {
 			super.emit = patch;
 		}
@@ -91,7 +91,7 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 				// c) Next message happens after this one (so the UI can handle the message before another event goes through)
 				this.sendChain = this.sendChain
 					.then(() =>
-						Promise.all(this.sendHooks.map((s) => s(data, a2)))
+						Promise.all(this.sendHooks.map((s) => s(data, a2))),
 					)
 					.then(() => super.send(data, a2));
 			} else {
@@ -112,11 +112,11 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 				// c) Next message happens after this one (so this side can handle the message before another event goes through)
 				this.msgChain = this.msgChain
 					.then(() =>
-						Promise.all(this.receiveHooks.map((p) => p(args[0])))
+						Promise.all(this.receiveHooks.map((p) => p(args[0]))),
 					)
 					.then(() => superHandler(event, ...args))
 					.catch((e) =>
-						traceError(`Exception while handling messages: ${e}`)
+						traceError(`Exception while handling messages: ${e}`),
 					);
 				// True value indicates there were handlers. We definitely have 'message' handlers.
 				return true;
@@ -129,7 +129,7 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 			return this.handleEvent(
 				(ev, ...args) => super.emit(ev, ...args),
 				event,
-				...args
+				...args,
 			);
 		}
 
@@ -137,21 +137,21 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 			this.receiveHooks.push(hook);
 		}
 		public removeReceiveHook(
-			hook: (data: WebSocketWS.Data) => Promise<void>
+			hook: (data: WebSocketWS.Data) => Promise<void>,
 		) {
 			this.receiveHooks = this.receiveHooks.filter((l) => l !== hook);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		public addSendHook(
-			patch: (data: any, cb?: (err?: Error) => void) => Promise<void>
+			patch: (data: any, cb?: (err?: Error) => void) => Promise<void>,
 		): void {
 			this.sendHooks.push(patch);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		public removeSendHook(
-			patch: (data: any, cb?: (err?: Error) => void) => Promise<void>
+			patch: (data: any, cb?: (err?: Error) => void) => Promise<void>,
 		): void {
 			this.sendHooks = this.sendHooks.filter((p) => p !== patch);
 		}

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as path from "../../vscode-path/path";
-import { traceError } from "../../logging";
-import { getEnvironmentVariable } from "../../common/utils/platform.node";
-import { pathExists, readFile } from "../../common/platform/fileUtils.node";
 import { Uri } from "vscode";
-import { normCasePath, arePathsSame } from "../../common/platform/fileUtils";
+import { arePathsSame, normCasePath } from "../../common/platform/fileUtils";
+import { pathExists, readFile } from "../../common/platform/fileUtils.node";
+import { getEnvironmentVariable } from "../../common/utils/platform.node";
+import { traceError } from "../../logging";
+import * as path from "../../vscode-path/path";
 
 function getSearchHeight() {
 	// PIPENV_MAX_DEPTH tells pipenv the maximum number of directories to recursively search for
@@ -19,7 +19,7 @@ function getSearchHeight() {
 	// eslint-disable-next-line no-restricted-globals
 	if (isNaN(maxDepth)) {
 		traceError(
-			`PIPENV_MAX_DEPTH is incorrectly set. Converting value '${maxDepthStr}' to number results in NaN`
+			`PIPENV_MAX_DEPTH is incorrectly set. Converting value '${maxDepthStr}' to number results in NaN`,
 		);
 		return 1;
 	}
@@ -33,7 +33,7 @@ function getSearchHeight() {
  */
 export async function _getAssociatedPipfile(
 	searchDir: string,
-	options: { lookIntoParentDirectories: boolean }
+	options: { lookIntoParentDirectories: boolean },
 ): Promise<string | undefined> {
 	const pipFileName = getEnvironmentVariable("PIPENV_PIPFILE") || "Pipfile";
 	let heightToSearch = options.lookIntoParentDirectories
@@ -73,7 +73,7 @@ async function getProjectDir(envFolder: string): Promise<string | undefined> {
 	const projectDir = await readFile(dotProjectFile);
 	if (!(await pathExists(projectDir))) {
 		traceError(
-			`The .project file inside environment folder: ${envFolder} doesn't contain a valid path to the project`
+			`The .project file inside environment folder: ${envFolder} doesn't contain a valid path to the project`,
 		);
 		return undefined;
 	}
@@ -85,7 +85,7 @@ async function getProjectDir(envFolder: string): Promise<string | undefined> {
  * @param interpreterPath Absolute path to any python interpreter.
  */
 async function getPipfileIfGlobal(
-	interpreterPath: Uri
+	interpreterPath: Uri,
 ): Promise<string | undefined> {
 	const envFolder = path.dirname(path.dirname(interpreterPath.fsPath));
 	const projectDir = await getProjectDir(envFolder);
@@ -116,7 +116,7 @@ async function getPipfileIfGlobal(
  */
 export async function isPipenvEnvironmentRelatedToFolder(
 	interpreterPath: Uri,
-	folder: Uri
+	folder: Uri,
 ): Promise<boolean> {
 	const pipFileAssociatedWithEnvironment =
 		await getPipfileIfGlobal(interpreterPath);
@@ -130,13 +130,13 @@ export async function isPipenvEnvironmentRelatedToFolder(
 		getEnvironmentVariable("PIPENV_NO_INHERIT") === undefined;
 	const pipFileAssociatedWithFolder = await _getAssociatedPipfile(
 		folder.fsPath,
-		{ lookIntoParentDirectories }
+		{ lookIntoParentDirectories },
 	);
 	if (!pipFileAssociatedWithFolder) {
 		return false;
 	}
 	return arePathsSame(
 		pipFileAssociatedWithEnvironment,
-		pipFileAssociatedWithFolder
+		pipFileAssociatedWithFolder,
 	);
 }

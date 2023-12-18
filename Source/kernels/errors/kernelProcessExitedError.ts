@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { KernelConnectionMetadata } from "../types";
 import { DataScience } from "../../platform/common/utils/localize";
+import { KernelConnectionMetadata } from "../types";
 import { BaseKernelError } from "./types";
 
 /**
@@ -12,12 +12,12 @@ export class KernelProcessExitedError extends BaseKernelError {
 	constructor(
 		public readonly exitCode: number = -1,
 		public override readonly stdErr: string,
-		kernelConnectionMetadata: KernelConnectionMetadata
+		kernelConnectionMetadata: KernelConnectionMetadata,
 	) {
 		super(
 			"kerneldied",
 			DataScience.kernelDied(stdErr.trim()),
-			kernelConnectionMetadata
+			kernelConnectionMetadata,
 		);
 	}
 }

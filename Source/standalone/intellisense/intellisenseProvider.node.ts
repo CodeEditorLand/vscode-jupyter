@@ -12,29 +12,29 @@ import {
 	Uri,
 	workspace,
 } from "vscode";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IPythonExtensionChecker } from "../../platform/api/types";
-import {
-	IDisposableRegistry,
-	IConfigurationService,
-} from "../../platform/common/types";
-import { IInterpreterService } from "../../platform/interpreter/contracts";
-import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
-import {
-	INotebookCompletionProvider,
-	INotebookEditorProvider,
-} from "../../notebooks/types";
-import { LanguageServer } from "./languageServer.node";
 import {
 	IControllerRegistration,
 	IVSCodeNotebookController,
 } from "../../notebooks/controllers/types";
-import { getComparisonKey } from "../../platform/vscode-path/resources";
-import { NotebookPythonPathService } from "./notebookPythonPathService.node";
+import {
+	INotebookCompletionProvider,
+	INotebookEditorProvider,
+} from "../../notebooks/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { IPythonExtensionChecker } from "../../platform/api/types";
+import { getRootFolder } from "../../platform/common/application/workspace.base";
+import {
+	IConfigurationService,
+	IDisposableRegistry,
+} from "../../platform/common/types";
 import { isJupyterNotebook } from "../../platform/common/utils";
 import { noop } from "../../platform/common/utils/misc";
+import { IInterpreterService } from "../../platform/interpreter/contracts";
 import { traceInfoIfCI } from "../../platform/logging";
-import { getRootFolder } from "../../platform/common/application/workspace.base";
+import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
+import { getComparisonKey } from "../../platform/vscode-path/resources";
+import { LanguageServer } from "./languageServer.node";
+import { NotebookPythonPathService } from "./notebookPythonPathService.node";
 
 const EmptyWorkspaceKey = "";
 
@@ -77,23 +77,23 @@ export class IntellisenseProvider
 		this.controllerRegistration.onControllerSelected(
 			this.controllerChanged,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		// Sign up for notebook open and close events.
 		workspace.onDidOpenNotebookDocument(
 			this.openedNotebook,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		workspace.onDidCloseNotebookDocument(
 			this.closedNotebook,
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		// For all currently open notebooks, launch their language server
 		workspace.notebookDocuments.forEach((n) =>
-			this.openedNotebook(n).catch(noop)
+			this.openedNotebook(n).catch(noop),
 		);
 
 		// Track active interpreter, but synchronously. We need synchronously so we
@@ -102,14 +102,14 @@ export class IntellisenseProvider
 		this.interpreterService.onDidChangeInterpreter(
 			this.handleInterpreterChange,
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		// If we change the language server type, we need to restart
 		workspace.onDidChangeConfiguration(
 			this.onDidChangeConfiguration,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -132,7 +132,7 @@ export class IntellisenseProvider
 		document: TextDocument,
 		position: Position,
 		context: CompletionContext,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	) {
 		const client = await this.getLanguageClient(notebook);
 		if (client) {
@@ -144,7 +144,7 @@ export class IntellisenseProvider
 					document,
 					position,
 					cancelToken,
-					context
+					context,
 				);
 				if (results && "items" in results) {
 					return results.items;
@@ -161,7 +161,7 @@ export class IntellisenseProvider
 	}
 
 	private getActiveInterpreterSync(
-		uri: Uri | undefined
+		uri: Uri | undefined,
 	): PythonEnvironment | undefined {
 		if (!this.extensionChecker.isPythonExtensionInstalled) {
 			return;
@@ -189,7 +189,7 @@ export class IntellisenseProvider
 			// Create the language server for this connection
 			const newServer = await this.ensureLanguageServer(
 				e.controller.connection.interpreter,
-				e.notebook
+				e.notebook,
 			);
 
 			// Get the language server for the old connection (if we have one)
@@ -260,7 +260,7 @@ export class IntellisenseProvider
 	private shouldAllowIntellisense(
 		uri: Uri,
 		interpreterId: string,
-		_interpreterPath: Uri
+		_interpreterPath: Uri,
 	) {
 		// We should allow intellisense for a URI when the interpreter matches
 		// the controller for the uri
@@ -319,7 +319,7 @@ export class IntellisenseProvider
 
 	private async ensureLanguageServer(
 		interpreter: PythonEnvironment | undefined,
-		notebook: NotebookDocument
+		notebook: NotebookDocument,
 	) {
 		// We should have one language server per active interpreter.
 		// See if we already have one for this interpreter or not
@@ -330,7 +330,7 @@ export class IntellisenseProvider
 			const languageServerPromise = LanguageServer.createLanguageServer(
 				interpreter,
 				this.shouldAllowIntellisense.bind(this),
-				this.getNotebookHeader.bind(this)
+				this.getNotebookHeader.bind(this),
 			).then((l) => {
 				// If we just created it, indicate to the language server to start watching this notebook
 				l?.startWatching(notebook);
@@ -345,7 +345,7 @@ export class IntellisenseProvider
 	private onDidChangeConfiguration(event: ConfigurationChangeEvent) {
 		if (event.affectsConfiguration("python.languageServer")) {
 			traceInfoIfCI(
-				"Dispose all language servers due to changes in configuration"
+				"Dispose all language servers due to changes in configuration",
 			);
 			// Dispose all servers and start over for each open notebook
 			this.servers.forEach((p) => p.then((s) => s?.dispose()));
@@ -353,7 +353,7 @@ export class IntellisenseProvider
 
 			// For all currently open notebooks, launch their language server
 			workspace.notebookDocuments.forEach((n) =>
-				this.openedNotebook(n).catch(noop)
+				this.openedNotebook(n).catch(noop),
 			);
 		}
 	}

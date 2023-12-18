@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { PythonExtension } from "@vscode/python-extension";
+import type { SemVer } from "semver";
 import { Event, Uri } from "vscode";
 import { Resource } from "../common/types";
-import type { SemVer } from "semver";
-import { PythonVersion } from "../pythonEnvironments/info/pythonVersion";
 import { EnvironmentType } from "../pythonEnvironments/info";
-import { PythonExtension } from "@vscode/python-extension";
+import { PythonVersion } from "../pythonEnvironments/info/pythonVersion";
 
 export const IPythonApiProvider = Symbol("IPythonApi");
 export interface IPythonApiProvider {
@@ -72,7 +72,7 @@ export interface PythonApi {
 	getActivatedEnvironmentVariables(
 		resource: Resource,
 		interpreter: PythonEnvironment_PythonApi,
-		allowExceptions?: boolean
+		allowExceptions?: boolean,
 	): Promise<NodeJS.ProcessEnv | undefined>;
 	/**
 	 * Retrieve interpreter path selected for Jupyter server from Python memento storage
@@ -86,7 +86,7 @@ export interface PythonApi {
 	 * Registers a visibility filter for the interpreter status bar.
 	 */
 	registerInterpreterStatusFilter(
-		filter: IInterpreterStatusbarVisibilityFilter
+		filter: IInterpreterStatusbarVisibilityFilter,
 	): void;
 	getCondaVersion?(): Promise<SemVer | undefined>;
 	/**
@@ -100,7 +100,7 @@ export interface PythonApi {
 	 * @param func : The function that Python should call when requesting the Python path.
 	 */
 	registerJupyterPythonPathFunction(
-		func: (uri: Uri) => Promise<string | undefined>
+		func: (uri: Uri) => Promise<string | undefined>,
 	): void;
 
 	/**
@@ -110,6 +110,6 @@ export interface PythonApi {
 	 * @param func : The function that Python should call when requesting the notebook URI.
 	 */
 	registerGetNotebookUriForTextDocumentUriFunction(
-		func: (textDocumentUri: Uri) => Uri | undefined
+		func: (textDocumentUri: Uri) => Uri | undefined,
 	): void;
 }

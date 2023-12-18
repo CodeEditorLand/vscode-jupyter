@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 
 import { CancellationToken, CancellationTokenSource } from "vscode";
+import { raceCancellation } from "../../../platform/common/cancellation";
+import { splitLines } from "../../../platform/common/helpers";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { IInterpreterService } from "../../../platform/interpreter/contracts";
 import {
 	IInstaller,
-	Product,
 	InstallerResponse,
+	Product,
 } from "../../../platform/interpreter/installer/types";
-import { raceCancellation } from "../../../platform/common/cancellation";
-import { IInterpreterService } from "../../../platform/interpreter/contracts";
 import { IPythonExecutionFactory } from "../../../platform/interpreter/types.node";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
-import { BaseDataViewerDependencyImplementation } from "./baseDataViewerDependencyImplementation";
 import { traceWarning } from "../../../platform/logging";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { splitLines } from "../../../platform/common/helpers";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
+import { BaseDataViewerDependencyImplementation } from "./baseDataViewerDependencyImplementation";
 
 const separator = "5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d";
 export const kernelGetPandasVersion = `import pandas;print(pandas.__version__);print("${separator}")`;
@@ -27,14 +27,14 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 	constructor(
 		private readonly installer: IInstaller,
 		private pythonFactory: IPythonExecutionFactory,
-		private interpreterService: IInterpreterService
+		private interpreterService: IInterpreterService,
 	) {
 		super();
 	}
 
 	protected async _getVersion(
 		interpreter: PythonEnvironment,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<string | undefined> {
 		const launcher = await this.pythonFactory.createActivatedEnvironment({
 			resource: undefined,
@@ -49,7 +49,7 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 		if (!output?.includes(separator)) {
 			traceWarning(
 				DataScience.failedToGetVersionOfPandas,
-				`Output is ${output}`
+				`Output is ${output}`,
 			);
 			return "";
 		}
@@ -60,7 +60,7 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 
 	protected async _doInstall(
 		interpreter: PythonEnvironment,
-		tokenSource: CancellationTokenSource
+		tokenSource: CancellationTokenSource,
 	): Promise<void> {
 		// All data science dependencies require an interpreter to be passed in
 		// Default to the active interpreter if no interpreter is available
@@ -79,8 +79,8 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 			this.installer.install(
 				Product.pandas,
 				interpreterToInstallDependenciesInto,
-				tokenSource
-			)
+				tokenSource,
+			),
 		);
 		if (response === InstallerResponse.Installed) {
 			sendTelemetryEvent(Telemetry.UserInstalledPandas);
@@ -88,7 +88,7 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 	}
 
 	public async checkAndInstallMissingDependencies(
-		interpreter: PythonEnvironment
+		interpreter: PythonEnvironment,
 	): Promise<void> {
 		sendTelemetryEvent(Telemetry.DataViewerUsingInterpreter);
 

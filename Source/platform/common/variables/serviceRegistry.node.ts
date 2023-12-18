@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { IServiceManager } from "../../ioc/types";
-import { EnvironmentVariablesService } from "./environment.node";
 import { CustomEnvironmentVariablesProvider } from "./customEnvironmentVariablesProvider.node";
+import { EnvironmentVariablesService } from "./environment.node";
 import {
 	ICustomEnvironmentVariablesProvider,
 	IEnvironmentVariablesService,
@@ -12,10 +12,10 @@ import {
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IEnvironmentVariablesService>(
 		IEnvironmentVariablesService,
-		EnvironmentVariablesService
+		EnvironmentVariablesService,
 	);
 	serviceManager.addSingleton<ICustomEnvironmentVariablesProvider>(
 		ICustomEnvironmentVariablesProvider,
-		CustomEnvironmentVariablesProvider
+		CustomEnvironmentVariablesProvider,
 	);
 }

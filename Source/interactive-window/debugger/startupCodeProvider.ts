@@ -6,11 +6,12 @@ import { Uri } from "vscode";
 import { isPythonKernelConnection } from "../../kernels/helpers";
 import {
 	IKernel,
-	isLocalConnection,
 	IStartupCodeProvider,
 	IStartupCodeProviders,
 	StartupCodePriority,
+	isLocalConnection,
 } from "../../kernels/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import {
 	InteractiveWindowView,
 	isWebExtension,
@@ -21,7 +22,6 @@ import {
 	IConfigurationService,
 	IExtensionContext,
 } from "../../platform/common/types";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
 
 @injectable()
 export class InteractiveWindowDebuggingStartupCodeProvider
@@ -74,8 +74,8 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 						"pythonFiles",
 						"vscode_datascience_helpers",
 						"kernel",
-						"addRunCellHook.py"
-					)
+						"addRunCellHook.py",
+					),
 				);
 			}
 			const addRunCellHook = await this.addRunCellHookContents;

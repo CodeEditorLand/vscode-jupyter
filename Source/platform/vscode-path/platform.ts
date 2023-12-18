@@ -129,11 +129,11 @@ else {
 	console.error("Unable to resolve platform.");
 }
 
-export const enum Platform {
-	Web,
-	Mac,
-	Linux,
-	Windows,
+export enum Platform {
+	Web = 0,
+	Mac = 1,
+	Linux = 2,
+	Windows = 3,
 }
 export function PlatformToString(platform: Platform) {
 	switch (platform) {
@@ -230,7 +230,7 @@ export const setTimeout0 = (() => {
 			id: number;
 			callback: () => void;
 		}
-		let pending: IQueueElement[] = [];
+		const pending: IQueueElement[] = [];
 		globals.addEventListener("message", (e: MessageEvent) => {
 			if (e.data && e.data.vscodeScheduleAsyncWork) {
 				for (let i = 0, len = pending.length; i < len; i++) {
@@ -256,7 +256,7 @@ export const setTimeout0 = (() => {
 	return (callback: () => void) => setTimeout(callback);
 })();
 
-export const enum OperatingSystem {
+export enum OperatingSystem {
 	Windows = 1,
 	Macintosh = 2,
 	Linux = 3,
@@ -265,8 +265,8 @@ export const OS =
 	_isMacintosh || _isIOS
 		? OperatingSystem.Macintosh
 		: _isWindows
-			? OperatingSystem.Windows
-			: OperatingSystem.Linux;
+		  ? OperatingSystem.Windows
+		  : OperatingSystem.Linux;
 
 let _isLittleEndian = true;
 let _isLittleEndianComputed = false;

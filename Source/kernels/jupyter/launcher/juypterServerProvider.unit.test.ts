@@ -9,10 +9,10 @@ import { CancellationTokenSource, Disposable, EventEmitter, Uri } from "vscode";
 import { dispose } from "../../../platform/common/utils/lifecycle";
 import { IInterpreterService } from "../../../platform/interpreter/contracts";
 import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { JupyterServerProvider } from "./jupyterServerProvider.node";
 import { DisplayOptions } from "../../displayOptions";
-import { IJupyterServerHelper } from "../types";
 import { IJupyterConnection } from "../../types";
+import { IJupyterServerHelper } from "../types";
+import { JupyterServerProvider } from "./jupyterServerProvider.node";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function createTypeMoq<T>(tag: string): typemoq.IMock<T> {
@@ -49,7 +49,7 @@ suite("Jupyter Server Provider", () => {
 		// Create the server provider
 		serverProvider = new JupyterServerProvider(
 			instance(jupyterServerHelper),
-			instance(interpreterService)
+			instance(interpreterService),
 		);
 		source = new CancellationTokenSource();
 		disposables.push(source);
@@ -58,11 +58,11 @@ suite("Jupyter Server Provider", () => {
 
 	test("Get Or Create", async () => {
 		when(jupyterServerHelper.getUsableJupyterPython()).thenResolve(
-			workingPython
+			workingPython,
 		);
 		const connection = createTypeMoq<IJupyterConnection>("jupyter server");
 		when(
-			jupyterServerHelper.startServer(anything(), anything())
+			jupyterServerHelper.startServer(anything(), anything()),
 		).thenResolve(connection.object);
 
 		// Disable UI just lets us skip mocking the progress reporter

@@ -22,7 +22,7 @@ interface IVariableExplorerCellFormatterProps {
 // Our formatter for cells in the variable explorer. Allow for different styles per column type
 export class VariableExplorerCellFormatter extends React.Component<IVariableExplorerCellFormatterProps> {
 	public override shouldComponentUpdate(
-		nextProps: IVariableExplorerCellFormatterProps
+		nextProps: IVariableExplorerCellFormatterProps,
 	) {
 		return nextProps.value !== this.props.value;
 	}
@@ -34,7 +34,8 @@ export class VariableExplorerCellFormatter extends React.Component<IVariableExpl
 				<div
 					className={className}
 					role={this.props.role ? this.props.role : "cell"}
-					title={this.props.value.toString()}>
+					title={this.props.value.toString()}
+				>
 					{this.props.value}
 				</div>
 			);

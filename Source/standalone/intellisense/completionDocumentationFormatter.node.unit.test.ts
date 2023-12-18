@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { assert } from "chai";
 import { EOL } from "os";
 // eslint-disable-next-line local-rules/node-imports
 import * as path from "path";
+import { assert } from "chai";
 import * as fs from "fs-extra";
-import { convertDocumentationToMarkdown } from "./completionDocumentationFormatter";
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from "../../test/constants.node";
+import { convertDocumentationToMarkdown } from "./completionDocumentationFormatter";
 
 suite("Jupyter Completion Documentation Formatter", () => {
 	suite("Python DocString", () => {
@@ -46,7 +46,7 @@ suite("Jupyter Completion Documentation Formatter", () => {
 			"src",
 			"standalone",
 			"intellisense",
-			"completionDocumentationFormatter"
+			"completionDocumentationFormatter",
 		);
 		const expectedOutputFile = path.join(root, `${inputFile}.md`);
 		inputFile = path.join(root, `${inputFile}.txt`);
@@ -56,7 +56,7 @@ suite("Jupyter Completion Documentation Formatter", () => {
 		]);
 		const converted = convertDocumentationToMarkdown(
 			documentation,
-			language
+			language,
 		);
 		// fs.writeFileSync(expectedOutputFile, typeof converted === 'string' ? converted : converted.value);
 		if (typeof converted === "string") {

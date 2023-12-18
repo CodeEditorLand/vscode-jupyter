@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, optional } from "inversify";
-import {
-	IKernelSession,
-	IKernelSessionFactory,
-	isLocalConnection,
-	KernelSessionCreationOptions,
-} from "../types";
+import { JupyterKernelSessionFactory } from "../jupyter/session/jupyterKernelSessionFactory";
 import {
 	IRawKernelSessionFactory,
 	IRawNotebookSupportedService,
 } from "../raw/types";
-import { JupyterKernelSessionFactory } from "../jupyter/session/jupyterKernelSessionFactory";
+import {
+	IKernelSession,
+	IKernelSessionFactory,
+	KernelSessionCreationOptions,
+	isLocalConnection,
+} from "../types";
 
 /**
  * Generic class for connecting to a server. Probably could be renamed as it doesn't provide notebooks, but rather connections.
@@ -33,7 +33,7 @@ export class KernelSessionFactory implements IKernelSessionFactory {
 	) {}
 
 	public async create(
-		options: KernelSessionCreationOptions
+		options: KernelSessionCreationOptions,
 	): Promise<IKernelSession> {
 		const kernelConnection = options.kernelConnection;
 		if (

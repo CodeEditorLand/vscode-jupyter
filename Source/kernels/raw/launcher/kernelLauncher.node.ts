@@ -1,52 +1,52 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import * as os from "os";
+import { promisify } from "util";
 import * as fsextra from "fs-extra";
 import { inject, injectable } from "inversify";
-import * as os from "os";
-import * as path from "../../../platform/vscode-path/path";
-import { promisify } from "util";
 import uuid from "uuid/v4";
 import { CancellationError, CancellationToken, window } from "vscode";
+import {
+	LocalKernelSpecConnectionMetadata,
+	PythonKernelConnectionMetadata,
+	isLocalConnection,
+} from "../../../kernels/types";
 import { IPythonExtensionChecker } from "../../../platform/api/types";
 import {
 	Cancellation,
 	raceCancellationError,
 } from "../../../platform/common/cancellation";
-import { getTelemetrySafeErrorMessageFromPythonTraceback } from "../../../platform/errors/errorUtils";
-import { traceVerbose, traceWarning } from "../../../platform/logging";
+import { isTestExecution } from "../../../platform/common/constants";
+import { format, splitLines } from "../../../platform/common/helpers";
 import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
+import { getDisplayPathFromLocalFile } from "../../../platform/common/platform/fs-paths.node";
+import { IPlatformService } from "../../../platform/common/platform/types";
 import { IFileSystemNode } from "../../../platform/common/platform/types.node";
 import { IProcessServiceFactory } from "../../../platform/common/process/types.node";
 import {
-	IDisposableRegistry,
 	IConfigurationService,
+	IDisposableRegistry,
 	Resource,
 } from "../../../platform/common/types";
+import { getResourceType } from "../../../platform/common/utils";
 import { swallowExceptions } from "../../../platform/common/utils/decorators";
 import { DataScience } from "../../../platform/common/utils/localize";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
-import {
-	isLocalConnection,
-	LocalKernelSpecConnectionMetadata,
-	PythonKernelConnectionMetadata,
-} from "../../../kernels/types";
-import { IKernelLauncher, IKernelProcess, IKernelConnection } from "../types";
-import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
-import { KernelProcess } from "./kernelProcess.node";
-import { JupyterPaths } from "../finder/jupyterPaths.node";
-import { isTestExecution } from "../../../platform/common/constants";
-import { getDisplayPathFromLocalFile } from "../../../platform/common/platform/fs-paths.node";
 import { noop } from "../../../platform/common/utils/misc";
-import { sendKernelTelemetryEvent } from "../../telemetry/sendKernelTelemetryEvent";
-import { PythonKernelInterruptDaemon } from "../finder/pythonKernelInterruptDaemon.node";
-import { IPlatformService } from "../../../platform/common/platform/types";
 import { StopWatch } from "../../../platform/common/utils/stopWatch";
-import { getResourceType } from "../../../platform/common/utils";
-import { format, splitLines } from "../../../platform/common/helpers";
+import { getTelemetrySafeErrorMessageFromPythonTraceback } from "../../../platform/errors/errorUtils";
 import { IPythonExecutionFactory } from "../../../platform/interpreter/types.node";
+import { traceVerbose, traceWarning } from "../../../platform/logging";
+import * as path from "../../../platform/vscode-path/path";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
 import { UsedPorts } from "../../common/usedPorts";
 import { isPythonKernelConnection } from "../../helpers";
+import { sendKernelTelemetryEvent } from "../../telemetry/sendKernelTelemetryEvent";
+import { JupyterPaths } from "../finder/jupyterPaths.node";
+import { PythonKernelInterruptDaemon } from "../finder/pythonKernelInterruptDaemon.node";
+import { IKernelConnection, IKernelLauncher, IKernelProcess } from "../types";
+import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
+import { KernelProcess } from "./kernelProcess.node";
 
 const PortFormatString = `kernelLauncherPortStart_{0}.tmp`;
 // Launches and returns a kernel process given a resource or python interpreter.
@@ -85,7 +85,7 @@ export class KernelLauncher implements IKernelLauncher {
 
 			const filePath = path.join(
 				os.tmpdir(),
-				format(PortFormatString, port.toString())
+				format(PortFormatString, port.toString()),
 			);
 			await fsextra.remove(filePath);
 		} catch (exc) {
@@ -104,7 +104,7 @@ export class KernelLauncher implements IKernelLauncher {
 					// Try creating a file with the port in the name
 					const filePath = path.join(
 						os.tmpdir(),
-						format(PortFormatString, portStart.toString())
+						format(PortFormatString, portStart.toString()),
 					);
 					await fsextra.open(filePath, "wx");
 
@@ -116,7 +116,7 @@ export class KernelLauncher implements IKernelLauncher {
 				}
 			}
 			traceVerbose(
-				`Computed port start for KernelLauncher is : ${result}`
+				`Computed port start for KernelLauncher is : ${result}`,
 			);
 
 			return result;
@@ -132,14 +132,14 @@ export class KernelLauncher implements IKernelLauncher {
 		timeout: number,
 		resource: Resource,
 		workingDirectory: string,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<IKernelProcess> {
 		const stopWatch = new StopWatch();
 		const promise = (async () => {
 			this.logIPyKernelPath(
 				resource,
 				kernelConnectionMetadata,
-				cancelToken
+				cancelToken,
 			).catch(noop);
 
 			// Should be available now, wait with a timeout
@@ -148,7 +148,7 @@ export class KernelLauncher implements IKernelLauncher {
 				resource,
 				workingDirectory,
 				timeout,
-				cancelToken
+				cancelToken,
 			);
 		})();
 		promise
@@ -157,8 +157,8 @@ export class KernelLauncher implements IKernelLauncher {
 				sendTelemetryEvent(
 					Telemetry.KernelLauncherPerf,
 					{ duration: stopWatch.elapsedTime },
-					{ resourceType: getResourceType(resource) }
-				)
+					{ resourceType: getResourceType(resource) },
+				),
 			)
 			.catch(noop);
 		return promise;
@@ -175,7 +175,7 @@ export class KernelLauncher implements IKernelLauncher {
 		kernelConnectionMetadata:
 			| LocalKernelSpecConnectionMetadata
 			| PythonKernelConnectionMetadata,
-		token: CancellationToken
+		token: CancellationToken,
 	) {
 		const interpreter = kernelConnectionMetadata.interpreter;
 		if (
@@ -189,14 +189,14 @@ export class KernelLauncher implements IKernelLauncher {
 			{
 				interpreter,
 				resource,
-			}
+			},
 		);
 		const output = await service.exec(
 			[
 				"-c",
 				'import ipykernel; print(ipykernel.__version__); print("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d"); print(ipykernel.__file__)',
 			],
-			{ token }
+			{ token },
 		);
 		if (token.isCancellationRequested) {
 			return;
@@ -213,12 +213,12 @@ export class KernelLauncher implements IKernelLauncher {
 					`ipykernel version & path ${
 						outputs[0]
 					}, ${getDisplayPathFromLocalFile(
-						outputs[1]
-					)} for ${displayInterpreterPath}`
+						outputs[1],
+					)} for ${displayInterpreterPath}`,
 				);
 			} else {
 				traceVerbose(
-					`ipykernel version & path ${output.stdout.trim()} for ${displayInterpreterPath}`
+					`ipykernel version & path ${output.stdout.trim()} for ${displayInterpreterPath}`,
 				);
 			}
 		}
@@ -230,7 +230,7 @@ export class KernelLauncher implements IKernelLauncher {
 				.map((l, i) => (i === 0 ? l : `    ${l}`))
 				.join("\n");
 			traceWarning(
-				`Stderr output when getting ipykernel version & path ${formattedOutput} for ${displayInterpreterPath}`
+				`Stderr output when getting ipykernel version & path ${formattedOutput} for ${displayInterpreterPath}`,
 			);
 		}
 	}
@@ -242,11 +242,11 @@ export class KernelLauncher implements IKernelLauncher {
 		resource: Resource,
 		workingDirectory: string,
 		timeout: number,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<IKernelProcess> {
 		const connection = await raceCancellationError(
 			cancelToken,
-			this.getKernelConnection(kernelConnectionMetadata)
+			this.getKernelConnection(kernelConnectionMetadata),
 		);
 		// Create a new output channel for this kernel
 		const baseName = resource ? path.basename(resource.fsPath) : "";
@@ -256,8 +256,8 @@ export class KernelLauncher implements IKernelLauncher {
 			jupyterSettings.development
 				? window.createOutputChannel(
 						DataScience.kernelConsoleOutputChannel(baseName),
-						"log"
-					)
+						"log",
+				  )
 				: undefined;
 		outputChannel?.clear();
 
@@ -275,18 +275,18 @@ export class KernelLauncher implements IKernelLauncher {
 			jupyterSettings,
 			this.jupyterPaths,
 			this.pythonKernelInterruptDaemon,
-			this.platformService
+			this.platformService,
 		);
 
 		kernelProcess.exited(
 			() => outputChannel?.dispose(),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		try {
 			await raceCancellationError(
 				cancelToken,
-				kernelProcess.launch(workingDirectory, timeout, cancelToken)
+				kernelProcess.launch(workingDirectory, timeout, cancelToken),
 			);
 		} catch (ex) {
 			await kernelProcess.dispose();
@@ -303,9 +303,9 @@ export class KernelLauncher implements IKernelLauncher {
 					{
 						exitReason:
 							getTelemetrySafeErrorMessageFromPythonTraceback(
-								reason
+								reason,
 							),
-					}
+					},
 				);
 				UsedPorts.delete(connection.control_port);
 				UsedPorts.delete(connection.hb_port);
@@ -315,7 +315,7 @@ export class KernelLauncher implements IKernelLauncher {
 				disposable.dispose();
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		// Double check for cancel
@@ -357,7 +357,7 @@ export class KernelLauncher implements IKernelLauncher {
 	private async getKernelConnection(
 		kernelConnectionMetadata:
 			| LocalKernelSpecConnectionMetadata
-			| PythonKernelConnectionMetadata
+			| PythonKernelConnectionMetadata,
 	): Promise<IKernelConnection> {
 		const ports = await this.chainGetConnectionPorts();
 		return {

@@ -3,7 +3,7 @@
 
 /* eslint-disable local-rules/dont-use-process */
 
-import { globals, INodeProcess, isMacintosh, isWindows } from "./platform";
+import { INodeProcess, globals, isMacintosh, isWindows } from "./platform";
 
 let safeProcess: Omit<INodeProcess, "arch"> & { arch: string | undefined };
 declare const process: INodeProcess;

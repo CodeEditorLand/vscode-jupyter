@@ -3,26 +3,12 @@
 
 import "@jupyter-widgets/controls/css/labvariables.css";
 
-import type { Kernel, KernelMessage } from "@jupyterlab/services";
+import { Event, EventEmitter } from "@c4312/evt";
 import type * as nbformat from "@jupyterlab/nbformat";
+import type { Kernel, KernelMessage } from "@jupyterlab/services";
 import { Widget } from "@lumino/widgets";
 import fastDeepEqual from "fast-deep-equal";
-import { EventEmitter, Event } from "@c4312/evt";
-import { logMessage, setLogger } from "../../react-common/logger";
-import { IMessageHandler, PostOffice } from "../../react-common/postOffice";
-import { create as createKernel } from "./kernel";
-import {
-	IIPyWidgetManager,
-	IJupyterLabWidgetManager,
-	IJupyterLabWidgetManagerCtor,
-	INotebookModel,
-	ScriptLoader,
-} from "./types";
 import { KernelSocketOptions } from "../../../../kernels/types";
-import {
-	Deferred,
-	createDeferred,
-} from "../../../../platform/common/utils/async";
 import {
 	IInteractiveWindowMapping,
 	IPyWidgetMessages,
@@ -33,7 +19,21 @@ import {
 	WIDGET_STATE_MIMETYPE,
 } from "../../../../platform/common/constants";
 import { NotebookMetadata } from "../../../../platform/common/utils";
+import {
+	Deferred,
+	createDeferred,
+} from "../../../../platform/common/utils/async";
 import { noop } from "../../../../platform/common/utils/misc";
+import { logMessage, setLogger } from "../../react-common/logger";
+import { IMessageHandler, PostOffice } from "../../react-common/postOffice";
+import { create as createKernel } from "./kernel";
+import {
+	IIPyWidgetManager,
+	IJupyterLabWidgetManager,
+	IJupyterLabWidgetManagerCtor,
+	INotebookModel,
+	ScriptLoader,
+} from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -65,13 +65,13 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		private readonly postOffice: PostOffice,
 		private readonly scriptLoader: ScriptLoader,
 		private readonly JupyterLabWidgetManager: IJupyterLabWidgetManagerCtor,
-		private readonly widgetState?: NotebookMetadata["widgets"]
+		private readonly widgetState?: NotebookMetadata["widgets"],
 	) {
 		this.postOffice.addHandler(this);
 
 		// Handshake.
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
-			IPyWidgetMessages.IPyWidgets_Ready
+			IPyWidgetMessages.IPyWidgets_Ready,
 		);
 		setLogger((category: "error" | "verbose", message: string) => {
 			this.postOffice.sendMessage<IInteractiveWindowMapping>(
@@ -79,7 +79,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 				{
 					category,
 					message,
-				}
+				},
 			);
 			if (category === "error") {
 				console.error(message);
@@ -96,7 +96,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 					},
 					userName: "",
 				},
-				widgetState
+				widgetState,
 			);
 		}
 	}
@@ -115,7 +115,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		} else if (message === IPyWidgetMessages.IPyWidgets_IsReadyRequest) {
 			logMessage("Received IPyWidgetMessages.IPyWidgets_IsReadyRequest");
 			this.postOffice.sendMessage<IInteractiveWindowMapping>(
-				IPyWidgetMessages.IPyWidgets_Ready
+				IPyWidgetMessages.IPyWidgets_Ready,
 			);
 		} else if (message === IPyWidgetMessages.IPyWidgets_onRestartKernel) {
 			logMessage("Received IPyWidgetMessages.IPyWidgets_onRestartKernel");
@@ -142,7 +142,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		options?: {
 			loadKernel: false;
 			loadNotebook: boolean;
-		}
+		},
 	): Promise<void> {
 		if (!notebook) {
 			return;
@@ -156,7 +156,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 
 		await this.manager.restoreWidgets(notebook, options);
 		const state = notebook.metadata.get(
-			"widgets"
+			"widgets",
 		) as NotebookMetadata["widgets"];
 		const widgetState =
 			state && state[WIDGET_STATE_MIMETYPE]
@@ -185,11 +185,11 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 			model_id: string;
 			version_major: number;
 		},
-		ele: HTMLElement
+		ele: HTMLElement,
 	): Promise<Widget | undefined> {
 		if (!data) {
 			throw new Error(
-				"application/vnd.jupyter.widget-view+json not in msg.content.data, as msg.content.data is 'undefined'."
+				"application/vnd.jupyter.widget-view+json not in msg.content.data, as msg.content.data is 'undefined'.",
 			);
 		}
 		if (!this.manager) {
@@ -213,7 +213,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		// then, and only then are we ready to render the widget.
 		// I.e. this is a way of synchronizing the render with the processing of the messages.
 		logMessage(
-			`Waiting for model to be available before rendering it ${data.model_id}`
+			`Waiting for model to be available before rendering it ${data.model_id}`,
 		);
 		await this.modelIdsToBeDisplayed.get(modelId)!.promise;
 
@@ -241,7 +241,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 	}
 	private initializeKernelAndWidgetManager(
 		options: KernelSocketOptions,
-		widgetState?: NotebookMetadata["widgets"]
+		widgetState?: NotebookMetadata["widgets"],
 	) {
 		if (
 			this.manager &&
@@ -255,7 +255,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		this.proxyKernel = createKernel(
 			options,
 			this.postOffice,
-			this.pendingMessages
+			this.pendingMessages,
 		);
 		this.pendingMessages = [];
 
@@ -268,17 +268,17 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 				this.widgetContainer,
 				this.scriptLoader,
 				logMessage,
-				widgetState
+				widgetState,
 			);
 
 			// Listen for display data messages so we can prime the model for a display data
 			this.proxyKernel.iopubMessage.connect(
-				this.handleDisplayDataMessage.bind(this)
+				this.handleDisplayDataMessage.bind(this),
 			);
 
 			// Listen for unhandled IO pub so we can forward to the extension
 			this.manager.onUnhandledIOPubMessage.connect(
-				this.handleUnhandledIOPubMessage.bind(this)
+				this.handleUnhandledIOPubMessage.bind(this),
 			);
 
 			// Tell the observable about our new manager
@@ -294,7 +294,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 	 */
 	private handleDisplayDataMessage(
 		_sender: any,
-		payload: KernelMessage.IIOPubMessage
+		payload: KernelMessage.IIOPubMessage,
 	) {
 		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const jupyterLab =
@@ -340,12 +340,12 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 
 	private handleUnhandledIOPubMessage(
 		_manager: any,
-		msg: KernelMessage.IIOPubMessage
+		msg: KernelMessage.IIOPubMessage,
 	) {
 		// Send this to the other side
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
 			InteractiveWindowMessages.IPyWidgetUnhandledKernelMessage,
-			msg
+			msg,
 		);
 	}
 }

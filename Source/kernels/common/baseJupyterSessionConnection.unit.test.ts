@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { assert } from "chai";
-import { ISignal, Signal } from "@lumino/signaling";
 import { IChangedArgs } from "@jupyterlab/coreutils";
 import { Kernel, KernelMessage, Session } from "@jupyterlab/services";
-import { mock, when, instance, verify } from "ts-mockito";
+import { ISignal, Signal } from "@lumino/signaling";
+import { assert } from "chai";
+import { instance, mock, verify, when } from "ts-mockito";
 import { CancellationToken, CancellationTokenSource } from "vscode";
 import { IDisposable } from "../../platform/common/types";
-import { noop } from "../../test/core";
-import { BaseJupyterSessionConnection } from "./baseJupyterSessionConnection";
 import { dispose } from "../../platform/common/utils/lifecycle";
 import { createEventHandler } from "../../test/common";
+import { noop } from "../../test/core";
+import { BaseJupyterSessionConnection } from "./baseJupyterSessionConnection";
 
 suite("Base Jupyter Session Connection", () => {
 	let disposables: IDisposable[] = [];
@@ -54,7 +54,7 @@ suite("Base Jupyter Session Connection", () => {
 	> {
 		override waitForIdle(
 			_timeout: number,
-			_token: CancellationToken
+			_token: CancellationToken,
 		): Promise<void> {
 			throw new Error("Method not implemented.");
 		}
@@ -73,7 +73,7 @@ suite("Base Jupyter Session Connection", () => {
 		when(kernel.status).thenReturn("idle");
 		when(kernel.connectionStatus).thenReturn("connected");
 		when(kernel.statusChanged).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>())
+			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>()),
 		);
 		when(kernel.iopubMessage).thenReturn(
 			instance(
@@ -82,8 +82,8 @@ suite("Base Jupyter Session Connection", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 					>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.anyMessage).thenReturn({
 			connect: noop,
@@ -96,18 +96,18 @@ suite("Base Jupyter Session Connection", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IMessage<KernelMessage.MessageType>
 					>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.disposed).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, void>>())
+			instance(mock<ISignal<Kernel.IKernelConnection, void>>()),
 		);
 		when(kernel.connectionStatusChanged).thenReturn(
 			instance(
 				mock<
 					ISignal<Kernel.IKernelConnection, Kernel.ConnectionStatus>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.clientId).thenReturn("some Client Id");
 		when(kernel.id).thenReturn("some Kernel Id");
@@ -129,10 +129,10 @@ suite("Base Jupyter Session Connection", () => {
 		when(session.dispose()).thenReturn();
 		when(session.kernel).thenReturn(instance(kernel));
 		sessionDisposed = new Signal<Session.ISessionConnection, void>(
-			instance(session)
+			instance(session),
 		);
 		sessionPropertyChanged = new Signal<Session.ISessionConnection, "path">(
-			instance(session)
+			instance(session),
 		);
 		sessionIOPubMessage = new Signal<
 			Session.ISessionConnection,
@@ -164,12 +164,12 @@ suite("Base Jupyter Session Connection", () => {
 		when(session.kernelChanged).thenReturn(sessionKernelChanged);
 		when(session.statusChanged).thenReturn(
 			new Signal<Session.ISessionConnection, Kernel.Status>(
-				instance(session)
-			)
+				instance(session),
+			),
 		);
 		when(session.unhandledMessage).thenReturn(sessionUnhandledMessage);
 		when(session.connectionStatusChanged).thenReturn(
-			sessionConnectionStatusChanged
+			sessionConnectionStatusChanged,
 		);
 		when(session.anyMessage).thenReturn(sessionAnyMessage);
 		when(session.isDisposed).thenReturn(false);
@@ -233,7 +233,7 @@ suite("Base Jupyter Session Connection", () => {
 		const disposed = createEventHandler(
 			jupyterSession,
 			"onDidDispose",
-			disposables
+			disposables,
 		);
 
 		jupyterSession.dispose();

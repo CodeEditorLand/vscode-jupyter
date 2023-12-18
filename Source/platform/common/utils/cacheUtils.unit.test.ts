@@ -4,8 +4,8 @@
 import { assert, expect } from "chai";
 import * as sinon from "sinon";
 import {
-	clearCache,
 	InMemoryCache,
+	clearCache,
 } from "../../../platform/common/utils/cacheUtils";
 
 type CacheUtilsTestScenario = {
@@ -94,7 +94,7 @@ suite("Common Utils - CacheUtils", () => {
 
 				expect(cache.hasData).to.be.equal(
 					false,
-					"Must not have any data"
+					"Must not have any data",
 				);
 
 				cache.data = scenario.dataToStore;
@@ -107,7 +107,7 @@ suite("Common Utils - CacheUtils", () => {
 
 				expect(cache.hasData).to.be.equal(
 					false,
-					"Must not have any data"
+					"Must not have any data",
 				);
 
 				cache.data = scenario.dataToStore;
@@ -119,7 +119,7 @@ suite("Common Utils - CacheUtils", () => {
 				expect(cache.hasData).to.be.equal(false, "Must not have data");
 				expect(cache.data).to.be.deep.equal(
 					undefined,
-					"Must not have data"
+					"Must not have data",
 				);
 			});
 			test(`Data is stored in cache must be cleared: ${scenario.scenarioDesc}`, () => {
@@ -127,7 +127,7 @@ suite("Common Utils - CacheUtils", () => {
 
 				expect(cache.hasData).to.be.equal(
 					false,
-					"Must not have any data"
+					"Must not have any data",
 				);
 
 				cache.data = scenario.dataToStore;
@@ -139,7 +139,7 @@ suite("Common Utils - CacheUtils", () => {
 				expect(cache.hasData).to.be.equal(false, "Must not have data");
 				expect(cache.data).to.be.deep.equal(
 					undefined,
-					"Must not have data"
+					"Must not have data",
 				);
 			});
 			test(`Data is stored in cache and expired data is not returned: ${scenario.scenarioDesc}`, async () => {
@@ -147,43 +147,43 @@ suite("Common Utils - CacheUtils", () => {
 
 				expect(cache.hasData).to.be.equal(
 					false,
-					"Must not have any data before caching."
+					"Must not have any data before caching.",
 				);
 				cache.data = scenario.dataToStore;
 				expect(cache.hasData).to.be.equal(
 					true,
-					"Must have data after setting the first time."
+					"Must have data after setting the first time.",
 				);
 				expect(cache.data).to.be.deep.equal(scenario.dataToStore);
 
 				clock.tick(10);
 				expect(cache.hasData).to.be.equal(
 					true,
-					"Must have data after waiting for 10ms"
+					"Must have data after waiting for 10ms",
 				);
 				expect(cache.data).to.be.deep.equal(
 					scenario.dataToStore,
-					"Data should be intact and unchanged in cache after 10ms"
+					"Data should be intact and unchanged in cache after 10ms",
 				);
 
 				clock.tick(50);
 				expect(cache.hasData).to.be.equal(
 					true,
-					"Must have data after waiting 50ms"
+					"Must have data after waiting 50ms",
 				);
 				expect(cache.data).to.be.deep.equal(
 					scenario.dataToStore,
-					"Data should be intact and unchanged in cache after 50ms"
+					"Data should be intact and unchanged in cache after 50ms",
 				);
 
 				clock.tick(110);
 				expect(cache.hasData).to.be.equal(
 					false,
-					"Must not have data after waiting 110ms"
+					"Must not have data after waiting 110ms",
 				);
 				expect(cache.data).to.be.deep.equal(
 					undefined,
-					"Must not have data stored after 100ms timeout expires."
+					"Must not have data stored after 100ms timeout expires.",
 				);
 			});
 			test(`Data is stored in cache and with same key points to the same data: ${scenario.scenarioDesc}`, () => {
@@ -192,11 +192,11 @@ suite("Common Utils - CacheUtils", () => {
 
 				expect(cache.hasData).to.be.equal(
 					false,
-					"Must not have any data"
+					"Must not have any data",
 				);
 				expect(cache2.hasData).to.be.equal(
 					false,
-					"Must not have any data"
+					"Must not have any data",
 				);
 
 				cache.data = scenario.dataToStore;

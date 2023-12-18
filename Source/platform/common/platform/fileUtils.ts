@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { getOSType, OSType } from "../utils/platform";
 import * as path from "../../../platform/vscode-path/path";
+import { OSType, getOSType } from "../utils/platform";
 
 export function normCasePath(filePath: string): string {
 	return getOSType() === OSType.Windows

@@ -4,33 +4,33 @@
 import { inject, injectable, optional } from "inversify";
 import { NotebookEditor, TextEditor, window, workspace } from "vscode";
 import {
+	IInteractiveWindow,
+	IInteractiveWindowProvider,
+} from "../../interactive-window/types";
+import { isPythonNotebook } from "../../kernels/helpers";
+import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
+import {
 	IKernel,
 	IKernelProvider,
 	isRemoteConnection,
 } from "../../kernels/types";
+import { IControllerRegistration } from "../../notebooks/controllers/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import {
 	EditorContexts,
 	PYTHON_LANGUAGE,
 } from "../../platform/common/constants";
-import { ContextKey } from "../../platform/common/contextKey";
-import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
-import { isNotebookCell, noop } from "../../platform/common/utils/misc";
 import {
 	InteractiveWindowView,
 	JupyterNotebookView,
 } from "../../platform/common/constants";
-import {
-	IInteractiveWindowProvider,
-	IInteractiveWindow,
-} from "../../interactive-window/types";
+import { ContextKey } from "../../platform/common/contextKey";
+import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
 import {
 	getNotebookMetadata,
 	isJupyterNotebook,
 } from "../../platform/common/utils";
-import { isPythonNotebook } from "../../kernels/helpers";
-import { IControllerRegistration } from "../../notebooks/controllers/types";
-import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
+import { isNotebookCell, noop } from "../../platform/common/utils/misc";
 
 /**
  * Tracks a lot of the context keys needed in the extension.
@@ -51,7 +51,7 @@ export class ActiveEditorContextService
 	private canRestartInteractiveWindowKernelContext: ContextKey;
 	private canInterruptInteractiveWindowKernelContext: ContextKey;
 	private hasNativeNotebookCells: ContextKey;
-	private isPythonFileActive: boolean = false;
+	private isPythonFileActive = false;
 	private isPythonNotebook: ContextKey;
 	private isJupyterKernelSelected: ContextKey;
 	private hasNativeNotebookOrInteractiveWindowOpen: ContextKey;
@@ -118,19 +118,19 @@ export class ActiveEditorContextService
 		window.onDidChangeActiveTextEditor(
 			this.onDidChangeActiveTextEditor,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.kernelProvider.onKernelStatusChanged(
 			this.onDidKernelStatusChange,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		// Interactive provider might not be available
 		if (this.interactiveProvider) {
 			this.interactiveProvider.onDidChangeActiveInteractiveWindow(
 				this.onDidChangeActiveInteractiveWindow,
 				this,
-				this.disposables
+				this.disposables,
 			);
 
 			if (this.interactiveProvider.activeWindow) {
@@ -143,7 +143,7 @@ export class ActiveEditorContextService
 		window.onDidChangeActiveNotebookEditor(
 			this.onDidChangeActiveNotebookEditor,
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		// Do we already have python file opened.
@@ -153,22 +153,22 @@ export class ActiveEditorContextService
 		window.onDidChangeNotebookEditorSelection(
 			this.updateNativeNotebookInteractiveWindowOpenContext,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		workspace.onDidOpenNotebookDocument(
 			this.updateNativeNotebookInteractiveWindowOpenContext,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		workspace.onDidCloseNotebookDocument(
 			this.updateNativeNotebookInteractiveWindowOpenContext,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.controllers.onControllerSelectionChanged(
 			() => this.updateSelectedKernelContext(),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.updateSelectedKernelContext();
 	}
@@ -195,7 +195,7 @@ export class ActiveEditorContextService
 			.set(
 				e && isJupyterNotebookDoc
 					? isPythonNotebook(getNotebookMetadata(e.notebook))
-					: false
+					: false,
 			)
 			.catch(noop);
 		this.updateContextOfActiveNotebookKernel(e);
@@ -210,8 +210,8 @@ export class ActiveEditorContextService
 				workspace.notebookDocuments.some(
 					(nb) =>
 						nb.notebookType === JupyterNotebookView ||
-						nb.notebookType === InteractiveWindowView
-				)
+						nb.notebookType === InteractiveWindowView,
+				),
 			)
 			.catch(noop);
 	}
@@ -252,7 +252,7 @@ export class ActiveEditorContextService
 				(c) =>
 					c.extensionId ===
 						connection.serverProviderHandle.extensionId &&
-					c.id === connection.serverProviderHandle.id
+					c.id === connection.serverProviderHandle.id,
 			);
 
 		if (!provider) {
@@ -310,7 +310,7 @@ export class ActiveEditorContextService
 			notebook === window.activeNotebookEditor?.notebook
 		) {
 			this.updateContextOfActiveNotebookKernel(
-				window.activeNotebookEditor
+				window.activeNotebookEditor,
 			);
 		}
 	}
@@ -326,26 +326,26 @@ export class ActiveEditorContextService
 		this.interactiveOrNativeContext
 			.set(
 				this.nativeContext.value === true ||
-					this.interactiveContext.value === true
+					this.interactiveContext.value === true,
 			)
 			.catch(noop);
 		this.pythonOrNativeContext
 			.set(
 				this.nativeContext.value === true ||
-					this.isPythonFileActive === true
+					this.isPythonFileActive === true,
 			)
 			.catch(noop);
 		this.pythonOrInteractiveContext
 			.set(
 				this.interactiveContext.value === true ||
-					this.isPythonFileActive === true
+					this.isPythonFileActive === true,
 			)
 			.catch(noop);
 		this.pythonOrInteractiveOrNativeContext
 			.set(
 				this.nativeContext.value === true ||
 					(this.interactiveContext.value === true &&
-						this.isPythonFileActive === true)
+						this.isPythonFileActive === true),
 			)
 			.catch(noop);
 	}

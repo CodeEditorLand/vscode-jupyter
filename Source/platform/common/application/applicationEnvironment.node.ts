@@ -36,7 +36,7 @@ export class ApplicationEnvironment extends BaseApplicationEnvironment {
 					"Application Support",
 					vscodeFolderName,
 					"User",
-					"settings.json"
+					"settings.json",
 				);
 			case OSType.Linux:
 				return uriPath.joinPath(
@@ -44,7 +44,7 @@ export class ApplicationEnvironment extends BaseApplicationEnvironment {
 					".config",
 					vscodeFolderName,
 					"User",
-					"settings.json"
+					"settings.json",
 				);
 			case OSType.Windows:
 				return process.env.APPDATA
@@ -52,8 +52,8 @@ export class ApplicationEnvironment extends BaseApplicationEnvironment {
 							Uri.file(process.env.APPDATA),
 							vscodeFolderName,
 							"User",
-							"settings.json"
-						)
+							"settings.json",
+					  )
 					: undefined;
 			default:
 				return;
@@ -62,7 +62,7 @@ export class ApplicationEnvironment extends BaseApplicationEnvironment {
 	public get userCustomKeybindingsFile(): Uri | undefined {
 		return uriPath.resolvePath(
 			this.extensionContext.globalStorageUri,
-			path.join("..", "..", "keybindings.json")
+			path.join("..", "..", "keybindings.json"),
 		);
 	}
 }

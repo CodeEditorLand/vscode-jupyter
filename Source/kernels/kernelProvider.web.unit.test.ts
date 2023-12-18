@@ -11,26 +11,26 @@ import {
 	IDisposable,
 	IExtensionContext,
 } from "../platform/common/types";
+import { dispose } from "../platform/common/utils/lifecycle";
 import { createEventHandler } from "../test/common";
+import { noop } from "../test/core";
 import {
-	createKernelController,
 	TestNotebookDocument,
+	createKernelController,
 } from "../test/datascience/notebook/executionHelper";
 import { IJupyterServerUriStorage } from "./jupyter/types";
-import { KernelProvider } from "./kernelProvider.web";
 import { Kernel, ThirdPartyKernel } from "./kernel";
+import { ThirdPartyKernelProvider } from "./kernelProvider.node";
+import { KernelProvider } from "./kernelProvider.web";
 import {
-	IKernelSessionFactory,
 	IKernelController,
+	IKernelSessionFactory,
 	IStartupCodeProviders,
 	KernelConnectionMetadata,
 } from "./types";
-import { ThirdPartyKernelProvider } from "./kernelProvider.node";
-import { dispose } from "../platform/common/utils/lifecycle";
-import { noop } from "../test/core";
 
 suite("Jupyter Session", () => {
-	suite("Web Kernel Provider", function () {
+	suite("Web Kernel Provider", () => {
 		let disposables: IDisposable[] = [];
 		const asyncDisposables: { dispose: () => Promise<unknown> }[] = [];
 		let sessionCreator: IKernelSessionFactory;
@@ -50,7 +50,7 @@ suite("Jupyter Session", () => {
 			workspaceMemento = mock<Memento>();
 			when(workspaceMemento.update(anything(), anything())).thenResolve();
 			when(workspaceMemento.get(anything(), anything())).thenCall(
-				(_: unknown, defaultValue: unknown) => defaultValue
+				(_: unknown, defaultValue: unknown) => defaultValue,
 			);
 		});
 		function createKernelProvider() {
@@ -66,7 +66,7 @@ suite("Jupyter Session", () => {
 				instance(jupyterServerUriStorage),
 				[],
 				instance(registry),
-				instance(workspaceMemento)
+				instance(workspaceMemento),
 			);
 		}
 		function create3rdPartyKernelProvider() {
@@ -79,14 +79,14 @@ suite("Jupyter Session", () => {
 				instance(sessionCreator),
 				instance(configService),
 				instance(registry),
-				instance(workspaceMemento)
+				instance(workspaceMemento),
 			);
 		}
 		teardown(async () => {
 			sinon.restore();
 			disposables = dispose(disposables);
 			await Promise.all(
-				asyncDisposables.map((item) => item.dispose().catch(noop))
+				asyncDisposables.map((item) => item.dispose().catch(noop)),
 			);
 			asyncDisposables.length = 0;
 		});
@@ -97,31 +97,31 @@ suite("Jupyter Session", () => {
 			const kernelCreated = createEventHandler(
 				kernelProvider,
 				"onDidCreateKernel",
-				disposables
+				disposables,
 			);
 			const kernelStarted = createEventHandler(
 				kernelProvider,
 				"onDidStartKernel",
-				disposables
+				disposables,
 			);
 			const kernelDisposed = createEventHandler(
 				kernelProvider,
 				"onDidDisposeKernel",
-				disposables
+				disposables,
 			);
 			const kernelRestarted = createEventHandler(
 				kernelProvider,
 				"onDidRestartKernel",
-				disposables
+				disposables,
 			);
 			const kernelStatusChanged = createEventHandler(
 				kernelProvider,
 				"onKernelStatusChanged",
-				disposables
+				disposables,
 			);
 			const notebook = new TestNotebookDocument(
 				undefined,
-				"jupyter-notebook"
+				"jupyter-notebook",
 			);
 			const onStarted = new EventEmitter<void>();
 			const onStatusChanged = new EventEmitter<void>();
@@ -172,44 +172,44 @@ suite("Jupyter Session", () => {
 
 			assert.isTrue(
 				kernelCreated.fired,
-				"IKernelProvider.onDidCreateKernel not fired"
+				"IKernelProvider.onDidCreateKernel not fired",
 			);
 			assert.isFalse(
 				kernelStarted.fired,
-				"IKernelProvider.onDidStartKernel should not be fired"
+				"IKernelProvider.onDidStartKernel should not be fired",
 			);
 			assert.isFalse(
 				kernelStatusChanged.fired,
-				"IKernelProvider.onKernelStatusChanged should not be fired"
+				"IKernelProvider.onKernelStatusChanged should not be fired",
 			);
 			assert.isFalse(
 				kernelRestarted.fired,
-				"IKernelProvider.onDidRestartKernel should not have fired"
+				"IKernelProvider.onDidRestartKernel should not have fired",
 			);
 			assert.isFalse(
 				kernelDisposed.fired,
-				"IKernelProvider.onDidDisposeKernel should not have fired"
+				"IKernelProvider.onDidDisposeKernel should not have fired",
 			);
 
 			onStarted.fire();
 			assert.isTrue(
 				kernelStarted.fired,
-				"IKernelProvider.onDidStartKernel not fired"
+				"IKernelProvider.onDidStartKernel not fired",
 			);
 			onStatusChanged.fire();
 			assert.isTrue(
 				kernelStatusChanged.fired,
-				"IKernelProvider.onKernelStatusChanged not fired"
+				"IKernelProvider.onKernelStatusChanged not fired",
 			);
 			onRestartedEvent.fire();
 			assert.isTrue(
 				kernelRestarted.fired,
-				"IKernelProvider.onKernelRestarted not fired"
+				"IKernelProvider.onKernelRestarted not fired",
 			);
 			onDisposedEvent.fire();
 			assert.isTrue(
 				kernelDisposed.fired,
-				"IKernelProvider.onDisposedEvent not fired"
+				"IKernelProvider.onDisposedEvent not fired",
 			);
 		}
 		test("Kernel Events", () => testKernelProviderEvents(false));

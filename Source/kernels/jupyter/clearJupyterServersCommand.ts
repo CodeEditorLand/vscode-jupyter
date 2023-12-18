@@ -2,15 +2,15 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
+import { CancellationTokenSource, commands } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { Commands, JVSC_EXTENSION_ID } from "../../platform/common/constants";
 import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
+import { noop } from "../../platform/common/utils/misc";
 import {
 	IJupyterServerProviderRegistry,
 	IJupyterServerUriStorage,
 } from "./types";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { noop } from "../../platform/common/utils/misc";
-import { CancellationTokenSource, commands } from "vscode";
 
 /**
  * Registers commands to allow the user to set the remote server URI.
@@ -37,7 +37,7 @@ export class ClearJupyterServersCommand
 							.filter(
 								(p) =>
 									p.id.startsWith("_builtin") ||
-									p.extensionId === JVSC_EXTENSION_ID
+									p.extensionId === JVSC_EXTENSION_ID,
 							)
 							.map(async (provider) => {
 								if (
@@ -49,27 +49,27 @@ export class ClearJupyterServersCommand
 								const token = new CancellationTokenSource();
 								const servers = await Promise.resolve(
 									provider.serverProvider.provideJupyterServers(
-										token.token
-									)
+										token.token,
+									),
 								);
 								await Promise.all(
 									(servers || []).map((server) =>
 										provider.serverProvider!
 											.removeJupyterServer!(server).catch(
-											noop
-										)
-									)
+											noop,
+										),
+									),
 								);
-							})
+							}),
 					).catch(noop);
 					await commands
 						.executeCommand(
-							"dataScience.ClearUserProviderJupyterServerCache"
+							"dataScience.ClearUserProviderJupyterServerCache",
 						)
 						.then(noop, noop);
 				},
-				this
-			)
+				this,
+			),
 		);
 	}
 }

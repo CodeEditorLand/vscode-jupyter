@@ -120,7 +120,7 @@ export function isEqualOrParent(
 	base: string,
 	parentCandidate: string,
 	ignoreCase?: boolean,
-	separator = sep
+	separator = sep,
 ): boolean {
 	if (base === parentCandidate) {
 		return true;

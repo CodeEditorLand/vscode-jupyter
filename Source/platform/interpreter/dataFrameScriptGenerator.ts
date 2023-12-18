@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import dedent from "dedent";
 import { inject, injectable } from "inversify";
 import { IFileSystem } from "../common/platform/types";
 import { IDataFrameScriptGenerator, IExtensionContext } from "../common/types";
 import { joinPath } from "../vscode-path/resources";
-import dedent from "dedent";
 
 const DataFrameFunc = "_VSCODE_getDataFrame";
 const cleanupCode = dedent`
@@ -78,7 +78,7 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 			"pythonFiles",
 			"vscode_datascience_helpers",
 			"dataframes",
-			"vscodeDataFrame.py"
+			"vscodeDataFrame.py",
 		);
 		const contents = await this.fs.readFile(scriptPath);
 		DataFrameScriptGenerator.contentsOfDataFrameScript = contents;

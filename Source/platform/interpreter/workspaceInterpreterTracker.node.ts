@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Uri, extensions, workspace } from "vscode";
-import { IDisposableRegistry, Resource } from "../common/types";
-import { PythonEnvironment } from "../pythonEnvironments/info";
 import { inject, injectable } from "inversify";
-import { IInterpreterService } from "./contracts";
+import { Uri, extensions, workspace } from "vscode";
 import { IPythonExtensionChecker } from "../api/types";
-import { areInterpreterPathsSame } from "../pythonEnvironments/info/interpreter";
-import { IWorkspaceInterpreterTracker } from "./types";
 import { getWorkspaceFolderIdentifier } from "../common/application/workspace.base";
+import { IDisposableRegistry, Resource } from "../common/types";
 import { isWebExtension } from "../constants";
+import { PythonEnvironment } from "../pythonEnvironments/info";
+import { areInterpreterPathsSame } from "../pythonEnvironments/info/interpreter";
+import { IInterpreterService } from "./contracts";
+import { IWorkspaceInterpreterTracker } from "./types";
 
 /**
  * Tracks the interpreters in use for a workspace. Necessary to send kernel telemetry.
@@ -34,12 +34,12 @@ export class DesktopWorkspaceInterpreterTracker
 		extensions.onDidChange(
 			this.trackActiveInterpreters,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	public isActiveWorkspaceInterpreter(
 		resource: Resource,
-		interpreter?: PythonEnvironment
+		interpreter?: PythonEnvironment,
 	) {
 		if (!interpreter) {
 			return false;
@@ -65,7 +65,7 @@ export class DesktopWorkspaceInterpreterTracker
 		this.interpreterService.onDidChangeInterpreter(
 			async () => {
 				const workspaces: Uri[] = Array.isArray(
-					workspace.workspaceFolders
+					workspace.workspaceFolders,
 				)
 					? workspace.workspaceFolders.map((item) => item.uri)
 					: [];
@@ -76,20 +76,20 @@ export class DesktopWorkspaceInterpreterTracker
 								getWorkspaceFolderIdentifier(item);
 							const interpreter =
 								await this.interpreterService.getActiveInterpreter(
-									item
+									item,
 								);
 							this.workspaceInterpreters.set(
 								workspaceId,
-								interpreter?.uri
+								interpreter?.uri,
 							);
 						} catch (ex) {
 							// Don't care.
 						}
-					})
+					}),
 				);
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

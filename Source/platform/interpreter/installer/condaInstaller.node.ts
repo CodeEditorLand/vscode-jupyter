@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
+import { CancellationTokenSource, Uri } from "vscode";
+import { IPythonExtensionChecker } from "../../api/types";
+import { fileToCommandArgument, toCommandArgument } from "../../common/helpers";
+import { IServiceContainer } from "../../ioc/types";
 import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../pythonEnvironments/info";
-import { CondaService } from "../condaService.node";
-import { IServiceContainer } from "../../ioc/types";
-import { ExecutionInstallArgs, ModuleInstaller } from "./moduleInstaller.node";
-import { ModuleInstallerType, ModuleInstallFlags, Product } from "./types";
 import * as path from "../../vscode-path/path";
-import { translateProductToModule } from "./utils";
-import { fileToCommandArgument, toCommandArgument } from "../../common/helpers";
-import { getPinnedPackages } from "./pinnedPackages";
-import { CancellationTokenSource, Uri } from "vscode";
-import { IPythonExtensionChecker } from "../../api/types";
+import { CondaService } from "../condaService.node";
 import { IInterpreterService } from "../contracts";
-import { Environment } from "@vscode/python-extension";
 import {
 	getEnvironmentType,
 	isCondaEnvironmentWithoutPython,
 } from "../helpers";
+import { ExecutionInstallArgs, ModuleInstaller } from "./moduleInstaller.node";
+import { getPinnedPackages } from "./pinnedPackages";
+import { ModuleInstallFlags, ModuleInstallerType, Product } from "./types";
+import { translateProductToModule } from "./utils";
 
 /**
  * A Python module installer for a conda environment.
@@ -64,7 +64,7 @@ export class CondaInstaller extends ModuleInstaller {
 	 * @returns {Promise<boolean>} Whether conda is supported as a module installer or not.
 	 */
 	public async isSupported(
-		interpreter: PythonEnvironment | Environment
+		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
 		if (this._isCondaAvailable === false) {
 			return false;
@@ -87,13 +87,13 @@ export class CondaInstaller extends ModuleInstaller {
 		productOrModuleName: Product | string,
 		interpreter: PythonEnvironment | Environment,
 		cancelTokenSource: CancellationTokenSource,
-		flags?: ModuleInstallFlags
+		flags?: ModuleInstallFlags,
 	): Promise<void> {
 		await super.installModule(
 			productOrModuleName,
 			interpreter,
 			cancelTokenSource,
-			flags
+			flags,
 		);
 
 		// If we just installed a package into a conda env without python init, then Python may have gotten installed
@@ -108,14 +108,14 @@ export class CondaInstaller extends ModuleInstaller {
 		) {
 			const pythonExt =
 				this.serviceContainer.get<IPythonExtensionChecker>(
-					IPythonExtensionChecker
+					IPythonExtensionChecker,
 				);
 			if (!pythonExt.isPythonExtensionActive) {
 				return;
 			}
 			const interpreterService =
 				this.serviceContainer.get<IInterpreterService>(
-					IInterpreterService
+					IInterpreterService,
 				);
 			const updatedCondaEnv =
 				await interpreterService.getInterpreterDetails(interpreter.id);
@@ -131,7 +131,7 @@ export class CondaInstaller extends ModuleInstaller {
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
-		flags: ModuleInstallFlags = ModuleInstallFlags.None
+		flags: ModuleInstallFlags = ModuleInstallFlags.None,
 	): Promise<ExecutionInstallArgs> {
 		const condaService =
 			this.serviceContainer.get<CondaService>(CondaService);

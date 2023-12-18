@@ -1,18 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { assert } from "chai";
-import { Signal } from "@lumino/signaling";
-import uuid from "uuid/v4";
-import * as fakeTimers from "@sinonjs/fake-timers";
 import { Kernel } from "@jupyterlab/services";
+import { IInspectReplyMsg } from "@jupyterlab/services/lib/kernel/messages";
+import { Signal } from "@lumino/signaling";
+import * as fakeTimers from "@sinonjs/fake-timers";
+import { assert } from "chai";
 import { anything, instance, mock, reset, verify, when } from "ts-mockito";
-import {
-	IKernel,
-	IKernelSession,
-	KernelConnectionMetadata,
-} from "../../kernels/types";
-import { createMockedDocument } from "../../test/datascience/editor-integration/helpers";
+import uuid from "uuid/v4";
 import {
 	CancellationToken,
 	CancellationTokenSource,
@@ -25,17 +20,22 @@ import {
 	Uri,
 } from "vscode";
 import {
-	MAX_PENDING_REQUESTS,
-	resolveCompletionItem,
-} from "./resolveCompletionItem";
+	IKernel,
+	IKernelSession,
+	KernelConnectionMetadata,
+} from "../../kernels/types";
 import { IDisposable } from "../../platform/common/types";
+import { Deferred, createDeferred } from "../../platform/common/utils/async";
 import {
 	DisposableStore,
 	dispose,
 } from "../../platform/common/utils/lifecycle";
-import { Deferred, createDeferred } from "../../platform/common/utils/async";
-import { IInspectReplyMsg } from "@jupyterlab/services/lib/kernel/messages";
 import { sleep } from "../../test/core";
+import { createMockedDocument } from "../../test/datascience/editor-integration/helpers";
+import {
+	MAX_PENDING_REQUESTS,
+	resolveCompletionItem,
+} from "./resolveCompletionItem";
 
 suite("Jupyter Kernel Completion (requestInspect)", () => {
 	let kernel: IKernel;
@@ -55,7 +55,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		when(kernel.id).thenReturn(kernelId);
 		const kernelConnectionMetadata = mock<KernelConnectionMetadata>();
 		when(kernel.kernelConnectionMetadata).thenReturn(
-			instance(kernelConnectionMetadata)
+			instance(kernelConnectionMetadata),
 		);
 		when(kernelConnectionMetadata.id).thenReturn(kernelId);
 		const session = mock<IKernelSession>();
@@ -66,7 +66,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			Kernel.Status
 		>(instance(kernelConnection));
 		when(kernelConnection.statusChanged).thenReturn(
-			kernelStatusChangedSignal
+			kernelStatusChangedSignal,
 		);
 		document = createMockedDocument("foo.", Uri.parse("a.ipynb"), 1, true);
 
@@ -79,8 +79,8 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		disposables.push(new Disposable(() => clock.uninstall()));
 		disposables.push(
 			new Disposable(() =>
-				Signal.disconnectAll(instance(kernelConnection))
-			)
+				Signal.disconnectAll(instance(kernelConnection)),
+			),
 		);
 		disposables.push(tokenSource);
 		disposables.push(toDispose);
@@ -114,12 +114,12 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 				"python",
 				document,
 				new Position(0, 4),
-				toDispose
+				toDispose,
 			);
 
 			assert.strictEqual(
 				result.documentation,
-				completionItem.documentation
+				completionItem.documentation,
 			);
 		}
 	});
@@ -144,7 +144,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		});
 		// Resolve the response 2s later
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			sleep(2000, disposables).then(() => deferred.promise)
+			sleep(2000, disposables).then(() => deferred.promise),
 		);
 
 		const resultPromise = resolveCompletionItem(
@@ -155,7 +155,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			"python",
 			document,
 			new Position(0, 4),
-			toDispose
+			toDispose,
 		);
 		// Cancel the request 1s later
 		void sleep(1000, disposables).then(() => tokenSource.cancel());
@@ -171,7 +171,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		when(kernel.status).thenReturn("idle");
 		const deferred = createDeferred<IInspectReplyMsg>();
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			deferred.promise
+			deferred.promise,
 		);
 
 		const resultPromise = resolveCompletionItem(
@@ -182,7 +182,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			"python",
 			document,
 			new Position(0, 4),
-			toDispose
+			toDispose,
 		);
 
 		const [result] = await Promise.all([
@@ -213,7 +213,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			parent_header: {} as any,
 		});
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			deferred.promise
+			deferred.promise,
 		);
 
 		const resultPromise = resolveCompletionItem(
@@ -224,7 +224,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			"python",
 			document,
 			new Position(0, 4),
-			toDispose
+			toDispose,
 		);
 		const [result] = await Promise.all([
 			resultPromise,
@@ -232,7 +232,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		]);
 		assert.strictEqual(
 			(result.documentation as MarkdownString).value,
-			"Some documentation"
+			"Some documentation",
 		);
 	});
 	test("Resolve & leave documentation as is when nothing is returned from the kernel", async () => {
@@ -253,7 +253,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			parent_header: {} as any,
 		});
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			deferred.promise
+			deferred.promise,
 		);
 
 		const resultPromise = resolveCompletionItem(
@@ -264,7 +264,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			"python",
 			document,
 			new Position(0, 4),
-			toDispose
+			toDispose,
 		);
 		const [result] = await Promise.all([
 			resultPromise,
@@ -292,7 +292,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			parent_header: {} as any,
 		});
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			sleep(1000).then(() => deferred.promise)
+			sleep(1000).then(() => deferred.promise),
 		);
 
 		const resultPromise = resolveCompletionItem(
@@ -303,7 +303,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			"python",
 			document,
 			new Position(0, 4),
-			toDispose
+			toDispose,
 		);
 		const [result] = await Promise.all([
 			resultPromise,
@@ -311,7 +311,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		]);
 		assert.strictEqual(
 			(result.documentation as MarkdownString).value,
-			"Some documentation"
+			"Some documentation",
 		);
 	});
 	test("Never make any requests if we fail to get a response n times", async () => {
@@ -320,7 +320,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		when(kernel.status).thenReturn("idle");
 		const deferred = createDeferred<IInspectReplyMsg>();
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			deferred.promise
+			deferred.promise,
 		);
 		const sendRequest = () =>
 			resolveCompletionItem(
@@ -331,7 +331,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 				"python",
 				document,
 				new Position(0, 4),
-				toDispose
+				toDispose,
 			);
 
 		for (let index = 0; index < MAX_PENDING_REQUESTS; index++) {
@@ -342,10 +342,10 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			]);
 			assert.strictEqual(
 				result.documentation,
-				completionItem.documentation
+				completionItem.documentation,
 			);
 			verify(kernelConnection.requestInspect(anything())).times(
-				index + 1
+				index + 1,
 			);
 		}
 
@@ -354,12 +354,12 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			void sendRequest();
 		}
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS
+			MAX_PENDING_REQUESTS,
 		);
 
 		reset(kernelConnection);
 		when(kernelConnection.requestInspect(anything())).thenReturn(
-			deferred.promise
+			deferred.promise,
 		);
 		const resultPromise = resolveCompletionItem(
 			completionItem,
@@ -369,7 +369,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 			"python",
 			document,
 			new Position(0, 4),
-			toDispose
+			toDispose,
 		);
 		const [result] = await Promise.all([
 			resultPromise,
@@ -399,7 +399,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 				"python",
 				document,
 				new Position(0, 4),
-				toDispose
+				toDispose,
 			);
 		for (let index = 0; index < MAX_PENDING_REQUESTS; index++) {
 			void sendRequest();
@@ -407,13 +407,13 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		// const [result] = await Promise.all([resultPromise, clock.tickAsync(5_000)]);
 		// assert.strictEqual(result.documentation, completionItem.documentation);
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS
+			MAX_PENDING_REQUESTS,
 		);
 		assert.strictEqual(requests.length, MAX_PENDING_REQUESTS);
 
 		await clock.tickAsync(500); // Wait for 500ms (lets see if the back off strategy works & does not send any requests)
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS
+			MAX_PENDING_REQUESTS,
 		);
 		assert.strictEqual(requests.length, MAX_PENDING_REQUESTS);
 
@@ -421,7 +421,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		void sendRequest();
 		await clock.tickAsync(500); // Wait for 500ms (lets see if the back off strategy works & does not send any requests)
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS
+			MAX_PENDING_REQUESTS,
 		);
 		assert.strictEqual(requests.length, MAX_PENDING_REQUESTS);
 
@@ -431,14 +431,14 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		} as any);
 		await clock.tickAsync(500); // Wait for backoff strategy to work.
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS + 1
+			MAX_PENDING_REQUESTS + 1,
 		);
 
 		// Asking for resolving another completion will not send a new request, as there are too many
 		void sendRequest();
 		await clock.tickAsync(500); // Wait for 500ms (lets see if the back off strategy works & does not send any requests)
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS + 1
+			MAX_PENDING_REQUESTS + 1,
 		);
 		assert.strictEqual(requests.length, MAX_PENDING_REQUESTS);
 
@@ -448,7 +448,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		} as any);
 		await clock.tickAsync(500); // Wait for backoff strategy to work.
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS + 2
+			MAX_PENDING_REQUESTS + 2,
 		);
 
 		// Even if the token is cancelled, the pending requests queue should not be cleared.
@@ -460,7 +460,7 @@ suite("Jupyter Kernel Completion (requestInspect)", () => {
 		tokenSource.cancel();
 		await clock.tickAsync(500); // Wait for backoff strategy to work.
 		verify(kernelConnection.requestInspect(anything())).times(
-			MAX_PENDING_REQUESTS + 2
+			MAX_PENDING_REQUESTS + 2,
 		);
 	});
 });

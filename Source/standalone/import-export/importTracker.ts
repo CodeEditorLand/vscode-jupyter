@@ -12,25 +12,25 @@ import {
 	notebooks,
 	workspace,
 } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import {
+	JupyterNotebookView,
+	PYTHON_LANGUAGE,
+	isCI,
+	isTestExecution,
+} from "../../platform/common/constants";
+import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
+import { isJupyterNotebook } from "../../platform/common/utils";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { ResourceMap } from "../../platform/common/utils/map";
+import { noop } from "../../platform/common/utils/misc";
+import { EventName } from "../../platform/telemetry/constants";
+import { getTelemetrySafeHashedString } from "../../platform/telemetry/helpers";
 import {
 	ResourceTypeTelemetryProperty,
 	sendTelemetryEvent,
 } from "../../telemetry";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import {
-	isCI,
-	isTestExecution,
-	JupyterNotebookView,
-	PYTHON_LANGUAGE,
-} from "../../platform/common/constants";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
-import { noop } from "../../platform/common/utils/misc";
-import { EventName } from "../../platform/telemetry/constants";
-import { getTelemetrySafeHashedString } from "../../platform/telemetry/helpers";
-import { isJupyterNotebook } from "../../platform/common/utils";
 import { isTelemetryDisabled } from "../../telemetry";
-import { ResourceMap } from "../../platform/common/utils/map";
 
 /*
 Python has a fairly rich import statement. Originally the matching regexp was kept simple for
@@ -62,7 +62,7 @@ const MAX_DOCUMENT_LINES = 1000;
 const testExecution = isTestExecution();
 
 export const IImportTracker = Symbol("IImportTracker");
-export interface IImportTracker {}
+export type IImportTracker = {};
 
 /**
  * Sends hashed names of imported packages to telemetry. Hashes are updated on opening, closing, and saving of documents.
@@ -115,7 +115,7 @@ export class ImportTracker
 
 	public activate() {
 		workspace.notebookDocuments.forEach((e) =>
-			this.checkNotebookDocument(e, "onOpenCloseOrSave")
+			this.checkNotebookDocument(e, "onOpenCloseOrSave"),
 		);
 	}
 
@@ -136,14 +136,14 @@ export class ImportTracker
 
 	private onOpenedOrClosedNotebookDocument(
 		e: NotebookDocument,
-		when: "onExecution" | "onOpenCloseOrSave"
+		when: "onExecution" | "onOpenCloseOrSave",
 	) {
 		if (!isJupyterNotebook(e) || this.isTelemetryDisabled) {
 			return;
 		}
 		this.scheduleCheck(
 			e.uri,
-			this.checkNotebookDocument.bind(this, e, when)
+			this.checkNotebookDocument.bind(this, e, when),
 		);
 	}
 
@@ -168,19 +168,21 @@ export class ImportTracker
 
 	private async checkNotebookDocument(
 		e: NotebookDocument,
-		when: "onExecution" | "onOpenCloseOrSave"
+		when: "onExecution" | "onOpenCloseOrSave",
 	) {
 		if (!isJupyterNotebook(e) || this.isTelemetryDisabled) {
 			return;
 		}
 		await Promise.all(
-			e.getCells().map(async (cell) => this.checkNotebookCell(cell, when))
+			e
+				.getCells()
+				.map(async (cell) => this.checkNotebookCell(cell, when)),
 		);
 	}
 
 	private async checkNotebookCell(
 		cell: NotebookCell,
-		when: "onExecution" | "onOpenCloseOrSave"
+		when: "onExecution" | "onOpenCloseOrSave",
 	) {
 		if (
 			!isJupyterNotebook(cell.notebook) ||
@@ -197,7 +199,7 @@ export class ImportTracker
 			await this.sendTelemetryForImports(
 				this.getDocumentLines(cell.document),
 				resourceType,
-				when
+				when,
 			);
 		} catch (ex) {
 			// Can fail on CI, if the notebook has been closed or the like
@@ -225,7 +227,7 @@ export class ImportTracker
 						packageNames.push(
 							...match.groups.importImport
 								.split(",")
-								.map((rawPackageName) => rawPackageName.trim())
+								.map((rawPackageName) => rawPackageName.trim()),
 						);
 					}
 				}
@@ -240,7 +242,7 @@ export class ImportTracker
 	private async sendTelemetryForImports(
 		lines: string[],
 		resourceType: ResourceTypeTelemetryProperty["resourceType"],
-		when: "onExecution" | "onOpenCloseOrSave"
+		when: "onExecution" | "onOpenCloseOrSave",
 	) {
 		await Promise.all(
 			this.lookForImports(lines).map(async (packageName) => {
@@ -258,7 +260,7 @@ export class ImportTracker
 					resourceType,
 					when,
 				});
-			})
+			}),
 		);
 	}
 }

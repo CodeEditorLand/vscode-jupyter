@@ -9,9 +9,9 @@ import {
 	NotebookCellOutputItem,
 	TextDocument,
 } from "vscode";
+import { noop } from "../../platform/common/utils/misc";
 import { traceInfo, traceVerbose } from "../../platform/logging";
 import { IKernelController } from "../types";
-import { noop } from "../../platform/common/utils/misc";
 
 /**
  * Wrapper class around NotebookCellExecution that allows us to
@@ -19,7 +19,7 @@ import { noop } from "../../platform/common/utils/misc";
  * - Do something when 'end' is called
  */
 export class NotebookCellExecutionWrapper implements NotebookCellExecution {
-	public started: boolean = false;
+	public started = false;
 	private _startTime?: number;
 	/**
 	 * @param {boolean} [clearOutputOnStartWithTime=false] If true, clear the output when start is called with a time.
@@ -28,7 +28,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 		private readonly _impl: NotebookCellExecution,
 		public controllerId: string,
 		private _endCallback: (() => void) | undefined,
-		private readonly clearOutputOnStartWithTime = false
+		private readonly clearOutputOnStartWithTime = false,
 	) {}
 	public get cell(): NotebookCell {
 		return this._impl.cell;
@@ -59,12 +59,12 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 			// That's when we clear the output. (ideally it should be cleared as soon as its queued, but thats an upstream core issue).
 			if (this.clearOutputOnStartWithTime) {
 				traceVerbose(
-					`Start cell ${this.cell.index} execution @ ${startTime} (clear output)`
+					`Start cell ${this.cell.index} execution @ ${startTime} (clear output)`,
 				);
 				this._impl.clearOutput().then(noop, noop);
 			} else {
 				traceVerbose(
-					`Start cell ${this.cell.index} execution @ ${startTime}`
+					`Start cell ${this.cell.index} execution @ ${startTime}`,
 				);
 			}
 		}
@@ -76,7 +76,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 				traceInfo(
 					`End cell ${this.cell.index} execution after ${
 						((endTime || 0) - (this._startTime || 0)) / 1000
-					}s, completed @ ${endTime}, started @ ${this._startTime}`
+					}s, completed @ ${endTime}, started @ ${this._startTime}`,
 				);
 			} finally {
 				this._endCallback();
@@ -90,28 +90,28 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 	}
 	replaceOutput(
 		out: NotebookCellOutput | NotebookCellOutput[],
-		cell?: NotebookCell
+		cell?: NotebookCell,
 	): Thenable<void> {
 		this.startIfNecessary();
 		return this._impl.replaceOutput(out, cell);
 	}
 	appendOutput(
 		out: NotebookCellOutput | NotebookCellOutput[],
-		cell?: NotebookCell
+		cell?: NotebookCell,
 	): Thenable<void> {
 		this.startIfNecessary();
 		return this._impl.appendOutput(out, cell);
 	}
 	replaceOutputItems(
 		items: NotebookCellOutputItem | NotebookCellOutputItem[],
-		output: NotebookCellOutput
+		output: NotebookCellOutput,
 	): Thenable<void> {
 		this.startIfNecessary();
 		return this._impl.replaceOutputItems(items, output);
 	}
 	appendOutputItems(
 		items: NotebookCellOutputItem | NotebookCellOutputItem[],
-		output: NotebookCellOutput
+		output: NotebookCellOutput,
 	): Thenable<void> {
 		this.startIfNecessary();
 		return this._impl.appendOutputItems(items, output);
@@ -129,19 +129,12 @@ export class CellExecutionCreator {
 	static getOrCreate(
 		cell: NotebookCell,
 		controller: IKernelController,
-		clearOutputOnStartWithTime = false
+		clearOutputOnStartWithTime = false,
 	) {
 		let cellExecution: NotebookCellExecutionWrapper | undefined;
 		const key = cell.document;
 		cellExecution = this.get(cell);
-		if (!cellExecution) {
-			cellExecution = CellExecutionCreator.create(
-				key,
-				cell,
-				controller,
-				clearOutputOnStartWithTime
-			);
-		} else {
+		if (cellExecution) {
 			// Cell execution may already exist, but its controller may be different
 			if (cellExecution.controllerId !== controller.id) {
 				// Stop the old execution so we don't have more than one for a cell at a time.
@@ -153,7 +146,7 @@ export class CellExecutionCreator {
 					key,
 					cell,
 					controller,
-					clearOutputOnStartWithTime
+					clearOutputOnStartWithTime,
 				);
 
 				// Start the new one off now if the old one was already started
@@ -161,6 +154,13 @@ export class CellExecutionCreator {
 					cellExecution.start(new Date().getTime());
 				}
 			}
+		} else {
+			cellExecution = CellExecutionCreator.create(
+				key,
+				cell,
+				controller,
+				clearOutputOnStartWithTime,
+			);
 		}
 		return cellExecution;
 	}
@@ -173,7 +173,7 @@ export class CellExecutionCreator {
 		key: TextDocument,
 		cell: NotebookCell,
 		controller: IKernelController,
-		clearOutputOnStartWithTime = false
+		clearOutputOnStartWithTime = false,
 	) {
 		const result = new NotebookCellExecutionWrapper(
 			controller.createNotebookCellExecution(cell),
@@ -181,7 +181,7 @@ export class CellExecutionCreator {
 			() => {
 				CellExecutionCreator._map.delete(key);
 			},
-			clearOutputOnStartWithTime
+			clearOutputOnStartWithTime,
 		);
 		CellExecutionCreator._map.set(key, result);
 		return result;

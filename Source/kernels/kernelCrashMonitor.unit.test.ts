@@ -1,31 +1,31 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as fakeTimers from "@sinonjs/fake-timers";
 import { KernelMessage } from "@jupyterlab/services";
+import * as fakeTimers from "@sinonjs/fake-timers";
+import { assert } from "chai";
 import { anything, instance, mock, verify, when } from "ts-mockito";
 import { Disposable, EventEmitter, NotebookCell } from "vscode";
-import { dispose } from "../platform/common/utils/lifecycle";
 import { IDisposable } from "../platform/common/types";
+import { dispose } from "../platform/common/utils/lifecycle";
+import { DataScience } from "../platform/common/utils/localize";
+import { createOutputWithErrorMessageForDisplay } from "../platform/errors/errorUtils";
 import {
-	createKernelController,
 	TestNotebookDocument,
+	createKernelController,
 } from "../test/datascience/notebook/executionHelper";
+import { mockedVSCodeNamespaces } from "../test/vscode-mock";
+import { getDisplayNameOrNameOfKernelConnection } from "./helpers";
 import { KernelCrashMonitor } from "./kernelCrashMonitor";
 import {
 	IKernel,
-	IKernelSession,
 	IKernelController,
 	IKernelProvider,
+	IKernelSession,
 	INotebookKernelExecution,
 	LocalKernelSpecConnectionMetadata,
 	RemoteKernelSpecConnectionMetadata,
 } from "./types";
-import { assert } from "chai";
-import { DataScience } from "../platform/common/utils/localize";
-import { createOutputWithErrorMessageForDisplay } from "../platform/errors/errorUtils";
-import { getDisplayNameOrNameOfKernelConnection } from "./helpers";
-import { mockedVSCodeNamespaces } from "../test/vscode-mock";
 
 suite("Kernel Crash Monitor", () => {
 	let kernelProvider: IKernelProvider;
@@ -49,7 +49,7 @@ suite("Kernel Crash Monitor", () => {
 		id: "id",
 		extensionId: "",
 	};
-	let remoteKernelSpec = RemoteKernelSpecConnectionMetadata.create({
+	const remoteKernelSpec = RemoteKernelSpecConnectionMetadata.create({
 		id: "remote",
 		baseUrl: "1",
 		kernelSpec: {
@@ -60,7 +60,7 @@ suite("Kernel Crash Monitor", () => {
 		},
 		serverProviderHandle,
 	});
-	let localKernelSpec = LocalKernelSpecConnectionMetadata.create({
+	const localKernelSpec = LocalKernelSpecConnectionMetadata.create({
 		id: "local",
 		kernelSpec: {
 			argv: [],
@@ -93,26 +93,26 @@ suite("Kernel Crash Monitor", () => {
 		when(kernel.session).thenReturn(instance(kernelSession));
 		when(kernelSession.kind).thenReturn("localRaw");
 		when(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything())
+			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
 		).thenResolve();
 
 		when(kernelProvider.onDidStartKernel).thenReturn(
-			onDidStartKernel.event
+			onDidStartKernel.event,
 		);
 		when(kernelProvider.onKernelStatusChanged).thenReturn(
-			onKernelStatusChanged.event
+			onKernelStatusChanged.event,
 		);
 		when(kernelProvider.getOrCreate(anything(), anything())).thenReturn(
-			instance(kernel)
+			instance(kernel),
 		);
 		when(kernelProvider.getKernelExecution(anything())).thenReturn(
-			instance(kernelExecution)
+			instance(kernelExecution),
 		);
 		when(kernelExecution.onPreExecute).thenReturn(onPreExecute.event);
 
 		kernelCrashMonitor = new KernelCrashMonitor(
 			disposables,
-			instance(kernelProvider)
+			instance(kernelProvider),
 		);
 		clock = fakeTimers.install();
 		disposables.push(new Disposable(() => clock.uninstall()));
@@ -131,8 +131,8 @@ suite("Kernel Crash Monitor", () => {
 
 		const expectedErrorMessage = Buffer.from(
 			createOutputWithErrorMessageForDisplay(
-				DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell
-			)?.items[0]!.data!
+				DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell,
+			)?.items[0]!.data!,
 		).toString();
 
 		when(kernel.status).thenReturn("dead");
@@ -145,9 +145,9 @@ suite("Kernel Crash Monitor", () => {
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				DataScience.kernelDiedWithoutError(
-					getDisplayNameOrNameOfKernelConnection(localKernelSpec)
-				)
-			)
+					getDisplayNameOrNameOfKernelConnection(localKernelSpec),
+				),
+			),
 		).once();
 
 		assert.strictEqual(cell.outputs.length, 1);
@@ -155,7 +155,7 @@ suite("Kernel Crash Monitor", () => {
 		const outputItem = cell.outputs[0].items[0];
 		assert.include(
 			Buffer.from(outputItem.data).toString(),
-			expectedErrorMessage
+			expectedErrorMessage,
 		);
 	});
 	test("Error message displayed and Cell output updated with error message (jupyter kernel)", async () => {
@@ -170,8 +170,8 @@ suite("Kernel Crash Monitor", () => {
 
 		const expectedErrorMessage = Buffer.from(
 			createOutputWithErrorMessageForDisplay(
-				DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell
-			)?.items[0]!.data!
+				DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell,
+			)?.items[0]!.data!,
 		).toString();
 
 		when(kernel.status).thenReturn("autorestarting");
@@ -185,9 +185,9 @@ suite("Kernel Crash Monitor", () => {
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				DataScience.kernelDiedWithoutErrorAndAutoRestarting(
-					getDisplayNameOrNameOfKernelConnection(remoteKernelSpec)
-				)
-			)
+					getDisplayNameOrNameOfKernelConnection(remoteKernelSpec),
+				),
+			),
 		).once();
 
 		assert.strictEqual(cell.outputs.length, 1);
@@ -195,7 +195,7 @@ suite("Kernel Crash Monitor", () => {
 		const outputItem = cell.outputs[0].items[0];
 		assert.include(
 			Buffer.from(outputItem.data).toString(),
-			expectedErrorMessage
+			expectedErrorMessage,
 		);
 	});
 });

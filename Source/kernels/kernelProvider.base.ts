@@ -3,7 +3,6 @@
 
 import type { KernelMessage } from "@jupyterlab/services";
 import { Event, EventEmitter, NotebookDocument, Uri, workspace } from "vscode";
-import { traceInfoIfCI, traceVerbose, traceWarning } from "../platform/logging";
 import { getDisplayPath } from "../platform/common/platform/fs-paths";
 import {
 	IAsyncDisposable,
@@ -11,16 +10,17 @@ import {
 	IDisposableRegistry,
 } from "../platform/common/types";
 import { isUri, noop } from "../platform/common/utils/misc";
-import {
-	IThirdPartyKernel,
-	IKernelProvider,
-	IKernel,
-	KernelOptions,
-	IThirdPartyKernelProvider,
-	ThirdPartyKernelOptions,
-	INotebookKernelExecution,
-} from "./types";
+import { traceInfoIfCI, traceVerbose, traceWarning } from "../platform/logging";
 import { JupyterServerProviderHandle } from "./jupyter/types";
+import {
+	IKernel,
+	IKernelProvider,
+	INotebookKernelExecution,
+	IThirdPartyKernel,
+	IThirdPartyKernelProvider,
+	KernelOptions,
+	ThirdPartyKernelOptions,
+} from "./types";
 
 /**
  * Provides kernels to the system. Generally backed by a URI or a notebook object.
@@ -65,13 +65,13 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 	}
 	constructor(
 		protected asyncDisposables: IAsyncDisposableRegistry,
-		protected disposables: IDisposableRegistry
+		protected disposables: IDisposableRegistry,
 	) {
 		this.asyncDisposables.push(this);
 		workspace.onDidCloseNotebookDocument(
 			(e) => this.disposeOldKernel(e),
 			this,
-			disposables
+			disposables,
 		);
 		disposables.push(this._onDidDisposeKernel);
 		disposables.push(this._onDidRestartKernel);
@@ -94,11 +94,11 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 		return this._onDidCreateKernel.event;
 	}
 	public get(
-		uriOrNotebook: Uri | NotebookDocument | string
+		uriOrNotebook: Uri | NotebookDocument | string,
 	): IKernel | undefined {
 		if (isUri(uriOrNotebook)) {
 			const notebook = workspace.notebookDocuments.find(
-				(item) => item.uri.toString() === uriOrNotebook.toString()
+				(item) => item.uri.toString() === uriOrNotebook.toString(),
 			);
 			return notebook ? this.get(notebook) : undefined;
 		} else if (typeof uriOrNotebook === "string") {
@@ -129,12 +129,12 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 	}
 	public abstract getOrCreate(
 		notebook: NotebookDocument,
-		options: KernelOptions
+		options: KernelOptions,
 	): IKernel;
 	protected storeKernel(
 		notebook: NotebookDocument,
 		options: KernelOptions,
-		kernel: IKernel
+		kernel: IKernel,
 	) {
 		this.kernelsByNotebook.set(notebook, { options, kernel });
 		this.kernelsById.set(kernel.id, { options, kernel });
@@ -152,14 +152,14 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 					this.kernelsById.delete(kernel.id);
 					traceVerbose(
 						`Kernel got disposed, hence there is no longer a kernel associated with ${getDisplayPath(
-							kernel.uri
-						)}`
+							kernel.uri,
+						)}`,
 					);
 				}
 				this.pendingDisposables.delete(kernel);
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	protected disposeOldKernel(notebook: NotebookDocument) {
@@ -167,8 +167,8 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 		if (kernelToDispose) {
 			traceVerbose(
 				`Disposing kernel associated with ${getDisplayPath(
-					notebook.uri
-				)}, isClosed=${notebook.isClosed}`
+					notebook.uri,
+				)}, isClosed=${notebook.isClosed}`,
 			);
 			this.kernelsById.delete(kernelToDispose.kernel.id);
 			this.pendingDisposables.add(kernelToDispose.kernel);
@@ -176,7 +176,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 				.dispose()
 				.catch((ex) => traceWarning("Failed to dispose old kernel", ex))
 				.finally(() =>
-					this.pendingDisposables.delete(kernelToDispose.kernel)
+					this.pendingDisposables.delete(kernelToDispose.kernel),
 				)
 				.catch(noop);
 		}
@@ -197,7 +197,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 						(server) =>
 							server.id === metadata.serverProviderHandle.id &&
 							server.handle ===
-								metadata.serverProviderHandle.handle
+								metadata.serverProviderHandle.handle,
 					);
 					if (matchingRemovedServer) {
 						// it should be removed
@@ -241,23 +241,23 @@ export abstract class BaseThirdPartyKernelProvider
 	public readonly onKernelStatusChanged = this._onKernelStatusChanged.event;
 	public get kernels() {
 		return Array.from(this.kernelsByUri.values()).map(
-			(item) => item.kernel
+			(item) => item.kernel,
 		);
 	}
 	constructor(
 		protected asyncDisposables: IAsyncDisposableRegistry,
-		protected disposables: IDisposableRegistry
+		protected disposables: IDisposableRegistry,
 	) {
 		this.asyncDisposables.push(this);
 		workspace.onDidCloseNotebookDocument(
 			(e) => {
 				traceVerbose(
-					`Notebook document ${getDisplayPath(e.uri)} got closed`
+					`Notebook document ${getDisplayPath(e.uri)} got closed`,
 				);
 				this.disposeOldKernel(e.uri);
 			},
 			this,
-			disposables
+			disposables,
 		);
 		disposables.push(this._onDidDisposeKernel);
 		disposables.push(this._onDidRestartKernel);
@@ -303,12 +303,12 @@ export abstract class BaseThirdPartyKernelProvider
 	}
 	public abstract getOrCreate(
 		uri: Uri,
-		options: ThirdPartyKernelOptions
+		options: ThirdPartyKernelOptions,
 	): IThirdPartyKernel;
 	protected storeKernel(
 		uri: Uri,
 		options: ThirdPartyKernelOptions,
-		kernel: IThirdPartyKernel
+		kernel: IThirdPartyKernel,
 	) {
 		this.kernelsByUri.set(uri.toString(), { options, kernel });
 		this.kernelsById.set(kernel.id, { options, kernel });
@@ -320,7 +320,7 @@ export abstract class BaseThirdPartyKernelProvider
 	 */
 	protected deleteMappingIfKernelIsDisposed(
 		uri: Uri,
-		kernel: IThirdPartyKernel
+		kernel: IThirdPartyKernel,
 	) {
 		kernel.onDisposed(
 			() => {
@@ -330,21 +330,21 @@ export abstract class BaseThirdPartyKernelProvider
 					this.kernelsById.delete(kernel.id);
 					traceVerbose(
 						`Kernel got disposed, hence there is no longer a kernel associated with ${getDisplayPath(
-							uri
-						)}`
+							uri,
+						)}`,
 					);
 				}
 				this.pendingDisposables.delete(kernel);
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	protected disposeOldKernel(uri: Uri) {
 		const kernelToDispose = this.kernelsByUri.get(uri.toString());
 		if (kernelToDispose) {
 			traceInfoIfCI(
-				`Disposing kernel associated with ${getDisplayPath(uri)}`
+				`Disposing kernel associated with ${getDisplayPath(uri)}`,
 			);
 			this.kernelsById.delete(kernelToDispose.kernel.id);
 			this.pendingDisposables.add(kernelToDispose.kernel);
@@ -352,7 +352,7 @@ export abstract class BaseThirdPartyKernelProvider
 				.dispose()
 				.catch((ex) => traceWarning("Failed to dispose old kernel", ex))
 				.finally(() =>
-					this.pendingDisposables.delete(kernelToDispose.kernel)
+					this.pendingDisposables.delete(kernelToDispose.kernel),
 				)
 				.catch(noop);
 		}

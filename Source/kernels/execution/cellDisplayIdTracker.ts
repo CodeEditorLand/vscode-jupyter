@@ -10,9 +10,9 @@ import {
 	workspace,
 } from "vscode";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { dispose } from "../../platform/common/utils/lifecycle";
 import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
 import { isJupyterNotebook } from "../../platform/common/utils";
+import { dispose } from "../../platform/common/utils/lifecycle";
 
 /**
  * Tracks a cell's display id. Some messages are sent to other cells and the display id is used to identify them.
@@ -56,11 +56,11 @@ export class CellOutputDisplayIdTracker
 					// If a cell was cleared, then remove the mapping, the output cannot exist anymore.
 					const displayIdToDelete =
 						CellOutputDisplayIdTracker.cellToDisplayIdMapping.get(
-							change.cell
+							change.cell,
 						);
 					if (displayIdToDelete) {
 						CellOutputDisplayIdTracker.cellToDisplayIdMapping.delete(
-							change.cell
+							change.cell,
 						);
 						CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument
 							.get(e.notebook)
@@ -78,11 +78,11 @@ export class CellOutputDisplayIdTracker
 		cell: NotebookCell,
 		displayId: string,
 		outputContainer: NotebookCellOutput,
-		outputItems: NotebookCellOutputItem[]
+		outputItems: NotebookCellOutputItem[],
 	) {
 		let mapOfDisplayIdToOutput =
 			CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument.get(
-				cell.notebook
+				cell.notebook,
 			);
 		if (!mapOfDisplayIdToOutput) {
 			mapOfDisplayIdToOutput = new Map<
@@ -95,7 +95,7 @@ export class CellOutputDisplayIdTracker
 			>();
 			CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument.set(
 				cell.notebook,
-				mapOfDisplayIdToOutput
+				mapOfDisplayIdToOutput,
 			);
 		}
 		mapOfDisplayIdToOutput.set(displayId, {
@@ -110,7 +110,7 @@ export class CellOutputDisplayIdTracker
 	 */
 	public static getMappedOutput(
 		notebook: NotebookDocument,
-		displayId: string
+		displayId: string,
 	):
 		| {
 				cell: NotebookCell;
@@ -120,7 +120,7 @@ export class CellOutputDisplayIdTracker
 		| undefined {
 		const mapOfDisplayIdToOutput =
 			CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument.get(
-				notebook
+				notebook,
 			);
 		if (!mapOfDisplayIdToOutput) {
 			return;

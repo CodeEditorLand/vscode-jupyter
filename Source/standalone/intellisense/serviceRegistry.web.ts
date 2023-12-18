@@ -10,22 +10,22 @@ import { PythonKernelCompletionProviderRegistration } from "./pythonKernelComple
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	_isDevMode: boolean
+	_isDevMode: boolean,
 ) {
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		NotebookCellBangInstallDiagnosticsProvider
+		NotebookCellBangInstallDiagnosticsProvider,
 	);
 	serviceManager.addSingleton<PythonKernelCompletionProvider>(
 		PythonKernelCompletionProvider,
-		PythonKernelCompletionProvider
+		PythonKernelCompletionProvider,
 	); // Used in tests
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonKernelCompletionProviderRegistration
+		PythonKernelCompletionProviderRegistration,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		NonPythonKernelCompletionProvider
+		NonPythonKernelCompletionProvider,
 	);
 }

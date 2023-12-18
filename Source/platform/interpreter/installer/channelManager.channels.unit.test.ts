@@ -4,6 +4,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import assert from "assert";
+import { anything, instance, mock, when } from "ts-mockito";
+import { Uri } from "vscode";
 import { ServiceContainer } from "../../ioc/container";
 import { IServiceContainer } from "../../ioc/types";
 import {
@@ -11,9 +13,7 @@ import {
 	PythonEnvironment,
 } from "../../pythonEnvironments/info";
 import { InstallationChannelManager } from "./channelManager.node";
-import { Product, IModuleInstaller } from "./types";
-import { Uri } from "vscode";
-import { anything, instance, mock, when } from "ts-mockito";
+import { IModuleInstaller, Product } from "./types";
 
 suite("Installation - installation channels", () => {
 	let serviceContainer: IServiceContainer;
@@ -40,7 +40,7 @@ suite("Installation - installation channels", () => {
 		assert.strictEqual(
 			channels[0],
 			instance(installer),
-			"Incorrect installer"
+			"Incorrect installer",
 		);
 	});
 
@@ -56,12 +56,12 @@ suite("Installation - installation channels", () => {
 		assert.strictEqual(
 			channels[0],
 			instance(installer1),
-			"Incorrect installer 1"
+			"Incorrect installer 1",
 		);
 		assert.strictEqual(
 			channels[1],
 			instance(installer2),
-			"Incorrect installer 2"
+			"Incorrect installer 2",
 		);
 	});
 
@@ -82,7 +82,7 @@ suite("Installation - installation channels", () => {
 		assert.strictEqual(
 			channels[0],
 			instance(pipenvInstaller),
-			"Installer must be pipenv"
+			"Installer must be pipenv",
 		);
 	});
 
@@ -100,7 +100,7 @@ suite("Installation - installation channels", () => {
 
 		const result = await cm.getInstallationChannel(
 			Product.ensurepip,
-			interpreter
+			interpreter,
 		);
 
 		assert.strictEqual(result, instance(installer1));
@@ -108,7 +108,7 @@ suite("Installation - installation channels", () => {
 
 	function mockInstaller(
 		supported: boolean,
-		priority?: number
+		priority?: number,
 	): IModuleInstaller {
 		const installer = mock<IModuleInstaller>();
 		(installer as any).then = undefined;

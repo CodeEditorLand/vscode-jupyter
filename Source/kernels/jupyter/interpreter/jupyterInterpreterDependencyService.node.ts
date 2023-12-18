@@ -10,28 +10,28 @@ import {
 	window,
 } from "vscode";
 import { raceCancellation } from "../../../platform/common/cancellation";
-import { traceError } from "../../../platform/logging";
-import { DataScience, Common } from "../../../platform/common/utils/localize";
+import { JupyterCommands } from "../../../platform/common/constants";
+import { HelpLinks } from "../../../platform/common/constants";
+import { Common, DataScience } from "../../../platform/common/utils/localize";
 import { noop } from "../../../platform/common/utils/misc";
+import { JupyterInstallError } from "../../../platform/errors/jupyterInstallError";
+import { ProductNames } from "../../../platform/interpreter/installer/productNames";
+import {
+	IInstaller,
+	InstallerResponse,
+	Product,
+} from "../../../platform/interpreter/installer/types";
+import { traceError } from "../../../platform/logging";
+import { reportAction } from "../../../platform/progress/decorator";
+import { ReportableAction } from "../../../platform/progress/types";
 import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../../platform/pythonEnvironments/info";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
-import { JupyterCommands } from "../../../platform/common/constants";
-import { JupyterInstallError } from "../../../platform/errors/jupyterInstallError";
-import { ProductNames } from "../../../platform/interpreter/installer/productNames";
-import {
-	Product,
-	IInstaller,
-	InstallerResponse,
-} from "../../../platform/interpreter/installer/types";
-import { HelpLinks } from "../../../platform/common/constants";
-import { reportAction } from "../../../platform/progress/decorator";
-import { ReportableAction } from "../../../platform/progress/types";
+import { getComparisonKey } from "../../../platform/vscode-path/resources";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
 import { JupyterInterpreterDependencyResponse } from "../types";
 import { IJupyterCommandFactory } from "../types.node";
-import { getComparisonKey } from "../../../platform/vscode-path/resources";
 
 /**
  * Sorts the given list of products (in place) in the order in which they need to be installed.
@@ -69,7 +69,7 @@ function sortProductsInOrderForInstallation(products: Product[]) {
  */
 export function getMessageForLibrariesNotInstalled(
 	products: Product[],
-	interpreter: PythonEnvironment
+	interpreter: PythonEnvironment,
 ): string {
 	const interpreterName =
 		interpreter.displayName ||
@@ -89,21 +89,21 @@ export function getMessageForLibrariesNotInstalled(
 			return interpreterName
 				? DataScience.libraryRequiredToLaunchJupyterNotInstalledInterpreter(
 						interpreterName,
-						names[0]
-					)
+						names[0],
+				  )
 				: DataScience.libraryRequiredToLaunchJupyterNotInstalled(
-						names[0]
-					);
+						names[0],
+				  );
 		default: {
 			const lastItem = names.pop();
 			return interpreterName
 				? DataScience.librariesRequiredToLaunchJupyterNotInstalledInterpreter(
 						interpreterName,
-						`${names.join(", ")} ${Common.and} ${lastItem}`
-					)
+						`${names.join(", ")} ${Common.and} ${lastItem}`,
+				  )
 				: DataScience.librariesRequiredToLaunchJupyterNotInstalled(
-						`${names.join(", ")} ${Common.and} ${lastItem}`
-					);
+						`${names.join(", ")} ${Common.and} ${lastItem}`,
+				  );
 		}
 	}
 }
@@ -145,7 +145,7 @@ export class JupyterInterpreterDependencyService {
 	@reportAction(ReportableAction.InstallingMissingDependencies)
 	public async installMissingDependencies(
 		interpreter: PythonEnvironment,
-		_error?: JupyterInstallError
+		_error?: JupyterInstallError,
 	): Promise<JupyterInterpreterDependencyResponse> {
 		const tokenSource = new CancellationTokenSource();
 		try {
@@ -169,7 +169,7 @@ export class JupyterInterpreterDependencyService {
 				pipInstalledInNonCondaEnv === false
 					? [Product.pip].concat(missingProducts)
 					: missingProducts,
-				interpreter
+				interpreter,
 			);
 			sendTelemetryEvent(Telemetry.PythonModuleInstall, undefined, {
 				action: "displayed",
@@ -180,7 +180,7 @@ export class JupyterInterpreterDependencyService {
 				message,
 				{ modal: true },
 				DataScience.jupyterInstall,
-				DataScience.selectDifferentJupyterInterpreter
+				DataScience.selectDifferentJupyterInterpreter,
 			);
 
 			switch (selection) {
@@ -194,7 +194,7 @@ export class JupyterInterpreterDependencyService {
 						missingProducts.push(Product.jupyter);
 					}
 					const productsToInstall = missingProducts.filter(
-						(product) => product !== Product.kernelspec
+						(product) => product !== Product.kernelspec,
 					);
 					// Install jupyter, then notebook, then others in that order.
 					sortProductsInOrderForInstallation(productsToInstall);
@@ -210,8 +210,8 @@ export class JupyterInterpreterDependencyService {
 								interpreter,
 								tokenSource,
 								undefined,
-								pipInstalledInNonCondaEnv === false
-							)
+								pipInstalledInNonCondaEnv === false,
+							),
 						);
 						if (response === InstallerResponse.Installed) {
 							productToInstall = productsToInstall.shift();
@@ -233,7 +233,7 @@ export class JupyterInterpreterDependencyService {
 
 				case DataScience.pythonInteractiveHelpLink: {
 					void env.openExternal(
-						Uri.parse(HelpLinks.PythonInteractiveHelpLink)
+						Uri.parse(HelpLinks.PythonInteractiveHelpLink),
 					);
 					sendTelemetryEvent(Telemetry.UserDidNotInstallJupyter);
 					return JupyterInterpreterDependencyResponse.cancel;
@@ -257,10 +257,10 @@ export class JupyterInterpreterDependencyService {
 	 */
 	public async areDependenciesInstalled(
 		interpreter: PythonEnvironment,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<boolean> {
 		return this.getDependenciesNotInstalled(interpreter, token).then(
-			(items) => items.length === 0
+			(items) => items.length === 0,
 		);
 	}
 
@@ -273,7 +273,7 @@ export class JupyterInterpreterDependencyService {
 	 */
 	public async getDependenciesNotInstalled(
 		interpreter: PythonEnvironment,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<Product[]> {
 		// If we know that all modules were available at one point in time, then use that cache.
 		const key = getComparisonKey(interpreter.uri);
@@ -289,14 +289,16 @@ export class JupyterInterpreterDependencyService {
 				this.installer
 					.isInstalled(Product.jupyter, interpreter)
 					.then((installed) =>
-						installed ? noop() : notInstalled.push(Product.jupyter)
+						installed ? noop() : notInstalled.push(Product.jupyter),
 					),
 				this.installer
 					.isInstalled(Product.notebook, interpreter)
 					.then((installed) =>
-						installed ? noop() : notInstalled.push(Product.notebook)
+						installed
+							? noop()
+							: notInstalled.push(Product.notebook),
 					),
-			])
+			]),
 		);
 
 		if (notInstalled.length > 0) {
@@ -308,7 +310,7 @@ export class JupyterInterpreterDependencyService {
 		// Perform this check only if jupyter & notebook modules are installed.
 		const products = await this.isKernelSpecAvailable(
 			interpreter,
-			token
+			token,
 		).then((installed) => (installed ? [] : [Product.kernelspec]));
 		if (products.length === 0) {
 			this.dependenciesInstalledInInterpreter.add(key);
@@ -326,14 +328,14 @@ export class JupyterInterpreterDependencyService {
 	 */
 	private async isKernelSpecAvailable(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken
+		_token?: CancellationToken,
 	): Promise<boolean> {
 		const command = this.commandFactory.createInterpreterCommand(
 			JupyterCommands.KernelSpecCommand,
 			"jupyter",
 			["-m", "jupyter", "kernelspec"],
 			interpreter,
-			false
+			false,
 		);
 		return command
 			.exec(["--version"], { throwOnStdErr: true })
@@ -357,7 +359,7 @@ export class JupyterInterpreterDependencyService {
 	 */
 	private async checkKernelSpecAvailability(
 		interpreter: PythonEnvironment,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<JupyterInterpreterDependencyResponse> {
 		if (await this.isKernelSpecAvailable(interpreter)) {
 			return JupyterInterpreterDependencyResponse.ok;
@@ -369,7 +371,7 @@ export class JupyterInterpreterDependencyService {
 		const selectionFromError = await window.showErrorMessage(
 			DataScience.jupyterKernelSpecModuleNotFound(interpreter.uri.fsPath),
 			{ modal: true },
-			DataScience.selectDifferentJupyterInterpreter
+			DataScience.selectDifferentJupyterInterpreter,
 		);
 		return selectionFromError ===
 			DataScience.selectDifferentJupyterInterpreter

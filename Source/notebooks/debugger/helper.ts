@@ -12,15 +12,15 @@ import {
 } from "./debuggingTypes";
 
 export enum IpykernelCheckResult {
-	Unknown,
-	Ok,
-	Outdated,
-	NotInstalled,
-	ControllerNotSelected,
+	Unknown = 0,
+	Ok = 1,
+	Outdated = 2,
+	NotInstalled = 3,
+	ControllerNotSelected = 4,
 }
 
 export async function isUsingIpykernel6OrLater(
-	execution: INotebookKernelExecution
+	execution: INotebookKernelExecution,
 ): Promise<IpykernelCheckResult> {
 	const delimiter = `5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`;
 	const code = `import builtins
@@ -34,7 +34,7 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 	for (const line of output) {
 		if (line.output_type !== "stream") continue;
 
-		let lineText = line.text?.toString().trim() ?? "";
+		const lineText = line.text?.toString().trim() ?? "";
 		if (!lineText.includes(delimiter)) {
 			continue;
 		}
@@ -55,7 +55,7 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 }
 
 export function assertIsDebugConfig(
-	thing: unknown
+	thing: unknown,
 ): asserts thing is INotebookDebugConfig {
 	const config = thing as INotebookDebugConfig;
 	if (
@@ -71,7 +71,7 @@ export function assertIsDebugConfig(
 }
 
 export function assertIsInteractiveWindowDebugConfig(
-	thing: unknown
+	thing: unknown,
 ): asserts thing is IInteractiveWindowDebugConfig {
 	assertIsDebugConfig(thing);
 	if (thing.__mode !== KernelDebugMode.InteractiveWindow) {
@@ -87,8 +87,8 @@ export function getMessageSourceAndHookIt(
 			line?: number;
 			endLine?: number;
 		},
-		source?: DebugProtocol.Source
-	) => void
+		source?: DebugProtocol.Source,
+	) => void,
 ): void {
 	switch (msg.type) {
 		case "event":
@@ -102,7 +102,8 @@ export function getMessageSourceAndHookIt(
 					break;
 				case "breakpoint":
 					sourceHook(
-						(event as DebugProtocol.BreakpointEvent).body.breakpoint
+						(event as DebugProtocol.BreakpointEvent).body
+							.breakpoint,
 					);
 					break;
 				default:
@@ -132,17 +133,17 @@ export function getMessageSourceAndHookIt(
 				case "breakpointLocations":
 					// TODO this technically would have to be mapped to two different sources, in reality, I don't think that will happen in vscode
 					sourceHook(
-						request.arguments as DebugProtocol.BreakpointLocationsArguments
+						request.arguments as DebugProtocol.BreakpointLocationsArguments,
 					);
 					break;
 				case "source":
 					sourceHook(
-						request.arguments as DebugProtocol.SourceArguments
+						request.arguments as DebugProtocol.SourceArguments,
 					);
 					break;
 				case "gotoTargets":
 					sourceHook(
-						request.arguments as DebugProtocol.GotoTargetsArguments
+						request.arguments as DebugProtocol.GotoTargetsArguments,
 					);
 					break;
 				default:
@@ -204,20 +205,20 @@ export function isShortNamePath(path: string): boolean {
 
 export function shortNameMatchesLongName(
 	shortNamePath: string,
-	longNamePath: string
+	longNamePath: string,
 ): boolean {
 	const r = new RegExp(
 		shortNamePath
 			.replace(/\\/g, "\\\\")
 			.replace(/~\d+\\\\/g, "[^\\\\]+\\\\"),
-		"i"
+		"i",
 	);
 	return r.test(longNamePath);
 }
 
 export async function cellDebugSetup(
 	execution: INotebookKernelExecution,
-	debugAdapter: IKernelDebugAdapter
+	debugAdapter: IKernelDebugAdapter,
 ): Promise<void> {
 	// remove this if when https://github.com/microsoft/debugpy/issues/706 is fixed and ipykernel ships it
 	// executing this code restarts debugpy and fixes https://github.com/microsoft/vscode-jupyter/issues/7251

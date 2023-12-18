@@ -9,7 +9,7 @@
  * @returns
  */
 export function serializeDataViews(
-	buffers: undefined | (ArrayBuffer | ArrayBufferView)[]
+	buffers: undefined | (ArrayBuffer | ArrayBufferView)[],
 ) {
 	if (!buffers || !Array.isArray(buffers) || buffers.length === 0) {
 		return;
@@ -24,7 +24,7 @@ export function serializeDataViews(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const buffer = Array.apply(
 				null,
-				new Uint8Array(item.buffer as any) as any
+				new Uint8Array(item.buffer as any) as any,
 			);
 			newBufferView.push({
 				...item,
@@ -55,7 +55,7 @@ export function serializeDataViews(
  * @returns
  */
 export function deserializeDataViews(
-	buffers: undefined | (ArrayBuffer | ArrayBufferView)[]
+	buffers: undefined | (ArrayBuffer | ArrayBufferView)[],
 ) {
 	if (!Array.isArray(buffers) || buffers.length === 0) {
 		return buffers;
@@ -71,7 +71,7 @@ export function deserializeDataViews(
 			const bufferView = new DataView(
 				buffer,
 				item.byteOffset,
-				item.byteLength
+				item.byteLength,
 			);
 			newBufferView.push(bufferView);
 		} else {

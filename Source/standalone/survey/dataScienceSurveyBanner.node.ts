@@ -11,7 +11,8 @@ import {
 	window,
 } from "vscode";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { traceError } from "../../platform/logging";
+import { getVSCodeChannel } from "../../platform/common/application/applicationEnvironment";
+import { openInBrowser } from "../../platform/common/net/browser";
 import {
 	BannerType,
 	IDisposableRegistry,
@@ -19,12 +20,11 @@ import {
 	IPersistentState,
 	IPersistentStateFactory,
 } from "../../platform/common/types";
-import * as localize from "../../platform/common/utils/localize";
-import { MillisecondsInADay, isCodeSpace } from "../../platform/constants.node";
 import { isJupyterNotebook } from "../../platform/common/utils";
+import * as localize from "../../platform/common/utils/localize";
 import { noop } from "../../platform/common/utils/misc";
-import { openInBrowser } from "../../platform/common/net/browser";
-import { getVSCodeChannel } from "../../platform/common/application/applicationEnvironment";
+import { MillisecondsInADay, isCodeSpace } from "../../platform/constants.node";
+import { traceError } from "../../platform/logging";
 
 export const ISurveyBanner = Symbol("ISurveyBanner");
 export interface ISurveyBanner
@@ -42,8 +42,8 @@ export enum ExperimentNotebookSurveyStateKeys {
 }
 
 enum DSSurveyLabelIndex {
-	Yes,
-	No,
+	Yes = 0,
+	No = 1,
 }
 
 export type ShowBannerWithExpiryTime = {
@@ -97,7 +97,7 @@ export class DataScienceSurveyBanner
 		return this.showBannerState.get(type)!.value.expiry! < Date.now();
 	}
 
-	private disabledInCurrentSession: boolean = false;
+	private disabledInCurrentSession = false;
 	private bannerLabels: string[] = [
 		localize.DataScienceSurveyBanner.bannerLabelYes,
 		localize.DataScienceSurveyBanner.bannerLabelNo,
@@ -136,7 +136,7 @@ export class DataScienceSurveyBanner
 		notebooks.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -150,7 +150,7 @@ export class DataScienceSurveyBanner
 
 		const response = await window.showInformationMessage(
 			this.getBannerMessage(type),
-			...this.bannerLabels
+			...this.bannerLabels,
 		);
 		switch (response) {
 			case this.bannerLabels[DSSurveyLabelIndex.Yes]: {
@@ -188,8 +188,8 @@ export class DataScienceSurveyBanner
 				val,
 				{
 					data: true,
-				}
-			)
+				},
+			),
 		);
 	}
 
@@ -197,7 +197,7 @@ export class DataScienceSurveyBanner
 		openInBrowser(this.getSurveyLink(type));
 	}
 	private async disable(answer: DSSurveyLabelIndex, type: BannerType) {
-		let monthsTillNextPrompt = answer === DSSurveyLabelIndex.Yes ? 6 : 4;
+		const monthsTillNextPrompt = answer === DSSurveyLabelIndex.Yes ? 6 : 4;
 
 		if (monthsTillNextPrompt) {
 			await this.showBannerState.get(type)!.updateValue({
@@ -212,11 +212,11 @@ export class DataScienceSurveyBanner
 		switch (type) {
 			case BannerType.InsidersNotebookSurvey:
 				return this.getPersistentState(
-					InsidersNotebookSurveyStateKeys.ExecutionCount
+					InsidersNotebookSurveyStateKeys.ExecutionCount,
 				);
 			case BannerType.ExperimentNotebookSurvey:
 				return this.getPersistentState(
-					ExperimentNotebookSurveyStateKeys.ExecutionCount
+					ExperimentNotebookSurveyStateKeys.ExecutionCount,
 				);
 			default:
 				traceError("Invalid Banner type");
@@ -227,14 +227,14 @@ export class DataScienceSurveyBanner
 	private getPersistentState(val: string): number {
 		const state = this.persistentState.createGlobalPersistentState<number>(
 			val,
-			0
+			0,
 		);
 		return state.value;
 	}
 
 	// Handle when a cell finishes execution
 	private async onDidChangeNotebookCellExecutionState(
-		cellStateChange: NotebookCellExecutionStateChangeEvent
+		cellStateChange: NotebookCellExecutionStateChangeEvent,
 	): Promise<void> {
 		if (!isJupyterNotebook(cellStateChange.cell.notebook)) {
 			return;
@@ -244,11 +244,11 @@ export class DataScienceSurveyBanner
 		if (cellStateChange.state === NotebookCellExecutionState.Executing) {
 			this.updateStateAndShowBanner(
 				InsidersNotebookSurveyStateKeys.ExecutionCount,
-				BannerType.InsidersNotebookSurvey
+				BannerType.InsidersNotebookSurvey,
 			).catch(noop);
 			this.updateStateAndShowBanner(
 				ExperimentNotebookSurveyStateKeys.ExecutionCount,
-				BannerType.ExperimentNotebookSurvey
+				BannerType.ExperimentNotebookSurvey,
 			).catch(noop);
 		}
 	}
@@ -256,7 +256,7 @@ export class DataScienceSurveyBanner
 	private async updateStateAndShowBanner(val: string, banner: BannerType) {
 		const state = this.persistentState.createGlobalPersistentState<number>(
 			val,
-			0
+			0,
 		);
 		await state.updateValue(state.value + 1);
 		this.showBanner(banner).catch(noop);

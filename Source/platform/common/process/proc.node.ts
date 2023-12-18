@@ -11,8 +11,11 @@ import {
 import { TraceOptions } from "../../logging/types";
 import { IDisposable } from "../types";
 import { createDeferred } from "../utils/async";
+import { dispose } from "../utils/lifecycle";
+import { noop } from "../utils/misc";
 import { EnvironmentVariables } from "../variables/types";
 import { DEFAULT_ENCODING } from "./constants.node";
+import { logProcess } from "./logger.node";
 import {
 	ExecutionResult,
 	IBufferDecoder,
@@ -23,9 +26,6 @@ import {
 	SpawnOptions,
 	StdErrError,
 } from "./types.node";
-import { logProcess } from "./logger.node";
-import { noop } from "../utils/misc";
-import { dispose } from "../utils/lifecycle";
 
 export class BufferDecoder implements IBufferDecoder {
 	public decode(buffers: Buffer[]): string {
@@ -85,7 +85,7 @@ export class ProcessService implements IProcessService {
 	public execObservable(
 		file: string,
 		args: string[],
-		options: SpawnOptions = {}
+		options: SpawnOptions = {},
 	): ObservableExecutionResult<string> {
 		const spawnOptions = this.getDefaultOptions(options);
 		const proc = spawn(file, args, spawnOptions);
@@ -94,7 +94,7 @@ export class ProcessService implements IProcessService {
 		const disposables: IDisposable[] = [];
 		const disposable: IDisposable = {
 			// eslint-disable-next-line
-			dispose: function () {
+			dispose: () => {
 				if (proc && !proc.killed && !procExited) {
 					ProcessService.kill(proc.pid);
 				}
@@ -123,7 +123,7 @@ export class ProcessService implements IProcessService {
 						ProcessService.kill(proc.pid);
 						procExited = true;
 					}
-				})
+				}),
 			);
 		}
 
@@ -166,7 +166,7 @@ export class ProcessService implements IProcessService {
 	public exec(
 		file: string,
 		args: string[],
-		options: SpawnOptions = {}
+		options: SpawnOptions = {},
 	): Promise<ExecutionResult<string>> {
 		const spawnOptions = this.getDefaultOptions(options);
 		const proc = spawn(file, args, spawnOptions);
@@ -190,7 +190,7 @@ export class ProcessService implements IProcessService {
 
 		if (options.token) {
 			disposables.push(
-				options.token.onCancellationRequested(disposable.dispose)
+				options.token.onCancellationRequested(disposable.dispose),
 			);
 		}
 
@@ -234,11 +234,11 @@ export class ProcessService implements IProcessService {
 
 	@traceDecoratorVerbose(
 		"Execing shell command",
-		TraceOptions.BeforeCall | TraceOptions.Arguments
+		TraceOptions.BeforeCall | TraceOptions.Arguments,
 	)
 	public shellExec(
 		command: string,
-		@ignoreLogging() options: ShellOptions = {}
+		@ignoreLogging() options: ShellOptions = {},
 	): Promise<ExecutionResult<string>> {
 		const shellOptions = this.getDefaultOptions(options);
 		return new Promise((resolve, reject) => {
@@ -284,7 +284,7 @@ export class ProcessService implements IProcessService {
 	}
 
 	private getDefaultOptions<T extends ShellOptions | SpawnOptions>(
-		options: T
+		options: T,
 	): T {
 		const defaultOptions = { ...options };
 		const execOptions = defaultOptions as SpawnOptions;

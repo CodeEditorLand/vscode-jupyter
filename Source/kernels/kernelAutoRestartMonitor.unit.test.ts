@@ -2,30 +2,30 @@
 // Licensed under the MIT License.
 
 import type { KernelMessage } from "@jupyterlab/services";
-import { instance, mock, verify, when } from "ts-mockito";
 import { assert } from "chai";
+import { instance, mock, verify, when } from "ts-mockito";
 import { EventEmitter } from "vscode";
+import { IDisposable } from "../platform/common/types";
+import { dispose } from "../platform/common/utils/lifecycle";
+import { KernelProgressReporter } from "../platform/progress/kernelProgressReporter";
 import { KernelAutoRestartMonitor } from "./kernelAutoRestartMonitor.node";
 import {
 	IKernel,
-	IKernelSession,
 	IKernelProvider,
+	IKernelSession,
 	LocalKernelSpecConnectionMetadata,
 } from "./types";
-import { dispose } from "../platform/common/utils/lifecycle";
-import { IDisposable } from "../platform/common/types";
-import { KernelProgressReporter } from "../platform/progress/kernelProgressReporter";
 
 suite("Jupyter Execution", async () => {
 	let kernelProvider: IKernelProvider;
 	let restartMonitor: KernelAutoRestartMonitor;
-	let onKernelStatusChanged = new EventEmitter<{
+	const onKernelStatusChanged = new EventEmitter<{
 		status: KernelMessage.Status;
 		kernel: IKernel;
 	}>();
-	let onDidStartKernel = new EventEmitter<IKernel>();
-	let onDidReStartKernel = new EventEmitter<IKernel>();
-	let onDidDisposeKernel = new EventEmitter<IKernel>();
+	const onDidStartKernel = new EventEmitter<IKernel>();
+	const onDidReStartKernel = new EventEmitter<IKernel>();
+	const onDidDisposeKernel = new EventEmitter<IKernel>();
 	let disposables: IDisposable[] = [];
 	const connectionMetadata = LocalKernelSpecConnectionMetadata.create({
 		id: "123",
@@ -39,20 +39,20 @@ suite("Jupyter Execution", async () => {
 	setup(() => {
 		kernelProvider = mock<IKernelProvider>();
 		when(kernelProvider.onDidRestartKernel).thenReturn(
-			onDidReStartKernel.event
+			onDidReStartKernel.event,
 		);
 		when(kernelProvider.onDidStartKernel).thenReturn(
-			onDidStartKernel.event
+			onDidStartKernel.event,
 		);
 		when(kernelProvider.onDidDisposeKernel).thenReturn(
-			onDidDisposeKernel.event
+			onDidDisposeKernel.event,
 		);
 		when(kernelProvider.onKernelStatusChanged).thenReturn(
-			onKernelStatusChanged.event
+			onKernelStatusChanged.event,
 		);
 		restartMonitor = new KernelAutoRestartMonitor(
 			disposables,
-			instance(kernelProvider)
+			instance(kernelProvider),
 		);
 	});
 	teardown(() => {
@@ -74,7 +74,7 @@ suite("Jupyter Execution", async () => {
 		verifyProgressDisplay("localJupyter");
 	});
 	function verifyProgressDisplay(
-		sessionType: "remoteJupyter" | "localJupyter" | "localRaw"
+		sessionType: "remoteJupyter" | "localJupyter" | "localRaw",
 	) {
 		restartMonitor.activate();
 

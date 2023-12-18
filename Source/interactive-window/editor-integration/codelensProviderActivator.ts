@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable, inject } from "inversify";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IDataScienceCodeLensProvider } from "./types";
+import { inject, injectable } from "inversify";
 import { languages } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { PYTHON_FILE_ANY_SCHEME } from "../../platform/common/constants";
 import { IExtensionContext } from "../../platform/common/types";
+import { IDataScienceCodeLensProvider } from "./types";
 
 @injectable()
 export class CodeLensProviderActivator
@@ -22,8 +22,8 @@ export class CodeLensProviderActivator
 		this.extensionContext.subscriptions.push(
 			languages.registerCodeLensProvider(
 				[PYTHON_FILE_ANY_SCHEME],
-				this.dataScienceCodeLensProvider
-			)
+				this.dataScienceCodeLensProvider,
+			),
 		);
 	}
 }

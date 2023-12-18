@@ -3,28 +3,28 @@
 
 import { inject, injectable, optional } from "inversify";
 import { NotebookDocument, extensions } from "vscode";
+import { trackKernelResourceInformation } from "../../kernels/telemetry/helper";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import {
-	IPythonExtensionChecker,
 	IPythonApiProvider,
+	IPythonExtensionChecker,
 } from "../../platform/api/types";
 import {
 	IDisposableRegistry,
 	InterpreterUri,
 } from "../../platform/common/types";
 import { isResource, noop } from "../../platform/common/utils/misc";
+import { isWebExtension } from "../../platform/constants";
 import { IInterpreterService } from "../../platform/interpreter/contracts";
 import {
 	IInstaller,
 	Product,
 } from "../../platform/interpreter/installer/types";
+import { IInterpreterPackages } from "../../platform/interpreter/types";
 import {
 	IControllerRegistration,
 	IVSCodeNotebookController,
 } from "../controllers/types";
-import { trackKernelResourceInformation } from "../../kernels/telemetry/helper";
-import { IInterpreterPackages } from "../../platform/interpreter/types";
-import { isWebExtension } from "../../platform/constants";
 
 /**
  * Watches interpreter and notebook selection events in order to ask the IInterpreterPackages service to track
@@ -56,30 +56,30 @@ export class InterpreterPackageTracker
 		this.notebookControllerManager.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		if (!isWebExtension()) {
 			this.interpreterService.onDidChangeInterpreter(
 				this.trackPackagesOfActiveInterpreter,
 				this,
-				this.disposables
+				this.disposables,
 			);
 		}
 		this.installer?.onInstalled(
 			this.onDidInstallPackage,
 			this,
-			this.disposables
+			this.disposables,
 		); // Not supported in Web
 		extensions.onDidChange(
 			this.trackUponActivation,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.trackUponActivation().catch(noop);
 		this.apiProvider.onDidActivatePythonExtension(
 			this.trackUponActivation,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private async onNotebookControllerSelected(event: {
@@ -93,7 +93,7 @@ export class InterpreterPackageTracker
 			kernelConnection: event.controller.connection,
 		});
 		await this.packages.trackPackages(
-			event.controller.connection.interpreter
+			event.controller.connection.interpreter,
 		);
 	}
 	private async trackUponActivation() {
@@ -129,7 +129,7 @@ export class InterpreterPackageTracker
 			// Get details of active interpreter for the Uri provided.
 			const activeInterpreter =
 				await this.interpreterService.getActiveInterpreter(
-					args.resource
+					args.resource,
 				);
 			await this.packages.trackPackages(activeInterpreter, true);
 		} else {

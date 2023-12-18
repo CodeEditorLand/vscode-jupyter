@@ -12,46 +12,46 @@ import {
 } from "vscode";
 import { KernelConnectionMetadata } from "../../../kernels/types";
 import { IDisposable } from "../../../platform/common/types";
+import { DisposableBase } from "../../../platform/common/utils/lifecycle";
 import { Common, DataScience } from "../../../platform/common/utils/localize";
 import { noop } from "../../../platform/common/utils/misc";
 import { InputFlowAction } from "../../../platform/common/utils/multiStepInput";
 import { ServiceContainer } from "../../../platform/ioc/container";
 import {
-	CommandQuickPickItem,
-	ConnectionQuickPickItem,
-	KernelListErrorQuickPickItem,
-	IQuickPickKernelItemProvider,
-} from "./types";
-import {
 	IConnectionDisplayData,
 	IConnectionDisplayDataProvider,
 } from "../types";
-import { DisposableBase } from "../../../platform/common/utils/lifecycle";
+import {
+	CommandQuickPickItem,
+	ConnectionQuickPickItem,
+	IQuickPickKernelItemProvider,
+	KernelListErrorQuickPickItem,
+} from "./types";
 export type CompoundQuickPickItem =
 	| CommandQuickPickItem
 	| ConnectionQuickPickItem
 	| KernelListErrorQuickPickItem
 	| QuickPickItem;
 export function isKernelPickItem(
-	item: CompoundQuickPickItem
+	item: CompoundQuickPickItem,
 ): item is ConnectionQuickPickItem {
 	return "connection" in item;
 }
 export function isCommandQuickPickItem(
-	item: CompoundQuickPickItem
+	item: CompoundQuickPickItem,
 ): item is CommandQuickPickItem {
 	return "command" in item;
 }
 function updateKernelQuickPickWithNewItems<T extends CompoundQuickPickItem>(
 	quickPick: QuickPick<T>,
 	items: T[],
-	activeItem?: T
+	activeItem?: T,
 ) {
 	const activeItems = activeItem
 		? [activeItem]
 		: quickPick.activeItems.length
-			? [quickPick.activeItems[0]]
-			: [];
+		  ? [quickPick.activeItems[0]]
+		  : [];
 	if (activeItems.length && !items.includes(activeItems[0])) {
 		const oldActiveItem = activeItems[0];
 		const newActiveKernelQuickPickItem =
@@ -59,7 +59,7 @@ function updateKernelQuickPickWithNewItems<T extends CompoundQuickPickItem>(
 			items.find(
 				(item) =>
 					isKernelPickItem(item) &&
-					item.connection.id === oldActiveItem.connection.id
+					item.connection.id === oldActiveItem.connection.id,
 			);
 		// Find this same quick pick item.
 		if (newActiveKernelQuickPickItem) {
@@ -100,16 +100,16 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 	protected quickPickItems: (QuickPickItem | ConnectionQuickPickItem)[] = [];
 	constructor(
 		protected readonly provider: IQuickPickKernelItemProvider,
-		protected readonly token: CancellationToken
+		protected readonly token: CancellationToken,
 	) {
 		super();
 		this.displayDataProvider =
 			ServiceContainer.instance.get<IConnectionDisplayDataProvider>(
-				IConnectionDisplayDataProvider
+				IConnectionDisplayDataProvider,
 			);
 	}
 	public async selectKernel(
-		quickPickFactory: CreateAndSelectItemFromQuickPick
+		quickPickFactory: CreateAndSelectItemFromQuickPick,
 	): Promise<
 		| { selection: "controller"; connection: KernelConnectionMetadata }
 		| { selection: "userPerformedSomeOtherAction" }
@@ -124,7 +124,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		quickPickFactory: CreateAndSelectItemFromQuickPick,
 		quickPickToBeUpdated: {
 			quickPick: QuickPick<CompoundQuickPickItem> | undefined;
-		}
+		},
 	): Promise<
 		| { selection: "controller"; connection: KernelConnectionMetadata }
 		| { selection: "userPerformedSomeOtherAction" }
@@ -134,7 +134,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			return;
 		}
 		const items = this.provider.kernels.map((connection) =>
-			this.connectionToQuickPick(connection)
+			this.connectionToQuickPick(connection),
 		);
 		this.quickPickItems.push({
 			kind: QuickPickItemKind.Separator,
@@ -146,14 +146,14 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 
 		return this.selectKernelImplInternal(
 			quickPickFactory,
-			quickPickToBeUpdated
+			quickPickToBeUpdated,
 		);
 	}
 	private async selectKernelImplInternal(
 		quickPickFactory: CreateAndSelectItemFromQuickPick,
 		quickPickToBeUpdated: {
 			quickPick: QuickPick<CompoundQuickPickItem> | undefined;
-		}
+		},
 	): Promise<
 		| { selection: "controller"; connection: KernelConnectionMetadata }
 		| { selection: "userPerformedSomeOtherAction" }
@@ -197,16 +197,16 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 					case "idle":
 						timeout = setTimeout(
 							() => (quickPick.busy = false),
-							500
+							500,
 						);
 						this._register(
 							new Disposable(
-								() => timeout && clearTimeout(timeout)
-							)
+								() => timeout && clearTimeout(timeout),
+							),
 						);
 						break;
 				}
-			}, this)
+			}, this),
 		);
 
 		this.updateRecommended(quickPick);
@@ -214,14 +214,14 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		this._register(
 			this.provider.onDidChangeRecommended(
 				() => this.updateRecommended(quickPick),
-				this
-			)
+				this,
+			),
 		);
 		this._register(
 			this.provider.onDidChange(
 				() => this.updateQuickPickItems(quickPick),
-				this
-			)
+				this,
+			),
 		);
 
 		const result = await selection;
@@ -241,7 +241,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 				} else if (ex === InputFlowAction.back) {
 					return this.selectKernelImplInternal(
 						quickPickFactory,
-						quickPickToBeUpdated
+						quickPickToBeUpdated,
 					);
 				}
 				throw ex;
@@ -254,14 +254,14 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		}
 	}
 	protected updateQuickPickItems(
-		quickPick: QuickPick<CompoundQuickPickItem>
+		quickPick: QuickPick<CompoundQuickPickItem>,
 	) {
 		quickPick.title = this.provider.title;
 		const currentConnections = new Set(
 			quickPick.items
 				.filter((item) => isKernelPickItem(item))
 				.map((item) => item as ConnectionQuickPickItem)
-				.map((item) => item.connection.id)
+				.map((item) => item.connection.id),
 		);
 		const items = this.provider.kernels
 			.filter((kernel) => !currentConnections.has(kernel.id))
@@ -278,12 +278,12 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			Array.from(currentItemsInCategory).map((item) => [
 				item.connection.id,
 				item,
-			])
+			]),
 		);
 		const oldItemCount = currentItemsInCategory.size;
 		items.forEach((item) => {
 			const existingItem = currentItemIdsInCategory.get(
-				item.connection.id
+				item.connection.id,
 			);
 			if (existingItem) {
 				currentItemsInCategory.delete(existingItem);
@@ -295,25 +295,25 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		this.quickPickItems.splice(
 			indexOfExistingCategory + 1,
 			oldItemCount,
-			...newItems
+			...newItems,
 		);
 
 		this.rebuildQuickPickItems(quickPick);
 	}
 	private rebuildQuickPickItems(quickPick: QuickPick<CompoundQuickPickItem>) {
 		let recommendedItem = this.recommendedItems.find((item) =>
-			isKernelPickItem(item)
+			isKernelPickItem(item),
 		);
 		const recommendedConnections = new Set(
 			this.recommendedItems
 				.filter(isKernelPickItem)
-				.map((item) => item.connection.id)
+				.map((item) => item.connection.id),
 		);
 		// Ensure the recommended items isn't duplicated in the list.
 		const connections = this.quickPickItems.filter(
 			(item) =>
 				!isKernelPickItem(item) ||
-				!recommendedConnections.has(item.connection.id)
+				!recommendedConnections.has(item.connection.id),
 		);
 		const currentActiveItem = quickPick.activeItems.length
 			? quickPick.activeItems[0]
@@ -340,7 +340,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		updateKernelQuickPickWithNewItems(
 			quickPick,
 			this.recommendedItems.concat(connections),
-			recommendedItem
+			recommendedItem,
 		);
 	}
 	private removeMissingKernels(quickPick: QuickPick<CompoundQuickPickItem>) {
@@ -349,7 +349,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			.map((item) => item as ConnectionQuickPickItem)
 			.map((item) => item.connection.id);
 		const kernels = new Map<string, KernelConnectionMetadata>(
-			this.provider.kernels.map((kernel) => [kernel.id, kernel])
+			this.provider.kernels.map((kernel) => [kernel.id, kernel]),
 		);
 		const removedIds = currentConnections.filter((id) => !kernels.has(id));
 		if (removedIds.length) {
@@ -361,7 +361,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 				}
 			});
 			this.quickPickItems = this.quickPickItems.filter(
-				(item) => !itemsRemoved.includes(item)
+				(item) => !itemsRemoved.includes(item),
 			);
 			this.rebuildQuickPickItems(quickPick);
 		}
@@ -380,7 +380,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		}
 		const recommendedItem = this.connectionToQuickPick(
 			this.provider.recommended,
-			true
+			true,
 		);
 		if (this.recommendedItems.length === 2) {
 			this.recommendedItems[1] = recommendedItem;
@@ -396,10 +396,10 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 	 * Similarly its possible the user updated the kernelSpec args or the like and we need to update the quick pick to have the latest connection object.
 	 */
 	private updateQuickPickWithLatestConnection(
-		quickPick: QuickPick<CompoundQuickPickItem>
+		quickPick: QuickPick<CompoundQuickPickItem>,
 	) {
 		const kernels = new Map<string, KernelConnectionMetadata>(
-			this.provider.kernels.map((kernel) => [kernel.id, kernel])
+			this.provider.kernels.map((kernel) => [kernel.id, kernel]),
 		);
 		this.recommendedItems.concat(this.quickPickItems).forEach((item) => {
 			if (!isKernelPickItem(item) || !kernels.has(item.connection.id)) {
@@ -411,23 +411,23 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			}
 			item.label = this.connectionToQuickPick(
 				kernel,
-				item.isRecommended
+				item.isRecommended,
 			).label;
 			item.tooltip = this.connectionToQuickPick(
 				kernel,
-				item.isRecommended
+				item.isRecommended,
 			).tooltip;
 			item.detail = this.connectionToQuickPick(
 				kernel,
-				item.isRecommended
+				item.isRecommended,
 			).detail;
 			item.description = this.connectionToQuickPick(
 				kernel,
-				item.isRecommended
+				item.isRecommended,
 			).description;
 			item.isRecommended = this.connectionToQuickPick(
 				kernel,
-				item.isRecommended
+				item.isRecommended,
 			).isRecommended;
 			item.connection = kernel; // Possible some other information since then has changed, hence keep the connection up to date.
 		});
@@ -436,14 +436,14 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 
 	private connectionToQuickPick(
 		connection: KernelConnectionMetadata,
-		recommended: boolean = false
+		recommended = false,
 	): ConnectionQuickPickItem {
 		// If the recommended item is actually the selected item, then do not display the star.
 		const icon = recommended ? "$(star-full) " : "";
 		const setData = (
 			info: ConnectionQuickPickItem,
 			e: IConnectionDisplayData,
-			connection: KernelConnectionMetadata
+			connection: KernelConnectionMetadata,
 		) => {
 			info.label = `${icon}${e.label}`;
 			info.detail = e.detail;
@@ -468,7 +468,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		};
 		setData(info, displayData, connection);
 		this._register(
-			displayData.onDidChange((e) => setData(info, e, connection), this)
+			displayData.onDidChange((e) => setData(info, e, connection), this),
 		);
 		return info;
 	}

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { IChangedArgs } from "@jupyterlab/coreutils";
-import * as fakeTimers from "@sinonjs/fake-timers";
 import {
 	Kernel,
 	KernelMessage,
@@ -10,12 +9,11 @@ import {
 	Session,
 } from "@jupyterlab/services";
 import { ISignal, Signal } from "@lumino/signaling";
+import * as fakeTimers from "@sinonjs/fake-timers";
 import { assert } from "chai";
 import { anything, instance, mock, verify, when } from "ts-mockito";
 import { CancellationTokenSource, Disposable, Uri } from "vscode";
-import { IDisposable, Resource } from "../../../platform/common/types";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { noop } from "../../../platform/common/utils/misc";
+import { JupyterKernelService } from "../../../kernels/jupyter/session/jupyterKernelService.node";
 import {
 	IJupyterConnection,
 	KernelConnectionMetadata,
@@ -23,10 +21,12 @@ import {
 	LocalKernelSpecConnectionMetadata,
 	RemoteKernelSpecConnectionMetadata,
 } from "../../../kernels/types";
-import { JupyterKernelService } from "../../../kernels/jupyter/session/jupyterKernelService.node";
+import { IDisposable, Resource } from "../../../platform/common/types";
 import { dispose } from "../../../platform/common/utils/lifecycle";
-import { resolvableInstance } from "../../../test/datascience/helpers";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { noop } from "../../../platform/common/utils/misc";
 import { createEventHandler } from "../../../test/common";
+import { resolvableInstance } from "../../../test/datascience/helpers";
 import { JupyterSessionWrapper } from "./jupyterSession";
 
 suite("JupyterSession", () => {
@@ -66,7 +66,7 @@ suite("JupyterSession", () => {
 	let kernelService: JupyterKernelService;
 	function createJupyterSession(
 		resource: Resource = undefined,
-		kernelConnectionMetadata: KernelConnectionMetadata
+		kernelConnectionMetadata: KernelConnectionMetadata,
 	) {
 		connection = mock<IJupyterConnection>();
 		token = new CancellationTokenSource();
@@ -78,10 +78,10 @@ suite("JupyterSession", () => {
 		when(session.dispose()).thenReturn();
 		when(session.kernel).thenReturn(instance(kernel));
 		sessionDisposed = new Signal<Session.ISessionConnection, void>(
-			instance(session)
+			instance(session),
 		);
 		sessionPropertyChanged = new Signal<Session.ISessionConnection, "path">(
-			instance(session)
+			instance(session),
 		);
 		sessionIOPubMessage = new Signal<
 			Session.ISessionConnection,
@@ -113,19 +113,19 @@ suite("JupyterSession", () => {
 		when(session.kernelChanged).thenReturn(sessionKernelChanged);
 		when(session.statusChanged).thenReturn(
 			new Signal<Session.ISessionConnection, Kernel.Status>(
-				instance(session)
-			)
+				instance(session),
+			),
 		);
 		when(session.unhandledMessage).thenReturn(sessionUnhandledMessage);
 		when(session.connectionStatusChanged).thenReturn(
-			sessionConnectionStatusChanged
+			sessionConnectionStatusChanged,
 		);
 		when(session.anyMessage).thenReturn(sessionAnyMessage);
 		when(session.isDisposed).thenReturn(false);
 		when(kernel.status).thenReturn("idle");
 		when(kernel.connectionStatus).thenReturn("connected");
 		when(kernel.statusChanged).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>())
+			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>()),
 		);
 		when(kernel.iopubMessage).thenReturn(
 			instance(
@@ -134,8 +134,8 @@ suite("JupyterSession", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 					>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.anyMessage).thenReturn({
 			connect: noop,
@@ -148,18 +148,18 @@ suite("JupyterSession", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IMessage<KernelMessage.MessageType>
 					>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.disposed).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, void>>())
+			instance(mock<ISignal<Kernel.IKernelConnection, void>>()),
 		);
 		when(kernel.connectionStatusChanged).thenReturn(
 			instance(
 				mock<
 					ISignal<Kernel.IKernelConnection, Kernel.ConnectionStatus>
-				>()
-			)
+				>(),
+			),
 		);
 		when(connection.rootDirectory).thenReturn(Uri.file(""));
 		kernelService = mock(JupyterKernelService);
@@ -168,8 +168,8 @@ suite("JupyterSession", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 		resolvableInstance(session);
 		jupyterSession = new JupyterSessionWrapper(
@@ -177,7 +177,7 @@ suite("JupyterSession", () => {
 			resource,
 			kernelConnectionMetadata,
 			instance(kernelService),
-			"jupyterExtension"
+			"jupyterExtension",
 		);
 	}
 	teardown(async () => {
@@ -198,16 +198,16 @@ suite("JupyterSession", () => {
 						id: "1",
 						extensionId: "",
 					},
-				})
+				}),
 			);
 
 			const onDidShutdown = createEventHandler(
 				jupyterSession,
-				"onDidShutdown"
+				"onDidShutdown",
 			);
 			const onDidDispose = createEventHandler(
 				jupyterSession,
-				"onDidDispose"
+				"onDidDispose",
 			);
 			let disposeSignalled = false;
 			jupyterSession.disposed.connect(() => (disposeSignalled = true));
@@ -238,16 +238,16 @@ suite("JupyterSession", () => {
 						id: "1",
 						extensionId: "",
 					},
-				})
+				}),
 			);
 
 			const onDidShutdown = createEventHandler(
 				jupyterSession,
-				"onDidShutdown"
+				"onDidShutdown",
 			);
 			const onDidDispose = createEventHandler(
 				jupyterSession,
-				"onDidDispose"
+				"onDidDispose",
 			);
 			let disposeSignalled = false;
 			jupyterSession.disposed.connect(() => (disposeSignalled = true));
@@ -280,16 +280,16 @@ suite("JupyterSession", () => {
 						id: "1",
 						extensionId: "",
 					},
-				})
+				}),
 			);
 
 			const onDidShutdown = createEventHandler(
 				jupyterSession,
-				"onDidShutdown"
+				"onDidShutdown",
 			);
 			const onDidDispose = createEventHandler(
 				jupyterSession,
-				"onDidDispose"
+				"onDidDispose",
 			);
 			let disposeSignalled = false;
 			jupyterSession.disposed.connect(() => (disposeSignalled = true));
@@ -319,16 +319,16 @@ suite("JupyterSession", () => {
 						id: "1",
 						extensionId: "",
 					},
-				})
+				}),
 			);
 
 			const onDidShutdown = createEventHandler(
 				jupyterSession,
-				"onDidShutdown"
+				"onDidShutdown",
 			);
 			const onDidDispose = createEventHandler(
 				jupyterSession,
-				"onDidDispose"
+				"onDidDispose",
 			);
 			let disposeSignalled = false;
 			jupyterSession.disposed.connect(() => (disposeSignalled = true));
@@ -358,16 +358,16 @@ suite("JupyterSession", () => {
 						id: "1",
 						extensionId: "",
 					},
-				})
+				}),
 			);
 
 			const onDidShutdown = createEventHandler(
 				jupyterSession,
-				"onDidShutdown"
+				"onDidShutdown",
 			);
 			const onDidDispose = createEventHandler(
 				jupyterSession,
-				"onDidDispose"
+				"onDidDispose",
 			);
 			let disposeSignalled = false;
 			jupyterSession.disposed.connect(() => (disposeSignalled = true));
@@ -392,16 +392,16 @@ suite("JupyterSession", () => {
 					id: "",
 					kernelSpec: {} as any,
 					interpreter: {} as any,
-				})
+				}),
 			);
 
 			const onDidShutdown = createEventHandler(
 				jupyterSession,
-				"onDidShutdown"
+				"onDidShutdown",
 			);
 			const onDidDispose = createEventHandler(
 				jupyterSession,
-				"onDidDispose"
+				"onDidDispose",
 			);
 			let disposeSignalled = false;
 			jupyterSession.disposed.connect(() => (disposeSignalled = true));
@@ -431,7 +431,7 @@ suite("JupyterSession", () => {
 									id: "",
 									kernelSpec: {} as any,
 									interpreter: {} as any,
-								})
+							  })
 							: RemoteKernelSpecConnectionMetadata.create({
 									id: "",
 									kernelSpec: {} as any,
@@ -441,10 +441,10 @@ suite("JupyterSession", () => {
 										id: "1",
 										extensionId: "",
 									},
-								});
+							  });
 					createJupyterSession(
 						Uri.file("test.ipynb"),
-						kernelConnection
+						kernelConnection,
 					);
 				});
 				suiteTeardown(() => token.dispose());
@@ -455,14 +455,14 @@ suite("JupyterSession", () => {
 
 					const promise = jupyterSession.waitForIdle(
 						100,
-						token.token
+						token.token,
 					);
 					promise.catch(noop);
 					await clock.runAllAsync();
 
 					await assert.isRejected(
 						promise,
-						DataScience.jupyterLaunchTimedOut
+						DataScience.jupyterLaunchTimedOut,
 					);
 				});
 				test("Will succeed", async () => {
@@ -484,7 +484,7 @@ suite("JupyterSession", () => {
 						id: "",
 						kernelSpec: {} as any,
 						interpreter: {} as any,
-					})
+					}),
 				);
 			});
 
@@ -500,10 +500,10 @@ suite("JupyterSession", () => {
 				when(future.done).thenReturn(Promise.resolve(undefined as any));
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				when(
-					kernel.requestExecute(anything(), anything(), anything())
+					kernel.requestExecute(anything(), anything(), anything()),
 				).thenReturn(instance(future) as any);
 				when(kernel.requestExecute(anything())).thenReturn(
-					instance(future) as any
+					instance(future) as any,
 				);
 
 				const result = jupyterSession.kernel!.requestExecute({
@@ -521,7 +521,7 @@ suite("JupyterSession", () => {
 				const sessionServerSettings: ServerConnection.ISettings =
 					mock<ServerConnection.ISettings>();
 				when(session.serverSettings).thenReturn(
-					instance(sessionServerSettings)
+					instance(sessionServerSettings),
 				);
 
 				await executeUserCode();
@@ -539,8 +539,8 @@ suite("JupyterSession", () => {
 						anything(),
 						anything(),
 						anything(),
-						anything()
-					)
+						anything(),
+					),
 				).once();
 			});
 			test("Restart should fail if user cancels from installing missing dependencies", async () => {
@@ -548,7 +548,7 @@ suite("JupyterSession", () => {
 				const sessionServerSettings: ServerConnection.ISettings =
 					mock<ServerConnection.ISettings>();
 				when(session.serverSettings).thenReturn(
-					instance(sessionServerSettings)
+					instance(sessionServerSettings),
 				);
 				when(
 					kernelService.ensureKernelIsUsable(
@@ -556,13 +556,13 @@ suite("JupyterSession", () => {
 						anything(),
 						anything(),
 						anything(),
-						anything()
-					)
+						anything(),
+					),
 				).thenReject(new Error("Do not install missing dependencies"));
 
 				await assert.isRejected(
 					jupyterSession.restart(),
-					"Do not install missing dependencies"
+					"Do not install missing dependencies",
 				);
 
 				// We should not kill session.
@@ -576,8 +576,8 @@ suite("JupyterSession", () => {
 						anything(),
 						anything(),
 						anything(),
-						anything()
-					)
+						anything(),
+					),
 				).once();
 			});
 		});

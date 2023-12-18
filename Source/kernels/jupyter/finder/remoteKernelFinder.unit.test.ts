@@ -3,14 +3,24 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as sinon from "sinon";
 import type { Session } from "@jupyterlab/services";
 import { assert } from "chai";
+import * as sinon from "sinon";
 import { anything, instance, mock, verify, when } from "ts-mockito";
-import { getDisplayNameOrNameOfKernelConnection } from "../../helpers";
 import { Disposable, Uri } from "vscode";
+import { IApplicationEnvironment } from "../../../platform/common/application/types";
 import { CryptoUtils } from "../../../platform/common/crypto";
+import { IFileSystem } from "../../../platform/common/platform/types";
+import { IExtensionContext } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
+import { TestEventHandler, createEventHandler } from "../../../test/common";
 import { noop, sleep } from "../../../test/core";
+import {
+	resolvableInstance,
+	uriEquals,
+} from "../../../test/datascience/helpers";
+import { getDisplayNameOrNameOfKernelConnection } from "../../helpers";
+import { KernelFinder } from "../../kernelFinder";
 import {
 	IJupyterConnection,
 	IJupyterKernelSpec,
@@ -19,22 +29,12 @@ import {
 	LiveRemoteKernelConnectionMetadata,
 	RemoteKernelSpecConnectionMetadata,
 } from "../../types";
-import { IJupyterKernel, IJupyterRemoteCachedKernelValidator } from "../types";
-import { KernelFinder } from "../../kernelFinder";
-import { IApplicationEnvironment } from "../../../platform/common/application/types";
-import { IExtensionContext } from "../../../platform/common/types";
-import { createEventHandler, TestEventHandler } from "../../../test/common";
-import { CacheDataFormat, RemoteKernelFinder } from "./remoteKernelFinder";
 import { JupyterConnection } from "../connection/jupyterConnection";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import { generateIdFromRemoteProvider } from "../jupyterUtils";
-import { IFileSystem } from "../../../platform/common/platform/types";
-import {
-	resolvableInstance,
-	uriEquals,
-} from "../../../test/datascience/helpers";
 import { RemoteKernelSpecCacheFileName } from "../constants";
+import { generateIdFromRemoteProvider } from "../jupyterUtils";
 import { JupyterLabHelper } from "../session/jupyterLabHelper";
+import { IJupyterKernel, IJupyterRemoteCachedKernelValidator } from "../types";
+import { CacheDataFormat, RemoteKernelFinder } from "./remoteKernelFinder";
 
 suite(`Remote Kernel Finder`, () => {
 	let disposables: Disposable[] = [];
@@ -106,7 +106,7 @@ suite(`Remote Kernel Finder`, () => {
 					model: {},
 				},
 			};
-		}
+		},
 	);
 	const globalStorageUri = Uri.file("globalStorage");
 	const serverEntry = {
@@ -141,31 +141,31 @@ suite(`Remote Kernel Finder`, () => {
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName
-					)
-				)
-			)
+						RemoteKernelSpecCacheFileName,
+					),
+				),
+			),
 		).thenReject(new Error("File does not exist"));
 		when(
 			fs.writeFile(
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName
-					)
+						RemoteKernelSpecCacheFileName,
+					),
 				),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall(async (_, data: string) => {
 			when(
 				fs.readFile(
 					uriEquals(
 						Uri.joinPath(
 							globalStorageUri,
-							RemoteKernelSpecCacheFileName
-						)
-					)
-				)
+							RemoteKernelSpecCacheFileName,
+						),
+					),
+				),
 			).thenResolve(data);
 		});
 		cachedRemoteKernelValidator =
@@ -179,7 +179,7 @@ suite(`Remote Kernel Finder`, () => {
 		disposables.push(kernelsChanged);
 		jupyterConnection = mock<JupyterConnection>();
 		when(jupyterConnection.createConnectionInfo(anything())).thenResolve(
-			connInfo
+			connInfo,
 		);
 		remoteKernelFinder = new RemoteKernelFinder(
 			"currentremote",
@@ -191,7 +191,7 @@ suite(`Remote Kernel Finder`, () => {
 			serverEntry.provider,
 			instance(jupyterConnection),
 			instance(fs),
-			instance(context)
+			instance(context),
 		);
 	});
 	teardown(() => {
@@ -215,27 +215,27 @@ suite(`Remote Kernel Finder`, () => {
 		assert.equal(
 			getDisplayNameOrNameOfKernelConnection(kernels[0]),
 			"Python 3 on Disk",
-			"Did not find correct python kernel"
+			"Did not find correct python kernel",
 		);
 		assert.equal(
 			getDisplayNameOrNameOfKernelConnection(kernels[1]),
 			"Python 2 on Disk",
-			"Did not find correct python 2 kernel"
+			"Did not find correct python 2 kernel",
 		);
 		assert.equal(
 			getDisplayNameOrNameOfKernelConnection(kernels[2]),
 			"Julia on Disk",
-			"Did not find correct julia kernel"
+			"Did not find correct julia kernel",
 		);
 	});
 	test("Live sessions", async () => {
 		remoteKernelFinder.activate().then(noop, noop);
 
 		when(jupyterSessionManager.getRunningKernels()).thenResolve(
-			python3Kernels
+			python3Kernels,
 		);
 		when(jupyterSessionManager.getRunningSessions()).thenResolve(
-			python3Sessions
+			python3Sessions,
 		);
 		when(jupyterSessionManager.getKernelSpecs()).thenResolve([
 			python3spec,
@@ -246,7 +246,7 @@ suite(`Remote Kernel Finder`, () => {
 		const kernels =
 			await remoteKernelFinder.listKernelsFromConnection(connInfo);
 		const liveKernels = kernels.filter(
-			(k) => k.kind === "connectToLiveRemoteKernel"
+			(k) => k.kind === "connectToLiveRemoteKernel",
 		);
 		assert.equal(liveKernels.length, 3, "Live kernels not found");
 	});
@@ -286,7 +286,7 @@ suite(`Remote Kernel Finder`, () => {
 			liveRemoteKernel.toJSON(),
 		] as KernelConnectionMetadata[];
 		when(cachedRemoteKernelValidator.isValid(anything())).thenResolve(
-			false
+			false,
 		);
 
 		const cacheKey = generateIdFromRemoteProvider(serverEntry.provider);
@@ -295,15 +295,15 @@ suite(`Remote Kernel Finder`, () => {
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName
-					)
-				)
-			)
+						RemoteKernelSpecCacheFileName,
+					),
+				),
+			),
 		).thenResolve(
 			JSON.stringify(<CacheDataFormat>{
 				extensionVersion: "",
 				data: { [cacheKey]: cachedKernels },
-			})
+			}),
 		);
 		when(jupyterSessionManager.getRunningKernels()).thenResolve([]);
 		when(jupyterSessionManager.getRunningSessions()).thenResolve([]);
@@ -354,7 +354,7 @@ suite(`Remote Kernel Finder`, () => {
 			liveRemoteKernel.toJSON(),
 		];
 		when(cachedRemoteKernelValidator.isValid(anything())).thenCall(
-			async (k) => liveRemoteKernel.id === k.id
+			async (k) => liveRemoteKernel.id === k.id,
 		);
 		const cacheKey = generateIdFromRemoteProvider(serverEntry.provider);
 		when(
@@ -362,15 +362,15 @@ suite(`Remote Kernel Finder`, () => {
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName
-					)
-				)
-			)
+						RemoteKernelSpecCacheFileName,
+					),
+				),
+			),
 		).thenResolve(
 			JSON.stringify(<CacheDataFormat>{
 				extensionVersion: "",
 				data: { [cacheKey]: cachedKernels },
-			})
+			}),
 		);
 		when(jupyterSessionManager.getRunningKernels()).thenResolve([]);
 		when(jupyterSessionManager.getRunningSessions()).thenResolve([]);
@@ -393,7 +393,7 @@ suite(`Remote Kernel Finder`, () => {
 				}
 				return k;
 			}),
-			[liveRemoteKernel]
+			[liveRemoteKernel],
 		);
 	});
 });

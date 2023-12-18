@@ -25,7 +25,7 @@ export class RemoteWidgetScriptSourceProvider
 	private readonly scriptManager: IIPyWidgetScriptManager;
 	constructor(
 		kernel: IKernel,
-		scriptManagerFactory: IIPyWidgetScriptManagerFactory
+		scriptManagerFactory: IIPyWidgetScriptManagerFactory,
 	) {
 		if (
 			kernel.kernelConnectionMetadata.kind !==
@@ -34,7 +34,7 @@ export class RemoteWidgetScriptSourceProvider
 				"startUsingRemoteKernelSpec"
 		) {
 			throw new Error(
-				"Invalid usage of this class, can only be used with remtoe kernels"
+				"Invalid usage of this class, can only be used with remtoe kernels",
 			);
 		}
 		this.kernelConnection = kernel.kernelConnectionMetadata;
@@ -48,11 +48,12 @@ export class RemoteWidgetScriptSourceProvider
 	}
 
 	public async getWidgetScriptSource(
-		moduleName: string
+		moduleName: string,
 	): Promise<Readonly<WidgetScriptSource>> {
 		const sources = await this.getWidgetScriptSources();
 		const found = sources.find(
-			(item) => item.moduleName.toLowerCase() === moduleName.toLowerCase()
+			(item) =>
+				item.moduleName.toLowerCase() === moduleName.toLowerCase(),
 		);
 		if (!found && moduleName.includes("/")) {
 			// Possible moduleName already contains the path to the script.
@@ -80,7 +81,7 @@ export class RemoteWidgetScriptSourceProvider
 						scriptUri: widgetModuleMappings[moduleName].toString(),
 						source: "remote",
 					};
-				})
+				}),
 			);
 			return sources;
 		}

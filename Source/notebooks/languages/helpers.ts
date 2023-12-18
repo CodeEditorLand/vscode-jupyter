@@ -9,14 +9,14 @@ import { traceWarning } from "../../platform/logging";
 // Get the language of the notebook document, preference given to metadata over the language of
 // the first cell
 export function getLanguageOfNotebookDocument(
-	doc: NotebookDocument
+	doc: NotebookDocument,
 ): string | undefined {
 	// If the document has been closed, accessing cell information can fail.
 	// Ignore such exceptions.
 	try {
 		// Give preference to the language information in the metadata.
 		const language = getLanguageInNotebookMetadata(
-			getNotebookMetadata(doc)
+			getNotebookMetadata(doc),
 		);
 		// Fall back to the language of the first code cell in the notebook.
 		return (

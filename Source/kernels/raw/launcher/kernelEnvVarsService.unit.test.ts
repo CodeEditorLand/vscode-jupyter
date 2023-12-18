@@ -5,7 +5,14 @@
 
 import { assert, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { anything, instance, mock, when } from "ts-mockito";
+import { Uri } from "vscode";
+import { JupyterSettings } from "../../../platform/common/configSettings";
 import { IFileSystemNode } from "../../../platform/common/platform/types.node";
+import {
+	IConfigurationService,
+	IWatchableJupyterSettings,
+} from "../../../platform/common/types";
 import { EnvironmentVariablesService } from "../../../platform/common/variables/environment.node";
 import { ICustomEnvironmentVariablesProvider } from "../../../platform/common/variables/types";
 import { IEnvironmentActivationService } from "../../../platform/interpreter/activation/types";
@@ -14,15 +21,8 @@ import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../../platform/pythonEnvironments/info";
-import { anything, instance, mock, when } from "ts-mockito";
-import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
 import { IJupyterKernelSpec } from "../../types";
-import { Uri } from "vscode";
-import {
-	IConfigurationService,
-	IWatchableJupyterSettings,
-} from "../../../platform/common/types";
-import { JupyterSettings } from "../../../platform/common/configSettings";
+import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
 
 use(chaiAsPromised);
 
@@ -62,14 +62,14 @@ suite("Kernel Environment Variables Service", () => {
 		configService = mock<IConfigurationService>();
 		settings = mock(JupyterSettings);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(settings)
+			instance(settings),
 		);
 		kernelVariablesService = new KernelEnvironmentVariablesService(
 			instance(interpreterService),
 			instance(envActivation),
 			variablesService,
 			instance(customVariablesService),
-			instance(configService)
+			instance(configService),
 		);
 		if (process.platform === "win32") {
 			// Win32 will generate upper case all the time
@@ -82,7 +82,7 @@ suite("Kernel Environment Variables Service", () => {
 			processEnv = process.env;
 		}
 		processPath = Object.keys(processEnv).find(
-			(k) => k.toLowerCase() == "path"
+			(k) => k.toLowerCase() == "path",
 		);
 	});
 	teardown(() => Object.assign(process.env, originalEnvVars));
@@ -92,16 +92,16 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobar",
 		});
 		when(
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobar",
 		});
@@ -109,20 +109,20 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 		when(
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			interpreter,
-			kernelSpec
+			kernelSpec,
 		);
 
 		assert.isOk(processPath);
@@ -134,16 +134,16 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			HELLO_VAR: "new",
 		});
 		when(
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			HELLO_VAR: "new",
 		});
@@ -151,20 +151,20 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 		when(
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			interpreter,
-			kernelSpec
+			kernelSpec,
 		);
 
 		assert.strictEqual(vars!["HELLO_VAR"], "new");
@@ -175,8 +175,8 @@ suite("Kernel Environment Variables Service", () => {
 				{},
 				processEnv,
 				{ HELLO_VAR: "new" },
-				{ PATH: "", Path: "" }
-			)
+				{ PATH: "", Path: "" },
+			),
 		);
 	});
 
@@ -186,8 +186,8 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			HELLO_VAR: "interpreter",
 		});
@@ -195,8 +195,8 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			HELLO_VAR: "new",
 		});
@@ -204,14 +204,14 @@ suite("Kernel Environment Variables Service", () => {
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			interpreter,
-			kernelSpec
+			kernelSpec,
 		);
 
 		assert.strictEqual(vars!["HELLO_VAR"], "interpreter");
 		// Compare ignoring the PATH variable.
 		assert.deepEqual(
 			vars,
-			Object.assign({}, processEnv, { HELLO_VAR: "interpreter" })
+			Object.assign({}, processEnv, { HELLO_VAR: "interpreter" }),
 		);
 	});
 
@@ -222,15 +222,15 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({});
 		when(
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			HELLO_VAR: "new",
 		});
@@ -238,7 +238,7 @@ suite("Kernel Environment Variables Service", () => {
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			undefined,
-			kernelSpec
+			kernelSpec,
 		);
 
 		assert.strictEqual(vars!["HELLO_VAR"], "new");
@@ -249,8 +249,8 @@ suite("Kernel Environment Variables Service", () => {
 				{},
 				processEnv,
 				{ HELLO_VAR: "new" },
-				{ PATH: "", Path: "" }
-			)
+				{ PATH: "", Path: "" },
+			),
 		);
 	});
 
@@ -260,14 +260,14 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			undefined,
-			kernelSpec
+			kernelSpec,
 		);
 
 		assert.deepEqual(vars, processEnv);
@@ -278,8 +278,8 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobar",
 		});
@@ -287,8 +287,8 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobaz",
 		});
@@ -296,7 +296,7 @@ suite("Kernel Environment Variables Service", () => {
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			interpreter,
-			kernelSpec
+			kernelSpec,
 		);
 		assert.isOk(processPath);
 		assert.strictEqual(vars![processPath!], `foobar`);
@@ -304,7 +304,7 @@ suite("Kernel Environment Variables Service", () => {
 
 	test("KernelSpec interpreterPath used if interpreter is undefined", async () => {
 		when(
-			interpreterService.getInterpreterDetails(anything(), anything())
+			interpreterService.getInterpreterDetails(anything(), anything()),
 		).thenResolve({
 			envType: EnvironmentType.Conda,
 			uri: Uri.joinPath(Uri.file("env"), "foopath"),
@@ -315,8 +315,8 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "pathInInterpreterEnv",
 		});
@@ -324,8 +324,8 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobaz",
 		});
@@ -334,7 +334,7 @@ suite("Kernel Environment Variables Service", () => {
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			undefined,
-			kernelSpec
+			kernelSpec,
 		);
 		assert.isOk(processPath);
 		assert.strictEqual(vars![processPath!], `pathInInterpreterEnv`);
@@ -342,10 +342,10 @@ suite("Kernel Environment Variables Service", () => {
 
 	async function testPYTHONNOUSERSITE(
 		envType: EnvironmentType,
-		shouldBeSet: boolean
+		shouldBeSet: boolean,
 	) {
 		when(
-			interpreterService.getInterpreterDetails(anything(), anything())
+			interpreterService.getInterpreterDetails(anything(), anything()),
 		).thenResolve({
 			envType,
 			uri: Uri.file("foopath"),
@@ -356,8 +356,8 @@ suite("Kernel Environment Variables Service", () => {
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobar",
 		});
@@ -365,8 +365,8 @@ suite("Kernel Environment Variables Service", () => {
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve({
 			PATH: "foobaz",
 		});
@@ -376,18 +376,18 @@ suite("Kernel Environment Variables Service", () => {
 		const vars = await kernelVariablesService.getEnvironmentVariables(
 			undefined,
 			undefined,
-			kernelSpec
+			kernelSpec,
 		);
 
 		if (shouldBeSet) {
 			assert.isOk(
 				vars!["PYTHONNOUSERSITE"],
-				"PYTHONNOUSERSITE should be set"
+				"PYTHONNOUSERSITE should be set",
 			);
 		} else {
 			assert.isUndefined(
 				vars!["PYTHONNOUSERSITE"],
-				"PYTHONNOUSERSITE should not be set"
+				"PYTHONNOUSERSITE should not be set",
 			);
 		}
 	}

@@ -2,23 +2,23 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import * as path from "../../platform/vscode-path/path";
 import { CancellationToken, NotebookDocument, Uri } from "vscode";
 import { INotebookImporter } from "../../kernels/jupyter/types";
 import { IJupyterSubCommandExecutionService } from "../../kernels/jupyter/types.node";
 import { IFileSystemNode } from "../../platform/common/platform/types.node";
+import * as path from "../../platform/vscode-path/path";
 
-import { reportAction } from "../../platform/progress/decorator";
-import { ReportableAction } from "../../platform/progress/types";
-import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
-import { ExportFormat, IExportBase, IExportUtil } from "./types";
-import { ExportUtilNode, removeSvgs } from "./exportUtil.node";
 import { TemporaryDirectory } from "../../platform/common/platform/types";
-import { ExportInterpreterFinder } from "./exportInterpreterFinder.node";
 import {
 	IPythonExecutionFactory,
 	IPythonExecutionService,
 } from "../../platform/interpreter/types.node";
+import { reportAction } from "../../platform/progress/decorator";
+import { ReportableAction } from "../../platform/progress/types";
+import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
+import { ExportInterpreterFinder } from "./exportInterpreterFinder.node";
+import { ExportUtilNode, removeSvgs } from "./exportUtil.node";
+import { ExportFormat, IExportBase, IExportUtil } from "./types";
 
 /**
  * Base class for using nbconvert to perform different export operations on node
@@ -42,7 +42,7 @@ export class ExportBase implements IExportBase {
 		_sourceDocument: NotebookDocument,
 		_target: Uri,
 		_interpreter: PythonEnvironment,
-		_token: CancellationToken
+		_token: CancellationToken,
 	): Promise<void> {
 		return;
 	}
@@ -53,7 +53,7 @@ export class ExportBase implements IExportBase {
 		target: Uri,
 		format: ExportFormat,
 		interpreter: PythonEnvironment | undefined,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<void> {
 		if (token.isCancellationRequested) {
 			return;
@@ -61,13 +61,13 @@ export class ExportBase implements IExportBase {
 
 		interpreter =
 			await this.exportInterpreterFinder.getExportInterpreter(
-				interpreter
+				interpreter,
 			);
 
 		if (format === ExportFormat.python) {
 			const contents = await this.importer.importFromFile(
 				sourceDocument.uri,
-				interpreter
+				interpreter,
 			);
 			await this.fs.writeFile(target, contents);
 			return;
@@ -99,7 +99,7 @@ export class ExportBase implements IExportBase {
 		}
 
 		const tempTarget = await this.fs.createTemporaryLocalFile(
-			path.extname(target.fsPath)
+			path.extname(target.fsPath),
 		);
 		const args = [
 			source.fsPath,
@@ -118,7 +118,7 @@ export class ExportBase implements IExportBase {
 				throwOnStdErr: false,
 				encoding: "utf8",
 				token: token,
-			}
+			},
 		);
 
 		if (token.isCancellationRequested) {
@@ -130,7 +130,7 @@ export class ExportBase implements IExportBase {
 				await this.fs.copy(Uri.file(tempTarget.filePath), target);
 			} else {
 				throw new Error(
-					"File size is zero during conversion. Outputting error."
+					"File size is zero during conversion. Outputting error.",
 				);
 			}
 		} catch {
@@ -145,24 +145,24 @@ export class ExportBase implements IExportBase {
 	private async makeSourceFile(
 		target: Uri,
 		contents: string,
-		tempDir: TemporaryDirectory
+		tempDir: TemporaryDirectory,
 	): Promise<Uri> {
 		// Creates a temporary file with the same base name as the target file
 		const fileName = path.basename(
 			target.fsPath,
-			path.extname(target.fsPath)
+			path.extname(target.fsPath),
 		);
 		const sourceFilePath = await new ExportUtilNode().makeFileInDirectory(
 			contents,
 			`${fileName}.ipynb`,
-			tempDir.path
+			tempDir.path,
 		);
 		return Uri.file(sourceFilePath);
 	}
 
 	protected async getExecutionService(
 		source: Uri,
-		interpreter: PythonEnvironment
+		interpreter: PythonEnvironment,
 	): Promise<IPythonExecutionService | undefined> {
 		return this.pythonExecutionFactory.createActivatedEnvironment({
 			resource: source,

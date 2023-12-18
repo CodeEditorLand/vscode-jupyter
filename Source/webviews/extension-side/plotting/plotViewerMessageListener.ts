@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import {
-	IWebviewPanelMessageListener,
 	IWebviewPanel,
+	IWebviewPanelMessageListener,
 } from "../../../platform/common/application/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -17,7 +17,7 @@ export class PlotViewerMessageListener implements IWebviewPanelMessageListener {
 	constructor(
 		callback: (message: string, payload: any) => void,
 		viewChanged: (panel: IWebviewPanel) => void,
-		disposed: () => void
+		disposed: () => void,
 	) {
 		// Save our dispose callback so we remove our history window
 		this.disposedCallback = disposed;

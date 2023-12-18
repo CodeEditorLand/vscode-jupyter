@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { injectable } from "inversify";
-import { Uri, NotebookEditor, window, workspace } from "vscode";
+import { NotebookEditor, Uri, window, workspace } from "vscode";
 import { Resource } from "../platform/common/types";
 import { getResourceType } from "../platform/common/utils";
+import { OSType, getOSType } from "../platform/common/utils/platform";
 import { getComparisonKey } from "../platform/vscode-path/resources";
 import { IEmbedNotebookEditorProvider, INotebookEditorProvider } from "./types";
-import { getOSType, OSType } from "../platform/common/utils/platform";
 
 /**
  * Notebook Editor provider used by other parts of DS code.
@@ -21,7 +21,7 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 	private providers: Set<IEmbedNotebookEditorProvider> = new Set();
 
 	registerEmbedNotebookProvider(
-		provider: IEmbedNotebookEditorProvider
+		provider: IEmbedNotebookEditorProvider,
 	): void {
 		this.providers.add(provider);
 	}
@@ -31,8 +31,8 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 		const notebook =
 			getResourceType(resource) === "notebook"
 				? workspace.notebookDocuments.find(
-						(item) => getComparisonKey(item.uri, true) === key
-					)
+						(item) => getComparisonKey(item.uri, true) === key,
+				  )
 				: undefined;
 		const targetNotebookEditor =
 			notebook && window.activeNotebookEditor?.notebook === notebook
@@ -43,7 +43,7 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 			return targetNotebookEditor;
 		}
 
-		for (let provider of this.providers) {
+		for (const provider of this.providers) {
 			const editor = provider.findNotebookEditor(resource);
 
 			if (editor) {
@@ -55,14 +55,14 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 	get activeNotebookEditor(): NotebookEditor | undefined {
 		return (
 			this.findNotebookEditor(
-				window.activeNotebookEditor?.notebook.uri
+				window.activeNotebookEditor?.notebook.uri,
 			) || this.findNotebookEditor(window.activeTextEditor?.document.uri)
 		);
 	}
 
 	findAssociatedNotebookDocument(uri: Uri) {
 		const ignoreCase = getOSType() === OSType.Windows;
-		let notebook = workspace.notebookDocuments.find((n) => {
+		const notebook = workspace.notebookDocuments.find((n) => {
 			// Use the path part of the URI. It should match the path for the notebook
 			return ignoreCase
 				? n.uri.path.toLowerCase() === uri.path.toLowerCase()
@@ -73,7 +73,7 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 			return notebook;
 		}
 
-		for (let provider of this.providers) {
+		for (const provider of this.providers) {
 			const document = provider.findAssociatedNotebookDocument(uri);
 
 			if (document) {

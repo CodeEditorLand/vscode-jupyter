@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import * as os from "os";
 import type * as nbformat from "@jupyterlab/nbformat";
 import { inject, injectable } from "inversify";
-import * as os from "os";
-import * as path from "../../platform/vscode-path/path";
 import uuid from "uuid/v4";
+import { Uri } from "vscode";
+import { getFilePath } from "../../platform/common/platform/fs-paths";
 import { TemporaryDirectory } from "../../platform/common/platform/types";
 import { IFileSystemNode } from "../../platform/common/platform/types.node";
 import { sleep } from "../../platform/common/utils/async";
+import { ServiceContainer } from "../../platform/ioc/container";
+import * as path from "../../platform/vscode-path/path";
+import { ExportDialog } from "./exportDialog";
 import { ExportUtilBase } from "./exportUtil";
 import { ExportFormat } from "./types";
-import { Uri } from "vscode";
-import { getFilePath } from "../../platform/common/platform/fs-paths";
-import { ExportDialog } from "./exportDialog";
-import { ServiceContainer } from "../../platform/ioc/container";
 
 /**
  * Export utilities that only work in node
@@ -28,7 +28,7 @@ export class ExportUtil extends ExportUtilBase {
 	override async getTargetFile(
 		format: ExportFormat,
 		source: Uri,
-		defaultFileName?: string | undefined
+		defaultFileName?: string | undefined,
 	): Promise<Uri | undefined> {
 		let target;
 
@@ -36,11 +36,11 @@ export class ExportUtil extends ExportUtilBase {
 			target = await new ExportDialog().showDialog(
 				format,
 				source,
-				defaultFileName
+				defaultFileName,
 			);
 		} else {
 			target = Uri.file(
-				(await this.fs.createTemporaryLocalFile(".py")).filePath
+				(await this.fs.createTemporaryLocalFile(".py")).filePath,
 			);
 		}
 
@@ -78,7 +78,7 @@ export class ExportUtilNode {
 	public async makeFileInDirectory(
 		contents: string,
 		fileName: string,
-		dirPath: string
+		dirPath: string,
 	): Promise<string> {
 		const newFilePath = path.join(dirPath, fileName);
 		const fs =

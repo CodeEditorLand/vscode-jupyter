@@ -1,35 +1,35 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable, inject } from "inversify";
+import type { Session } from "@jupyterlab/services";
+import { inject, injectable } from "inversify";
 import { Event, EventEmitter, Uri } from "vscode";
-import {
-	IKernelProvider,
-	KernelConnectionMetadata as IKernelKernelConnectionMetadata,
-	IThirdPartyKernelProvider,
-	BaseKernelConnectionMetadata,
-	IKernelFinder,
-} from "../../kernels/types";
-import { traceVerbose, traceInfoIfCI } from "../../platform/logging";
-import { IDisposableRegistry, IExtensions } from "../../platform/common/types";
-import { PromiseChain } from "../../platform/common/utils/async";
-import { sendTelemetryEvent } from "../../telemetry";
-import { ApiAccessService } from "./apiAccessService";
 import {
 	ActiveKernel,
 	IExportedKernelService,
 	KernelConnectionMetadata,
 } from "../../api";
+import { DisplayOptions } from "../../kernels/displayOptions";
+import {
+	BaseKernelConnectionMetadata,
+	IKernelFinder,
+	IKernelProvider,
+	IThirdPartyKernelProvider,
+	KernelConnectionMetadata as IKernelKernelConnectionMetadata,
+} from "../../kernels/types";
+import { KernelConnector } from "../../notebooks/controllers/kernelConnector";
+import { IControllerRegistration } from "../../notebooks/controllers/types";
 import {
 	JupyterNotebookView,
 	Telemetry,
 } from "../../platform/common/constants";
-import { KernelConnector } from "../../notebooks/controllers/kernelConnector";
-import { DisplayOptions } from "../../kernels/displayOptions";
+import { IDisposableRegistry, IExtensions } from "../../platform/common/types";
+import { PromiseChain } from "../../platform/common/utils/async";
 import { IServiceContainer } from "../../platform/ioc/types";
+import { traceInfoIfCI, traceVerbose } from "../../platform/logging";
+import { sendTelemetryEvent } from "../../telemetry";
 import { IExportedKernelServiceFactory } from "./api";
-import { IControllerRegistration } from "../../notebooks/controllers/types";
-import type { Session } from "@jupyterlab/services";
+import { ApiAccessService } from "./apiAccessService";
 import { wrapKernelSession } from "./kernelWrapper";
 
 @injectable()
@@ -56,7 +56,7 @@ export class JupyterKernelServiceFactory
 	public async getService() {
 		const info = this.extensions.determineExtensionFromCallStack();
 		const accessInfo = await this.chainedApiAccess.chainFinally(() =>
-			this.apiAccess.getAccessInformation(info)
+			this.apiAccess.getAccessInformation(info),
 		);
 		if (!accessInfo.accessAllowed) {
 			return;
@@ -72,7 +72,7 @@ export class JupyterKernelServiceFactory
 			this.thirdPartyKernelProvider,
 			this.disposables,
 			this.controllerRegistration,
-			this.serviceContainer
+			this.serviceContainer,
 		);
 		this.extensionApi.set(accessInfo.extensionId, service);
 		return service;
@@ -196,7 +196,7 @@ class JupyterKernelService implements IExportedKernelService {
 			pemUsed: "getKernelSpecifications",
 		});
 		return this.kernelFinder.kernels.map((item) =>
-			this.translateKernelConnectionMetadataToExportedType(item)
+			this.translateKernelConnectionMetadataToExportedType(item),
 		);
 	}
 	getActiveKernels(): {
@@ -218,7 +218,7 @@ class JupyterKernelService implements IExportedKernelService {
 				(item) =>
 					item.startedAtLeastOnce ||
 					item.kernelConnectionMetadata.kind ===
-						"connectToLiveRemoteKernel"
+						"connectToLiveRemoteKernel",
 			)
 			.forEach((item) => {
 				const kernel = this.kernelProvider.get(item.notebook);
@@ -232,7 +232,7 @@ class JupyterKernelService implements IExportedKernelService {
 				kernels.push({
 					metadata:
 						this.translateKernelConnectionMetadataToExportedType(
-							item.kernelConnectionMetadata
+							item.kernelConnectionMetadata,
 						),
 					uri: item.uri,
 					id: item.id,
@@ -243,7 +243,7 @@ class JupyterKernelService implements IExportedKernelService {
 				(item) =>
 					item.startedAtLeastOnce ||
 					item.kernelConnectionMetadata.kind ===
-						"connectToLiveRemoteKernel"
+						"connectToLiveRemoteKernel",
 			)
 			.forEach((item) => {
 				const kernel = this.thirdPartyKernelProvider.get(item.uri);
@@ -257,7 +257,7 @@ class JupyterKernelService implements IExportedKernelService {
 				kernels.push({
 					metadata:
 						this.translateKernelConnectionMetadataToExportedType(
-							item.kernelConnectionMetadata
+							item.kernelConnectionMetadata,
 						),
 					uri: item.uri,
 					id: item.id,
@@ -300,7 +300,7 @@ class JupyterKernelService implements IExportedKernelService {
 		if (kernel?.session) {
 			return {
 				metadata: this.translateKernelConnectionMetadataToExportedType(
-					kernel.kernelConnectionMetadata
+					kernel.kernelConnectionMetadata,
 				),
 				connection: wrapKernelSession(kernel.session),
 			};
@@ -308,7 +308,7 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 	async startKernel(
 		spec: KernelConnectionMetadata,
-		uri: Uri
+		uri: Uri,
 	): Promise<Session.ISessionConnection> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
@@ -318,7 +318,7 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 	async connect(
 		spec: ActiveKernel,
-		uri: Uri
+		uri: Uri,
 	): Promise<Session.ISessionConnection> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
@@ -328,10 +328,10 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 	private async startOrConnect(
 		spec: KernelConnectionMetadata | ActiveKernel,
-		uri: Uri
+		uri: Uri,
 	): Promise<Session.ISessionConnection> {
 		const connection = this.kernelFinder.kernels.find(
-			(item) => item.id === spec.id
+			(item) => item.id === spec.id,
 		);
 		if (!connection) {
 			throw new Error("Not found");
@@ -342,7 +342,7 @@ class JupyterKernelService implements IExportedKernelService {
 			{ resource: uri },
 			new DisplayOptions(false),
 			this.disposables,
-			"3rdPartyExtension"
+			"3rdPartyExtension",
 		);
 		if (!kernel?.session) {
 			throw new Error("Not found");
@@ -350,7 +350,7 @@ class JupyterKernelService implements IExportedKernelService {
 		return wrapKernelSession(kernel.session);
 	}
 	private translateKernelConnectionMetadataToExportedType(
-		connection: Readonly<IKernelKernelConnectionMetadata>
+		connection: Readonly<IKernelKernelConnectionMetadata>,
 	): KernelConnectionMetadata {
 		if (!this.translatedConnections.has(connection)) {
 			// By not forcing the cast, we ensure the types are compatible.
@@ -360,7 +360,7 @@ class JupyterKernelService implements IExportedKernelService {
 			// We recast to KernelConnectionMetadata as this has already define its properties as readonly.
 
 			const translatedConnection = Object.freeze(
-				BaseKernelConnectionMetadata.fromJSON(connection.toJSON())
+				BaseKernelConnectionMetadata.fromJSON(connection.toJSON()),
 			) as KernelConnectionMetadata;
 			this.translatedConnections.set(connection, translatedConnection);
 		}

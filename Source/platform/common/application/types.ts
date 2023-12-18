@@ -90,7 +90,7 @@ export interface IDebugService {
 	 */
 	registerDebugConfigurationProvider(
 		debugType: string,
-		provider: DebugConfigurationProvider
+		provider: DebugConfigurationProvider,
 	): Disposable;
 
 	/**
@@ -102,7 +102,7 @@ export interface IDebugService {
 	 */
 	registerDebugAdapterTrackerFactory(
 		debugType: string,
-		factory: DebugAdapterTrackerFactory
+		factory: DebugAdapterTrackerFactory,
 	): Disposable;
 
 	/**
@@ -118,7 +118,7 @@ export interface IDebugService {
 	startDebugging(
 		folder: WorkspaceFolder | undefined,
 		nameOrConfiguration: string | DebugConfiguration,
-		parentSession?: DebugSession
+		parentSession?: DebugSession,
 	): Thenable<boolean>;
 
 	/**
@@ -154,7 +154,7 @@ export interface IWebviewMessageListener {
 }
 
 export const IWebviewPanelMessageListener = Symbol(
-	"IWebviewPanelMessageListener"
+	"IWebviewPanelMessageListener",
 );
 export interface IWebviewPanelMessageListener
 	extends IWebviewMessageListener,
@@ -166,7 +166,7 @@ export interface IWebviewPanelMessageListener
 }
 
 export const IWebviewViewMessageListener = Symbol(
-	"IWebviewViewMessageListener"
+	"IWebviewViewMessageListener",
 );
 export interface IWebviewViewMessageListener
 	extends IWebviewMessageListener,
@@ -292,7 +292,7 @@ export interface IEncryptedStorage {
 	store(
 		service: string,
 		key: string,
-		value: string | undefined
+		value: string | undefined,
 	): Promise<void>;
 	retrieve(service: string, key: string): Promise<string | undefined>;
 }

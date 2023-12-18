@@ -30,24 +30,24 @@ export class KernelAutoRestartMonitor
 		this.kernelProvider.onKernelStatusChanged(
 			this.onKernelStatusChanged,
 			this,
-			this.disposableRegistry
+			this.disposableRegistry,
 		);
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposableRegistry
+			this.disposableRegistry,
 		);
 		this.disposableRegistry.push(
 			this.kernelProvider.onDidDisposeKernel((kernel) => {
 				this.kernelRestartProgress.get(kernel)?.dispose();
 				this.kernelRestartProgress.delete(kernel);
-			}, this)
+			}, this),
 		);
 		this.disposableRegistry.push(
 			this.kernelProvider.onDidRestartKernel((kernel) => {
 				this.kernelRestartProgress.get(kernel)?.dispose();
 				this.kernelRestartProgress.delete(kernel);
-			}, this)
+			}, this),
 		);
 	}
 	private onDidStartKernel(kernel: IKernel) {
@@ -77,9 +77,9 @@ export class KernelAutoRestartMonitor
 				kernel.resourceUri,
 				DataScience.restartingKernelStatus(
 					getDisplayNameOrNameOfKernelConnection(
-						kernel.kernelConnectionMetadata
-					)
-				)
+						kernel.kernelConnectionMetadata,
+					),
+				),
 			);
 			this.kernelRestartProgress.set(kernel, progress);
 		} else if (

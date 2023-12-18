@@ -37,7 +37,7 @@ export class KernelCompletionsPreWarmer
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

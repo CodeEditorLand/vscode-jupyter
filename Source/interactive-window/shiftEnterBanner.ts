@@ -5,12 +5,12 @@ import { inject, injectable } from "inversify";
 import { ConfigurationTarget, window } from "vscode";
 import { Telemetry } from "../platform/common/constants";
 import {
+	IConfigurationService,
 	IJupyterExtensionBanner,
 	IPersistentStateFactory,
-	IConfigurationService,
 } from "../platform/common/types";
 import * as localize from "../platform/common/utils/localize";
-import { sendTelemetryEvent, captureUsageTelemetry } from "../telemetry";
+import { captureUsageTelemetry, sendTelemetryEvent } from "../telemetry";
 
 export const BANNER_NAME_INTERACTIVE_SHIFTENTER: string =
 	"InteractiveShiftEnterBanner";
@@ -20,15 +20,15 @@ export enum InteractiveShiftEnterStateKeys {
 }
 
 enum InteractiveShiftEnterLabelIndex {
-	Yes,
-	No,
+	Yes = 0,
+	No = 1,
 }
 
 // Create a banner to ask users if they want to send shift-enter to the interactive window or not
 @injectable()
 export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 	private initialized?: boolean;
-	private disabledInCurrentSession: boolean = false;
+	private disabledInCurrentSession = false;
 	private bannerMessage: string =
 		localize.InteractiveShiftEnterBanner.bannerMessage;
 	private bannerLabels: string[] = [
@@ -59,7 +59,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 	public isEnabled(): boolean {
 		return this.persistentState.createGlobalPersistentState<boolean>(
 			InteractiveShiftEnterStateKeys.ShowBanner,
-			true
+			true,
 		).value;
 	}
 
@@ -76,7 +76,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		sendTelemetryEvent(Telemetry.ShiftEnterBannerShown);
 		const response = await window.showInformationMessage(
 			this.bannerMessage,
-			...this.bannerLabels
+			...this.bannerLabels,
 		);
 		switch (response) {
 			case this.bannerLabels[InteractiveShiftEnterLabelIndex.Yes]: {
@@ -99,7 +99,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		return Promise.resolve(
 			this.isEnabled() &&
 				!this.disabledInCurrentSession &&
-				!settings.sendSelectionToInteractiveWindow
+				!settings.sendSelectionToInteractiveWindow,
 		);
 	}
 
@@ -109,7 +109,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 			"interactiveWindow.textEditor.executeSelection",
 			false,
 			undefined,
-			ConfigurationTarget.Global
+			ConfigurationTarget.Global,
 		);
 		await this.disableBanner();
 	}
@@ -120,7 +120,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 			"interactiveWindow.textEditor.executeSelection",
 			true,
 			undefined,
-			ConfigurationTarget.Global
+			ConfigurationTarget.Global,
 		);
 		await this.disableBanner();
 	}
@@ -129,7 +129,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		await this.persistentState
 			.createGlobalPersistentState<boolean>(
 				InteractiveShiftEnterStateKeys.ShowBanner,
-				false
+				false,
 			)
 			.updateValue(false);
 	}

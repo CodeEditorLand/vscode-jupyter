@@ -157,7 +157,7 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		onGridSort?: (
 			sortColumn: string,
-			sortDirection: "ASC" | "DESC" | "NONE"
+			sortDirection: "ASC" | "DESC" | "NONE",
 		) => void;
 
 		/**
@@ -285,7 +285,7 @@ declare namespace AdazzleReactDataGrid {
 
 		getCellActions?: (
 			column: Column<T>,
-			row: T
+			row: T,
 		) => (ActionButton | ActionMenu)[];
 	}
 
@@ -407,7 +407,7 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		(
 			ev: React.SyntheticEvent<any>,
-			args: { rowIdx: number; idx: number; name: string }
+			args: { rowIdx: number; idx: number; name: string },
 		): void;
 	}
 
@@ -577,17 +577,17 @@ declare namespace AdazzleReactDataGrid {
 	}
 	export namespace ReactDataGrid {
 		// Useful types
-		export import Column = AdazzleReactDataGrid.Column;
-		export import Filter = AdazzleReactDataGrid.Filter;
+		export
+		export
 
 		// Various events
-		export import RowUpdateEvent = AdazzleReactDataGrid.RowUpdateEvent;
-		export import SelectionParams = AdazzleReactDataGrid.SelectionParams;
-		export import CellDragEvent = AdazzleReactDataGrid.CellDragEvent;
-		export import DragHandleDoubleClickEvent = AdazzleReactDataGrid.DragHandleDoubleClickEvent;
-		export import CellCopyPasteEvent = AdazzleReactDataGrid.CellCopyPasteEvent;
-		export import GridRowsUpdatedEvent = AdazzleReactDataGrid.GridRowsUpdatedEvent;
-		export import OnRowExpandToggle = AdazzleReactDataGrid.OnRowExpandToggle;
+		export
+		export
+		export
+		export
+		export
+		export
+		export
 
 		export namespace editors {
 			class EditorBase<P = {}, S = {}> extends React.Component<
@@ -631,7 +631,7 @@ declare namespace AdazzleReactDataGridPlugins {
 		onFocus?: () => void;
 		editorDisplayValue?: (
 			column: AdazzleReactDataGrid.ExcelColumn,
-			value: any
+			value: any,
 		) => string;
 	}
 
@@ -697,7 +697,7 @@ declare namespace AdazzleReactDataGridPlugins {
 		export function connect(Menu: any): any;
 		export function ContextMenuLayer(
 			identifier: any,
-			configure?: (props: any) => any
+			configure?: (props: any) => any,
 		): (Component: any) => any;
 	}
 }

@@ -42,12 +42,12 @@ export class ConfigMigration {
 
 	public async migrateSettings() {
 		const migratedSettings: Thenable<void>[] = [];
-		for (let prop of Object.keys(ConfigMigration.migratedSettings)) {
+		for (const prop of Object.keys(ConfigMigration.migratedSettings)) {
 			migratedSettings.push(
 				...this.migrateSetting(
 					prop,
-					ConfigMigration.migratedSettings[prop]
-				)
+					ConfigMigration.migratedSettings[prop],
+				),
 			);
 		}
 		try {
@@ -68,7 +68,7 @@ export class ConfigMigration {
 				promise = this.jupyterConfig.update(
 					newSetting,
 					oldDetails.workspaceValue,
-					ConfigurationTarget.Workspace
+					ConfigurationTarget.Workspace,
 				);
 			}
 			migratedSettings.push(
@@ -77,10 +77,10 @@ export class ConfigMigration {
 						this.jupyterConfig.update(
 							oldSetting,
 							undefined,
-							ConfigurationTarget.Workspace
+							ConfigurationTarget.Workspace,
 						),
-					handleSettingMigrationFailure
-				)
+					handleSettingMigrationFailure,
+				),
 			);
 		}
 		if (oldDetails?.workspaceFolderValue !== undefined) {
@@ -89,7 +89,7 @@ export class ConfigMigration {
 				promise = this.jupyterConfig.update(
 					newSetting,
 					oldDetails.workspaceFolderValue,
-					ConfigurationTarget.WorkspaceFolder
+					ConfigurationTarget.WorkspaceFolder,
 				);
 			}
 			migratedSettings.push(
@@ -98,10 +98,10 @@ export class ConfigMigration {
 						this.jupyterConfig.update(
 							oldSetting,
 							undefined,
-							ConfigurationTarget.WorkspaceFolder
+							ConfigurationTarget.WorkspaceFolder,
 						),
-					handleSettingMigrationFailure
-				)
+					handleSettingMigrationFailure,
+				),
 			);
 		}
 		if (oldDetails?.globalValue !== undefined) {
@@ -110,7 +110,7 @@ export class ConfigMigration {
 				promise = this.jupyterConfig.update(
 					newSetting,
 					oldDetails.globalValue,
-					ConfigurationTarget.Global
+					ConfigurationTarget.Global,
 				);
 			}
 			migratedSettings.push(
@@ -119,10 +119,10 @@ export class ConfigMigration {
 						this.jupyterConfig.update(
 							oldSetting,
 							undefined,
-							ConfigurationTarget.Global
+							ConfigurationTarget.Global,
 						),
-					handleSettingMigrationFailure
-				)
+					handleSettingMigrationFailure,
+				),
 			);
 		}
 

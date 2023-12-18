@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable } from "inversify";
 import * as os from "os";
-import { coerce, SemVer } from "semver";
+import { injectable } from "inversify";
+import { SemVer, coerce } from "semver";
 import { Uri } from "vscode";
-import { getOSType, OSType } from "../utils/platform";
+import { OSType, getOSType } from "../utils/platform";
 import { getUserHomeDir } from "../utils/platform.node";
 import { parseVersion } from "../utils/version.node";
 import {

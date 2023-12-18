@@ -34,7 +34,8 @@ export class ImageButton extends React.Component<IImageButtonProps> {
 				aria-label={this.props.tooltip}
 				className={classNames}
 				onClick={this.props.onClick}
-				onMouseDown={this.props.onMouseDown}>
+				onMouseDown={this.props.onMouseDown}
+			>
 				<span className={innerFilter}>
 					<span className="image-button-child">
 						{this.props.children}

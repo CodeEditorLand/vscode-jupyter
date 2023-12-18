@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import * as assert from "assert";
-import * as vscode from "vscode";
 import { anything, instance, mock, when } from "ts-mockito";
+import * as vscode from "vscode";
 import {
 	CellAnalysis,
 	ICellExecution,
@@ -15,7 +15,7 @@ function withNotebookCells(data: [string, string][], fileName: string) {
 		const cell = mock<vscode.NotebookCell>();
 		const document = mock<vscode.TextDocument>();
 		when(document.uri).thenReturn(
-			vscode.Uri.parse(fileName).with({ fragment: cellDto[0] })
+			vscode.Uri.parse(fileName).with({ fragment: cellDto[0] }),
 		);
 		when(cell.document).thenReturn(instance(document));
 		return instance(cell);
@@ -32,7 +32,7 @@ suite("Analysis", () => {
 				["W2sZmlsZQ==", "foo()"],
 				["W3sZmlsZQ==", "bar()"],
 			],
-			"df.ipynb"
+			"df.ipynb",
 		);
 
 		const refsArr = [
@@ -139,7 +139,7 @@ suite("Analysis", () => {
 			const analyzer = new CellAnalysis(
 				document,
 				cellExecutions,
-				refsMap
+				refsMap,
 			);
 			const deps = analyzer.getPredecessorCells(cells[2]);
 			assert.strictEqual(deps.length, 2);
@@ -156,21 +156,21 @@ suite("Analysis", () => {
 			const analyzer = new CellAnalysis(
 				document,
 				cellExecutions,
-				refsMap
+				refsMap,
 			);
 			const affectedCells = analyzer.getSuccessorCells(cells[0]);
 			assert.strictEqual(affectedCells.length, 4);
 			assert.strictEqual(
 				affectedCells[1].document.uri.fragment,
-				"W1sZmlsZQ=="
+				"W1sZmlsZQ==",
 			);
 			assert.strictEqual(
 				affectedCells[2].document.uri.fragment,
-				"W2sZmlsZQ=="
+				"W2sZmlsZQ==",
 			);
 			assert.strictEqual(
 				affectedCells[3].document.uri.fragment,
-				"W3sZmlsZQ=="
+				"W3sZmlsZQ==",
 			);
 		}
 
@@ -178,13 +178,13 @@ suite("Analysis", () => {
 			const analyzer = new CellAnalysis(
 				document,
 				cellExecutions,
-				refsMap
+				refsMap,
 			);
 			const affectedCells = analyzer.getSuccessorCells(cells[1]);
 			assert.strictEqual(affectedCells.length, 2);
 			assert.strictEqual(
 				affectedCells[1].document.uri.fragment,
-				"W3sZmlsZQ=="
+				"W3sZmlsZQ==",
 			);
 		}
 
@@ -207,15 +207,15 @@ suite("Analysis", () => {
 			assert.strictEqual(affectedCells.length, 4);
 			assert.strictEqual(
 				affectedCells[1].document.uri.fragment,
-				"W1sZmlsZQ=="
+				"W1sZmlsZQ==",
 			);
 			assert.strictEqual(
 				affectedCells[2].document.uri.fragment,
-				"W2sZmlsZQ=="
+				"W2sZmlsZQ==",
 			);
 			assert.strictEqual(
 				affectedCells[3].document.uri.fragment,
-				"W3sZmlsZQ=="
+				"W3sZmlsZQ==",
 			);
 		}
 
@@ -225,7 +225,7 @@ suite("Analysis", () => {
 			assert.strictEqual(affectedCells.length, 2);
 			assert.strictEqual(
 				affectedCells[1].document.uri.fragment,
-				"W3sZmlsZQ=="
+				"W3sZmlsZQ==",
 			);
 		}
 	});
@@ -237,7 +237,7 @@ suite("Analysis", () => {
 				["W1sZmlsZQ==", "y=6"],
 				["W2sZmlsZQ==", "print(x+y)"],
 			],
-			"df.ipynb"
+			"df.ipynb",
 		);
 
 		const refsArr = [
@@ -356,7 +356,7 @@ suite("Analysis", () => {
 			const analyzer = new CellAnalysis(
 				document,
 				cellExecutions,
-				refsMap
+				refsMap,
 			);
 			const deps = analyzer.getPredecessorCells(cells[2]);
 			assert.strictEqual(deps.length, 3);
@@ -368,14 +368,14 @@ suite("Analysis", () => {
 			assert.strictEqual(affectedCells.length, 2);
 			assert.strictEqual(
 				affectedCells[1].document.uri.fragment,
-				"W2sZmlsZQ=="
+				"W2sZmlsZQ==",
 			);
 
 			const affectedCells2 = analyzer.getSuccessorCells(cells[1]);
 			assert.strictEqual(affectedCells2.length, 2);
 			assert.strictEqual(
 				affectedCells2[1].document.uri.fragment,
-				"W2sZmlsZQ=="
+				"W2sZmlsZQ==",
 			);
 		}
 
@@ -391,14 +391,14 @@ suite("Analysis", () => {
 			assert.strictEqual(affectedCells.length, 2);
 			assert.strictEqual(
 				affectedCells[1].document.uri.fragment,
-				"W2sZmlsZQ=="
+				"W2sZmlsZQ==",
 			);
 
 			const affectedCells2 = analyzer.getSuccessorCells(cells[1]);
 			assert.strictEqual(affectedCells2.length, 2);
 			assert.strictEqual(
 				affectedCells2[1].document.uri.fragment,
-				"W2sZmlsZQ=="
+				"W2sZmlsZQ==",
 			);
 		}
 	});
@@ -416,7 +416,7 @@ suite("Analysis", () => {
 				["W3sZmlsZQ==", "print(df)"],
 				["W4sZmlsZQ==", "x = df['Brand'].values"],
 			],
-			"df.ipynb"
+			"df.ipynb",
 		);
 
 		const refsArr = [

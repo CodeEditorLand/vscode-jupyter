@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, named } from "inversify";
+import minimatch from "minimatch";
 import { ConfigurationTarget, Memento, Uri, workspace } from "vscode";
+import { IPlatformService } from "../../platform/common/platform/types";
 import {
-	IMemento,
 	GLOBAL_MEMENTO,
 	IDisposable,
 	IDisposableRegistry,
+	IMemento,
 } from "../../platform/common/types";
-import { BuiltInModules } from "./constants";
-import { IPlatformService } from "../../platform/common/platform/types";
 import { dispose } from "../../platform/common/utils/lifecycle";
-import { IReservedPythonNamedProvider } from "./types";
-import minimatch from "minimatch";
-import { IFileSystemNode } from "../common/platform/types.node";
 import * as path from "../../platform/vscode-path/resources";
+import { IFileSystemNode } from "../common/platform/types.node";
+import { BuiltInModules } from "./constants";
+import { IReservedPythonNamedProvider } from "./types";
 
 const PYTHON_PACKAGES_MEMENTO_KEY = "jupyter.pythonPackages";
 export const ignoreListSettingName = "diagnostics.reservedPythonNames.exclude";
@@ -59,7 +59,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 	}
 
 	public async getUriOverridingReservedPythonNames(
-		cwd: Uri
+		cwd: Uri,
 	): Promise<{ uri: Uri; type: "file" | "__init__" }[]> {
 		const [files, initFile] = await Promise.all([
 			this.fs.searchLocal("*.py", cwd.fsPath, true),
@@ -75,7 +75,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 					if (await this.isReserved(uri)) {
 						problematicFiles.push({ uri, type: "file" });
 					}
-				})
+				}),
 		);
 		const initFilePromises = Promise.all(
 			initFile
@@ -84,7 +84,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 					if (await this.isReserved(uri)) {
 						problematicFiles.push({ uri, type: "__init__" });
 					}
-				})
+				}),
 		);
 		await Promise.all([filePromises, initFilePromises]);
 		return problematicFiles;
@@ -137,8 +137,8 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 			jupyterConfig.update(
 				ignoreListSettingName,
 				Array.from(this.ignoredFiles),
-				ConfigurationTarget.Global
-			)
+				ConfigurationTarget.Global,
+			),
 		);
 		return this.pendingUpdate;
 	}
@@ -146,7 +146,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 		const jupyterConfig = workspace.getConfiguration("jupyter");
 		let listInSettings = jupyterConfig.get(
 			ignoreListSettingName,
-			[]
+			[],
 		) as string[];
 		// Ignore file case on windows, hence lower case the files.
 		if (this.platform.isWindows) {

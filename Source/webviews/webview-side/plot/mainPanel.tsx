@@ -7,6 +7,14 @@ import * as React from "react";
 import { Tool, Value } from "react-svg-pan-zoom";
 import uuid from "uuid/v4";
 
+import { SharedMessages } from "../../../messageTypes";
+import { RegExpValues } from "../../../platform/common/constants";
+import { createDeferred } from "../../../platform/common/utils/async";
+import { IJupyterExtraSettings } from "../../../platform/webviews/types";
+import {
+	IPlotViewerMapping,
+	PlotViewerMessages,
+} from "../../extension-side/plotting/types";
 import { storeLocStrings } from "../react-common/locReactSide";
 import { IMessageHandler, PostOffice } from "../react-common/postOffice";
 import { getDefaultSettings } from "../react-common/settingsReactSide";
@@ -14,14 +22,6 @@ import { SvgList } from "../react-common/svgList";
 import { SvgViewer } from "../react-common/svgViewer";
 import { TestSvg } from "./testSvg";
 import { Toolbar } from "./toolbar";
-import { createDeferred } from "../../../platform/common/utils/async";
-import { SharedMessages } from "../../../messageTypes";
-import {
-	IPlotViewerMapping,
-	PlotViewerMessages,
-} from "../../extension-side/plotting/types";
-import { IJupyterExtraSettings } from "../../../platform/webviews/types";
-import { RegExpValues } from "../../../platform/common/constants";
 
 // Our css has to come after in order to override body styles
 export interface IMainPanelProps {
@@ -62,7 +62,7 @@ export class MainPanel
 	// eslint-disable-next-line
 	constructor(props: IMainPanelProps, _state: IMainPanelState) {
 		super(props);
-		const images = !props.skipDefault ? [TestSvg, TestSvg, TestSvg] : [];
+		const images = props.skipDefault ? [] : [TestSvg, TestSvg, TestSvg];
 		const thumbnails = images.map(this.generateThumbnail);
 		const sizes = images.map(this.extractSize);
 		const values = images.map((_i) => undefined);
@@ -86,7 +86,7 @@ export class MainPanel
 
 		// Tell the plot viewer code we have started.
 		this.postOffice.sendMessage<IPlotViewerMapping>(
-			PlotViewerMessages.Started
+			PlotViewerMessages.Started,
 		);
 
 		// Listen to key events
@@ -380,7 +380,7 @@ export class MainPanel
 
 	private sendMessage<M extends IPlotViewerMapping, T extends keyof M>(
 		type: T,
-		payload?: M[T]
+		payload?: M[T],
 	) {
 		this.postOffice.sendMessage<M, T>(type, payload);
 	}
@@ -400,7 +400,7 @@ export class MainPanel
 							[this.state.images[this.state.currentImage]],
 							{
 								type: "image/svg+xml;charset=utf-8",
-							}
+							},
 						);
 						const img = new Image();
 						const url = window.URL.createObjectURL(svgBlob);
@@ -450,7 +450,7 @@ export class MainPanel
 				sizes: this.state.sizes.filter((_v, i) => i !== oldCurrent),
 				values: this.state.values.filter((_v, i) => i !== oldCurrent),
 				thumbnails: this.state.thumbnails.filter(
-					(_v, i) => i !== oldCurrent
+					(_v, i) => i !== oldCurrent,
 				),
 				currentImage: newCurrent,
 			});

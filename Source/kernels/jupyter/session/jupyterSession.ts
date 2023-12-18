@@ -8,30 +8,30 @@ import {
 	CancellationTokenSource,
 	Uri,
 } from "vscode";
+import { JVSC_EXTENSION_ID } from "../../../platform/common/constants";
+import { IDisposable, Resource } from "../../../platform/common/types";
+import { getResourceType } from "../../../platform/common/utils";
+import { raceTimeout } from "../../../platform/common/utils/async";
+import { dispose } from "../../../platform/common/utils/lifecycle";
+import { noop } from "../../../platform/common/utils/misc";
 import {
+	traceInfoIfCI,
 	traceVerbose,
 	traceWarning,
-	traceInfoIfCI,
 } from "../../../platform/logging";
-import { Resource, IDisposable } from "../../../platform/common/types";
-import { raceTimeout } from "../../../platform/common/utils/async";
 import { suppressShutdownErrors } from "../../common/baseJupyterSession";
+import { BaseJupyterSessionConnection } from "../../common/baseJupyterSessionConnection";
+import { waitForIdleOnSession } from "../../common/helpers";
+import { DisplayOptions } from "../../displayOptions";
 import {
+	IJupyterConnection,
+	IJupyterKernelSession,
+	KernelActionSource,
 	KernelConnectionMetadata,
 	isLocalConnection,
-	IJupyterConnection,
-	KernelActionSource,
-	IJupyterKernelSession,
 	isRemoteConnection,
 } from "../../types";
-import { DisplayOptions } from "../../displayOptions";
 import { IJupyterKernelService } from "../types";
-import { noop } from "../../../platform/common/utils/misc";
-import { getResourceType } from "../../../platform/common/utils";
-import { waitForIdleOnSession } from "../../common/helpers";
-import { BaseJupyterSessionConnection } from "../../common/baseJupyterSessionConnection";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import { JVSC_EXTENSION_ID } from "../../../platform/common/constants";
 
 export class JupyterSessionWrapper
 	extends BaseJupyterSessionConnection<
@@ -52,7 +52,7 @@ export class JupyterSessionWrapper
 				this.session ? "defined" : "undefined"
 			} & real kernel is ${
 				this.session?.kernel ? "defined" : "undefined"
-			}`
+			}`,
 		);
 		return "unknown";
 	}
@@ -63,13 +63,13 @@ export class JupyterSessionWrapper
 		private readonly resource: Resource,
 		private readonly kernelConnectionMetadata: KernelConnectionMetadata,
 		private readonly kernelService: IJupyterKernelService | undefined,
-		private readonly creator: KernelActionSource
+		private readonly creator: KernelActionSource,
 	) {
 		super(
 			isLocalConnection(kernelConnectionMetadata)
 				? "localJupyter"
 				: "remoteJupyter",
-			session
+			session,
 		);
 		this.initializeKernelSocket();
 	}
@@ -86,7 +86,7 @@ export class JupyterSessionWrapper
 
 	public async waitForIdle(
 		timeout: number,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<void> {
 		try {
 			await waitForIdleOnSession(
@@ -94,7 +94,7 @@ export class JupyterSessionWrapper
 				this.resource,
 				this.session,
 				timeout,
-				token
+				token,
 			);
 		} catch (ex) {
 			traceInfoIfCI(`Error waiting for idle`, ex);
@@ -118,7 +118,7 @@ export class JupyterSessionWrapper
 	}
 	private async validateLocalKernelDependencies(
 		token: CancellationToken,
-		ui: DisplayOptions
+		ui: DisplayOptions,
 	) {
 		if (
 			!this.kernelConnectionMetadata?.interpreter ||
@@ -142,7 +142,7 @@ export class JupyterSessionWrapper
 			this.kernelConnectionMetadata,
 			ui,
 			token,
-			this.creator === "3rdPartyExtension"
+			this.creator === "3rdPartyExtension",
 		);
 	}
 
@@ -164,7 +164,7 @@ export class JupyterSessionWrapper
 		traceVerbose(
 			`Shutdown session - current session, called from \n ${stack
 				.map((l) => `    ${l}`)
-				.join("\n")}`
+				.join("\n")}`,
 		);
 		const kernelIdForLogging = `${this.session.kernel?.id}, ${this.kernelConnectionMetadata.id}`;
 		traceVerbose(`shutdownSession ${kernelIdForLogging} - start`);
@@ -172,14 +172,14 @@ export class JupyterSessionWrapper
 			if (shutdownEvenIfRemote || this.canShutdownSession()) {
 				try {
 					traceVerbose(
-						`Session can be shutdown ${this.kernelConnectionMetadata.id}`
+						`Session can be shutdown ${this.kernelConnectionMetadata.id}`,
 					);
 					suppressShutdownErrors(this.session.kernel);
 					// Shutdown may fail if the process has been killed
 					if (!this.session.isDisposed) {
 						await raceTimeout(
 							1000,
-							this.session.shutdown().catch(noop)
+							this.session.shutdown().catch(noop),
 						);
 					}
 				} catch {
@@ -197,7 +197,7 @@ export class JupyterSessionWrapper
 				}
 			} else {
 				traceVerbose(
-					`Session cannot be shutdown ${this.kernelConnectionMetadata.id}`
+					`Session cannot be shutdown ${this.kernelConnectionMetadata.id}`,
 				);
 			}
 			try {
@@ -214,7 +214,7 @@ export class JupyterSessionWrapper
 			traceWarning("Failures in disposing the session", e);
 		}
 		traceVerbose(
-			`shutdownSession ${kernelIdForLogging} - shutdown complete`
+			`shutdownSession ${kernelIdForLogging} - shutdown complete`,
 		);
 	}
 	private canShutdownSession(): boolean {
@@ -246,7 +246,7 @@ export class JupyterSessionWrapper
 
 export function getRemoteSessionOptions(
 	_remoteConnection: IJupyterConnection,
-	_resource?: Uri
+	_resource?: Uri,
 ): Pick<Session.ISessionOptions, "path" | "name"> | undefined | void {
 	// if (!resource || resource.scheme === 'untitled' || !remoteConnection.mappedRemoteNotebookDir) {
 	//     return;

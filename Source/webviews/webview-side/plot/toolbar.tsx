@@ -25,7 +25,8 @@ export class Toolbar extends React.Component<IToolbarProps> {
 					baseTheme={this.props.baseTheme}
 					onClick={this.props.prevButtonClicked}
 					disabled={!this.props.prevButtonClicked}
-					tooltip={getLocString("previousPlot", "Previous")}>
+					tooltip={getLocString("previousPlot", "Previous")}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"
@@ -36,7 +37,8 @@ export class Toolbar extends React.Component<IToolbarProps> {
 					baseTheme={this.props.baseTheme}
 					onClick={this.props.nextButtonClicked}
 					disabled={!this.props.nextButtonClicked}
-					tooltip={getLocString("nextPlot", "Next")}>
+					tooltip={getLocString("nextPlot", "Next")}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"
@@ -46,7 +48,8 @@ export class Toolbar extends React.Component<IToolbarProps> {
 				<ImageButton
 					baseTheme={this.props.baseTheme}
 					onClick={this.pan}
-					tooltip={getLocString("panPlot", "Pan")}>
+					tooltip={getLocString("panPlot", "Pan")}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"
@@ -56,7 +59,8 @@ export class Toolbar extends React.Component<IToolbarProps> {
 				<ImageButton
 					baseTheme={this.props.baseTheme}
 					onClick={this.zoomIn}
-					tooltip={getLocString("zoomInPlot", "Zoom in")}>
+					tooltip={getLocString("zoomInPlot", "Zoom in")}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"
@@ -66,7 +70,8 @@ export class Toolbar extends React.Component<IToolbarProps> {
 				<ImageButton
 					baseTheme={this.props.baseTheme}
 					onClick={this.zoomOut}
-					tooltip={getLocString("zoomOutPlot", "Zoom out")}>
+					tooltip={getLocString("zoomOutPlot", "Zoom out")}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"
@@ -82,8 +87,9 @@ export class Toolbar extends React.Component<IToolbarProps> {
 					onClick={this.props.exportButtonClicked}
 					tooltip={getLocString(
 						"exportPlot",
-						"Export to different formats."
-					)}>
+						"Export to different formats.",
+					)}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"
@@ -94,7 +100,8 @@ export class Toolbar extends React.Component<IToolbarProps> {
 					baseTheme={this.props.baseTheme}
 					onClick={this.props.deleteButtonClicked}
 					disabled={!this.props.deleteButtonClicked}
-					tooltip={getLocString("deletePlot", "Remove")}>
+					tooltip={getLocString("deletePlot", "Remove")}
+				>
 					<Image
 						baseTheme={this.props.baseTheme}
 						class="image-button-image"

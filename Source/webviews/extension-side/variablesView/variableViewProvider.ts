@@ -19,7 +19,7 @@ import {
 	IExperimentService,
 	IExtensionContext,
 } from "../../../platform/common/types";
-import { createDeferred, Deferred } from "../../../platform/common/utils/async";
+import { Deferred, createDeferred } from "../../../platform/common/utils/async";
 import { INotebookWatcher, IVariableViewProvider } from "./types";
 import { VariableView } from "./variableView";
 
@@ -67,7 +67,7 @@ export class VariableViewProvider implements IVariableViewProvider {
 	public async resolveWebviewView(
 		webviewView: WebviewView,
 		_context: WebviewViewResolveContext,
-		_token: CancellationToken
+		_token: CancellationToken,
 	): Promise<void> {
 		webviewView.webview.options = { enableScripts: true };
 
@@ -79,7 +79,7 @@ export class VariableViewProvider implements IVariableViewProvider {
 			this.variables,
 			this.disposables,
 			this.notebookWatcher,
-			this.experiments
+			this.experiments,
 		);
 
 		// If someone is waiting for the variable view resolve that here

@@ -4,14 +4,14 @@
 import { inject, injectable } from "inversify";
 import { Disposable } from "vscode";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
-import { dispose } from "../../../platform/common/utils/lifecycle";
 import {
 	IDisposable,
 	IDisposableRegistry,
 } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { noop } from "../../../platform/common/utils/misc";
-import { IJupyterServerUriStorage } from "../types";
 import { IKernel, IKernelProvider, isRemoteConnection } from "../../types";
+import { IJupyterServerUriStorage } from "../types";
 
 const INTERVAL_IN_SECONDS_TO_UPDATE_MRU = 1_000;
 @injectable()
@@ -38,12 +38,12 @@ export class RemoteJupyterServerMruUpdate
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.kernelProvider.onDidRestartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private onDidStartKernel(kernel: IKernel) {

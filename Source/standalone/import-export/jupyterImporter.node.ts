@@ -4,28 +4,28 @@
 import { inject, injectable } from "inversify";
 
 import { Uri } from "vscode";
-import { Identifiers, CodeSnippets } from "../../platform/common/constants";
 import {
-	IDisposableRegistry,
+	INbConvertExportToPythonService,
+	INbConvertInterpreterDependencyChecker,
+	INotebookImporter,
+} from "../../kernels/jupyter/types";
+import { CodeSnippets, Identifiers } from "../../platform/common/constants";
+import { format } from "../../platform/common/helpers";
+import { IFileSystemNode } from "../../platform/common/platform/types.node";
+import {
 	IConfigurationService,
+	IDisposableRegistry,
 } from "../../platform/common/types";
 import { DataScience } from "../../platform/common/utils/localize";
-import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
 import { noop } from "../../platform/common/utils/misc";
-import {
-	INotebookImporter,
-	INbConvertInterpreterDependencyChecker,
-	INbConvertExportToPythonService,
-} from "../../kernels/jupyter/types";
-import { IFileSystemNode } from "../../platform/common/platform/types.node";
-import { format } from "../../platform/common/helpers";
+import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
 
 /**
  * Translates a python file into a notebook
  */
 @injectable()
 export class JupyterImporter implements INotebookImporter {
-	public isDisposed: boolean = false;
+	public isDisposed = false;
 	// Template that changes markdown cells to have # %% [markdown] in the comments
 	private readonly nbconvertBaseTemplateFormat =
 		// eslint-disable-next-line no-multi-str
@@ -58,11 +58,11 @@ export class JupyterImporter implements INotebookImporter {
 
 	public async importFromFile(
 		sourceFile: Uri,
-		interpreter: PythonEnvironment
+		interpreter: PythonEnvironment,
 	): Promise<string> {
 		const nbConvertVersion =
 			await this.nbConvertDependencyChecker.getNbConvertVersion(
-				interpreter
+				interpreter,
 			);
 		// Use the jupyter nbconvert functionality to turn the notebook into a python file
 		if (nbConvertVersion) {
@@ -87,7 +87,7 @@ export class JupyterImporter implements INotebookImporter {
 				await this.exportToPythonService.exportNotebookToPython(
 					sourceFile,
 					interpreter,
-					template
+					template,
 				);
 			if (fileOutput.includes("get_ipython()")) {
 				fileOutput = this.addIPythonImport(fileOutput);
@@ -104,7 +104,7 @@ export class JupyterImporter implements INotebookImporter {
 
 	private addInstructionComments = (pythonOutput: string): string => {
 		const comments = DataScience.instructionComments(
-			this.defaultCellMarker
+			this.defaultCellMarker,
 		);
 		return comments.concat(pythonOutput);
 	};
@@ -120,12 +120,12 @@ export class JupyterImporter implements INotebookImporter {
 		return format(
 			CodeSnippets.ImportIPython,
 			this.defaultCellMarker,
-			pythonOutput
+			pythonOutput,
 		);
 	};
 
 	public async createTemplateFile(
-		nbconvert6: boolean
+		nbconvert6: boolean,
 	): Promise<string | undefined> {
 		// Create a temp file on disk
 		const file = await this.fs.createTemporaryLocalFile(".tpl");
@@ -140,8 +140,8 @@ export class JupyterImporter implements INotebookImporter {
 					format(
 						this.nbconvertBaseTemplateFormat,
 						nbconvert6 ? this.nbconvert6Null : this.nbconvert5Null,
-						this.defaultCellMarker
-					)
+						this.defaultCellMarker,
+					),
 				);
 
 				// Now we should have a template that will convert

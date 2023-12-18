@@ -13,8 +13,8 @@ import {
 } from "../../../platform/common/utils";
 import { noop } from "../../../platform/common/utils/misc";
 import { sendTelemetryEvent } from "../../../telemetry";
-import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
 import { IRawNotebookSupportedService } from "../../raw/types";
+import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
 
 /**
  * Starts up a bunch of objects when running in a node environment.
@@ -36,14 +36,14 @@ export class Activation implements IExtensionSyncActivationService {
 		this.disposables.push(
 			workspace.onDidOpenNotebookDocument(
 				this.onDidOpenNotebookEditor,
-				this
-			)
+				this,
+			),
 		);
 		this.disposables.push(
 			this.jupyterInterpreterService.onDidChangeInterpreter(
 				this.onDidChangeInterpreter,
-				this
-			)
+				this,
+			),
 		);
 	}
 

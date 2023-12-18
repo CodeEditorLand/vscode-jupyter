@@ -19,7 +19,7 @@ export interface IKernelLauncher {
 		timeout: number,
 		resource: Resource,
 		workingDirectory: string,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<IKernelProcess>;
 }
 
@@ -60,7 +60,7 @@ export interface IKernelProcess extends IAsyncDisposable {
 
 // Provides a service to determine if raw notebook is supported or not
 export const IRawNotebookSupportedService = Symbol(
-	"IRawNotebookSupportedService"
+	"IRawNotebookSupportedService",
 );
 export interface IRawNotebookSupportedService {
 	isSupported: boolean;
@@ -69,6 +69,6 @@ export interface IRawNotebookSupportedService {
 export const IRawKernelSessionFactory = Symbol("IRawKernelSessionFactory");
 export interface IRawKernelSessionFactory {
 	create(
-		options: LocaLKernelSessionCreationOptions
+		options: LocaLKernelSessionCreationOptions,
 	): Promise<IRawKernelSession>;
 }

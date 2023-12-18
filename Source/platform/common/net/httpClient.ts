@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { IHttpClient } from "../types";
-import { traceVerbose } from "../../logging";
 import * as fetch from "cross-fetch";
 import { workspace } from "vscode";
+import { traceVerbose } from "../../logging";
+import { IHttpClient } from "../types";
 
 /**
  * Class used to verify http connections and make GET requests
@@ -30,7 +30,7 @@ export class HttpClient implements IHttpClient {
 			return response.status === 200;
 		} catch (ex) {
 			traceVerbose(
-				`HttpClient - Failure checking for file ${uri}: ${ex}`
+				`HttpClient - Failure checking for file ${uri}: ${ex}`,
 			);
 			return false;
 		}

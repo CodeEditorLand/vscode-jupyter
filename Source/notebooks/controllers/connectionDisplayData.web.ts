@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable, inject } from "inversify";
+import { inject, injectable } from "inversify";
 import {
 	getDisplayNameOrNameOfKernelConnection,
 	getKernelConnectionDisplayPath,
 	getRemoteKernelSessionInformation,
 } from "../../kernels/helpers";
+import { getJupyterDisplayName } from "../../kernels/jupyter/connection/jupyterServerProviderRegistry";
 import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
 import { KernelConnectionMetadata } from "../../kernels/types";
 import { IPlatformService } from "../../platform/common/platform/types";
 import { IDisposableRegistry } from "../../platform/common/types";
-import {
-	IConnectionDisplayData,
-	IConnectionDisplayDataProvider,
-} from "./types";
+import { DataScience } from "../../platform/common/utils/localize";
 import {
 	ConnectionDisplayData,
 	getKernelConnectionCategory,
 	getKernelConnectionCategorySync,
 } from "./connectionDisplayData";
-import { DataScience } from "../../platform/common/utils/localize";
-import { getJupyterDisplayName } from "../../kernels/jupyter/connection/jupyterServerProviderRegistry";
+import {
+	IConnectionDisplayData,
+	IConnectionDisplayDataProvider,
+} from "./types";
 
 @injectable()
 export class ConnectionDisplayDataProvider
@@ -37,13 +37,13 @@ export class ConnectionDisplayDataProvider
 	) {}
 
 	public getDisplayData(
-		connection: KernelConnectionMetadata
+		connection: KernelConnectionMetadata,
 	): IConnectionDisplayData {
 		if (!this.details.get(connection.id)) {
 			const label = getDisplayNameOrNameOfKernelConnection(connection);
 			let description = getKernelConnectionDisplayPath(
 				connection,
-				this.platform
+				this.platform,
 			);
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
@@ -59,7 +59,7 @@ export class ConnectionDisplayDataProvider
 				"",
 				category,
 				undefined,
-				descriptionProvider
+				descriptionProvider,
 			);
 			this.disposables.push(newDetails);
 			this.details.set(connection.id, newDetails);
@@ -74,7 +74,7 @@ export class ConnectionDisplayDataProvider
 			const displayName = getJupyterDisplayName(
 				connection.serverProviderHandle,
 				this.jupyterUriProviderRegistration,
-				DataScience.kernelDefaultRemoteDisplayName
+				DataScience.kernelDefaultRemoteDisplayName,
 			);
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;

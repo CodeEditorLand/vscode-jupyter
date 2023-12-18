@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import {
-	InteractiveWindowMessages,
 	IInteractiveWindowMapping,
+	InteractiveWindowMessages,
 } from "../../../../messageTypes";
 import { BaseReduxActionPayload } from "../../../types";
 import { IMainState } from "../../interactive-common/mainState";

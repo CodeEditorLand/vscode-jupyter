@@ -2,23 +2,23 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { CancellationError, CancellationToken, extensions } from "vscode";
+import { generateIdFromRemoteProvider } from "../../kernels/jupyter/jupyterUtils";
+import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
 import {
 	IKernel,
 	IKernelProvider,
 	IKernelSession,
 	isRemoteConnection,
 } from "../../kernels/types";
-import { IDisposableRegistry } from "../../platform/common/types";
-import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
-import { traceError, traceVerbose, traceWarning } from "../../platform/logging";
-import { CancellationError, CancellationToken, extensions } from "vscode";
-import { generateIdFromRemoteProvider } from "../../kernels/jupyter/jupyterUtils";
-import { JVSC_EXTENSION_ID, Telemetry } from "../../platform/common/constants";
-import { sendTelemetryEvent } from "../../telemetry";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { raceCancellation } from "../../platform/common/cancellation";
-import { KernelProgressReporter } from "../../platform/progress/kernelProgressReporter";
+import { JVSC_EXTENSION_ID, Telemetry } from "../../platform/common/constants";
+import { IDisposableRegistry } from "../../platform/common/types";
 import { DataScience } from "../../platform/common/utils/localize";
+import { traceError, traceVerbose, traceWarning } from "../../platform/logging";
+import { KernelProgressReporter } from "../../platform/progress/kernelProgressReporter";
+import { sendTelemetryEvent } from "../../telemetry";
 
 @injectable()
 export class KernelStartupHooksForJupyterProviders
@@ -36,7 +36,7 @@ export class KernelStartupHooksForJupyterProviders
 		this.kernelProvider.onDidCreateKernel(
 			(kernel) => this.addOnStartHooks(kernel),
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -54,7 +54,7 @@ export class KernelStartupHooksForJupyterProviders
 			"didStart",
 			async (
 				session: IKernelSession | undefined,
-				token: CancellationToken
+				token: CancellationToken,
 			) => {
 				if (!session) {
 					return;
@@ -64,12 +64,12 @@ export class KernelStartupHooksForJupyterProviders
 						(provider) =>
 							provider.extensionId ===
 								connection.serverProviderHandle.extensionId &&
-							provider.id === connection.serverProviderHandle.id
+							provider.id === connection.serverProviderHandle.id,
 					);
 				if (!serverProvider) {
 					// This is not possible
 					traceError(
-						`Unable to find Jupyter Server Provider for ${connection.id} with provider ${connection.serverProviderHandle.extensionId}$${connection.serverProviderHandle.id}`
+						`Unable to find Jupyter Server Provider for ${connection.id} with provider ${connection.serverProviderHandle.extensionId}$${connection.serverProviderHandle.id}`,
 					);
 					return;
 				}
@@ -78,31 +78,31 @@ export class KernelStartupHooksForJupyterProviders
 					return;
 				}
 				const servers = await Promise.resolve(
-					serverProvider.serverProvider.provideJupyterServers(token)
+					serverProvider.serverProvider.provideJupyterServers(token),
 				);
 				const server = servers?.find(
-					(s) => s.id === connection.serverProviderHandle.handle
+					(s) => s.id === connection.serverProviderHandle.handle,
 				);
 				if (!server) {
 					// This is not possible
 					traceError(
-						`Unable to find servers for kernel ${connection.id} with provider ${connection.serverProviderHandle.extensionId}$${connection.serverProviderHandle.id}`
+						`Unable to find servers for kernel ${connection.id} with provider ${connection.serverProviderHandle.extensionId}$${connection.serverProviderHandle.id}`,
 					);
 					return;
 				}
 
 				const onStartKernel =
 					serverProvider.serverProvider.onStartKernel.bind(
-						serverProvider.serverProvider
+						serverProvider.serverProvider,
 					);
 				const time = Date.now();
 				try {
 					const extension = extensions.getExtension(
-						serverProvider.extensionId
+						serverProvider.extensionId,
 					);
 					const message = DataScience.runningKernelStartupHooksFor(
 						extension?.packageJSON?.displayName ||
-							serverProvider.extensionId
+							serverProvider.extensionId,
 					);
 					await KernelProgressReporter.wrapAndReportProgress(
 						kernel.resourceUri,
@@ -112,9 +112,9 @@ export class KernelStartupHooksForJupyterProviders
 								token,
 								onStartKernel(
 									{ uri: kernel.uri, server, session },
-									token
-								)
-							)
+									token,
+								),
+							),
 					);
 				} catch (ex) {
 					if (ex instanceof CancellationError) {
@@ -123,7 +123,7 @@ export class KernelStartupHooksForJupyterProviders
 					// We do not care about the errors from 3rd party extensions.
 					traceWarning(
 						`Startup hook for ${connection.serverProviderHandle.extensionId}$${connection.serverProviderHandle.id} failed`,
-						ex
+						ex,
 					);
 				} finally {
 					const duration = Date.now() - time;
@@ -134,19 +134,19 @@ export class KernelStartupHooksForJupyterProviders
 							extensionId:
 								connection.serverProviderHandle.extensionId,
 							providerId: connection.serverProviderHandle.id,
-						}
+						},
 					);
 					if (duration > 1_000) {
 						traceVerbose(
 							`Kernel Startup hook for ${generateIdFromRemoteProvider(
-								connection.serverProviderHandle
-							)} took ${duration}ms`
+								connection.serverProviderHandle,
+							)} took ${duration}ms`,
 						);
 					}
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

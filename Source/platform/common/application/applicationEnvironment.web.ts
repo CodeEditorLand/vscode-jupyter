@@ -3,8 +3,8 @@
 
 import { inject, injectable } from "inversify";
 import { Uri } from "vscode";
-import { BaseApplicationEnvironment } from "./applicationEnvironment.base";
 import { IExtensionContext } from "../types";
+import { BaseApplicationEnvironment } from "./applicationEnvironment.base";
 
 /**
  * BaseApplicationEnvironment for web. Some properties are not available in web.

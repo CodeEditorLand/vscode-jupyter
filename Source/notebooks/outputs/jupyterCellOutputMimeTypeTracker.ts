@@ -12,13 +12,13 @@ import {
 } from "vscode";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { JupyterNotebookView } from "../../platform/common/constants";
-import { dispose } from "../../platform/common/utils/lifecycle";
 import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
 import { isJupyterNotebook } from "../../platform/common/utils";
+import { dispose } from "../../platform/common/utils/lifecycle";
 import {
 	ResourceTypeTelemetryProperty,
-	sendTelemetryEvent,
 	Telemetry,
+	sendTelemetryEvent,
 } from "../../telemetry";
 import { isTelemetryDisabled } from "../../telemetry";
 
@@ -42,22 +42,22 @@ export class CellOutputMimeTypeTracker
 		workspace.onDidOpenNotebookDocument(
 			this.onDidOpenCloseDocument,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		workspace.onDidCloseNotebookDocument(
 			this.onDidOpenCloseDocument,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		workspace.onDidSaveNotebookDocument(
 			this.onDidOpenCloseDocument,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		notebooks.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -65,7 +65,7 @@ export class CellOutputMimeTypeTracker
 		dispose(this.disposables);
 	}
 	public async onDidChangeNotebookCellExecutionState(
-		e: NotebookCellExecutionStateChangeEvent
+		e: NotebookCellExecutionStateChangeEvent,
 	): Promise<void> {
 		if (!isJupyterNotebook(e.cell.notebook) || this.isTelemetryDisabled) {
 			return;
@@ -77,12 +77,12 @@ export class CellOutputMimeTypeTracker
 			return;
 		}
 		doc.getCells().forEach((cell) =>
-			this.checkCell(cell, "onOpenCloseOrSave")
+			this.checkCell(cell, "onOpenCloseOrSave"),
 		);
 	}
 	private checkCell(
 		cell: NotebookCell,
-		when: "onExecution" | "onOpenCloseOrSave"
+		when: "onExecution" | "onOpenCloseOrSave",
 	) {
 		if (cell.kind === NotebookCellKind.Markup) {
 			return;
@@ -95,15 +95,14 @@ export class CellOutputMimeTypeTracker
 				? "notebook"
 				: "interactive";
 		cell.outputs
-			.map((output) => output.items.map((item) => item.mime))
-			.flat()
+			.flatMap((output) => output.items.map((item) => item.mime))
 			.map((mime) => this.sendTelemetry(mime, when, resourceType));
 	}
 
 	private sendTelemetry(
 		mimeType: string,
 		when: "onExecution" | "onOpenCloseOrSave",
-		resourceType: ResourceTypeTelemetryProperty["resourceType"]
+		resourceType: ResourceTypeTelemetryProperty["resourceType"],
 	) {
 		// No need to send duplicate telemetry or waste CPU cycles on an unneeded hash.
 		const key = `${mimeType}-${when}`;

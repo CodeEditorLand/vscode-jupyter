@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
-import { Commands } from "../../platform/common/constants";
 import { commands, workspace } from "vscode";
 import { ICommandNameArgumentTypeMapping } from "../../commands";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { Commands } from "../../platform/common/constants";
+import { IDisposable, IDisposableRegistry } from "../../platform/common/types";
 
 @injectable()
 export class CommandRegistry
@@ -30,7 +30,7 @@ export class CommandRegistry
 
 		this.registerCommand(
 			Commands.ContinueEditSessionInCodespace,
-			this.continueEditSessionInCodespace
+			this.continueEditSessionInCodespace,
 		);
 	}
 
@@ -45,7 +45,7 @@ export class CommandRegistry
 
 	private async continueEditSessionInCodespace() {
 		await commands.executeCommand(
-			"_workbench.editSessions.actions.continueEditSession.github.codespaces.continueEditSessionInCodespaceWithJupyterServer"
+			"_workbench.editSessions.actions.continueEditSession.github.codespaces.continueEditSessionInCodespaceWithJupyterServer",
 		);
 	}
 }

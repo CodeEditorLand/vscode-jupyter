@@ -14,13 +14,13 @@ import {
 	window,
 	workspace,
 } from "vscode";
-import { IKernel, IKernelProvider } from "../../../kernels/types";
-import { IActiveNotebookChangedEvent, INotebookWatcher } from "./types";
 import { IInteractiveWindowProvider } from "../../../interactive-window/types";
-import { IDisposableRegistry } from "../../../platform/common/types";
-import { IDataViewerFactory } from "../dataviewer/types";
+import { IKernel, IKernelProvider } from "../../../kernels/types";
 import { JupyterNotebookView } from "../../../platform/common/constants";
+import { IDisposableRegistry } from "../../../platform/common/types";
 import { isJupyterNotebook } from "../../../platform/common/utils";
+import { IDataViewerFactory } from "../dataviewer/types";
+import { IActiveNotebookChangedEvent, INotebookWatcher } from "./types";
 
 type KernelStateEventArgs = {
 	notebook: NotebookDocument;
@@ -29,8 +29,8 @@ type KernelStateEventArgs = {
 };
 
 enum KernelState {
-	executed,
-	restarted,
+	executed = 0,
+	restarted = 1,
 }
 
 // For any class that is monitoring the active notebook document, this class will update you
@@ -69,8 +69,8 @@ export class NotebookWatcher implements INotebookWatcher {
 		const activeDataViewer = this.dataViewerFactory.activeViewer;
 		return activeDataViewer
 			? this.kernelProvider.kernels.find(
-					(item) => item === activeDataViewer.kernel
-				)
+					(item) => item === activeDataViewer.kernel,
+			  )
 			: undefined;
 	}
 
@@ -137,13 +137,13 @@ export class NotebookWatcher implements INotebookWatcher {
 		}
 		return workspace.notebookDocuments.find(
 			(notebookDocument) =>
-				notebookDocument === interactiveWindow?.notebookDocument
+				notebookDocument === interactiveWindow?.notebookDocument,
 		);
 	}
 
 	// Handle when a cell finishes execution
 	private onDidChangeNotebookCellExecutionState(
-		cellStateChange: NotebookCellExecutionStateChangeEvent
+		cellStateChange: NotebookCellExecutionStateChangeEvent,
 	) {
 		if (!isJupyterNotebook(cellStateChange.cell.notebook)) {
 			return;
@@ -171,7 +171,7 @@ export class NotebookWatcher implements INotebookWatcher {
 			) {
 				this._executionCountTracker.set(
 					kernelStateEvent.notebook,
-					kernelStateEvent.cell.executionSummary?.executionOrder
+					kernelStateEvent.cell.executionSummary?.executionOrder,
 				);
 			}
 
@@ -218,7 +218,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 		if (editor && isJupyterNotebook(editor.notebook)) {
 			const executionCount = this._executionCountTracker.get(
-				editor.notebook
+				editor.notebook,
 			);
 			executionCount && (changeEvent.executionCount = executionCount);
 		}
@@ -228,7 +228,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 	// Check to see if this is a non-silent execution that we want to update on
 	private isNonSilentExecution(
-		kernelStateEvent: KernelStateEventArgs
+		kernelStateEvent: KernelStateEventArgs,
 	): boolean {
 		if (
 			kernelStateEvent.state === KernelState.executed &&
@@ -243,7 +243,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 	// Check to see if this event was on the active notebook
 	private isActiveNotebookEvent(
-		kernelStateEvent: KernelStateEventArgs
+		kernelStateEvent: KernelStateEventArgs,
 	): boolean {
 		return this.activeKernel?.notebook === kernelStateEvent.notebook;
 	}

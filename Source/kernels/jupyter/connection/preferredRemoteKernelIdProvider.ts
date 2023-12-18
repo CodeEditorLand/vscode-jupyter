@@ -3,13 +3,13 @@
 
 import { inject, injectable, named } from "inversify";
 import { Memento, Uri } from "vscode";
-import { traceVerbose } from "../../../platform/logging";
 import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
 import {
-	IMemento,
 	GLOBAL_MEMENTO,
 	ICryptoUtils,
+	IMemento,
 } from "../../../platform/common/types";
+import { traceVerbose } from "../../../platform/logging";
 
 export const ActiveKernelIdList = "Active_Kernel_Id_List";
 // This is the number of kernel ids that will be remembered between opening and closing VS code
@@ -33,7 +33,7 @@ export class PreferredRemoteKernelIdProvider {
 	) {}
 
 	public async getPreferredRemoteKernelId(
-		uri: Uri
+		uri: Uri,
 	): Promise<string | undefined> {
 		// Stored as a list so we don't take up too much space
 		const list: KernelIdListEntry[] = this.globalMemento.get<
@@ -44,9 +44,9 @@ export class PreferredRemoteKernelIdProvider {
 			const fileHash = await this.crypto.createHash(uri.toString());
 			const entry = list.find((l) => l.fileHash === fileHash);
 			traceVerbose(
-				`Preferred Remote kernel for ${getDisplayPath(
-					uri
-				)} is ${entry?.kernelId}`
+				`Preferred Remote kernel for ${getDisplayPath(uri)} is ${
+					entry?.kernelId
+				}`,
 			);
 			return entry?.kernelId;
 		}
@@ -57,13 +57,13 @@ export class PreferredRemoteKernelIdProvider {
 	}
 	public async storePreferredRemoteKernelId(
 		uri: Uri,
-		id: string
+		id: string,
 	): Promise<void> {
 		await this.updatePreferredRemoteKernelIdInternal(uri, id);
 	}
 	private async updatePreferredRemoteKernelIdInternal(
 		uri: Uri,
-		id?: string
+		id?: string,
 	): Promise<void> {
 		let requiresUpdate = false;
 
@@ -72,9 +72,9 @@ export class PreferredRemoteKernelIdProvider {
 			JSON.stringify(
 				this.globalMemento.get<KernelIdListEntry[]>(
 					ActiveKernelIdList,
-					[]
-				)
-			)
+					[],
+				),
+			),
 		);
 		const fileHash = await this.crypto.createHash(uri.toString());
 		const index = list.findIndex((l) => l.fileHash === fileHash);
@@ -90,8 +90,8 @@ export class PreferredRemoteKernelIdProvider {
 			list.push({ fileHash, kernelId: id });
 			traceVerbose(
 				`Storing Preferred remote kernel for ${getDisplayPath(
-					uri
-				)} is ${id}`
+					uri,
+				)} is ${id}`,
 			);
 		}
 

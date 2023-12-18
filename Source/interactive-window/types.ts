@@ -11,15 +11,15 @@ import {
 	Tab,
 	Uri,
 } from "vscode";
-import { IDebuggingManager } from "../notebooks/debugger/debuggingTypes";
 import { IKernel, KernelConnectionMetadata } from "../kernels/types";
+import { IVSCodeNotebookController } from "../notebooks/controllers/types";
+import { IDebuggingManager } from "../notebooks/debugger/debuggingTypes";
 import {
-	Resource,
-	InteractiveWindowMode,
 	ICell,
+	InteractiveWindowMode,
+	Resource,
 } from "../platform/common/types";
 import { IFileGeneratedCodes } from "./editor-integration/types";
-import { IVSCodeNotebookController } from "../notebooks/controllers/types";
 
 export type INativeInteractiveWindow = {
 	notebookUri: Uri;
@@ -55,7 +55,7 @@ export interface IInteractiveWindowProvider {
 	 */
 	getOrCreate(
 		owner: Resource,
-		connection?: KernelConnectionMetadata
+		connection?: KernelConnectionMetadata,
 	): Promise<IInteractiveWindow>;
 	/**
 	 * Given a text document, return the associated interactive window if one exists.
@@ -70,7 +70,7 @@ export interface IInteractiveWindowProvider {
 	 * Find an interactive window that contains the given notebook
 	 */
 	getInteractiveWindowWithNotebook(
-		notebookUri: Uri | undefined
+		notebookUri: Uri | undefined,
 	): IInteractiveWindow | undefined;
 	/**
 	 * Find all interactive windows to which the file has submitted code
@@ -79,7 +79,7 @@ export interface IInteractiveWindowProvider {
 }
 
 export const IInteractiveControllerHelper = Symbol(
-	"IInteractiveControllerHelper"
+	"IInteractiveControllerHelper",
 );
 export interface IInteractiveControllerHelper {
 	onControllerSelected: Event<{
@@ -88,20 +88,20 @@ export interface IInteractiveControllerHelper {
 	}>;
 	getInitialController(
 		resource: Resource,
-		connection?: KernelConnectionMetadata
+		connection?: KernelConnectionMetadata,
 	): Promise<IVSCodeNotebookController | undefined>;
 	getSelectedController(
-		notebookDocument: NotebookDocument
+		notebookDocument: NotebookDocument,
 	): IVSCodeNotebookController | undefined;
 	getRegisteredController(
-		metadata: KernelConnectionMetadata
+		metadata: KernelConnectionMetadata,
 	): IVSCodeNotebookController | undefined;
 	createKernel(
 		metadata: KernelConnectionMetadata,
 		controller: NotebookController,
 		resource: Resource,
 		notebookDocument: NotebookDocument,
-		disposables: Disposable[]
+		disposables: Disposable[],
 	): Promise<{ kernel: IKernel; actualController: NotebookController }>;
 }
 
@@ -144,12 +144,12 @@ export interface InteractiveTab extends Tab {
 }
 
 export const IInteractiveWindowDebuggingManager = Symbol(
-	"IInteractiveWindowDebuggingManager"
+	"IInteractiveWindowDebuggingManager",
 );
 export interface IInteractiveWindowDebuggingManager extends IDebuggingManager {
 	start(notebook: NotebookDocument, cell: NotebookCell): Promise<void>;
 	updateSourceMaps(
 		editor: NotebookEditor,
-		generatedCodes: IFileGeneratedCodes[]
+		generatedCodes: IFileGeneratedCodes[],
 	): Promise<void>;
 }

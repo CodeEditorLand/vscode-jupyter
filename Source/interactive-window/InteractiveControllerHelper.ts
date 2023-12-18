@@ -4,12 +4,13 @@
 import { inject, injectable, named, optional } from "inversify";
 import {
 	Disposable,
+	Event,
 	Memento,
 	NotebookController,
 	NotebookDocument,
-	Event,
 } from "vscode";
 import { DisplayOptions } from "../kernels/displayOptions";
+import { createInterpreterKernelSpec, getKernelId } from "../kernels/helpers";
 import { initializeInteractiveOrNotebookTelemetryBasedOnUserAction } from "../kernels/telemetry/helper";
 import {
 	IKernel,
@@ -26,6 +27,7 @@ import {
 	InteractiveWindowView,
 	JupyterNotebookView,
 } from "../platform/common/constants";
+import { getDisplayPath } from "../platform/common/platform/fs-paths";
 import {
 	IDisposableRegistry,
 	IMemento,
@@ -36,8 +38,6 @@ import { IInterpreterService } from "../platform/interpreter/contracts";
 import { IServiceContainer } from "../platform/ioc/types";
 import { traceInfoIfCI, traceWarning } from "../platform/logging";
 import { IInteractiveControllerHelper } from "./types";
-import { createInterpreterKernelSpec, getKernelId } from "../kernels/helpers";
-import { getDisplayPath } from "../platform/common/platform/fs-paths";
 
 const MostRecentKernelSelectedKey = "LastInteractiveKernelSelected";
 
@@ -68,13 +68,13 @@ export class InteractiveControllerHelper
 
 	public async getInitialController(
 		resource: Resource,
-		preferredConnection?: KernelConnectionMetadata
+		preferredConnection?: KernelConnectionMetadata,
 	) {
 		// If given a preferred connection, use that if it exists
 		if (preferredConnection) {
 			const controller = this.controllerRegistration.get(
 				preferredConnection,
-				InteractiveWindowView
+				InteractiveWindowView,
 			);
 			if (controller) {
 				return controller;
@@ -85,13 +85,13 @@ export class InteractiveControllerHelper
 		if (this.workspaceMemento.get(MostRecentKernelSelectedKey)) {
 			const metadata =
 				this.workspaceMemento.get<KernelConnectionMetadata>(
-					MostRecentKernelSelectedKey
+					MostRecentKernelSelectedKey,
 				);
 			const controller = metadata
 				? this.controllerRegistration.get(
 						metadata,
-						InteractiveWindowView
-					)
+						InteractiveWindowView,
+				  )
 				: undefined;
 			if (controller) {
 				return controller;
@@ -105,18 +105,18 @@ export class InteractiveControllerHelper
 			InteractiveWindowView,
 			resource,
 			this.interpreterService,
-			this.controllerRegistration
+			this.controllerRegistration,
 		);
 	}
 
 	public getSelectedController(
-		notebookDocument: NotebookDocument
+		notebookDocument: NotebookDocument,
 	): IVSCodeNotebookController | undefined {
 		return this.controllerRegistration.getSelected(notebookDocument);
 	}
 
 	public getRegisteredController(
-		metadata: KernelConnectionMetadata
+		metadata: KernelConnectionMetadata,
 	): IVSCodeNotebookController | undefined {
 		return this.controllerRegistration.get(metadata, "interactive");
 	}
@@ -126,11 +126,11 @@ export class InteractiveControllerHelper
 		controller: NotebookController,
 		resource: Resource,
 		notebookDocument: NotebookDocument,
-		disposables: Disposable[]
+		disposables: Disposable[],
 	): Promise<{ kernel: IKernel; actualController: NotebookController }> {
 		await initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			resource,
-			metadata
+			metadata,
 		);
 
 		const onStartKernel = (action: KernelAction, k: IKernel) => {
@@ -143,7 +143,7 @@ export class InteractiveControllerHelper
 					k.controller.id
 				} in ${this.controllerRegistration.all
 					.map((item) => `${item.kind}:${item.id}`)
-					.join(", ")}`
+					.join(", ")}`,
 			);
 		};
 
@@ -158,15 +158,15 @@ export class InteractiveControllerHelper
 			new DisplayOptions(false),
 			disposables,
 			"jupyterExtension",
-			onStartKernel
+			onStartKernel,
 		);
 
 		const found = this.controllerRegistration.registered.find(
-			(item) => item.id === kernel.controller.id
+			(item) => item.id === kernel.controller.id,
 		);
 		if (!found) {
 			throw Error(
-				`Controller ${kernel.controller.id} not found or not yet created`
+				`Controller ${kernel.controller.id} not found or not yet created`,
 			);
 		}
 		const actualController = found.controller;
@@ -176,20 +176,20 @@ export class InteractiveControllerHelper
 			isActiveInterpreter(
 				kernel.kernelConnectionMetadata,
 				resource,
-				this.interpreterService
+				this.interpreterService,
 			)
 				.then(async (isActiveInterpreter) => {
 					await this.workspaceMemento.update(
 						MostRecentKernelSelectedKey,
 						isActiveInterpreter
 							? undefined
-							: kernel.kernelConnectionMetadata
+							: kernel.kernelConnectionMetadata,
 					);
 				})
 				.catch((reason) => {
 					traceWarning(
 						"Failed to store kernel connection metadata",
-						reason
+						reason,
 					);
 				});
 		}
@@ -204,7 +204,7 @@ async function createActiveInterpreterController(
 	viewType: typeof JupyterNotebookView | typeof InteractiveWindowView,
 	resource: Resource,
 	interpreters: IInterpreterService,
-	registration: IControllerRegistration
+	registration: IControllerRegistration,
 ): Promise<IVSCodeNotebookController | undefined> {
 	const pythonInterpreter = await interpreters.getActiveInterpreter(resource);
 	if (pythonInterpreter) {
@@ -223,8 +223,8 @@ async function createActiveInterpreterController(
 			`Active Interpreter Controller ${controller.connection.kind}:${
 				controller.id
 			} created for View ${viewType} with resource ${getDisplayPath(
-				resource
-			)}`
+				resource,
+			)}`,
 		);
 		return controller;
 	}
@@ -233,7 +233,7 @@ async function createActiveInterpreterController(
 async function isActiveInterpreter(
 	metadata: KernelConnectionMetadata,
 	resource: Resource,
-	interpreters: IInterpreterService
+	interpreters: IInterpreterService,
 ) {
 	const activeInterpreter = await interpreters.getActiveInterpreter(resource);
 	return activeInterpreter?.id === metadata.interpreter?.id;

@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as path from "../../../../platform/vscode-path/path";
 import { Uri } from "vscode";
+import { JupyterPaths } from "../../../../kernels/raw/finder/jupyterPaths.node";
+import { IKernel } from "../../../../kernels/types";
 import { IFileSystemNode } from "../../../../platform/common/platform/types.node";
 import { IExtensionContext } from "../../../../platform/common/types";
 import { StopWatch } from "../../../../platform/common/utils/stopWatch";
-import { sendTelemetryEvent, Telemetry } from "../../../../telemetry";
 import { getTelemetrySafeHashedString } from "../../../../platform/telemetry/helpers";
-import { IKernel } from "../../../../kernels/types";
-import { BaseIPyWidgetScriptManager } from "./baseIPyWidgetScriptManager";
+import * as path from "../../../../platform/vscode-path/path";
+import { Telemetry, sendTelemetryEvent } from "../../../../telemetry";
 import { IIPyWidgetScriptManager, INbExtensionsPathProvider } from "../types";
-import { JupyterPaths } from "../../../../kernels/raw/finder/jupyterPaths.node";
+import { BaseIPyWidgetScriptManager } from "./baseIPyWidgetScriptManager";
 
 type KernelConnectionId = string;
 /**
@@ -42,13 +42,13 @@ export class LocalIPyWidgetScriptManager
 		private readonly fs: IFileSystemNode,
 		private readonly nbExtensionsPathProvider: INbExtensionsPathProvider,
 		private readonly context: IExtensionContext,
-		private readonly jupyterPaths: JupyterPaths
+		private readonly jupyterPaths: JupyterPaths,
 	) {
 		super(kernel);
 		// When re-loading VS Code, always overwrite the files.
 		this.overwriteExistingFiles =
 			!LocalIPyWidgetScriptManager.nbExtensionsCopiedKernelConnectionList.has(
-				kernel.kernelConnectionMetadata.id
+				kernel.kernelConnectionMetadata.id,
 			);
 	}
 	public getBaseUrl() {
@@ -68,26 +68,26 @@ export class LocalIPyWidgetScriptManager
 		return this.nbExtensionsParentPath;
 	}
 	private async getNbExtensionsParentPathImpl(): Promise<Uri | undefined> {
-		let overwrite = this.overwriteExistingFiles;
+		const overwrite = this.overwriteExistingFiles;
 
 		try {
 			const stopWatch = new StopWatch();
 			this.sourceNbExtensionsPath =
 				await this.nbExtensionsPathProvider.getNbExtensionsParentPath(
-					this.kernel
+					this.kernel,
 				);
 			if (!this.sourceNbExtensionsPath) {
 				return;
 			}
 			const kernelHash = await getTelemetrySafeHashedString(
-				this.kernel.kernelConnectionMetadata.id
+				this.kernel.kernelConnectionMetadata.id,
 			);
 			const baseUrl = Uri.joinPath(
 				this.context.extensionUri,
 				"temp",
 				"scripts",
 				kernelHash,
-				"jupyter"
+				"jupyter",
 			);
 
 			const targetNbExtensions = Uri.joinPath(baseUrl, "nbextensions");
@@ -100,7 +100,7 @@ export class LocalIPyWidgetScriptManager
 				this.fs.createDirectory(targetNbExtensions),
 			]);
 			const nbExtensionFolders = jupyterDataDirectories.map((dataDir) =>
-				Uri.joinPath(dataDir, "nbextensions")
+				Uri.joinPath(dataDir, "nbextensions"),
 			);
 			// The nbextensions folder is sorted in order of priority.
 			// Hence when copying, copy the lowest priority nbextensions folder first.
@@ -116,7 +116,7 @@ export class LocalIPyWidgetScriptManager
 			// If we've copied once, then next time, don't overwrite.
 			this.overwriteExistingFiles = false;
 			LocalIPyWidgetScriptManager.nbExtensionsCopiedKernelConnectionList.add(
-				this.kernel.kernelConnectionMetadata.id
+				this.kernel.kernelConnectionMetadata.id,
 			);
 			sendTelemetryEvent(Telemetry.IPyWidgetNbExtensionCopyTime, {
 				duration: stopWatch.elapsedTime,
@@ -127,7 +127,7 @@ export class LocalIPyWidgetScriptManager
 				Telemetry.IPyWidgetNbExtensionCopyTime,
 				undefined,
 				undefined,
-				ex
+				ex,
 			);
 			throw ex;
 		}
@@ -143,12 +143,12 @@ export class LocalIPyWidgetScriptManager
 		// Get all of the widget entry points, which would be of the form `nbextensions/<widget folder>/extension.js`
 		const nbExtensionsFolder = Uri.joinPath(
 			nbExtensionsParentPath,
-			"nbextensions"
+			"nbextensions",
 		);
 		const extensions = await this.fs.searchLocal(
 			"*/extension.js",
 			nbExtensionsFolder.fsPath,
-			true
+			true,
 		);
 		return extensions.map((entry) => ({
 			uri: Uri.joinPath(nbExtensionsFolder, entry),

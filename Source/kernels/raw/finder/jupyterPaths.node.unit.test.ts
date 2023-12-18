@@ -13,26 +13,26 @@ import {
 	Uri,
 } from "vscode";
 import {
-	CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS,
-	JupyterPaths,
-} from "./jupyterPaths.node";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import {
 	IFileSystem,
 	IPlatformService,
 } from "../../../platform/common/platform/types";
 import { IDisposable } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { isWeb } from "../../../platform/common/utils/misc";
 import { OSType } from "../../../platform/common/utils/platform";
 import { ICustomEnvironmentVariablesProvider } from "../../../platform/common/variables/types";
 import {
-	IPythonExecutionService,
 	IPythonExecutionFactory,
+	IPythonExecutionService,
 } from "../../../platform/interpreter/types.node";
 import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import * as path from "../../../platform/vscode-path/path";
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from "../../../test/constants.node";
 import { uriEquals } from "../../../test/datascience/helpers";
+import {
+	CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS,
+	JupyterPaths,
+} from "./jupyterPaths.node";
 
 suite("Jupyter Paths", () => {
 	let disposables: IDisposable[] = [];
@@ -71,7 +71,7 @@ suite("Jupyter Paths", () => {
 		pythonExecService = mock<IPythonExecutionService>();
 		(instance(pythonExecService) as any).then = undefined;
 		when(
-			pythonExecFactory.createActivatedEnvironment(anything())
+			pythonExecFactory.createActivatedEnvironment(anything()),
 		).thenResolve(instance(pythonExecService));
 		platformService = mock<IPlatformService>();
 		envVarsProvider = mock<ICustomEnvironmentVariablesProvider>();
@@ -80,7 +80,7 @@ suite("Jupyter Paths", () => {
 		context = mock<ExtensionContext>();
 		when(context.extensionUri).thenReturn(extensionUri);
 		when(
-			envVarsProvider.getEnvironmentVariables(anything(), anything())
+			envVarsProvider.getEnvironmentVariables(anything(), anything()),
 		).thenResolve(process.env);
 		jupyterPaths = new JupyterPaths(
 			instance(platformService),
@@ -89,7 +89,7 @@ suite("Jupyter Paths", () => {
 			instance(memento),
 			instance(fs),
 			instance(context),
-			instance(pythonExecFactory)
+			instance(pythonExecFactory),
 		);
 		delete process.env["JUPYTER_PATH"];
 		delete process.env["APPDATA"];
@@ -121,7 +121,7 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 1);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(Uri.file(appDataDir), "jupyter").toString()
+			Uri.joinPath(Uri.file(appDataDir), "jupyter").toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on Windows with PROGRAMDATA", async () => {
@@ -137,11 +137,11 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 2);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(windowsHomeDir, ".jupyter", "data").toString()
+			Uri.joinPath(windowsHomeDir, ".jupyter", "data").toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString()
+			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on Windows with APPDATA & PROGRAMDATA", async () => {
@@ -159,11 +159,11 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 2);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(Uri.file(appDataDir), "jupyter").toString()
+			Uri.joinPath(Uri.file(appDataDir), "jupyter").toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString()
+			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on Windows with JUPYTER_CONFIG_DIR & PROGRAMDATA", async () => {
@@ -181,11 +181,11 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 2);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(Uri.file(configDir), "data").toString()
+			Uri.joinPath(Uri.file(configDir), "data").toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString()
+			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on Windows with JUPYTER_CONFIG_DIR, PROGRAMDATA & JUPYTER_DATA_DIR", async () => {
@@ -205,11 +205,11 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 2);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString()
+			Uri.joinPath(Uri.file(programDataDir), "jupyter").toString(),
 		);
 	});
 
@@ -235,19 +235,19 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 4);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyter_Paths[0]).toString()
+			Uri.file(jupyter_Paths[0]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.file(jupyter_Paths[1]).toString()
+			Uri.file(jupyter_Paths[1]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[2].toString(),
-			Uri.file(jupyter_Paths[2]).toString()
+			Uri.file(jupyter_Paths[2]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[3].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 	});
 
@@ -274,27 +274,27 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 5);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyter_Paths[0]).toString()
+			Uri.file(jupyter_Paths[0]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.file(jupyter_Paths[1]).toString()
+			Uri.file(jupyter_Paths[1]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[2].toString(),
-			Uri.file(jupyter_Paths[2]).toString()
+			Uri.file(jupyter_Paths[2]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[3].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[4].toString(),
 			Uri.joinPath(
 				Uri.file(interpreter.sysPrefix!),
 				"share",
-				"jupyter"
-			).toString()
+				"jupyter",
+			).toString(),
 		);
 	});
 
@@ -304,15 +304,15 @@ suite("Jupyter Paths", () => {
 		const pythonFile = Uri.joinPath(
 			extensionUri,
 			"pythonFiles",
-			"printJupyterDataDir.py"
+			"printJupyterDataDir.py",
 		);
 		when(
-			pythonExecService.exec(deepEqual([pythonFile.fsPath]), anything())
+			pythonExecService.exec(deepEqual([pythonFile.fsPath]), anything()),
 		).thenResolve({
 			stdout: "JupyterDataDirFromPython",
 		});
 		when(fs.exists(uriEquals("JupyterDataDirFromPython"))).thenResolve(
-			true
+			true,
 		);
 		const jupyter_Paths = [
 			"FjupyterDataDir",
@@ -334,31 +334,31 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 6);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyter_Paths[0]).toString()
+			Uri.file(jupyter_Paths[0]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.file(jupyter_Paths[1]).toString()
+			Uri.file(jupyter_Paths[1]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[2].toString(),
-			Uri.file(jupyter_Paths[2]).toString()
+			Uri.file(jupyter_Paths[2]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[3].toString(),
-			Uri.file("JupyterDataDirFromPython").toString()
+			Uri.file("JupyterDataDirFromPython").toString(),
 		);
 		assert.strictEqual(
 			dataDirs[4].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[5].toString(),
 			Uri.joinPath(
 				Uri.file(interpreter.sysPrefix!),
 				"share",
-				"jupyter"
-			).toString()
+				"jupyter",
+			).toString(),
 		);
 	});
 
@@ -373,7 +373,7 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 1);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(unixHomeDir, ".local", "share", "jupyter").toString()
+			Uri.joinPath(unixHomeDir, ".local", "share", "jupyter").toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on Unix with JUPYTER_DATA_DIR", async () => {
@@ -389,7 +389,7 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 1);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on Unix with JUPYTER_DATA_DIR & XDG_DATA_HOME", async () => {
@@ -404,7 +404,7 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 1);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(Uri.file(xdgDataHome), "jupyter").toString()
+			Uri.joinPath(Uri.file(xdgDataHome), "jupyter").toString(),
 		);
 	});
 
@@ -419,7 +419,7 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 1);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.joinPath(macHomeDir, "Library", "Jupyter").toString()
+			Uri.joinPath(macHomeDir, "Library", "Jupyter").toString(),
 		);
 	});
 	test("Get datadir for non-python kernel on mac with JUPYTER_DATA_DIR", async () => {
@@ -435,7 +435,7 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 1);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 	});
 	test("Get datadir for python kernel on mac with JUPYTER_DATA_DIR", async () => {
@@ -452,15 +452,15 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 2);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
 			Uri.joinPath(
 				Uri.file(interpreter.sysPrefix!),
 				"share",
-				"jupyter"
-			).toString()
+				"jupyter",
+			).toString(),
 		);
 	});
 	test("Get datadir for python kernel on mac with Python DataDir, JUPYTER_CONFIG_DIR, PROGRAMDATA, JUPYTER_DATA_DIR & JUPYTER_PATH", async () => {
@@ -469,15 +469,15 @@ suite("Jupyter Paths", () => {
 		const pythonFile = Uri.joinPath(
 			extensionUri,
 			"pythonFiles",
-			"printJupyterDataDir.py"
+			"printJupyterDataDir.py",
 		);
 		when(
-			pythonExecService.exec(deepEqual([pythonFile.fsPath]), anything())
+			pythonExecService.exec(deepEqual([pythonFile.fsPath]), anything()),
 		).thenResolve({
 			stdout: "JupyterDataDirFromPython",
 		});
 		when(fs.exists(uriEquals("JupyterDataDirFromPython"))).thenResolve(
-			true
+			true,
 		);
 		const jupyter_Paths = [
 			"FjupyterDataDir",
@@ -499,31 +499,31 @@ suite("Jupyter Paths", () => {
 		assert.strictEqual(dataDirs.length, 6);
 		assert.strictEqual(
 			dataDirs[0].toString(),
-			Uri.file(jupyter_Paths[0]).toString()
+			Uri.file(jupyter_Paths[0]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[1].toString(),
-			Uri.file(jupyter_Paths[1]).toString()
+			Uri.file(jupyter_Paths[1]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[2].toString(),
-			Uri.file(jupyter_Paths[2]).toString()
+			Uri.file(jupyter_Paths[2]).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[3].toString(),
-			Uri.file("JupyterDataDirFromPython").toString()
+			Uri.file("JupyterDataDirFromPython").toString(),
 		);
 		assert.strictEqual(
 			dataDirs[4].toString(),
-			Uri.file(jupyterDataDir).toString()
+			Uri.file(jupyterDataDir).toString(),
 		);
 		assert.strictEqual(
 			dataDirs[5].toString(),
 			Uri.joinPath(
 				Uri.file(interpreter.sysPrefix!),
 				"share",
-				"jupyter"
-			).toString()
+				"jupyter",
+			).toString(),
 		);
 	});
 
@@ -531,27 +531,27 @@ suite("Jupyter Paths", () => {
 		when(platformService.osType).thenReturn(OSType.Windows);
 		when(platformService.homeDir).thenReturn(windowsHomeDir);
 		when(
-			memento.get(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, anything())
+			memento.get(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, anything()),
 		).thenReturn([]);
 
 		const paths = await jupyterPaths.getKernelSpecRootPaths(
-			cancelToken.token
+			cancelToken.token,
 		);
 		const winJupyterPath = path.join(
 			"AppData",
 			"Roaming",
 			"jupyter",
-			"kernels"
+			"kernels",
 		);
 
 		assert.strictEqual(
 			paths.length,
 			1,
-			`Expected 1 path, got ${paths.length}, ${JSON.stringify(paths)}`
+			`Expected 1 path, got ${paths.length}, ${JSON.stringify(paths)}`,
 		);
 		assert.strictEqual(
 			paths[0].toString(),
-			Uri.joinPath(windowsHomeDir, winJupyterPath).toString()
+			Uri.joinPath(windowsHomeDir, winJupyterPath).toString(),
 		);
 	});
 
@@ -559,76 +559,76 @@ suite("Jupyter Paths", () => {
 		when(platformService.osType).thenReturn(OSType.Windows);
 		when(platformService.homeDir).thenReturn(windowsHomeDir);
 		when(
-			memento.get(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, anything())
+			memento.get(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, anything()),
 		).thenReturn([]);
 		const jupyter_Paths = [__filename];
 		process.env["JUPYTER_PATH"] = jupyter_Paths.join(path.delimiter);
 
 		const paths = await jupyterPaths.getKernelSpecRootPaths(
-			cancelToken.token
+			cancelToken.token,
 		);
 		const winJupyterPath = path.join(
 			"AppData",
 			"Roaming",
 			"jupyter",
-			"kernels"
+			"kernels",
 		);
 
 		assert.strictEqual(
 			paths.length,
 			2,
-			`Expected 2 path, got ${paths.length}, ${JSON.stringify(paths)}`
+			`Expected 2 path, got ${paths.length}, ${JSON.stringify(paths)}`,
 		);
 		assert.strictEqual(
 			paths[0].toString(),
-			Uri.joinPath(Uri.file(__filename), "kernels").toString()
+			Uri.joinPath(Uri.file(__filename), "kernels").toString(),
 		);
 		assert.strictEqual(
 			paths[1].toString(),
-			Uri.joinPath(windowsHomeDir, winJupyterPath).toString()
+			Uri.joinPath(windowsHomeDir, winJupyterPath).toString(),
 		);
 	});
-	test("Get kernelspec root paths on Windows with JUPYTER_PATH & ALLUSERSPROFILE env variable", async function () {
+	test("Get kernelspec root paths on Windows with JUPYTER_PATH & ALLUSERSPROFILE env variable", async () => {
 		when(platformService.osType).thenReturn(OSType.Windows);
 		when(platformService.homeDir).thenReturn(windowsHomeDir);
 		when(
-			memento.get(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, anything())
+			memento.get(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, anything()),
 		).thenReturn([]);
 		const jupyter_Paths = [__filename];
 		process.env["JUPYTER_PATH"] = jupyter_Paths.join(path.delimiter);
 		const allUserProfilePath = (process.env["PROGRAMDATA"] = path.join(
 			EXTENSION_ROOT_DIR_FOR_TESTS,
-			"temp"
+			"temp",
 		));
 
 		const paths = await jupyterPaths.getKernelSpecRootPaths(
-			cancelToken.token
+			cancelToken.token,
 		);
 		const winJupyterPath = path.join(
 			"AppData",
 			"Roaming",
 			"jupyter",
-			"kernels"
+			"kernels",
 		);
 
 		assert.strictEqual(
 			paths.length,
 			3,
-			`Expected 3 path, got ${paths.length}, ${JSON.stringify(paths)}`
+			`Expected 3 path, got ${paths.length}, ${JSON.stringify(paths)}`,
 		);
 		assert.strictEqual(
 			paths[0].toString(),
-			Uri.joinPath(Uri.file(__filename), "kernels").toString()
+			Uri.joinPath(Uri.file(__filename), "kernels").toString(),
 		);
 		assert.strictEqual(
 			paths[1].toString(),
-			Uri.joinPath(windowsHomeDir, winJupyterPath).toString()
+			Uri.joinPath(windowsHomeDir, winJupyterPath).toString(),
 		);
 		assert.strictEqual(
 			paths[2].toString(),
 			Uri.file(
-				path.join(allUserProfilePath, "jupyter", "kernels")
-			).toString()
+				path.join(allUserProfilePath, "jupyter", "kernels"),
+			).toString(),
 		);
 	});
 });

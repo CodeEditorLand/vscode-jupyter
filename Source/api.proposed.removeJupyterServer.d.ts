@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { Uri } from "vscode";
-
 declare module "./api" {
 	/**
 	 * Use of proposed API is not recommended.

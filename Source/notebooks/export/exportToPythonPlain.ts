@@ -15,8 +15,8 @@ import {
 } from "../../platform/common/platform/types";
 import { IConfigurationService } from "../../platform/common/types";
 import { appendLineFeed } from "../../platform/common/utils";
-import { IExport } from "./types";
 import { ServiceContainer } from "../../platform/ioc/container";
+import { IExport } from "./types";
 
 // Handles exporting a NotebookDocument to python without using nbconvert
 export class ExportToPythonPlain implements IExport {
@@ -27,7 +27,7 @@ export class ExportToPythonPlain implements IExport {
 		this.fs = ServiceContainer.instance.get<IFileSystem>(IFileSystem);
 		this.configuration =
 			ServiceContainer.instance.get<IConfigurationService>(
-				IConfigurationService
+				IConfigurationService,
 			);
 		this.platform =
 			ServiceContainer.instance.get<IPlatformService>(IPlatformService);
@@ -45,7 +45,7 @@ export class ExportToPythonPlain implements IExport {
 	public async export(
 		sourceDocument: NotebookDocument,
 		target: Uri,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<void> {
 		if (token.isCancellationRequested) {
 			return;
@@ -62,12 +62,12 @@ export class ExportToPythonPlain implements IExport {
 			.filter(
 				(cell) =>
 					!cell.metadata.custom?.metadata
-						?.isInteractiveWindowMessageCell
+						?.isInteractiveWindowMessageCell,
 			) // We don't want interactive window sys info cells
 			.reduce(
 				(previousValue, currentValue) =>
 					previousValue + this.exportCell(currentValue),
-				""
+				"",
 			);
 	}
 
@@ -80,11 +80,11 @@ export class ExportToPythonPlain implements IExport {
 			switch (cell.kind) {
 				case NotebookCellKind.Code:
 					return `${cellMarker}${eol}${this.exportCodeCell(
-						cell
+						cell,
 					)}${eol}${eol}`;
 				case NotebookCellKind.Markup:
 					return `${cellMarker} [markdown]${eol}${this.exportMarkdownCell(
-						cell
+						cell,
 					)}${eol}${eol}`;
 			}
 		}
@@ -94,7 +94,7 @@ export class ExportToPythonPlain implements IExport {
 
 	// Convert one Code cell to a string
 	private exportCodeCell(cell: NotebookCell): string {
-		let code = splitLines(cell.document.getText(), {
+		const code = splitLines(cell.document.getText(), {
 			trim: false,
 			removeEmptyEntries: false,
 		});
@@ -107,13 +107,13 @@ export class ExportToPythonPlain implements IExport {
 		return appendLineFeed(
 			code,
 			this.getEOL(),
-			commentMagic ? commentMagicCommands : undefined
+			commentMagic ? commentMagicCommands : undefined,
 		).join("");
 	}
 
 	// Convert one Markup cell to a string
 	private exportMarkdownCell(cell: NotebookCell): string {
-		let code = splitLines(cell.document.getText(), {
+		const code = splitLines(cell.document.getText(), {
 			trim: false,
 			removeEmptyEntries: false,
 		});

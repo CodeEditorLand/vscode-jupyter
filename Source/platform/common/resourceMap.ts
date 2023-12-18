@@ -8,10 +8,7 @@ interface ResourceMapKeyFn {
 }
 
 class ResourceMapEntry<T> {
-	constructor(
-		readonly Uri: Uri,
-		readonly value: T
-	) {}
+	constructor(readonly Uri: Uri, readonly value: T) {}
 }
 
 /**
@@ -41,7 +38,7 @@ export class ResourceMap<T> implements Map<Uri, T> {
 
 	constructor(
 		mapOrKeyFn?: ResourceMap<T> | ResourceMapKeyFn,
-		toKey?: ResourceMapKeyFn
+		toKey?: ResourceMapKeyFn,
 	) {
 		if (mapOrKeyFn instanceof ResourceMap) {
 			this.map = new Map(mapOrKeyFn.map);
@@ -55,7 +52,7 @@ export class ResourceMap<T> implements Map<Uri, T> {
 	set(resource: Uri, value: T): this {
 		this.map.set(
 			this.toKey(resource),
-			new ResourceMapEntry(resource, value)
+			new ResourceMapEntry(resource, value),
 		);
 		return this;
 	}
@@ -83,38 +80,38 @@ export class ResourceMap<T> implements Map<Uri, T> {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	forEach(
 		clb: (value: T, key: Uri, map: Map<Uri, T>) => void,
-		thisArg?: any
+		thisArg?: any,
 	): void {
 		if (typeof thisArg !== "undefined") {
 			clb = clb.bind(thisArg);
 		}
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		for (let [_, entry] of this.map) {
+		for (const [_, entry] of this.map) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			clb(entry.value, entry.Uri, <any>this);
 		}
 	}
 
 	*values(): IterableIterator<T> {
-		for (let entry of this.map.values()) {
+		for (const entry of this.map.values()) {
 			yield entry.value;
 		}
 	}
 
 	*keys(): IterableIterator<Uri> {
-		for (let entry of this.map.values()) {
+		for (const entry of this.map.values()) {
 			yield entry.Uri;
 		}
 	}
 
 	*entries(): IterableIterator<[Uri, T]> {
-		for (let entry of this.map.values()) {
+		for (const entry of this.map.values()) {
 			yield [entry.Uri, entry.value];
 		}
 	}
 
 	*[Symbol.iterator](): IterableIterator<[Uri, T]> {
-		for (let [, entry] of this.map) {
+		for (const [, entry] of this.map) {
 			yield [entry.Uri, entry.value];
 		}
 	}

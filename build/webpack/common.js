@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const glob = require("glob");
 const path = require("path");
@@ -41,13 +40,13 @@ function getBundleConfiguration() {
 	if (process.env.VSC_VSCE_TARGET === "web") {
 		console.log("Building Web Bundle");
 		return bundleConfiguration.web;
-	} else if (!process.env.VSC_VSCE_TARGET) {
+	} else if (process.env.VSC_VSCE_TARGET) {
+		console.log("Building Desktop Bundle");
+		return bundleConfiguration.desktop;
+	} else {
 		console.log("Building Universal Bundle");
 		// Building locally or on Github actions, when we're not creating platform specific bundles.
 		return bundleConfiguration.webAndDesktop;
-	} else {
-		console.log("Building Desktop Bundle");
-		return bundleConfiguration.desktop;
 	}
 }
 

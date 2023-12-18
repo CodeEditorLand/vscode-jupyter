@@ -44,7 +44,8 @@ export class Flyout extends React.Component<IFlyoutProps, IFlyoutState> {
 					title={this.props.buttonTooltip}
 					aria-label={this.props.buttonTooltip}
 					onMouseEnter={this.mouseEnter}
-					className={buttonClassName}>
+					className={buttonClassName}
+				>
 					<span className={innerFilter}>
 						{this.props.buttonContent}
 					</span>

@@ -5,8 +5,8 @@ import "./cellFormatter.css";
 
 import * as React from "react";
 import * as ReactDOMServer from "react-dom/server";
-import { ISlickRow } from "./reactSlickGrid";
 import { ColumnType } from "../../extension-side/dataviewer/types";
+import { ISlickRow } from "./reactSlickGrid";
 
 interface ICellFormatterProps {
 	value: string | number | object | boolean;
@@ -46,7 +46,7 @@ class CellFormatter extends React.Component<ICellFormatterProps> {
 	}
 
 	private renderNumber(value: number) {
-		let val = generateDisplayValue(value);
+		const val = generateDisplayValue(value);
 		const isIndexColumn = this.props.columnDef.id === "0";
 
 		return (
@@ -55,7 +55,8 @@ class CellFormatter extends React.Component<ICellFormatterProps> {
 					isIndexColumn ? " index-column-formatter" : ""
 				}`}
 				role="gridcell"
-				title={val}>
+				title={val}
+			>
 				<span>{val}</span>
 			</div>
 		);
@@ -68,10 +69,10 @@ export function cellFormatterFunc(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	value: any,
 	columnDef: Slick.Column<ISlickRow>,
-	_dataContext: Slick.SlickData
+	_dataContext: Slick.SlickData,
 ): string {
 	return ReactDOMServer.renderToString(
-		<CellFormatter value={value} columnDef={columnDef} />
+		<CellFormatter value={value} columnDef={columnDef} />,
 	);
 }
 

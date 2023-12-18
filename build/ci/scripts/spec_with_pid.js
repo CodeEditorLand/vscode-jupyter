@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @module Spec
  */
@@ -40,8 +39,6 @@ const prefix = process.env.VSC_JUPYTER_CI_TEST_PARALLEL
  */
 function Spec(runner, options) {
 	Base.call(this, runner, options);
-
-	var self = this;
 	var indents = 0;
 	var n = 0;
 
@@ -49,28 +46,28 @@ function Spec(runner, options) {
 		return Array(indents).join("  ");
 	}
 
-	runner.on(EVENT_RUN_BEGIN, function () {
+	runner.on(EVENT_RUN_BEGIN, () => {
 		Base.consoleLog();
 	});
 
-	runner.on(EVENT_SUITE_BEGIN, function (suite) {
+	runner.on(EVENT_SUITE_BEGIN, (suite) => {
 		++indents;
 		Base.consoleLog(color("suite", `${prefix}%s%s`), indent(), suite.title);
 	});
 
-	runner.on(EVENT_SUITE_END, function () {
+	runner.on(EVENT_SUITE_END, () => {
 		--indents;
 		if (indents === 1) {
 			Base.consoleLog();
 		}
 	});
 
-	runner.on(EVENT_TEST_PENDING, function (test) {
+	runner.on(EVENT_TEST_PENDING, (test) => {
 		var fmt = indent() + color("pending", `${prefix} %s`);
 		Base.consoleLog(fmt, test.title);
 	});
 
-	runner.on(EVENT_TEST_PASS, function (test) {
+	runner.on(EVENT_TEST_PASS, (test) => {
 		var fmt;
 		if (test.speed === "fast") {
 			fmt =
@@ -88,15 +85,15 @@ function Spec(runner, options) {
 		}
 	});
 
-	runner.on(EVENT_TEST_FAIL, function (test) {
+	runner.on(EVENT_TEST_FAIL, (test) => {
 		Base.consoleLog(
 			indent() + color("fail", `${prefix}%d) %s`),
 			++n,
-			test.title
+			test.title,
 		);
 	});
 
-	runner.once(EVENT_RUN_END, self.epilogue.bind(self));
+	runner.once(EVENT_RUN_END, this.epilogue.bind(this));
 }
 
 /**

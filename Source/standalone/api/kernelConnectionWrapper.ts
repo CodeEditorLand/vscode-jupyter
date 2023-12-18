@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import type { Kernel } from "@jupyterlab/services";
-import { IDisposable } from "../../platform/common/types";
-import { noop } from "../../platform/common/utils/misc";
 import { BaseKernelConnectionWrapper } from "../../kernels/jupyter/baseKernelConnectionWrapper";
 import { IBaseKernel } from "../../kernels/types";
+import { IDisposable } from "../../platform/common/types";
+import { noop } from "../../platform/common/utils/misc";
 
 /**
  * Wrapper around an IKernelConnection that is exposed to 3rd parties. Allows us to change the underlying connection without exposing it to the 3rd party (like on a restart)
@@ -29,10 +29,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 		}
 	}
 
-	constructor(
-		readonly kernel: IBaseKernel,
-		disposables: IDisposable[]
-	) {
+	constructor(readonly kernel: IBaseKernel, disposables: IDisposable[]) {
 		super(kernel.session!.kernel!, disposables);
 		const emiStatusChangeEvents = () => {
 			this.statusChanged.emit(kernel.status);
@@ -51,7 +48,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 				this.disposed.emit();
 			},
 			this,
-			disposables
+			disposables,
 		);
 		kernel.onStarted(emiStatusChangeEvents, this, disposables);
 		kernel.onRestarted(emiStatusChangeEvents, this, disposables);
@@ -98,7 +95,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 		this.startHandleKernelMessages(this.kernel.session.kernel);
 	}
 	protected override startHandleKernelMessages(
-		kernelConnection: Kernel.IKernelConnection
+		kernelConnection: Kernel.IKernelConnection,
 	) {
 		this._kernelConnection = kernelConnection;
 		super.startHandleKernelMessages(kernelConnection);

@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type { IDisplayData, IDisplayUpdate } from "@jupyterlab/nbformat";
+import type { Kernel, KernelMessage } from "@jupyterlab/services";
 import { assert } from "chai";
-import { createMockedNotebookDocument } from "../../test/datascience/editor-integration/helpers";
+import dedent from "dedent";
+import { instance, mock } from "ts-mockito";
 import {
 	CancellationTokenSource,
 	NotebookCell,
@@ -12,24 +15,21 @@ import {
 	NotebookCellOutputItem,
 } from "vscode";
 import { PYTHON_LANGUAGE } from "../../platform/common/constants";
-import dedent from "dedent";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import { IKernelController } from "../types";
 import { IDisposable, IExtensionContext } from "../../platform/common/types";
-import type { Kernel, KernelMessage } from "@jupyterlab/services";
-import { instance, mock } from "ts-mockito";
-import type { IDisplayData, IDisplayUpdate } from "@jupyterlab/nbformat";
-import { CellExecutionMessageHandlerService } from "./cellExecutionMessageHandlerService";
-import { createKernelController } from "../../test/datascience/notebook/executionHelper";
-import { translateCellDisplayOutput } from "./helpers";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { waitForCondition } from "../../test/common";
+import { createMockedNotebookDocument } from "../../test/datascience/editor-integration/helpers";
 import {
 	IFakeSocket,
 	MsgIdProducer,
 	createKernelConnection,
 	createMessageProducers,
 } from "../../test/datascience/fakeKernelConnection.node";
+import { createKernelController } from "../../test/datascience/notebook/executionHelper";
 import { JupyterRequestCreator } from "../jupyter/session/jupyterRequestCreator.node";
-import { waitForCondition } from "../../test/common";
+import { IKernelController } from "../types";
+import { CellExecutionMessageHandlerService } from "./cellExecutionMessageHandlerService";
+import { translateCellDisplayOutput } from "./helpers";
 
 suite(`Cell Execution Message Handler`, () => {
 	let disposables: IDisposable[] = [];
@@ -48,7 +48,7 @@ suite(`Cell Execution Message Handler`, () => {
 			controller,
 			instance(context),
 			[],
-			notebook
+			notebook,
 		);
 		disposables.push(messageHandlerService);
 		return notebook;
@@ -73,7 +73,7 @@ suite(`Cell Execution Message Handler`, () => {
 		handler.onErrorHandlingExecuteRequestIOPubMessage(
 			(ex) => (messageHandlingFailure = ex.error),
 			undefined,
-			disposables
+			disposables,
 		);
 		disposables.push(handler);
 		return { request, producer, handler };
@@ -230,8 +230,8 @@ suite(`Cell Execution Message Handler`, () => {
 			messageGenerator: (
 				producer: ReturnType<
 					ReturnType<typeof createMessageProducers>["forExecRequest"]
-				>
-			) => KernelMessage.IMessage<KernelMessage.MessageType>[]
+				>,
+			) => KernelMessage.IMessage<KernelMessage.MessageType>[],
 		) {
 			// Now update the display data of the first cell from the second cell
 			const { request, producer } = sendRequest(cell, code);
@@ -239,7 +239,7 @@ suite(`Cell Execution Message Handler`, () => {
 			fakeSocket.emitOnMessage(producer.status("busy"));
 			fakeSocket.emitOnMessage(producer.execInput(executionCount));
 			messageGenerator(producer).forEach((msg) =>
-				fakeSocket.emitOnMessage(msg)
+				fakeSocket.emitOnMessage(msg),
 			);
 			fakeSocket.emitOnMessage(producer.status("idle"));
 			fakeSocket.emitOnMessage(producer.reply(executionCount));
@@ -324,7 +324,7 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id: "displayIdXYZ" },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(cell.outputs.length, 1);
 			const output2 = translateCellDisplayOutput(cell.outputs[0]);
@@ -338,7 +338,7 @@ suite(`Cell Execution Message Handler`, () => {
 							width: 500,
 						},
 					},
-				})
+				}),
 			);
 		});
 		test("Execute cell and update Display Data with metadata (even if Cell DOM has not yet been updated) (Issue 8621)", async () => {
@@ -389,7 +389,7 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id: "displayIdXYZ" },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(cell.outputs.length, 1);
 			const output2 = translateCellDisplayOutput(cell.outputs[0]);
@@ -403,7 +403,7 @@ suite(`Cell Execution Message Handler`, () => {
 							width: 500,
 						},
 					},
-				})
+				}),
 			);
 		});
 		test("Execute cell and add Display output", async () => {
@@ -440,14 +440,14 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 
 			assert.isAtLeast(cell.outputs.length, 1);
 			const output = translateCellDisplayOutput(cell.outputs[0]);
 			assert.strictEqual(
 				(output.transient as any).display_id,
-				display_id
+				display_id,
 			);
 
 			// Update the display data.
@@ -463,13 +463,13 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Hello"
+				"Hello",
 			);
 			// Update the display data again.
 			await executeCellWithOutput(
@@ -484,13 +484,13 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"World"
+				"World",
 			);
 		});
 
@@ -529,7 +529,7 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			// Mimic a situation where the cell outputs have not yet been updated in the DOM.
 			notebook
@@ -548,13 +548,13 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Hello"
+				"Hello",
 			);
 			// Update the display data again.
 			await executeCellWithOutput(
@@ -569,13 +569,13 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"World"
+				"World",
 			);
 		});
 		test("Updates to two separate display updates in the same cell output", async () => {
@@ -610,36 +610,36 @@ suite(`Cell Execution Message Handler`, () => {
 							data: item.data,
 							metadata: item.metadata,
 							transient: item.transient as any,
-						})
+						}),
 					);
-				}
+				},
 			);
 			assert.strictEqual(notebook.cellAt(0).outputs.length, 2);
 			const output1 = translateCellDisplayOutput(
-				notebook.cellAt(0).outputs[0]
+				notebook.cellAt(0).outputs[0],
 			);
 			assert.strictEqual(
 				(output1.transient as any).display_id,
-				display_id
+				display_id,
 			);
 			const output2 = translateCellDisplayOutput(
-				notebook.cellAt(0).outputs[1]
+				notebook.cellAt(0).outputs[1],
 			);
 			assert.strictEqual(
 				(output2.transient as any).display_id,
-				display_id2
+				display_id2,
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Hello"
+				"Hello",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"World"
+				"World",
 			);
 
 			// Update the first display data.
@@ -655,20 +655,20 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			// await executeAndUpdateDisplayData(notebook, codeToUpdateDisplayData1ILike, 2, outputsFromILikeUpdate);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"I Like"
+				"I Like",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"World"
+				"World",
 			);
 
 			// Update the second display data.
@@ -684,20 +684,20 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id: display_id2 },
 						}),
 					];
-				}
+				},
 			);
 			// await executeAndUpdateDisplayData(notebook, codeToUpdateDisplayData1Pizza, 3, outputsFromPizzaUpdate);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"I Like"
+				"I Like",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"Pizza"
+				"Pizza",
 			);
 		});
 
@@ -733,37 +733,37 @@ suite(`Cell Execution Message Handler`, () => {
 							data: item.data,
 							metadata: item.metadata,
 							transient: item.transient as any,
-						})
+						}),
 					);
-				}
+				},
 			);
 
 			assert.strictEqual(notebook.cellAt(0).outputs.length, 2);
 			const output1 = translateCellDisplayOutput(
-				notebook.cellAt(0).outputs[0]
+				notebook.cellAt(0).outputs[0],
 			);
 			assert.strictEqual(
 				(output1.transient as any).display_id,
-				display_id
+				display_id,
 			);
 			const output2 = translateCellDisplayOutput(
-				notebook.cellAt(0).outputs[1]
+				notebook.cellAt(0).outputs[1],
 			);
 			assert.strictEqual(
 				(output2.transient as any).display_id,
-				display_id2
+				display_id2,
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Hello"
+				"Hello",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"World"
+				"World",
 			);
 
 			// Update the second display data.
@@ -779,21 +779,21 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id: display_id2 },
 						}),
 					];
-				}
+				},
 			);
 
 			// await executeAndUpdateDisplayData(notebook, codeToUpdateDisplayData1Pizza, 2, outputsFromPizzaUpdate);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Hello"
+				"Hello",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"Pizza"
+				"Pizza",
 			);
 
 			// Update the first display data.
@@ -809,20 +809,20 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			// await executeAndUpdateDisplayData(notebook, codeToUpdateDisplayData1ILike, 3, outputsFromILikeUpdate);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"I Like"
+				"I Like",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"Pizza"
+				"Pizza",
 			);
 		});
 
@@ -858,9 +858,9 @@ suite(`Cell Execution Message Handler`, () => {
 							data: item.data,
 							metadata: item.metadata,
 							transient: item.transient as any,
-						})
+						}),
 					);
-				}
+				},
 			);
 
 			// Mimic a situation where the cell outputs have not yet been updated in the DOM.
@@ -881,19 +881,19 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id: display_id2 },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Hello"
+				"Hello",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"Pizza"
+				"Pizza",
 			);
 
 			// Update the first display data.
@@ -909,19 +909,19 @@ suite(`Cell Execution Message Handler`, () => {
 							transient: { display_id },
 						}),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"I Like"
+				"I Like",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"Pizza"
+				"Pizza",
 			);
 		});
 
@@ -994,37 +994,37 @@ suite(`Cell Execution Message Handler`, () => {
 						}),
 						producer.stream({ name: "stdout", text: "Pizza\n" }),
 					];
-				}
+				},
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[0].items[0].data
+					notebook.cellAt(0).outputs[0].items[0].data,
 				).toString(),
-				"Touch me not\n"
+				"Touch me not\n",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[1].items[0].data
+					notebook.cellAt(0).outputs[1].items[0].data,
 				).toString(),
-				"C"
+				"C",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[2].items[0].data
+					notebook.cellAt(0).outputs[2].items[0].data,
 				).toString(),
-				"Hello\n"
+				"Hello\n",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[2].items[1].data
+					notebook.cellAt(0).outputs[2].items[1].data,
 				).toString(),
-				"World\n"
+				"World\n",
 			);
 			assert.strictEqual(
 				Buffer.from(
-					notebook.cellAt(0).outputs[2].items[2].data
+					notebook.cellAt(0).outputs[2].items[2].data,
 				).toString(),
-				"Pizza\n"
+				"Pizza\n",
 			);
 		});
 	});
@@ -1044,7 +1044,7 @@ suite(`Cell Execution Message Handler`, () => {
 		test("Execute cell and resume cell execution on reload (with reply message)", async () =>
 			testResumingExecution(false));
 		async function testResumingExecution(
-			markEndOfExecutionWithReplyMessage: boolean
+			markEndOfExecutionWithReplyMessage: boolean,
 		) {
 			const notebook = createNotebook([
 				{
@@ -1057,13 +1057,13 @@ suite(`Cell Execution Message Handler`, () => {
 			const cell = notebook.cellAt(0);
 			const { request, handler, producer } = sendRequest(
 				cell,
-				print1To100
+				print1To100,
 			);
 			fakeSocket.emitOnMessage(producer.status("busy"));
 			fakeSocket.emitOnMessage(producer.execInput(1));
 			Array.from({ length: 50 }, (_, i) => {
 				fakeSocket.emitOnMessage(
-					producer.stream({ name: "stdout", text: `${i}\n` })
+					producer.stream({ name: "stdout", text: `${i}\n` }),
 				);
 			});
 
@@ -1071,23 +1071,23 @@ suite(`Cell Execution Message Handler`, () => {
 				() => cell.outputs.length === 1,
 				100,
 				() =>
-					`Cell should have 1 output, but got ${cell.outputs.length}`
+					`Cell should have 1 output, but got ${cell.outputs.length}`,
 			);
 			await waitForCondition(
 				() => cell.outputs[0].items.length === 50,
 				100,
 				() =>
-					`Cell output should have 50 output items, but got ${cell.outputs[0].items.length}`
+					`Cell output should have 50 output items, but got ${cell.outputs[0].items.length}`,
 			);
 			for (let index = 0; index < cell.outputs[0].items.length; index++) {
 				const item = cell.outputs[0].items[index];
 				assert.strictEqual(
 					item.mime,
-					"application/vnd.code.notebook.stdout"
+					"application/vnd.code.notebook.stdout",
 				);
 				assert.strictEqual(
 					Buffer.from(item.data).toString(),
-					`${index}\n`
+					`${index}\n`,
 				);
 			}
 
@@ -1099,13 +1099,13 @@ suite(`Cell Execution Message Handler`, () => {
 			// Resume cell execution
 			const { handler: handler2 } = resumeExecution(
 				cell,
-				request.msg.header.msg_id
+				request.msg.header.msg_id,
 			);
 
 			// Assume we start seeing outputs from 75 onwards, the others 50 to 74 are lost, as they were sent when vscode was closed.
 			Array.from({ length: 25 }, (_, i) => {
 				fakeSocket.emitOnMessage(
-					producer.stream({ name: "stdout", text: `${75 + i}\n` })
+					producer.stream({ name: "stdout", text: `${75 + i}\n` }),
 				);
 			});
 			fakeSocket.emitOnMessage(producer.status("idle"));
@@ -1118,7 +1118,7 @@ suite(`Cell Execution Message Handler`, () => {
 				fakeSocket.emitOnMessage(
 					createMessageProducers(msgIdProducer)
 						.forKernelInfo()
-						.reply()
+						.reply(),
 				);
 			}
 
@@ -1127,24 +1127,24 @@ suite(`Cell Execution Message Handler`, () => {
 				() => cell.outputs[0].items.length === 75,
 				100,
 				() =>
-					`Cell output should have 75 output items, but got ${cell.outputs[0].items.length}`
+					`Cell output should have 75 output items, but got ${cell.outputs[0].items.length}`,
 			);
 
 			for (let index = 0; index < cell.outputs[0].items.length; index++) {
 				const item = cell.outputs[0].items[index];
 				assert.strictEqual(
 					item.mime,
-					"application/vnd.code.notebook.stdout"
+					"application/vnd.code.notebook.stdout",
 				);
 				if (index >= 50) {
 					assert.strictEqual(
 						Buffer.from(item.data).toString(),
-						`${25 + index}\n`
+						`${25 + index}\n`,
 					);
 				} else {
 					assert.strictEqual(
 						Buffer.from(item.data).toString(),
-						`${index}\n`
+						`${index}\n`,
 					);
 				}
 			}
@@ -1159,14 +1159,14 @@ suite(`Cell Execution Message Handler`, () => {
 						msg_id,
 						cellExecution:
 							createKernelController().createNotebookCellExecution(
-								cell
+								cell,
 							),
-					}
+					},
 				);
 			handler.onErrorHandlingExecuteRequestIOPubMessage(
 				(ex) => (messageHandlingFailure = ex.error),
 				undefined,
-				disposables
+				disposables,
 			);
 			disposables.push(handler);
 			return { handler };

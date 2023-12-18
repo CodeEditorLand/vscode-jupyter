@@ -27,8 +27,8 @@ export class VariableViewActivationService
 				this.variableViewProvider,
 				{
 					webviewOptions: { retainContextWhenHidden: false },
-				}
-			)
+				},
+			),
 		);
 	}
 }

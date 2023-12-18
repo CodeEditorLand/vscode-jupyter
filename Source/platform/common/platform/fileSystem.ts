@@ -3,12 +3,12 @@
 
 import { injectable } from "inversify";
 import * as vscode from "vscode";
-import { IFileSystem } from "./types";
-import * as uriPath from "../../vscode-path/resources";
-import { isFileNotFoundError } from "./errors";
 import { traceError } from "../../logging";
+import * as uriPath from "../../vscode-path/resources";
 import { computeHash } from "../crypto";
 import { HttpClient } from "../net/httpClient";
+import { isFileNotFoundError } from "./errors";
+import { IFileSystem } from "./types";
 
 export const ENCODING = "utf8";
 
@@ -39,7 +39,7 @@ export class FileSystem implements IFileSystem {
 	async copy(
 		source: vscode.Uri,
 		destination: vscode.Uri,
-		options?: { overwrite: boolean }
+		options?: { overwrite: boolean },
 	): Promise<void> {
 		await this.vscfs.copy(source, destination, options);
 	}
@@ -72,7 +72,7 @@ export class FileSystem implements IFileSystem {
 		filename: vscode.Uri,
 		// the file type to expect; if not provided then any file type
 		// matches; otherwise a mismatch results in a "false" value
-		fileType?: vscode.FileType
+		fileType?: vscode.FileType,
 	): Promise<boolean> {
 		// Special case. http/https always returns stat true even if the file doesn't
 		// exist. In those two cases use the http client instead

@@ -17,14 +17,14 @@ suite("Debug Location Tracker", () => {
 	test("Check debug location", async () => {
 		expect(debugTracker.debugLocation).to.be.equal(
 			undefined,
-			"Initial location is empty"
+			"Initial location is empty",
 		);
 
 		debugTracker.onDidSendMessage(makeStopMessage());
 
 		expect(debugTracker.debugLocation).to.be.equal(
 			undefined,
-			"After stop location is empty"
+			"After stop location is empty",
 		);
 
 		debugTracker.onWillReceiveMessage(makeStackTraceRequest());
@@ -37,14 +37,14 @@ suite("Debug Location Tracker", () => {
 		};
 		expect(debugTracker.debugLocation).to.be.deep.equal(
 			testLocation,
-			"Source location is incorrect"
+			"Source location is incorrect",
 		);
 
 		debugTracker.onDidSendMessage(makeContinueMessage());
 
 		expect(debugTracker.debugLocation).to.be.equal(
 			undefined,
-			"After continue location is empty"
+			"After continue location is empty",
 		);
 	});
 });

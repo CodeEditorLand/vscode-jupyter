@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, optional } from "inversify";
+import { workspace } from "vscode";
 import { IInteractiveWindowProvider } from "../../interactive-window/types";
+import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
+import { IKernelFinder } from "../../kernels/types";
+import { PreferredKernelConnectionService } from "../../notebooks/controllers/preferredKernelConnectionService";
+import { IControllerRegistration } from "../../notebooks/controllers/types";
+import { IFileConverter } from "../../notebooks/export/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IFileSystem } from "../../platform/common/platform/types";
 import { IDisposableRegistry } from "../../platform/common/types";
-import { IFileConverter } from "../../notebooks/export/types";
 import { ExportCommands } from "./exportCommands";
-import { IControllerRegistration } from "../../notebooks/controllers/types";
-import { IKernelFinder } from "../../kernels/types";
-import { PreferredKernelConnectionService } from "../../notebooks/controllers/preferredKernelConnectionService";
-import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
-import { workspace } from "vscode";
 
 /**
  * Registers the export commands if in a trusted workspace.

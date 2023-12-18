@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Uri } from "vscode";
 import * as os from "os";
+import { Uri } from "vscode";
 import { EnvironmentVariables } from "../variables/types";
-import { getOSType, OSType } from "./platform";
+import { OSType, getOSType } from "./platform";
 export * from "./platform";
 
 // Home path depends upon OS

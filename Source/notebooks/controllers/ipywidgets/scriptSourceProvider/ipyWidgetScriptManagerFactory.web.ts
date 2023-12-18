@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable, inject } from "inversify";
+import { inject, injectable } from "inversify";
+import { IKernel } from "../../../../kernels/types";
 import { IFileSystem } from "../../../../platform/common/platform/types";
 import {
 	IDisposableRegistry,
 	IExtensionContext,
 } from "../../../../platform/common/types";
-import { IKernel } from "../../../../kernels/types";
-import { RemoteIPyWidgetScriptManager } from "./remoteIPyWidgetScriptManager";
 import {
 	IIPyWidgetScriptManager,
 	IIPyWidgetScriptManagerFactory,
 } from "../types";
+import { RemoteIPyWidgetScriptManager } from "./remoteIPyWidgetScriptManager";
 
 /**
  * Determines the IPyWidgetScriptManager for use in a web environment
@@ -39,17 +39,17 @@ export class IPyWidgetScriptManagerFactory
 				const scriptManager = new RemoteIPyWidgetScriptManager(
 					kernel,
 					this.context,
-					this.fs
+					this.fs,
 				);
 				this.managers.set(kernel, scriptManager);
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
-					this.disposables
+					this.disposables,
 				);
 			} else {
 				throw new Error(
-					"Cannot enumerate Widget Scripts using local kernels on the Web"
+					"Cannot enumerate Widget Scripts using local kernels on the Web",
 				);
 			}
 		}

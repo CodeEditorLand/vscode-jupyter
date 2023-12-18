@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 import * as vscode from "vscode";
-import { INotebookLanguageClient } from "./pylance";
 import {
-	cellIndexesToRanges,
-	areRangesEqual,
 	LocationWithReferenceKind,
-	noop,
 	Range,
+	areRangesEqual,
+	cellIndexesToRanges,
+	noop,
 } from "./common";
+import { INotebookLanguageClient } from "./pylance";
 
 const writeDecorationType = vscode.window.createTextEditorDecorationType({
 	after: {
@@ -55,16 +55,16 @@ export class CellAnalysis {
 		private readonly _cellRefs: Map<
 			string,
 			ILocationWithReferenceKindAndSymbol[]
-		>
+		>,
 	) {}
 
 	private _getVirtualCellList(
-		cell: vscode.NotebookCell
+		cell: vscode.NotebookCell,
 	): vscode.NotebookCell[] {
 		const cellExecutionIndex = this._cellExecution.findIndex(
 			(item) =>
 				item.cell.document.uri.toString() ===
-				cell.document.uri.toString()
+				cell.document.uri.toString(),
 		);
 
 		if (cellExecutionIndex === -1) {
@@ -79,7 +79,7 @@ export class CellAnalysis {
 	 */
 	getPredecessorCells(
 		cell: vscode.NotebookCell,
-		forceReadNotebook: boolean = false
+		forceReadNotebook = false,
 	): vscode.NotebookCell[] {
 		// find last execution item index from cell list whose cell property matches cell
 		const virtualCellList = forceReadNotebook
@@ -103,10 +103,10 @@ export class CellAnalysis {
 		const lastExecutionIndex = i;
 		const slicedCellExecution = virtualCellList.slice(
 			0,
-			lastExecutionIndex + 1
+			lastExecutionIndex + 1,
 		);
 		const cellBitmap: boolean[] = new Array(
-			slicedCellExecution.length
+			slicedCellExecution.length,
 		).fill(false);
 		cellBitmap[lastExecutionIndex] = true;
 
@@ -141,7 +141,7 @@ export class CellAnalysis {
 			reversedCellRefs,
 			cellBitmap,
 			cellFragment,
-			slicedCellExecution
+			slicedCellExecution,
 		);
 
 		const cellData: vscode.NotebookCell[] = [];
@@ -163,14 +163,14 @@ export class CellAnalysis {
 		const virtualCellList = this._getVirtualCellList(cell);
 
 		const cellIndex = virtualCellList.findIndex(
-			(item) => item.document.uri.fragment === cell.document.uri.fragment
+			(item) => item.document.uri.fragment === cell.document.uri.fragment,
 		);
 		if (cellIndex === -1) {
 			return [];
 		}
 
 		const cellBitmap: boolean[] = new Array(virtualCellList.length).fill(
-			false
+			false,
 		);
 		cellBitmap[cellIndex] = true;
 
@@ -186,11 +186,11 @@ export class CellAnalysis {
 					const modifiedCellRefs =
 						modificationCellRefs.get(modifiedCellFragment) ?? [];
 					modifiedCellRefs.push(
-						...refs.filter((item) => item !== ref)
+						...refs.filter((item) => item !== ref),
 					);
 					modificationCellRefs.set(
 						modifiedCellFragment,
-						modifiedCellRefs
+						modifiedCellRefs,
 					);
 				}
 			});
@@ -201,18 +201,18 @@ export class CellAnalysis {
 			if (cellBitmap[i]) {
 				const deps =
 					this._cellRefs.get(
-						virtualCellList[i].document.uri.fragment
+						virtualCellList[i].document.uri.fragment,
 					) || [];
 				const modificationDeps =
 					modificationCellRefs.get(
-						virtualCellList[i].document.uri.fragment
+						virtualCellList[i].document.uri.fragment,
 					) || [];
 				const mergedDeps = [...deps, ...modificationDeps];
 
 				mergedDeps.forEach((dep) => {
 					const index = virtualCellList.findIndex(
 						(item) =>
-							item.document.uri.fragment === dep.uri.fragment
+							item.document.uri.fragment === dep.uri.fragment,
 					);
 					// @todo what if index < cellIndex?
 					if (index !== -1 && index >= i) {
@@ -236,17 +236,17 @@ export class CellAnalysis {
 		reversedCellRefs: Map<string, string[]>,
 		cellBitmap: boolean[],
 		cellFragment: string,
-		cellExecution: vscode.NotebookCell[]
+		cellExecution: vscode.NotebookCell[],
 	) {
 		if (reversedCellRefs.has(cellFragment)) {
 			for (const dependency of reversedCellRefs.get(cellFragment)!) {
 				const index = cellExecution.findIndex(
-					(cell) => cell.document.uri.fragment === dependency
+					(cell) => cell.document.uri.fragment === dependency,
 				);
 
 				if (index === -1) {
 					throw new Error(
-						`Dependency ${dependency} is not in the execution list.`
+						`Dependency ${dependency} is not in the execution list.`,
 					);
 				}
 				if (!cellBitmap[index]) {
@@ -255,7 +255,7 @@ export class CellAnalysis {
 						reversedCellRefs,
 						cellBitmap,
 						dependency,
-						cellExecution
+						cellExecution,
 					);
 				}
 			}
@@ -284,7 +284,7 @@ export class NotebookDocumentSymbolTracker {
 	private _disposables: vscode.Disposable[] = [];
 	constructor(
 		private readonly _notebookEditor: vscode.NotebookEditor,
-		private readonly _client: INotebookLanguageClient
+		private readonly _client: INotebookLanguageClient,
 	) {
 		this._notebookEditor.notebook.getCells().forEach((cell) => {
 			this._requestCellSymbols(cell, false).then(noop, noop);
@@ -296,7 +296,7 @@ export class NotebookDocumentSymbolTracker {
 					e.contentChanges.forEach((change) => {
 						change.removedCells.forEach((cell) => {
 							this._pendingRequests.delete(
-								cell.document.uri.fragment
+								cell.document.uri.fragment,
 							);
 							this._cellRefs.delete(cell.document.uri.fragment);
 						});
@@ -304,7 +304,7 @@ export class NotebookDocumentSymbolTracker {
 						change.addedCells.forEach((cell) => {
 							this._requestCellSymbols(cell, false).then(
 								noop,
-								noop
+								noop,
 							);
 						});
 					});
@@ -312,15 +312,15 @@ export class NotebookDocumentSymbolTracker {
 					e.cellChanges.forEach((change) => {
 						this._requestCellSymbols(change.cell, false).then(
 							noop,
-							noop
+							noop,
 						);
 						this._updateCellStatus(
 							change.cell,
-							CellExecutionStatus.Stale
+							CellExecutionStatus.Stale,
 						);
 					});
 				}
-			})
+			}),
 		);
 
 		this._disposables.push(
@@ -331,7 +331,7 @@ export class NotebookDocumentSymbolTracker {
 				) {
 					this._updateCellStatus(
 						e.cell,
-						CellExecutionStatus.Executing
+						CellExecutionStatus.Executing,
 					);
 				}
 
@@ -348,13 +348,13 @@ export class NotebookDocumentSymbolTracker {
 
 					this._updateCellStatus(e.cell, CellExecutionStatus.Fresh);
 				}
-			})
+			}),
 		);
 	}
 
 	private _updateCellStatus(
 		cell: vscode.NotebookCell,
-		status: CellExecutionStatus
+		status: CellExecutionStatus,
 	) {
 		this._staleCellRefs.set(cell.document.uri.fragment, status);
 	}
@@ -379,12 +379,12 @@ export class NotebookDocumentSymbolTracker {
 		const analysis = new CellAnalysis(
 			this._notebookEditor.notebook,
 			this._cellExecution,
-			this._cellRefs
+			this._cellRefs,
 		);
 		try {
 			const precedentCells = analysis.getPredecessorCells(cell);
 			this._notebookEditor.selections = cellIndexesToRanges(
-				precedentCells.map((cell) => cell.index)
+				precedentCells.map((cell) => cell.index),
 			);
 			return;
 		} catch {}
@@ -392,7 +392,7 @@ export class NotebookDocumentSymbolTracker {
 		try {
 			const precedentCells = analysis.getPredecessorCells(cell, true);
 			this._notebookEditor.selections = cellIndexesToRanges(
-				precedentCells.map((cell) => cell.index)
+				precedentCells.map((cell) => cell.index),
 			);
 			return;
 		} catch {
@@ -405,13 +405,13 @@ export class NotebookDocumentSymbolTracker {
 		const analysis = new CellAnalysis(
 			this._notebookEditor.notebook,
 			this._cellExecution,
-			this._cellRefs
+			this._cellRefs,
 		);
 		const successorCells = analysis.getSuccessorCells(
-			cell
+			cell,
 		) as vscode.NotebookCell[];
 		const cellRanges = cellIndexesToRanges(
-			successorCells.map((cell) => cell.index)
+			successorCells.map((cell) => cell.index),
 		);
 		this._notebookEditor.selections = cellRanges;
 	}
@@ -421,7 +421,7 @@ export class NotebookDocumentSymbolTracker {
 		const analysis = new CellAnalysis(
 			this._notebookEditor.notebook,
 			this._cellExecution,
-			this._cellRefs
+			this._cellRefs,
 		);
 		let precedentCells: vscode.NotebookCell[] = [];
 
@@ -440,14 +440,14 @@ export class NotebookDocumentSymbolTracker {
 		const staleCellIndex = precedentCells.findIndex(
 			(cell) =>
 				(this._staleCellRefs.get(cell.document.uri.fragment) ??
-					CellExecutionStatus.Stale) === CellExecutionStatus.Stale
+					CellExecutionStatus.Stale) === CellExecutionStatus.Stale,
 		);
 
 		const cellRanges = cellIndexesToRanges(
 			(staleCellIndex === -1
 				? precedentCells
 				: precedentCells.slice(staleCellIndex)
-			).map((cell) => cell.index)
+			).map((cell) => cell.index),
 		);
 		await vscode.commands
 			.executeCommand("notebook.cell.execute", {
@@ -465,13 +465,13 @@ export class NotebookDocumentSymbolTracker {
 		const analysis = new CellAnalysis(
 			this._notebookEditor.notebook,
 			this._cellExecution,
-			this._cellRefs
+			this._cellRefs,
 		);
 		const successorCells = analysis.getSuccessorCells(
-			cell
+			cell,
 		) as vscode.NotebookCell[];
 		const cellRanges = cellIndexesToRanges(
-			successorCells.map((cell) => cell.index)
+			successorCells.map((cell) => cell.index),
 		);
 		await vscode.commands
 			.executeCommand("notebook.cell.execute", {
@@ -521,7 +521,7 @@ export class NotebookDocumentSymbolTracker {
 				(editor) =>
 					editor.document.uri.path ===
 						this._notebookEditor.notebook.uri.path &&
-					editor.document.uri.fragment === fragment
+					editor.document.uri.fragment === fragment,
 			);
 			if (matcheEditor) {
 				const writeRanges: vscode.Range[] = [];
@@ -530,24 +530,24 @@ export class NotebookDocumentSymbolTracker {
 				const dedupedLocations = locations.reduce(
 					(
 						acc: ILocationWithReferenceKind[],
-						current: ILocationWithReferenceKind
+						current: ILocationWithReferenceKind,
 					) => {
 						const isDuplicate = acc.find((item) =>
-							areRangesEqual(item.range, current.range)
+							areRangesEqual(item.range, current.range),
 						);
-						if (!isDuplicate) {
-							return acc.concat([current]);
-						} else {
+						if (isDuplicate) {
 							return acc;
+						} else {
+							return acc.concat([current]);
 						}
 					},
-					[]
+					[],
 				);
 
 				dedupedLocations.forEach((loc) => {
 					const position = new vscode.Position(
 						loc.range.end.line,
-						loc.range.end.character
+						loc.range.end.character,
 					);
 					const range = new vscode.Range(position, position);
 
@@ -566,7 +566,7 @@ export class NotebookDocumentSymbolTracker {
 
 	private async _requestCellSymbols(
 		cell: vscode.NotebookCell,
-		synchronous: boolean
+		synchronous: boolean,
 	) {
 		// request cell symbols in a debounced fashion
 		const existing = this._pendingRequests.get(cell.document.uri.fragment);
@@ -579,7 +579,7 @@ export class NotebookDocumentSymbolTracker {
 				new vscode.CancellationTokenSource();
 			await this._doRequestCellSymbols(
 				cell,
-				cancellationTokenSource.token
+				cancellationTokenSource.token,
 			);
 			cancellationTokenSource.dispose();
 			return;
@@ -614,7 +614,7 @@ export class NotebookDocumentSymbolTracker {
 
 	private async _doRequestCellSymbols(
 		cell: vscode.NotebookCell,
-		token: vscode.CancellationToken
+		token: vscode.CancellationToken,
 	) {
 		const symbols = await this._getDocumentSymbols(cell);
 		if (!symbols) {
@@ -629,14 +629,14 @@ export class NotebookDocumentSymbolTracker {
 				cell.document,
 				symbol.selectionRange.start,
 				{ includeDeclaration: true },
-				token
+				token,
 			);
 			if (symbolReferences) {
 				references.push(
 					...symbolReferences.map((ref) => ({
 						...ref,
 						associatedSymbol: symbol,
-					}))
+					})),
 				);
 			}
 		}
@@ -650,12 +650,12 @@ export class NotebookDocumentSymbolTracker {
 					uri: vscode.Uri.parse(ref.uri),
 					kind: areRangesEqual(
 						ref.range,
-						ref.associatedSymbol.selectionRange
+						ref.associatedSymbol.selectionRange,
 					)
 						? "write"
 						: ref.kind,
 					associatedSymbol: ref.associatedSymbol,
-				}))
+				})),
 			);
 		}
 	}
@@ -679,7 +679,7 @@ export class SymbolsTracker {
 		vscode.window.visibleNotebookEditors.forEach((editor) => {
 			this._notebookDocumentSymbolTrackers.set(
 				editor.notebook.uri.toString(),
-				new NotebookDocumentSymbolTracker(editor, this._client)
+				new NotebookDocumentSymbolTracker(editor, this._client),
 			);
 		});
 
@@ -688,15 +688,15 @@ export class SymbolsTracker {
 				e.forEach((editor) => {
 					if (
 						!this._notebookDocumentSymbolTrackers.has(
-							editor.notebook.uri.toString()
+							editor.notebook.uri.toString(),
 						)
 					) {
 						this._notebookDocumentSymbolTrackers.set(
 							editor.notebook.uri.toString(),
 							new NotebookDocumentSymbolTracker(
 								editor,
-								this._client
-							)
+								this._client,
+							),
 						);
 					}
 				});
@@ -705,20 +705,20 @@ export class SymbolsTracker {
 				this._notebookDocumentSymbolTrackers.forEach((tracker, uri) => {
 					if (
 						!vscode.window.visibleNotebookEditors.find(
-							(editor) => editor.notebook.uri.toString() === uri
+							(editor) => editor.notebook.uri.toString() === uri,
 						)
 					) {
 						tracker.dispose();
 						this._notebookDocumentSymbolTrackers.delete(uri);
 					}
 				});
-			})
+			}),
 		);
 	}
 
 	async debugSymbols(notebookDocument: vscode.NotebookDocument) {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
-			notebookDocument.uri.toString()
+			notebookDocument.uri.toString(),
 		);
 		if (tracker) {
 			await tracker.debugSymbols();
@@ -727,10 +727,10 @@ export class SymbolsTracker {
 
 	async runSuccessorCells(
 		notebookDocument: vscode.NotebookDocument,
-		cell: vscode.NotebookCell
+		cell: vscode.NotebookCell,
 	) {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
-			notebookDocument.uri.toString()
+			notebookDocument.uri.toString(),
 		);
 		if (tracker) {
 			await tracker.runSuccessorCells(cell);
@@ -739,10 +739,10 @@ export class SymbolsTracker {
 
 	async runPrecedentCells(
 		notebookDocument: vscode.NotebookDocument,
-		cell: vscode.NotebookCell
+		cell: vscode.NotebookCell,
 	) {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
-			notebookDocument.uri.toString()
+			notebookDocument.uri.toString(),
 		);
 		if (tracker) {
 			await tracker.runPrecedentCells(cell);
@@ -751,10 +751,10 @@ export class SymbolsTracker {
 
 	async selectSuccessorCells(
 		notebookDocument: vscode.NotebookDocument,
-		cell: vscode.NotebookCell
+		cell: vscode.NotebookCell,
 	) {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
-			notebookDocument.uri.toString()
+			notebookDocument.uri.toString(),
 		);
 		if (tracker) {
 			await tracker.selectSuccessorCells(cell);
@@ -763,10 +763,10 @@ export class SymbolsTracker {
 
 	async selectPrecedentCells(
 		notebookDocument: vscode.NotebookDocument,
-		cell: vscode.NotebookCell
+		cell: vscode.NotebookCell,
 	) {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
-			notebookDocument.uri.toString()
+			notebookDocument.uri.toString(),
 		);
 		if (tracker) {
 			await tracker.selectPrecedentCells(cell);

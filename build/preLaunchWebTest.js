@@ -15,7 +15,7 @@ exports.startJupyter = async function startJupyter(detached) {
 	const bundlePath = path.join(
 		extensionDevelopmentPath,
 		"out",
-		"extension.web.bundle"
+		"extension.web.bundle",
 	);
 	const bundleFile = `${bundlePath}.js`;
 	if (await fs.pathExists(bundleFile)) {
@@ -24,7 +24,7 @@ exports.startJupyter = async function startJupyter(detached) {
 		});
 		const newContents = bundleContents.replace(
 			/^exports\.JUPYTER_SERVER_URI = '(.*)';$/gm,
-			`exports.JUPYTER_SERVER_URI = '${uri.toString()}';`
+			`exports.JUPYTER_SERVER_URI = '${uri.toString()}';`,
 		);
 		if (newContents === bundleContents) {
 			throw new Error("JUPYTER_SERVER_URI in bundle not updated");

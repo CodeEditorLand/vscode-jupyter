@@ -2,31 +2,31 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, optional } from "inversify";
+import { CancellationTokenSource, Uri } from "vscode";
+import { IJupyterServerUri, JupyterServer } from "../../../api";
+import {
+	IConfigurationService,
+	ReadWrite,
+} from "../../../platform/common/types";
 import { noop } from "../../../platform/common/utils/misc";
-import { RemoteJupyterServerUriProviderError } from "../../errors/remoteJupyterServerUriProviderError";
+import { JupyterSelfCertsError } from "../../../platform/errors/jupyterSelfCertsError";
+import { JupyterSelfCertsExpiredError } from "../../../platform/errors/jupyterSelfCertsExpiredError";
+import { RemoteJupyterServerConnectionError } from "../../../platform/errors/remoteJupyterServerConnectionError";
 import { BaseError } from "../../../platform/errors/types";
+import { RemoteJupyterServerUriProviderError } from "../../errors/remoteJupyterServerUriProviderError";
+import { IDataScienceErrorHandler } from "../../errors/types";
 import {
 	createJupyterConnectionInfo,
 	handleExpiredCertsError,
 	handleSelfCertsError,
 } from "../jupyterUtils";
+import { JupyterLabHelper } from "../session/jupyterLabHelper";
 import {
 	IJupyterRequestAgentCreator,
 	IJupyterRequestCreator,
 	IJupyterServerProviderRegistry,
 	JupyterServerProviderHandle,
 } from "../types";
-import { IJupyterServerUri, JupyterServer } from "../../../api";
-import { JupyterSelfCertsError } from "../../../platform/errors/jupyterSelfCertsError";
-import { JupyterSelfCertsExpiredError } from "../../../platform/errors/jupyterSelfCertsExpiredError";
-import { IDataScienceErrorHandler } from "../../errors/types";
-import {
-	IConfigurationService,
-	ReadWrite,
-} from "../../../platform/common/types";
-import { RemoteJupyterServerConnectionError } from "../../../platform/errors/remoteJupyterServerConnectionError";
-import { CancellationTokenSource, Uri } from "vscode";
-import { JupyterLabHelper } from "../session/jupyterLabHelper";
 
 /**
  * Creates IJupyterConnection objects for URIs and 3rd party handles/ids.
@@ -53,7 +53,7 @@ export class JupyterConnection {
 		const server = await this.getJupyterServerUri(serverId);
 		if (!server) {
 			throw new Error(
-				`Unable to get resolved server information for ${serverId.extensionId}:${serverId.id}:${serverId.handle}`
+				`Unable to get resolved server information for ${serverId.extensionId}:${serverId.id}:${serverId.handle}`,
 			);
 		}
 		const serverUri: IJupyterServerUri = {
@@ -72,14 +72,14 @@ export class JupyterConnection {
 			this.requestCreator,
 			this.requestAgentCreator,
 			this.configService,
-			Uri.file("")
+			Uri.file(""),
 		);
 	}
 
 	public async validateRemoteUri(
 		provider: JupyterServerProviderHandle,
 		serverUri?: IJupyterServerUri,
-		doNotDisplayUnActionableMessages?: boolean
+		doNotDisplayUnActionableMessages?: boolean,
 	): Promise<void> {
 		let sessionManager: JupyterLabHelper | undefined = undefined;
 		if (!serverUri) {
@@ -98,7 +98,7 @@ export class JupyterConnection {
 				};
 			} else {
 				throw new Error(
-					`Unable to get resolved server information for ${provider.extensionId}:${provider.id}:${provider.handle}`
+					`Unable to get resolved server information for ${provider.extensionId}:${provider.id}:${provider.handle}`,
 				);
 			}
 		}
@@ -108,7 +108,7 @@ export class JupyterConnection {
 			this.requestCreator,
 			this.requestAgentCreator,
 			this.configService,
-			Uri.file("")
+			Uri.file(""),
 		);
 		try {
 			// Attempt to list the running kernels. It will return empty if there are none, but will
@@ -123,7 +123,7 @@ export class JupyterConnection {
 			if (JupyterSelfCertsError.isSelfCertsError(err)) {
 				const handled = await handleSelfCertsError(
 					this.configService,
-					err.message
+					err.message,
 				);
 				if (!handled) {
 					throw err;
@@ -133,7 +133,7 @@ export class JupyterConnection {
 			) {
 				const handled = await handleExpiredCertsError(
 					this.configService,
-					err.message
+					err.message,
 				);
 				if (!handled) {
 					throw err;
@@ -143,8 +143,8 @@ export class JupyterConnection {
 					new RemoteJupyterServerConnectionError(
 						serverUri.baseUrl,
 						provider,
-						err
-					)
+						err,
+					),
 				);
 				// Can't set the URI in this case.
 				throw err;
@@ -166,17 +166,17 @@ export class JupyterConnection {
 				this.jupyterPickerRegistration.jupyterCollections.find(
 					(c) =>
 						c.extensionId === provider.extensionId &&
-						c.id === provider.id
+						c.id === provider.id,
 				) ||
 				(await this.jupyterPickerRegistration.activateThirdPartyExtensionAndFindCollection(
 					provider.extensionId,
-					provider.id
+					provider.id,
 				));
 			if (!collection) {
 				return;
 			}
 			const servers = await Promise.resolve(
-				collection.serverProvider.provideJupyterServers(token.token)
+				collection.serverProvider.provideJupyterServers(token.token),
 			);
 			const server = servers?.find((c) => c.id === provider.handle);
 			if (!server) {
@@ -188,15 +188,15 @@ export class JupyterConnection {
 			const resolvedServer = await Promise.resolve(
 				collection.serverProvider.resolveJupyterServer(
 					server,
-					token.token
-				)
+					token.token,
+				),
 			);
 			if (!resolvedServer?.connectionInformation) {
 				return;
 			}
 			const serverInfo: ReadWrite<JupyterServer> = Object.assign(
 				{},
-				server
+				server,
 			);
 			serverInfo.connectionInformation =
 				resolvedServer.connectionInformation;

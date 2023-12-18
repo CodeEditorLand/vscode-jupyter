@@ -1,26 +1,26 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
+import { Uri, workspace } from "vscode";
 import { IFileSystem } from "../common/platform/types";
-import { IEnvironmentActivationService } from "../interpreter/activation/types";
-import { IServiceContainer } from "../ioc/types";
-import { IDisposableRegistry } from "../common/types";
-import { createCondaEnv, createPythonEnv } from "./pythonEnvironment.node";
-import { createPythonProcessService } from "./pythonProcess.node";
 import { ProcessService } from "../common/process/proc.node";
 import {
-	IProcessServiceFactory,
 	IProcessService,
+	IProcessServiceFactory,
 } from "../common/process/types.node";
+import { IDisposableRegistry } from "../common/types";
+import { IEnvironmentActivationService } from "../interpreter/activation/types";
+import { IServiceContainer } from "../ioc/types";
+import { createCondaEnv, createPythonEnv } from "./pythonEnvironment.node";
+import { createPythonProcessService } from "./pythonProcess.node";
 import {
 	ExecutionFactoryCreateWithEnvironmentOptions,
 	ExecutionFactoryCreationOptions,
 	IPythonExecutionFactory,
 	IPythonExecutionService,
 } from "./types.node";
-import { Environment } from "@vscode/python-extension";
-import { Uri, workspace } from "vscode";
 
 /**
  * Creates IPythonExecutionService objects. They can be either process based or daemon based.
@@ -42,7 +42,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		this.fileSystem = this.serviceContainer.get<IFileSystem>(IFileSystem);
 	}
 	public async create(
-		options: ExecutionFactoryCreationOptions
+		options: ExecutionFactoryCreationOptions,
 	): Promise<IPythonExecutionService> {
 		const processService: IProcessService =
 			await this.processServiceFactory.create(options.resource);
@@ -51,17 +51,17 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 			options.interpreter,
 			processService,
 			this.fileSystem,
-			undefined
+			undefined,
 		);
 	}
 	public async createActivatedEnvironment(
-		options: ExecutionFactoryCreateWithEnvironmentOptions
+		options: ExecutionFactoryCreateWithEnvironmentOptions,
 	): Promise<IPythonExecutionService> {
 		options.resource = options.resource
 			? options.resource
 			: workspace.workspaceFolders?.length
-				? workspace.workspaceFolders[0].uri
-				: undefined;
+			  ? workspace.workspaceFolders[0].uri
+			  : undefined;
 
 		// This should never happen, but if it does ensure we never run code accidentally in untrusted workspaces.
 		if (!workspace.isTrusted) {
@@ -70,7 +70,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		const envVars =
 			await this.activationHelper.getActivatedEnvironmentVariables(
 				options.resource,
-				options.interpreter
+				options.interpreter,
 			);
 		const hasEnvVars = envVars && Object.keys(envVars).length > 0;
 		if (!hasEnvVars) {
@@ -87,7 +87,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		return createPythonService(
 			options.interpreter,
 			processService,
-			this.fileSystem
+			this.fileSystem,
 		);
 	}
 }
@@ -102,7 +102,7 @@ function createPythonService(
 			name: string;
 			path: string;
 		},
-	]
+	],
 ): IPythonExecutionService {
 	let env = createPythonEnv(interpreter, procService, fs);
 	if (conda) {
@@ -112,7 +112,7 @@ function createPythonService(
 			condaInfo,
 			interpreter,
 			procService,
-			fs
+			fs,
 		);
 	}
 	const procs = createPythonProcessService(procService, env);

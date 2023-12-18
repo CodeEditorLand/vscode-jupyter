@@ -1,32 +1,32 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import uuid from "uuid/v4";
 import type * as nbformat from "@jupyterlab/nbformat";
 import type { Contents, ContentsManager } from "@jupyterlab/services";
 import { inject, injectable } from "inversify";
-import { Uri, CancellationToken, NotebookDocument } from "vscode";
-import * as path from "../../platform/vscode-path/path";
+import uuid from "uuid/v4";
+import { CancellationToken, NotebookDocument, Uri } from "vscode";
 import { DisplayOptions } from "../../kernels/displayOptions";
 import { executeSilently, jvscIdentifier } from "../../kernels/helpers";
+import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
 import {
 	IKernel,
 	IKernelProvider,
 	isRemoteConnection,
 } from "../../kernels/types";
-import { concatMultilineString } from "../../platform/common/utils";
 import { IFileSystem } from "../../platform/common/platform/types";
-import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
-import { ExportFormat, IExportBase, IExportUtil } from "./types";
+import { Resource } from "../../platform/common/types";
+import { concatMultilineString } from "../../platform/common/utils";
+import { DataScience } from "../../platform/common/utils/localize";
+import { noop } from "../../platform/common/utils/misc";
+import { SessionDisposedError } from "../../platform/errors/sessionDisposedError";
 import { traceError, traceLog } from "../../platform/logging";
 import { reportAction } from "../../platform/progress/decorator";
 import { ReportableAction } from "../../platform/progress/types";
-import { SessionDisposedError } from "../../platform/errors/sessionDisposedError";
-import { Resource } from "../../platform/common/types";
-import { noop } from "../../platform/common/utils/misc";
-import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
+import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
+import * as path from "../../platform/vscode-path/path";
 import * as urlPath from "../../platform/vscode-path/resources";
-import { DataScience } from "../../platform/common/utils/localize";
+import { ExportFormat, IExportBase, IExportUtil } from "./types";
 
 function getRemoteIPynbSuffix(): string {
 	return `${jvscIdentifier}${uuid()}`;
@@ -58,7 +58,7 @@ export class ExportBase implements IExportBase {
 		_sourceDocument: NotebookDocument,
 		_target: Uri,
 		_interpreter: PythonEnvironment,
-		_token: CancellationToken
+		_token: CancellationToken,
 	): Promise<void> {
 		return undefined;
 	}
@@ -69,7 +69,7 @@ export class ExportBase implements IExportBase {
 		target: Uri,
 		format: ExportFormat,
 		_interpreter: PythonEnvironment,
-		_token: CancellationToken
+		_token: CancellationToken,
 	): Promise<void> {
 		const kernel = this.kernelProvider.get(sourceDocument);
 		if (!kernel) {
@@ -93,14 +93,14 @@ export class ExportBase implements IExportBase {
 		}
 		const kernelConnection = kernel.session.kernel;
 		const connection = await this.jupyterConnection.createConnectionInfo(
-			kernelConnectionMetadata.serverProviderHandle
+			kernelConnectionMetadata.serverProviderHandle,
 		);
 		const serverSettings = connection.settings;
 		const jupyter =
 			require("@jupyterlab/services") as typeof import("@jupyterlab/services");
 		const contentsManager = new jupyter.ContentsManager({ serverSettings });
 
-		let contents = await this.exportUtil.getContent(sourceDocument);
+		const contents = await this.exportUtil.getContent(sourceDocument);
 
 		let fileExt = "";
 
@@ -118,7 +118,7 @@ export class ExportBase implements IExportBase {
 
 		const backingFile = await this.createBackingFile(
 			resource,
-			contentsManager
+			contentsManager,
 		);
 
 		if (!backingFile) {
@@ -144,8 +144,8 @@ export class ExportBase implements IExportBase {
 			const outputs = await executeSilently(
 				kernelConnection,
 				`!jupyter nbconvert ${filePath} --to ${format} --output ${path.basename(
-					tempTarget
-				)}`
+					tempTarget,
+				)}`,
 			);
 
 			const text = this.parseStreamOutput(outputs);
@@ -164,7 +164,7 @@ export class ExportBase implements IExportBase {
 				});
 				const bytes = this.b64toBlob(
 					content.content,
-					"application/pdf"
+					"application/pdf",
 				);
 				const buffer = await bytes.arrayBuffer();
 				await this.fs.writeFile(target!, Buffer.from(buffer));
@@ -187,7 +187,7 @@ export class ExportBase implements IExportBase {
 	}
 	public async createBackingFile(
 		resource: Resource,
-		contentsManager: ContentsManager
+		contentsManager: ContentsManager,
 	): Promise<
 		{ dispose: () => Promise<unknown>; filePath: string } | undefined
 	> {
@@ -209,7 +209,7 @@ export class ExportBase implements IExportBase {
 				backingFile.path,
 				backingFileDir.length && backingFileDir !== "."
 					? `${backingFileDir}/${newName}`
-					: newName // Note, the docs say the path uses UNIX delimiters.
+					: newName, // Note, the docs say the path uses UNIX delimiters.
 			);
 		} catch (exc) {
 			traceError(`Backing file not supported: ${exc}`);
@@ -226,7 +226,7 @@ export class ExportBase implements IExportBase {
 	async getContents(
 		file: string,
 		format: Contents.FileFormat,
-		contentsManager: ContentsManager
+		contentsManager: ContentsManager,
 	): Promise<Contents.IModel> {
 		const data = await contentsManager.get(file, {
 			type: "file",
@@ -242,7 +242,7 @@ export class ExportBase implements IExportBase {
 		b64Data = b64Data.replace(/^[^,]+,/, "");
 		b64Data = b64Data.replace(/\s/g, "");
 		const byteCharacters = atob(b64Data);
-		let byteArrays = [];
+		const byteArrays = [];
 
 		for (
 			let offset = 0;
@@ -251,7 +251,7 @@ export class ExportBase implements IExportBase {
 		) {
 			const slice = byteCharacters.slice(offset, offset + sliceSize);
 
-			let byteNumbers = new Array(slice.length);
+			const byteNumbers = new Array(slice.length);
 			for (let i = 0; i < slice.length; i++) {
 				byteNumbers[i] = slice.charCodeAt(i);
 			}
@@ -293,7 +293,7 @@ export class ExportBase implements IExportBase {
 		}
 		const outputs = await executeSilently(
 			kernel.session.kernel,
-			`import os;os.getcwd();`
+			`import os;os.getcwd();`,
 		);
 		if (outputs.length === 0) {
 			return;

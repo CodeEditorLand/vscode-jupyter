@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import * as path from "../../../platform/vscode-path/path";
 import { Uri, window } from "vscode";
-import { traceError, traceInfo } from "../../../platform/logging";
-import { createDeferred } from "../../../platform/common/utils/async";
-import { IExportPlotRequest } from "./types";
-import { IFileSystemNode } from "../../../platform/common/platform/types.node";
-import * as localize from "../../../platform/common/utils/localize";
-import { noop } from "../../../platform/common/utils/misc";
-import { PlotViewer as PlotViewerBase } from "./plotViewer";
 import { IWebviewPanelProvider } from "../../../platform/common/application/types";
+import { IFileSystemNode } from "../../../platform/common/platform/types.node";
 import {
 	IConfigurationService,
 	IExtensionContext,
 } from "../../../platform/common/types";
+import { createDeferred } from "../../../platform/common/utils/async";
+import * as localize from "../../../platform/common/utils/localize";
+import { noop } from "../../../platform/common/utils/misc";
+import { traceError, traceInfo } from "../../../platform/logging";
+import * as path from "../../../platform/vscode-path/path";
+import { PlotViewer as PlotViewerBase } from "./plotViewer";
+import { IExportPlotRequest } from "./types";
 
 @injectable()
 export class PlotViewer extends PlotViewerBase {
@@ -29,7 +29,7 @@ export class PlotViewer extends PlotViewerBase {
 	}
 
 	protected override async exportPlot(
-		payload: IExportPlotRequest
+		payload: IExportPlotRequest,
 	): Promise<void> {
 		traceInfo("exporting plot...");
 		const filtersObject: Record<string, string[]> = {};
@@ -53,7 +53,7 @@ export class PlotViewer extends PlotViewerBase {
 					case ".png":
 						const buffer = Buffer.from(
 							payload.png.replace("data:image/png;base64", ""),
-							"base64"
+							"base64",
 						);
 						await this.fs.writeFile(file, buffer);
 						break;
@@ -77,7 +77,7 @@ export class PlotViewer extends PlotViewerBase {
 export async function saveSvgToPdf(
 	svg: string,
 	fs: IFileSystemNode,
-	file: Uri
+	file: Uri,
 ) {
 	traceInfo("Attempting pdf write...");
 	// Import here since pdfkit is so huge.

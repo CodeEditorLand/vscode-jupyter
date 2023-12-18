@@ -4,10 +4,10 @@
 import { Uri, workspace } from "vscode";
 import { Kernel, Kernels } from "../../api";
 import { ServiceContainer } from "../../platform/ioc/container";
-import { IKernel, IKernelProvider, isRemoteConnection } from "../types";
-import { createKernelApiForExtension as createKernelApiForExtension } from "./kernel";
 import { Telemetry, sendTelemetryEvent } from "../../telemetry";
+import { IKernel, IKernelProvider, isRemoteConnection } from "../types";
 import { requestApiAccess } from "./apiAccess";
+import { createKernelApiForExtension } from "./kernel";
 
 const kernelCache = new WeakMap<IKernel, Kernel>();
 
@@ -19,7 +19,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 			const kernelProvider =
 				ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
 			const notebook = workspace.notebookDocuments.find(
-				(item) => item.uri.toString() === uri.toString()
+				(item) => item.uri.toString() === uri.toString(),
 			);
 			const kernel = kernelProvider.get(notebook || uri);
 			// We are only interested in returning kernels that have been started by the user.
@@ -31,7 +31,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 						extensionId,
 						pemUsed: "getKernel",
 						accessAllowed,
-					}
+					},
 				);
 				return;
 			}
@@ -50,7 +50,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 						extensionId,
 						pemUsed: "getKernel",
 						accessAllowed,
-					}
+					},
 				);
 				return;
 			}
@@ -66,7 +66,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 				return;
 			}
 
-			let wrappedKernel =
+			const wrappedKernel =
 				kernelCache.get(kernel) ||
 				createKernelApiForExtension(extensionId, kernel, access);
 			kernelCache.set(kernel, wrappedKernel);

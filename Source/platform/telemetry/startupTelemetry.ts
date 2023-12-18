@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { workspace } from "vscode";
+import { sendTelemetryEvent } from ".";
 import { isTestExecution } from "../common/constants";
 import { traceError } from "../logging";
-import { sendTelemetryEvent } from ".";
 import { EventName } from "./constants";
-import { workspace } from "vscode";
 
 interface IStopWatch {
 	elapsedTime: number;
@@ -21,7 +21,7 @@ export async function sendStartupTelemetry(
 		startActivateTime: number;
 		endActivateTime: number;
 	},
-	stopWatch: IStopWatch
+	stopWatch: IStopWatch,
 ) {
 	if (isTestExecution()) {
 		return;
@@ -43,11 +43,11 @@ export async function sendErrorTelemetry(
 		workspaceFolderCount: number;
 		totalActivateTime: number;
 		codeLoadingTime: number;
-	}
+	},
 ) {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let props: any = {};
+		const props: any = {};
 		try {
 			await updateActivationTelemetryProps(durations);
 		} catch (ex) {

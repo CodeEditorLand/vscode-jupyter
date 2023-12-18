@@ -5,15 +5,15 @@ import { inject, injectable } from "inversify";
 import { SemVer } from "semver";
 import { CancellationToken } from "vscode";
 import { parseSemVer } from "../../../platform/common/utils";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { JupyterCommands } from "../../../telemetry";
+import { ResourceSet } from "../../../platform/common/utils/map";
 import {
 	IInstaller,
 	Product,
 } from "../../../platform/interpreter/installer/types";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import { JupyterCommands } from "../../../telemetry";
 import { INbConvertInterpreterDependencyChecker } from "../types";
 import { IJupyterCommandFactory } from "../types.node";
-import { ResourceSet } from "../../../platform/common/utils/map";
 
 /**
  * Checks the dependencies for nbconvert.
@@ -34,7 +34,7 @@ export class NbConvertInterpreterDependencyChecker
 	// template files for conversion
 	public async isNbConvertInstalled(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken
+		_token?: CancellationToken,
 	): Promise<boolean> {
 		if (this.nbconvertInstalledInInterpreter.has(interpreter.uri)) {
 			return true;
@@ -42,7 +42,7 @@ export class NbConvertInterpreterDependencyChecker
 		const isInstalled: boolean =
 			!!(await this.installer.isInstalled(
 				Product.nbconvert,
-				interpreter
+				interpreter,
 			)) &&
 			!!(await this.installer.isInstalled(Product.jupyter, interpreter));
 		if (isInstalled === true) {
@@ -54,14 +54,14 @@ export class NbConvertInterpreterDependencyChecker
 	// Get the specific version of nbconvert installed in the given interpreter
 	public async getNbConvertVersion(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken
+		_token?: CancellationToken,
 	): Promise<SemVer | undefined> {
 		const command = this.commandFactory.createInterpreterCommand(
 			JupyterCommands.ConvertCommand,
 			"jupyter",
 			["-m", "jupyter", "nbconvert"],
 			interpreter,
-			false
+			false,
 		);
 
 		const result = await command.exec(["--version"], {

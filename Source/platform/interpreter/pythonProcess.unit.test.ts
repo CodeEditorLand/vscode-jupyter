@@ -27,11 +27,11 @@ suite("PythonProcessService", () => {
 	setup(() => {
 		processService = TypeMoq.Mock.ofType<IProcessService>(
 			undefined,
-			TypeMoq.MockBehavior.Strict
+			TypeMoq.MockBehavior.Strict,
 		);
 		fileSystem = TypeMoq.Mock.ofType<IFileSystem>(
 			undefined,
-			TypeMoq.MockBehavior.Strict
+			TypeMoq.MockBehavior.Strict,
 		);
 	});
 
@@ -48,13 +48,13 @@ suite("PythonProcessService", () => {
 		};
 		processService
 			.setup((p) =>
-				p.execObservable(getFilePath(pythonPath), args, options)
+				p.execObservable(getFilePath(pythonPath), args, options),
 			)
 			.returns(() => observable);
 		const env = createPythonEnv(
 			{ uri: pythonPath } as PythonEnvironment,
 			processService.object,
-			fileSystem.object
+			fileSystem.object,
 		);
 		const procs = createPythonProcessService(processService.object, env);
 
@@ -62,11 +62,11 @@ suite("PythonProcessService", () => {
 
 		processService.verify(
 			(p) => p.execObservable(getFilePath(pythonPath), args, options),
-			TypeMoq.Times.once()
+			TypeMoq.Times.once(),
 		);
 		expect(result).to.be.equal(
 			observable,
-			"execObservable should return an observable"
+			"execObservable should return an observable",
 		);
 	});
 
@@ -85,13 +85,17 @@ suite("PythonProcessService", () => {
 		};
 		processService
 			.setup((p) =>
-				p.execObservable(getFilePath(pythonPath), expectedArgs, options)
+				p.execObservable(
+					getFilePath(pythonPath),
+					expectedArgs,
+					options,
+				),
 			)
 			.returns(() => observable);
 		const env = createPythonEnv(
 			{ uri: pythonPath } as PythonEnvironment,
 			processService.object,
-			fileSystem.object
+			fileSystem.object,
 		);
 		const procs = createPythonProcessService(processService.object, env);
 
@@ -102,13 +106,13 @@ suite("PythonProcessService", () => {
 				p.execObservable(
 					getFilePath(pythonPath),
 					expectedArgs,
-					options
+					options,
 				),
-			TypeMoq.Times.once()
+			TypeMoq.Times.once(),
 		);
 		expect(result).to.be.equal(
 			observable,
-			"execModuleObservable should return an observable"
+			"execModuleObservable should return an observable",
 		);
 	});
 
@@ -122,7 +126,7 @@ suite("PythonProcessService", () => {
 		const env = createPythonEnv(
 			{ uri: pythonPath } as PythonEnvironment,
 			processService.object,
-			fileSystem.object
+			fileSystem.object,
 		);
 		const procs = createPythonProcessService(processService.object, env);
 
@@ -130,11 +134,11 @@ suite("PythonProcessService", () => {
 
 		processService.verify(
 			(p) => p.exec(getFilePath(pythonPath), args, options),
-			TypeMoq.Times.once()
+			TypeMoq.Times.once(),
 		);
 		expect(result.stdout).to.be.equal(
 			stdout,
-			"exec should return the content of stdout"
+			"exec should return the content of stdout",
 		);
 	});
 
@@ -146,13 +150,13 @@ suite("PythonProcessService", () => {
 		const stdout = "bar";
 		processService
 			.setup((p) =>
-				p.exec(getFilePath(pythonPath), expectedArgs, options)
+				p.exec(getFilePath(pythonPath), expectedArgs, options),
 			)
 			.returns(() => Promise.resolve({ stdout }));
 		const env = createPythonEnv(
 			{ uri: pythonPath } as PythonEnvironment,
 			processService.object,
-			fileSystem.object
+			fileSystem.object,
 		);
 		const procs = createPythonProcessService(processService.object, env);
 
@@ -160,11 +164,11 @@ suite("PythonProcessService", () => {
 
 		processService.verify(
 			(p) => p.exec(getFilePath(pythonPath), expectedArgs, options),
-			TypeMoq.Times.once()
+			TypeMoq.Times.once(),
 		);
 		expect(result.stdout).to.be.equal(
 			stdout,
-			"exec should return the content of stdout"
+			"exec should return the content of stdout",
 		);
 	});
 
@@ -175,34 +179,34 @@ suite("PythonProcessService", () => {
 		const options = {};
 		processService
 			.setup((p) =>
-				p.exec(getFilePath(pythonPath), expectedArgs, options)
+				p.exec(getFilePath(pythonPath), expectedArgs, options),
 			)
 			.returns(() =>
 				Promise.resolve({
 					stdout: "bar",
 					stderr: `Error: No module named ${moduleName}`,
-				})
+				}),
 			);
 		processService
 			.setup((p) =>
 				p.exec(
 					getFilePath(pythonPath),
 					["-c", `import ${moduleName}`],
-					{ throwOnStdErr: true }
-				)
+					{ throwOnStdErr: true },
+				),
 			)
 			.returns(() => Promise.reject(new StdErrError("not installed")));
 		const env = createPythonEnv(
 			{ uri: pythonPath } as PythonEnvironment,
 			processService.object,
-			fileSystem.object
+			fileSystem.object,
 		);
 		const procs = createPythonProcessService(processService.object, env);
 
 		const result = procs.execModule(moduleName, args, options);
 
 		await expect(result).to.eventually.be.rejectedWith(
-			`Module '${moduleName}' not installed`
+			`Module '${moduleName}' not installed`,
 		);
 	});
 });

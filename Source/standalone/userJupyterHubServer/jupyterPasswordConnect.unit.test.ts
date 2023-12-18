@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as sinon from "sinon";
 import { assert } from "chai";
 import * as nodeFetch from "node-fetch";
+import * as sinon from "sinon";
 import { anything, instance, mock, when } from "ts-mockito";
+import { Disposable, InputBox } from "vscode";
 import { JupyterRequestCreator } from "../../kernels/jupyter/session/jupyterRequestCreator.web";
 import {
 	IJupyterRequestCreator,
@@ -14,12 +15,11 @@ import { AsyncDisposableRegistry } from "../../platform/common/asyncDisposableRe
 import { ConfigurationService } from "../../platform/common/configuration/service.node";
 import { IDisposableRegistry } from "../../platform/common/types";
 import { MultiStepInputFactory } from "../../platform/common/utils/multiStepInput";
+import { noop } from "../../test/core";
 import { MockInputBox } from "../../test/datascience/mockInputBox";
 import { MockQuickPick } from "../../test/datascience/mockQuickPick";
-import { JupyterHubPasswordConnect } from "./jupyterHubPasswordConnect";
-import { Disposable, InputBox } from "vscode";
-import { noop } from "../../test/core";
 import { mockedVSCodeNamespaces } from "../../test/vscode-mock";
+import { JupyterHubPasswordConnect } from "./jupyterHubPasswordConnect";
 
 /* eslint-disable @typescript-eslint/no-explicit-any, ,  */
 suite("Jupyter Hub Password Connect", () => {
@@ -59,10 +59,10 @@ suite("Jupyter Hub Password Connect", () => {
 		});
 
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReturn(
-			Promise.resolve("Python")
+			Promise.resolve("Python"),
 		);
 		when(mockedVSCodeNamespaces.window.createInputBox()).thenReturn(
-			inputBox
+			inputBox,
 		);
 		const multiStepFactory = new MultiStepInputFactory();
 		const mockDisposableRegistry = mock(AsyncDisposableRegistry);
@@ -78,7 +78,7 @@ suite("Jupyter Hub Password Connect", () => {
 			undefined,
 			instance(requestCreator),
 			instance(serverUriStorage),
-			instance(disposables)
+			instance(disposables),
 		);
 	});
 
@@ -88,13 +88,13 @@ suite("Jupyter Hub Password Connect", () => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} as any;
 		when(configService.getSettings(anything())).thenReturn(
-			dsSettings as any
+			dsSettings as any,
 		);
 
 		const quickPick = new MockQuickPick("");
 		const input = new MockInputBox("test", 2); // We want the input box to enter twice for this scenario
 		when(mockedVSCodeNamespaces.window.createQuickPick()).thenReturn(
-			quickPick!
+			quickPick!,
 		);
 		when(mockedVSCodeNamespaces.window.createInputBox()).thenReturn(input);
 
@@ -128,7 +128,7 @@ suite("Jupyter Hub Password Connect", () => {
 
 		return async (
 			url: nodeFetch.RequestInfo,
-			init?: nodeFetch.RequestInit
+			init?: nodeFetch.RequestInit,
 		) => {
 			const urlString = url.toString().toLowerCase();
 			if (urlString === "http://testname:8888/hub/api") {
@@ -161,16 +161,16 @@ suite("Jupyter Hub Password Connect", () => {
 		assert.equal(
 			result?.remappedBaseUrl,
 			"http://testname:8888/user/test",
-			"Url not remapped"
+			"Url not remapped",
 		);
 		assert.equal(
 			result?.remappedToken,
 			"foobar",
-			"Token should be returned in URL"
+			"Token should be returned in URL",
 		);
 		assert.ok(
 			result?.requestHeaders,
-			"No request headers returned for jupyter hub"
+			"No request headers returned for jupyter hub",
 		);
 	});
 });

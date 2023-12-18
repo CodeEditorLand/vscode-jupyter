@@ -16,18 +16,18 @@ export class KernelSpecNotTrustedError extends WrappedKernelError {
 		super(
 			DataScience.failedToStartAnUntrustedKernelSpec(
 				getDisplayNameOrNameOfKernelConnection(
-					kernelConnectionMetadata
+					kernelConnectionMetadata,
 				),
 				kernelConnectionMetadata.kernelSpec.specFile
 					? getDisplayPath(
 							Uri.file(
-								kernelConnectionMetadata.kernelSpec.specFile
-							)
-						)
-					: ""
+								kernelConnectionMetadata.kernelSpec.specFile,
+							),
+					  )
+					: "",
 			),
 			undefined,
-			kernelConnectionMetadata
+			kernelConnectionMetadata,
 		);
 	}
 }

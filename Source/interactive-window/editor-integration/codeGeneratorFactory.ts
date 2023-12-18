@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
+import { NotebookDocument, workspace } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import {
 	IConfigurationService,
 	IDisposableRegistry,
@@ -12,8 +14,6 @@ import {
 	IGeneratedCodeStorageFactory,
 	IInteractiveWindowCodeGenerator,
 } from "./types";
-import { NotebookDocument, workspace } from "vscode";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
 
 /**
  * The CodeGeneratorFactory creates CodeGenerators for a given notebook document.
@@ -39,11 +39,11 @@ export class CodeGeneratorFactory
 		workspace.onDidCloseNotebookDocument(
 			this.onDidCloseNotebook,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	public getOrCreate(
-		notebook: NotebookDocument
+		notebook: NotebookDocument,
 	): IInteractiveWindowCodeGenerator {
 		const existing = this.get(notebook);
 		if (existing) {
@@ -53,13 +53,13 @@ export class CodeGeneratorFactory
 			this.configService,
 			this.storageFactory.getOrCreate(notebook),
 			notebook,
-			this.disposables
+			this.disposables,
 		);
 		this.codeGenerators.set(notebook, codeGenerator);
 		return codeGenerator;
 	}
 	public get(
-		notebook: NotebookDocument
+		notebook: NotebookDocument,
 	): IInteractiveWindowCodeGenerator | undefined {
 		return this.codeGenerators.get(notebook);
 	}

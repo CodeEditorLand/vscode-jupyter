@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { Memento, Uri } from "vscode";
-import { ProductNames } from "./productNames";
-import { Product } from "./types";
-import { PythonEnvironment } from "../../pythonEnvironments/info";
 import { InterpreterUri } from "../../common/types";
 import { isResource } from "../../common/utils/misc";
+import { PythonEnvironment } from "../../pythonEnvironments/info";
 import { getInterpreterHash } from "../../pythonEnvironments/info/interpreter";
+import { ProductNames } from "./productNames";
+import { Product } from "./types";
 
 /**
  * Keep track of the fact that we attempted to install a package into an interpreter.
@@ -16,20 +16,20 @@ import { getInterpreterHash } from "../../pythonEnvironments/info/interpreter";
 export async function trackPackageInstalledIntoInterpreter(
 	memento: Memento,
 	product: Product,
-	interpreter: InterpreterUri
+	interpreter: InterpreterUri,
 ) {
 	if (isResource(interpreter)) {
 		return;
 	}
 	const key = `${await getInterpreterHash(interpreter)}#${ProductNames.get(
-		product
+		product,
 	)}`;
 	await memento.update(key, true);
 }
 export async function clearInstalledIntoInterpreterMemento(
 	memento: Memento,
 	product: Product,
-	interpreterPath: Uri
+	interpreterPath: Uri,
 ) {
 	const key = `${await getInterpreterHash({
 		uri: interpreterPath,
@@ -39,10 +39,10 @@ export async function clearInstalledIntoInterpreterMemento(
 export async function isModulePresentInEnvironmentCache(
 	memento: Memento,
 	product: Product,
-	interpreter: PythonEnvironment
+	interpreter: PythonEnvironment,
 ) {
 	const key = `${await getInterpreterHash(interpreter)}#${ProductNames.get(
-		product
+		product,
 	)}`;
 	return memento.get<boolean>(key, false);
 }

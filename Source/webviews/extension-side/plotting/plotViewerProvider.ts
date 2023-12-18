@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { IPlotViewer, IPlotViewerProvider } from "./types";
 import {
 	IAsyncDisposable,
 	IAsyncDisposableRegistry,
 	IDisposable,
 } from "../../../platform/common/types";
 import { IServiceContainer } from "../../../platform/ioc/types";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
+import { IPlotViewer, IPlotViewerProvider } from "./types";
 
 @injectable()
 export class PlotViewerProvider
@@ -46,7 +46,7 @@ export class PlotViewerProvider
 			this.currentViewer =
 				this.serviceContainer.get<IPlotViewer>(IPlotViewer);
 			this.currentViewerClosed = this.currentViewer.closed(
-				this.closedViewer
+				this.closedViewer,
 			);
 			this.currentViewer.removed(this.removedPlot);
 			sendTelemetryEvent(Telemetry.OpenPlotViewer);

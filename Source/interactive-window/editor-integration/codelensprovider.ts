@@ -8,6 +8,14 @@ import { IDebugService } from "../../platform/common/application/types";
 import { ContextKey } from "../../platform/common/contextKey";
 import { dispose } from "../../platform/common/utils/lifecycle";
 
+import { IDebugLocationTracker } from "../../notebooks/debugger/debuggingTypes";
+import {
+	CodeLensCommands,
+	EditorContexts,
+	InteractiveInputScheme,
+	NotebookCellScheme,
+	Telemetry,
+} from "../../platform/common/constants";
 import {
 	IConfigurationService,
 	IDisposable,
@@ -16,18 +24,10 @@ import {
 import { noop } from "../../platform/common/utils/misc";
 import { StopWatch } from "../../platform/common/utils/stopWatch";
 import { IServiceContainer } from "../../platform/ioc/types";
-import { sendTelemetryEvent } from "../../telemetry";
 import { traceInfoIfCI, traceVerbose } from "../../platform/logging";
-import {
-	CodeLensCommands,
-	EditorContexts,
-	InteractiveInputScheme,
-	NotebookCellScheme,
-	Telemetry,
-} from "../../platform/common/constants";
-import { IDataScienceCodeLensProvider, ICodeWatcher } from "./types";
 import * as urlPath from "../../platform/vscode-path/resources";
-import { IDebugLocationTracker } from "../../notebooks/debugger/debuggingTypes";
+import { sendTelemetryEvent } from "../../telemetry";
+import { ICodeWatcher, IDataScienceCodeLensProvider } from "./types";
 
 /**
  * Implementation of the VS code CodeLensProvider that provides code lenses for the Interactive Window.
@@ -38,8 +38,8 @@ import { IDebugLocationTracker } from "../../notebooks/debugger/debuggingTypes";
 export class DataScienceCodeLensProvider
 	implements IDataScienceCodeLensProvider, IDisposable
 {
-	private totalExecutionTimeInMs: number = 0;
-	private totalGetCodeLensCalls: number = 0;
+	private totalExecutionTimeInMs = 0;
+	private totalGetCodeLensCalls = 0;
 	private activeCodeWatchers: ICodeWatcher[] = [];
 	private didChangeCodeLenses: vscode.EventEmitter<void> =
 		new vscode.EventEmitter<void>();
@@ -99,11 +99,11 @@ export class DataScienceCodeLensProvider
 	// Some implementation based on DonJayamanne's jupyter extension work
 	public provideCodeLenses(
 		document: vscode.TextDocument,
-		_token: vscode.CancellationToken
+		_token: vscode.CancellationToken,
 	): vscode.CodeLens[] {
 		if (
 			[NotebookCellScheme, InteractiveInputScheme].includes(
-				document.uri.scheme
+				document.uri.scheme,
 			)
 		) {
 			return [];
@@ -114,7 +114,7 @@ export class DataScienceCodeLensProvider
 
 	// IDataScienceCodeLensProvider interface
 	public getCodeWatcher(
-		document: vscode.TextDocument
+		document: vscode.TextDocument,
 	): ICodeWatcher | undefined {
 		return this.matchWatcher(document.uri);
 	}
@@ -129,7 +129,7 @@ export class DataScienceCodeLensProvider
 
 	private onDidCloseTextDocument(e: vscode.TextDocument) {
 		const index = this.activeCodeWatchers.findIndex(
-			(item) => item.uri && item.uri.toString() === e.uri.toString()
+			(item) => item.uri && item.uri.toString() === e.uri.toString(),
 		);
 		if (index >= 0) {
 			const codewatcher = this.activeCodeWatchers.splice(index, 1);
@@ -161,13 +161,13 @@ export class DataScienceCodeLensProvider
 	// Adjust what code lenses are visible or not given debug mode and debug context location
 	private adjustDebuggingLenses(
 		document: vscode.TextDocument,
-		lenses: vscode.CodeLens[]
+		lenses: vscode.CodeLens[],
 	): vscode.CodeLens[] {
 		const debugCellList = CodeLensCommands.DebuggerCommands;
 
 		if (this.debugLocationTracker && this.debugService.activeDebugSession) {
 			const debugLocation = this.debugLocationTracker.getLocation(
-				this.debugService.activeDebugSession
+				this.debugService.activeDebugSession,
 			);
 
 			// Debug locations only work on local paths, so check against fsPath here.
@@ -185,7 +185,7 @@ export class DataScienceCodeLensProvider
 				(urlPath.isEqual(
 					vscode.Uri.file(debugLocation.fileName),
 					document.uri,
-					true
+					true,
 				) ||
 					(uri && urlPath.isEqual(uri, document.uri, true)))
 			) {
@@ -194,7 +194,7 @@ export class DataScienceCodeLensProvider
 					// -1 for difference between file system one based and debugger zero based
 					const pos = new vscode.Position(
 						debugLocation.lineNumber - 1,
-						debugLocation.column - 1
+						debugLocation.column - 1,
 					);
 					return lens.range.contains(pos);
 				});
@@ -209,8 +209,8 @@ export class DataScienceCodeLensProvider
 				traceInfoIfCI(
 					`Detected debugging context because activeDebugSession is name:"${this.debugService.activeDebugSession.name}", type: "${this.debugService.activeDebugSession.type}", ` +
 						`but fell through with debugLocation: ${JSON.stringify(
-							debugLocation
-						)}, and document.uri: ${document.uri.toString()}`
+							debugLocation,
+						)}, and document.uri: ${document.uri.toString()}`,
 				);
 			}
 		} else {
@@ -229,7 +229,7 @@ export class DataScienceCodeLensProvider
 	private getCodeLens(document: vscode.TextDocument): vscode.CodeLens[] {
 		// See if we already have a watcher for this file and version
 		const codeWatcher: ICodeWatcher | undefined = this.matchWatcher(
-			document.uri
+			document.uri,
 		);
 		if (codeWatcher) {
 			return codeWatcher.getCodeLenses();
@@ -242,7 +242,7 @@ export class DataScienceCodeLensProvider
 
 	private matchWatcher(uri: vscode.Uri): ICodeWatcher | undefined {
 		const index = this.activeCodeWatchers.findIndex(
-			(item) => item.uri && item.uri.toString() == uri.toString()
+			(item) => item.uri && item.uri.toString() == uri.toString(),
 		);
 		if (index >= 0) {
 			return this.activeCodeWatchers[index];
@@ -250,11 +250,11 @@ export class DataScienceCodeLensProvider
 
 		// Create a new watcher for this file if we can find a matching document
 		const possibleDocuments = vscode.workspace.textDocuments.filter(
-			(d) => d.uri.toString() === uri.toString()
+			(d) => d.uri.toString() === uri.toString(),
 		);
 		if (possibleDocuments && possibleDocuments.length > 0) {
 			traceVerbose(
-				`creating new code watcher with matching document ${uri}`
+				`creating new code watcher with matching document ${uri}`,
 			);
 			return this.createNewCodeWatcher(possibleDocuments[0]);
 		}

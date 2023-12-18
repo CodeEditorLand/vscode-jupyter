@@ -3,33 +3,11 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { assert } from "chai";
 import * as os from "os";
-import * as path from "../../../platform/vscode-path/path";
-import * as uriPath from "../../../platform/vscode-path/resources";
-import * as sinon from "sinon";
-import { anything, instance, mock, when, verify } from "ts-mockito";
-import { IPlatformService } from "../../../platform/common/platform/types";
-import { IInterpreterService } from "../../../platform/interpreter/contracts";
-import { CustomEnvironmentVariablesProvider } from "../../../platform/common/variables/customEnvironmentVariablesProvider.node";
-import { InterpreterService } from "../../../platform/api/pythonApi";
-import {
-	createInterpreterKernelSpec,
-	getInterpreterKernelSpecName,
-	getKernelId,
-	getNameOfKernelConnection,
-} from "../../helpers";
-import { PlatformService } from "../../../platform/common/platform/platformService.node";
-import { EXTENSION_ROOT_DIR } from "../../../platform/constants.node";
-import { FileSystem } from "../../../platform/common/platform/fileSystem.node";
 import type { KernelSpec } from "@jupyterlab/services";
-import {
-	EnvironmentType,
-	PythonEnvironment,
-} from "../../../platform/pythonEnvironments/info";
-import { IPythonExtensionChecker } from "../../../platform/api/types";
-import { PYTHON_LANGUAGE } from "../../../platform/common/constants";
-import * as platform from "../../../platform/common/utils/platform";
+import { assert } from "chai";
+import * as sinon from "sinon";
+import { anything, instance, mock, verify, when } from "ts-mockito";
 import {
 	CancellationTokenSource,
 	Disposable,
@@ -37,8 +15,44 @@ import {
 	Memento,
 	Uri,
 } from "vscode";
+import { InterpreterService } from "../../../platform/api/pythonApi";
+import { PythonExtensionChecker } from "../../../platform/api/pythonApi";
+import { IPythonExtensionChecker } from "../../../platform/api/types";
+import { IApplicationEnvironment } from "../../../platform/common/application/types";
+import { PYTHON_LANGUAGE } from "../../../platform/common/constants";
+import { FileSystem } from "../../../platform/common/platform/fileSystem.node";
+import { getDisplayPathFromLocalFile } from "../../../platform/common/platform/fs-paths.node";
+import { PlatformService } from "../../../platform/common/platform/platformService.node";
+import { IPlatformService } from "../../../platform/common/platform/types";
 import { IDisposable, IExtensionContext } from "../../../platform/common/types";
 import { dispose } from "../../../platform/common/utils/lifecycle";
+import { noop } from "../../../platform/common/utils/misc";
+import * as platform from "../../../platform/common/utils/platform";
+import { getUserHomeDir } from "../../../platform/common/utils/platform.node";
+import { CustomEnvironmentVariablesProvider } from "../../../platform/common/variables/customEnvironmentVariablesProvider.node";
+import { EXTENSION_ROOT_DIR } from "../../../platform/constants.node";
+import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import {
+	IPythonExecutionFactory,
+	IPythonExecutionService,
+} from "../../../platform/interpreter/types.node";
+import { ServiceContainer } from "../../../platform/ioc/container";
+import {
+	EnvironmentType,
+	PythonEnvironment,
+} from "../../../platform/pythonEnvironments/info";
+import * as path from "../../../platform/vscode-path/path";
+import * as uriPath from "../../../platform/vscode-path/resources";
+import { TestEventHandler, createEventHandler } from "../../../test/common";
+import { uriEquals } from "../../../test/datascience/helpers";
+import {
+	createInterpreterKernelSpec,
+	getInterpreterKernelSpecName,
+	getKernelId,
+	getNameOfKernelConnection,
+} from "../../helpers";
+import { IJupyterServerUriStorage } from "../../jupyter/types";
+import { KernelFinder } from "../../kernelFinder";
 import {
 	BaseKernelConnectionMetadata,
 	KernelConnectionMetadata,
@@ -46,26 +60,12 @@ import {
 	LocalKernelSpecConnectionMetadata,
 	PythonKernelConnectionMetadata,
 } from "../../types";
+import { ContributedLocalKernelSpecFinder } from "./contributedLocalKernelSpecFinder.node";
 import { JupyterPaths } from "./jupyterPaths.node";
 import { loadKernelSpec } from "./localKernelSpecFinderBase.node";
 import { LocalKnownPathKernelSpecFinder } from "./localKnownPathKernelSpecFinder.node";
 import { LocalPythonAndRelatedNonPythonKernelSpecFinder } from "./localPythonAndRelatedNonPythonKernelSpecFinder.node";
-import { getDisplayPathFromLocalFile } from "../../../platform/common/platform/fs-paths.node";
-import { PythonExtensionChecker } from "../../../platform/api/pythonApi";
-import { KernelFinder } from "../../kernelFinder";
-import { IJupyterServerUriStorage } from "../../jupyter/types";
-import { getUserHomeDir } from "../../../platform/common/utils/platform.node";
-import { IApplicationEnvironment } from "../../../platform/common/application/types";
-import { noop } from "../../../platform/common/utils/misc";
-import { uriEquals } from "../../../test/datascience/helpers";
-import { createEventHandler, TestEventHandler } from "../../../test/common";
-import { ContributedLocalKernelSpecFinder } from "./contributedLocalKernelSpecFinder.node";
 import { ITrustedKernelPaths } from "./types";
-import { ServiceContainer } from "../../../platform/ioc/container";
-import {
-	IPythonExecutionService,
-	IPythonExecutionFactory,
-} from "../../../platform/interpreter/types.node";
 
 [false, true].forEach((isWindows) => {
 	suite(
@@ -111,13 +111,13 @@ import {
 			};
 			async function initialize(
 				testData: TestData,
-				activeInterpreter?: PythonEnvironment
+				activeInterpreter?: PythonEnvironment,
 			) {
 				disposables.push(cancelToken);
 				cancelToken = new CancellationTokenSource();
 				const getOSTypeStub = sinon.stub(platform, "getOSType");
 				getOSTypeStub.returns(
-					isWindows ? platform.OSType.Windows : platform.OSType.Linux
+					isWindows ? platform.OSType.Windows : platform.OSType.Linux,
 				);
 				interpreterService = mock(InterpreterService);
 				onDidChangeInterpreter = new EventEmitter<
@@ -140,7 +140,7 @@ import {
 				(testData.interpreters || []).forEach((item) =>
 					"interpreter" in item
 						? distinctInterpreters.add(item.interpreter)
-						: distinctInterpreters.add(item)
+						: distinctInterpreters.add(item),
 				);
 				if (activeInterpreter) {
 					// Get interpreters also includes the active interpreter in the product.
@@ -148,25 +148,25 @@ import {
 				}
 				testData.interpreters = Array.from(distinctInterpreters);
 				when(interpreterService.onDidChangeInterpreter).thenReturn(
-					onDidChangeInterpreter.event
+					onDidChangeInterpreter.event,
 				);
 				when(interpreterService.onDidChangeInterpreters).thenReturn(
-					onDidChangeInterpreters.event
+					onDidChangeInterpreters.event,
 				);
 				when(interpreterService.onDidRemoveInterpreter).thenReturn(
-					onDidDeleteInterpreter.event
+					onDidDeleteInterpreter.event,
 				);
 				when(interpreterService.onDidChangeStatus).thenReturn(
-					onDidChangeInterpreterStatus.event
+					onDidChangeInterpreterStatus.event,
 				);
 				when(interpreterService.resolvedEnvironments).thenReturn(
-					Array.from(distinctInterpreters)
+					Array.from(distinctInterpreters),
 				);
 				when(
-					interpreterService.getActiveInterpreter(anything())
+					interpreterService.getActiveInterpreter(anything()),
 				).thenResolve(activeInterpreter);
 				when(
-					interpreterService.getInterpreterDetails(anything())
+					interpreterService.getInterpreterDetails(anything()),
 				).thenResolve();
 				platformService = mock(PlatformService);
 				when(platformService.isWindows).thenReturn(isWindows);
@@ -179,27 +179,27 @@ import {
 				const env = mock<IApplicationEnvironment>();
 				when(env.extensionVersion).thenReturn("");
 				const envVarsProvider = mock(
-					CustomEnvironmentVariablesProvider
+					CustomEnvironmentVariablesProvider,
 				);
 				when(
 					envVarsProvider.getEnvironmentVariables(
 						anything(),
-						anything()
-					)
+						anything(),
+					),
 				).thenResolve({});
 				const event = new EventEmitter<Uri | undefined>();
 				disposables.push(event);
 				when(
-					envVarsProvider.onDidEnvironmentVariablesChange
+					envVarsProvider.onDidEnvironmentVariablesChange,
 				).thenReturn(event.event);
 				extensionChecker = mock(PythonExtensionChecker);
 				when(extensionChecker.isPythonExtensionInstalled).thenReturn(
-					true
+					true,
 				);
 				const memento = mock<Memento>();
 				const context = mock<IExtensionContext>();
 				when(context.extensionUri).thenReturn(
-					Uri.file(EXTENSION_ROOT_DIR)
+					Uri.file(EXTENSION_ROOT_DIR),
 				);
 				when(memento.get(anything(), anything())).thenCall(
 					(_, defaultValue) => {
@@ -207,14 +207,14 @@ import {
 							return defaultValue;
 						}
 						return false;
-					}
+					},
 				);
 				when(memento.update(anything(), anything())).thenResolve();
 				const pythonExecFactory = mock<IPythonExecutionFactory>();
 				pythonExecService = mock<IPythonExecutionService>();
 				(instance(pythonExecService) as any).then = undefined;
 				when(pythonExecFactory.create(anything())).thenResolve(
-					instance(pythonExecService)
+					instance(pythonExecService),
 				);
 				jupyterPaths = new JupyterPaths(
 					instance(platformService),
@@ -223,7 +223,7 @@ import {
 					instance(memento),
 					instance(fs),
 					instance(context),
-					instance(pythonExecFactory)
+					instance(pythonExecFactory),
 				);
 
 				const kernelSpecsBySpecFile = new Map<
@@ -240,10 +240,10 @@ import {
 									"jupyter",
 									"kernels",
 									kernelSpec.name,
-									"kernel.json"
+									"kernel.json",
 								);
 								kernelSpecsBySpecFile.set(jsonFile, kernelSpec);
-							}
+							},
 						);
 					}
 				});
@@ -256,22 +256,24 @@ import {
 							const jsonFile = path.join(
 								globalSpecPath!.fsPath,
 								kernelSpec.name,
-								"kernel.json"
+								"kernel.json",
 							);
 							kernelSpecsBySpecFile.set(
 								jsonFile.replace(/\\/g, "/"),
-								kernelSpec
+								kernelSpec,
 							);
-						}
-					)
+						},
+					),
 				);
 				when(fs.readFile(anything())).thenCall((f: Uri) => {
 					// These tests run on windows & linux, hence support both paths.
 					const file = f.fsPath.replace(/\\/g, "/");
 					return kernelSpecsBySpecFile.has(file)
 						? Promise.resolve(
-								JSON.stringify(kernelSpecsBySpecFile.get(file)!)
-							)
+								JSON.stringify(
+									kernelSpecsBySpecFile.get(file)!,
+								),
+						  )
 						: Promise.reject(`File "${f}" not found.`);
 				});
 				when(fs.searchLocal(anything(), anything(), true)).thenCall(
@@ -279,23 +281,23 @@ import {
 						if (c === globalSpecPath?.fsPath) {
 							return (testData.globalKernelSpecs || []).map(
 								(kernelSpec) =>
-									path.join(kernelSpec.name, "kernel.json")
+									path.join(kernelSpec.name, "kernel.json"),
 							);
 						}
 						const interpreter = (testData.interpreters || []).find(
 							(item) =>
 								"interpreter" in item
 									? c.includes(item.interpreter.sysPrefix)
-									: c.includes(item.sysPrefix)
+									: c.includes(item.sysPrefix),
 						);
 						if (interpreter && "interpreter" in interpreter) {
 							return (interpreter.kernelSpecs || []).map(
 								(kernelSpec) =>
-									path.join(kernelSpec.name, "kernel.json")
+									path.join(kernelSpec.name, "kernel.json"),
 							);
 						}
 						return [];
-					}
+					},
 				);
 				when(fs.createDirectory(anything())).thenResolve();
 				when(fs.delete(anything())).thenResolve();
@@ -309,19 +311,19 @@ import {
 						instance(extensionChecker),
 						instance(memento),
 						disposables,
-						instance(env)
+						instance(env),
 					);
 				when(
 					memento.get(
 						"LOCAL_KERNEL_SPEC_CONNECTIONS_CACHE_KEY_V2",
-						anything()
-					)
+						anything(),
+					),
 				).thenReturn([]);
 				when(
-					memento.get("JUPYTER_GLOBAL_KERNELSPECS_V2", anything())
+					memento.get("JUPYTER_GLOBAL_KERNELSPECS_V2", anything()),
 				).thenReturn([]);
 				when(
-					memento.update("JUPYTER_GLOBAL_KERNELSPECS_V2", anything())
+					memento.update("JUPYTER_GLOBAL_KERNELSPECS_V2", anything()),
 				).thenResolve();
 
 				const uriStorage = mock<IJupyterServerUriStorage>();
@@ -348,7 +350,7 @@ import {
 						instance(memento),
 						disposables,
 						instance(env),
-						instance(trustedKernels)
+						instance(trustedKernels),
 					);
 
 				const localKernelSpecFinder =
@@ -358,12 +360,12 @@ import {
 						kernelFinder,
 						[],
 						instance(extensionChecker),
-						instance(interpreterService)
+						instance(interpreterService),
 					);
 				changeEventFired = createEventHandler(
 					kernelFinder,
 					"onDidChangeKernels",
-					disposables
+					disposables,
 				);
 				localKernelSpecFinder.activate();
 				nonPythonKernelSpecFinder.activate();
@@ -431,12 +433,12 @@ import {
 				uri: Uri.file(
 					isWindows
 						? "C:/Python/Python2/scripts/python.exe"
-						: "/usr/bin/python27"
+						: "/usr/bin/python27",
 				),
 				id: Uri.file(
 					isWindows
 						? "C:/Python/Python2/scripts/python.exe"
-						: "/usr/bin/python27"
+						: "/usr/bin/python27",
 				).fsPath,
 				sysPrefix: isWindows ? "C:/Python/Python2" : "/usr",
 				displayName: "Python 2.7",
@@ -448,12 +450,12 @@ import {
 				uri: Uri.file(
 					isWindows
 						? "C:/Python/Python3.6/scripts/python.exe"
-						: "/usr/bin/python36"
+						: "/usr/bin/python36",
 				),
 				id: Uri.file(
 					isWindows
 						? "C:/Python/Python3.6/scripts/python.exe"
-						: "/usr/bin/python36"
+						: "/usr/bin/python36",
 				).fsPath,
 				sysPrefix: isWindows ? "C:/Python/Python3.6" : "/usr",
 				displayName: "Python 3.6",
@@ -465,12 +467,12 @@ import {
 				uri: Uri.file(
 					isWindows
 						? "C:/Python/Python3.7/scripts/python.exe"
-						: "/usr/bin/python37"
+						: "/usr/bin/python37",
 				),
 				id: Uri.file(
 					isWindows
 						? "C:/Python/Python3.7/scripts/python.exe"
-						: "/usr/bin/python37"
+						: "/usr/bin/python37",
 				).fsPath,
 				sysPrefix: isWindows ? "C:/Python/Python3.7" : "/usr",
 				displayName: "Python 3.7",
@@ -482,12 +484,12 @@ import {
 				uri: Uri.file(
 					isWindows
 						? "C:/pyenv/envs/temp/scripts/python.exe"
-						: "/users/username/pyenv/envs/temp/python"
+						: "/users/username/pyenv/envs/temp/python",
 				),
 				id: Uri.file(
 					isWindows
 						? "C:/pyenv/envs/temp/scripts/python.exe"
-						: "/users/username/pyenv/envs/temp/python"
+						: "/users/username/pyenv/envs/temp/python",
 				).fsPath,
 				sysPrefix: isWindows
 					? "C:/pyenv/envs/temp"
@@ -502,12 +504,12 @@ import {
 				uri: Uri.file(
 					isWindows
 						? "C:/temp/venv/.venv/scripts/python.exe"
-						: "/users/username/temp/.venv/bin/python"
+						: "/users/username/temp/.venv/bin/python",
 				),
 				id: Uri.file(
 					isWindows
 						? "C:/temp/venv/.venv/scripts/python.exe"
-						: "/users/username/temp/.venv/bin/python"
+						: "/users/username/temp/.venv/bin/python",
 				).fsPath,
 				sysPrefix: isWindows
 					? "C:/temp/venv/.venv"
@@ -522,12 +524,12 @@ import {
 				uri: Uri.file(
 					isWindows
 						? "C:/conda/envs/env1/scripts/python.exe"
-						: "/conda/envs/env1/bin/python"
+						: "/conda/envs/env1/bin/python",
 				),
 				id: Uri.file(
 					isWindows
 						? "C:/conda/envs/env1/scripts/python.exe"
-						: "/conda/envs/env1/bin/python"
+						: "/conda/envs/env1/bin/python",
 				).fsPath,
 				sysPrefix: isWindows
 					? "C:/conda/envs/env1"
@@ -654,7 +656,7 @@ import {
 					language: "python",
 					// Most recent versions of extensions used a custom prefix in kernelnames.
 					name: `${await getInterpreterKernelSpecName(
-						python38VenvEnv
+						python38VenvEnv,
 					)}kernelSpecRegisteredByOlderVersionOfExtension`,
 					resources: {},
 					env: {
@@ -669,7 +671,7 @@ import {
 					interpreter: PythonEnvironment;
 					kernelspec: KernelSpec.ISpecModel;
 				}[],
-				expectedInterpreters: PythonEnvironment[]
+				expectedInterpreters: PythonEnvironment[],
 			) {
 				const duplicates = new Set<PythonEnvironment>();
 				expectedInterpreters = expectedInterpreters.filter((item) => {
@@ -685,17 +687,17 @@ import {
 						const kernelspecFile = path.join(
 							globalSpecPath!.fsPath,
 							kernelSpec.name,
-							"kernel.json"
+							"kernel.json",
 						);
 						const interpreter = expectedInterpreters.find(
 							(item) =>
 								kernelSpec.language === PYTHON_LANGUAGE &&
-								item.uri.fsPath === kernelSpec.argv[0]
+								item.uri.fsPath === kernelSpec.argv[0],
 						);
 						const spec = await loadKernelSpec(
 							Uri.file(kernelspecFile),
 							instance(fs),
-							cancelToken.token
+							cancelToken.token,
 						);
 						if (spec) {
 							expectedKernelSpecs.push(
@@ -703,10 +705,10 @@ import {
 									id: getKernelId(spec!, interpreter),
 									kernelSpec: spec,
 									interpreter,
-								})
+								}),
 							);
 						}
-					})
+					}),
 				);
 				await Promise.all(
 					expectedInterpreterKernelSpecFiles.map(
@@ -717,33 +719,33 @@ import {
 								"jupyter",
 								"kernels",
 								kernelspec.name,
-								"kernel.json"
+								"kernel.json",
 							);
 							const spec = await loadKernelSpec(
 								Uri.file(kernelSpecFile),
 								instance(fs),
 								cancelToken.token,
-								interpreter
+								interpreter,
 							);
 							if (spec) {
 								expectedKernelSpecs.push(
 									spec.language === PYTHON_LANGUAGE &&
-										interpreter
+									interpreter
 										? PythonKernelConnectionMetadata.create(
 												{
 													id: getKernelId(
 														spec!,
-														interpreter
+														interpreter,
 													),
 													kernelSpec: spec,
 													interpreter,
-												}
-											)
+												},
+										  )
 										: LocalKernelSpecConnectionMetadata.create(
 												{
 													id: getKernelId(
 														spec!,
-														interpreter
+														interpreter,
 													),
 													kernelSpec: spec,
 													interpreter:
@@ -751,27 +753,27 @@ import {
 														PYTHON_LANGUAGE
 															? interpreter
 															: undefined,
-												}
-											)
+												},
+										  ),
 								);
 							}
-						}
-					)
+						},
+					),
 				);
 				await Promise.all(
 					expectedInterpreters.map(async (interpreter) => {
 						const spec = await createInterpreterKernelSpec(
 							interpreter,
-							tempDirForKernelSpecs
+							tempDirForKernelSpecs,
 						);
 						expectedKernelSpecs.push(
 							PythonKernelConnectionMetadata.create({
 								id: getKernelId(spec!, interpreter),
 								kernelSpec: spec,
 								interpreter,
-							})
+							}),
 						);
-					})
+					}),
 				);
 				expectedKernelSpecs.sort((a, b) => a.id.localeCompare(b.id));
 				return expectedKernelSpecs;
@@ -823,27 +825,27 @@ import {
 				const expectedKernels = await generateExpectedKernels(
 					expectations.expectedGlobalKernelSpecs || [],
 					expectations.expectedInterpreterKernelSpecFiles || [],
-					expectations.expectedInterpreters || []
+					expectations.expectedInterpreters || [],
 				);
 
 				assert.equal(
 					actualKernels.length,
 					expectedKernels.length,
-					"Incorrect # of kernels"
+					"Incorrect # of kernels",
 				);
 				actualKernels.sort((a, b) => a.id.localeCompare(b.id));
 				expectedKernels.sort((a, b) => a.id.localeCompare(b.id));
 				try {
 					const expectedKernelMap = new Map(
-						expectedKernels.map((item) => [item.id, item])
+						expectedKernels.map((item) => [item.id, item]),
 					);
 					actualKernels.forEach((actualKernel) => {
 						const expectedKernel = expectedKernelMap.get(
-							actualKernel.id
+							actualKernel.id,
 						);
 						if (!expectedKernel) {
 							assert.fail(
-								`Kernel not found ${actualKernel.kind};${actualKernel.id}`
+								`Kernel not found ${actualKernel.kind};${actualKernel.id}`,
 							);
 						}
 						if (expectedKernel) {
@@ -867,12 +869,12 @@ import {
 							`Duplicate kernel id found ${
 								kernel.id
 							} (${getDisplayPathFromLocalFile(
-								kernel.kernelSpec.specFile
+								kernel.kernelSpec.specFile,
 							)}), duplicate of ${
 								duplicate.kernelSpec.display_name
 							} (${getDisplayPathFromLocalFile(
-								duplicate.kernelSpec.specFile
-							)})`
+								duplicate.kernelSpec.specFile,
+							)})`,
 						);
 					}
 					if (!kernel.kernelSpec.specFile) {
@@ -881,8 +883,8 @@ import {
 							`Kernelspec file not defined for ${
 								kernel.id
 							} (${getDisplayPathFromLocalFile(
-								kernel.kernelSpec.specFile
-							)})`
+								kernel.kernelSpec.specFile,
+							)})`,
 						);
 					}
 					ids.set(kernel.id, kernel);
@@ -917,8 +919,8 @@ import {
 						lowerCasedDeserialized,
 						lowerCasedKernel,
 						`Kernel ${getNameOfKernelConnection(
-							kernel
-						)} fails being serialized`
+							kernel,
+						)} fails being serialized`,
 					);
 				});
 			}
@@ -933,7 +935,7 @@ import {
 				};
 				await initialize(testData);
 				when(extensionChecker.isPythonExtensionInstalled).thenReturn(
-					false
+					false,
 				);
 				await changeEventFired.assertFiredAtLeast(1, 100).catch(noop);
 
@@ -952,7 +954,7 @@ import {
 				};
 				await initialize(testData);
 				when(extensionChecker.isPythonExtensionInstalled).thenReturn(
-					false
+					false,
 				);
 				await changeEventFired.assertFiredAtLeast(1, 100).catch(noop);
 
@@ -970,7 +972,7 @@ import {
 				};
 				await initialize(testData);
 				when(extensionChecker.isPythonExtensionInstalled).thenReturn(
-					false
+					false,
 				);
 				await changeEventFired.assertFiredAtLeast(1, 100).catch(noop);
 				await verifyKernels({
@@ -980,11 +982,11 @@ import {
 			});
 			function verifyGlobalKernelSpec(
 				actual: KernelConnectionMetadata | undefined,
-				expected: KernelSpec.ISpecModel
+				expected: KernelSpec.ISpecModel,
 			) {
 				assert.ok(
 					actual,
-					`${expected.display_name} Kernelspec not found`
+					`${expected.display_name} Kernelspec not found`,
 				);
 				if (actual?.kind === "connectToLiveRemoteKernel") {
 					throw new Error("Incorrect value");
@@ -995,8 +997,8 @@ import {
 					path.join(
 						globalSpecPath!.fsPath,
 						expected.name,
-						"kernel.json"
-					)
+						"kernel.json",
+					),
 				);
 				Object.keys(expected).forEach((key) => {
 					// We always mess around with the names, hence don't compare names.
@@ -1008,13 +1010,13 @@ import {
 						assert.deepEqual(
 							actualValue || {},
 							expected[key] || {},
-							`Incorrect value for ${key} (kernel '${expected.display_name}')`
+							`Incorrect value for ${key} (kernel '${expected.display_name}')`,
 						);
 					} else {
 						assert.deepEqual(
 							actualValue,
 							expected[key],
-							`Incorrect value for ${key} (kernel '${expected.display_name}')`
+							`Incorrect value for ${key} (kernel '${expected.display_name}')`,
 						);
 					}
 				});
@@ -1030,7 +1032,7 @@ import {
 				};
 				await initialize(testData);
 				when(extensionChecker.isPythonExtensionInstalled).thenReturn(
-					false
+					false,
 				);
 				const cancelToken = new CancellationTokenSource();
 				disposables.push(cancelToken);
@@ -1042,9 +1044,9 @@ import {
 					).find(
 						(item) =>
 							item.kernelSpec.display_name ===
-							juliaKernelSpec.display_name
+							juliaKernelSpec.display_name,
 					),
-					juliaKernelSpec
+					juliaKernelSpec,
 				);
 				verifyGlobalKernelSpec(
 					(
@@ -1052,9 +1054,9 @@ import {
 					).find(
 						(item) =>
 							item.kernelSpec.display_name ===
-							javaKernelSpec.display_name
+							javaKernelSpec.display_name,
 					),
-					javaKernelSpec
+					javaKernelSpec,
 				);
 				verifyGlobalKernelSpec(
 					(
@@ -1062,9 +1064,9 @@ import {
 					).find(
 						(item) =>
 							item.kernelSpec.display_name ===
-							defaultPython3Kernel.display_name
+							defaultPython3Kernel.display_name,
 					),
-					defaultPython3Kernel
+					defaultPython3Kernel,
 				);
 				verifyGlobalKernelSpec(
 					(
@@ -1072,9 +1074,9 @@ import {
 					).find(
 						(item) =>
 							item.kernelSpec.display_name ===
-							fullyQualifiedPythonKernelSpec.display_name
+							fullyQualifiedPythonKernelSpec.display_name,
 					),
-					fullyQualifiedPythonKernelSpec
+					fullyQualifiedPythonKernelSpec,
 				);
 			});
 			test("Verify Global KernelSpecs (non-python)", async () => {
@@ -1092,9 +1094,9 @@ import {
 					).find(
 						(item) =>
 							item.kernelSpec.display_name ===
-							juliaKernelSpec.display_name
+							juliaKernelSpec.display_name,
 					),
-					juliaKernelSpec
+					juliaKernelSpec,
 				);
 				verifyGlobalKernelSpec(
 					(
@@ -1102,9 +1104,9 @@ import {
 					).find(
 						(item) =>
 							item.kernelSpec.display_name ===
-							javaKernelSpec.display_name
+							javaKernelSpec.display_name,
 					),
-					javaKernelSpec
+					javaKernelSpec,
 				);
 			});
 			test("Kernelspecs registered by older versions of extensions `should not` be displayed & must be deleted", async () => {
@@ -1135,9 +1137,9 @@ import {
 							item.kernelSpec.display_name ===
 								kernelspecRegisteredByVeryOldVersionOfExtension.display_name ||
 							item.kernelSpec.name ===
-								kernelspecRegisteredByVeryOldVersionOfExtension.name
+								kernelspecRegisteredByVeryOldVersionOfExtension.name,
 					),
-					"Should not list kernels registered by older version of extension"
+					"Should not list kernels registered by older version of extension",
 				);
 
 				// Verify we deleted the old kernelspecs.
@@ -1147,29 +1149,29 @@ import {
 					uriPath.joinPath(
 						globalKernelSpecDir!,
 						kernelspecRegisteredByOlderVersionOfExtension.name,
-						"kernel.json"
+						"kernel.json",
 					),
 					uriPath.joinPath(
 						globalKernelSpecDir!,
 						kernelspecRegisteredByVeryOldVersionOfExtension.name,
-						"kernel.json"
+						"kernel.json",
 					),
 				];
 
 				// Verify files were copied to some other location before being deleted.
 				verify(
-					fs.copy(uriEquals(kernelSpecsToBeDeleted[0]), anything())
+					fs.copy(uriEquals(kernelSpecsToBeDeleted[0]), anything()),
 				).calledBefore(fs.delete(uriEquals(kernelSpecsToBeDeleted[0])));
 				verify(
-					fs.copy(uriEquals(kernelSpecsToBeDeleted[1]), anything())
+					fs.copy(uriEquals(kernelSpecsToBeDeleted[1]), anything()),
 				).calledBefore(fs.delete(uriEquals(kernelSpecsToBeDeleted[1])));
 
 				// Verify files were deleted.
 				verify(fs.delete(uriEquals(kernelSpecsToBeDeleted[0]))).atLeast(
-					1
+					1,
 				);
 				verify(fs.delete(uriEquals(kernelSpecsToBeDeleted[1]))).atLeast(
-					1
+					1,
 				);
 			});
 
@@ -1202,7 +1204,7 @@ import {
 						 */
 						async function verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
 							expectations: ExpectedKernels,
-							moreLogging?: boolean
+							moreLogging?: boolean,
 						) {
 							await changeEventFired.assertFiredAtLeast(1, 1000);
 							try {
@@ -1210,7 +1212,7 @@ import {
 							} catch {
 								if (moreLogging) {
 									console.error(
-										`Change event fired ${changeEventFired.count} times`
+										`Change event fired ${changeEventFired.count} times`,
 									);
 								}
 								await changeEventFired
@@ -1218,7 +1220,7 @@ import {
 									.catch(noop);
 								if (moreLogging) {
 									console.error(
-										`Change event fired.2, ${changeEventFired.count} times`
+										`Change event fired.2, ${changeEventFired.count} times`,
 									);
 								}
 								await verifyKernels(expectations);
@@ -1235,7 +1237,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1246,9 +1248,11 @@ import {
 									expectedInterpreters: [
 										python38VenvEnv,
 									].concat(
-										activePythonEnv ? [activePythonEnv] : []
+										activePythonEnv
+											? [activePythonEnv]
+											: [],
 									),
-								}
+								},
 							);
 						});
 						test("Discover default Python kernelspecs with env vars", async () => {
@@ -1264,7 +1268,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1279,9 +1283,11 @@ import {
 									expectedInterpreters: [
 										python38VenvEnv,
 									].concat(
-										activePythonEnv ? [activePythonEnv] : []
+										activePythonEnv
+											? [activePythonEnv]
+											: [],
 									),
-								}
+								},
 							);
 						});
 						test("If we have a kernelspec without custom kernelspecs nor custom args, we should still list this", async () => {
@@ -1293,7 +1299,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1304,9 +1310,11 @@ import {
 									expectedInterpreters: [
 										python36Global,
 									].concat(
-										activePythonEnv ? [activePythonEnv] : []
+										activePythonEnv
+											? [activePythonEnv]
+											: [],
 									),
-								}
+								},
 							);
 						});
 						test("If two kernelspecs share the same interpreter, but have different env variables, then both should be listed", async function () {
@@ -1331,7 +1339,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1351,9 +1359,11 @@ import {
 										python38VenvEnv,
 										python36Global,
 									].concat(
-										activePythonEnv ? [activePythonEnv] : []
+										activePythonEnv
+											? [activePythonEnv]
+											: [],
 									),
-								}
+								},
 							);
 						});
 						test("Discover multiple global kernelspecs and a custom Python kernelspecs", async () => {
@@ -1369,7 +1379,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1382,10 +1392,12 @@ import {
 									expectedInterpreters: [
 										python38VenvEnv,
 									].concat(
-										activePythonEnv ? [activePythonEnv] : []
+										activePythonEnv
+											? [activePythonEnv]
+											: [],
 									),
 								},
-								true
+								true,
 							);
 						});
 						test("Discover multiple global kernelspecs and a custom Python kernelspecs with env vars", async () => {
@@ -1400,7 +1412,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1414,9 +1426,11 @@ import {
 									expectedInterpreters: [
 										python38VenvEnv,
 									].concat(
-										activePythonEnv ? [activePythonEnv] : []
+										activePythonEnv
+											? [activePythonEnv]
+											: [],
 									),
-								}
+								},
 							);
 						});
 						test("If we do not have python extension installed, then ensure we do not start kernels using Python Environment, instead they are started as regular kernelspecs (via spawn)", async () => {
@@ -1432,7 +1446,7 @@ import {
 							};
 							await initialize(testData, undefined);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(false);
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
@@ -1445,7 +1459,7 @@ import {
 										fullyQualifiedPythonKernelSpec,
 										fullyQualifiedPythonKernelSpecWithEnv,
 									],
-								}
+								},
 							);
 
 							// Nothing should be started using the Python interpreter.
@@ -1458,8 +1472,8 @@ import {
 								).find(
 									(kernel) =>
 										kernel.kind ===
-										"startUsingPythonInterpreter"
-								)
+										"startUsingPythonInterpreter",
+								),
 							);
 						});
 						test("Default Python kernlespecs should be ignored", async () => {
@@ -1473,18 +1487,18 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 							const expectedKernels: ExpectedKernels = {
 								expectedInterpreters: [
 									python39PyEnv_HelloWorld,
 								].concat(
-									activePythonEnv ? [activePythonEnv] : []
+									activePythonEnv ? [activePythonEnv] : [],
 								),
 							};
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
-								expectedKernels
+								expectedKernels,
 							);
 						});
 						test("Custom Python Kernels with custom env variables are listed", async () => {
@@ -1504,7 +1518,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 							const expectedKernels: ExpectedKernels = {
 								expectedGlobalKernelSpecs: [juliaKernelSpec],
@@ -1528,12 +1542,12 @@ import {
 								expectedInterpreters: [
 									python39PyEnv_HelloWorld,
 								].concat(
-									activePythonEnv ? [activePythonEnv] : []
+									activePythonEnv ? [activePythonEnv] : [],
 								),
 							};
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
-								expectedKernels
+								expectedKernels,
 							);
 						});
 						test("Multiple global & custom Python Kernels", async () => {
@@ -1562,7 +1576,7 @@ import {
 							};
 							await initialize(testData, activePythonEnv);
 							when(
-								extensionChecker.isPythonExtensionInstalled
+								extensionChecker.isPythonExtensionInstalled,
 							).thenReturn(true);
 
 							const expectedKernels: ExpectedKernels = {
@@ -1594,17 +1608,17 @@ import {
 									python37Global,
 									condaEnv1,
 								].concat(
-									activePythonEnv ? [activePythonEnv] : []
+									activePythonEnv ? [activePythonEnv] : [],
 								),
 							};
 
 							await verifyKernelsAndIfFailedThenWaitForAnotherChangeEventAndRetry(
-								expectedKernels
+								expectedKernels,
 							);
 						});
-					}
+					},
 				);
 			});
-		}
+		},
 	);
 });

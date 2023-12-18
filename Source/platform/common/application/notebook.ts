@@ -5,23 +5,23 @@ import { inject, injectable } from "inversify";
 import {
 	Disposable,
 	Event,
-	notebooks,
+	EventEmitter,
+	NotebookCell,
+	NotebookCellExecutionStateChangeEvent,
 	NotebookController,
 	NotebookData,
 	NotebookDocument,
+	NotebookDocumentContentOptions,
+	NotebookDocumentShowOptions,
 	NotebookEditor,
 	NotebookEditorSelectionChangeEvent,
 	NotebookRendererScript,
+	NotebookSerializer,
+	Uri,
+	commands,
+	notebooks,
 	window,
 	workspace,
-	NotebookCell,
-	NotebookSerializer,
-	NotebookDocumentContentOptions,
-	Uri,
-	NotebookDocumentShowOptions,
-	NotebookCellExecutionStateChangeEvent,
-	commands,
-	EventEmitter,
 } from "vscode";
 import { IDisposableRegistry } from "../types";
 import { sleep } from "../utils/async";
@@ -79,11 +79,11 @@ export class VSCodeNotebook implements IVSCodeNotebook {
 	public async openNotebookDocument(uri: Uri): Promise<NotebookDocument>;
 	public async openNotebookDocument(
 		viewType: string,
-		content?: NotebookData
+		content?: NotebookData,
 	): Promise<NotebookDocument>;
 	public async openNotebookDocument(
 		viewOrUri: Uri | string,
-		content?: NotebookData
+		content?: NotebookData,
 	): Promise<NotebookDocument> {
 		if (typeof viewOrUri === "string") {
 			return workspace.openNotebookDocument(viewOrUri, content);
@@ -94,7 +94,7 @@ export class VSCodeNotebook implements IVSCodeNotebook {
 
 	public async showNotebookDocument(
 		document: NotebookDocument,
-		options?: NotebookDocumentShowOptions
+		options?: NotebookDocumentShowOptions,
 	): Promise<NotebookEditor> {
 		return window.showNotebookDocument(document, options);
 	}
@@ -102,12 +102,12 @@ export class VSCodeNotebook implements IVSCodeNotebook {
 	public registerNotebookSerializer(
 		notebookType: string,
 		serializer: NotebookSerializer,
-		options?: NotebookDocumentContentOptions
+		options?: NotebookDocumentContentOptions,
 	): Disposable {
 		return workspace.registerNotebookSerializer(
 			notebookType,
 			serializer,
-			options
+			options,
 		);
 	}
 	public createNotebookController(
@@ -117,17 +117,17 @@ export class VSCodeNotebook implements IVSCodeNotebook {
 		handler?: (
 			cells: NotebookCell[],
 			notebook: NotebookDocument,
-			controller: NotebookController
+			controller: NotebookController,
 		) => void | Thenable<void>,
 		rendererScripts?: NotebookRendererScript[],
-		_additionalLocalResourceRoots?: Uri[]
+		_additionalLocalResourceRoots?: Uri[],
 	): NotebookController {
 		return notebooks.createNotebookController(
 			id,
 			viewType,
 			label,
 			handler,
-			rendererScripts
+			rendererScripts,
 			// Not suported yet. See https://github.com/microsoft/vscode/issues/149868
 			// additionalLocalResourceRoots
 		);
@@ -141,7 +141,7 @@ export class VSCodeNotebook implements IVSCodeNotebook {
 		while (window.activeNotebookEditor) {
 			documents.add(window.activeNotebookEditor.notebook);
 			await commands.executeCommand(
-				"workbench.action.revertAndCloseActiveEditor"
+				"workbench.action.revertAndCloseActiveEditor",
 			);
 			await sleep(10);
 		}

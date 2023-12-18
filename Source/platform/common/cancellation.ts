@@ -8,12 +8,12 @@ import {
 } from "vscode";
 import { IDisposable } from "./types";
 import { isPromiseLike } from "./utils/async";
-import { Common } from "./utils/localize";
 import { dispose } from "./utils/lifecycle";
+import { Common } from "./utils/localize";
 
 export function isCancellationError(
 	ex: Error,
-	includeErrorsWithTheMessageCanceled = false
+	includeErrorsWithTheMessageCanceled = false,
 ) {
 	if (typeof ex !== "object" || !ex) {
 		return false;
@@ -113,11 +113,11 @@ export function wrapCancellationTokens(...tokens: CancellationToken[]) {
 		token.onCancellationRequested(
 			() => wrappedCancellationToken.cancel(),
 			undefined,
-			disposables
+			disposables,
 		);
 	}
 	const oldDispose = wrappedCancellationToken.dispose.bind(
-		wrappedCancellationToken
+		wrappedCancellationToken,
 	);
 	wrappedCancellationToken.dispose = () => {
 		oldDispose();

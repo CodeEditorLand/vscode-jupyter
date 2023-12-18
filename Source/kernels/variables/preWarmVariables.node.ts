@@ -4,13 +4,13 @@
 import { inject, injectable } from "inversify";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import {
-	IPythonExtensionChecker,
 	IPythonApiProvider,
+	IPythonExtensionChecker,
 } from "../../platform/api/types";
-import { CondaService } from "../../platform/interpreter/condaService.node";
 import { IDisposableRegistry } from "../../platform/common/types";
 import { noop } from "../../platform/common/utils/misc";
 import { IEnvironmentActivationService } from "../../platform/interpreter/activation/types";
+import { CondaService } from "../../platform/interpreter/condaService.node";
 import { JupyterInterpreterService } from "../jupyter/interpreter/jupyterInterpreterService.node";
 import { IRawNotebookSupportedService } from "../raw/types";
 
@@ -41,14 +41,14 @@ export class PreWarmActivatedJupyterEnvironmentVariables
 		if (!this.rawNotebookSupported.isSupported) {
 			this.disposables.push(
 				this.jupyterInterpreterService.onDidChangeInterpreter(() =>
-					this.preWarmInterpreterVariables().catch(noop)
-				)
+					this.preWarmInterpreterVariables().catch(noop),
+				),
 			);
 			this.preWarmInterpreterVariables().catch(noop);
 			this.apiProvider.onDidActivatePythonExtension(
 				this.preWarmInterpreterVariables,
 				this,
-				this.disposables
+				this.disposables,
 			);
 		}
 		if (this.extensionChecker.isPythonExtensionInstalled) {

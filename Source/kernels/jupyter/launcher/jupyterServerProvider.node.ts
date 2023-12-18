@@ -2,18 +2,18 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, optional } from "inversify";
-import { traceVerbose } from "../../../platform/logging";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { IInterpreterService } from "../../../platform/interpreter/contracts";
-import { JupyterInstallError } from "../../../platform/errors/jupyterInstallError";
-import { GetServerOptions, IJupyterConnection } from "../../types";
-import { IJupyterServerHelper, IJupyterServerProvider } from "../types";
-import { NotSupportedInWebError } from "../../../platform/errors/notSupportedInWebError";
-import { getFilePath } from "../../../platform/common/platform/fs-paths";
 import {
 	Cancellation,
 	isCancellationError,
 } from "../../../platform/common/cancellation";
+import { getFilePath } from "../../../platform/common/platform/fs-paths";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { JupyterInstallError } from "../../../platform/errors/jupyterInstallError";
+import { NotSupportedInWebError } from "../../../platform/errors/notSupportedInWebError";
+import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { traceVerbose } from "../../../platform/logging";
+import { GetServerOptions, IJupyterConnection } from "../../types";
+import { IJupyterServerHelper, IJupyterServerProvider } from "../types";
 
 @injectable()
 export class JupyterServerProvider implements IJupyterServerProvider {
@@ -26,7 +26,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 		private readonly interpreterService: IInterpreterService
 	) {}
 	public async getOrStartServer(
-		options: GetServerOptions
+		options: GetServerOptions,
 	): Promise<IJupyterConnection> {
 		if (!this.serverPromise) {
 			const promise = (this.serverPromise =
@@ -41,7 +41,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 	}
 
 	private async startServerImpl(
-		options: GetServerOptions
+		options: GetServerOptions,
 	): Promise<IJupyterConnection> {
 		const jupyterServerHelper = this.jupyterServerHelper;
 		if (!jupyterServerHelper) {
@@ -58,15 +58,15 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				// Indicate failing.
 				throw new JupyterInstallError(
 					DataScience.jupyterNotSupported(
-						await jupyterServerHelper.getJupyterServerError()
-					)
+						await jupyterServerHelper.getJupyterServerError(),
+					),
 				);
 			}
 			// Then actually start the server
 			traceVerbose(`Starting notebook server.`);
 			const result = await jupyterServerHelper.startServer(
 				options.resource,
-				options.token
+				options.token,
 			);
 			Cancellation.throwIfCanceled(options.token);
 			return result;
@@ -107,16 +107,16 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				throw new Error(
 					DataScience.jupyterNotSupportedBecauseOfEnvironment(
 						displayName,
-						e.toString()
-					)
+						e.toString(),
+					),
 				);
 			} else {
 				throw new JupyterInstallError(
 					DataScience.jupyterNotSupported(
 						this.jupyterServerHelper
 							? await this.jupyterServerHelper.getJupyterServerError()
-							: "Error"
-					)
+							: "Error",
+					),
 				);
 			}
 		}

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IJupyterServerUriStorage } from "../../kernels/jupyter/types";
-import { injectable, inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { commands } from "vscode";
+import { IJupyterServerUriStorage } from "../../kernels/jupyter/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 
 @injectable()
 export class ExposeUsedAzMLServerHandles

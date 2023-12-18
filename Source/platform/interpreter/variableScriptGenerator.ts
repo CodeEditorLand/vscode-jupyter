@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import dedent from "dedent";
 import { inject, injectable } from "inversify";
 import { IFileSystem } from "../common/platform/types";
 import { IExtensionContext, IVariableScriptGenerator } from "../common/types";
 import { joinPath } from "../vscode-path/resources";
-import dedent from "dedent";
 
 const VariableFunc = "_VSCODE_getVariable";
 const cleanupCode = dedent`
@@ -103,7 +103,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 			"pythonFiles",
 			"vscode_datascience_helpers",
 			"getVariableInfo",
-			"vscodeGetVariableInfo.py"
+			"vscodeGetVariableInfo.py",
 		);
 		const contents = await this.fs.readFile(scriptPath);
 		VariableScriptGenerator.contentsOfScript = contents;

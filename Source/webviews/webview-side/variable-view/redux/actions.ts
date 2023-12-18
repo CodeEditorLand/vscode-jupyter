@@ -33,7 +33,7 @@ function createIncomingActionWithPayload<
 }
 // This function isn't made common and not exported, to ensure it isn't used elsewhere.
 function createIncomingAction(
-	type: CommonActionType | InteractiveWindowMessages
+	type: CommonActionType | InteractiveWindowMessages,
 ): CommonAction {
 	return { type, payload: { messageDirection: "incoming", data: undefined } };
 }
@@ -46,7 +46,7 @@ export const actionCreators = {
 		createIncomingAction(CommonActionType.TOGGLE_VARIABLE_EXPLORER),
 	sort: (
 		sortColumn: string,
-		sortAscending: boolean
+		sortAscending: boolean,
 	): CommonAction<ISortVariablesRequest> =>
 		createIncomingActionWithPayload(CommonActionType.SORT_VARIABLES, {
 			sortColumn,
@@ -54,22 +54,22 @@ export const actionCreators = {
 		}),
 	setVariableExplorerHeight: (
 		containerHeight: number,
-		gridHeight: number
+		gridHeight: number,
 	): CommonAction<IVariableExplorerHeight> =>
 		createIncomingActionWithPayload(
 			CommonActionType.SET_VARIABLE_EXPLORER_HEIGHT,
-			{ containerHeight, gridHeight }
+			{ containerHeight, gridHeight },
 		),
 	setVariableViewHeight: (
-		viewHeight: number
+		viewHeight: number,
 	): CommonAction<IVariableViewHeight> =>
 		createIncomingActionWithPayload(
 			CommonActionType.SET_VARIABLE_VIEW_HEIGHT,
-			{ viewHeight }
+			{ viewHeight },
 		),
 	showDataViewer: (
 		variable: IJupyterVariable,
-		columnSize: number
+		columnSize: number,
 	): CommonAction<IShowDataViewerAction> =>
 		createIncomingActionWithPayload(CommonActionType.SHOW_DATA_VIEWER, {
 			variable,
@@ -80,10 +80,10 @@ export const actionCreators = {
 	getVariableData: (
 		newExecutionCount: number,
 		refreshCount: number,
-		startIndex: number = 0,
-		pageSize: number = 100,
-		sortColumn: string = "name",
-		sortAscending: boolean = true
+		startIndex = 0,
+		pageSize = 100,
+		sortColumn = "name",
+		sortAscending = true,
 	): CommonAction<IJupyterVariablesRequest> =>
 		createIncomingActionWithPayload(CommonActionType.GET_VARIABLE_DATA, {
 			executionCount: newExecutionCount,

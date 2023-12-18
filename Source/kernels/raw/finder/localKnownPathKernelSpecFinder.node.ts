@@ -5,36 +5,36 @@ import { inject, injectable, named } from "inversify";
 import {
 	CancellationToken,
 	CancellationTokenSource,
-	env,
 	Memento,
+	env,
 } from "vscode";
 import { getKernelId } from "../../../kernels/helpers";
 import {
 	IJupyterKernelSpec,
 	LocalKernelSpecConnectionMetadata,
 } from "../../../kernels/types";
-import { LocalKernelSpecFinderBase } from "./localKernelSpecFinderBase.node";
-import { JupyterPaths } from "./jupyterPaths.node";
+import { IExtensionSyncActivationService } from "../../../platform/activation/types";
 import { IPythonExtensionChecker } from "../../../platform/api/types";
 import { IApplicationEnvironment } from "../../../platform/common/application/types";
+import { debounce } from "../../../platform/common/decorators";
+import { IFileSystemNode } from "../../../platform/common/platform/types.node";
+import {
+	GLOBAL_MEMENTO,
+	IDisposableRegistry,
+	IMemento,
+} from "../../../platform/common/types";
+import {
+	areObjectsWithUrisTheSame,
+	noop,
+} from "../../../platform/common/utils/misc";
 import {
 	traceError,
 	traceVerbose,
 	traceWarning,
 } from "../../../platform/logging";
-import { IFileSystemNode } from "../../../platform/common/platform/types.node";
-import {
-	IMemento,
-	GLOBAL_MEMENTO,
-	IDisposableRegistry,
-} from "../../../platform/common/types";
 import { sendKernelSpecTelemetry } from "./helper";
-import {
-	areObjectsWithUrisTheSame,
-	noop,
-} from "../../../platform/common/utils/misc";
-import { IExtensionSyncActivationService } from "../../../platform/activation/types";
-import { debounce } from "../../../platform/common/decorators";
+import { JupyterPaths } from "./jupyterPaths.node";
+import { LocalKernelSpecFinderBase } from "./localKernelSpecFinderBase.node";
 
 function localKernelSpecsCacheKey() {
 	const LocalKernelSpecsCacheKey = "LOCAL_KERNEL_SPECS_CACHE_KEY_V_2023_2";
@@ -62,7 +62,7 @@ export class LocalKnownPathKernelSpecFinder
 		extensionChecker: IPythonExtensionChecker,
 		@inject(IMemento) @named(GLOBAL_MEMENTO) memento: Memento,
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
-		@inject(IApplicationEnvironment) env: IApplicationEnvironment
+		@inject(IApplicationEnvironment) env: IApplicationEnvironment,
 	) {
 		super(fs, extensionChecker, memento, disposables, env, jupyterPaths);
 	}
@@ -100,11 +100,11 @@ export class LocalKnownPathKernelSpecFinder
 	private writeKernelsToMemento() {
 		this.writeToMementoCache(
 			Array.from(this._kernels.values()),
-			localKernelSpecsCacheKey()
+			localKernelSpecsCacheKey(),
 		).catch(noop);
 	}
 	private async listKernelSpecs(
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<LocalKernelSpecConnectionMetadata[]> {
 		const fn = async () => {
 			const newKernelSpecs = await this.findKernelSpecs(cancelToken);
@@ -112,22 +112,22 @@ export class LocalKnownPathKernelSpecFinder
 				return [];
 			}
 			const oldSortedKernels = Array.from(this._kernels.values()).sort(
-				(a, b) => a.id.localeCompare(b.id)
+				(a, b) => a.id.localeCompare(b.id),
 			);
 			const newSortedKernels = newKernelSpecs.sort((a, b) =>
-				a.id.localeCompare(b.id)
+				a.id.localeCompare(b.id),
 			);
 			const newKernelIds = new Set(newKernelSpecs.map((k) => k.id));
 			const deletedKernels = oldSortedKernels.filter(
-				(k) => !newKernelIds.has(k.id)
+				(k) => !newKernelIds.has(k.id),
 			);
 
 			newKernelSpecs.forEach((k) => this._kernels.set(k.id, k));
 			if (deletedKernels.length) {
 				traceVerbose(
 					`Local kernel spec connection deleted ${deletedKernels.map(
-						(item) => `${item.kind}:'${item.id}'`
-					)}`
+						(item) => `${item.kind}:'${item.id}'`,
+					)}`,
 				);
 				deletedKernels.forEach((k) => this._kernels.delete(k.id));
 			}
@@ -149,7 +149,7 @@ export class LocalKnownPathKernelSpecFinder
 		return promise;
 	}
 	private async findKernelSpecs(
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<LocalKernelSpecConnectionMetadata[]> {
 		// Find all the possible places to look for this resource
 		const paths =
@@ -161,9 +161,9 @@ export class LocalKnownPathKernelSpecFinder
 			paths.map((kernelPath) =>
 				this.kernelSpecFinder.findKernelSpecsInPaths(
 					kernelPath,
-					cancelToken
-				)
-			)
+					cancelToken,
+				),
+			),
 		);
 		if (cancelToken.isCancellationRequested) {
 			return [];
@@ -185,7 +185,7 @@ export class LocalKnownPathKernelSpecFinder
 					const kernelSpec =
 						await this.kernelSpecFinder.loadKernelSpec(
 							kernelSpecFile,
-							cancelToken
+							cancelToken,
 						);
 					if (!kernelSpec || cancelToken.isCancellationRequested) {
 						return;
@@ -194,13 +194,13 @@ export class LocalKnownPathKernelSpecFinder
 					if (kernelSpec.metadata?.originalSpecFile) {
 						if (
 							originalSpecFiles.has(
-								kernelSpec.metadata.originalSpecFile
+								kernelSpec.metadata.originalSpecFile,
 							)
 						) {
 							return;
 						}
 						originalSpecFiles.add(
-							kernelSpec.metadata.originalSpecFile
+							kernelSpec.metadata.originalSpecFile,
 						);
 					}
 					if (kernelSpec.specFile) {
@@ -224,39 +224,39 @@ export class LocalKnownPathKernelSpecFinder
 						if (
 							!areObjectsWithUrisTheSame(
 								item,
-								this._kernels.get(item.id)
+								this._kernels.get(item.id),
 							)
 						) {
 							this._kernels.set(item.id, item);
 							this._onDidChangeKernels.fire();
 							this.writeKernelsToMemento();
 						}
-					} else if (!existing) {
+					} else if (existing) {
+						traceWarning(
+							`Duplicate kernel found ${kernelSpec.display_name} ${kernelSpec.executable} in ${kernelSpec.specFile}`,
+						);
+					} else {
 						unique.push(item);
 						byDisplayName.set(kernelSpec.display_name, kernelSpec);
 						if (
 							!areObjectsWithUrisTheSame(
 								item,
-								this._kernels.get(item.id)
+								this._kernels.get(item.id),
 							)
 						) {
 							this._kernels.set(item.id, item);
 							this._onDidChangeKernels.fire();
 							this.writeKernelsToMemento();
 						}
-					} else {
-						traceWarning(
-							`Duplicate kernel found ${kernelSpec.display_name} ${kernelSpec.executable} in ${kernelSpec.specFile}`
-						);
 					}
 				} catch (ex) {
 					traceError(
 						`Failed to load kernelSpec for ${kernelSpecFile}`,
-						ex
+						ex,
 					);
 					return;
 				}
-			})
+			}),
 		);
 
 		return unique;

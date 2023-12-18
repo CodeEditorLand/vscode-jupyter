@@ -1,14 +1,45 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+	ContentsManager,
+	KernelManager,
+	KernelSpecManager,
+	Session,
+	SessionManager,
+} from "@jupyterlab/services";
+import { inject, injectable, optional } from "inversify";
+import uuid from "uuid/v4";
 import { CancellationError, CancellationToken, Disposable } from "vscode";
 import {
 	Cancellation,
 	raceCancellationError,
 } from "../../../platform/common/cancellation";
-import uuid from "uuid/v4";
+import {
+	IAsyncDisposableRegistry,
+	IConfigurationService,
+	IDisplayOptions,
+	IDisposable,
+	Resource,
+} from "../../../platform/common/types";
+import { waitForCondition } from "../../../platform/common/utils/async";
+import { dispose } from "../../../platform/common/utils/lifecycle";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { noop, swallowExceptions } from "../../../platform/common/utils/misc";
+import { JupyterSelfCertsError } from "../../../platform/errors/jupyterSelfCertsError";
+import { JupyterSelfCertsExpiredError } from "../../../platform/errors/jupyterSelfCertsExpiredError";
+import { LocalJupyterServerConnectionError } from "../../../platform/errors/localJupyterServerConnectionError";
+import { RemoteJupyterServerConnectionError } from "../../../platform/errors/remoteJupyterServerConnectionError";
+import { SessionDisposedError } from "../../../platform/errors/sessionDisposedError";
+import { BaseError } from "../../../platform/errors/types";
+import { traceError, traceInfo, traceVerbose } from "../../../platform/logging";
+import { KernelProgressReporter } from "../../../platform/progress/kernelProgressReporter";
 import * as urlPath from "../../../platform/vscode-path/resources";
 import * as path from "../../../platform/vscode-path/resources";
+import { JupyterSessionStartError } from "../../common/baseJupyterSession";
+import { waitForIdleOnSession } from "../../common/helpers";
+import { JupyterInvalidKernelError } from "../../errors/jupyterInvalidKernelError";
+import { getNameOfKernelConnection, jvscIdentifier } from "../../helpers";
 import {
 	IJupyterConnection,
 	IJupyterKernelSession,
@@ -19,39 +50,8 @@ import {
 	isLocalConnection,
 	isRemoteConnection,
 } from "../../types";
-import { IJupyterKernelService, IJupyterServerProvider } from "../types";
-import { traceError, traceInfo, traceVerbose } from "../../../platform/logging";
-import { inject, injectable, optional } from "inversify";
-import { noop, swallowExceptions } from "../../../platform/common/utils/misc";
-import { SessionDisposedError } from "../../../platform/errors/sessionDisposedError";
-import { RemoteJupyterServerConnectionError } from "../../../platform/errors/remoteJupyterServerConnectionError";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import { JupyterSelfCertsError } from "../../../platform/errors/jupyterSelfCertsError";
-import { JupyterSelfCertsExpiredError } from "../../../platform/errors/jupyterSelfCertsExpiredError";
-import { LocalJupyterServerConnectionError } from "../../../platform/errors/localJupyterServerConnectionError";
-import { BaseError } from "../../../platform/errors/types";
-import {
-	IAsyncDisposableRegistry,
-	IConfigurationService,
-	IDisplayOptions,
-	IDisposable,
-	Resource,
-} from "../../../platform/common/types";
 import { JupyterConnection } from "../connection/jupyterConnection";
-import { KernelProgressReporter } from "../../../platform/progress/kernelProgressReporter";
-import { DataScience } from "../../../platform/common/utils/localize";
-import type {
-	KernelSpecManager,
-	SessionManager,
-	KernelManager,
-	ContentsManager,
-	Session,
-} from "@jupyterlab/services";
-import { JupyterSessionStartError } from "../../common/baseJupyterSession";
-import { waitForIdleOnSession } from "../../common/helpers";
-import { JupyterInvalidKernelError } from "../../errors/jupyterInvalidKernelError";
-import { getNameOfKernelConnection, jvscIdentifier } from "../../helpers";
-import { waitForCondition } from "../../../platform/common/utils/async";
+import { IJupyterKernelService, IJupyterServerProvider } from "../types";
 import { JupyterLabHelper } from "./jupyterLabHelper";
 import {
 	JupyterSessionWrapper,
@@ -74,7 +74,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 		private configService: IConfigurationService
 	) {}
 	public async create(
-		options: KernelSessionCreationOptions
+		options: KernelSessionCreationOptions,
 	): Promise<IJupyterKernelSession> {
 		const disposables: IDisposable[] = [];
 		let progressReporter: IDisposable | undefined;
@@ -87,7 +87,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 				options.resource,
 				isRemoteConnection(options.kernelConnection)
 					? DataScience.connectingToJupyter
-					: DataScience.startingJupyter
+					: DataScience.startingJupyter,
 			);
 			disposables.push(progressReporter);
 		};
@@ -95,7 +95,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			options.ui.onDidChangeDisableUI(
 				createProgressReporter,
 				this,
-				disposables
+				disposables,
 			);
 		}
 		createProgressReporter();
@@ -105,36 +105,36 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 		// Check to see if we support ipykernel or not
 		const disposablesIfAnyErrors: IDisposable[] = [];
 		const idleTimeout = this.configService.getSettings(
-			options.resource
+			options.resource,
 		).jupyterLaunchTimeout;
 		try {
 			connection = isRemoteConnection(options.kernelConnection)
 				? await raceCancellationError(
 						options.token,
 						this.jupyterConnection.createConnectionInfo(
-							options.kernelConnection.serverProviderHandle
-						)
-					)
+							options.kernelConnection.serverProviderHandle,
+						),
+				  )
 				: await this.jupyterNotebookProvider.getOrStartServer({
 						resource: options.resource,
 						token: options.token,
 						ui: options.ui,
-					});
+				  });
 
 			await raceCancellationError(
 				options.token,
-				this.validateLocalKernelDependencies(options)
+				this.validateLocalKernelDependencies(options),
 			);
 
 			const sessionManager = JupyterLabHelper.create(connection.settings);
 			this.asyncDisposables.push(sessionManager);
 			disposablesIfAnyErrors.push(
-				new Disposable(() => sessionManager.dispose().catch(noop))
+				new Disposable(() => sessionManager.dispose().catch(noop)),
 			);
 
 			await raceCancellationError(
 				options.token,
-				this.validateRemoteServer(options, sessionManager)
+				this.validateRemoteServer(options, sessionManager),
 			);
 
 			// Disposing session manager will dispose all sessions that were started by that session manager.
@@ -155,7 +155,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			}
 			Cancellation.throwIfCanceled(options.token);
 			traceInfo(
-				`Started session for kernel ${options.kernelConnection.kind}:${options.kernelConnection.id}`
+				`Started session for kernel ${options.kernelConnection.kind}:${options.kernelConnection.id}`,
 			);
 
 			const wrapperSession = new JupyterSessionWrapper(
@@ -163,7 +163,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 				options.resource,
 				options.kernelConnection,
 				this.kernelService,
-				options.creator
+				options.creator,
 			);
 			const disposed = session.disposed;
 			const onDidDisposeSession = () => {
@@ -197,15 +197,13 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 					throw new RemoteJupyterServerConnectionError(
 						connection.baseUrl,
 						options.kernelConnection.serverProviderHandle,
-						ex
+						ex,
 					);
 				}
+			} else if (ex instanceof BaseError) {
+				throw ex;
 			} else {
-				if (ex instanceof BaseError) {
-					throw ex;
-				} else {
-					throw new LocalJupyterServerConnectionError(ex);
-				}
+				throw new LocalJupyterServerConnectionError(ex);
 			}
 		} finally {
 			dispose(disposables);
@@ -213,7 +211,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 	}
 	private async validateRemoteServer(
 		options: KernelSessionCreationOptions,
-		sessionManager: JupyterLabHelper
+		sessionManager: JupyterLabHelper,
 	): Promise<void> {
 		if (sessionManager.isDisposed) {
 			throw new SessionDisposedError();
@@ -229,12 +227,12 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 		} catch (ex) {
 			traceError(
 				"Failed to fetch running kernels from remote server, connection may be outdated or remote server may be unreachable",
-				ex
+				ex,
 			);
 			throw new RemoteJupyterServerConnectionError(
 				options.kernelConnection.baseUrl,
 				options.kernelConnection.serverProviderHandle,
-				ex
+				ex,
 			);
 		}
 	}
@@ -260,7 +258,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 				options.kernelConnection,
 				options.ui,
 				options.token,
-				options.creator === "3rdPartyExtension"
+				options.creator === "3rdPartyExtension",
 			);
 		}
 	}
@@ -291,7 +289,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			) {
 				if (!options.kernelConnection.kernelModel.model) {
 					throw new Error(
-						`Kernel model not defined when connecting to an existing session`
+						`Kernel model not defined when connecting to an existing session`,
 					);
 				}
 				session = options.sessionManager.connectTo({
@@ -306,12 +304,12 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 							session.kernel?.connectionStatus === "connected" ||
 							options.token.isCancellationRequested,
 						options.idleTimeout,
-						100
-					)
+						100,
+					),
 				);
 			} else {
 				traceVerbose(
-					`createNewKernelSession ${options.kernelConnection?.id}`
+					`createNewKernelSession ${options.kernelConnection?.id}`,
 				);
 				session = await this.createNewSession(options);
 
@@ -320,7 +318,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 					options.resource,
 					session,
 					options.idleTimeout,
-					options.token
+					options.token,
 				).catch(noop);
 			}
 			if (options.token.isCancellationRequested) {
@@ -357,9 +355,9 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 	}): Promise<Session.ISessionConnection> {
 		const remoteSessionOptions = getRemoteSessionOptions(
 			options.connection,
-			options.resource
+			options.resource,
 		);
-		let sessionPath = remoteSessionOptions?.path;
+		const sessionPath = remoteSessionOptions?.path;
 
 		// If kernelName is empty this can cause problems for servers that don't
 		// understand that empty kernel name means the default kernel.
@@ -413,18 +411,18 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 					kernelConnectionOptions: {
 						handleComms: true, // This has to be true for ipywidgets to work
 					},
-				})
+				}),
 			);
 			if (!session.kernel) {
 				throw new JupyterSessionStartError(
-					new Error(`No kernel created`)
+					new Error(`No kernel created`),
 				);
 			}
 			traceInfo(
 				DataScience.createdNewKernel(
 					options.connection.baseUrl,
-					session?.kernel?.id || ""
-				)
+					session?.kernel?.id || "",
+				),
 			);
 			return session;
 		} catch (ex) {

@@ -6,12 +6,12 @@ import { anything, instance, mock, verify, when } from "ts-mockito";
 import { Disposable } from "vscode";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
 import { IDisposableRegistry } from "../../../platform/common/types";
-import { JupyterInterpreterSelectionCommand } from "./jupyterInterpreterSelectionCommand.node";
-import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
 import {
 	mockedVSCodeNamespaces,
 	resetVSCodeMocks,
 } from "../../../test/vscode-mock";
+import { JupyterInterpreterSelectionCommand } from "./jupyterInterpreterSelectionCommand.node";
+import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
 
 suite("Jupyter Interpreter Command", () => {
 	let interpreterCommand: IExtensionSyncActivationService;
@@ -24,7 +24,7 @@ suite("Jupyter Interpreter Command", () => {
 		when(interpreterService.selectInterpreter()).thenResolve();
 		interpreterCommand = new JupyterInterpreterSelectionCommand(
 			instance(interpreterService),
-			disposableRegistry
+			disposableRegistry,
 		);
 	});
 	teardown(() => resetVSCodeMocks());
@@ -33,8 +33,8 @@ suite("Jupyter Interpreter Command", () => {
 		when(
 			mockedVSCodeNamespaces.commands.registerCommand(
 				"jupyter.selectJupyterInterpreter",
-				anything()
-			)
+				anything(),
+			),
 		).thenReturn(instance(disposable));
 
 		await interpreterCommand.activate();
@@ -42,8 +42,8 @@ suite("Jupyter Interpreter Command", () => {
 		verify(
 			mockedVSCodeNamespaces.commands.registerCommand(
 				"jupyter.selectJupyterInterpreter",
-				anything()
-			)
+				anything(),
+			),
 		).once();
 	});
 	test("Command handler must be jupyter interpreter selection", async () => {
@@ -52,8 +52,8 @@ suite("Jupyter Interpreter Command", () => {
 		when(
 			mockedVSCodeNamespaces.commands.registerCommand(
 				"jupyter.selectJupyterInterpreter",
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((_, cb: Function) => {
 			handler = cb;
 			return instance(disposable);
@@ -64,8 +64,8 @@ suite("Jupyter Interpreter Command", () => {
 		verify(
 			mockedVSCodeNamespaces.commands.registerCommand(
 				"jupyter.selectJupyterInterpreter",
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		assert.isFunction(handler);
 

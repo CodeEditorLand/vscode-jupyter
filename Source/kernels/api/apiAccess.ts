@@ -11,8 +11,6 @@ import {
 	workspace,
 } from "vscode";
 import { JVSC_EXTENSION_ID } from "../../platform/common/constants";
-import { ServiceContainer } from "../../platform/ioc/container";
-import { traceError } from "../../platform/logging";
 import {
 	IDisposableRegistry,
 	IExtensionContext,
@@ -20,6 +18,8 @@ import {
 import { once } from "../../platform/common/utils/functional";
 import { Common } from "../../platform/common/utils/localize";
 import { noop } from "../../platform/common/utils/misc";
+import { ServiceContainer } from "../../platform/ioc/container";
+import { traceError } from "../../platform/logging";
 
 const extensionApiAccess = new Map<
 	string,
@@ -35,7 +35,7 @@ export function clearApiAccess() {
 	cachedAccessInfo = undefined;
 }
 export async function requestApiAccess(
-	extensionId: string
+	extensionId: string,
 ): Promise<{ accessAllowed: boolean }> {
 	if (!workspace.isTrusted) {
 		return { accessAllowed: false };
@@ -64,7 +64,7 @@ export async function requestApiAccess(
 }
 
 async function requestKernelAccessImpl(
-	extensionId: string
+	extensionId: string,
 ): Promise<{ result: "allowed" | "denied" | "learnMore" | "cancelled" }> {
 	const accessInfo = await getAccessForExtensionsFromStore();
 	if (accessInfo.get(extensionId) === true) {
@@ -77,7 +77,7 @@ async function requestKernelAccessImpl(
 		extensions.getExtension(extensionId)?.packageJSON?.displayName;
 	if (!displayName) {
 		traceError(
-			`Kernel API access revoked, as extension ${extensionId} does not exist!`
+			`Kernel API access revoked, as extension ${extensionId} does not exist!`,
 		);
 		return { result: "denied" };
 	}
@@ -87,27 +87,27 @@ async function requestKernelAccessImpl(
 		l10n.t(
 			"Do you want to grant Kernel access to the extension {0} ({1})?",
 			displayName,
-			extensionId
+			extensionId,
 		),
 		{
 			modal: true,
 			detail: l10n.t(
-				"This allows the extension to execute code against Jupyter Kernels."
+				"This allows the extension to execute code against Jupyter Kernels.",
 			),
 		},
 		allow,
 		Common.learnMore,
-		deny
+		deny,
 	);
 
 	if (result === Common.learnMore) {
 		env.openExternal(
-			Uri.parse("https://aka.ms/vscodeJupyterKernelApiAccess")
+			Uri.parse("https://aka.ms/vscodeJupyterKernelApiAccess"),
 		).then(noop, noop);
 	} else if (result === allow || result === deny) {
 		await updateIndividualExtensionAccessInStore(
 			extensionId,
-			result === allow
+			result === allow,
 		);
 	}
 	switch (result) {
@@ -126,21 +126,21 @@ export async function getExtensionAccessListForManagement() {
 	const extensionsWithoutAccess = new Set<string>();
 	const [extensions] = await Promise.all([
 		getAccessForExtensionsFromStore().then(
-			(accessInfo) => new Map(accessInfo)
+			(accessInfo) => new Map(accessInfo),
 		),
 		...Array.from(extensionApiAccess.entries()).map(
 			async ([extensionId, promise]) => {
 				if ((await promise).result !== "allowed") {
 					extensionsWithoutAccess.add(extensionId);
 				}
-			}
+			},
 		),
 	]);
 	extensionsWithoutAccess.forEach((extensionId) =>
-		extensions.set(extensionId, false)
+		extensions.set(extensionId, false),
 	);
 	extensionsTriedAccessingApi.forEach((extensionId) =>
-		extensions.set(extensionId, extensions.get(extensionId) === true)
+		extensions.set(extensionId, extensions.get(extensionId) === true),
 	);
 	return extensions;
 }
@@ -149,7 +149,7 @@ const apiAccessSecretKey = "API.Access";
 let cachedAccessInfo: Map<string, boolean> | undefined;
 
 async function getAccessForExtensionsFromStore(
-	ignoreCache: boolean = false
+	ignoreCache = false,
 ): Promise<Map<string, boolean>> {
 	const context =
 		ServiceContainer.instance.get<IExtensionContext>(IExtensionContext);
@@ -161,14 +161,14 @@ async function getAccessForExtensionsFromStore(
 	once(() => {
 		const disposables =
 			ServiceContainer.instance.get<IDisposableRegistry>(
-				IDisposableRegistry
+				IDisposableRegistry,
 			);
 		disposables.push(
 			context.secrets.onDidChange((e) => {
 				e.key === apiAccessSecretKey
 					? (cachedAccessInfo = undefined)
 					: undefined;
-			})
+			}),
 		);
 	})();
 
@@ -182,7 +182,7 @@ async function getAccessForExtensionsFromStore(
 			return new Map<string, boolean>();
 		}
 		cachedAccessInfo = new Map<string, boolean>(
-			Object.entries(JSON.parse(json))
+			Object.entries(JSON.parse(json)),
 		);
 		return cachedAccessInfo;
 	} catch (ex) {
@@ -194,7 +194,7 @@ async function getAccessForExtensionsFromStore(
 // Chain the updates, as we do not want to lose any transient updates/changes.
 let updatePromise = Promise.resolve();
 export async function updateListOfExtensionsAllowedToAccessApi(
-	extensionIds: string[]
+	extensionIds: string[],
 ) {
 	return (updatePromise = updatePromise.then(async () => {
 		await Promise.all(
@@ -205,11 +205,11 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 						extensionIds.includes(extensionId) === true
 							? "allowed"
 							: "denied";
-				}
-			)
+				},
+			),
 		);
 		cachedAccessInfo = new Map(
-			extensionIds.map((extensionId) => [extensionId, true])
+			extensionIds.map((extensionId) => [extensionId, true]),
 		);
 		const context =
 			ServiceContainer.instance.get<IExtensionContext>(IExtensionContext);
@@ -219,14 +219,14 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 		try {
 			await context.secrets.store(
 				apiAccessSecretKey,
-				JSON.stringify(Object.fromEntries(cachedAccessInfo))
+				JSON.stringify(Object.fromEntries(cachedAccessInfo)),
 			);
 		} catch (ex) {
 			traceError(
 				`Failed to update API access information ${JSON.stringify(
-					Object.fromEntries(cachedAccessInfo)
+					Object.fromEntries(cachedAccessInfo),
 				)}`,
-				ex
+				ex,
 			);
 		}
 	}));
@@ -234,7 +234,7 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 
 async function updateIndividualExtensionAccessInStore(
 	extensionId: string,
-	accessAllowed: boolean
+	accessAllowed: boolean,
 ) {
 	return (updatePromise = updatePromise.then(async () => {
 		const context =
@@ -250,14 +250,14 @@ async function updateIndividualExtensionAccessInStore(
 		try {
 			await context.secrets.store(
 				apiAccessSecretKey,
-				JSON.stringify(Object.fromEntries(apiAccess))
+				JSON.stringify(Object.fromEntries(apiAccess)),
 			);
 		} catch (ex) {
 			traceError(
 				`Failed to store API access information ${JSON.stringify(
-					Object.fromEntries(apiAccess)
+					Object.fromEntries(apiAccess),
 				)}`,
-				ex
+				ex,
 			);
 		}
 	}));

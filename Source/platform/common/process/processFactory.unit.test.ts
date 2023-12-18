@@ -9,18 +9,18 @@ import { ProcessServiceFactory } from "../../../platform/common/process/processF
 import { IDisposable } from "../../../platform/common/types";
 import { CustomEnvironmentVariablesProvider } from "../../../platform/common/variables/customEnvironmentVariablesProvider.node";
 import { ICustomEnvironmentVariablesProvider } from "../../../platform/common/variables/types";
+import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 import {
 	dispose,
 	getDisposableTracker,
 	setDisposableTracker,
 } from "../utils/lifecycle";
-import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 
 suite("Process - ProcessServiceFactory", () => {
 	let factory: ProcessServiceFactory;
 	let envVariablesProvider: ICustomEnvironmentVariablesProvider;
 	let disposableRegistry: IDisposable[] = [];
-	let oldDisposable = getDisposableTracker();
+	const oldDisposable = getDisposableTracker();
 	setup(() => {
 		envVariablesProvider = mock(CustomEnvironmentVariablesProvider);
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(true);
@@ -41,8 +41,8 @@ suite("Process - ProcessServiceFactory", () => {
 				envVariablesProvider.getEnvironmentVariables(
 					resource,
 					"RunNonPythonCode",
-					anything()
-				)
+					anything(),
+				),
 			).thenResolve({
 				x: "test",
 			});
@@ -52,8 +52,8 @@ suite("Process - ProcessServiceFactory", () => {
 				envVariablesProvider.getEnvironmentVariables(
 					resource,
 					"RunNonPythonCode",
-					anything()
-				)
+					anything(),
+				),
 			).once();
 
 			expect(disposableRegistry.length).equal(1);

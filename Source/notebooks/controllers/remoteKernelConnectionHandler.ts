@@ -3,18 +3,18 @@
 
 import { inject, injectable } from "inversify";
 import { NotebookDocument } from "vscode";
-import { IControllerRegistration, IVSCodeNotebookController } from "./types";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IDisposableRegistry } from "../../platform/common/types";
-import { noop } from "../../platform/common/utils/misc";
-import { traceVerbose } from "../../platform/logging";
+import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
+import { ILiveRemoteKernelConnectionUsageTracker } from "../../kernels/jupyter/types";
 import {
 	IKernel,
 	IKernelProvider,
 	isLocalConnection,
 } from "../../kernels/types";
-import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
-import { ILiveRemoteKernelConnectionUsageTracker } from "../../kernels/jupyter/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { IDisposableRegistry } from "../../platform/common/types";
+import { noop } from "../../platform/common/utils/misc";
+import { traceVerbose } from "../../platform/logging";
+import { IControllerRegistration, IVSCodeNotebookController } from "./types";
 
 /**
  * Tracks the remote kernel in use for a notebook (updates the live kernel information)
@@ -39,12 +39,12 @@ export class RemoteKernelConnectionHandler
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.controllers.onControllerSelectionChanged(
 			this.onNotebookControllerSelectionChanged,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private onNotebookControllerSelectionChanged({
@@ -67,13 +67,13 @@ export class RemoteKernelConnectionHandler
 				this.liveKernelTracker.trackKernelIdAsUsed(
 					notebook.uri,
 					controller.connection.serverProviderHandle,
-					controller.connection.kernelModel.id
+					controller.connection.kernelModel.id,
 				);
 			} else {
 				this.liveKernelTracker.trackKernelIdAsNotUsed(
 					notebook.uri,
 					controller.connection.serverProviderHandle,
-					controller.connection.kernelModel.id
+					controller.connection.kernelModel.id,
 				);
 			}
 		}
@@ -99,7 +99,7 @@ export class RemoteKernelConnectionHandler
 			const kernelId = kernel.session?.kernel?.id;
 			if (!kernel.disposed && !kernel.disposing && kernelId) {
 				traceVerbose(
-					`Updating preferred kernel for remote notebook ${kernelId}`
+					`Updating preferred kernel for remote notebook ${kernelId}`,
 				);
 				this.preferredRemoteKernelIdProvider
 					.storePreferredRemoteKernelId(resource, kernelId)
@@ -107,7 +107,7 @@ export class RemoteKernelConnectionHandler
 				this.liveKernelTracker.trackKernelIdAsUsed(
 					resource,
 					serverId,
-					kernelId
+					kernelId,
 				);
 			}
 		};

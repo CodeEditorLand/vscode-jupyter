@@ -3,18 +3,7 @@
 
 import { inject, injectable, named } from "inversify";
 import { Memento, NotebookDocument, commands, window, workspace } from "vscode";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import {
-	GLOBAL_MEMENTO,
-	IDisposable,
-	IDisposableRegistry,
-	IMemento,
-} from "../../platform/common/types";
-import { Common, DataScience } from "../../platform/common/utils/localize";
-import { noop } from "../../platform/common/utils/misc";
-import { sendTelemetryEvent } from "../../telemetry";
-import { Telemetry } from "../../platform/common/constants";
+import { extensions } from "vscode";
 import {
 	getKernelConnectionLanguage,
 	getLanguageInNotebookMetadata,
@@ -24,11 +13,22 @@ import {
 	IControllerRegistration,
 	IVSCodeNotebookController,
 } from "../../notebooks/controllers/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { Telemetry } from "../../platform/common/constants";
+import {
+	GLOBAL_MEMENTO,
+	IDisposable,
+	IDisposableRegistry,
+	IMemento,
+} from "../../platform/common/types";
 import {
 	getNotebookMetadata,
 	isJupyterNotebook,
 } from "../../platform/common/utils";
-import { extensions } from "vscode";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { Common, DataScience } from "../../platform/common/utils/localize";
+import { noop } from "../../platform/common/utils/misc";
+import { sendTelemetryEvent } from "../../telemetry";
 
 const mementoKeyToNeverPromptExtensionAgain =
 	"JVSC_NEVER_PROMPT_EXTENSIONS_LIST";
@@ -80,12 +80,12 @@ export class ExtensionRecommendationService
 		workspace.onDidOpenNotebookDocument(
 			this.onDidOpenNotebookDocument,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.controllerManager.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -94,7 +94,7 @@ export class ExtensionRecommendationService
 			return;
 		}
 		const language = getLanguageInNotebookMetadata(
-			getNotebookMetadata(notebook)
+			getNotebookMetadata(notebook),
 		);
 		if (language) {
 			this.recommendExtensionForLanguage(language).catch(noop);
@@ -122,7 +122,7 @@ export class ExtensionRecommendationService
 	}
 	private async recommendExtensionForLanguage(language: string) {
 		const extensionId = extensionsThatSupportJupyterKernelLanguages.get(
-			language.toLowerCase()
+			language.toLowerCase(),
 		);
 		if (!extensionId || extensions.getExtension(extensionId)) {
 			return;
@@ -142,7 +142,7 @@ export class ExtensionRecommendationService
 		this.recommendedInSession.add(extensionId);
 		const message = DataScience.recommendExtensionForNotebookLanguage(
 			`[${extensionInfo.displayName}](${extensionInfo.extensionLink})`,
-			language
+			language,
 		);
 		sendTelemetryEvent(Telemetry.RecommendExtension, undefined, {
 			extensionId,
@@ -152,7 +152,7 @@ export class ExtensionRecommendationService
 			message,
 			Common.bannerLabelYes,
 			Common.bannerLabelNo,
-			Common.doNotShowAgain
+			Common.doNotShowAgain,
 		);
 		switch (selection) {
 			case Common.bannerLabelYes: {
@@ -179,13 +179,13 @@ export class ExtensionRecommendationService
 				});
 				const list = this.globalMemento.get<string[]>(
 					mementoKeyToNeverPromptExtensionAgain,
-					[]
+					[],
 				);
 				if (!list.includes(extensionId)) {
 					list.push(extensionId);
 					await this.globalMemento.update(
 						mementoKeyToNeverPromptExtensionAgain,
-						list
+						list,
 					);
 				}
 				break;

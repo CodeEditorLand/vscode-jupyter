@@ -5,23 +5,43 @@ import { inject, injectable, optional } from "inversify";
 import {
 	CodeLens,
 	ConfigurationTarget,
-	env,
-	Range,
-	Uri,
-	commands,
 	NotebookCell,
 	NotebookEdit,
 	NotebookRange,
-	Selection,
 	Position,
+	Range,
+	Selection,
+	Uri,
 	ViewColumn,
-	workspace,
 	WorkspaceEdit,
+	commands,
+	env,
 	window,
+	workspace,
 } from "vscode";
-import { IKernelProvider, KernelConnectionMetadata } from "../../kernels/types";
 import { ICommandNameArgumentTypeMapping } from "../../commands";
+import { IDataScienceErrorHandler } from "../../kernels/errors/types";
+import {
+	IJupyterServerHelper,
+	INotebookExporter,
+} from "../../kernels/jupyter/types";
+import { IKernelProvider, KernelConnectionMetadata } from "../../kernels/types";
+import { ExportDialog } from "../../notebooks/export/exportDialog";
+import { ExportFormat, IFileConverter } from "../../notebooks/export/types";
+import { INotebookEditorProvider } from "../../notebooks/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IDebugService } from "../../platform/common/application/types";
+import {
+	CommandSource,
+	Commands,
+	PYTHON_LANGUAGE,
+	Telemetry,
+} from "../../platform/common/constants";
+import {
+	getDisplayPath,
+	getFilePath,
+} from "../../platform/common/platform/fs-paths";
+import { IFileSystem } from "../../platform/common/platform/types";
 import {
 	IConfigurationService,
 	IDisposable,
@@ -29,38 +49,18 @@ import {
 } from "../../platform/common/types";
 import { DataScience } from "../../platform/common/utils/localize";
 import { isUri, noop } from "../../platform/common/utils/misc";
-import { capturePerfTelemetry, captureUsageTelemetry } from "../../telemetry";
-import {
-	Commands,
-	CommandSource,
-	PYTHON_LANGUAGE,
-	Telemetry,
-} from "../../platform/common/constants";
-import {
-	IDataScienceCodeLensProvider,
-	ICodeWatcher,
-} from "../editor-integration/types";
-import { IInteractiveWindowProvider } from "../types";
-import * as urlPath from "../../platform/vscode-path/resources";
-import {
-	getDisplayPath,
-	getFilePath,
-} from "../../platform/common/platform/fs-paths";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { ExportFormat, IFileConverter } from "../../notebooks/export/types";
 import { openAndShowNotebook } from "../../platform/common/utils/notebooks";
 import { JupyterInstallError } from "../../platform/errors/jupyterInstallError";
 import { traceError, traceInfo, traceVerbose } from "../../platform/logging";
+import * as urlPath from "../../platform/vscode-path/resources";
+import { capturePerfTelemetry, captureUsageTelemetry } from "../../telemetry";
 import { generateCellsFromDocument } from "../editor-integration/cellFactory";
-import { IDataScienceErrorHandler } from "../../kernels/errors/types";
-import { INotebookEditorProvider } from "../../notebooks/types";
 import {
-	IJupyterServerHelper,
-	INotebookExporter,
-} from "../../kernels/jupyter/types";
-import { IFileSystem } from "../../platform/common/platform/types";
+	ICodeWatcher,
+	IDataScienceCodeLensProvider,
+} from "../editor-integration/types";
+import { IInteractiveWindowProvider } from "../types";
 import { StatusProvider } from "./statusProvider";
-import { ExportDialog } from "../../notebooks/export/exportDialog";
 
 /**
  * Class that registers command handlers for interactive window commands.
@@ -115,7 +115,7 @@ export class CommandRegistry
 		this.registerCommandsIfTrusted();
 		this.registerCommand(
 			Commands.InsertCellBelowPosition,
-			this.insertCellBelowPosition
+			this.insertCellBelowPosition,
 		);
 		this.registerCommand(Commands.InsertCellBelow, this.insertCellBelow);
 		this.registerCommand(Commands.InsertCellAbove, this.insertCellAbove);
@@ -123,62 +123,62 @@ export class CommandRegistry
 		this.registerCommand(Commands.SelectCell, this.selectCell);
 		this.registerCommand(
 			Commands.SelectCellContents,
-			this.selectCellContents
+			this.selectCellContents,
 		);
 		this.registerCommand(
 			Commands.ExtendSelectionByCellAbove,
-			this.extendSelectionByCellAbove
+			this.extendSelectionByCellAbove,
 		);
 		this.registerCommand(
 			Commands.ExtendSelectionByCellBelow,
-			this.extendSelectionByCellBelow
+			this.extendSelectionByCellBelow,
 		);
 		this.registerCommand(Commands.MoveCellsUp, this.moveCellsUp);
 		this.registerCommand(Commands.MoveCellsDown, this.moveCellsDown);
 		this.registerCommand(
 			Commands.ChangeCellToMarkdown,
-			this.changeCellToMarkdown
+			this.changeCellToMarkdown,
 		);
 		this.registerCommand(Commands.ChangeCellToCode, this.changeCellToCode);
 		this.registerCommand(
 			Commands.GotoNextCellInFile,
-			this.gotoNextCellInFile
+			this.gotoNextCellInFile,
 		);
 		this.registerCommand(
 			Commands.GotoPrevCellInFile,
-			this.gotoPrevCellInFile
+			this.gotoPrevCellInFile,
 		);
 		this.registerCommand(Commands.AddCellBelow, this.addCellBelow);
 		this.registerCommand(
 			Commands.CreateNewNotebook,
-			this.createNewNotebook
+			this.createNewNotebook,
 		);
 		this.registerCommand(
 			Commands.LatestExtension,
-			this.openPythonExtensionPage
+			this.openPythonExtensionPage,
 		);
 		this.registerCommand(
 			Commands.EnableDebugLogging,
-			this.enableDebugLogging
+			this.enableDebugLogging,
 		);
 		this.registerCommand(
 			Commands.ResetLoggingLevel,
-			this.resetLoggingLevel
+			this.resetLoggingLevel,
 		);
 		this.registerCommand(
 			Commands.EnableLoadingWidgetsFrom3rdPartySource,
-			this.enableLoadingWidgetScriptsFromThirdParty
+			this.enableLoadingWidgetScriptsFromThirdParty,
 		);
 		this.registerCommand(
 			Commands.CreateNewInteractive,
 			(connection?: KernelConnectionMetadata) =>
-				this.createNewInteractiveWindow(connection)
+				this.createNewInteractiveWindow(connection),
 		);
 		this.registerCommand(
 			Commands.ImportNotebook,
 			(
 				file?: Uri,
-				_cmdSource: CommandSource = CommandSource.commandPalette
+				_cmdSource: CommandSource = CommandSource.commandPalette,
 			) => {
 				return this.listenForErrors(() => {
 					if (file) {
@@ -187,13 +187,13 @@ export class CommandRegistry
 						return this.importNotebook();
 					}
 				});
-			}
+			},
 		);
 		this.registerCommand(
 			Commands.ImportNotebookFile,
 			(
 				file?: Uri,
-				_cmdSource: CommandSource = CommandSource.commandPalette
+				_cmdSource: CommandSource = CommandSource.commandPalette,
 			) => {
 				return this.listenForErrors(() => {
 					if (file) {
@@ -202,13 +202,13 @@ export class CommandRegistry
 						return this.importNotebook();
 					}
 				});
-			}
+			},
 		);
 		commands.registerCommand(
 			Commands.ExportFileAsNotebook,
 			(
 				file?: Uri,
-				_cmdSource: CommandSource = CommandSource.commandPalette
+				_cmdSource: CommandSource = CommandSource.commandPalette,
 			) => {
 				return this.listenForErrors(() => {
 					if (file) {
@@ -225,13 +225,13 @@ export class CommandRegistry
 
 					return Promise.resolve();
 				});
-			}
+			},
 		);
 		this.registerCommand(
 			Commands.ExportFileAndOutputAsNotebook,
 			(
 				file: Uri,
-				_cmdSource: CommandSource = CommandSource.commandPalette
+				_cmdSource: CommandSource = CommandSource.commandPalette,
 			) => {
 				return this.listenForErrors(() => {
 					if (file) {
@@ -243,51 +243,51 @@ export class CommandRegistry
 							activeEditor.document.languageId === PYTHON_LANGUAGE
 						) {
 							return this.exportFileAndOutput(
-								activeEditor.document.uri
+								activeEditor.document.uri,
 							);
 						}
 					}
 					return Promise.resolve();
 				});
-			}
+			},
 		);
 		this.registerCommand(
 			Commands.ExpandAllCells,
 			async (context?: { notebookEditor: { notebookUri: Uri } }) =>
-				this.expandAllCells(context?.notebookEditor?.notebookUri)
+				this.expandAllCells(context?.notebookEditor?.notebookUri),
 		);
 		this.registerCommand(
 			Commands.CollapseAllCells,
 			async (context?: { notebookEditor: { notebookUri: Uri } }) =>
-				this.collapseAllCells(context?.notebookEditor?.notebookUri)
+				this.collapseAllCells(context?.notebookEditor?.notebookUri),
 		);
 		this.registerCommand(Commands.ExportOutputAsNotebook, () =>
-			this.exportCells()
+			this.exportCells(),
 		);
 		this.registerCommand(
 			Commands.InteractiveExportAsNotebook,
 			(context?: { notebookEditor: { notebookUri: Uri } }) =>
-				this.export(context?.notebookEditor?.notebookUri)
+				this.export(context?.notebookEditor?.notebookUri),
 		);
 		this.registerCommand(
 			Commands.InteractiveExportAs,
 			(context?: { notebookEditor: { notebookUri: Uri } }) =>
-				this.exportAs(context?.notebookEditor?.notebookUri)
+				this.exportAs(context?.notebookEditor?.notebookUri),
 		);
 		this.registerCommand(Commands.ScrollToCell, (file: Uri, id: string) =>
-			this.scrollToCell(file, id)
+			this.scrollToCell(file, id),
 		);
 		this.registerCommand(
 			Commands.InteractiveClearAll,
-			this.clearAllCellsInInteractiveWindow
+			this.clearAllCellsInInteractiveWindow,
 		);
 		this.registerCommand(
 			Commands.InteractiveGoToCode,
-			this.goToCodeInInteractiveWindow
+			this.goToCodeInInteractiveWindow,
 		);
 		commands.registerCommand(
 			Commands.InteractiveCopyCell,
-			this.copyCellInInteractiveWindow
+			this.copyCellInInteractiveWindow,
 		);
 	}
 	public dispose() {
@@ -302,30 +302,30 @@ export class CommandRegistry
 		this.registerCommand(Commands.RunCurrentCell, this.runCurrentCell);
 		this.registerCommand(
 			Commands.RunCurrentCellAdvance,
-			this.runCurrentCellAndAdvance
+			this.runCurrentCellAndAdvance,
 		);
 		this.registerCommand(
 			Commands.ExecSelectionInInteractiveWindow,
 			(textOrUri: string | undefined | Uri) => {
 				this.runSelectionOrLine(textOrUri).catch(noop);
-			}
+			},
 		);
 		this.registerCommand(Commands.RunAllCellsAbove, this.runAllCellsAbove);
 		this.registerCommand(
 			Commands.RunCellAndAllBelow,
-			this.runCellAndAllBelow
+			this.runCellAndAllBelow,
 		);
 		this.registerCommand(
 			Commands.RunAllCellsAbovePalette,
-			this.runAllCellsAboveFromCursor
+			this.runAllCellsAboveFromCursor,
 		);
 		this.registerCommand(
 			Commands.RunCellAndAllBelowPalette,
-			this.runCellAndAllBelowFromCursor
+			this.runCellAndAllBelowFromCursor,
 		);
 		this.registerCommand(
 			Commands.RunCurrentCellAndAddBelow,
-			this.runCurrentCellAndAddBelow
+			this.runCurrentCellAndAddBelow,
 		);
 		this.registerCommand(Commands.DebugCell, this.debugCell);
 		this.registerCommand(Commands.DebugStepOver, this.debugStepOver);
@@ -333,7 +333,7 @@ export class CommandRegistry
 		this.registerCommand(Commands.DebugStop, this.debugStop);
 		this.registerCommand(
 			Commands.DebugCurrentCellPalette,
-			this.debugCurrentCellFromCursor
+			this.debugCurrentCellFromCursor,
 		);
 		this.registerCommand(Commands.OpenVariableView, this.openVariableView);
 		this.registerCommand(Commands.OpenOutlineView, this.openOutlineView);
@@ -341,11 +341,11 @@ export class CommandRegistry
 		this.registerCommand(Commands.RunFromLine, this.runFromLine);
 		this.registerCommand(
 			Commands.RunFileInInteractiveWindows,
-			this.runFileInteractive
+			this.runFileInteractive,
 		);
 		this.registerCommand(
 			Commands.DebugFileInInteractiveWindows,
-			this.debugFileInteractive
+			this.debugFileInteractive,
 		);
 	}
 	private registerCommand<
@@ -360,15 +360,15 @@ export class CommandRegistry
 	private getCodeWatcher(file: Uri | undefined): ICodeWatcher | undefined {
 		if (file && this.dataScienceCodeLensProvider) {
 			const possibleDocuments = workspace.textDocuments.filter((d) =>
-				urlPath.isEqual(d.uri, file)
+				urlPath.isEqual(d.uri, file),
 			);
 			if (possibleDocuments && possibleDocuments.length === 1) {
 				return this.dataScienceCodeLensProvider.getCodeWatcher(
-					possibleDocuments[0]
+					possibleDocuments[0],
 				);
 			} else if (possibleDocuments && possibleDocuments.length > 1) {
 				throw new Error(
-					DataScience.documentMismatch(getFilePath(file))
+					DataScience.documentMismatch(getFilePath(file)),
 				);
 			}
 		}
@@ -383,12 +383,12 @@ export class CommandRegistry
 				"logging.level",
 				"debug",
 				undefined,
-				ConfigurationTarget.Global
+				ConfigurationTarget.Global,
 			);
 			commands
 				.executeCommand(
 					"jupyter.reloadVSCode",
-					DataScience.reloadRequired
+					DataScience.reloadRequired,
 				)
 				.then(noop, noop);
 		}
@@ -401,12 +401,12 @@ export class CommandRegistry
 				"logging.level",
 				"error",
 				undefined,
-				ConfigurationTarget.Global
+				ConfigurationTarget.Global,
 			);
 			commands
 				.executeCommand(
 					"jupyter.reloadVSCode",
-					DataScience.reloadRequired
+					DataScience.reloadRequired,
 				)
 				.then(noop, noop);
 		}
@@ -425,7 +425,7 @@ export class CommandRegistry
 				"widgetScriptSources",
 				["jsdelivr.com", "unpkg.com"],
 				undefined,
-				ConfigurationTarget.Global
+				ConfigurationTarget.Global,
 			)
 			.catch(noop);
 	}
@@ -473,12 +473,12 @@ export class CommandRegistry
 		startLine: number,
 		startChar: number,
 		endLine: number,
-		endChar: number
+		endChar: number,
 	): Promise<void> {
 		const codeWatcher = this.getCodeWatcher(file);
 		if (codeWatcher) {
 			return codeWatcher.runCell(
-				new Range(startLine, startChar, endLine, endChar)
+				new Range(startLine, startChar, endLine, endChar),
 			);
 		}
 	}
@@ -486,7 +486,7 @@ export class CommandRegistry
 	private async runAllCellsAbove(
 		file: Uri,
 		stopLine: number,
-		stopCharacter: number
+		stopCharacter: number,
 	): Promise<void> {
 		if (file) {
 			const codeWatcher = this.getCodeWatcher(file);
@@ -500,7 +500,7 @@ export class CommandRegistry
 	private async runCellAndAllBelow(
 		file: Uri | undefined,
 		startLine: number,
-		startCharacter: number
+		startCharacter: number,
 	): Promise<void> {
 		if (file) {
 			const codeWatcher = this.getCodeWatcher(file);
@@ -508,7 +508,7 @@ export class CommandRegistry
 			if (codeWatcher) {
 				return codeWatcher.runCellAndAllBelow(
 					startLine,
-					startCharacter
+					startCharacter,
 				);
 			}
 		}
@@ -529,7 +529,7 @@ export class CommandRegistry
 
 		if (activeCodeWatcher && textEditor && textEditor.selection) {
 			return activeCodeWatcher.runFromLine(
-				textEditor.selection.start.line
+				textEditor.selection.start.line,
 			);
 		}
 	}
@@ -553,14 +553,14 @@ export class CommandRegistry
 	}
 
 	private async runSelectionOrLine(
-		textOrUri: string | undefined | Uri
+		textOrUri: string | undefined | Uri,
 	): Promise<void> {
 		const activeCodeWatcher = this.getCurrentCodeWatcher();
 		if (activeCodeWatcher) {
 			return activeCodeWatcher.runSelectionOrLine(
 				window.activeTextEditor,
 				// If this is a URI, the runSelectionOrLine is not expecting a URI, so act like nothing was sent.
-				isUri(textOrUri) ? undefined : textOrUri
+				isUri(textOrUri) ? undefined : textOrUri,
 			);
 		} else {
 			return;
@@ -572,14 +572,14 @@ export class CommandRegistry
 		startLine: number,
 		startChar: number,
 		endLine: number,
-		endChar: number
+		endChar: number,
 	): Promise<void> {
 		if (file) {
 			const codeWatcher = this.getCodeWatcher(file);
 
 			if (codeWatcher) {
 				return codeWatcher.debugCell(
-					new Range(startLine, startChar, endLine, endChar)
+					new Range(startLine, startChar, endLine, endChar),
 				);
 			}
 		}
@@ -608,7 +608,7 @@ export class CommandRegistry
 				const kernel = this.kernelProvider.get(iw.notebookDocument);
 				if (kernel) {
 					traceVerbose(
-						`Interrupt kernel due to debug stop of IW ${uri.toString()}`
+						`Interrupt kernel due to debug stop of IW ${uri.toString()}`,
 					);
 					// If we have a matching iw, then stop current execution
 					await kernel.interrupt();
@@ -703,7 +703,7 @@ export class CommandRegistry
 			if (activeCodeWatcher) {
 				return activeCodeWatcher.runAllCellsAbove(
 					currentCodeLens.range.start.line,
-					currentCodeLens.range.start.character
+					currentCodeLens.range.start.character,
 				);
 			}
 		} else {
@@ -718,7 +718,7 @@ export class CommandRegistry
 			if (activeCodeWatcher) {
 				return activeCodeWatcher.runCellAndAllBelow(
 					currentCodeLens.range.start.line,
-					currentCodeLens.range.start.character
+					currentCodeLens.range.start.character,
 				);
 			}
 		} else {
@@ -741,7 +741,7 @@ export class CommandRegistry
 	private async createNewNotebook(): Promise<void> {
 		window
 			.showInformationMessage(
-				'This command has been deprecated and will eventually be removed, please use ["Create: New Jupyter Notebook"](command:workbench.action.openGlobalKeybindings?%5B%22@command:ipynb.newUntitledIpynb%22%5D) instead.'
+				'This command has been deprecated and will eventually be removed, please use ["Create: New Jupyter Notebook"](command:workbench.action.openGlobalKeybindings?%5B%22@command:ipynb.newUntitledIpynb%22%5D) instead.',
 			)
 			.then(noop, noop);
 		await commands.executeCommand("ipynb.newUntitledIpynb");
@@ -776,15 +776,15 @@ export class CommandRegistry
 
 		// Ask our code lens provider to find the matching code watcher for the current document
 		return this.dataScienceCodeLensProvider.getCodeWatcher(
-			activeEditor.document
+			activeEditor.document,
 		);
 	}
 
 	private openPythonExtensionPage() {
 		env.openExternal(
 			Uri.parse(
-				`https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter`
-			)
+				`https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter`,
+			),
 		).then(noop, noop);
 	}
 
@@ -825,38 +825,38 @@ export class CommandRegistry
 			) {
 				const cells = generateCellsFromDocument(
 					activeEditor.document,
-					this.configuration.getSettings(activeEditor.document.uri)
+					this.configuration.getSettings(activeEditor.document.uri),
 				);
 				if (cells) {
 					// Bring up the export dialog box
 					const uri = await new ExportDialog().showDialog(
 						ExportFormat.ipynb,
-						file
+						file,
 					);
 					await this.waitForStatus(
 						async () => {
 							if (uri) {
 								const notebook =
 									await this.jupyterExporter?.translateToNotebook(
-										cells
+										cells,
 									);
 								await this.fileSystem.writeFile(
 									uri,
-									JSON.stringify(notebook, undefined, 1)
+									JSON.stringify(notebook, undefined, 1),
 								);
 							}
 						},
 						DataScience.exportingFormat,
-						getDisplayPath(file)
+						getDisplayPath(file),
 					);
 					// When all done, show a notice that it completed.
 					if (uri && filePath) {
 						const openQuestion1 = DataScience.exportOpenQuestion1;
 						const selection = await window.showInformationMessage(
 							DataScience.exportDialogComplete(
-								getDisplayPath(file)
+								getDisplayPath(file),
 							),
-							openQuestion1
+							openQuestion1,
 						);
 						if (selection === openQuestion1) {
 							await openAndShowNotebook(uri);
@@ -886,13 +886,13 @@ export class CommandRegistry
 			) {
 				const cells = generateCellsFromDocument(
 					activeEditor.document,
-					this.configuration.getSettings(activeEditor.document.uri)
+					this.configuration.getSettings(activeEditor.document.uri),
 				);
 				if (cells) {
 					// Bring up the export dialog box
 					const uri = await new ExportDialog().showDialog(
 						ExportFormat.ipynb,
-						file
+						file,
 					);
 					if (!uri) {
 						return;
@@ -902,22 +902,22 @@ export class CommandRegistry
 							if (uri) {
 								const notebook =
 									await this.jupyterExporter?.translateToNotebook(
-										cells
+										cells,
 									);
 								await this.fileSystem.writeFile(
 									uri,
-									JSON.stringify(notebook, undefined, 1)
+									JSON.stringify(notebook, undefined, 1),
 								);
 							}
 						},
 						DataScience.exportingFormat,
-						getDisplayPath(file)
+						getDisplayPath(file),
 					);
 					// Next open this notebook & execute it.
 					await workspace
 						.openNotebookDocument(uri)
 						.then((document) =>
-							window.showNotebookDocument(document)
+							window.showNotebookDocument(document),
 						);
 					await commands.executeCommand("notebook.execute");
 					return uri;
@@ -927,9 +927,9 @@ export class CommandRegistry
 			await this.dataScienceErrorHandler.handleError(
 				new JupyterInstallError(
 					DataScience.jupyterNotSupported(
-						await this.jupyterServerHelper.getJupyterServerError()
-					)
-				)
+						await this.jupyterServerHelper.getJupyterServerError(),
+					),
+				),
 			);
 		}
 	}
@@ -937,10 +937,10 @@ export class CommandRegistry
 	private async expandAllCells(uri?: Uri) {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
-				uri
+				uri,
 			);
 		traceInfo(
-			`Expanding all cells in interactive window with uri ${interactiveWindow?.notebookUri}`
+			`Expanding all cells in interactive window with uri ${interactiveWindow?.notebookUri}`,
 		);
 		if (interactiveWindow) {
 			await interactiveWindow.expandAllCells();
@@ -950,10 +950,10 @@ export class CommandRegistry
 	private async collapseAllCells(uri?: Uri) {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
-				uri
+				uri,
 			);
 		traceInfo(
-			`Collapsing all cells in interactive window with uri ${interactiveWindow?.notebookUri}`
+			`Collapsing all cells in interactive window with uri ${interactiveWindow?.notebookUri}`,
 		);
 		if (interactiveWindow) {
 			await interactiveWindow.collapseAllCells();
@@ -970,7 +970,7 @@ export class CommandRegistry
 	private exportAs(uri?: Uri) {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
-				uri
+				uri,
 			);
 		if (interactiveWindow) {
 			interactiveWindow.exportAs();
@@ -980,7 +980,7 @@ export class CommandRegistry
 	private export(uri?: Uri) {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
-				uri
+				uri,
 			);
 		if (interactiveWindow) {
 			interactiveWindow.export();
@@ -988,11 +988,11 @@ export class CommandRegistry
 	}
 
 	private async createNewInteractiveWindow(
-		connection?: KernelConnectionMetadata
+		connection?: KernelConnectionMetadata,
 	): Promise<void> {
 		await this.interactiveWindowProvider?.getOrCreate(
 			undefined,
-			connection
+			connection,
 		);
 	}
 
@@ -1000,14 +1000,14 @@ export class CommandRegistry
 		promise: () => Promise<T>,
 		formatMessage: (arg1: string) => string,
 		file: string,
-		canceled?: () => void
+		canceled?: () => void,
 	): Promise<T> {
 		const message = formatMessage(file || "");
 		return this.statusProvider.waitWithStatus(
 			promise,
 			message,
 			undefined,
-			canceled
+			canceled,
 		);
 	}
 
@@ -1029,7 +1029,7 @@ export class CommandRegistry
 					await this.fileConverter.importIpynb(uris[0]);
 				},
 				DataScience.importingFormat,
-				getDisplayPath(uris[0])
+				getDisplayPath(uris[0]),
 			);
 		}
 	}
@@ -1043,7 +1043,7 @@ export class CommandRegistry
 					await this.fileConverter.importIpynb(file);
 				},
 				DataScience.importingFormat,
-				getDisplayPath(file)
+				getDisplayPath(file),
 			);
 		}
 	}
@@ -1053,7 +1053,7 @@ export class CommandRegistry
 			// Find the interactive windows that have this file as a submitter
 			const possibles =
 				this.interactiveWindowProvider.getInteractiveWindowsWithSubmitter(
-					file
+					file,
 				);
 
 			// Scroll to cell in the one that has the cell. We need this so
@@ -1073,7 +1073,7 @@ export class CommandRegistry
 	}): Promise<void> {
 		const uri =
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
-				context?.notebookEditor?.notebookUri
+				context?.notebookEditor?.notebookUri,
 			)?.notebookUri;
 
 		if (!uri) {
@@ -1082,7 +1082,7 @@ export class CommandRegistry
 
 		// Look for the matching notebook document to add cells to
 		const document = workspace.notebookDocuments.find(
-			(document) => document.uri.toString() === uri.toString()
+			(document) => document.uri.toString() === uri.toString(),
 		);
 		if (!document) {
 			return;
@@ -1091,7 +1091,7 @@ export class CommandRegistry
 		// Remove the cells from the matching notebook document
 		const edit = new WorkspaceEdit();
 		const nbEdit = NotebookEdit.deleteCells(
-			new NotebookRange(0, document.cellCount)
+			new NotebookRange(0, document.cellCount),
 		);
 		edit.set(document.uri, [nbEdit]);
 		await workspace.applyEdit(edit);
@@ -1111,7 +1111,7 @@ export class CommandRegistry
 				editor.revealRange(new Range(line, 0, line, 0));
 				editor.selection = new Selection(
 					new Position(line, 0),
-					new Position(line, 0)
+					new Position(line, 0),
 				);
 			}
 		}
@@ -1120,7 +1120,7 @@ export class CommandRegistry
 	private async copyCellInInteractiveWindow(context?: NotebookCell) {
 		if (context) {
 			const settings = this.configuration.getSettings(
-				context.notebook.uri
+				context.notebook.uri,
 			);
 			const source = [
 				// Prepend cell marker to code

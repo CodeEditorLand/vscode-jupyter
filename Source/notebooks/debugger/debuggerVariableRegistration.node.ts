@@ -8,6 +8,7 @@ import {
 	DebugSession,
 	ProviderResult,
 } from "vscode";
+import { IJupyterVariables } from "../../kernels/variables/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IDebugService } from "../../platform/common/application/types";
 import { Identifiers, PYTHON_LANGUAGE } from "../../platform/common/constants";
@@ -17,7 +18,6 @@ import {
 	pythonKernelDebugAdapter,
 } from "./constants";
 import { IJupyterDebugService } from "./debuggingTypes";
-import { IJupyterVariables } from "../../kernels/variables/types";
 
 /**
  * Registes a DebugAdapter for handling variable values when debugging.
@@ -39,25 +39,25 @@ export class DebuggerVariableRegistration
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				PYTHON_LANGUAGE,
-				this
-			)
+				this,
+			),
 		);
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				pythonKernelDebugAdapter,
-				this
-			)
+				this,
+			),
 		);
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				pythonIWKernelDebugAdapter,
-				this
-			)
+				this,
+			),
 		);
 	}
 
 	public createDebugAdapterTracker(
-		_session: DebugSession
+		_session: DebugSession,
 	): ProviderResult<DebugAdapterTracker> {
 		return this.debugVariables;
 	}

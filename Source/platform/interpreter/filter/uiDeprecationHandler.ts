@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
+import { commands } from "vscode";
 import { IExtensionSyncActivationService } from "../../activation/types";
 import { IDisposableRegistry } from "../../common/types";
 import { noop } from "../../common/utils/misc";
-import { commands } from "vscode";
 
 @injectable()
 export class PythonFilterUICommandDeprecation
@@ -23,11 +23,11 @@ export class PythonFilterUICommandDeprecation
 					commands
 						.executeCommand(
 							"workbench.action.openSettings",
-							"jupyter.kernels.excludePythonEnvironments"
+							"jupyter.kernels.excludePythonEnvironments",
 						)
 						.then(noop, noop),
-				this
-			)
+				this,
+			),
 		);
 	}
 }

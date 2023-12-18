@@ -3,8 +3,8 @@
 
 import { inject, injectable } from "inversify";
 import { NotebookCellOutputItem, NotebookDocument } from "vscode";
-import { traceError } from "../../../platform/logging";
 import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
+import { traceError } from "../../../platform/logging";
 import { IPlotViewerProvider } from "../plotting/types";
 
 const svgMimeType = "image/svg+xml";
@@ -23,22 +23,22 @@ export class PlotViewHandler {
 		}
 		const outputItem = getOutputItem(notebook, outputId, svgMimeType);
 		let svgString: string | undefined;
-		if (!outputItem) {
+		if (outputItem) {
+			svgString = new TextDecoder().decode(outputItem.data);
+		} else {
 			// Didn't find svg, see if we have png we can convert
 			const pngOutput = getOutputItem(notebook, outputId, pngMimeType);
 
 			if (!pngOutput) {
 				return traceError(
 					`No SVG or PNG Plot to open ${getDisplayPath(
-						notebook.uri
-					)}, id: ${outputId}`
+						notebook.uri,
+					)}, id: ${outputId}`,
 				);
 			}
 
 			// If we did find a PNG wrap it in an SVG element so that we can display it
 			svgString = convertPngToSvg(pngOutput);
-		} else {
-			svgString = new TextDecoder().decode(outputItem.data);
 		}
 		if (svgString) {
 			await this.plotViewProvider.showPlot(svgString);
@@ -49,7 +49,7 @@ export class PlotViewHandler {
 function getOutputItem(
 	notebook: NotebookDocument,
 	outputId: string,
-	mimeType: string
+	mimeType: string,
 ): NotebookCellOutputItem | undefined {
 	for (const cell of notebook.getCells()) {
 		for (const output of cell.outputs) {

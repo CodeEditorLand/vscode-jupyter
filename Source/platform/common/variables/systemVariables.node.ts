@@ -3,8 +3,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { Range, Uri, window, workspace } from "vscode";
 import * as path from "../../vscode-path/path";
-import { Uri, Range, workspace, window } from "vscode";
 import { AbstractSystemVariables } from "./systemVariables";
 
 /**
@@ -34,8 +34,8 @@ export class SystemVariables extends AbstractSystemVariables {
 			this._selectedText = window.activeTextEditor.document.getText(
 				new Range(
 					window.activeTextEditor.selection.start,
-					window.activeTextEditor.selection.end
-				)
+					window.activeTextEditor.selection.end,
+				),
 			);
 		}
 		this._execPath = process.execPath;

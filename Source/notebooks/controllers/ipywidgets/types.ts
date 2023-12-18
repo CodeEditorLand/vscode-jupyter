@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { Event, Uri } from "vscode";
-import { IDisposable } from "../../../platform/common/types";
-import { IPyWidgetMessages } from "../../../messageTypes";
 import { IKernel } from "../../../kernels/types";
+import { IPyWidgetMessages } from "../../../messageTypes";
+import { IDisposable } from "../../../platform/common/types";
 
 export interface IPyWidgetMessage {
 	message: IPyWidgetMessages;
@@ -51,7 +51,7 @@ export interface IWidgetScriptSourceProvider extends IDisposable {
 	getWidgetScriptSource(
 		moduleName: string,
 		moduleVersion: string,
-		isWebViewOnline?: boolean
+		isWebViewOnline?: boolean,
 	): Promise<Readonly<WidgetScriptSource>>;
 	/**
 	 * Returns all of the widgets found for a kernel.
@@ -69,13 +69,13 @@ export interface IWidgetScriptSourceProvider extends IDisposable {
 }
 
 export const IWidgetScriptSourceProviderFactory = Symbol(
-	"IWidgetScriptSourceProviderFactory"
+	"IWidgetScriptSourceProviderFactory",
 );
 
 export interface IWidgetScriptSourceProviderFactory {
 	getProviders(
 		kernel: IKernel,
-		uriConverter: ILocalResourceUriConverter
+		uriConverter: ILocalResourceUriConverter,
 	): IWidgetScriptSourceProvider[];
 }
 
@@ -103,7 +103,7 @@ export interface INbExtensionsPathProvider {
 }
 
 export const IIPyWidgetScriptManagerFactory = Symbol(
-	"IIPyWidgetScriptManagerFactory"
+	"IIPyWidgetScriptManagerFactory",
 );
 export interface IIPyWidgetScriptManagerFactory {
 	getOrCreate(kernel: IKernel): IIPyWidgetScriptManager;

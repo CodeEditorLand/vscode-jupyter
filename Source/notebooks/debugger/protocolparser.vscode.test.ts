@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { expect } from "chai";
 import { PassThrough } from "stream";
+import { expect } from "chai";
 import { createDeferred } from "../../platform/common/utils/async";
-import { ProtocolParser } from "./protocolParser.node";
 import { sleep } from "../../test/common.node";
+import { ProtocolParser } from "./protocolParser.node";
 
 suite("Debugging - Protocol Parser @debugger", () => {
 	test("Test request, response and event messages", async () => {
@@ -26,32 +26,32 @@ suite("Debugging - Protocol Parser @debugger", () => {
 		});
 
 		stream.write(
-			'Content-Length: 289\r\n\r\n{"command":"initialize","arguments":{"clientID":"vscode","adapterID":"pythonExperiment","pathFormat":"path","linesStartAt1":true,"columnsStartAt1":true,"supportsVariableType":true,"supportsVariablePaging":true,"supportsRunInTerminalRequest":true,"locale":"en-us"},"type":"request","seq":1}'
+			'Content-Length: 289\r\n\r\n{"command":"initialize","arguments":{"clientID":"vscode","adapterID":"pythonExperiment","pathFormat":"path","linesStartAt1":true,"columnsStartAt1":true,"supportsVariableType":true,"supportsVariablePaging":true,"supportsRunInTerminalRequest":true,"locale":"en-us"},"type":"request","seq":1}',
 		);
 		await expect(requestDetected).to.eventually.equal(
 			true,
-			"request not parsed"
+			"request not parsed",
 		);
 
 		stream.write(
-			'Content-Length: 265\r\n\r\n{"seq":1,"type":"response","request_seq":1,"command":"initialize","success":true,"body":{"supportsEvaluateForHovers":false,"supportsConditionalBreakpoints":true,"supportsConfigurationDoneRequest":true,"supportsFunctionBreakpoints":false,"supportsSetVariable":true}}'
+			'Content-Length: 265\r\n\r\n{"seq":1,"type":"response","request_seq":1,"command":"initialize","success":true,"body":{"supportsEvaluateForHovers":false,"supportsConditionalBreakpoints":true,"supportsConfigurationDoneRequest":true,"supportsFunctionBreakpoints":false,"supportsSetVariable":true}}',
 		);
 		await expect(responseDetected).to.eventually.equal(
 			true,
-			"response not parsed"
+			"response not parsed",
 		);
 
 		stream.write(
-			'Content-Length: 63\r\n\r\n{"type": "event", "seq": 1, "event": "initialized", "body": {}}'
+			'Content-Length: 63\r\n\r\n{"type": "event", "seq": 1, "event": "initialized", "body": {}}',
 		);
 		await expect(eventDetected).to.eventually.equal(
 			true,
-			"event not parsed"
+			"event not parsed",
 		);
 
 		expect(messagesDetected).to.be.equal(
 			3,
-			"incorrect number of protocol messages"
+			"incorrect number of protocol messages",
 		);
 	});
 	test("Ensure messages are not received after disposing the parser", async () => {
@@ -65,28 +65,28 @@ suite("Debugging - Protocol Parser @debugger", () => {
 			protocolParser.on("request_initialize", () => resolve(true));
 		});
 		stream.write(
-			'Content-Length: 289\r\n\r\n{"command":"initialize","arguments":{"clientID":"vscode","adapterID":"pythonExperiment","pathFormat":"path","linesStartAt1":true,"columnsStartAt1":true,"supportsVariableType":true,"supportsVariablePaging":true,"supportsRunInTerminalRequest":true,"locale":"en-us"},"type":"request","seq":1}'
+			'Content-Length: 289\r\n\r\n{"command":"initialize","arguments":{"clientID":"vscode","adapterID":"pythonExperiment","pathFormat":"path","linesStartAt1":true,"columnsStartAt1":true,"supportsVariableType":true,"supportsVariablePaging":true,"supportsRunInTerminalRequest":true,"locale":"en-us"},"type":"request","seq":1}',
 		);
 		await expect(requestDetected).to.eventually.equal(
 			true,
-			"request not parsed"
+			"request not parsed",
 		);
 
 		protocolParser.dispose();
 
 		const responseDetected = createDeferred<boolean>();
 		protocolParser.on("response_initialize", () =>
-			responseDetected.resolve(true)
+			responseDetected.resolve(true),
 		);
 
 		stream.write(
-			'Content-Length: 265\r\n\r\n{"seq":1,"type":"response","request_seq":1,"command":"initialize","success":true,"body":{"supportsEvaluateForHovers":false,"supportsConditionalBreakpoints":true,"supportsConfigurationDoneRequest":true,"supportsFunctionBreakpoints":false,"supportsSetVariable":true}}'
+			'Content-Length: 265\r\n\r\n{"seq":1,"type":"response","request_seq":1,"command":"initialize","success":true,"body":{"supportsEvaluateForHovers":false,"supportsConditionalBreakpoints":true,"supportsConfigurationDoneRequest":true,"supportsFunctionBreakpoints":false,"supportsSetVariable":true}}',
 		);
 		// Wait for messages to go through and get parsed (unnecenssary, but add for testing edge cases).
 		await sleep(1000);
 		expect(responseDetected.completed).to.be.equal(
 			false,
-			"Promise should not have resolved"
+			"Promise should not have resolved",
 		);
 	});
 });

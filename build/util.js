@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const fs = require("fs");
 const path = require("path");
@@ -15,7 +14,7 @@ function getListOfFiles(filename) {
 	return files.map((file) => {
 		return path.join(
 			exports.ExtensionRootDir,
-			file.replace(/\//g, path.sep)
+			file.replace(/\//g, path.sep),
 		);
 	});
 }

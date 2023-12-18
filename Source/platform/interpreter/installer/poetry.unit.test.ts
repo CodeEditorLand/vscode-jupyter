@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 
 import { assert, expect } from "chai";
-import * as path from "../../../platform/vscode-path/path";
 import * as sinon from "sinon";
-import { TEST_LAYOUT_ROOT } from "../../../test/pythonEnvironments/constants";
+import * as fileUtils from "../../../platform/common/platform/fileUtils.node";
 import {
-	ShellOptions,
 	ExecutionResult,
+	ShellOptions,
 } from "../../../platform/common/process/types.node";
 import * as platformApis from "../../../platform/common/utils/platform";
 import * as platformApisNode from "../../../platform/common/utils/platform.node";
-import * as fileUtils from "../../../platform/common/platform/fileUtils.node";
 import {
-	isPoetryEnvironment,
 	Poetry,
+	isPoetryEnvironment,
 } from "../../../platform/interpreter/installer/poetry.node";
+import * as path from "../../../platform/vscode-path/path";
+import { TEST_LAYOUT_ROOT } from "../../../test/pythonEnvironments/constants";
 
 const testPoetryDir = path.join(TEST_LAYOUT_ROOT, "poetry");
 const project1 = path.join(testPoetryDir, "project1");
@@ -41,8 +41,8 @@ suite("isPoetryEnvironment Tests", () => {
 					testPoetryDir,
 					"poetry-tutorial-project-6hnqYwvD-py3.8",
 					"Scripts",
-					"python.exe"
-				)
+					"python.exe",
+				),
 			);
 			expect(result).to.equal(true);
 		});
@@ -53,8 +53,8 @@ suite("isPoetryEnvironment Tests", () => {
 					testPoetryDir,
 					"wannabeglobalenv",
 					"Scripts",
-					"python.exe"
-				)
+					"python.exe",
+				),
 			);
 			expect(result).to.equal(false);
 		});
@@ -65,8 +65,8 @@ suite("isPoetryEnvironment Tests", () => {
 					testPoetryDir,
 					"project1-haha-py3.8",
 					"Scripts",
-					"python.exe"
-				)
+					"python.exe",
+				),
 			);
 			expect(result).to.equal(false);
 		});
@@ -85,7 +85,7 @@ suite("isPoetryEnvironment Tests", () => {
 						});
 					}
 					return Promise.reject(new Error("Command failed"));
-				}
+				},
 			);
 		});
 
@@ -98,7 +98,7 @@ suite("isPoetryEnvironment Tests", () => {
 				.stub(platformApis, "getOSType")
 				.callsFake(() => platformApis.OSType.Windows);
 			const result = await isPoetryEnvironment(
-				path.join(project1, ".venv", "Scripts", "python.exe")
+				path.join(project1, ".venv", "Scripts", "python.exe"),
 			);
 			expect(result).to.equal(true);
 		});
@@ -108,7 +108,7 @@ suite("isPoetryEnvironment Tests", () => {
 				.stub(platformApis, "getOSType")
 				.callsFake(() => platformApis.OSType.Windows);
 			const result = await isPoetryEnvironment(
-				path.join(project1, ".venv2", "Scripts", "python.exe")
+				path.join(project1, ".venv2", "Scripts", "python.exe"),
 			);
 			expect(result).to.equal(false);
 		});
@@ -118,7 +118,7 @@ suite("isPoetryEnvironment Tests", () => {
 				.stub(platformApis, "getOSType")
 				.callsFake(() => platformApis.OSType.Linux);
 			const result = await isPoetryEnvironment(
-				path.join(project4, ".venv", "bin", "python")
+				path.join(project4, ".venv", "bin", "python"),
 			);
 			expect(result).to.equal(false);
 		});
@@ -141,7 +141,7 @@ suite("Poetry binary is located correctly", async () => {
 	test("Return undefined if pyproject.toml doesn't exist in cwd", async () => {
 		getPythonSetting.returns("poetryPath");
 		shellExecute.callsFake((_command: string, _options: ShellOptions) =>
-			Promise.resolve<ExecutionResult<string>>({ stdout: "" })
+			Promise.resolve<ExecutionResult<string>>({ stdout: "" }),
 		);
 
 		const poetry = await Poetry.getPoetry(testPoetryDir);
@@ -152,7 +152,7 @@ suite("Poetry binary is located correctly", async () => {
 	test("Return undefined if cwd contains pyproject.toml which does not contain a poetry section", async () => {
 		getPythonSetting.returns("poetryPath");
 		shellExecute.callsFake((_command: string, _options: ShellOptions) =>
-			Promise.resolve<ExecutionResult<string>>({ stdout: "" })
+			Promise.resolve<ExecutionResult<string>>({ stdout: "" }),
 		);
 
 		const poetry = await Poetry.getPoetry(project3);
@@ -226,7 +226,7 @@ suite("Poetry binary is located correctly", async () => {
 	test("Return undefined otherwise", async () => {
 		getPythonSetting.returns("poetry");
 		shellExecute.callsFake((_command: string, _options: ShellOptions) =>
-			Promise.reject(new Error("Command failed"))
+			Promise.reject(new Error("Command failed")),
 		);
 
 		const poetry = await Poetry.getPoetry(project1);

@@ -26,10 +26,10 @@ export class DebugCellController implements IDebuggingDelegate {
 	constructor(
 		private readonly debugAdapter: IKernelDebugAdapter,
 		public readonly debugCell: NotebookCell,
-		private readonly execution: INotebookKernelExecution
+		private readonly execution: INotebookKernelExecution,
 	) {
 		sendTelemetryEvent(
-			DebuggingTelemetry.successfullyStartedRunAndDebugCell
+			DebuggingTelemetry.successfullyStartedRunAndDebugCell,
 		);
 	}
 
@@ -41,7 +41,7 @@ export class DebugCellController implements IDebuggingDelegate {
 		if (isDebugpyAttachRequest(msg)) {
 			this.trace(
 				"intercept",
-				"debugpyAttach request for subprocess, not supported"
+				"debugpyAttach request for subprocess, not supported",
 			);
 			return true;
 		}
@@ -57,7 +57,7 @@ export class DebugCellController implements IDebuggingDelegate {
 	}
 
 	public async willSendRequest(
-		request: DebugProtocol.Request
+		request: DebugProtocol.Request,
 	): Promise<undefined> {
 		if (request.command === "configurationDone") {
 			await cellDebugSetup(this.execution, this.debugAdapter);

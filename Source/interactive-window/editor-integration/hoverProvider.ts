@@ -4,6 +4,8 @@
 import { inject, injectable, named } from "inversify";
 
 import * as vscode from "vscode";
+import { IKernel, IKernelProvider } from "../../kernels/types";
+import { IJupyterVariables } from "../../kernels/variables/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { raceCancellation } from "../../platform/common/cancellation";
 import {
@@ -12,15 +14,13 @@ import {
 	PYTHON,
 	Telemetry,
 } from "../../platform/common/constants";
-import { traceError } from "../../platform/logging";
 import { IDisposableRegistry } from "../../platform/common/types";
 import { raceTimeout } from "../../platform/common/utils/async";
 import { StopWatch } from "../../platform/common/utils/stopWatch";
+import { traceError } from "../../platform/logging";
 import { sendTelemetryEvent } from "../../telemetry";
-import { IKernel, IKernelProvider } from "../../kernels/types";
-import { IJupyterVariables } from "../../kernels/variables/types";
-import { IInteractiveWindowProvider } from "../types";
 import { getInteractiveCellMetadata } from "../helpers";
+import { IInteractiveWindowProvider } from "../types";
 
 /**
  * Provides hover support in python files based on the state of a jupyter kernel. Files that are
@@ -49,12 +49,12 @@ export class HoverProvider
 		vscode.notebooks.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.kernelProvider.onDidRestartKernel(
 			() => this.runFiles.clear(),
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	public dispose() {
@@ -63,7 +63,7 @@ export class HoverProvider
 		}
 	}
 	private async onDidChangeNotebookCellExecutionState(
-		e: vscode.NotebookCellExecutionStateChangeEvent
+		e: vscode.NotebookCellExecutionStateChangeEvent,
 	): Promise<void> {
 		try {
 			if (e.cell.notebook.notebookType !== InteractiveWindowView) {
@@ -86,19 +86,19 @@ export class HoverProvider
 	public async provideHover(
 		document: vscode.TextDocument,
 		position: vscode.Position,
-		token: vscode.CancellationToken
+		token: vscode.CancellationToken,
 	): Promise<vscode.Hover | undefined> {
 		this.stopWatch.reset();
 		const result = await raceTimeout(
 			300,
-			this.getVariableHover(document, position, token)
+			this.getVariableHover(document, position, token),
 		);
 		sendTelemetryEvent(
 			Telemetry.InteractiveFileTooltipsPerf,
 			{ duration: this.stopWatch.elapsedTime },
 			{
 				isResultNull: !!result,
-			}
+			},
 		);
 		return result;
 	}
@@ -113,7 +113,7 @@ export class HoverProvider
 	private async getVariableHover(
 		document: vscode.TextDocument,
 		position: vscode.Position,
-		token: vscode.CancellationToken
+		token: vscode.CancellationToken,
 	): Promise<vscode.Hover | undefined> {
 		// Make sure to fail as soon as the cancel token is signaled
 		const range = document.getWordRangeAtPosition(position);
@@ -133,9 +133,9 @@ export class HoverProvider
 							this.variableProvider.getVariableProperties!(
 								word,
 								n,
-								token
-							)
-						)
+								token,
+							),
+						),
 					);
 					const entries = Object.entries(attributes || {});
 					if (entries.length > 0) {
@@ -143,7 +143,7 @@ export class HoverProvider
 							entries.reduce(
 								(accum, entry) =>
 									accum + `${entry[0]}: ${entry[1]}\n`,
-								"```\n"
+								"```\n",
 							) + "```";
 						const result = {
 							contents: [new vscode.MarkdownString(asMarkdown)],
@@ -158,8 +158,9 @@ export class HoverProvider
 
 	private getMatchingKernels(document: vscode.TextDocument): IKernel[] {
 		// First see if we have an interactive window who's owner is this document
-		let notebookUri = this.interactiveProvider.get(document.uri)
-			?.notebookUri;
+		const notebookUri = this.interactiveProvider.get(
+			document.uri,
+		)?.notebookUri;
 		if (!notebookUri) {
 			return [];
 		}

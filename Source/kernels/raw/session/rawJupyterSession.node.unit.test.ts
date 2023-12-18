@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ISignal, Signal } from "@lumino/signaling";
 import { IChangedArgs } from "@jupyterlab/coreutils";
 import { Kernel, KernelMessage } from "@jupyterlab/services";
-import { mock, when, instance, verify } from "ts-mockito";
-import { Disposable, Uri } from "vscode";
-import { RawJupyterSessionWrapper } from "./rawJupyterSession.node";
-import { LocalKernelSpecConnectionMetadata } from "../../types";
-import { noop } from "../../../test/core";
+import { ISignal, Signal } from "@lumino/signaling";
 import { assert } from "chai";
-import { dispose } from "../../../platform/common/utils/lifecycle";
+import { instance, mock, verify, when } from "ts-mockito";
+import { Disposable, Uri } from "vscode";
 import { IDisposable } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
+import { noop } from "../../../test/core";
+import { LocalKernelSpecConnectionMetadata } from "../../types";
+import { RawJupyterSessionWrapper } from "./rawJupyterSession.node";
 import { RawSessionConnection } from "./rawSessionConnection.node";
 
 suite("Raw Jupyter Session Wrapper", () => {
@@ -29,10 +29,10 @@ suite("Raw Jupyter Session Wrapper", () => {
 		when(session.dispose()).thenReturn();
 		when(session.kernel).thenReturn(instance(kernel));
 		const sessionDisposed = new Signal<RawSessionConnection, void>(
-			instance(session)
+			instance(session),
 		);
 		const sessionPropertyChanged = new Signal<RawSessionConnection, "path">(
-			instance(session)
+			instance(session),
 		);
 		const sessionIOPubMessage = new Signal<
 			RawSessionConnection,
@@ -63,18 +63,18 @@ suite("Raw Jupyter Session Wrapper", () => {
 		when(session.iopubMessage).thenReturn(sessionIOPubMessage);
 		when(session.kernelChanged).thenReturn(sessionKernelChanged);
 		when(session.statusChanged).thenReturn(
-			new Signal<RawSessionConnection, Kernel.Status>(instance(session))
+			new Signal<RawSessionConnection, Kernel.Status>(instance(session)),
 		);
 		when(session.unhandledMessage).thenReturn(sessionUnhandledMessage);
 		when(session.connectionStatusChanged).thenReturn(
-			sessionConnectionStatusChanged
+			sessionConnectionStatusChanged,
 		);
 		when(session.anyMessage).thenReturn(sessionAnyMessage);
 		when(session.isDisposed).thenReturn(false);
 		when(kernel.status).thenReturn("idle");
 		when(kernel.connectionStatus).thenReturn("connected");
 		when(kernel.statusChanged).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>())
+			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>()),
 		);
 		when(kernel.iopubMessage).thenReturn(
 			instance(
@@ -83,8 +83,8 @@ suite("Raw Jupyter Session Wrapper", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 					>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.anyMessage).thenReturn({
 			connect: noop,
@@ -97,29 +97,29 @@ suite("Raw Jupyter Session Wrapper", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IMessage<KernelMessage.MessageType>
 					>
-				>()
-			)
+				>(),
+			),
 		);
 		when(kernel.disposed).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, void>>())
+			instance(mock<ISignal<Kernel.IKernelConnection, void>>()),
 		);
 		when(kernel.connectionStatusChanged).thenReturn(
 			instance(
 				mock<
 					ISignal<Kernel.IKernelConnection, Kernel.ConnectionStatus>
-				>()
-			)
+				>(),
+			),
 		);
 		disposables.push(
-			new Disposable(() => Signal.disconnectAll(instance(session)))
+			new Disposable(() => Signal.disconnectAll(instance(session))),
 		);
 		disposables.push(
-			new Disposable(() => Signal.disconnectAll(instance(kernel)))
+			new Disposable(() => Signal.disconnectAll(instance(kernel))),
 		);
 		sessionWrapper = new RawJupyterSessionWrapper(
 			instance(session),
 			Uri.file("one.ipynb"),
-			kernelConnectionMetadata
+			kernelConnectionMetadata,
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));

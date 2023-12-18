@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export function formatErrorForLogging(error: Error | string): string {
-	let message: string = "";
+	let message = "";
 	if (typeof error === "string") {
 		message = error;
 	} else {

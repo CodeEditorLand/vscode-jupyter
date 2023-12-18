@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as vscode from "vscode";
-import { IApplicationEnvironment } from "./types";
 import { inject, injectable } from "inversify";
+import * as vscode from "vscode";
 import { IExtensionContext } from "../types";
+import { IApplicationEnvironment } from "./types";
 
 /**
  * Wrapper around the vscode.env object and some other properties related to the VS code instance.

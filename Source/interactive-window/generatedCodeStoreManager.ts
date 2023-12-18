@@ -7,8 +7,8 @@ import { IKernel, IKernelProvider } from "../kernels/types";
 import { IControllerRegistration } from "../notebooks/controllers/types";
 import { IExtensionSyncActivationService } from "../platform/activation/types";
 import { InteractiveWindowView } from "../platform/common/constants";
-import { dispose } from "../platform/common/utils/lifecycle";
 import { IDisposable, IDisposableRegistry } from "../platform/common/types";
+import { dispose } from "../platform/common/utils/lifecycle";
 import {
 	ICodeGeneratorFactory,
 	IGeneratedCodeStorageFactory,
@@ -42,12 +42,12 @@ export class GeneratedCodeStorageManager
 		this.kernelProvider.onDidCreateKernel(
 			this.onDidCreateKernel,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.controllers.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private onNotebookControllerSelected({
@@ -75,7 +75,7 @@ export class GeneratedCodeStorageManager
 				this.codeGeneratorFactory.getOrCreate(notebook).reset();
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

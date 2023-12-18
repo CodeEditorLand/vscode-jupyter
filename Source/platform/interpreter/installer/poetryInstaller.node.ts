@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
+import { Uri } from "vscode";
+import { IConfigurationService } from "../../common/types";
+import { IServiceContainer } from "../../ioc/types";
 import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../pythonEnvironments/info";
-import { IConfigurationService } from "../../common/types";
+import { getEnvironmentType } from "../helpers";
 import { getInterpreterWorkspaceFolder } from "./helpers";
-import { IServiceContainer } from "../../ioc/types";
 import { ExecutionInstallArgs, ModuleInstaller } from "./moduleInstaller.node";
 import { isPoetryEnvironmentRelatedToFolder } from "./poetry.node";
 import { ModuleInstallerType } from "./types";
-import { Environment } from "@vscode/python-extension";
-import { Uri } from "vscode";
-import { getEnvironmentType } from "../helpers";
 
 export const poetryName = "poetry";
 
@@ -52,7 +52,7 @@ export class PoetryInstaller extends ModuleInstaller {
 	}
 
 	public async isSupported(
-		interpreter: PythonEnvironment | Environment
+		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
 		if (
 			("executable" in interpreter
@@ -72,7 +72,7 @@ export class PoetryInstaller extends ModuleInstaller {
 			return isPoetryEnvironmentRelatedToFolder(
 				executable.fsPath,
 				folder.fsPath,
-				this.configurationService.getSettings(undefined).poetryPath
+				this.configurationService.getSettings(undefined).poetryPath,
 			);
 		}
 
@@ -81,7 +81,7 @@ export class PoetryInstaller extends ModuleInstaller {
 
 	protected async getExecutionArgs(
 		moduleName: string,
-		interpreter: PythonEnvironment | Environment
+		interpreter: PythonEnvironment | Environment,
 	): Promise<ExecutionInstallArgs> {
 		const execPath =
 			this.configurationService.getSettings(undefined).poetryPath;

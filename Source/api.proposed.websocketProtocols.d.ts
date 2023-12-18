@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 // @ts-ignore Bogus import required for compiler to work
-import type { CancellationToken } from "vscode";
 
 declare module "./api" {
 	/**

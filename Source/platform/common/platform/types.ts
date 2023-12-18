@@ -40,7 +40,7 @@ export interface IFileSystem {
 	copy(
 		source: vscode.Uri,
 		destination: vscode.Uri,
-		options?: { overwrite: boolean }
+		options?: { overwrite: boolean },
 	): Promise<void>;
 	createDirectory(uri: vscode.Uri): Promise<void>;
 	delete(uri: vscode.Uri): Promise<void>;

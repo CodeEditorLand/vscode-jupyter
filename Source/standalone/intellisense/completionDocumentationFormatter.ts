@@ -15,7 +15,7 @@ const formatters = new Map<
 
 export function convertDocumentationToMarkdown(
 	documentation: string,
-	language: string
+	language: string,
 ): MarkdownString | string {
 	const formatter = formatters.get(language.toLowerCase());
 	return formatter ? formatter(documentation) : documentation;
@@ -33,7 +33,7 @@ const sectionHeaders = [
 	"Subclasses:",
 ];
 function convertPythonDocumentationToMarkdown(
-	documentation: string
+	documentation: string,
 ): MarkdownString | string {
 	const lines = splitLines(documentation, {
 		trim: false,
@@ -52,7 +52,7 @@ function convertPythonDocumentationToMarkdown(
 		if (index === 0) {
 			const signature = ["Signature:", "Init signature:"].find(
 				(signature) =>
-					line.toLowerCase().startsWith(signature.toLowerCase())
+					line.toLowerCase().startsWith(signature.toLowerCase()),
 			);
 			if (signature) {
 				codeBlockStarted = true;
@@ -85,7 +85,7 @@ function convertPythonDocumentationToMarkdown(
 			return;
 		}
 		const possibleSection = sectionHeaders.find((section) =>
-			line.trim().toLowerCase().startsWith(section.toLowerCase())
+			line.trim().toLowerCase().startsWith(section.toLowerCase()),
 		);
 		if (possibleSection && !processedSections.has(possibleSection)) {
 			currentSection = possibleSection.toLowerCase();
@@ -241,7 +241,7 @@ const juliaSectionHeaders = [
 	{ section: "Note:", header: "│ Note", nextLine: String.fromCharCode(9474) },
 ];
 function convertJuliaDocumentationToMarkdown(
-	documentation: string
+	documentation: string,
 ): MarkdownString | string {
 	const lines = splitLines(documentation, {
 		trim: false,
@@ -259,7 +259,7 @@ function convertJuliaDocumentationToMarkdown(
 	) {
 		lines.forEach(
 			(line, index) =>
-				(lines[index] = line.trim().length ? line.substring(2) : line)
+				(lines[index] = line.trim().length ? line.substring(2) : line),
 		);
 	}
 	lines.map((line, index) => {
@@ -295,7 +295,7 @@ function convertJuliaDocumentationToMarkdown(
 			}
 		}
 		const possibleSection = juliaSectionHeaders.find((section) =>
-			line.trim().toLowerCase().startsWith(section.header.toLowerCase())
+			line.trim().toLowerCase().startsWith(section.header.toLowerCase()),
 		);
 		if (
 			possibleSection &&
@@ -323,7 +323,7 @@ function convertJuliaDocumentationToMarkdown(
 						(l) =>
 							l.trim().length === 0 ||
 							l.trim().startsWith("|") ||
-							l.trim().startsWith(String.fromCharCode(9474))
+							l.trim().startsWith(String.fromCharCode(9474)),
 					)
 			) {
 				currentSection = "";
@@ -341,7 +341,7 @@ function convertJuliaDocumentationToMarkdown(
 		}
 		if (currentSection === "note:") {
 			markdownStringLines.push(
-				line.trim() ? line.trim().substring(1) : ""
+				line.trim() ? line.trim().substring(1) : "",
 			);
 			return;
 		}
@@ -362,7 +362,7 @@ function convertJuliaDocumentationToMarkdown(
 }
 
 function convertRDocumentationToMarkdown(
-	documentation: string
+	documentation: string,
 ): MarkdownString | string {
 	const lines = splitLines(documentation, {
 		trim: false,
@@ -374,7 +374,7 @@ function convertRDocumentationToMarkdown(
 	lines.forEach(
 		(line, index) =>
 			(lines[index] =
-				line.indexOf("     ") === 0 ? line.substring(5) : line)
+				line.indexOf("     ") === 0 ? line.substring(5) : line),
 	);
 	let currentSection = "";
 	let codeBlockStarted = false;
@@ -419,7 +419,7 @@ function convertRDocumentationToMarkdown(
 		}
 		if (currentSection === "note:") {
 			markdownStringLines.push(
-				line.trim() ? line.trim().substring(1) : ""
+				line.trim() ? line.trim().substring(1) : "",
 			);
 			return;
 		}

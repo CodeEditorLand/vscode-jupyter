@@ -23,11 +23,11 @@ export class RemoteJupyterServerUriProviderError extends BaseError {
 			handle: string;
 			extensionId: string;
 		},
-		public readonly originalError: Error
+		public readonly originalError: Error,
 	) {
 		super(
 			"remotejupyterserveruriprovider",
-			originalError.message || originalError.toString()
+			originalError.message || originalError.toString(),
 		);
 	}
 }

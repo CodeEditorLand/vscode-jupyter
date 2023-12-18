@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
-import { ExecutionInstallArgs, ModuleInstaller } from "./moduleInstaller.node";
-import * as path from "../../vscode-path/path";
-import { _SCRIPTS_DIR } from "../internal/scripts/index.node";
-import {
-	ModuleInstallerType,
-	ModuleInstallFlags,
-	Product,
-	IInstaller,
-} from "./types";
+import { workspace } from "vscode";
+import { IServiceContainer } from "../../ioc/types";
 import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../pythonEnvironments/info";
-import { IServiceContainer } from "../../ioc/types";
-import { translateProductToModule } from "./utils";
-import { IPythonExecutionFactory } from "../types.node";
-import { getPinnedPackages } from "./pinnedPackages";
-import { Environment } from "@vscode/python-extension";
+import * as path from "../../vscode-path/path";
 import { getEnvironmentType } from "../helpers";
-import { workspace } from "vscode";
+import { _SCRIPTS_DIR } from "../internal/scripts/index.node";
+import { IPythonExecutionFactory } from "../types.node";
+import { ExecutionInstallArgs, ModuleInstaller } from "./moduleInstaller.node";
+import { getPinnedPackages } from "./pinnedPackages";
+import {
+	IInstaller,
+	ModuleInstallFlags,
+	ModuleInstallerType,
+	Product,
+} from "./types";
+import { translateProductToModule } from "./utils";
 
 /**
  * Installer for pip. Default installer for most everything.
@@ -50,7 +50,7 @@ export class PipInstaller extends ModuleInstaller {
 		return 0;
 	}
 	public async isSupported(
-		interpreter: PythonEnvironment | Environment
+		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
 		const envType =
 			"executable" in interpreter
@@ -70,7 +70,7 @@ export class PipInstaller extends ModuleInstaller {
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
-		flags: ModuleInstallFlags = 0
+		flags: ModuleInstallFlags = 0,
 	): Promise<ExecutionInstallArgs> {
 		if (moduleName === translateProductToModule(Product.pip)) {
 			// If `ensurepip` is available, if not, then install pip using the script file.
@@ -106,16 +106,16 @@ export class PipInstaller extends ModuleInstaller {
 		}
 		return {
 			args: ["-m", "pip", ...args, moduleName].concat(
-				getPinnedPackages("pip", moduleName)
+				getPinnedPackages("pip", moduleName),
 			),
 		};
 	}
 	private isPipAvailable(
-		interpreter: PythonEnvironment | Environment
+		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
 		const pythonExecutionFactory =
 			this.serviceContainer.get<IPythonExecutionFactory>(
-				IPythonExecutionFactory
+				IPythonExecutionFactory,
 			);
 		return pythonExecutionFactory
 			.create({ resource: undefined, interpreter })

@@ -9,7 +9,6 @@ import {
 	window,
 	workspace,
 } from "vscode";
-import { sendTelemetryEvent } from "../../telemetry";
 import { Telemetry } from "../../platform/common/constants";
 import { IConfigurationService } from "../../platform/common/types";
 import * as localize from "../../platform/common/utils/localize";
@@ -17,12 +16,13 @@ import { noop } from "../../platform/common/utils/misc";
 import { traceError } from "../../platform/logging";
 import { ProgressReporter } from "../../platform/progress/progressReporter";
 import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
+import { sendTelemetryEvent } from "../../telemetry";
 import { ExportFileOpener } from "./exportFileOpener";
-import { ExportFormat, IExportUtil, IFileConverter } from "./types";
-import { ExportToPython } from "./exportToPython";
-import { ExportToPDF } from "./exportToPDF";
 import { ExportToHTML } from "./exportToHTML";
+import { ExportToPDF } from "./exportToPDF";
+import { ExportToPython } from "./exportToPython";
 import { ExportToPythonPlain } from "./exportToPythonPlain";
+import { ExportFormat, IExportUtil, IFileConverter } from "./types";
 
 /**
  * Converts different file formats to others. Used in export.
@@ -39,7 +39,7 @@ export abstract class FileConverterBase implements IFileConverter {
 	async importIpynb(source: Uri): Promise<void> {
 		const reporter = this.progressReporter.createProgressIndicator(
 			localize.DataScience.importingIpynb,
-			true
+			true,
 		);
 		try {
 			// Open the source as a NotebookDocument, note that this doesn't actually show an editor, and we don't need
@@ -49,7 +49,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				ExportFormat.python,
 				nbDoc,
 				undefined,
-				reporter.token
+				reporter.token,
 			);
 		} finally {
 			reporter.dispose();
@@ -60,11 +60,11 @@ export abstract class FileConverterBase implements IFileConverter {
 		format: ExportFormat,
 		sourceDocument: NotebookDocument,
 		defaultFileName?: string | undefined,
-		candidateInterpreter?: PythonEnvironment
+		candidateInterpreter?: PythonEnvironment,
 	): Promise<undefined> {
 		const reporter = this.progressReporter.createProgressIndicator(
 			localize.DataScience.exportingToFormat(format.toString()),
-			true
+			true,
 		);
 
 		try {
@@ -73,7 +73,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				sourceDocument,
 				defaultFileName,
 				reporter.token,
-				candidateInterpreter
+				candidateInterpreter,
 			);
 		} finally {
 			reporter.dispose();
@@ -93,13 +93,13 @@ export abstract class FileConverterBase implements IFileConverter {
 		sourceDocument: NotebookDocument,
 		defaultFileName: string | undefined,
 		token: CancellationToken,
-		candidateInterpreter?: PythonEnvironment
+		candidateInterpreter?: PythonEnvironment,
 	): Promise<void> {
 		try {
-			let target = await this.exportUtil.getTargetFile(
+			const target = await this.exportUtil.getTargetFile(
 				format,
 				sourceDocument.uri,
-				defaultFileName
+				defaultFileName,
 			);
 			if (!target) {
 				return;
@@ -109,7 +109,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				sourceDocument,
 				target,
 				token,
-				candidateInterpreter
+				candidateInterpreter,
 			);
 		} catch (e) {
 			traceError("Export failed", e);
@@ -122,7 +122,7 @@ export abstract class FileConverterBase implements IFileConverter {
 			}
 
 			this.showExportFailed(
-				localize.DataScience.exportFailedGeneralMessage
+				localize.DataScience.exportFailedGeneralMessage,
 			);
 		}
 	}
@@ -132,7 +132,7 @@ export abstract class FileConverterBase implements IFileConverter {
 		sourceDocument: NotebookDocument,
 		target: Uri,
 		token: CancellationToken,
-		candidateInterpreter?: PythonEnvironment
+		candidateInterpreter?: PythonEnvironment,
 	) {
 		// For web, we perform plain export for Python
 		if (
@@ -145,7 +145,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				format,
 				sourceDocument,
 				target,
-				token
+				token,
 			);
 		} else {
 			await this.performNbConvertExport(
@@ -153,7 +153,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				format,
 				target,
 				candidateInterpreter,
-				token
+				token,
 			);
 		}
 
@@ -173,7 +173,7 @@ export abstract class FileConverterBase implements IFileConverter {
 		format: ExportFormat,
 		sourceDocument: NotebookDocument,
 		target: Uri,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<Uri | undefined> {
 		if (target) {
 			switch (format) {
@@ -181,7 +181,7 @@ export abstract class FileConverterBase implements IFileConverter {
 					await new ExportToPythonPlain().export(
 						sourceDocument,
 						target,
-						cancelToken
+						cancelToken,
 					);
 					break;
 			}
@@ -195,7 +195,7 @@ export abstract class FileConverterBase implements IFileConverter {
 		format: ExportFormat,
 		target: Uri,
 		interpreter: PythonEnvironment | undefined,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	) {
 		try {
 			return await this.exportToFormat(
@@ -203,7 +203,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				target,
 				format,
 				interpreter,
-				cancelToken
+				cancelToken,
 			);
 		} finally {
 		}
@@ -214,7 +214,7 @@ export abstract class FileConverterBase implements IFileConverter {
 		target: Uri,
 		format: ExportFormat,
 		interpreter: PythonEnvironment | undefined,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	) {
 		switch (format) {
 			case ExportFormat.python:
@@ -222,7 +222,7 @@ export abstract class FileConverterBase implements IFileConverter {
 					sourceDocument,
 					target,
 					interpreter!,
-					cancelToken
+					cancelToken,
 				);
 
 			case ExportFormat.pdf:
@@ -230,7 +230,7 @@ export abstract class FileConverterBase implements IFileConverter {
 					sourceDocument,
 					target,
 					interpreter!,
-					cancelToken
+					cancelToken,
 				);
 
 			case ExportFormat.html:
@@ -238,7 +238,7 @@ export abstract class FileConverterBase implements IFileConverter {
 					sourceDocument,
 					target,
 					interpreter!,
-					cancelToken
+					cancelToken,
 				);
 
 			default:
@@ -248,7 +248,7 @@ export abstract class FileConverterBase implements IFileConverter {
 
 	private showExportFailed(msg: string) {
 		void window.showErrorMessage(
-			`${localize.DataScience.failedExportMessage} ${msg}`
+			`${localize.DataScience.failedExportMessage} ${msg}`,
 		);
 	}
 }

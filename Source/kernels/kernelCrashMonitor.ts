@@ -7,13 +7,13 @@ import { NotebookCell, window } from "vscode";
 import { IExtensionSyncActivationService } from "../platform/activation/types";
 import { Telemetry } from "../platform/common/constants";
 import { IDisposableRegistry } from "../platform/common/types";
+import { swallowExceptions } from "../platform/common/utils/decorators";
 import { DataScience } from "../platform/common/utils/localize";
 import { noop } from "../platform/common/utils/misc";
-import { sendKernelTelemetryEvent } from "./telemetry/sendKernelTelemetryEvent";
 import { endCellAndDisplayErrorsInCell } from "./execution/helpers";
 import { getDisplayNameOrNameOfKernelConnection } from "./helpers";
+import { sendKernelTelemetryEvent } from "./telemetry/sendKernelTelemetryEvent";
 import { IKernel, IKernelProvider } from "./types";
-import { swallowExceptions } from "../platform/common/utils/decorators";
 
 /**
  * Monitors kernel crashes and on the event of a crash will display the results in the most recent cell.
@@ -35,12 +35,12 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 		this.kernelProvider.onKernelStatusChanged(
 			this.onKernelStatusChanged,
 			this,
-			this.disposableRegistry
+			this.disposableRegistry,
 		);
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposableRegistry
+			this.disposableRegistry,
 		);
 	}
 	private onDidStartKernel(kernel: IKernel) {
@@ -50,7 +50,7 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 			.onPreExecute(
 				(cell) => this.lastExecutedCellPerKernel.set(kernel, cell),
 				this,
-				this.disposableRegistry
+				this.disposableRegistry,
 			);
 	}
 
@@ -77,9 +77,9 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 				.showErrorMessage(
 					DataScience.kernelDiedWithoutError(
 						getDisplayNameOrNameOfKernelConnection(
-							kernel.kernelConnectionMetadata
-						)
-					)
+							kernel.kernelConnectionMetadata,
+						),
+					),
 				)
 				.then(noop, noop);
 
@@ -97,9 +97,9 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 				.showErrorMessage(
 					DataScience.kernelDiedWithoutErrorAndAutoRestarting(
 						getDisplayNameOrNameOfKernelConnection(
-							kernel.kernelConnectionMetadata
-						)
-					)
+							kernel.kernelConnectionMetadata,
+						),
+					),
 				)
 				.then(noop, noop);
 
@@ -116,7 +116,7 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 			lastExecutedCell,
 			kernel.controller,
 			DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell,
-			false
+			false,
 		);
 	}
 }

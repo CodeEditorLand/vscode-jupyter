@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { WrappedError } from "../../platform/errors/types";
 import { isTestExecution } from "../../platform/common/constants";
+import { WrappedError } from "../../platform/errors/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function suppressShutdownErrors(realKernel: any) {

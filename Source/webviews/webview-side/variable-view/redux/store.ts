@@ -10,7 +10,7 @@ export function createStore(
 	skipDefault: boolean,
 	baseTheme: string,
 	testMode: boolean,
-	postOffice: PostOffice
+	postOffice: PostOffice,
 ) {
 	return ReduxCommon.createStore(
 		skipDefault,
@@ -21,6 +21,6 @@ export function createStore(
 		true /* Start with variable view open */,
 		reducerMap,
 		postOffice,
-		() => Promise.resolve()
+		() => Promise.resolve(),
 	);
 }

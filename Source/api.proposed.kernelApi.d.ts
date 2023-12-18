@@ -39,7 +39,7 @@ declare module "./api" {
 		 */
 		executeCode(
 			code: string,
-			token: CancellationToken
+			token: CancellationToken,
 		): AsyncIterable<OutputItem[]>;
 	}
 	export interface Kernels {

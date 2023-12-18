@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { injectable } from "inversify";
-import { Resource } from "../types";
-import { BaseWorkspaceService, getRootFolder } from "./workspace.base";
+import { workspace } from "vscode";
 import * as urlPath from "../../vscode-path/resources";
 import { getFilePath } from "../platform/fs-paths";
-import { workspace } from "vscode";
+import { Resource } from "../types";
+import { BaseWorkspaceService, getRootFolder } from "./workspace.base";
 
 /**
  * Web implementation of the workspace service. Computing working directory is different for web.

@@ -12,14 +12,14 @@ import {
 } from "vscode";
 import { traceVerbose } from "../logging";
 import { openInBrowser } from "./net/browser";
-import { Deprecated } from "./utils/localize";
 import {
 	DeprecatedFeatureInfo,
 	DeprecatedSettingAndValue,
-	IFeaturesManager,
 	IFeatureSet,
+	IFeaturesManager,
 	IPersistentStateFactory,
 } from "./types";
+import { Deprecated } from "./utils/localize";
 
 const deprecatedFeatures: DeprecatedFeatureInfo[] = [
 	{
@@ -100,8 +100,8 @@ export class FeatureManager implements IFeaturesManager {
 					commands.registerCommand(
 						cmd,
 						() => this.notifyDeprecation(deprecatedInfo),
-						this
-					)
+						this,
+					),
 				);
 			});
 		}
@@ -111,12 +111,12 @@ export class FeatureManager implements IFeaturesManager {
 	}
 
 	public async notifyDeprecation(
-		deprecatedInfo: DeprecatedFeatureInfo
+		deprecatedInfo: DeprecatedFeatureInfo,
 	): Promise<void> {
 		const notificationPromptEnabled =
 			this.persistentStateFactory.createGlobalPersistentState(
 				deprecatedInfo.doNotDisplayPromptStateKey,
-				true
+				true,
 			);
 		if (!notificationPromptEnabled.value) {
 			return;
@@ -126,7 +126,7 @@ export class FeatureManager implements IFeaturesManager {
 		const option = await window.showInformationMessage(
 			deprecatedInfo.message,
 			moreInfo,
-			doNotShowAgain
+			doNotShowAgain,
 		);
 		if (!option) {
 			return;
@@ -148,7 +148,7 @@ export class FeatureManager implements IFeaturesManager {
 	}
 
 	public checkAndNotifyDeprecatedSetting(
-		deprecatedInfo: DeprecatedFeatureInfo
+		deprecatedInfo: DeprecatedFeatureInfo,
 	) {
 		let notify = false;
 		if (
@@ -161,26 +161,26 @@ export class FeatureManager implements IFeaturesManager {
 				}
 				notify = this.isDeprecatedSettingAndValueUsed(
 					workspace.getConfiguration("jupyter", workspaceFolder.uri),
-					deprecatedInfo.setting!
+					deprecatedInfo.setting!,
 				);
 			});
 		} else {
 			notify = this.isDeprecatedSettingAndValueUsed(
 				workspace.getConfiguration("jupyter"),
-				deprecatedInfo.setting!
+				deprecatedInfo.setting!,
 			);
 		}
 
 		if (notify) {
 			this.notifyDeprecation(deprecatedInfo).catch((ex) =>
-				traceVerbose("Jupyter Extension: notifyDeprecation", ex)
+				traceVerbose("Jupyter Extension: notifyDeprecation", ex),
 			);
 		}
 	}
 
 	public isDeprecatedSettingAndValueUsed(
 		pythonConfig: WorkspaceConfiguration,
-		deprecatedSetting: DeprecatedSettingAndValue
+		deprecatedSetting: DeprecatedSettingAndValue,
 	) {
 		if (!pythonConfig.has(deprecatedSetting.setting)) {
 			return false;
@@ -211,7 +211,7 @@ export class FeatureManager implements IFeaturesManager {
 		}
 		return (
 			deprecatedSetting.values.indexOf(
-				pythonConfig.get<{}>(deprecatedSetting.setting)!
+				pythonConfig.get<{}>(deprecatedSetting.setting)!,
 			) >= 0
 		);
 	}

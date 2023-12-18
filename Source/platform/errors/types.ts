@@ -9,10 +9,7 @@
 export abstract class BaseError extends Error {
 	public stdErr?: string;
 	public isJupyterError = true;
-	constructor(
-		public readonly category: ErrorCategory,
-		message: string
-	) {
+	constructor(public readonly category: ErrorCategory, message: string) {
 		super(message);
 	}
 }
@@ -24,7 +21,7 @@ export class WrappedError extends BaseError {
 	constructor(
 		message: string,
 		public readonly originalException?: Error,
-		category?: ErrorCategory
+		category?: ErrorCategory,
 	) {
 		super(category || getErrorCategory(originalException), message);
 		if (originalException) {

@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import * as path from "../../../platform/vscode-path/path";
 import { Uri, workspace } from "vscode";
 import { IPlatformService } from "../../../platform/common/platform/types";
-import { ITrustedKernelPaths } from "./types";
 import { createDeferred } from "../../../platform/common/utils/async";
+import * as path from "../../../platform/vscode-path/path";
+import { ITrustedKernelPaths } from "./types";
 
 @injectable()
 export class TrustedKernelPaths implements ITrustedKernelPaths {
@@ -40,7 +40,7 @@ export class TrustedKernelPaths implements ITrustedKernelPaths {
 				.includes(
 					this.platform.isWindows
 						? kernelPath.path.toLowerCase()
-						: kernelPath.path
+						: kernelPath.path,
 				)
 		) {
 			return true;

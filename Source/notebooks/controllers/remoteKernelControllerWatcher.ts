@@ -2,19 +2,19 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
+import { CancellationTokenSource } from "vscode";
+import { JupyterServerCollection, JupyterServerProvider } from "../../api";
 import {
-	IJupyterServerUriStorage,
 	IJupyterServerProviderRegistry,
+	IJupyterServerUriStorage,
 } from "../../kernels/jupyter/types";
 import { isLocalConnection } from "../../kernels/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IDisposableRegistry } from "../../platform/common/types";
+import { swallowExceptions } from "../../platform/common/utils/decorators";
 import { noop } from "../../platform/common/utils/misc";
 import { traceWarning } from "../../platform/logging";
 import { IControllerRegistration } from "./types";
-import { JupyterServerCollection, JupyterServerProvider } from "../../api";
-import { CancellationTokenSource } from "vscode";
-import { swallowExceptions } from "../../platform/common/utils/decorators";
 
 /**
  * Tracks 3rd party IJupyterUriProviders and requests URIs from their handles. We store URI information in our
@@ -38,30 +38,30 @@ export class RemoteKernelControllerWatcher
 	) {}
 	activate(): void {
 		this.serverProviderRegistry.jupyterCollections.forEach((collection) =>
-			this.checkExpiredServersInJupyterCollection(collection)
+			this.checkExpiredServersInJupyterCollection(collection),
 		);
 		this.serverProviderRegistry.onDidChangeCollections(
 			({ added, removed }) => {
 				added.forEach((collection) =>
-					this.checkExpiredServersInJupyterCollection(collection)
+					this.checkExpiredServersInJupyterCollection(collection),
 				);
 
 				removed.forEach((collection) =>
 					this.removeControllersBelongingToDisposedProvider(
 						collection.extensionId,
-						collection.id
-					)
+						collection.id,
+					),
 				);
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	@swallowExceptions(
-		"Failed to check what servers were shutdown in Controller Watcher"
+		"Failed to check what servers were shutdown in Controller Watcher",
 	)
 	private async checkExpiredServersInJupyterCollection(
-		collection: JupyterServerCollection
+		collection: JupyterServerCollection,
 	) {
 		if (
 			!this.handledServerProviderChanges.has(collection.serverProvider) &&
@@ -71,10 +71,10 @@ export class RemoteKernelControllerWatcher
 			collection.serverProvider.onDidChangeServers(
 				() =>
 					this.checkExpiredServersInJupyterCollection(
-						collection
+						collection,
 					).catch(noop),
 				this,
-				this.disposables
+				this.disposables,
 			);
 		}
 		const tokenSource = new CancellationTokenSource();
@@ -82,13 +82,13 @@ export class RemoteKernelControllerWatcher
 		try {
 			const currentServers = await Promise.resolve(
 				collection.serverProvider.provideJupyterServers(
-					tokenSource.token
-				)
+					tokenSource.token,
+				),
 			);
 			await this.removeControllersAndUriStorageBelongingToInvalidServers(
 				collection.extensionId,
 				collection.id,
-				(currentServers || []).map((s) => s.id)
+				(currentServers || []).map((s) => s.id),
 			);
 		} finally {
 			tokenSource.dispose();
@@ -97,7 +97,7 @@ export class RemoteKernelControllerWatcher
 	private async removeControllersAndUriStorageBelongingToInvalidServers(
 		extensionId: string,
 		providerId: string,
-		validServerIds: string[]
+		validServerIds: string[],
 	) {
 		const uris = this.uriStorage.all;
 		await Promise.all(
@@ -105,7 +105,7 @@ export class RemoteKernelControllerWatcher
 				.filter(
 					(item) =>
 						item.provider.extensionId === extensionId &&
-						item.provider.id === providerId
+						item.provider.id === providerId,
 				)
 				.map(async (item) => {
 					// Check if this handle is still valid.
@@ -114,7 +114,7 @@ export class RemoteKernelControllerWatcher
 						// Looks like the 3rd party provider has updated its handles and this server is no longer available.
 						await this.uriStorage.remove(item.provider);
 					}
-				})
+				}),
 		);
 
 		this.controllers.registered.forEach((controller) => {
@@ -131,7 +131,7 @@ export class RemoteKernelControllerWatcher
 			) {
 				// Looks like the 3rd party provider has updated its handles and this server is no longer available.
 				traceWarning(
-					`Deleting controller ${controller.id} as it is associated with a server Id that has been removed`
+					`Deleting controller ${controller.id} as it is associated with a server Id that has been removed`,
 				);
 				controller.dispose();
 			}
@@ -139,7 +139,7 @@ export class RemoteKernelControllerWatcher
 	}
 	private removeControllersBelongingToDisposedProvider(
 		extensionId: string,
-		providerId: string
+		providerId: string,
 	) {
 		this.controllers.registered.forEach((controller) => {
 			const connection = controller.connection;
@@ -152,7 +152,7 @@ export class RemoteKernelControllerWatcher
 			}
 			// Looks like the 3rd party provider has updated its handles and this server is no longer available.
 			traceWarning(
-				`Deleting controller ${controller.id} as it is associated with a Provider Id that has been removed`
+				`Deleting controller ${controller.id} as it is associated with a Provider Id that has been removed`,
 			);
 			controller.dispose();
 		});

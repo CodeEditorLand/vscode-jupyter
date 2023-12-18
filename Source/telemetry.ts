@@ -1,17 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Telemetry } from "./platform/common/constants";
-import {
-	CheckboxState,
-	EventName,
-	SliceOperationSource,
-} from "./platform/telemetry/constants";
-import { DebuggingTelemetry } from "./notebooks/debugger/constants";
-import { EnvironmentType } from "./platform/pythonEnvironments/info";
-import { TelemetryErrorProperties } from "./platform/errors/types";
-import { ExportFormat } from "./notebooks/export/types";
+import { IExportedKernelService, Kernel, Kernels } from "./api";
 import {
 	InterruptResult,
 	KernelActionSource,
@@ -20,10 +10,20 @@ import {
 } from "./kernels/types";
 // eslint-disable-next-line
 import { PreferredKernelExactMatchReason } from "./notebooks/controllers/types";
+import { DebuggingTelemetry } from "./notebooks/debugger/constants";
+import { ExportFormat } from "./notebooks/export/types";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Telemetry } from "./platform/common/constants";
 import { ExcludeType, PickType } from "./platform/common/utils/misc";
+import { TelemetryErrorProperties } from "./platform/errors/types";
+import { EnvironmentType } from "./platform/pythonEnvironments/info";
+import {
+	CheckboxState,
+	EventName,
+	SliceOperationSource,
+} from "./platform/telemetry/constants";
 import { SharedPropertyMapping } from "./platform/telemetry/index";
 import { IExtensionApi } from "./standalone/api/api";
-import { IExportedKernelService, Kernel, Kernels } from "./api";
 
 export * from "./platform/telemetry/index";
 export type DurationMeasurement = {
@@ -168,54 +168,54 @@ type GdprEventDefinition<P> = P extends never | undefined
 	: keyof EventPropertiesData<
 				ExcludeType<ExcludeType<P, number>, number | undefined>
 		  > extends never | undefined
-		? IEventData & {
+	  ? IEventData & {
 				measures:
 					| EventPropertiesData<PickType<P, number | undefined>>
 					| EventPropertiesData<PickType<P, number>>;
-			}
-		: keyof (EventPropertiesData<PickType<P, number | undefined>> &
+		  }
+	  : keyof (EventPropertiesData<PickType<P, number | undefined>> &
 					EventPropertiesData<PickType<P, number>>) extends
 					| never
 					| undefined
-			? IEventData & {
+		  ? IEventData & {
 					properties: EventPropertiesData<
 						ExcludeType<ExcludeType<P, number>, number | undefined>
 					>;
-				}
-			: IEventData & {
+			  }
+		  : IEventData & {
 					measures:
 						| EventPropertiesData<PickType<P, number | undefined>>
 						| EventPropertiesData<PickType<P, number>>;
 					properties: EventPropertiesData<
 						ExcludeType<ExcludeType<P, number>, number | undefined>
 					>;
-				};
+			  };
 
 type PropertyMeasureDefinition<P> = P extends never
 	? never
 	: keyof EventPropertiesData<
 				ExcludeType<ExcludeType<P, number>, number | undefined>
 		  > extends never
-		? {
+	  ? {
 				measures:
 					| EventPropertiesData<PickType<P, number | undefined>>
 					| EventPropertiesData<PickType<P, number>>;
-			}
-		: keyof (EventPropertiesData<PickType<P, number | undefined>> &
+		  }
+	  : keyof (EventPropertiesData<PickType<P, number | undefined>> &
 					EventPropertiesData<PickType<P, number>>) extends never
-			? {
+		  ? {
 					properties: EventPropertiesData<
 						ExcludeType<ExcludeType<P, number>, number | undefined>
 					>;
-				}
-			: {
+			  }
+		  : {
 					measures:
 						| EventPropertiesData<PickType<P, number | undefined>>
 						| EventPropertiesData<PickType<P, number>>;
 					properties: EventPropertiesData<
 						ExcludeType<ExcludeType<P, number>, number | undefined>
 					>;
-				};
+			  };
 
 function globallySharedProperties(): PropertyMeasureDefinition<SharedPropertyMapping>["properties"] {
 	return {

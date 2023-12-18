@@ -4,24 +4,28 @@
 /* eslint-disable no-void */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import * as fakeTimers from "@sinonjs/fake-timers";
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
 import { assert } from "chai";
-import * as fakeTimers from "@sinonjs/fake-timers";
+import { anything, instance, mock, verify, when } from "ts-mockito";
 import {
-	NotebookDocument,
+	Disposable,
 	EventEmitter,
 	NotebookController,
+	NotebookDocument,
 	Uri,
-	Disposable,
 } from "vscode";
-import { VSCodeNotebookController } from "./vscodeNotebookController";
+import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
+import { ITrustedKernelPaths } from "../../kernels/raw/finder/types";
 import {
 	IKernel,
 	IKernelProvider,
 	KernelConnectionMetadata,
 	LocalKernelConnectionMetadata,
 } from "../../kernels/types";
-import { anything, instance, mock, verify, when } from "ts-mockito";
+import { IPythonExtensionChecker } from "../../platform/api/types";
+import { PYTHON_LANGUAGE } from "../../platform/common/constants";
+import { IPlatformService } from "../../platform/common/platform/types";
 import {
 	IConfigurationService,
 	IDisposable,
@@ -29,25 +33,21 @@ import {
 	IWatchableJupyterSettings,
 } from "../../platform/common/types";
 import { dispose } from "../../platform/common/utils/lifecycle";
-import { NotebookCellLanguageService } from "../languages/cellLanguageService";
-import { IServiceContainer } from "../../platform/ioc/types";
-import { IJupyterServerProviderRegistry } from "../../kernels/jupyter/types";
-import { IPlatformService } from "../../platform/common/platform/types";
-import { IPythonExtensionChecker } from "../../platform/api/types";
-import { PYTHON_LANGUAGE } from "../../platform/common/constants";
-import { TestNotebookDocument } from "../../test/datascience/notebook/executionHelper";
-import { KernelConnector } from "./kernelConnector";
-import { ITrustedKernelPaths } from "../../kernels/raw/finder/types";
 import { IInterpreterService } from "../../platform/interpreter/contracts";
+import { IServiceContainer } from "../../platform/ioc/types";
 import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
-import { IConnectionDisplayDataProvider } from "./types";
-import { ConnectionDisplayDataProvider } from "./connectionDisplayData.node";
+import { TestNotebookDocument } from "../../test/datascience/notebook/executionHelper";
 import {
 	mockedVSCodeNamespaces,
 	resetVSCodeMocks,
 } from "../../test/vscode-mock";
+import { NotebookCellLanguageService } from "../languages/cellLanguageService";
+import { ConnectionDisplayDataProvider } from "./connectionDisplayData.node";
+import { KernelConnector } from "./kernelConnector";
+import { IConnectionDisplayDataProvider } from "./types";
+import { VSCodeNotebookController } from "./vscodeNotebookController";
 
-suite(`Notebook Controller`, function () {
+suite(`Notebook Controller`, () => {
 	let controller: NotebookController;
 	let kernelConnection: KernelConnectionMetadata;
 	let context: IExtensionContext;
@@ -71,7 +71,7 @@ suite(`Notebook Controller`, function () {
 	let trustedPaths: ITrustedKernelPaths;
 	let displayDataProvider: IConnectionDisplayDataProvider;
 	let interpreterService: IInterpreterService;
-	setup(async function () {
+	setup(async () => {
 		resetVSCodeMocks();
 		disposables.push(new Disposable(() => resetVSCodeMocks()));
 		kernelConnection = mock<KernelConnectionMetadata>();
@@ -94,7 +94,7 @@ suite(`Notebook Controller`, function () {
 		interpreterService = mock<IInterpreterService>();
 		const onDidChangeInterpreters = new EventEmitter<PythonEnvironment[]>();
 		when(interpreterService.onDidChangeInterpreters).thenReturn(
-			onDidChangeInterpreters.event
+			onDidChangeInterpreters.event,
 		);
 		onDidCloseNotebookDocument = new EventEmitter<NotebookDocument>();
 		disposables.push(onDidChangeSelectedNotebooks);
@@ -104,11 +104,11 @@ suite(`Notebook Controller`, function () {
 		disposables.push(new Disposable(() => clock.uninstall()));
 		when(context.extensionUri).thenReturn(Uri.file("extension"));
 		when(controller.onDidChangeSelectedNotebooks).thenReturn(
-			onDidChangeSelectedNotebooks.event
+			onDidChangeSelectedNotebooks.event,
 		);
 		when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn([]);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
 		).thenReturn(onDidCloseNotebookDocument.event);
 		when(
 			mockedVSCodeNamespaces.notebooks.createNotebookController(
@@ -116,8 +116,8 @@ suite(`Notebook Controller`, function () {
 				anything(),
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((_id, _view, _label, _handler) => {
 			// executionHandler = handler;
 			return instance(controller);
@@ -127,22 +127,22 @@ suite(`Notebook Controller`, function () {
 		]);
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(true);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
 		).thenReturn(onDidCloseNotebookDocument.event);
 		when(mockedVSCodeNamespaces.window.visibleNotebookEditors).thenReturn(
-			[]
+			[],
 		);
 		when(
-			mockedVSCodeNamespaces.workspace.applyEdit(anything())
+			mockedVSCodeNamespaces.workspace.applyEdit(anything()),
 		).thenResolve();
 		when(kernelProvider.getOrCreate(anything(), anything())).thenReturn(
-			instance(kernel)
+			instance(kernel),
 		);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(jupyterSettings)
+			instance(jupyterSettings),
 		);
 		when(
-			(kernelConnection as LocalKernelConnectionMetadata).kernelSpec
+			(kernelConnection as LocalKernelConnectionMetadata).kernelSpec,
 		).thenReturn({
 			argv: [],
 			executable: "",
@@ -152,11 +152,11 @@ suite(`Notebook Controller`, function () {
 		});
 		when(extensionChecker.isPythonExtensionInstalled).thenReturn(true);
 		when(kernel.kernelConnectionMetadata).thenReturn(
-			instance(kernelConnection)
+			instance(kernelConnection),
 		);
 		when(kernelConnection.id).thenReturn("1");
 		when(
-			serviceContainer.get<ITrustedKernelPaths>(ITrustedKernelPaths)
+			serviceContainer.get<ITrustedKernelPaths>(ITrustedKernelPaths),
 		).thenReturn(instance(trustedPaths));
 		when(trustedPaths.isTrusted(anything())).thenReturn(true);
 		when(jupyterSettings.disableJupyterAutoStart).thenReturn(false);
@@ -164,7 +164,7 @@ suite(`Notebook Controller`, function () {
 			instance(platform),
 			instance(providerRegistry),
 			disposables,
-			instance(interpreterService)
+			instance(interpreterService),
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -180,11 +180,11 @@ suite(`Notebook Controller`, function () {
 			instance(configService),
 			instance(extensionChecker),
 			instance(serviceContainer),
-			displayDataProvider
+			displayDataProvider,
 		);
 		notebook = new TestNotebookDocument(undefined, viewType);
 	}
-	test("Kernel is created upon selecting a controller", async function () {
+	test("Kernel is created upon selecting a controller", async () => {
 		createController("jupyter-notebook");
 		when(kernelProvider.get(notebook)).thenReturn();
 
@@ -193,7 +193,7 @@ suite(`Notebook Controller`, function () {
 
 		verify(kernelProvider.getOrCreate(anything(), anything())).once();
 	});
-	test("Kernel is not created upon selecting a controller if workspace is not trusted", async function () {
+	test("Kernel is not created upon selecting a controller if workspace is not trusted", async () => {
 		createController("jupyter-notebook");
 		when(kernelProvider.get(notebook)).thenReturn();
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(false);
@@ -203,7 +203,7 @@ suite(`Notebook Controller`, function () {
 
 		verify(kernelProvider.getOrCreate(anything(), anything())).never();
 	});
-	test("Kernel is auto started upon selecting a local controller", async function () {
+	test("Kernel is auto started upon selecting a local controller", async () => {
 		createController("jupyter-notebook");
 		when(kernelConnection.kind).thenReturn("startUsingLocalKernelSpec");
 		when(kernelProvider.get(notebook)).thenReturn();
@@ -218,8 +218,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook)
-			)
+						oldConnectToNotebook),
+			),
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -227,7 +227,7 @@ suite(`Notebook Controller`, function () {
 		verify(kernelProvider.getOrCreate(anything(), anything())).once();
 		assert.isTrue(kernelStarted, "Kernel not started");
 	});
-	test("Kernel is not auto started upon selecting a local controller if kernel path is not trusted", async function () {
+	test("Kernel is not auto started upon selecting a local controller if kernel path is not trusted", async () => {
 		createController("jupyter-notebook");
 		when(kernelConnection.kind).thenReturn("startUsingLocalKernelSpec");
 		when(kernelProvider.get(notebook)).thenReturn();
@@ -243,8 +243,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook)
-			)
+						oldConnectToNotebook),
+			),
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -252,7 +252,7 @@ suite(`Notebook Controller`, function () {
 		verify(kernelProvider.getOrCreate(anything(), anything())).once();
 		assert.isFalse(kernelStarted, "Kernel should not have been started");
 	});
-	test("Kernel is not auto started upon selecting a local controller if auto start is disabled", async function () {
+	test("Kernel is not auto started upon selecting a local controller if auto start is disabled", async () => {
 		createController("jupyter-notebook");
 		when(kernelConnection.kind).thenReturn("startUsingLocalKernelSpec");
 		when(kernelProvider.get(notebook)).thenReturn();
@@ -268,8 +268,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook)
-			)
+						oldConnectToNotebook),
+			),
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -277,7 +277,7 @@ suite(`Notebook Controller`, function () {
 		verify(kernelProvider.getOrCreate(anything(), anything())).once();
 		assert.isFalse(kernelStarted, "Kernel should not have been started");
 	});
-	test("Kernel is not auto started upon selecting a remote kernelspec controller", async function () {
+	test("Kernel is not auto started upon selecting a remote kernelspec controller", async () => {
 		createController("jupyter-notebook");
 		when(kernelConnection.kind).thenReturn("startUsingRemoteKernelSpec");
 		when(kernelProvider.get(notebook)).thenReturn();
@@ -292,8 +292,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook)
-			)
+						oldConnectToNotebook),
+			),
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -301,7 +301,7 @@ suite(`Notebook Controller`, function () {
 		verify(kernelProvider.getOrCreate(anything(), anything())).once();
 		assert.isFalse(kernelStarted, "Kernel should not have been started");
 	});
-	test("Kernel is not auto started upon selecting a remote live kernel controller", async function () {
+	test("Kernel is not auto started upon selecting a remote live kernel controller", async () => {
 		createController("jupyter-notebook");
 		when(kernelConnection.kind).thenReturn("connectToLiveRemoteKernel");
 		when(kernelProvider.get(notebook)).thenReturn();
@@ -316,8 +316,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook)
-			)
+						oldConnectToNotebook),
+			),
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -325,7 +325,7 @@ suite(`Notebook Controller`, function () {
 		verify(kernelProvider.getOrCreate(anything(), anything())).once();
 		assert.isFalse(kernelStarted, "Kernel should not have been started");
 	});
-	test("Update notebook metadata upon selecting a controller", async function () {
+	test("Update notebook metadata upon selecting a controller", async () => {
 		createController("jupyter-notebook");
 		when(kernelConnection.kind).thenReturn("connectToLiveRemoteKernel");
 		when(kernelProvider.get(notebook)).thenReturn();

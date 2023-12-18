@@ -3,8 +3,8 @@
 
 import { inject, injectable } from "inversify";
 import { ExtensionMode } from "vscode";
-import { isCI } from "../constants";
 import { traceError } from "../../logging";
+import { isCI } from "../constants";
 import { IExtensionContext } from "../types";
 import { IEncryptedStorage } from "./types";
 
@@ -24,7 +24,7 @@ export class EncryptedStorage implements IEncryptedStorage {
 	public async store(
 		service: string,
 		key: string,
-		value: string | undefined
+		value: string | undefined,
 	): Promise<void> {
 		// On CI we don't need to use keytar for testing (else it hangs).
 		if (
@@ -35,22 +35,22 @@ export class EncryptedStorage implements IEncryptedStorage {
 			return;
 		}
 
-		if (!value) {
+		if (value) {
+			await this.extensionContext.secrets.store(
+				`${service}.${key}`,
+				value,
+			);
+		} else {
 			try {
 				await this.extensionContext.secrets.delete(`${service}.${key}`);
 			} catch (e) {
 				traceError(e);
 			}
-		} else {
-			await this.extensionContext.secrets.store(
-				`${service}.${key}`,
-				value
-			);
 		}
 	}
 	public async retrieve(
 		service: string,
-		key: string
+		key: string,
 	): Promise<string | undefined> {
 		// On CI we don't need to use keytar for testing (else it hangs).
 		if (
@@ -62,7 +62,7 @@ export class EncryptedStorage implements IEncryptedStorage {
 		try {
 			// eslint-disable-next-line
 			const val = await this.extensionContext.secrets.get(
-				`${service}.${key}`
+				`${service}.${key}`,
 			);
 			return val;
 		} catch (e) {

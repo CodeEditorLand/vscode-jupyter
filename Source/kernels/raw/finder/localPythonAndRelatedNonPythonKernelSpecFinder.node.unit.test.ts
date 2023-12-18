@@ -2,41 +2,41 @@
 // Licensed under the MIT License.
 
 import * as fakeTimers from "@sinonjs/fake-timers";
+import { assert } from "chai";
 import * as sinon from "sinon";
-import { Disposable, Memento, Uri, EventEmitter } from "vscode";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
+import { Disposable, EventEmitter, Memento, Uri } from "vscode";
+import {
+	deserializePythonEnvironment,
+	serializePythonEnvironment,
+} from "../../../platform/api/pythonApi";
 import { IPythonExtensionChecker } from "../../../platform/api/types";
 import { IApplicationEnvironment } from "../../../platform/common/application/types";
-import { dispose } from "../../../platform/common/utils/lifecycle";
+import { PYTHON_LANGUAGE } from "../../../platform/common/constants";
+import { IFileSystemNode } from "../../../platform/common/platform/types.node";
 import { IDisposable } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
+import { ResourceMap } from "../../../platform/common/utils/map";
+import { noop } from "../../../platform/common/utils/misc";
 import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { traceInfo } from "../../../platform/logging";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import { createEventHandler } from "../../../test/common";
+import { sleep } from "../../../test/core";
+import { uriEquals } from "../../../test/datascience/helpers";
+import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
+import { createInterpreterKernelSpec, getKernelId } from "../../helpers";
 import {
 	IJupyterKernelSpec,
 	LocalKernelSpecConnectionMetadata,
 	PythonKernelConnectionMetadata,
 } from "../../types";
+import { localPythonKernelsCacheKey } from "./interpreterKernelSpecFinderHelper.node";
+import { JupyterPaths, baseKernelPath } from "./jupyterPaths.node";
+import { LocalKernelSpecFinder } from "./localKernelSpecFinderBase.node";
 import { LocalKnownPathKernelSpecFinder } from "./localKnownPathKernelSpecFinder.node";
 import { LocalPythonAndRelatedNonPythonKernelSpecFinder } from "./localPythonAndRelatedNonPythonKernelSpecFinder.node";
 import { ITrustedKernelPaths } from "./types";
-import { baseKernelPath, JupyterPaths } from "./jupyterPaths.node";
-import { IFileSystemNode } from "../../../platform/common/platform/types.node";
-import { assert } from "chai";
-import { createEventHandler } from "../../../test/common";
-import { anything, capture, instance, mock, verify, when } from "ts-mockito";
-import { LocalKernelSpecFinder } from "./localKernelSpecFinderBase.node";
-import { PYTHON_LANGUAGE } from "../../../platform/common/constants";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { noop } from "../../../platform/common/utils/misc";
-import { createInterpreterKernelSpec, getKernelId } from "../../helpers";
-import {
-	deserializePythonEnvironment,
-	serializePythonEnvironment,
-} from "../../../platform/api/pythonApi";
-import { uriEquals } from "../../../test/datascience/helpers";
-import { traceInfo } from "../../../platform/logging";
-import { sleep } from "../../../test/core";
-import { localPythonKernelsCacheKey } from "./interpreterKernelSpecFinderHelper.node";
-import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
-import { ResourceMap } from "../../../platform/common/utils/map";
 
 suite(`Local Python and related kernels`, async () => {
 	let finder: LocalPythonAndRelatedNonPythonKernelSpecFinder;
@@ -45,7 +45,7 @@ suite(`Local Python and related kernels`, async () => {
 	let extensionChecker: IPythonExtensionChecker;
 	let kernelSpecsFromKnownLocations: LocalKnownPathKernelSpecFinder;
 	let globalState: Memento;
-	let disposables: IDisposable[] = [];
+	const disposables: IDisposable[] = [];
 	let env: IApplicationEnvironment;
 	let trustedKernels: ITrustedKernelPaths;
 	let clock: fakeTimers.InstalledClock;
@@ -53,9 +53,9 @@ suite(`Local Python and related kernels`, async () => {
 	let onDidChangeKernelsFromKnownLocations: EventEmitter<void>;
 	let onDidChangeInterpreters: EventEmitter<PythonEnvironment[]>;
 	let onDidRemoveInterpreter: EventEmitter<{ id: string }>;
-	let tempDirForKernelSpecs = Uri.file("/tmp");
-	let findKernelSpecsInPathsReturnValue = new ResourceMap<Uri[]>();
-	let loadKernelSpecReturnValue = new ResourceMap<IJupyterKernelSpec>();
+	const tempDirForKernelSpecs = Uri.file("/tmp");
+	const findKernelSpecsInPathsReturnValue = new ResourceMap<Uri[]>();
+	const loadKernelSpecReturnValue = new ResourceMap<IJupyterKernelSpec>();
 	const globalKernelRootPath = Uri.file("root");
 	const pythonKernelSpec = PythonKernelConnectionMetadata.create({
 		id: "python",
@@ -95,7 +95,7 @@ suite(`Local Python and related kernels`, async () => {
 			specFile: Uri.joinPath(
 				globalKernelRootPath,
 				"python",
-				"kernel.json"
+				"kernel.json",
 			).fsPath,
 		},
 	});
@@ -118,7 +118,7 @@ suite(`Local Python and related kernels`, async () => {
 				specFile: Uri.joinPath(
 					globalKernelRootPath,
 					"unknown",
-					"kernel.json"
+					"kernel.json",
 				).fsPath,
 			},
 		});
@@ -157,7 +157,7 @@ suite(`Local Python and related kernels`, async () => {
 	const cachedVenvInterpreterWithOlderVersionOfPython = {
 		...deserializePythonEnvironment(
 			serializePythonEnvironment(venvInterpreter),
-			venvInterpreter.id
+			venvInterpreter.id,
 		)!,
 		version: { major: 3, minor: 8, patch: 0, raw: "3.8.0" },
 	};
@@ -186,37 +186,37 @@ suite(`Local Python and related kernels`, async () => {
 		loadKernelSpecReturnValue.clear();
 		when(trustedKernels.isTrusted(anything())).thenReturn(true);
 		when(globalState.get(anything(), anything())).thenCall(
-			(_, defaultValue) => defaultValue
+			(_, defaultValue) => defaultValue,
 		);
 		when(globalState.update(anything(), anything())).thenResolve();
 		when(interpreterService.onDidChangeInterpreters).thenReturn(
-			onDidChangeInterpreters.event
+			onDidChangeInterpreters.event,
 		);
 		when(interpreterService.onDidRemoveInterpreter).thenReturn(
-			onDidRemoveInterpreter.event
+			onDidRemoveInterpreter.event,
 		);
 		when(interpreterService.getActiveInterpreter()).thenResolve();
 		when(interpreterService.getActiveInterpreter(anything())).thenResolve();
 		when(interpreterService.status).thenReturn("refreshing");
 		when(kernelSpecsFromKnownLocations.kernels).thenReturn([]);
 		when(kernelSpecsFromKnownLocations.onDidChangeKernels).thenReturn(
-			onDidChangeKernelsFromKnownLocations.event
+			onDidChangeKernelsFromKnownLocations.event,
 		);
 		when(env.extensionVersion).thenReturn("1");
 		when(fs.exists(anything())).thenResolve(true);
 		when(jupyterPaths.getKernelSpecTempRegistrationFolder()).thenResolve(
-			tempDirForKernelSpecs
+			tempDirForKernelSpecs,
 		);
 		when(jupyterPaths.getKernelSpecRootPaths(anything())).thenResolve([]);
 		when(jupyterPaths.getKernelSpecRootPath()).thenResolve(
-			globalKernelRootPath
+			globalKernelRootPath,
 		);
 		when(mockedVSCodeNamespaces.workspace.workspaceFolders).thenReturn([]);
 
 		// Initialize the kernel specs (test data).
 		let kernelSpec = await createInterpreterKernelSpec(
 			venvInterpreter,
-			tempDirForKernelSpecs
+			tempDirForKernelSpecs,
 		);
 		venvPythonKernel = PythonKernelConnectionMetadata.create({
 			id: getKernelId(kernelSpec, venvInterpreter),
@@ -226,14 +226,14 @@ suite(`Local Python and related kernels`, async () => {
 		cachedVenvPythonKernel = PythonKernelConnectionMetadata.create({
 			id: getKernelId(
 				kernelSpec,
-				cachedVenvInterpreterWithOlderVersionOfPython
+				cachedVenvInterpreterWithOlderVersionOfPython,
 			),
 			interpreter: cachedVenvInterpreterWithOlderVersionOfPython,
 			kernelSpec,
 		});
 		kernelSpec = await createInterpreterKernelSpec(
 			condaInterpreter,
-			tempDirForKernelSpecs
+			tempDirForKernelSpecs,
 		);
 		condaKernel = PythonKernelConnectionMetadata.create({
 			id: getKernelId(kernelSpec, condaInterpreter),
@@ -254,22 +254,22 @@ suite(`Local Python and related kernels`, async () => {
 			instance(globalState),
 			disposables,
 			instance(env),
-			instance(trustedKernels)
+			instance(trustedKernels),
 		);
 
 		const findStub = sinon.stub(
 			LocalKernelSpecFinder.prototype,
-			"findKernelSpecsInPaths"
+			"findKernelSpecsInPaths",
 		);
 		findStub.callsFake(
 			async (searchPath) =>
-				findKernelSpecsInPathsReturnValue.get(searchPath) || []
+				findKernelSpecsInPathsReturnValue.get(searchPath) || [],
 		);
 		disposables.push(new Disposable(() => findStub.restore()));
 
 		const loadKernelSpecStub = sinon.stub(
 			LocalKernelSpecFinder.prototype,
-			"loadKernelSpec"
+			"loadKernelSpec",
 		);
 		loadKernelSpecStub.callsFake(async (file, _, interpreter) => {
 			return (
@@ -303,16 +303,16 @@ suite(`Local Python and related kernels`, async () => {
 	test("Nothing found in cache", async () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
-			"onDidChangeKernels"
+			"onDidChangeKernels",
 		);
 		const statues: (typeof finder.status)[] = [];
 		finder.onDidChangeStatus(
 			() => statues.push(finder.status),
 			this,
-			disposables
+			disposables,
 		);
 		when(
-			globalState.get(localPythonKernelsCacheKey(), anything())
+			globalState.get(localPythonKernelsCacheKey(), anything()),
 		).thenCall((_, defaultValue) => defaultValue);
 		finder.activate();
 
@@ -326,13 +326,13 @@ suite(`Local Python and related kernels`, async () => {
 	test("Lists kernels from cache", async () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
-			"onDidChangeKernels"
+			"onDidChangeKernels",
 		);
 		const statues: (typeof finder.status)[] = [];
 		finder.onDidChangeStatus(
 			() => statues.push(finder.status),
 			this,
-			disposables
+			disposables,
 		);
 		const kernelsInCache = {
 			extensionVersion: "1",
@@ -343,7 +343,7 @@ suite(`Local Python and related kernels`, async () => {
 			],
 		};
 		when(
-			globalState.get(localPythonKernelsCacheKey(), anything())
+			globalState.get(localPythonKernelsCacheKey(), anything()),
 		).thenReturn(JSON.stringify(kernelsInCache));
 		finder.activate();
 
@@ -355,7 +355,7 @@ suite(`Local Python and related kernels`, async () => {
 		assert.strictEqual(finder.kernels.length, 3);
 		assert.deepEqual(
 			finder.kernels.map((k) => k.id).sort(),
-			kernelsInCache.kernels.map((k) => k.id).sort()
+			kernelsInCache.kernels.map((k) => k.id).sort(),
 		);
 	});
 	test("Discovers kernels as interpreters", async () => {
@@ -367,10 +367,10 @@ suite(`Local Python and related kernels`, async () => {
 		finder.onDidChangeStatus(
 			() => statues.push(finder.status),
 			this,
-			disposables
+			disposables,
 		);
 		when(
-			globalState.get(localPythonKernelsCacheKey(), anything())
+			globalState.get(localPythonKernelsCacheKey(), anything()),
 		).thenCall((_, defaultValue) => defaultValue);
 		finder.activate();
 
@@ -392,7 +392,7 @@ suite(`Local Python and related kernels`, async () => {
 		]);
 		when(trustedKernels.isTrusted(anything())).thenReturn(false);
 		when(interpreterService.getInterpreterDetails(anything())).thenResolve(
-			undefined
+			undefined,
 		);
 
 		finder.activate();
@@ -404,8 +404,8 @@ suite(`Local Python and related kernels`, async () => {
 		assert.strictEqual(
 			uri.fsPath,
 			Uri.file(
-				globalPythonKernelSpecUnknownExecutable.kernelSpec.specFile!
-			).fsPath
+				globalPythonKernelSpecUnknownExecutable.kernelSpec.specFile!,
+			).fsPath,
 		);
 		verify(interpreterService.getInterpreterDetails(anything())).never();
 	});
@@ -423,14 +423,14 @@ suite(`Local Python and related kernels`, async () => {
 		]);
 		when(trustedKernels.isTrusted(anything())).thenReturn(true);
 		when(
-			interpreterService.getInterpreterDetails(anything(), anything())
+			interpreterService.getInterpreterDetails(anything(), anything()),
 		).thenResolve(undefined);
 
 		finder.activate();
 		await clock.runAllAsync();
 
 		const uriOfUnknownExecutable = Uri.file(
-			globalPythonKernelSpecUnknownExecutable.kernelSpec.argv[0]
+			globalPythonKernelSpecUnknownExecutable.kernelSpec.argv[0],
 		);
 
 		// Verify we checked whether its trusted & attempted to read interpreter details.
@@ -439,16 +439,16 @@ suite(`Local Python and related kernels`, async () => {
 				uriEquals(
 					Uri.file(
 						globalPythonKernelSpecUnknownExecutable.kernelSpec
-							.specFile!
-					)
-				)
-			)
+							.specFile!,
+					),
+				),
+			),
 		).atLeast(1);
 		verify(
 			interpreterService.getInterpreterDetails(
 				uriEquals(uriOfUnknownExecutable),
-				anything()
-			)
+				anything(),
+			),
 		).atLeast(1);
 	});
 	test("Get Python Envs as a Kernel", async () => {
@@ -461,7 +461,7 @@ suite(`Local Python and related kernels`, async () => {
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
@@ -471,7 +471,7 @@ suite(`Local Python and related kernels`, async () => {
 
 		assert.deepEqual(finder.kernels, [venvPythonKernel, condaKernel]);
 	});
-	test("Find a matching interpreter for global kernel specs (when path to executable is in argv of kernelspec.json)", async function () {
+	test("Find a matching interpreter for global kernel specs (when path to executable is in argv of kernelspec.json)", async () => {
 		when(kernelSpecsFromKnownLocations.kernels).thenReturn([
 			globalPythonKernelSpec,
 			globalJuliaKernelSpec,
@@ -483,13 +483,13 @@ suite(`Local Python and related kernels`, async () => {
 
 		const spec = await createInterpreterKernelSpec(
 			globalInterpreter,
-			tempDirForKernelSpecs
+			tempDirForKernelSpecs,
 		);
 		const expectedGlobalKernelSpec =
 			LocalKernelSpecConnectionMetadata.create({
 				id: getKernelId(
 					globalPythonKernelSpec.kernelSpec,
-					globalInterpreter
+					globalInterpreter,
 				),
 				kernelSpec: globalPythonKernelSpec.kernelSpec,
 				interpreter: globalInterpreter,
@@ -503,7 +503,7 @@ suite(`Local Python and related kernels`, async () => {
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -513,11 +513,11 @@ suite(`Local Python and related kernels`, async () => {
 		assert.deepEqual(
 			finder.kernels.sort((a, b) => a.id.localeCompare(b.id)),
 			[expectedGlobalKernelSpec, condaKernel, expectedGlobalKernel].sort(
-				(a, b) => a.id.localeCompare(b.id)
-			)
+				(a, b) => a.id.localeCompare(b.id),
+			),
 		);
 	});
-	test("Ignore Gloabl kernelspecs if we cannot find a matching interpreter (when path to executable is in argv of kernelspec.json)", async function () {
+	test("Ignore Gloabl kernelspecs if we cannot find a matching interpreter (when path to executable is in argv of kernelspec.json)", async () => {
 		when(kernelSpecsFromKnownLocations.kernels).thenReturn([
 			globalPythonKernelSpec,
 			globalPythonKernelSpecUnknownExecutable,
@@ -529,13 +529,13 @@ suite(`Local Python and related kernels`, async () => {
 		]);
 		const spec = await createInterpreterKernelSpec(
 			globalInterpreter,
-			tempDirForKernelSpecs
+			tempDirForKernelSpecs,
 		);
 		const expectedGlobalKernelSpec =
 			LocalKernelSpecConnectionMetadata.create({
 				id: getKernelId(
 					globalPythonKernelSpec.kernelSpec,
-					globalInterpreter
+					globalInterpreter,
 				),
 				kernelSpec: globalPythonKernelSpec.kernelSpec,
 				interpreter: globalInterpreter,
@@ -550,15 +550,15 @@ suite(`Local Python and related kernels`, async () => {
 		when(
 			interpreterService.getInterpreterDetails(
 				uriEquals(
-					globalPythonKernelSpecUnknownExecutable.kernelSpec.argv[0]
-				)
-			)
+					globalPythonKernelSpecUnknownExecutable.kernelSpec.argv[0],
+				),
+			),
 		).thenResolve();
 
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -568,22 +568,22 @@ suite(`Local Python and related kernels`, async () => {
 		assert.deepEqual(
 			finder.kernels.sort((a, b) => a.id.localeCompare(b.id)),
 			[expectedGlobalKernelSpec, condaKernel, expectedGlobalKernel].sort(
-				(a, b) => a.id.localeCompare(b.id)
-			)
+				(a, b) => a.id.localeCompare(b.id),
+			),
 		);
 	});
-	test("Get kernels from cache first and override cache with latest Env information from Python Extension", async function () {
+	test("Get kernels from cache first and override cache with latest Env information from Python Extension", async () => {
 		// Cache will have a virtual env of Python for 3.8.0
 		// & later the user updates that same virtual env to 3.10.0 (either by deleting that folder and re-installing a new venv in the same folder or other means)
 		// After we load, we need to ensure we display the new version of 3.10.0
 		// This is something users have done quite a lot in the past.
 		when(
-			globalState.get(localPythonKernelsCacheKey(), anything())
+			globalState.get(localPythonKernelsCacheKey(), anything()),
 		).thenReturn(
 			JSON.stringify({
 				kernels: [cachedVenvPythonKernel],
 				extensionVersion: "1",
-			})
+			}),
 		);
 		when(interpreterService.resolvedEnvironments).thenReturn([]);
 		when(kernelSpecsFromKnownLocations.kernels).thenReturn([]);
@@ -591,7 +591,7 @@ suite(`Local Python and related kernels`, async () => {
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -607,9 +607,9 @@ suite(`Local Python and related kernels`, async () => {
 						interrupt_mode:
 							k.kernelSpec.interrupt_mode || undefined,
 					},
-				})
+				}),
 			),
-			[cachedVenvPythonKernel as any]
+			[cachedVenvPythonKernel as any],
 		);
 
 		// Now lets discover Python environments, and ensure we have 2 kernels, and one of the kernel has the updated Version of Python
@@ -623,7 +623,7 @@ suite(`Local Python and related kernels`, async () => {
 
 		assert.deepEqual(finder.kernels, [venvPythonKernel, condaKernel]);
 	});
-	test("Ensure cache does not override Python Envs retrieved from Python Extension (as the former is older information and latter is more recent)", async function () {
+	test("Ensure cache does not override Python Envs retrieved from Python Extension (as the former is older information and latter is more recent)", async () => {
 		when(interpreterService.resolvedEnvironments).thenReturn([
 			venvInterpreter,
 			condaInterpreter,
@@ -633,19 +633,19 @@ suite(`Local Python and related kernels`, async () => {
 		// After we load, we need to ensure we display the new version of 3.10.0
 		// This is something users have done quite a lot in the past.
 		when(
-			globalState.get(localPythonKernelsCacheKey(), anything())
+			globalState.get(localPythonKernelsCacheKey(), anything()),
 		).thenReturn(
 			JSON.stringify({
 				kernels: [cachedVenvPythonKernel],
 				extensionVersion: "1",
-			})
+			}),
 		);
 		when(kernelSpecsFromKnownLocations.kernels).thenReturn([]);
 
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -655,7 +655,7 @@ suite(`Local Python and related kernels`, async () => {
 		// The cached kernel should not be listed as the Python env returned by Python extension is more recent.
 		assert.deepEqual(finder.kernels, [venvPythonKernel, condaKernel]);
 	});
-	test("Ensure old (non-existent) kernel from cache is no longer listed after its not in the list of Python envs returned by Python extension", async function () {
+	test("Ensure old (non-existent) kernel from cache is no longer listed after its not in the list of Python envs returned by Python extension", async () => {
 		// Python will never return the old Python environment.
 		when(interpreterService.resolvedEnvironments).thenReturn([
 			condaInterpreter,
@@ -664,12 +664,12 @@ suite(`Local Python and related kernels`, async () => {
 		// & later the Python extension no longer returns this Python env in the list of environments
 		// At this point we should not list this kernel as its not a valid environment (not valid because Python doesn't list it anymore).
 		when(
-			globalState.get(localPythonKernelsCacheKey(), anything())
+			globalState.get(localPythonKernelsCacheKey(), anything()),
 		).thenReturn(
 			JSON.stringify({
 				kernels: [venvPythonKernel],
 				extensionVersion: "1",
-			})
+			}),
 		);
 		when(kernelSpecsFromKnownLocations.kernels).thenReturn([]);
 		// Indication that Python is still busy refreshing interpreters
@@ -678,7 +678,7 @@ suite(`Local Python and related kernels`, async () => {
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -712,7 +712,7 @@ suite(`Local Python and related kernels`, async () => {
 					},
 				});
 			}),
-			[venvPythonKernel, condaKernel] as any
+			[venvPythonKernel, condaKernel] as any,
 		);
 
 		// Indication that we've finished discovering interpreters.
@@ -720,13 +720,13 @@ suite(`Local Python and related kernels`, async () => {
 		onDidChangeInterpreters.fire([]);
 		await clock.runAllAsync();
 		await onDidChange.assertFiredAtLeast(
-			numberOfTimesChangeEventTriggered + 1
+			numberOfTimesChangeEventTriggered + 1,
 		);
 
 		// The cached kernel should no longer be listed anymore.
 		assert.deepEqual(finder.kernels, [condaKernel]);
 	});
-	test("Ensure kernels are removed from the list after Python extension triggers a removal of an interpreter", async function () {
+	test("Ensure kernels are removed from the list after Python extension triggers a removal of an interpreter", async () => {
 		// Python will first give us 2 interpreters.
 		when(interpreterService.resolvedEnvironments).thenReturn([
 			venvInterpreter,
@@ -738,7 +738,7 @@ suite(`Local Python and related kernels`, async () => {
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -757,13 +757,13 @@ suite(`Local Python and related kernels`, async () => {
 		onDidChangeInterpreters.fire([]);
 		await clock.runAllAsync();
 		await onDidChange.assertFiredAtLeast(
-			numberOfTimesChangeEventTriggered + 1
+			numberOfTimesChangeEventTriggered + 1,
 		);
 
 		// We should no longer list the venv kernel.
 		assert.deepEqual(finder.kernels, [condaKernel]);
 	});
-	test("Ensure kernels are removed from the list after Python extension triggers a removal of an interpreter (via removed event)", async function () {
+	test("Ensure kernels are removed from the list after Python extension triggers a removal of an interpreter (via removed event)", async () => {
 		// Python will first give us 2 interpreters.
 		when(interpreterService.resolvedEnvironments).thenReturn([
 			venvInterpreter,
@@ -775,7 +775,7 @@ suite(`Local Python and related kernels`, async () => {
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));
 		finder.activate();
@@ -796,7 +796,7 @@ suite(`Local Python and related kernels`, async () => {
 		assert.strictEqual(
 			onDidChange.count,
 			numberOfTimesChangeEventTriggered + 1,
-			"Event not fired"
+			"Event not fired",
 		);
 
 		// We should no longer list the venv kernel.
@@ -811,19 +811,19 @@ suite(`Local Python and related kernels`, async () => {
 		findKernelSpecsInPathsReturnValue.set(
 			Uri.joinPath(
 				Uri.file(condaKernel.interpreter.sysPrefix!),
-				baseKernelPath
+				baseKernelPath,
 			),
-			[Uri.file(javaKernelSpec.kernelSpec.specFile!)]
+			[Uri.file(javaKernelSpec.kernelSpec.specFile!)],
 		);
 		// Java Kernel spec should load and return the kernelspec json.
 		loadKernelSpecReturnValue.set(
 			Uri.file(javaKernelSpec.kernelSpec.specFile!),
-			javaKernelSpec.kernelSpec
+			javaKernelSpec.kernelSpec,
 		);
 		const onDidChange = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables
+			disposables,
 		);
 
 		// We need to have a Kernel Spec that will be started using activated Python environment.
@@ -833,7 +833,7 @@ suite(`Local Python and related kernels`, async () => {
 				kernelSpec: javaKernelSpec.kernelSpec,
 				interpreter: condaInterpreter,
 				id: getKernelId(javaKernelSpec.kernelSpec, condaInterpreter),
-			}
+			},
 		);
 
 		finder.onDidChangeKernels(() => clock.runAllAsync().catch(noop));

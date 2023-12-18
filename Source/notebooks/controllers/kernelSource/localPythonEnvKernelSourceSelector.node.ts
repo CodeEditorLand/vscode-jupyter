@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
 import {
 	CancellationError,
@@ -10,40 +11,39 @@ import {
 	Uri,
 } from "vscode";
 import {
+	createInterpreterKernelSpec,
+	getKernelId,
+} from "../../../kernels/helpers";
+import {
 	ContributedKernelFinderKind,
 	IContributedKernelFinder,
 } from "../../../kernels/internalTypes";
+import { KernelFinder } from "../../../kernels/kernelFinder";
+import { JupyterPaths } from "../../../kernels/raw/finder/jupyterPaths.node";
 import {
 	IKernelFinder,
 	KernelConnectionMetadata,
 	PythonKernelConnectionMetadata,
 } from "../../../kernels/types";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import {
-	IDisposable,
-	IDisposableRegistry,
-} from "../../../platform/common/types";
-import { PythonEnvironmentFilter } from "../../../platform/interpreter/filter/filterService";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { PromiseMonitor } from "../../../platform/common/utils/promises";
-import { JupyterPaths } from "../../../kernels/raw/finder/jupyterPaths.node";
+import { IExtensionSyncActivationService } from "../../../platform/activation/types";
+import { pythonEnvToJupyterEnv } from "../../../platform/api/pythonApi";
 import {
 	IPythonApiProvider,
 	IPythonExtensionChecker,
 } from "../../../platform/api/types";
-import { pythonEnvToJupyterEnv } from "../../../platform/api/pythonApi";
 import {
-	createInterpreterKernelSpec,
-	getKernelId,
-} from "../../../kernels/helpers";
-import { Environment } from "@vscode/python-extension";
-import { noop } from "../../../platform/common/utils/misc";
-import { IExtensionSyncActivationService } from "../../../platform/activation/types";
-import { KernelFinder } from "../../../kernels/kernelFinder";
-import { LocalPythonKernelSelector } from "./localPythonKernelSelector.node";
-import { InputFlowAction } from "../../../platform/common/utils/multiStepInput";
-import { ILocalPythonNotebookKernelSourceSelector } from "../types";
+	IDisposable,
+	IDisposableRegistry,
+} from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { DisposableBase } from "../../../platform/common/utils/lifecycle";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { noop } from "../../../platform/common/utils/misc";
+import { InputFlowAction } from "../../../platform/common/utils/multiStepInput";
+import { PromiseMonitor } from "../../../platform/common/utils/promises";
+import { PythonEnvironmentFilter } from "../../../platform/interpreter/filter/filterService";
+import { ILocalPythonNotebookKernelSourceSelector } from "../types";
+import { LocalPythonKernelSelector } from "./localPythonKernelSelector.node";
 
 export type MultiStepResult<
 	T extends KernelConnectionMetadata = KernelConnectionMetadata,
@@ -71,12 +71,12 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 	private _onDidChangeKernels = this._register(
 		new EventEmitter<{
 			removed?: { id: string }[];
-		}>()
+		}>(),
 	);
 	onDidChangeKernels = this._onDidChangeKernels.event;
 	private _kernels = new Map<string, PythonKernelConnectionMetadata>();
 	private readonly _onDidChangeStatus = this._register(
-		new EventEmitter<void>()
+		new EventEmitter<void>(),
 	);
 	private _status: "idle" | "discovering" = "idle";
 	public get status() {
@@ -115,8 +115,8 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 					(this.status = this.promiseMonitor.isComplete
 						? "idle"
 						: "discovering"),
-				this
-			)
+				this,
+			),
 		);
 		if (this.checker.isPythonExtensionInstalled) {
 			this.getKernelSpecsDir().catch(noop);
@@ -128,12 +128,12 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 						this.getKernelSpecsDir().catch(noop);
 						this.hookupPythonApi().catch(noop);
 					}
-				}, this)
+				}, this),
 			);
 		}
 	}
 	public async selectLocalKernel(
-		notebook: NotebookDocument
+		notebook: NotebookDocument,
 	): Promise<PythonKernelConnectionMetadata | undefined> {
 		const cancellationTokenSource = new CancellationTokenSource();
 		const disposables: IDisposable[] = [cancellationTokenSource];
@@ -141,7 +141,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			const selector = new LocalPythonKernelSelector(
 				notebook,
-				cancellationTokenSource.token
+				cancellationTokenSource.token,
 			);
 			disposables.push(selector);
 			const kernel = await selector.selectKernel();
@@ -187,10 +187,10 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				this.promiseMonitor.push(
 					api.environments
 						.refreshEnvironments({ forceRefresh: true })
-						.catch(noop)
+						.catch(noop),
 				);
 				api.environments.known.forEach((e) =>
-					this.buildDummyEnvironment(e).catch(noop)
+					this.buildDummyEnvironment(e).catch(noop),
 				);
 			})
 			.catch(noop);
@@ -212,7 +212,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			return;
 		}
 		api.environments.known.map((e) =>
-			this.buildDummyEnvironment(e).catch(noop)
+			this.buildDummyEnvironment(e).catch(noop),
 		);
 		this._register(
 			api.environments.onDidChangeEnvironments((e) => {
@@ -225,7 +225,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				} else {
 					this.buildDummyEnvironment(e.env).catch(noop);
 				}
-			}, this)
+			}, this),
 		);
 	}
 	private async buildDummyEnvironment(e: Environment) {
@@ -235,7 +235,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				0;
 		const interpreter = pythonEnvToJupyterEnv(
 			e,
-			displayEmptyCondaEnv === true
+			displayEmptyCondaEnv === true,
 		);
 		if (
 			!interpreter ||
@@ -245,7 +245,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		}
 		const spec = await createInterpreterKernelSpec(
 			interpreter,
-			await this.getKernelSpecsDir()
+			await this.getKernelSpecsDir(),
 		);
 		const result = PythonKernelConnectionMetadata.create({
 			kernelSpec: spec,
@@ -258,7 +258,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			existingInterpreterInfo.updateInterpreter(result.interpreter);
 			this._kernels.set(
 				e.id,
-				Object.assign(existingInterpreterInfo, result)
+				Object.assign(existingInterpreterInfo, result),
 			);
 			this._onDidChangeKernels.fire({});
 		} else {

@@ -9,19 +9,19 @@ import type { ISignal, Signal } from "@lumino/signaling";
 import * as WebSocketWS from "ws";
 import { KernelSocketOptions } from "../../../../kernels/types";
 import {
-	Deferred,
-	createDeferred,
-} from "../../../../platform/common/utils/async";
-import {
-	serializeDataViews,
-	deserializeDataViews,
-} from "../../../../platform/common/utils/serializers";
-import {
 	IInteractiveWindowMapping,
 	IPyWidgetMessages,
 } from "../../../../messageTypes";
-import { IMessageHandler, PostOffice } from "../../react-common/postOffice";
+import {
+	Deferred,
+	createDeferred,
+} from "../../../../platform/common/utils/async";
 import { noop } from "../../../../platform/common/utils/misc";
+import {
+	deserializeDataViews,
+	serializeDataViews,
+} from "../../../../platform/common/utils/serializers";
+import { IMessageHandler, PostOffice } from "../../react-common/postOffice";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -97,7 +97,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		options?: Pick<
 			Kernel.IKernelConnection.IOptions,
 			"clientId" | "username" | "handleComms"
-		>
+		>,
 	) {
 		return new ProxyKernel(
 			{
@@ -105,14 +105,14 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 				clientId: options?.clientId || this._options.clientId,
 				userName: options?.username || this._options.userName,
 			},
-			this.postOffice
+			this.postOffice,
 		);
 	}
 	private realKernel: Kernel.IKernelConnection;
 	private hookResults = new Map<string, boolean | PromiseLike<boolean>>();
 	private websocket: WebSocketWS & { sendEnabled: boolean };
 	private messageHook: (
-		msg: KernelMessage.IIOPubMessage
+		msg: KernelMessage.IIOPubMessage,
 	) => boolean | PromiseLike<boolean>;
 	private messageHooks: Map<
 		string,
@@ -122,10 +122,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	private _options: KernelSocketOptions;
 	// Messages that are awaiting extension messages to be fully handled
 	private awaitingExtensionMessage: Map<string, Deferred<void>>;
-	constructor(
-		options: KernelSocketOptions,
-		private postOffice: PostOffice
-	) {
+	constructor(options: KernelSocketOptions, private postOffice: PostOffice) {
 		// Dummy websocket we give to the underlying real kernel
 		let proxySocketInstance: any;
 		class ProxyWebSocket {
@@ -133,13 +130,13 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			public onmessage?:
 				| ((this: ProxyWebSocket, ev: MessageEvent) => any)
 				| null;
-			public sendEnabled: boolean = true;
+			public sendEnabled = true;
 			constructor() {
 				proxySocketInstance = this;
 			}
 			public close(
 				_code?: number | undefined,
-				_reason?: string | undefined
+				_reason?: string | undefined,
 			): void {
 				// Nothing.
 			}
@@ -149,7 +146,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 					| ArrayBuffer
 					| SharedArrayBuffer
 					| Blob
-					| ArrayBufferView
+					| ArrayBufferView,
 			): void {
 				// This is a command being sent from the UI kernel to the websocket. We mirror that to
 				// the extension side.
@@ -157,13 +154,13 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 					if (typeof data === "string") {
 						postOffice.sendMessage<IInteractiveWindowMapping>(
 							IPyWidgetMessages.IPyWidgets_msg,
-							data
+							data,
 						);
 					} else {
 						// Serialize binary data properly before sending to extension.
 						postOffice.sendMessage<IInteractiveWindowMapping>(
 							IPyWidgetMessages.IPyWidgets_binary_msg,
-							serializeDataViews([data as any])
+							serializeDataViews([data as any]),
 						);
 					}
 				}
@@ -214,7 +211,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	public sendShellMessage<T extends KernelMessage.ShellMessageType>(
 		msg: KernelMessage.IShellMessage<T>,
 		expectReply?: boolean,
-		disposeOnDone?: boolean
+		disposeOnDone?: boolean,
 	): Kernel.IShellFuture<
 		KernelMessage.IShellMessage<T>,
 		KernelMessage.IShellMessage<KernelMessage.ShellMessageType>
@@ -222,13 +219,13 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		return this.realKernel.sendShellMessage(
 			msg,
 			expectReply,
-			disposeOnDone
+			disposeOnDone,
 		);
 	}
 	public sendControlMessage<T extends KernelMessage.ControlMessageType>(
 		msg: KernelMessage.IControlMessage<T>,
 		expectReply?: boolean,
-		disposeOnDone?: boolean
+		disposeOnDone?: boolean,
 	): Kernel.IControlFuture<
 		KernelMessage.IControlMessage<T>,
 		KernelMessage.IControlMessage<KernelMessage.ControlMessageType>
@@ -236,7 +233,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		return this.realKernel.sendControlMessage(
 			msg,
 			expectReply,
-			disposeOnDone
+			disposeOnDone,
 		);
 	}
 	public reconnect(): Promise<void> {
@@ -268,7 +265,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		content:
 			| KernelMessage.IHistoryRequestRange
 			| KernelMessage.IHistoryRequestSearch
-			| KernelMessage.IHistoryRequestTail
+			| KernelMessage.IHistoryRequestTail,
 	): Promise<KernelMessage.IHistoryReplyMsg> {
 		return this.realKernel.requestHistory(content);
 	}
@@ -282,7 +279,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			stop_on_error?: boolean;
 		},
 		disposeOnDone?: boolean,
-		metadata?: import("@lumino/coreutils").JSONObject
+		metadata?: import("@lumino/coreutils").JSONObject,
 	): Kernel.IShellFuture<
 		KernelMessage.IExecuteRequestMsg,
 		KernelMessage.IExecuteReplyMsg
@@ -297,7 +294,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			command: string;
 			arguments?: any;
 		},
-		disposeOnDone?: boolean
+		disposeOnDone?: boolean,
 	): Kernel.IControlFuture<
 		KernelMessage.IDebugRequestMsg,
 		KernelMessage.IDebugReplyMsg
@@ -316,7 +313,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		return this.realKernel.requestCommInfo(content);
 	}
 	public sendInputReply(
-		content: KernelMessage.IInputReplyMsg["content"]
+		content: KernelMessage.IInputReplyMsg["content"],
 	): void {
 		return this.realKernel.sendInputReply(content);
 	}
@@ -324,14 +321,14 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		targetName: string,
 		callback: (
 			comm: Kernel.IComm,
-			msg: KernelMessage.ICommOpenMsg
-		) => void | PromiseLike<void>
+			msg: KernelMessage.ICommOpenMsg,
+		) => void | PromiseLike<void>,
 	): void {
 		// When a comm target has been registered, we need to register this in the real kernel in extension side.
 		// Hence send that message to extension.
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
 			IPyWidgetMessages.IPyWidgets_registerCommTarget,
-			targetName
+			targetName,
 		);
 		return this.realKernel.registerCommTarget(targetName, callback);
 	}
@@ -339,8 +336,8 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		targetName: string,
 		callback: (
 			comm: Kernel.IComm,
-			msg: KernelMessage.ICommOpenMsg
-		) => void | PromiseLike<void>
+			msg: KernelMessage.ICommOpenMsg,
+		) => void | PromiseLike<void>,
 	): void {
 		return this.realKernel.removeCommTarget(targetName, callback);
 	}
@@ -399,8 +396,8 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	public registerMessageHook(
 		msgId: string,
 		hook: (
-			msg: KernelMessage.IIOPubMessage
-		) => boolean | PromiseLike<boolean>
+			msg: KernelMessage.IIOPubMessage,
+		) => boolean | PromiseLike<boolean>,
 	): void {
 		// We don't want to finish our processing of this message until the extension has told us that it has finished
 		// With the extension side registering of the message hook
@@ -409,14 +406,14 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		// A message could cause multiple callback waits, so use id+type as key
 		const key = this.generateExtensionResponseKey(
 			msgId,
-			IPyWidgetMessages.IPyWidgets_RegisterMessageHook.toString()
+			IPyWidgetMessages.IPyWidgets_RegisterMessageHook.toString(),
 		);
 		this.awaitingExtensionMessage.set(key, waitPromise);
 
 		// Tell the other side about this.
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
 			IPyWidgetMessages.IPyWidgets_RegisterMessageHook,
-			msgId
+			msgId,
 		);
 
 		// Save the real hook so we can call it
@@ -429,8 +426,8 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	public removeMessageHook(
 		msgId: string,
 		_hook: (
-			msg: KernelMessage.IIOPubMessage
-		) => boolean | PromiseLike<boolean>
+			msg: KernelMessage.IIOPubMessage,
+		) => boolean | PromiseLike<boolean>,
 	): void {
 		// We don't want to finish our processing of this message until the extension has told us that it has finished
 		// With the extension side removing of the message hook
@@ -439,7 +436,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		// A message could cause multiple callback waits, so use id+type as key
 		const key = this.generateExtensionResponseKey(
 			msgId,
-			IPyWidgetMessages.IPyWidgets_RemoveMessageHook.toString()
+			IPyWidgetMessages.IPyWidgets_RemoveMessageHook.toString(),
 		);
 		this.awaitingExtensionMessage.set(key, waitPromise);
 
@@ -448,7 +445,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			{
 				hookMsgId: msgId,
 				lastHookedMsgId: this.lastHookedMessageId,
-			}
+			},
 		);
 
 		// Remove our mapping
@@ -477,13 +474,13 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			IPyWidgetMessages.IPyWidgets_msg_received,
 			{
 				id,
-			}
+			},
 		);
 	}
 
 	private generateExtensionResponseKey(
 		msgId: string,
-		msgType: string
+		msgType: string,
 	): string {
 		return `${msgId}${msgType}`;
 	}
@@ -504,7 +501,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		this.realKernel.requestKernelInfo = originalRequestKernelInfo;
 	}
 	private messageHookInterceptor(
-		msg: KernelMessage.IIOPubMessage
+		msg: KernelMessage.IIOPubMessage,
 	): boolean | PromiseLike<boolean> {
 		try {
 			// Save the active message that is currently being hooked. The Extension
@@ -512,7 +509,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			this.lastHookedMessageId = msg.header.msg_id;
 
 			const hook = this.messageHooks.get(
-				(msg.parent_header as any).msg_id
+				(msg.parent_header as any).msg_id,
 			);
 			if (hook) {
 				// When the kernel calls the hook, save the result for this message. The other side will ask for it
@@ -553,7 +550,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 							parentId: args.parentId,
 							msgType: args.msg.header.msg_type,
 							result: r,
-						}
+						},
 					);
 				});
 			} else {
@@ -564,7 +561,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 						parentId: args.parentId,
 						msgType: args.msg.header.msg_type,
 						result: result === true,
-					}
+					},
 				);
 			}
 		} else {
@@ -576,7 +573,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 					parentId: args.parentId,
 					msgType: args.msg.header.msg_type,
 					result: true,
-				}
+				},
 			);
 		}
 	}
@@ -593,7 +590,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			this.realKernel.sendShellMessage(
 				payload.msg,
 				false,
-				payload.msg.content.silent
+				payload.msg.content.silent,
 			);
 		} finally {
 			this.websocket.sendEnabled = true;
@@ -605,7 +602,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	// Note, this message comes from the kernel after it is done handling the message async
 	private onIOPubMessage(
 		_sender: Kernel.IKernelConnection,
-		message: KernelMessage.IIOPubMessage
+		message: KernelMessage.IIOPubMessage,
 	) {
 		// If we are not waiting for anything on the extension just send it
 		if (this.awaitingExtensionMessage.size <= 0) {
@@ -616,7 +613,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			// Since the Extension is blocking waiting for this message to be handled we know all extension message are
 			// related to this message or before and should be resolved before we move on
 			const extensionPromises = Array.from(
-				this.awaitingExtensionMessage.values()
+				this.awaitingExtensionMessage.values(),
 			).map((value) => {
 				return value.promise;
 			});
@@ -629,7 +626,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 				.catch((ex) => {
 					window.console.error(
 						"Failed to send iopub_msg_handled message",
-						ex
+						ex,
 					);
 				});
 		}
@@ -641,7 +638,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			IPyWidgetMessages.IPyWidgets_iopub_msg_handled,
 			{
 				id: message.header.msg_id,
-			}
+			},
 		);
 		this._ioPubMessageSignal.emit(message);
 	}
@@ -656,7 +653,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 export function create(
 	options: KernelSocketOptions,
 	postOffice: PostOffice,
-	pendingMessages: { message: string; payload: any }[]
+	pendingMessages: { message: string; payload: any }[],
 ): Kernel.IKernelConnection {
 	const result = new ProxyKernel(options, postOffice);
 	// Make sure to handle all the missed messages

@@ -27,7 +27,7 @@ export interface ILogger {
 export type TraceDecoratorType = (
 	_: Object,
 	__: string,
-	descriptor: TypedPropertyDescriptor<any>
+	descriptor: TypedPropertyDescriptor<any>,
 ) => TypedPropertyDescriptor<any>;
 
 // The information we want to log.

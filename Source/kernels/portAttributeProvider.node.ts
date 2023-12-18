@@ -10,8 +10,8 @@ import {
 	PortAutoForwardAction,
 } from "vscode";
 import { IExtensionSyncActivationService } from "../platform/activation/types";
-import { traceError } from "../platform/logging";
 import { IDisposableRegistry } from "../platform/common/types";
+import { traceError } from "../platform/logging";
 import { UsedPorts } from "./common/usedPorts";
 
 /**
@@ -28,7 +28,7 @@ export class PortAttributesProviders
 	activate(): void {
 		try {
 			this.disposables.push(
-				workspace.registerPortAttributesProvider({}, this)
+				workspace.registerPortAttributesProvider({}, this),
 			);
 		} catch (ex) {
 			// In case proposed API changes.
@@ -37,7 +37,7 @@ export class PortAttributesProviders
 	}
 	providePortAttributes(
 		attributes: { port: number; pid?: number; commandLine?: string },
-		_token: CancellationToken
+		_token: CancellationToken,
 	): PortAttributes | undefined {
 		try {
 			if (UsedPorts.has(attributes.port)) {

@@ -4,23 +4,23 @@
 import type * as nbformat from "@jupyterlab/nbformat";
 import { inject, injectable, named } from "inversify";
 import { DebugConfiguration, Disposable, NotebookDocument } from "vscode";
+import { JupyterDebuggerNotInstalledError } from "../../kernels/errors/jupyterDebuggerNotInstalledError";
+import { executeSilently } from "../../kernels/helpers";
+import { getPlainTextOrStreamOutput } from "../../kernels/kernel";
+import { IKernel, isLocalConnection } from "../../kernels/types";
+import { IJupyterDebugService } from "../../notebooks/debugger/debuggingTypes";
 import { IPythonApiProvider } from "../../platform/api/types";
-import { traceInfo, traceInfoIfCI, traceWarning } from "../../platform/logging";
+import { Identifiers } from "../../platform/common/constants";
+import { trimQuotes } from "../../platform/common/helpers";
 import { IPlatformService } from "../../platform/common/platform/types";
 import { IConfigurationService } from "../../platform/common/types";
 import { DataScience } from "../../platform/common/utils/localize";
-import { Identifiers } from "../../platform/common/constants";
-import { Telemetry } from "../../telemetry";
-import { JupyterDebuggerNotInstalledError } from "../../kernels/errors/jupyterDebuggerNotInstalledError";
-import { getPlainTextOrStreamOutput } from "../../kernels/kernel";
-import { IKernel, isLocalConnection } from "../../kernels/types";
-import { IInteractiveWindowDebugger } from "../types";
-import { IFileGeneratedCodes } from "../editor-integration/types";
-import { IJupyterDebugService } from "../../notebooks/debugger/debuggingTypes";
-import { executeSilently } from "../../kernels/helpers";
-import { buildSourceMap } from "./helper";
-import { trimQuotes } from "../../platform/common/helpers";
 import { noop } from "../../platform/common/utils/misc";
+import { traceInfo, traceInfoIfCI, traceWarning } from "../../platform/logging";
+import { Telemetry } from "../../telemetry";
+import { IFileGeneratedCodes } from "../editor-integration/types";
+import { IInteractiveWindowDebugger } from "../types";
+import { buildSourceMap } from "./helper";
 
 /**
  * Public API to begin debugging in the interactive window
@@ -34,7 +34,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	private readonly waitForDebugClientCode: string;
 	private readonly tracingEnableCode: string;
 	private readonly tracingDisableCode: string;
-	private debuggingActive: boolean = false;
+	private debuggingActive = false;
 	constructor(
 		@inject(IPythonApiProvider)
 		private readonly apiProvider: IPythonApiProvider,
@@ -69,7 +69,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			{
 				justMyCode: settings.debugJustMyCode,
 				python: pythonPath,
-			}
+			},
 		);
 	}
 
@@ -95,7 +95,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	}
 
 	public async updateSourceMaps(
-		hashes: IFileGeneratedCodes[]
+		hashes: IFileGeneratedCodes[],
 	): Promise<void> {
 		// Make sure that we have an active debugging session at this point
 		if (this.debugService.activeDebugSession && this.debuggingActive) {
@@ -105,10 +105,10 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 					if (this.debuggingActive) {
 						return this.debugService.activeDebugSession!.customRequest(
 							"setPydevdSourceMap",
-							buildSourceMap(fileHash)
+							buildSourceMap(fileHash),
 						);
 					}
-				})
+				}),
 			);
 		}
 	}
@@ -140,7 +140,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	private async startDebugSession(
 		startCommand: (config: DebugConfiguration) => Thenable<boolean>,
 		kernel: IKernel,
-		extraConfig: Partial<DebugConfiguration>
+		extraConfig: Partial<DebugConfiguration>,
 	) {
 		traceInfo("start debugging");
 		if (!kernel.session?.kernel) {
@@ -168,7 +168,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 							"Execute_request failure starting debug session for IW",
 						telemetryName:
 							Telemetry.InteractiveWindowDebugSetupCodeFailure,
-					}
+					},
 				);
 				if (
 					importResults.some((item) => item.output_type === "error")
@@ -177,8 +177,8 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 				} else {
 					traceInfo(
 						`import startup: ${getPlainTextOrStreamOutput(
-							importResults
-						)}`
+							importResults,
+						)}`,
 					);
 				}
 
@@ -190,7 +190,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 
 	private async connect(
 		kernel: IKernel,
-		extraConfig: Partial<DebugConfiguration>
+		extraConfig: Partial<DebugConfiguration>,
 	): Promise<DebugConfiguration | undefined> {
 		const notebook = kernel.notebook;
 		// If we already have configuration, we're already attached, don't do it again.
@@ -235,14 +235,14 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	}
 
 	private async calculateDebuggerPathList(
-		kernel: IKernel
+		kernel: IKernel,
 	): Promise<string | undefined> {
 		const extraPaths: string[] = [];
 
 		// Add the settings path first as it takes precedence over the ptvsd extension path
 		// eslint-disable-next-line no-multi-str
 		let settingsPath = this.configService.getSettings(
-			kernel.resourceUri
+			kernel.resourceUri,
 		).debugpyDistPath;
 		// Escape windows path chars so they end up in the source escaped
 		if (settingsPath) {
@@ -299,15 +299,15 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 								"Execute_request failure appending debugger paths for IW",
 							telemetryName:
 								Telemetry.InteractiveWindowDebugSetupCodeFailure,
-						}
-					)
+						},
+				  )
 				: [];
 			traceInfo(`Appending paths: ${getPlainTextOrStreamOutput(result)}`);
 		}
 	}
 
 	private async connectToLocal(
-		kernel: IKernel
+		kernel: IKernel,
 	): Promise<{ port: number; host: string }> {
 		const outputs = kernel.session?.kernel
 			? await executeSilently(
@@ -319,8 +319,8 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 							"Execute_request failure enabling debugging for IW",
 						telemetryName:
 							Telemetry.InteractiveWindowDebugSetupCodeFailure,
-					}
-				)
+					},
+			  )
 			: [];
 
 		// Pull our connection info out from the cells returned by enable_attach
@@ -347,13 +347,13 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			throw new JupyterDebuggerNotInstalledError(
 				this.debuggerPackage,
 				error.ename,
-				kernel.kernelConnectionMetadata
+				kernel.kernelConnectionMetadata,
 			);
 		}
 		throw new JupyterDebuggerNotInstalledError(
 			DataScience.jupyterDebuggerOutputParseError(this.debuggerPackage),
 			undefined,
-			kernel.kernelConnectionMetadata
+			kernel.kernelConnectionMetadata,
 		);
 	}
 }

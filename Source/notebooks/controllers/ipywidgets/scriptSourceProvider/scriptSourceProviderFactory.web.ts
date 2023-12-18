@@ -3,20 +3,20 @@
 
 import { inject, injectable, named } from "inversify";
 import { Memento } from "vscode";
+import { IKernel } from "../../../../kernels/types";
 import {
 	GLOBAL_MEMENTO,
 	IConfigurationService,
 	IMemento,
 } from "../../../../platform/common/types";
-import { IKernel } from "../../../../kernels/types";
-import { CDNWidgetScriptSourceProvider } from "./cdnWidgetScriptSourceProvider";
-import { RemoteWidgetScriptSourceProvider } from "./remoteWidgetScriptSourceProvider";
 import {
 	IIPyWidgetScriptManagerFactory,
 	ILocalResourceUriConverter,
 	IWidgetScriptSourceProvider,
 	IWidgetScriptSourceProviderFactory,
 } from "../types";
+import { CDNWidgetScriptSourceProvider } from "./cdnWidgetScriptSourceProvider";
+import { RemoteWidgetScriptSourceProvider } from "./remoteWidgetScriptSourceProvider";
 
 /**
  * Determines the IWidgetScriptSourceProvider for use in a web environment
@@ -37,7 +37,7 @@ export class ScriptSourceProviderFactory
 
 	public getProviders(
 		kernel: IKernel,
-		_uriConverter: ILocalResourceUriConverter
+		_uriConverter: ILocalResourceUriConverter,
 	) {
 		const scriptProviders: IWidgetScriptSourceProvider[] = [];
 
@@ -45,8 +45,8 @@ export class ScriptSourceProviderFactory
 		scriptProviders.push(
 			new CDNWidgetScriptSourceProvider(
 				this.globalMemento,
-				this.configurationSettings
-			)
+				this.configurationSettings,
+			),
 		);
 
 		// Only remote is supported at the moment
@@ -56,8 +56,8 @@ export class ScriptSourceProviderFactory
 				scriptProviders.push(
 					new RemoteWidgetScriptSourceProvider(
 						kernel,
-						this.widgetScriptManagerFactory
-					)
+						this.widgetScriptManagerFactory,
+					),
 				);
 				break;
 		}

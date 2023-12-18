@@ -4,7 +4,10 @@
 import { IExtensionSyncActivationService } from "../activation/types";
 import { IExperimentService } from "../common/types";
 import { IServiceManager } from "../ioc/types";
+import { LanguageInitializer } from "../telemetry/languageInitializer";
+import { ApplicationEnvironment } from "./application/applicationEnvironment";
 import { ReloadVSCodeCommandHandler } from "./application/commands/reloadCommand.node";
+import { RunInDedicatedExtensionHostCommandHandler } from "./application/commands/runInDedicatedExtensionHost.node";
 import { DebugService } from "./application/debugService";
 import { EncryptedStorage } from "./application/encryptedStorage";
 import { Extensions } from "./application/extensions.node";
@@ -14,11 +17,14 @@ import {
 	IEncryptedStorage,
 } from "./application/types";
 import { AsyncDisposableRegistry } from "./asyncDisposableRegistry";
+import { OldCacheCleaner } from "./cache";
 import { CryptoUtils } from "./crypto";
 import { ExperimentService } from "./experiments/service";
 import { FeatureManager } from "./featureManager";
 import { PersistentStateFactory } from "./persistentState";
 import { IS_WINDOWS } from "./platform/constants.node";
+import { registerTypes as registerPlatformTypes } from "./platform/serviceRegistry.node";
+import { registerTypes as processRegisterTypes } from "./process/serviceRegistry.node";
 import {
 	IAsyncDisposableRegistry,
 	ICryptoUtils,
@@ -31,13 +37,7 @@ import {
 	IMultiStepInputFactory,
 	MultiStepInputFactory,
 } from "./utils/multiStepInput";
-import { LanguageInitializer } from "../telemetry/languageInitializer";
-import { registerTypes as registerPlatformTypes } from "./platform/serviceRegistry.node";
-import { registerTypes as processRegisterTypes } from "./process/serviceRegistry.node";
 import { registerTypes as variableRegisterTypes } from "./variables/serviceRegistry.node";
-import { RunInDedicatedExtensionHostCommandHandler } from "./application/commands/runInDedicatedExtensionHost.node";
-import { OldCacheCleaner } from "./cache";
-import { ApplicationEnvironment } from "./application/applicationEnvironment";
 
 // eslint-disable-next-line
 export function registerTypes(serviceManager: IServiceManager) {
@@ -46,51 +46,51 @@ export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IExtensions>(IExtensions, Extensions);
 	serviceManager.addSingleton<IPersistentStateFactory>(
 		IPersistentStateFactory,
-		PersistentStateFactory
+		PersistentStateFactory,
 	);
 	serviceManager.addSingleton<IDebugService>(IDebugService, DebugService);
 	serviceManager.addSingleton<IApplicationEnvironment>(
 		IApplicationEnvironment,
-		ApplicationEnvironment
+		ApplicationEnvironment,
 	);
 	serviceManager.addSingleton<IEncryptedStorage>(
 		IEncryptedStorage,
-		EncryptedStorage
+		EncryptedStorage,
 	);
 	serviceManager.addSingleton<ICryptoUtils>(ICryptoUtils, CryptoUtils);
 	serviceManager.addSingleton<IExperimentService>(
 		IExperimentService,
-		ExperimentService
+		ExperimentService,
 	);
 
 	serviceManager.addSingleton<IFeaturesManager>(
 		IFeaturesManager,
-		FeatureManager
+		FeatureManager,
 	);
 
 	serviceManager.addSingleton<IAsyncDisposableRegistry>(
 		IAsyncDisposableRegistry,
-		AsyncDisposableRegistry
+		AsyncDisposableRegistry,
 	);
 	serviceManager.addSingleton<IMultiStepInputFactory>(
 		IMultiStepInputFactory,
-		MultiStepInputFactory
+		MultiStepInputFactory,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		LanguageInitializer
+		LanguageInitializer,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		OldCacheCleaner
+		OldCacheCleaner,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ReloadVSCodeCommandHandler
+		ReloadVSCodeCommandHandler,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RunInDedicatedExtensionHostCommandHandler
+		RunInDedicatedExtensionHostCommandHandler,
 	);
 	registerPlatformTypes(serviceManager);
 	processRegisterTypes(serviceManager);

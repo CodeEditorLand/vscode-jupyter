@@ -10,7 +10,7 @@ let loadedCollection: LocalizedMessages | undefined;
 
 export function getLocString(
 	key: keyof LocalizedMessages,
-	defValue: string
+	defValue: string,
 ): string {
 	if (loadedCollection && loadedCollection.hasOwnProperty(key)) {
 		return loadedCollection[key];
@@ -25,6 +25,6 @@ export function storeLocStrings(collection: LocalizedMessages) {
 
 export function format(locString: string, ...args: string[]) {
 	return locString.replace(/{(\d+)}/g, (match, number) =>
-		args[number] === undefined ? match : args[number]
+		args[number] === undefined ? match : args[number],
 	);
 }

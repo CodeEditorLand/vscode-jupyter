@@ -6,14 +6,15 @@ import * as sinon from "sinon";
 import { anything, instance, mock, when } from "ts-mockito";
 import {
 	CancellationTokenSource,
-	NotebookDocument,
 	Disposable,
 	EventEmitter,
+	NotebookDocument,
 } from "vscode";
 import {
 	ContributedKernelFinderKind,
 	IContributedKernelFinder,
 } from "../../kernels/internalTypes";
+import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
 import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
 import {
 	IJupyterConnection,
@@ -26,15 +27,14 @@ import {
 	RemoteKernelConnectionMetadata,
 	RemoteKernelSpecConnectionMetadata,
 } from "../../kernels/types";
-import { dispose } from "../../platform/common/utils/lifecycle";
 import { IDisposable } from "../../platform/common/types";
 import { NotebookMetadata } from "../../platform/common/utils";
+import { dispose } from "../../platform/common/utils/lifecycle";
 import { IInterpreterService } from "../../platform/interpreter/contracts";
 import { ServiceContainer } from "../../platform/ioc/container";
 import { uriEquals } from "../../test/datascience/helpers";
 import { TestNotebookDocument } from "../../test/datascience/notebook/executionHelper";
 import { PreferredKernelConnectionService } from "./preferredKernelConnectionService";
-import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
 
 suite("Preferred Kernel Connection", () => {
 	let preferredService: PreferredKernelConnectionService;
@@ -187,35 +187,35 @@ suite("Preferred Kernel Connection", () => {
 
 		when(
 			serviceContainer.get<PreferredRemoteKernelIdProvider>(
-				PreferredRemoteKernelIdProvider
-			)
+				PreferredRemoteKernelIdProvider,
+			),
 		).thenReturn(instance(preferredRemoteKernelProvider));
 		when(serviceContainer.get<IKernelFinder>(IKernelFinder)).thenReturn(
-			instance(kernelFinder)
+			instance(kernelFinder),
 		);
 		when(
-			serviceContainer.get<IInterpreterService>(IInterpreterService)
+			serviceContainer.get<IInterpreterService>(IInterpreterService),
 		).thenReturn(instance(interpreterService));
 		when(remoteKernelFinder.kind).thenReturn(
-			ContributedKernelFinderKind.Remote
+			ContributedKernelFinderKind.Remote,
 		);
 		when(remoteKernelFinder.onDidChangeKernels).thenReturn(
-			onDidChangeRemoteKernels.event
+			onDidChangeRemoteKernels.event,
 		);
 		when(localKernelSpecFinder.kind).thenReturn(
-			ContributedKernelFinderKind.LocalKernelSpec
+			ContributedKernelFinderKind.LocalKernelSpec,
 		);
 		when(localKernelSpecFinder.onDidChangeKernels).thenReturn(
-			onDidChangeLocalKernels.event
+			onDidChangeLocalKernels.event,
 		);
 		when(localPythonEnvFinder.kind).thenReturn(
-			ContributedKernelFinderKind.LocalPythonEnvironment
+			ContributedKernelFinderKind.LocalPythonEnvironment,
 		);
 		when(localPythonEnvFinder.onDidChangeKernels).thenReturn(
-			onDidChangePythonKernels.event
+			onDidChangePythonKernels.event,
 		);
 		when(interpreterService.getInterpreterHash(anything())).thenCall(
-			(id) => id
+			(id) => id,
 		);
 		when(kernelFinder.registered).thenReturn([
 			instance(remoteKernelFinder),
@@ -224,10 +224,10 @@ suite("Preferred Kernel Connection", () => {
 		]);
 		(instance(connection) as any).then = undefined;
 		when(jupyterConnection.createConnectionInfo(anything())).thenResolve(
-			instance(connection)
+			instance(connection),
 		);
 		preferredService = new PreferredKernelConnectionService(
-			instance(jupyterConnection)
+			instance(jupyterConnection),
 		);
 		disposables.push(preferredService);
 	});
@@ -236,8 +236,8 @@ suite("Preferred Kernel Connection", () => {
 		test("Find preferred kernel spec if there is no exact match for the live kernel connection (match kernel spec name)", async () => {
 			when(
 				preferredRemoteKernelProvider.getPreferredRemoteKernelId(
-					uriEquals(notebook.uri)
-				)
+					uriEquals(notebook.uri),
+				),
 			).thenResolve(remoteLiveKernelConnection2.id);
 			when(remoteKernelFinder.status).thenReturn("idle");
 			when(remoteKernelFinder.kernels).thenReturn([
@@ -251,7 +251,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredRemoteKernelConnection(
 					notebook,
 					instance(remoteKernelFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.strictEqual(preferredKernel, remoteJavaKernelSpec);
@@ -259,8 +259,8 @@ suite("Preferred Kernel Connection", () => {
 		test("Find preferred kernel spec if there is no exact match for the live kernel connection (match kernel spec language)", async () => {
 			when(
 				preferredRemoteKernelProvider.getPreferredRemoteKernelId(
-					uriEquals(notebook.uri)
-				)
+					uriEquals(notebook.uri),
+				),
 			).thenResolve(remoteLiveKernelConnection2.id);
 			when(remoteKernelFinder.status).thenReturn("idle");
 			when(remoteKernelFinder.kernels).thenReturn([
@@ -274,7 +274,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredRemoteKernelConnection(
 					notebook,
 					instance(remoteKernelFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.strictEqual(preferredKernel, remoteJavaKernelSpec);
@@ -313,7 +313,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredLocalKernelSpecConnection(
 					notebook,
 					instance(localKernelSpecFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.isUndefined(preferredKernel);
@@ -328,7 +328,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredLocalKernelSpecConnection(
 					notebook,
 					instance(localKernelSpecFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.isUndefined(preferredKernel);
@@ -345,7 +345,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredLocalKernelSpecConnection(
 					notebook,
 					instance(localKernelSpecFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.strictEqual(preferredKernel, localJavaKernelSpec);
@@ -362,7 +362,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredLocalKernelSpecConnection(
 					notebook,
 					instance(localKernelSpecFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.strictEqual(preferredKernel, localJavaKernelSpec);
@@ -377,7 +377,7 @@ suite("Preferred Kernel Connection", () => {
 				await preferredService.findPreferredPythonKernelConnection(
 					notebook,
 					instance(localPythonEnvFinder),
-					cancellation.token
+					cancellation.token,
 				);
 
 			assert.isUndefined(preferredKernel);

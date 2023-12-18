@@ -4,6 +4,14 @@
 import type * as nbformat from "@jupyterlab/nbformat";
 import { inject, injectable, named } from "inversify";
 import { Memento, NotebookDocument, workspace } from "vscode";
+import {
+	getKernelConnectionLanguage,
+	isPythonKernelConnection,
+} from "../../kernels/helpers";
+import {
+	IJupyterKernelSpec,
+	KernelConnectionMetadata,
+} from "../../kernels/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IPythonExtensionChecker } from "../../platform/api/types";
 import {
@@ -12,23 +20,15 @@ import {
 	VSCodeKnownNotebookLanguages,
 } from "../../platform/common/constants";
 import {
+	GLOBAL_MEMENTO,
 	IDisposableRegistry,
 	IMemento,
-	GLOBAL_MEMENTO,
 } from "../../platform/common/types";
-import { swallowExceptions } from "../../platform/common/utils/decorators";
-import {
-	getKernelConnectionLanguage,
-	isPythonKernelConnection,
-} from "../../kernels/helpers";
 import {
 	isJupyterNotebook,
 	translateKernelLanguageToMonaco,
 } from "../../platform/common/utils";
-import {
-	IJupyterKernelSpec,
-	KernelConnectionMetadata,
-} from "../../kernels/types";
+import { swallowExceptions } from "../../platform/common/utils/decorators";
 import { getLanguageOfNotebookDocument } from "./helpers";
 
 export const LastSavedNotebookCellLanguage =
@@ -68,24 +68,24 @@ export class NotebookCellLanguageService
 			: "plaintext";
 		// Note, what ever language is returned here, when the user selects a kernel, the cells (of blank documents) get updated based on that kernel selection.
 		return translateKernelLanguageToMonaco(
-			jupyterLanguage || defaultLanguage
+			jupyterLanguage || defaultLanguage,
 		);
 	}
 	public activate() {
 		workspace.onDidSaveNotebookDocument(
 			this.onDidSaveNotebookDocument,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	public getSupportedLanguages(
-		kernelConnection: KernelConnectionMetadata
+		kernelConnection: KernelConnectionMetadata,
 	): string[] {
 		if (isPythonKernelConnection(kernelConnection)) {
 			return LanguagesSupportedByPythonkernel;
 		} else {
 			const language = translateKernelLanguageToMonaco(
-				getKernelConnectionLanguage(kernelConnection) || ""
+				getKernelConnectionLanguage(kernelConnection) || "",
 			);
 			// We should set `supportedLanguages` only if VS Code knows about them.
 			// Assume user has a kernel for `go` & VS Code doesn't know about `go` language, & we initailize `supportedLanguages` to [go]
@@ -102,7 +102,7 @@ export class NotebookCellLanguageService
 	}
 	private get lastSavedNotebookCellLanguage(): string | undefined {
 		return this.globalMemento.get<string | undefined>(
-			LastSavedNotebookCellLanguage
+			LastSavedNotebookCellLanguage,
 		);
 	}
 	@swallowExceptions("Saving last saved cell language")
@@ -114,7 +114,7 @@ export class NotebookCellLanguageService
 		if (language && language !== this.lastSavedNotebookCellLanguage) {
 			await this.globalMemento.update(
 				LastSavedNotebookCellLanguage,
-				language
+				language,
 			);
 		}
 	}

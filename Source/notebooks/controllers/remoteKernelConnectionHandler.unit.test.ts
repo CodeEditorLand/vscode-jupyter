@@ -3,28 +3,28 @@
 
 import { use } from "chai";
 
+import { Kernel } from "@jupyterlab/services";
+import chaiAsPromised from "chai-as-promised";
 import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { EventEmitter, NotebookDocument, Uri } from "vscode";
+import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
 import { ILiveRemoteKernelConnectionUsageTracker } from "../../kernels/jupyter/types";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import { IDisposable } from "../../platform/common/types";
-import chaiAsPromised from "chai-as-promised";
 import {
 	IKernel,
 	IKernelProvider,
 	IKernelSession,
-	isLocalConnection,
 	KernelActionSource,
 	KernelConnectionMetadata,
 	LiveRemoteKernelConnectionMetadata,
 	LocalKernelSpecConnectionMetadata,
 	RemoteKernelSpecConnectionMetadata,
+	isLocalConnection,
 } from "../../kernels/types";
-import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
+import { IDisposable } from "../../platform/common/types";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { uriEquals } from "../../test/datascience/helpers";
 import { RemoteKernelConnectionHandler } from "./remoteKernelConnectionHandler";
 import { IControllerRegistration, IVSCodeNotebookController } from "./types";
-import { Kernel } from "@jupyterlab/services";
-import { uriEquals } from "../../test/datascience/helpers";
 
 use(chaiAsPromised);
 suite("Remote kernel connection handler", async () => {
@@ -98,21 +98,21 @@ suite("Remote kernel connection handler", async () => {
 		disposables.push(onNotebookControllerSelectionChanged);
 
 		when(kernelProvider.onDidStartKernel).thenReturn(
-			onDidStartKernel.event
+			onDidStartKernel.event,
 		);
 		when(controllers.onControllerSelectionChanged).thenReturn(
-			onNotebookControllerSelectionChanged.event
+			onNotebookControllerSelectionChanged.event,
 		);
 		when(
 			preferredRemoteKernelProvider.storePreferredRemoteKernelId(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 		when(
 			preferredRemoteKernelProvider.clearPreferredRemoteKernelId(
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 
 		remoteConnectionHandler = new RemoteKernelConnectionHandler(
@@ -120,7 +120,7 @@ suite("Remote kernel connection handler", async () => {
 			instance(kernelProvider),
 			instance(controllers),
 			instance(tracker),
-			instance(preferredRemoteKernelProvider)
+			instance(preferredRemoteKernelProvider),
 		);
 	});
 	teardown(() => {
@@ -133,7 +133,7 @@ suite("Remote kernel connection handler", async () => {
 	});
 	function verifyRemoteKernelTracking(
 		connection: KernelConnectionMetadata,
-		source: KernelActionSource
+		source: KernelActionSource,
 	) {
 		const kernel1 = mock<IKernel>();
 		when(kernel1.kernelConnectionMetadata).thenReturn(connection);
@@ -154,13 +154,13 @@ suite("Remote kernel connection handler", async () => {
 		remoteConnectionHandler.activate();
 
 		verify(
-			tracker.trackKernelIdAsUsed(anything(), anything(), anything())
+			tracker.trackKernelIdAsUsed(anything(), anything(), anything()),
 		).never();
 		verify(
 			preferredRemoteKernelProvider.storePreferredRemoteKernelId(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).never();
 
 		onDidStartKernel.fire(instance(kernel1));
@@ -175,30 +175,30 @@ suite("Remote kernel connection handler", async () => {
 				tracker.trackKernelIdAsUsed(
 					uriEquals(nbUri),
 					deepEqual(remoteKernelSpec.serverProviderHandle),
-					"_KernelId_"
-				)
+					"_KernelId_",
+				),
 			).atLeast(2);
 			verify(
 				preferredRemoteKernelProvider.storePreferredRemoteKernelId(
 					uriEquals(nbUri),
-					"_KernelId_"
-				)
+					"_KernelId_",
+				),
 			).atLeast(2);
 		} else {
 			verify(
-				tracker.trackKernelIdAsUsed(anything(), anything(), anything())
+				tracker.trackKernelIdAsUsed(anything(), anything(), anything()),
 			).never();
 			verify(
 				preferredRemoteKernelProvider.storePreferredRemoteKernelId(
 					anything(),
-					anything()
-				)
+					anything(),
+				),
 			).never();
 		}
 	}
 	function verifyRemoteKernelTrackingUponKernelSelection(
 		connection: KernelConnectionMetadata,
-		selected: boolean
+		selected: boolean,
 	) {
 		const controller = mock<IVSCodeNotebookController>();
 		const notebook = mock<NotebookDocument>();
@@ -210,13 +210,13 @@ suite("Remote kernel connection handler", async () => {
 		remoteConnectionHandler.activate();
 
 		verify(
-			tracker.trackKernelIdAsUsed(anything(), anything(), anything())
+			tracker.trackKernelIdAsUsed(anything(), anything(), anything()),
 		).never();
 		verify(
 			preferredRemoteKernelProvider.storePreferredRemoteKernelId(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).never();
 
 		onNotebookControllerSelectionChanged.fire({
@@ -231,29 +231,29 @@ suite("Remote kernel connection handler", async () => {
 					tracker.trackKernelIdAsUsed(
 						nbUri,
 						deepEqual(remoteKernelSpec.serverProviderHandle),
-						connection.kernelModel.id!
-					)
+						connection.kernelModel.id!,
+					),
 				).once();
 			} else {
 				verify(
 					tracker.trackKernelIdAsNotUsed(
 						nbUri,
 						deepEqual(remoteKernelSpec.serverProviderHandle),
-						connection.kernelModel.id!
-					)
+						connection.kernelModel.id!,
+					),
 				).once();
 			}
 		} else {
 			verify(
-				tracker.trackKernelIdAsUsed(anything(), anything(), anything())
+				tracker.trackKernelIdAsUsed(anything(), anything(), anything()),
 			).never();
 		}
 
 		if (selected && isLocalConnection(connection)) {
 			verify(
 				preferredRemoteKernelProvider.clearPreferredRemoteKernelId(
-					nbUri
-				)
+					nbUri,
+				),
 			).once();
 		}
 	}

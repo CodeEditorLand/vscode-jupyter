@@ -49,7 +49,7 @@ export function cellIndexesToRanges(indexes: number[]): vscode.NotebookRange[] {
 
 	return indexes
 		.reduce(
-			function (ranges, num) {
+			(ranges, num) => {
 				if (num <= ranges[0][1]) {
 					ranges[0][1] = num + 1;
 				} else {
@@ -57,30 +57,30 @@ export function cellIndexesToRanges(indexes: number[]): vscode.NotebookRange[] {
 				}
 				return ranges;
 			},
-			[[first, first + 1]]
+			[[first, first + 1]],
 		)
 		.reverse()
 		.map((val) => new vscode.NotebookRange(val[0], val[1]));
 }
 
 function findNotebook(
-	document: vscode.TextDocument
+	document: vscode.TextDocument,
 ): vscode.NotebookDocument | undefined {
 	return vscode.workspace.notebookDocuments.find(
 		(doc) =>
 			doc.uri.authority === document.uri.authority &&
-			doc.uri.path === document.uri.path
+			doc.uri.path === document.uri.path,
 	);
 }
 
 export function findNotebookAndCell(
-	cell: vscode.NotebookCell | undefined
+	cell: vscode.NotebookCell | undefined,
 ):
 	| { notebook: vscode.NotebookDocument; cell: vscode.NotebookCell }
 	| undefined {
 	const doc =
 		vscode.workspace.textDocuments.find(
-			(doc) => doc.uri.toString() === cell?.document.uri.toString()
+			(doc) => doc.uri.toString() === cell?.document.uri.toString(),
 		) ?? vscode.window.activeTextEditor?.document;
 	if (!doc) {
 		return;
@@ -92,7 +92,7 @@ export function findNotebookAndCell(
 	}
 	const cells = notebook.getCells();
 	const currentCell = cells.find(
-		(cell) => cell.document.uri.toString() === doc.uri.toString()
+		(cell) => cell.document.uri.toString() === doc.uri.toString(),
 	);
 	if (!currentCell) {
 		return;
@@ -103,7 +103,7 @@ export function findNotebookAndCell(
 
 export function areRangesEqual(
 	a: Range | vscode.Range,
-	b: Range | vscode.Range
+	b: Range | vscode.Range,
 ) {
 	return (
 		a.start.line === b.start.line &&

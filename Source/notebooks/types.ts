@@ -14,7 +14,7 @@ import {
 import { Resource } from "../platform/common/types";
 
 export const INotebookCompletionProvider = Symbol(
-	"INotebookCompletionProvider"
+	"INotebookCompletionProvider",
 );
 
 export interface INotebookCompletionProvider {
@@ -23,7 +23,7 @@ export interface INotebookCompletionProvider {
 		document: TextDocument,
 		position: Position,
 		context: CompletionContext,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<CompletionItem[] | null | undefined>;
 }
 

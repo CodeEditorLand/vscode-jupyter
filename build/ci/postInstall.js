@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const { EOL } = require("os");
 const colors = require("colors/safe");
@@ -23,29 +22,29 @@ function createJupyterKernelWithoutSerialization() {
 		"services",
 		"lib",
 		"kernel",
-		"default.js"
+		"default.js",
 	);
 	var filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		throw new Error(
 			"Jupyter lab default kernel not found '" +
 				filePath +
-				"' (Jupyter Extension post install script)"
+				"' (Jupyter Extension post install script)",
 		);
 	}
 	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
 	var replacedContents = fileContents
 		.replace(
 			/^const serialize =.*$/gm,
-			"const serialize = { serialize: (a) => a, deserialize: (a) => a };"
+			"const serialize = { serialize: (a) => a, deserialize: (a) => a };",
 		)
 		.replace(
 			"const owned = team.session === this.clientId;",
-			"const owned = parentHeader.session === this.clientId;"
+			"const owned = parentHeader.session === this.clientId;",
 		);
 	if (replacedContents === fileContents) {
 		throw new Error(
-			"Jupyter lab default kernel cannot be made non serializing"
+			"Jupyter lab default kernel cannot be made non serializing",
 		);
 	}
 	var destPath = path.join(path.dirname(filePath), "nonSerializingKernel.js");
@@ -59,28 +58,28 @@ function fixVariableNameInKernelDefaultJs() {
 		"services",
 		"lib",
 		"kernel",
-		"default.js"
+		"default.js",
 	);
 	var filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		throw new Error(
 			"Jupyter lab default kernel not found '" +
 				filePath +
-				"' (Jupyter Extension post install script)"
+				"' (Jupyter Extension post install script)",
 		);
 	}
 	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
 	const replacement = "const owned = parentHeader.session === this.clientId;";
 	var replacedContents = fileContents.replace(
 		"const owned = team.session === this.clientId;",
-		replacement
+		replacement,
 	);
 	if (replacedContents === fileContents) {
 		if (fileContents.includes(replacement)) {
 			return;
 		}
 		throw new Error(
-			"Jupyter lab default kernel cannot be updated to fix variable name 'team'"
+			"Jupyter lab default kernel cannot be updated to fix variable name 'team'",
 		);
 	}
 	fs.writeFileSync(filePath, replacedContents);
@@ -93,20 +92,20 @@ function removeUnnecessaryLoggingFromKernelDefault() {
 		"services",
 		"lib",
 		"kernel",
-		"default.js"
+		"default.js",
 	);
 	var filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		throw new Error(
 			"Jupyter lab default kernel not found '" +
 				filePath +
-				"' (Jupyter Extension post install script)"
+				"' (Jupyter Extension post install script)",
 		);
 	}
 	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
 	var replacedContents = fileContents.replace(
 		"console.debug(`Starting WebSocket: ${display}`);",
-		""
+		"",
 	);
 	if (replacedContents === fileContents) {
 		// We do not care if we cannot remove this.
@@ -124,14 +123,14 @@ function updateJSDomTypeDefinition() {
 		"node_modules",
 		"@types",
 		"jsdom",
-		"base.d.ts"
+		"base.d.ts",
 	);
 	var filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		console.warn(
 			"JSdom base.d.ts not found '" +
 				filePath +
-				"' (Jupyter Extension post install script)"
+				"' (Jupyter Extension post install script)",
 		);
 		return;
 	}
@@ -144,7 +143,7 @@ function updateJSDomTypeDefinition() {
 			'readonly ["Infinity"]: number;',
 			"// @ts-ignore",
 			'readonly ["NaN"]: number;',
-		].join(`${EOL}        `)
+		].join(`${EOL}        `),
 	);
 	if (replacedContents === fileContents) {
 		console.warn("JSdom base.d.ts not updated");
@@ -170,14 +169,14 @@ function makeVariableExplorerAlwaysSorted() {
 			"node_modules",
 			"react-data-grid",
 			"dist",
-			fileName
+			fileName,
 		);
 		var filePath = path.join(constants.ExtensionRootDir, relativePath);
 		if (!fs.existsSync(filePath)) {
 			throw new Error(
 				"react-data-grid dist file not found '" +
 					filePath +
-					"' (pvsc post install script)"
+					"' (pvsc post install script)",
 			);
 		}
 		var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
@@ -185,30 +184,30 @@ function makeVariableExplorerAlwaysSorted() {
 			// tslint:disable-next-line:no-console
 			console.log(
 				colors.blue(
-					relativePath + " file already updated (by Jupyter VSC)"
-				)
+					relativePath + " file already updated (by Jupyter VSC)",
+				),
 			);
 			return;
 		}
 		if (fileContents.indexOf(originalCode) > 0) {
 			var replacedText = fileContents.replace(
 				originalCode,
-				alwaysSortedCode
+				alwaysSortedCode,
 			);
 			if (fileContents === replacedText) {
 				throw new Error(
-					`Fix for react-data-grid file ${fileName} failed (pvsc post install script)`
+					`Fix for react-data-grid file ${fileName} failed (pvsc post install script)`,
 				);
 			}
 			fs.writeFileSync(filePath, replacedText);
 			// tslint:disable-next-line:no-console
 			console.log(
-				colors.green(relativePath + " file updated (by Jupyter VSC)")
+				colors.green(relativePath + " file updated (by Jupyter VSC)"),
 			);
 		} else {
 			// tslint:disable-next-line:no-console
 			console.log(
-				colors.red(relativePath + " file does not need updating.")
+				colors.red(relativePath + " file does not need updating."),
 			);
 		}
 	}
@@ -237,8 +236,8 @@ function fixJupyterLabRenderers() {
 			filePath,
 			fileContents.replace(
 				textToReplace,
-				`import { marked } from 'marked'`
-			)
+				`import { marked } from 'marked'`,
+			),
 		);
 	});
 	if (warnings.length === 2) {
@@ -289,7 +288,7 @@ function fixUIFabricForTS49() {
  */
 function verifyMomentIsOnlyUsedByJupyterLabCoreUtils() {
 	const packageLock = require(
-		path.join(__dirname, "..", "..", "package-lock.json")
+		path.join(__dirname, "..", "..", "package-lock.json"),
 	);
 	const packagesAllowedToUseMoment = [
 		"node_modules/@jupyterlab/coreutils",
@@ -299,7 +298,7 @@ function verifyMomentIsOnlyUsedByJupyterLabCoreUtils() {
 	["packages", "dependencies"].forEach((key) => {
 		if (!(key in packageLock)) {
 			throw new Error(
-				`Invalid package-lock.json, as it does not contain the key '${key}'`
+				`Invalid package-lock.json, as it does not contain the key '${key}'`,
 			);
 		}
 		const packages = packageLock[key];
@@ -316,7 +315,7 @@ function verifyMomentIsOnlyUsedByJupyterLabCoreUtils() {
 						packages[packageName][dependencyKey];
 					if ("moment" in dependenciesOfPackage) {
 						otherPackagesUsingMoment.push(
-							`${key}.${dependencyKey}.${packageName}`
+							`${key}.${dependencyKey}.${packageName}`,
 						);
 					}
 				}
@@ -329,8 +328,8 @@ function verifyMomentIsOnlyUsedByJupyterLabCoreUtils() {
 		// Else we might have to either polyfill that to ensure moment usage works or just bring in moment back again.
 		throw new Error(
 			`Moment is being used by other packages (${otherPackagesUsingMoment.join(
-				", "
-			)}).`
+				", ",
+			)}).`,
 		);
 	}
 }
@@ -405,7 +404,7 @@ function fixUiFabricCompilationIssues() {
 		const newSource = lines.reduce(
 			(source, line) =>
 				source.replace(line, `${EOL}// @ts-ignore${EOL}${line}`),
-			source
+			source,
 		);
 
 		if (newSource !== source && !source.includes("// @ts-ignore")) {
@@ -420,13 +419,13 @@ function ensureOrigNBFormatIsOptional() {
 		__dirname,
 		"..",
 		"..",
-		"node_modules/@jupyterlab/nbformat/lib/index.d.ts"
+		"node_modules/@jupyterlab/nbformat/lib/index.d.ts",
 	);
 	const source = fs.readFileSync(filePath, "utf8");
 	if (source.includes(stringToReplace)) {
 		fs.writeFileSync(
 			filePath,
-			source.replace(stringToReplace, "orig_nbformat?: number;")
+			source.replace(stringToReplace, "orig_nbformat?: number;"),
 		);
 	}
 }
@@ -439,7 +438,7 @@ function commentOutInvalidExport() {
 		__dirname,
 		"..",
 		"..",
-		"node_modules/react-virtualized/dist/es/WindowScroller/utils/onScroll.js"
+		"node_modules/react-virtualized/dist/es/WindowScroller/utils/onScroll.js",
 	);
 	const source = fs.readFileSync(filePath, "utf8");
 	if (source.includes(stringToReplace)) {

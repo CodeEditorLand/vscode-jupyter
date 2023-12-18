@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { Event, extensions, NotebookEditor, window } from "vscode";
+import { Event, NotebookEditor, extensions, window } from "vscode";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
 import { RendererExtension } from "../../../platform/common/constants";
-import { dispose } from "../../../platform/common/utils/lifecycle";
 import { IDisposable } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { noop } from "../../../platform/common/utils/misc";
 import { PlotViewHandler } from "./plotViewHandler";
 import { IPlotSaveHandler } from "./types";
@@ -72,7 +72,7 @@ export class RendererCommunication
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

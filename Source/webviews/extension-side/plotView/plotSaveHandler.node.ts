@@ -20,10 +20,10 @@ export class PlotSaveHandler extends PlotSaveHandlerBase {
 
 	protected override async saveAsPdf(
 		output: NotebookCellOutput,
-		target: Uri
+		target: Uri,
 	) {
 		const svgXml = Buffer.from(
-			output.items.find((item) => item.mime === svgMimeType)!.data
+			output.items.find((item) => item.mime === svgMimeType)!.data,
 		).toString();
 		await saveSvgToPdf(svgXml, this.fsNode, target);
 	}

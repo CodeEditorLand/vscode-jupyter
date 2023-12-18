@@ -56,7 +56,8 @@ export class SvgList extends React.Component<ISvgListProps> {
 					// See the comments here: https://github.com/Microsoft/tslint-microsoft-contrib/issues/676
 					// eslint-disable-next-line
 					onKeyDown={keyDownHandler}
-					key={index}>
+					key={index}
+				>
 					<div className="svg-list-item-image">
 						<SvgLoader svgXML={image}></SvgLoader>
 					</div>
@@ -67,7 +68,7 @@ export class SvgList extends React.Component<ISvgListProps> {
 
 	private onKeyDown = (
 		event: React.KeyboardEvent<HTMLDivElement>,
-		index: number
+		index: number,
 	) => {
 		// Enter and Space commit an action the same as a click does
 		if (event.key === "Enter" || event.key === " ") {

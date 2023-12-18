@@ -3,9 +3,9 @@
 
 import * as Redux from "redux";
 import {
+	IInteractiveWindowMapping,
 	InteractiveWindowMessages,
 	SharedMessages,
-	IInteractiveWindowMapping,
 } from "../../../../messageTypes";
 import { BaseReduxActionPayload } from "../../../types";
 import { QueueAnotherFunc } from "../../react-common/reduxUtils";
@@ -53,7 +53,7 @@ export function postActionToExtension<
 export function postActionToExtension(
 	originalReducerArg: ReducerArg,
 	message: any,
-	payload?: any
+	payload?: any,
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const newPayload: BaseReduxActionPayload<any> = {

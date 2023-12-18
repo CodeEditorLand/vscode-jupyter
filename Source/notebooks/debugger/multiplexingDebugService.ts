@@ -18,11 +18,11 @@ import {
 	commands,
 } from "vscode";
 import { DebugProtocol } from "vscode-debugprotocol";
-import { IJupyterDebugService } from "./debuggingTypes";
 import { IDebugService } from "../../platform/common/application/types";
 import { Identifiers } from "../../platform/common/constants";
 import { IDisposableRegistry } from "../../platform/common/types";
 import { noop } from "../../platform/common/utils/misc";
+import { IJupyterDebugService } from "./debuggingTypes";
 
 /**
  * IJupyterDebugService that will pick the correct debugger based on if doing run by line or normal debugging.
@@ -134,17 +134,17 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 	}
 	public registerDebugConfigurationProvider(
 		debugType: string,
-		provider: DebugConfigurationProvider
+		provider: DebugConfigurationProvider,
 	): Disposable {
 		const d1 = this.vscodeDebugService.registerDebugConfigurationProvider(
 			debugType,
-			provider
+			provider,
 		);
 		if (this.jupyterDebugService) {
 			const d2 =
 				this.jupyterDebugService.registerDebugConfigurationProvider(
 					debugType,
-					provider
+					provider,
 				);
 			return this.combineDisposables(d1, d2);
 		}
@@ -152,17 +152,17 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 	}
 	public registerDebugAdapterTrackerFactory(
 		debugType: string,
-		factory: DebugAdapterTrackerFactory
+		factory: DebugAdapterTrackerFactory,
 	): Disposable {
 		const d1 = this.vscodeDebugService.registerDebugAdapterTrackerFactory(
 			debugType,
-			factory
+			factory,
 		);
 		if (this.jupyterDebugService) {
 			const d2 =
 				this.jupyterDebugService.registerDebugAdapterTrackerFactory(
 					debugType,
-					factory
+					factory,
 				);
 			return this.combineDisposables(d1, d2);
 		}
@@ -171,13 +171,13 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 	public startDebugging(
 		folder: WorkspaceFolder | undefined,
 		nameOrConfiguration: string | DebugConfiguration,
-		parentSession?: DebugSession | undefined
+		parentSession?: DebugSession | undefined,
 	): Thenable<boolean> {
 		this.lastStartedService = this.vscodeDebugService;
 		return this.vscodeDebugService.startDebugging(
 			folder,
 			nameOrConfiguration,
-			parentSession
+			parentSession,
 		);
 	}
 	public addBreakpoints(breakpoints: Breakpoint[]): void {
@@ -195,7 +195,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 			return this.jupyterDebugService.getStack();
 		}
 		throw new Error(
-			"Requesting jupyter specific stack when not debugging."
+			"Requesting jupyter specific stack when not debugging.",
 		);
 	}
 	public step(): Promise<void> {
@@ -224,7 +224,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 			return this.jupyterDebugService.requestVariables();
 		}
 		throw new Error(
-			"Requesting jupyter specific variables when not debugging."
+			"Requesting jupyter specific variables when not debugging.",
 		);
 	}
 

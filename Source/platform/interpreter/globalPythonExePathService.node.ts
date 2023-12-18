@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
 import { Uri } from "vscode";
-import * as path from "../vscode-path/resources";
-import { EnvironmentType } from "../pythonEnvironments/info";
-import { IFileSystem, IPlatformService } from "../common/platform/types";
-import { swallowExceptions } from "../common/utils/decorators";
-import { IProcessServiceFactory } from "../common/process/types.node";
-import { traceVerbose } from "../logging";
 import { getDisplayPath } from "../common/platform/fs-paths";
-import { Environment } from "@vscode/python-extension";
-import { getEnvironmentType } from "./helpers";
+import { IFileSystem, IPlatformService } from "../common/platform/types";
+import { IProcessServiceFactory } from "../common/process/types.node";
+import { swallowExceptions } from "../common/utils/decorators";
 import { ResourceMap } from "../common/utils/map";
+import { traceVerbose } from "../logging";
+import { EnvironmentType } from "../pythonEnvironments/info";
+import * as path from "../vscode-path/resources";
+import { getEnvironmentType } from "./helpers";
 
 @injectable()
 export class GlobalPythonExecutablePathService {
@@ -31,7 +31,7 @@ export class GlobalPythonExecutablePathService {
 	 */
 	@swallowExceptions()
 	public async getExecutablesPath(
-		environment: Environment
+		environment: Environment,
 	): Promise<Uri | undefined> {
 		const executable = environment.executable.uri;
 		if (
@@ -77,7 +77,7 @@ export class GlobalPythonExecutablePathService {
 	 *
 	 */
 	private async getUserSitePathImpl(
-		executable: Uri
+		executable: Uri,
 	): Promise<Uri | undefined> {
 		const processService = await this.processFactory.create(undefined);
 		const delimiter = "USER_BASE_VALUE";
@@ -91,7 +91,7 @@ export class GlobalPythonExecutablePathService {
 			const output = stdout
 				.substring(
 					stdout.indexOf(delimiter) + delimiter.length,
-					stdout.lastIndexOf(delimiter)
+					stdout.lastIndexOf(delimiter),
 				)
 				.trim();
 			const outputPath = Uri.file(output);
@@ -106,21 +106,21 @@ export class GlobalPythonExecutablePathService {
 					`USER_SITE ${
 						sitePath.fsPath
 					} dir does not exist for the interpreter ${getDisplayPath(
-						executable
-					)}`
+						executable,
+					)}`,
 				);
 			}
 			traceVerbose(
 				`USER_SITE for ${getDisplayPath(executable)} is ${
 					sitePath.fsPath
-				}`
+				}`,
 			);
 			return sitePath;
 		} else {
 			throw new Error(
 				`USER_SITE not found for the interpreter ${getDisplayPath(
-					executable
-				)}. Stdout: ${stdout}`
+					executable,
+				)}. Stdout: ${stdout}`,
 			);
 		}
 	}

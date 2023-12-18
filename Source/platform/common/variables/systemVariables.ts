@@ -14,10 +14,10 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 	public resolve(value: string[]): string[];
 	public resolve(value: IStringDictionary<string>): IStringDictionary<string>;
 	public resolve(
-		value: IStringDictionary<string[]>
+		value: IStringDictionary<string[]>,
 	): IStringDictionary<string[]>;
 	public resolve(
-		value: IStringDictionary<IStringDictionary<string>>
+		value: IStringDictionary<IStringDictionary<string>>,
 	): IStringDictionary<IStringDictionary<string>>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public resolve(value: any): any {
@@ -63,7 +63,9 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 	}
 
 	private __resolveLiteral(
-		values: IStringDictionary<string | IStringDictionary<string> | string[]>
+		values: IStringDictionary<
+			string | IStringDictionary<string> | string[]
+		>,
 	): IStringDictionary<string | IStringDictionary<string> | string[]> {
 		const result: IStringDictionary<
 			string | IStringDictionary<string> | string[]

@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { traceInfo } from "../../logging";
+import { toCommandArgument } from "../helpers";
+import { getDisplayPath } from "../platform/fs-paths.node";
 import { Logging } from "../utils/localize";
 import { SpawnOptions } from "./types.node";
-import { getDisplayPath } from "../platform/fs-paths.node";
-import { toCommandArgument } from "../helpers";
 
 /***
  * Logs the running of a new process. Does not log stdout/stderr.
@@ -13,7 +13,7 @@ import { toCommandArgument } from "../helpers";
 export function logProcess(
 	file: string,
 	args: string[],
-	options?: SpawnOptions
+	options?: SpawnOptions,
 ) {
 	const argsList = args.reduce((accumulator, current, index) => {
 		let formattedArg = toCommandArgument(current);
@@ -33,8 +33,8 @@ export function logProcess(
 	if (options && options.cwd) {
 		message.push(
 			`    > ${Logging.currentWorkingDirectory} ${getDisplayPath(
-				options.cwd.toString()
-			)}`
+				options.cwd.toString(),
+			)}`,
 		);
 	}
 	traceInfo(message.join("\n"));

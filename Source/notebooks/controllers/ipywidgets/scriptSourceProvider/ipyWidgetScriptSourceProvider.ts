@@ -1,15 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { traceError, traceInfo } from "../../../../platform/logging";
+import type {
+	IAnyMessageArgs,
+	IKernelConnection,
+} from "@jupyterlab/services/lib/kernel/kernel";
+import type { ICommOpenMsg } from "@jupyterlab/services/lib/kernel/messages";
+import { Disposable } from "vscode";
+import { IKernel } from "../../../../kernels/types";
 import {
-	WidgetCDNs,
 	IConfigurationService,
 	IDisposable,
+	WidgetCDNs,
 } from "../../../../platform/common/types";
-import { sendTelemetryEvent, Telemetry } from "../../../../telemetry";
+import { swallowExceptions } from "../../../../platform/common/utils/decorators";
+import { dispose } from "../../../../platform/common/utils/lifecycle";
+import { noop } from "../../../../platform/common/utils/misc";
+import { traceError, traceInfo } from "../../../../platform/logging";
 import { getTelemetrySafeHashedString } from "../../../../platform/telemetry/helpers";
-import { IKernel } from "../../../../kernels/types";
+import { Telemetry, sendTelemetryEvent } from "../../../../telemetry";
 import {
 	ILocalResourceUriConverter,
 	IWidgetScriptSourceProvider,
@@ -17,15 +26,6 @@ import {
 	WidgetScriptSource,
 } from "../types";
 import { CDNWidgetScriptSourceProvider } from "./cdnWidgetScriptSourceProvider";
-import { dispose } from "../../../../platform/common/utils/lifecycle";
-import { Disposable } from "vscode";
-import type {
-	IAnyMessageArgs,
-	IKernelConnection,
-} from "@jupyterlab/services/lib/kernel/kernel";
-import type { ICommOpenMsg } from "@jupyterlab/services/lib/kernel/messages";
-import { swallowExceptions } from "../../../../platform/common/utils/decorators";
-import { noop } from "../../../../platform/common/utils/misc";
 
 /**
  * This class decides where to get widget scripts from.
@@ -49,11 +49,11 @@ export class IPyWidgetScriptSourceProvider
 		private readonly configurationSettings: IConfigurationService,
 		private readonly sourceProviderFactory: IWidgetScriptSourceProviderFactory,
 		private readonly isWebViewOnline: Promise<boolean>,
-		private readonly cdnScriptProvider: CDNWidgetScriptSourceProvider
+		private readonly cdnScriptProvider: CDNWidgetScriptSourceProvider,
 	) {
 		this.scriptProviders = this.sourceProviderFactory.getProviders(
 			this.kernel,
-			this.localResourceUriConverter
+			this.localResourceUriConverter,
 		);
 		this.monitorKernel();
 	}
@@ -76,7 +76,7 @@ export class IPyWidgetScriptSourceProvider
 				if (item.getWidgetScriptSources) {
 					sources.push(...(await item.getWidgetScriptSources()));
 				}
-			})
+			}),
 		);
 		return sources;
 	}
@@ -85,7 +85,7 @@ export class IPyWidgetScriptSourceProvider
 	 */
 	public async getWidgetScriptSource(
 		moduleName: string,
-		moduleVersion: string
+		moduleVersion: string,
 	): Promise<Readonly<WidgetScriptSource>> {
 		const isWebViewOnline = await this.isWebViewOnline;
 
@@ -100,7 +100,7 @@ export class IPyWidgetScriptSourceProvider
 			const source = await scriptProvider.getWidgetScriptSource(
 				moduleName,
 				moduleVersion,
-				isWebViewOnline
+				isWebViewOnline,
 			);
 			// If we found the script source, then use that.
 			if (source.scriptUri) {
@@ -112,15 +112,15 @@ export class IPyWidgetScriptSourceProvider
 			moduleName,
 			moduleVersion,
 			"",
-			found.source
+			found.source,
 		).catch(noop);
-		if (!found.scriptUri) {
-			traceError(
-				`Script source for Widget ${moduleName}@${moduleVersion} not found`
+		if (found.scriptUri) {
+			traceInfo(
+				`Script source for Widget ${moduleName}@${moduleVersion} was found from source ${found.source}`,
 			);
 		} else {
-			traceInfo(
-				`Script source for Widget ${moduleName}@${moduleVersion} was found from source ${found.source}`
+			traceError(
+				`Script source for Widget ${moduleName}@${moduleVersion} not found`,
 			);
 		}
 		return found;
@@ -130,7 +130,7 @@ export class IPyWidgetScriptSourceProvider
 		moduleName: string,
 		moduleVersion: string,
 		modelName: string,
-		source?: "cdn" | "local" | "remote"
+		source?: "cdn" | "local" | "remote",
 	) {
 		const key = `${moduleName}.${moduleName}@${moduleVersion}`;
 		if (IPyWidgetScriptSourceProvider.trackedWidgetModuleNames.has(key)) {
@@ -188,7 +188,7 @@ export class IPyWidgetScriptSourceProvider
 		this.kernel.onDidKernelSocketChange(
 			() => this.hookKernelEvents(),
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private hookKernelEvents() {
@@ -199,8 +199,8 @@ export class IPyWidgetScriptSourceProvider
 		kernelConnection.anyMessage.connect(this.onAnyMessage, this);
 		this.disposables.push(
 			new Disposable(() =>
-				kernelConnection.anyMessage.disconnect(this.onAnyMessage, this)
-			)
+				kernelConnection.anyMessage.disconnect(this.onAnyMessage, this),
+			),
 		);
 	}
 	@swallowExceptions()
@@ -223,7 +223,7 @@ export class IPyWidgetScriptSourceProvider
 				this.sendTelemetryForWidgetModule(
 					data.state?._model_module,
 					data.state?._model_module_version || "",
-					data.state?._model_name
+					data.state?._model_name,
 				).catch(noop);
 			}
 		}

@@ -19,10 +19,12 @@ export class KernelDeadError extends WrappedKernelError {
 	constructor(kernelConnectionMetadata: KernelConnectionMetadata) {
 		super(
 			DataScience.kernelDiedWithoutError(
-				getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)
+				getDisplayNameOrNameOfKernelConnection(
+					kernelConnectionMetadata,
+				),
 			),
 			undefined,
-			kernelConnectionMetadata
+			kernelConnectionMetadata,
 		);
 	}
 }

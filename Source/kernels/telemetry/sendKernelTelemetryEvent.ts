@@ -3,17 +3,17 @@
 
 import { Resource } from "../../platform/common/types";
 import {
-	sendTelemetryEvent,
-	IEventNamePropertyMapping,
-	TelemetryEventInfo,
-} from "../../telemetry";
-import { getContextualPropsForTelemetry } from "../../platform/telemetry/telemetry";
-import {
 	ExcludeType,
-	noop,
 	PickType,
 	UnionToIntersection,
+	noop,
 } from "../../platform/common/utils/misc";
+import { getContextualPropsForTelemetry } from "../../platform/telemetry/telemetry";
+import {
+	IEventNamePropertyMapping,
+	TelemetryEventInfo,
+	sendTelemetryEvent,
+} from "../../telemetry";
 
 export function sendKernelTelemetryEvent<
 	P extends IEventNamePropertyMapping,
@@ -31,7 +31,7 @@ export function sendKernelTelemetryEvent<
 			? undefined
 			: Partial<ExcludeType<R, number>>
 		: undefined | undefined,
-	ex?: Error | undefined
+	ex?: Error | undefined,
 ) {
 	getContextualPropsForTelemetry(resource)
 		.then((props) => {
@@ -41,7 +41,7 @@ export function sendKernelTelemetryEvent<
 				eventName as any,
 				measures as any,
 				props as any,
-				ex
+				ex,
 			);
 		})
 		.catch(noop);

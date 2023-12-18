@@ -4,14 +4,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
 import { inject, injectable } from "inversify";
-import { traceError } from "../platform/logging";
+import { JupyterConnection } from "../kernels/jupyter/connection/jupyterConnection";
 import {
 	IJupyterServerProviderRegistry,
 	IJupyterServerUriStorage,
 	JupyterServerProviderHandle,
 } from "../kernels/jupyter/types";
-import { JupyterConnection } from "../kernels/jupyter/connection/jupyterConnection";
 import { CodespaceExtensionId } from "../platform/common/constants";
+import { traceError } from "../platform/logging";
 
 export type SelectJupyterUriCommandSource =
 	| "nonUser"
@@ -37,7 +37,7 @@ export class CodespacesJupyterServerSelector {
 	) {}
 
 	public async addJupyterServer(
-		provider: JupyterServerProviderHandle
+		provider: JupyterServerProviderHandle,
 	): Promise<void> {
 		if (
 			provider.extensionId.toLowerCase() !=
@@ -51,7 +51,7 @@ export class CodespacesJupyterServerSelector {
 		} catch (err) {
 			traceError(
 				`Error in validating the Remote Uri ${provider.id}.${provider.handle}`,
-				err
+				err,
 			);
 			return;
 		}
@@ -60,7 +60,7 @@ export class CodespacesJupyterServerSelector {
 		// Only codespaces uses the old API.
 		if (
 			!this.serverProviderRegistry.jupyterCollections.some(
-				(c) => c.extensionId === provider.extensionId
+				(c) => c.extensionId === provider.extensionId,
 			)
 		) {
 			await this.serverUriStorage.add(provider);

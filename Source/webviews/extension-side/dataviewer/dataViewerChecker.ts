@@ -16,7 +16,7 @@ export class DataViewerChecker {
 
 	public async isRequestedColumnSizeAllowed(
 		columnSize: number,
-		owningResource?: Resource
+		owningResource?: Resource,
 	): Promise<boolean> {
 		if (
 			columnSize > ColumnWarningSize &&
@@ -31,7 +31,7 @@ export class DataViewerChecker {
 				message,
 				yes,
 				no,
-				dontAskAgain
+				dontAskAgain,
 			);
 			if (result === dontAskAgain) {
 				await this.disableAskForLargeData();
@@ -42,7 +42,7 @@ export class DataViewerChecker {
 	}
 
 	private async shouldAskForLargeData(
-		owningResource?: Resource
+		owningResource?: Resource,
 	): Promise<boolean> {
 		const settings = owningResource
 			? this.configuration.getSettings(owningResource)
@@ -51,7 +51,7 @@ export class DataViewerChecker {
 	}
 
 	private async disableAskForLargeData(
-		owningResource?: Resource
+		owningResource?: Resource,
 	): Promise<void> {
 		const settings = owningResource
 			? this.configuration.getSettings(owningResource)
@@ -63,7 +63,7 @@ export class DataViewerChecker {
 					"askForLargeDataFrames",
 					false,
 					undefined,
-					ConfigurationTarget.Global
+					ConfigurationTarget.Global,
 				)
 				.catch(noop);
 		}

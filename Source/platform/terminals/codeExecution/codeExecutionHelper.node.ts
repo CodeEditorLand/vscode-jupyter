@@ -4,16 +4,16 @@
 import { inject, injectable } from "inversify";
 import { Uri } from "vscode";
 
-import { traceError } from "../../logging";
-import * as internalScripts from "../../interpreter/internal/scripts/index.node";
-import { getFilePath } from "../../common/platform/fs-paths";
-import { CodeExecutionHelperBase } from "./codeExecutionHelper";
-import { IProcessServiceFactory } from "../../common/process/types.node";
-import { IInterpreterService } from "../../interpreter/contracts";
-import { IServiceContainer } from "../../ioc/types";
 import { splitLines } from "../../common/helpers";
+import { getFilePath } from "../../common/platform/fs-paths";
+import { IProcessServiceFactory } from "../../common/process/types.node";
 import { IDisposable } from "../../common/types";
 import { dispose } from "../../common/utils/lifecycle";
+import { IInterpreterService } from "../../interpreter/contracts";
+import * as internalScripts from "../../interpreter/internal/scripts/index.node";
+import { IServiceContainer } from "../../ioc/types";
+import { traceError } from "../../logging";
+import { CodeExecutionHelperBase } from "./codeExecutionHelper";
 
 /**
  * Node version of the code execution helper. Node version is necessary because we can't create processes in the web version.
@@ -37,7 +37,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 
 	public override async normalizeLines(
 		code: string,
-		resource?: Uri
+		resource?: Uri,
 	): Promise<string> {
 		const disposables: IDisposable[] = [];
 		try {
@@ -47,7 +47,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 			}
 			// On windows cr is not handled well by python when passing in/out via stdin/stdout.
 			// So just remove cr from the input.
-			code = code.replace(new RegExp("\\r", "g"), "");
+			code = code.replace(/\r/g, "");
 			if (codeTrimmed.indexOf("\n") === -1) {
 				// the input is a single line, maybe indented, without terminator
 				return codeTrimmed + "\n";
@@ -64,7 +64,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				args,
 				{
 					throwOnStdErr: true,
-				}
+				},
 			);
 
 			// Read result from the normalization script from stdout, and resolve the promise when done.
@@ -76,7 +76,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 					}
 				},
 				this,
-				disposables
+				disposables,
 			);
 
 			// The normalization script expects a serialized JSON object, with the selection under the "code" key.
@@ -101,7 +101,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				{
 					trim: true,
 					removeEmptyEntries: false,
-				}
+				},
 			).findIndex((line) => line.length);
 			if (
 				indexOfFirstNonEmptyLineInOriginalCode >
@@ -117,7 +117,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 		} catch (ex) {
 			traceError(
 				ex,
-				"Python: Failed to normalize code for execution in Interactive Window"
+				"Python: Failed to normalize code for execution in Interactive Window",
 			);
 			return code;
 		} finally {

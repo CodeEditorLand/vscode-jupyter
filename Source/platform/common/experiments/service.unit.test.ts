@@ -5,15 +5,15 @@ import { assert } from "chai";
 import * as sinon from "sinon";
 import { anything, instance, mock, when } from "ts-mockito";
 import * as tasClient from "vscode-tas-client";
+import { MockMemento } from "../../../test/mocks/mementos";
+import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
+import * as Telemetry from "../../telemetry/index";
 import { ApplicationEnvironment } from "../application/applicationEnvironment";
 import { IApplicationEnvironment } from "../application/types";
 import { ConfigurationService } from "../configuration/service.node";
-import { ExperimentService } from "./service";
 import { IConfigurationService } from "../types";
-import * as Telemetry from "../../telemetry/index";
-import { MockMemento } from "../../../test/mocks/mementos";
 import { Experiments } from "../types";
-import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
+import { ExperimentService } from "./service";
 suite("Experimentation service", () => {
 	let configurationService: IConfigurationService;
 	let appEnvironment: IApplicationEnvironment;
@@ -26,8 +26,8 @@ suite("Experimentation service", () => {
 		when(
 			mockedVSCodeNamespaces.workspace.getConfiguration(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenReturn({
 			get: () => [],
 			has: () => false,
@@ -44,7 +44,7 @@ suite("Experimentation service", () => {
 	function configureSettings(
 		enabled: boolean,
 		optInto: string[],
-		optOutFrom: string[]
+		optOutFrom: string[],
 	) {
 		when(configurationService.getSettings(undefined)).thenReturn({
 			experiments: {
@@ -65,7 +65,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 
 			assert.deepEqual(experimentService._optInto, ["Foo - experiment"]);
@@ -78,7 +78,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 
 			assert.deepEqual(experimentService._optOutFrom, [
@@ -103,7 +103,7 @@ suite("Experimentation service", () => {
 					(eventName: string, _, properties: object | undefined) => {
 						const telemetry = { eventName, properties };
 						telemetryEvents.push(telemetry);
-					}
+					},
 				);
 
 			sinon.stub(tasClient, "getExperimentationService").returns({
@@ -122,7 +122,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result = await experimentService.inExperiment(experiment);
 
@@ -136,7 +136,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result = await experimentService.inExperiment(experiment);
 
@@ -150,7 +150,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result = await experimentService.inExperiment(experiment);
 
@@ -163,7 +163,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result = await experimentService.inExperiment(experiment);
 
@@ -188,7 +188,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result =
 				await experimentService.getExperimentValue(experiment);
@@ -202,7 +202,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result =
 				await experimentService.getExperimentValue(experiment);
@@ -216,7 +216,7 @@ suite("Experimentation service", () => {
 			const experimentService = new ExperimentService(
 				instance(configurationService),
 				instance(appEnvironment),
-				globalMemento
+				globalMemento,
 			);
 			const result =
 				await experimentService.getExperimentValue(experiment);

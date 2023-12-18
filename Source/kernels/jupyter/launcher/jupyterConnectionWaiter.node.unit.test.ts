@@ -5,36 +5,36 @@
 
 import { assert, use } from "chai";
 
+import events from "events";
+import chaiAsPromised from "chai-as-promised";
+import sinon from "sinon";
 import { anything, instance, mock, when } from "ts-mockito";
 import { CancellationToken, Uri } from "vscode";
-import {
-	IJupyterRequestAgentCreator,
-	IJupyterRequestCreator,
-	JupyterServerInfo,
-} from "../types";
-import chaiAsPromised from "chai-as-promised";
-import events from "events";
-import sinon from "sinon";
 import { JupyterSettings } from "../../../platform/common/configSettings";
 import { ConfigurationService } from "../../../platform/common/configuration/service.node";
 import { IFileSystemNode } from "../../../platform/common/platform/types.node";
+import { createObservable } from "../../../platform/common/process/proc.node";
 import {
-	Output,
 	ObservableExecutionResult,
+	Output,
 } from "../../../platform/common/process/types.node";
 import {
 	IConfigurationService,
 	IDisposable,
 	IJupyterSettings,
 } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { DataScience } from "../../../platform/common/utils/localize";
 import { EXTENSION_ROOT_DIR } from "../../../platform/constants.node";
 import { ServiceContainer } from "../../../platform/ioc/container";
 import { IServiceContainer } from "../../../platform/ioc/types";
-import { JupyterConnectionWaiter } from "./jupyterConnectionWaiter.node";
 import { noop } from "../../../test/core";
-import { createObservable } from "../../../platform/common/process/proc.node";
-import { dispose } from "../../../platform/common/utils/lifecycle";
+import {
+	IJupyterRequestAgentCreator,
+	IJupyterRequestCreator,
+	JupyterServerInfo,
+} from "../types";
+import { JupyterConnectionWaiter } from "./jupyterConnectionWaiter.node";
 use(chaiAsPromised);
 suite("Jupyter Connection Waiter", async () => {
 	let observableOutput: ReturnType<typeof createObservable<Output<string>>>;
@@ -109,21 +109,23 @@ suite("Jupyter Connection Waiter", async () => {
 		const settings = mock(JupyterSettings);
 		getServerInfoStub.resolves(dummyServerInfos);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(settings)
+			instance(settings),
 		);
 		when(serviceContainer.get<IFileSystemNode>(IFileSystemNode)).thenReturn(
-			instance(fs)
+			instance(fs),
 		);
 		when(
-			serviceContainer.get<IConfigurationService>(IConfigurationService)
+			serviceContainer.get<IConfigurationService>(IConfigurationService),
 		).thenReturn(instance(configService));
 		when(
-			serviceContainer.get<IJupyterRequestCreator>(IJupyterRequestCreator)
+			serviceContainer.get<IJupyterRequestCreator>(
+				IJupyterRequestCreator,
+			),
 		).thenReturn(instance(mock<IJupyterRequestCreator>()));
 		when(
 			serviceContainer.get<IJupyterRequestAgentCreator>(
-				IJupyterRequestAgentCreator
-			)
+				IJupyterRequestAgentCreator,
+			),
 		).thenReturn(instance(mock<IJupyterRequestAgentCreator>()));
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -136,7 +138,7 @@ suite("Jupyter Connection Waiter", async () => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			getServerInfoStub as any,
 			instance(serviceContainer),
-			undefined
+			undefined,
 		);
 	}
 	test("Successfully gets connection info", async () => {
@@ -171,7 +173,7 @@ suite("Jupyter Connection Waiter", async () => {
 
 		await assert.isRejected(
 			promise,
-			DataScience.jupyterServerCrashed(exitCode)
+			DataScience.jupyterServerCrashed(exitCode),
 		);
 	});
 });

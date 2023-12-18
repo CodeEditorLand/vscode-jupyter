@@ -19,14 +19,14 @@ export class PersistentState<T> implements IPersistentState<T> {
 		private storage: Memento,
 		private key: string,
 		private defaultValue?: T,
-		private expiryDurationMs?: number
+		private expiryDurationMs?: number,
 	) {}
 
 	public get value(): T {
 		if (this.expiryDurationMs) {
 			const cachedData = this.storage.get<{ data?: T; expiry?: number }>(
 				this.key,
-				{ data: this.defaultValue! }
+				{ data: this.defaultValue! },
 			);
 			if (
 				!cachedData ||
@@ -65,25 +65,25 @@ export class PersistentStateFactory implements IPersistentStateFactory {
 	public createGlobalPersistentState<T>(
 		key: string,
 		defaultValue?: T,
-		expiryDurationMs?: number
+		expiryDurationMs?: number,
 	): IPersistentState<T> {
 		return new PersistentState<T>(
 			this.globalState,
 			key,
 			defaultValue,
-			expiryDurationMs
+			expiryDurationMs,
 		);
 	}
 	public createWorkspacePersistentState<T>(
 		key: string,
 		defaultValue?: T,
-		expiryDurationMs?: number
+		expiryDurationMs?: number,
 	): IPersistentState<T> {
 		return new PersistentState<T>(
 			this.workspaceState,
 			key,
 			defaultValue,
-			expiryDurationMs
+			expiryDurationMs,
 		);
 	}
 }

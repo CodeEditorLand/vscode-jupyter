@@ -4,9 +4,9 @@
 import { assert } from "chai";
 import { instance, mock, verify, when } from "ts-mockito";
 import { CancellationTokenSource, Memento, Uri } from "vscode";
-import { dispose } from "../../../platform/common/utils/lifecycle";
 import { IFileSystemNode } from "../../../platform/common/platform/types.node";
 import { IDisposable } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { uriEquals } from "../../../test/datascience/helpers";
 import { IJupyterKernelSpec } from "../../types";
 import { JupyterPaths } from "./jupyterPaths.node";
@@ -28,7 +28,7 @@ suite("Local Kernel Spec Finder", () => {
 		finder = new LocalKernelSpecFinder(
 			instance(fs),
 			instance(globalState),
-			instance(jupyterPaths)
+			instance(jupyterPaths),
 		);
 		disposables.push(finder);
 	});
@@ -52,13 +52,13 @@ suite("Local Kernel Spec Finder", () => {
 		};
 		const uri = Uri.file("path/to/kernel.json");
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec)
+			JSON.stringify(kernelSpec),
 		);
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec)
+			JSON.stringify(kernelSpec),
 		);
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec)
+			JSON.stringify(kernelSpec),
 		);
 
 		const loadedSpec = await finder.loadKernelSpec(uri, cancellation.token);
@@ -89,7 +89,7 @@ suite("Local Kernel Spec Finder", () => {
 		};
 		const uri = Uri.file("path/to/kernel.json");
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec)
+			JSON.stringify(kernelSpec),
 		);
 
 		await finder.loadKernelSpec(uri, cancellation.token);

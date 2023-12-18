@@ -29,7 +29,7 @@ export class JupyterKernelSpec implements IJupyterKernelSpec {
 		public readonly isRegisteredByVSC?:
 			| "registeredByNewVersionOfExt"
 			| "registeredByOldVersionOfExt"
-			| "registeredByNewVersionOfExtForCustomKernelSpec"
+			| "registeredByNewVersionOfExtForCustomKernelSpec",
 	) {
 		this.name = specModel.name;
 		this.argv = specModel.argv;

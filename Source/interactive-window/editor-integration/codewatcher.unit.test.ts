@@ -18,38 +18,38 @@ import {
 } from "vscode";
 
 import { anything, instance, mock, when } from "ts-mockito";
+import {
+	IInteractiveWindow,
+	IInteractiveWindowProvider,
+} from "../../interactive-window/types";
+import { IDataScienceErrorHandler } from "../../kernels/errors/types";
+import { IKernel, IKernelProvider } from "../../kernels/types";
+import { IDebugLocationTracker } from "../../notebooks/debugger/debuggingTypes";
 import { IDebugService } from "../../platform/common/application/types";
+import { Commands, EditorContexts } from "../../platform/common/constants";
 import { IFileSystem } from "../../platform/common/platform/types";
 import { IConfigurationService } from "../../platform/common/types";
-import { CodeLensFactory } from "./codeLensFactory";
-import { DataScienceCodeLensProvider } from "./codelensprovider";
-import { CodeWatcher } from "./codewatcher";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { SystemVariables } from "../../platform/common/variables/systemVariables.node";
+import { InteractiveCellResultError } from "../../platform/errors/interactiveCellResultError";
 import { IServiceContainer } from "../../platform/ioc/types";
 import { ICodeExecutionHelper } from "../../platform/terminals/types";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import { IKernel, IKernelProvider } from "../../kernels/types";
-import { InteractiveCellResultError } from "../../platform/errors/interactiveCellResultError";
-import { ICodeWatcher, IGeneratedCodeStorageFactory } from "./types";
-import {
-	IInteractiveWindowProvider,
-	IInteractiveWindow,
-} from "../../interactive-window/types";
-import { Commands, EditorContexts } from "../../platform/common/constants";
-import { SystemVariables } from "../../platform/common/variables/systemVariables.node";
-import { IDebugLocationTracker } from "../../notebooks/debugger/debuggingTypes";
-import { IDataScienceErrorHandler } from "../../kernels/errors/types";
+import { noop } from "../../test/core";
 import { createDocument } from "../../test/datascience/editor-integration/helpers";
 import { MockDocumentManager } from "../../test/datascience/mockDocumentManager";
 import { MockJupyterSettings } from "../../test/datascience/mockJupyterSettings";
 import { MockEditor } from "../../test/datascience/mockTextEditor";
-import { noop } from "../../test/core";
 import { mockedVSCodeNamespaces } from "../../test/vscode-mock";
+import { CodeLensFactory } from "./codeLensFactory";
+import { DataScienceCodeLensProvider } from "./codelensprovider";
+import { CodeWatcher } from "./codewatcher";
+import { ICodeWatcher, IGeneratedCodeStorageFactory } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 function initializeMockTextEditor(
 	codeWatcher: CodeWatcher,
-	inputText: string
+	inputText: string,
 ): MockEditor {
 	const fileName = Uri.file("test.py").fsPath;
 	const version = 1;
@@ -58,7 +58,7 @@ function initializeMockTextEditor(
 		fileName,
 		version,
 		TypeMoq.Times.atLeastOnce(),
-		true
+		true,
 	);
 	codeWatcher.setDocument(document.object);
 
@@ -68,7 +68,7 @@ function initializeMockTextEditor(
 	const mockDocument = mockDocumentManager.addDocument(inputText, fileName);
 	const mockTextEditor = new MockEditor(mockDocumentManager, mockDocument);
 	when(mockedVSCodeNamespaces.window.activeTextEditor).thenReturn(
-		mockTextEditor
+		mockTextEditor,
 	);
 	mockTextEditor.selection = new Selection(0, 0, 0, 0);
 	return mockTextEditor;
@@ -106,7 +106,7 @@ suite("Code Watcher Unit Tests", () => {
 		jupyterSettings = new MockJupyterSettings(
 			undefined,
 			SystemVariables,
-			"node"
+			"node",
 		);
 		jupyterSettings.assign({
 			jupyterLaunchTimeout: 20000,
@@ -142,7 +142,7 @@ suite("Code Watcher Unit Tests", () => {
 		// Setup the file system
 		fileSystem
 			.setup((f) =>
-				f.arePathsSame(TypeMoq.It.isAny(), TypeMoq.It.isAny())
+				f.arePathsSame(TypeMoq.It.isAny(), TypeMoq.It.isAny()),
 			)
 			.returns(() => true);
 
@@ -154,19 +154,19 @@ suite("Code Watcher Unit Tests", () => {
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(true);
 		const trustedEvent = new EventEmitter<void>();
 		when(
-			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust
+			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust,
 		).thenReturn(trustedEvent.event);
 		const execStateChangeEvent =
 			new EventEmitter<NotebookCellExecutionStateChangeEvent>();
 		when(
 			mockedVSCodeNamespaces.notebooks
-				.onDidChangeNotebookCellExecutionState
+				.onDidChangeNotebookCellExecutionState,
 		).thenReturn(execStateChangeEvent.event);
 		const storageFactory = mock<IGeneratedCodeStorageFactory>();
 		const kernelProvider = mock<IKernelProvider>();
 		const kernelDisposedEvent = new EventEmitter<IKernel>();
 		when(kernelProvider.onDidDisposeKernel).thenReturn(
-			kernelDisposedEvent.event
+			kernelDisposedEvent.event,
 		);
 		disposables.push(trustedEvent);
 		disposables.push(execStateChangeEvent);
@@ -175,7 +175,7 @@ suite("Code Watcher Unit Tests", () => {
 			configService.object,
 			disposables,
 			instance(storageFactory),
-			instance(kernelProvider)
+			instance(kernelProvider),
 		);
 		serviceContainer
 			.setup((c) => c.get(TypeMoq.It.isValue(ICodeWatcher)))
@@ -186,8 +186,8 @@ suite("Code Watcher Unit Tests", () => {
 						configService.object,
 						helper.object,
 						dataScienceErrorHandler.object,
-						codeLensFactory
-					)
+						codeLensFactory,
+					),
 			);
 
 		// Setup our error handler
@@ -201,15 +201,15 @@ suite("Code Watcher Unit Tests", () => {
 
 		// Setup our active text editor
 		when(mockedVSCodeNamespaces.window.activeTextEditor).thenReturn(
-			textEditor.object
+			textEditor.object,
 		);
 
 		when(
 			mockedVSCodeNamespaces.commands.executeCommand(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((c, n, v) => {
 			if (c === "setContext") {
 				contexts.set(n, v);
@@ -222,7 +222,7 @@ suite("Code Watcher Unit Tests", () => {
 			configService.object,
 			helper.object,
 			dataScienceErrorHandler.object,
-			codeLensFactory
+			codeLensFactory,
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -239,32 +239,32 @@ suite("Code Watcher Unit Tests", () => {
 		codeLenses: CodeLens[],
 		startLensIndex: number,
 		targetRange: Range,
-		firstCell: boolean = false,
-		markdownCell: boolean = false
+		firstCell = false,
+		markdownCell = false,
 	) {
 		if (codeLenses[startLensIndex].command) {
 			expect(codeLenses[startLensIndex].command!.command).to.be.equal(
 				Commands.RunCell,
-				"Run Cell code lens command incorrect"
+				"Run Cell code lens command incorrect",
 			);
 		}
 		expect(codeLenses[startLensIndex].range).to.be.deep.equal(
 			targetRange,
-			"Run Cell code lens range incorrect"
+			"Run Cell code lens range incorrect",
 		);
 
 		if (!firstCell) {
 			if (codeLenses[startLensIndex + 1].command) {
 				expect(
-					codeLenses[startLensIndex + 1].command!.command
+					codeLenses[startLensIndex + 1].command!.command,
 				).to.be.equal(
 					Commands.RunAllCellsAbove,
-					"Run Above code lens command incorrect"
+					"Run Above code lens command incorrect",
 				);
 			}
 			expect(codeLenses[startLensIndex + 1].range).to.be.deep.equal(
 				targetRange,
-				"Run Above code lens range incorrect"
+				"Run Above code lens range incorrect",
 			);
 		}
 
@@ -272,43 +272,43 @@ suite("Code Watcher Unit Tests", () => {
 			const indexAdd = 2;
 			if (codeLenses[startLensIndex + indexAdd].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd].command!.command
+					codeLenses[startLensIndex + indexAdd].command!.command,
 				).to.be.equal(Commands.DebugCell, "Debug command incorrect");
 			}
 			expect(
-				codeLenses[startLensIndex + indexAdd].range
+				codeLenses[startLensIndex + indexAdd].range,
 			).to.be.deep.equal(targetRange, "Debug code lens range incorrect");
 
 			// Debugger mode commands
 			if (codeLenses[startLensIndex + indexAdd + 1].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd + 1].command!.command
+					codeLenses[startLensIndex + indexAdd + 1].command!.command,
 				).to.be.equal(
 					Commands.DebugContinue,
-					"Debug command incorrect"
+					"Debug command incorrect",
 				);
 			}
 			expect(
-				codeLenses[startLensIndex + indexAdd + 1].range
+				codeLenses[startLensIndex + indexAdd + 1].range,
 			).to.be.deep.equal(targetRange, "Debug code lens range incorrect");
 			if (codeLenses[startLensIndex + indexAdd + 2].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd + 2].command!.command
+					codeLenses[startLensIndex + indexAdd + 2].command!.command,
 				).to.be.equal(Commands.DebugStop, "Debug command incorrect");
 			}
 			expect(
-				codeLenses[startLensIndex + indexAdd + 2].range
+				codeLenses[startLensIndex + indexAdd + 2].range,
 			).to.be.deep.equal(targetRange, "Debug code lens range incorrect");
 			if (codeLenses[startLensIndex + indexAdd + 3].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd + 3].command!.command
+					codeLenses[startLensIndex + indexAdd + 3].command!.command,
 				).to.be.equal(
 					Commands.DebugStepOver,
-					"Debug command incorrect"
+					"Debug command incorrect",
 				);
 			}
 			expect(
-				codeLenses[startLensIndex + indexAdd + 3].range
+				codeLenses[startLensIndex + indexAdd + 3].range,
 			).to.be.deep.equal(targetRange, "Debug code lens range incorrect");
 		}
 	}
@@ -322,7 +322,7 @@ suite("Code Watcher Unit Tests", () => {
 			fileName,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -330,18 +330,18 @@ suite("Code Watcher Unit Tests", () => {
 		// Verify meta data
 		expect(codeWatcher.uri?.fsPath).to.be.equal(
 			fileName,
-			"File name of CodeWatcher does not match"
+			"File name of CodeWatcher does not match",
 		);
 		expect(codeWatcher.getVersion()).to.be.equal(
 			version,
-			"File version of CodeWatcher does not match"
+			"File version of CodeWatcher does not match",
 		);
 
 		// Verify code lenses
 		const codeLenses = codeWatcher.getCodeLenses();
 		expect(codeLenses.length).to.be.equal(
 			6,
-			"Incorrect count of code lenses"
+			"Incorrect count of code lenses",
 		);
 		verifyCodeLensesAtPosition(codeLenses, 0, new Range(0, 0, 0, 3), true);
 
@@ -358,7 +358,7 @@ suite("Code Watcher Unit Tests", () => {
 			fileName,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -366,18 +366,18 @@ suite("Code Watcher Unit Tests", () => {
 		// Verify meta data
 		expect(codeWatcher.uri?.fsPath).to.be.equal(
 			fileName,
-			"File name of CodeWatcher does not match"
+			"File name of CodeWatcher does not match",
 		);
 		expect(codeWatcher.getVersion()).to.be.equal(
 			version,
-			"File version of CodeWatcher does not match"
+			"File version of CodeWatcher does not match",
 		);
 
 		// Verify code lenses
 		const codeLenses = codeWatcher.getCodeLenses();
 		expect(codeLenses.length).to.be.equal(
 			0,
-			"Incorrect count of code lenses"
+			"Incorrect count of code lenses",
 		);
 
 		// Verify function calls
@@ -400,7 +400,7 @@ fourth line`;
 			fileName,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -408,18 +408,18 @@ fourth line`;
 		// Verify meta data
 		expect(codeWatcher.uri?.fsPath).to.be.equal(
 			fileName,
-			"File name of CodeWatcher does not match"
+			"File name of CodeWatcher does not match",
 		);
 		expect(codeWatcher.getVersion()).to.be.equal(
 			version,
-			"File version of CodeWatcher does not match"
+			"File version of CodeWatcher does not match",
 		);
 
 		// Verify code lenses
 		const codeLenses = codeWatcher.getCodeLenses();
 		expect(codeLenses.length).to.be.equal(
 			12,
-			"Incorrect count of code lenses"
+			"Incorrect count of code lenses",
 		);
 
 		verifyCodeLensesAtPosition(codeLenses, 0, new Range(3, 0, 5, 0), true);
@@ -453,7 +453,7 @@ fourth line
 			fileName,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -461,18 +461,18 @@ fourth line
 		// Verify meta data
 		expect(codeWatcher.uri?.fsPath).to.be.equal(
 			fileName,
-			"File name of CodeWatcher does not match"
+			"File name of CodeWatcher does not match",
 		);
 		expect(codeWatcher.getVersion()).to.be.equal(
 			version,
-			"File version of CodeWatcher does not match"
+			"File version of CodeWatcher does not match",
 		);
 
 		// Verify code lenses
 		const codeLenses = codeWatcher.getCodeLenses();
 		expect(codeLenses.length).to.be.equal(
 			14,
-			"Incorrect count of code lenses"
+			"Incorrect count of code lenses",
 		);
 
 		verifyCodeLensesAtPosition(codeLenses, 0, new Range(3, 0, 5, 0), true);
@@ -482,7 +482,7 @@ fourth line
 			12,
 			new Range(9, 0, 10, 12),
 			false,
-			true
+			true,
 		);
 
 		// Verify function calls
@@ -512,7 +512,7 @@ fourth line
 			fileName,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -520,18 +520,18 @@ fourth line
 		// Verify meta data
 		expect(codeWatcher.uri?.fsPath).to.be.equal(
 			fileName,
-			"File name of CodeWatcher does not match"
+			"File name of CodeWatcher does not match",
 		);
 		expect(codeWatcher.getVersion()).to.be.equal(
 			version,
-			"File version of CodeWatcher does not match"
+			"File version of CodeWatcher does not match",
 		);
 
 		// Verify code lenses
 		const codeLenses = codeWatcher.getCodeLenses();
 		expect(codeLenses.length).to.be.equal(
 			14,
-			"Incorrect count of code lenses"
+			"Incorrect count of code lenses",
 		);
 
 		verifyCodeLensesAtPosition(codeLenses, 0, new Range(3, 0, 5, 0), true);
@@ -541,7 +541,7 @@ fourth line
 			12,
 			new Range(9, 0, 10, 12),
 			false,
-			true
+			true,
 		);
 
 		// Verify function calls
@@ -557,7 +557,7 @@ fourth line
 			fileName,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 		const testRange = new Range(0, 0, 1, 7);
 
@@ -569,8 +569,8 @@ fourth line
 				h.addCode(
 					TypeMoq.It.isValue(testString),
 					TypeMoq.It.is((u) => u.fsPath == fileName),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -595,7 +595,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -606,8 +606,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -617,8 +617,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -643,7 +643,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -654,8 +654,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("testing0\n#%%\ntesting1"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -665,8 +665,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(3)
-				)
+					TypeMoq.It.isValue(3),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -692,7 +692,7 @@ testing3`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -706,8 +706,8 @@ testing3`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => {
 				funcOrder.push(1);
@@ -720,8 +720,8 @@ testing3`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => {
 				funcOrder.push(2);
@@ -734,8 +734,8 @@ testing3`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting3"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(4)
-				)
+					TypeMoq.It.isValue(4),
+				),
 			)
 			.returns(() => {
 				funcOrder.push(3);
@@ -765,7 +765,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -776,8 +776,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -814,7 +814,7 @@ testing3`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -825,8 +825,8 @@ testing3`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText1),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -836,8 +836,8 @@ testing3`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText2),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(4)
-				)
+					TypeMoq.It.isValue(4),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -871,7 +871,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -882,8 +882,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText1),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(1)
-				)
+					TypeMoq.It.isValue(1),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -893,8 +893,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText2),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(3)
-				)
+					TypeMoq.It.isValue(3),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -923,7 +923,7 @@ testing1`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -934,8 +934,8 @@ testing1`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -959,7 +959,7 @@ print('testing')`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -970,8 +970,8 @@ print('testing')`;
 				h.addCode(
 					TypeMoq.It.isAny(),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isAnyNumber()
-				)
+					TypeMoq.It.isAnyNumber(),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.never());
@@ -1003,7 +1003,7 @@ testing3`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1014,8 +1014,8 @@ testing3`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -1040,7 +1040,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1049,8 +1049,8 @@ testing2`;
 				h.getSelectedTextToExecute(
 					TypeMoq.It.is((ed: TextEditor) => {
 						return textEditor.object === ed;
-					})
-				)
+					}),
+				),
 			)
 			.returns(() => "testing2");
 		helper
@@ -1063,8 +1063,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("testing2"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(3)
-				)
+					TypeMoq.It.isValue(3),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -1095,7 +1095,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1104,8 +1104,8 @@ testing2`;
 				h.getSelectedTextToExecute(
 					TypeMoq.It.is((ed: TextEditor) => {
 						return textEditor.object === ed;
-					})
-				)
+					}),
+				),
 			)
 			.returns(() => "testing2");
 		helper
@@ -1118,8 +1118,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("text arg"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(3)
-				)
+					TypeMoq.It.isValue(3),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -1150,7 +1150,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1161,8 +1161,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -1184,19 +1184,19 @@ testing2`;
 		(codeWatcher as any).advanceToRange = (targetRange: Range) => {
 			expect(targetRange.start.line).is.equal(
 				2,
-				"Incorrect range in run cell and advance"
+				"Incorrect range in run cell and advance",
 			);
 			expect(targetRange.start.character).is.equal(
 				0,
-				"Incorrect range in run cell and advance"
+				"Incorrect range in run cell and advance",
 			);
 			expect(targetRange.end.line).is.equal(
 				3,
-				"Incorrect range in run cell and advance"
+				"Incorrect range in run cell and advance",
 			);
 			expect(targetRange.end.character).is.equal(
 				8,
-				"Incorrect range in run cell and advance"
+				"Incorrect range in run cell and advance",
 			);
 		};
 
@@ -1219,7 +1219,7 @@ testing1
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1230,8 +1230,8 @@ testing1
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1\n"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once());
@@ -1260,7 +1260,7 @@ testing1
 		jupyterSettings.newCellOnRunLast = true;
 		expect(advanceToRangeCalled).to.be.equal(
 			false,
-			"advanceToRange should not have been set"
+			"advanceToRange should not have been set",
 		);
 
 		// Verify function calls
@@ -1278,7 +1278,7 @@ testing1
 			inputText,
 			fileName.fsPath,
 			version,
-			TypeMoq.Times.atLeastOnce()
+			TypeMoq.Times.atLeastOnce(),
 		);
 		document.setup((doc) => doc.getText()).returns(() => inputText);
 		when(mockedVSCodeNamespaces.workspace.textDocuments).thenReturn([
@@ -1286,7 +1286,7 @@ testing1
 		]);
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(true);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust
+			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust,
 		).thenReturn(new EventEmitter<void>().event);
 
 		const codeLensProvider = new DataScienceCodeLensProvider(
@@ -1294,12 +1294,12 @@ testing1
 			debugLocationTracker.object,
 			configService.object,
 			disposables,
-			debugService.object
+			debugService.object,
 		);
 
 		let result = codeLensProvider.provideCodeLenses(
 			document.object,
-			tokenSource.token
+			tokenSource.token,
 		);
 		expect(result, "result not okay").to.be.ok;
 		let codeLens = result as CodeLens[];
@@ -1307,7 +1307,7 @@ testing1
 
 		expect(contexts.get(EditorContexts.HasCodeCells)).to.be.equal(
 			true,
-			"Code cells context not set"
+			"Code cells context not set",
 		);
 
 		// Change settings
@@ -1315,7 +1315,7 @@ testing1
 		jupyterSettings.fireChangeEvent();
 		result = codeLensProvider.provideCodeLenses(
 			document.object,
-			tokenSource.token
+			tokenSource.token,
 		);
 		expect(result, "result not okay").to.be.ok;
 		codeLens = result as CodeLens[];
@@ -1323,7 +1323,7 @@ testing1
 
 		expect(contexts.get(EditorContexts.HasCodeCells)).to.be.equal(
 			false,
-			"Code cells context not set"
+			"Code cells context not set",
 		);
 
 		// Change settings to empty
@@ -1331,7 +1331,7 @@ testing1
 		jupyterSettings.fireChangeEvent();
 		result = codeLensProvider.provideCodeLenses(
 			document.object,
-			tokenSource.token
+			tokenSource.token,
 		);
 		expect(result, "result not okay").to.be.ok;
 		codeLens = result as CodeLens[];
@@ -1358,7 +1358,7 @@ testing2`;
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1369,11 +1369,13 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText1),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() =>
-				Promise.reject(new InteractiveCellResultError(undefined as any))
+				Promise.reject(
+					new InteractiveCellResultError(undefined as any),
+				),
 			)
 			.verifiable(TypeMoq.Times.once());
 
@@ -1382,8 +1384,8 @@ testing2`;
 				h.addCode(
 					TypeMoq.It.isValue(targetText2),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once()); // Still called but not executed
@@ -1407,7 +1409,7 @@ testing2`; // Command tests override getText, so just need the ranges here
 			fileName.fsPath,
 			version,
 			TypeMoq.Times.atLeastOnce(),
-			true
+			true,
 		);
 
 		codeWatcher.setDocument(document.object);
@@ -1418,11 +1420,13 @@ testing2`; // Command tests override getText, so just need the ranges here
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(0)
-				)
+					TypeMoq.It.isValue(0),
+				),
 			)
 			.returns(() =>
-				Promise.reject(new InteractiveCellResultError(undefined as any))
+				Promise.reject(
+					new InteractiveCellResultError(undefined as any),
+				),
 			)
 			.verifiable(TypeMoq.Times.once());
 
@@ -1431,8 +1435,8 @@ testing2`; // Command tests override getText, so just need the ranges here
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
 					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
-					TypeMoq.It.isValue(2)
-				)
+					TypeMoq.It.isValue(2),
+				),
 			)
 			.returns(() => Promise.resolve(true))
 			.verifiable(TypeMoq.Times.once()); // Still called, but not executed
@@ -1451,7 +1455,7 @@ testing2`; // Command tests override getText, so just need the ranges here
 #%%
 testing1
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(0, 4, 0, 4);
@@ -1478,7 +1482,7 @@ testing2`);
 #%%
 testing1
 #%%
-testing2`
+testing2`,
 		);
 
 		// end selection at bottom of document
@@ -1507,7 +1511,7 @@ testing2
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(2, 4, 2, 4);
@@ -1522,7 +1526,7 @@ testing1a
 # %%
 
 #%%
-testing2`
+testing2`,
 		);
 		expect(mockTextEditor.selection.start.line).to.equal(5);
 		expect(mockTextEditor.selection.start.character).to.equal(0);
@@ -1537,7 +1541,7 @@ testing2`
 #%%
 testing1
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(0, 4, 0, 4);
@@ -1565,7 +1569,7 @@ testing2`);
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		// range crossing multiple cells.Insert below bottom of range.
@@ -1581,7 +1585,7 @@ testing1a
 # %%
 
 #%%
-testing2`
+testing2`,
 		);
 		expect(mockTextEditor.selection.start.line).to.equal(5);
 		expect(mockTextEditor.selection.start.character).to.equal(0);
@@ -1597,7 +1601,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		// above the first cell of the range
@@ -1613,7 +1617,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 		expect(mockTextEditor.selection.start.line).to.equal(2);
 		expect(mockTextEditor.selection.start.character).to.equal(0);
@@ -1629,7 +1633,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(0, 3, 0, 4);
@@ -1644,7 +1648,7 @@ testing0
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 		expect(mockTextEditor.selection.start.line).to.equal(1);
 		expect(mockTextEditor.selection.start.character).to.equal(0);
@@ -1660,7 +1664,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(3, 4, 3, 4);
@@ -1670,7 +1674,7 @@ testing2`
 		expect(mockTextEditor.document.getText()).to.equal(
 			`testing0
 #%%
-testing2`
+testing2`,
 		);
 	});
 
@@ -1682,7 +1686,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(3, 4, 5, 4);
@@ -1700,7 +1704,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(0, 1, 0, 4);
@@ -1723,7 +1727,7 @@ testing2`);
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(2, 1, 2, 1);
@@ -1744,7 +1748,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(2, 1, 4, 1);
@@ -1765,7 +1769,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(4, 1, 2, 1);
@@ -1786,7 +1790,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(0, 1, 0, 4);
@@ -1807,7 +1811,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(3, 4, 3, 4);
@@ -1831,7 +1835,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(3, 4, 5, 4);
@@ -1862,7 +1866,7 @@ testing2`
 testing1
 testing1a
 #%%
-testing2`
+testing2`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 4, 3, 4);
@@ -1896,7 +1900,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 2, 5, 2);
@@ -1920,7 +1924,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 2, 6, 4);
@@ -1944,7 +1948,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(6, 4, 5, 2);
@@ -1968,7 +1972,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 2, 8, 2);
@@ -1992,7 +1996,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(8, 2, 5, 2);
@@ -2016,7 +2020,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(6, 10, 4, 0);
@@ -2040,7 +2044,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(1, 0, 6, 10);
@@ -2064,7 +2068,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 2, 5, 2);
@@ -2088,7 +2092,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 2, 6, 4);
@@ -2112,7 +2116,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(6, 4, 5, 2);
@@ -2136,7 +2140,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(3, 2, 6, 2);
@@ -2160,7 +2164,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(6, 2, 3, 2);
@@ -2184,7 +2188,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(6, 10, 4, 0);
@@ -2208,7 +2212,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(6, 10, 1, 0);
@@ -2232,7 +2236,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 2, 6, 2);
@@ -2263,7 +2267,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 5, 5, 5);
@@ -2279,7 +2283,7 @@ testing_L6
 testing_L2
 testing_L3
 # %%
-testing_L8`
+testing_L8`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(2);
 		expect(mockTextEditor.selection.anchor.character).to.equal(5);
@@ -2298,7 +2302,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(8, 8, 5, 5);
@@ -2314,7 +2318,7 @@ testing_L6
 testing_L8
 # %%
 testing_L2
-testing_L3`
+testing_L3`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(5);
 		expect(mockTextEditor.selection.anchor.character).to.equal(8);
@@ -2333,7 +2337,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(1, 2, 5, 5);
@@ -2349,7 +2353,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(1);
 		expect(mockTextEditor.selection.anchor.character).to.equal(2);
@@ -2368,7 +2372,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 5, 5, 5);
@@ -2384,7 +2388,7 @@ testing_L3
 testing_L8
 # %%
 testing_L5
-testing_L6`
+testing_L6`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(7);
 		expect(mockTextEditor.selection.anchor.character).to.equal(5);
@@ -2403,7 +2407,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(2, 2, 5, 5);
@@ -2419,7 +2423,7 @@ testing_L2
 testing_L3
 # %%
 testing_L5
-testing_L6`
+testing_L6`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(4);
 		expect(mockTextEditor.selection.anchor.character).to.equal(2);
@@ -2438,7 +2442,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 
 		mockTextEditor.selection = new Selection(5, 5, 8, 5);
@@ -2454,7 +2458,7 @@ testing_L3
 testing_L5
 testing_L6
 # %%
-testing_L8`
+testing_L8`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(5);
 		expect(mockTextEditor.selection.anchor.character).to.equal(5);
@@ -2473,7 +2477,7 @@ testing_L3
 # # testing_L5
 testing_L6
 
-`
+`,
 		);
 
 		mockTextEditor.selection = new Selection(1, 2, 5, 5);
@@ -2507,7 +2511,7 @@ testing_L3
 # # testing_L5
 testing_L6
 
-`
+`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(5);
 		expect(mockTextEditor.selection.anchor.character).to.equal(0);
@@ -2550,7 +2554,7 @@ testing_L6
 # # testing_L5
 # testing_L6
 
-`
+`,
 		);
 
 		mockTextEditor.selection = new Selection(1, 2, 5, 5);
@@ -2584,7 +2588,7 @@ testing_L3
 # # testing_L5
 # testing_L6
 
-`
+`,
 		);
 		expect(mockTextEditor.selection.anchor.line).to.equal(5);
 		expect(mockTextEditor.selection.anchor.character).to.equal(0);

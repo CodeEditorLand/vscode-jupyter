@@ -3,16 +3,16 @@
 
 import { IDisposable } from "@fluentui/react";
 import type { KernelMessage } from "@jupyterlab/services";
+import type { Channel } from "@jupyterlab/services/lib/kernel/messages";
 import * as wireProtocol from "@nteract/messaging/lib/wire-protocol";
 import uuid from "uuid/v4";
 import * as WebSocketWS from "ws";
 import type { Dealer, Subscriber } from "zeromq";
-import { traceError } from "../../../platform/logging";
 import { noop } from "../../../platform/common/utils/misc";
+import { traceError } from "../../../platform/logging";
 import { IWebSocketLike } from "../../common/kernelSocketWrapper";
 import { IKernelSocket } from "../../types";
 import { IKernelConnection } from "../types";
-import type { Channel } from "@jupyterlab/services/lib/kernel/messages";
 import { getZeroMQ } from "./zeromq.node";
 
 function formConnectionString(config: IKernelConnection, channel: string) {
@@ -57,7 +57,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	private receiveHooks: ((data: WebSocketWS.Data) => Promise<void>)[] = [];
 	private sendHooks: ((
 		data: any,
-		cb?: (err?: Error) => void
+		cb?: (err?: Error) => void,
 	) => Promise<void>)[] = [];
 	private msgChain: Promise<any> = Promise.resolve();
 	private sendChain: Promise<any> = Promise.resolve();
@@ -66,7 +66,9 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 
 	constructor(
 		private connection: IKernelConnection,
-		private serialize: (msg: KernelMessage.IMessage) => string | ArrayBuffer
+		private serialize: (
+			msg: KernelMessage.IMessage,
+		) => string | ArrayBuffer,
 	) {
 		// Setup our ZMQ channels now
 		this.channels = this.generateChannels(connection);
@@ -134,46 +136,46 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	}
 
 	public addReceiveHook(
-		hook: (data: WebSocketWS.Data) => Promise<void>
+		hook: (data: WebSocketWS.Data) => Promise<void>,
 	): void {
 		this.receiveHooks.push(hook);
 	}
 	public removeReceiveHook(
-		hook: (data: WebSocketWS.Data) => Promise<void>
+		hook: (data: WebSocketWS.Data) => Promise<void>,
 	): void {
 		this.receiveHooks = this.receiveHooks.filter((l) => l !== hook);
 	}
 	public addSendHook(
 		hook: (
 			data: any,
-			cb?: ((err?: Error | undefined) => void) | undefined
-		) => Promise<void>
+			cb?: ((err?: Error | undefined) => void) | undefined,
+		) => Promise<void>,
 	): void {
 		this.sendHooks.push(hook);
 	}
 	public removeSendHook(
 		hook: (
 			data: any,
-			cb?: ((err?: Error | undefined) => void) | undefined
-		) => Promise<void>
+			cb?: ((err?: Error | undefined) => void) | undefined,
+		) => Promise<void>,
 	): void {
 		this.sendHooks = this.sendHooks.filter((p) => p !== hook);
 	}
 	private generateChannel<T extends Subscriber | Dealer>(
 		connection: IKernelConnection,
 		channel: Channel,
-		ctor: () => T
+		ctor: () => T,
 	): T {
 		const result = ctor();
 		result.connect(formConnectionString(connection, channel));
 		this.processSocketMessages(channel, result).catch(
-			traceError.bind(`Failed to read messages from channel ${channel}`)
+			traceError.bind(`Failed to read messages from channel ${channel}`),
 		);
 		return result;
 	}
 	private async processSocketMessages(
 		channel: Channel,
-		readable: Subscriber | Dealer
+		readable: Subscriber | Dealer,
 	) {
 		// eslint-disable-next-line @typescript-eslint/await-thenable
 		for await (const msg of readable) {
@@ -210,7 +212,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 						// If this limit has been reached the socket shall enter an exceptional state and
 						// depending on the socket type, ØMQ shall take appropriate action such as blocking or dropping sent messages.
 						receiveHighWaterMark: 0,
-					})
+					}),
 			),
 			shell: this.generateChannel(
 				connection,
@@ -221,7 +223,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 						sendHighWaterMark: 0,
 						receiveHighWaterMark: 0,
 						maxMessageSize: -1,
-					})
+					}),
 			),
 			control: this.generateChannel(
 				connection,
@@ -232,7 +234,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 						sendHighWaterMark: 0,
 						receiveHighWaterMark: 0,
 						maxMessageSize: -1,
-					})
+					}),
 			),
 			stdin: this.generateChannel(
 				connection,
@@ -243,7 +245,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 						sendHighWaterMark: 0,
 						receiveHighWaterMark: 0,
 						maxMessageSize: -1,
-					})
+					}),
 			),
 		};
 		// What about hb port? Enchannel didn't use this one.
@@ -261,8 +263,8 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 			: (wireProtocol.decode(
 					data,
 					this.connection.key,
-					this.connection.signature_scheme
-				) as any);
+					this.connection.signature_scheme,
+			  ) as any);
 
 		// Make sure it has a channel on it
 		message.channel = channel as any;
@@ -278,13 +280,13 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 					// Hooks expect serialized data as this normally comes from a WebSocket
 					const serialized = this.serialize(message);
 					return Promise.all(
-						this.receiveHooks.map((p) => p(serialized))
+						this.receiveHooks.map((p) => p(serialized)),
 					);
 				})
 				.then(() => this.fireOnMessage(message, channel));
 		} else {
 			this.msgChain = this.msgChain.then(() =>
-				this.fireOnMessage(message, channel)
+				this.fireOnMessage(message, channel),
 			);
 		}
 	}
@@ -302,9 +304,9 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 				// Swallow this error, so that other messages get processed.
 				traceError(
 					`Failed to handle message in Jupyter Kernel package ${JSON.stringify(
-						message
+						message,
 					)}`,
-					ex
+					ex,
 				);
 			}
 		}
@@ -315,7 +317,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 		const data = wireProtocol.encode(
 			msg as any,
 			this.connection.key,
-			this.connection.signature_scheme
+			this.connection.signature_scheme,
 		);
 
 		// Then send through our hooks, and then post to the real zmq socket
@@ -325,7 +327,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 
 			this.sendChain = this.sendChain
 				.then(() =>
-					Promise.all(this.sendHooks.map((s) => s(hookData, noop)))
+					Promise.all(this.sendHooks.map((s) => s(hookData, noop))),
 				)
 				.then(async () => {
 					try {
@@ -334,7 +336,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 						traceError(
 							`Failed to write data to the kernel channel ${msg.channel}`,
 							data,
-							ex
+							ex,
 						);
 						// No point throwing this error, as that would mean nothing else works from here on end.
 						// Lets ignore this error but log it and then continue
@@ -359,7 +361,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 			});
 		} else {
 			traceError(
-				`Attempting to send message on invalid channel: ${channel}`
+				`Attempting to send message on invalid channel: ${channel}`,
 			);
 		}
 	}

@@ -5,14 +5,14 @@ import { assert } from "chai";
 import { anything, instance, mock, when } from "ts-mockito";
 import { Uri } from "vscode";
 import {
+	IJupyterKernelSpec,
 	IKernel,
 	RemoteKernelSpecConnectionMetadata,
-	IJupyterKernelSpec,
 } from "../../../../kernels/types";
 import {
-	IWidgetScriptSourceProvider,
-	IIPyWidgetScriptManagerFactory,
 	IIPyWidgetScriptManager,
+	IIPyWidgetScriptManagerFactory,
+	IWidgetScriptSourceProvider,
 } from "../types";
 import { RemoteWidgetScriptSourceProvider } from "./remoteWidgetScriptSourceProvider";
 
@@ -32,7 +32,7 @@ suite("ipywidget - Remote Widget Script Source", () => {
 		scriptManagerFactory = mock<IIPyWidgetScriptManagerFactory>();
 		scriptManager = mock<IIPyWidgetScriptManager>();
 		when(scriptManagerFactory.getOrCreate(anything())).thenReturn(
-			instance(scriptManager)
+			instance(scriptManager),
 		);
 		kernel = mock<IKernel>();
 		const kernelConnection = RemoteKernelSpecConnectionMetadata.create({
@@ -44,7 +44,7 @@ suite("ipywidget - Remote Widget Script Source", () => {
 		when(kernel.kernelConnectionMetadata).thenReturn(kernelConnection);
 		scriptSourceProvider = new RemoteWidgetScriptSourceProvider(
 			instance(kernel),
-			instance(scriptManagerFactory)
+			instance(scriptManagerFactory),
 		);
 	});
 	test("Get baseurl", async () => {
@@ -57,7 +57,7 @@ suite("ipywidget - Remote Widget Script Source", () => {
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
 			"ModuleName",
-			"1"
+			"1",
 		);
 
 		assert.deepEqual(value, { moduleName: "ModuleName" });
@@ -70,7 +70,7 @@ suite("ipywidget - Remote Widget Script Source", () => {
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
 			"widgetNotFound",
-			"1"
+			"1",
 		);
 		assert.deepEqual(value, {
 			moduleName: "widgetNotFound",
@@ -84,13 +84,13 @@ suite("ipywidget - Remote Widget Script Source", () => {
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
 			"widget1",
-			"1"
+			"1",
 		);
 		assert.deepEqual(value, {
 			moduleName: "widget1",
 			source: "remote",
 			scriptUri: Uri.parse(
-				baseUrl + "nbextensions/widget1/inex.js"
+				baseUrl + "nbextensions/widget1/inex.js",
 			).toString(),
 		});
 	});
@@ -106,14 +106,14 @@ suite("ipywidget - Remote Widget Script Source", () => {
 				moduleName: "widget1",
 				source: "remote",
 				scriptUri: Uri.parse(
-					baseUrl + "nbextensions/widget1/inex.js"
+					baseUrl + "nbextensions/widget1/inex.js",
 				).toString(),
 			},
 			{
 				moduleName: "widget2",
 				source: "remote",
 				scriptUri: Uri.parse(
-					baseUrl + "nbextensions/widget2/inex.js"
+					baseUrl + "nbextensions/widget2/inex.js",
 				).toString(),
 			},
 		]);

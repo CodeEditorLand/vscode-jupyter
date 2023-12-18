@@ -11,24 +11,25 @@ import {
 import {
 	IKernelFinder,
 	IKernelProvider,
-	isRemoteConnection,
 	KernelConnectionMetadata,
+	isRemoteConnection,
 } from "../../kernels/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IPythonExtensionChecker } from "../../platform/api/types";
 import { isCancellationError } from "../../platform/common/cancellation";
 import {
-	isCI,
-	JupyterNotebookView,
 	InteractiveWindowView,
+	JupyterNotebookView,
+	isCI,
 } from "../../platform/common/constants";
 import {
-	IDisposableRegistry,
 	IConfigurationService,
-	IExtensionContext,
 	IDisposable,
+	IDisposableRegistry,
+	IExtensionContext,
 } from "../../platform/common/types";
 import { noop } from "../../platform/common/utils/misc";
+import { PythonEnvironmentFilter } from "../../platform/interpreter/filter/filterService";
 import { IServiceContainer } from "../../platform/ioc/types";
 import {
 	traceError,
@@ -38,13 +39,12 @@ import {
 } from "../../platform/logging";
 import { NotebookCellLanguageService } from "../languages/cellLanguageService";
 import { sendKernelListTelemetry } from "../telemetry/kernelTelemetry";
-import { PythonEnvironmentFilter } from "../../platform/interpreter/filter/filterService";
 import {
 	IConnectionDisplayDataProvider,
 	IControllerRegistration,
-	InteractiveControllerIdSuffix,
 	IVSCodeNotebookController,
 	IVSCodeNotebookControllerUpdateEvent,
+	InteractiveControllerIdSuffix,
 } from "./types";
 import { VSCodeNotebookController } from "./vscodeNotebookController";
 
@@ -118,38 +118,38 @@ export class ControllerRegistration
 		this.kernelFinder.onDidChangeKernels(
 			() => this.loadControllers(),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.kernelFinder.registered.forEach((finder) =>
-			this.monitorDeletionOfConnections(finder)
+			this.monitorDeletionOfConnections(finder),
 		);
 		this.kernelFinder.onDidChangeRegistrations(
 			(e) =>
 				e.added.forEach((finder) =>
-					this.monitorDeletionOfConnections(finder)
+					this.monitorDeletionOfConnections(finder),
 				),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.pythonEnvFilter.onDidChange(
 			this.onDidChangeFilter,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.serverUriStorage.onDidChange(
 			this.onDidChangeFilter,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.serverUriStorage.onDidChange(
 			this.onDidChangeUri,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.serverUriStorage.onDidRemove(
 			this.onDidRemoveServers,
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		this.onDidChange(
@@ -164,28 +164,28 @@ export class ControllerRegistration
 							) {
 								// This item was selected but is no longer allowed in the kernel list. Remove it
 								traceWarning(
-									`Removing controller ${controller.id} for ${controller.connection.kind} from kernel list`
+									`Removing controller ${controller.id} for ${controller.connection.kind} from kernel list`,
 								);
 								controller.dispose();
 							}
 						},
 						this,
-						this.disposables
+						this.disposables,
 					);
 				});
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		// Sign up for document either opening or closing
 		workspace.onDidOpenNotebookDocument(
 			this.onDidOpenNotebookDocument,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		// If the extension activates after installing Jupyter extension, then ensure we load controllers right now.
 		workspace.notebookDocuments.forEach((notebook) =>
-			this.onDidOpenNotebookDocument(notebook).catch(noop)
+			this.onDidOpenNotebookDocument(notebook).catch(noop),
 		);
 
 		this.loadControllers();
@@ -195,7 +195,7 @@ export class ControllerRegistration
 		sendKernelListTelemetry(this.registered.map((v) => v.connection));
 
 		traceInfoIfCI(
-			`Providing notebook controllers with length ${this.registered.length}.`
+			`Providing notebook controllers with length ${this.registered.length}.`,
 		);
 	}
 	public get loaded() {
@@ -227,7 +227,7 @@ export class ControllerRegistration
 					// See https://github.com/microsoft/vscode-jupyter/issues/13335
 					(isCI &&
 						this._activeInterpreterControllerIds.has(
-							controller.id
+							controller.id,
 						));
 
 				// Never remove remote kernels that don't exist.
@@ -246,22 +246,22 @@ export class ControllerRegistration
 				}
 				if (!connectionIsStillValid) {
 					traceVerbose(
-						`Controller ${controller.connection.kind}:'${controller.id}' for view = '${controller.viewType}' is no longer a valid`
+						`Controller ${controller.connection.kind}:'${controller.id}' for view = '${controller.viewType}' is no longer a valid`,
 					);
 				}
 				return !connectionIsStillValid;
-			}
+			},
 		);
 		// If we have any out of date connections, dispose of them
 		disposedControllers.forEach((controller) => {
 			traceWarning(
-				`Disposing old controller ${controller.connection.kind}:'${controller.id}' for view = '${controller.viewType}'`
+				`Disposing old controller ${controller.connection.kind}:'${controller.id}' for view = '${controller.viewType}'`,
 			);
 			controller.dispose(); // This should remove it from the registered list
 		});
 	}
 	private createNotebookControllers(
-		kernelConnections: KernelConnectionMetadata[]
+		kernelConnections: KernelConnectionMetadata[],
 	) {
 		if (kernelConnections.length === 0) {
 			return;
@@ -281,26 +281,26 @@ export class ControllerRegistration
 		}
 	}
 	private async monitorDeletionOfConnections(
-		finder: IContributedKernelFinder
+		finder: IContributedKernelFinder,
 	) {
 		const eventHandler = finder.onDidChangeKernels(
 			({ removed: connections }) => {
 				const deletedConnections = new Set(
-					(connections || []).map((c) => c.id)
+					(connections || []).map((c) => c.id),
 				);
 				this.registered
 					.filter((item) =>
-						deletedConnections.has(item.connection.id)
+						deletedConnections.has(item.connection.id),
 					)
 					.forEach((controller) => {
 						traceWarning(
-							`Deleting controller ${controller.id} as it is associated with a connection that has been deleted ${controller.connection.kind}:${controller.id}`
+							`Deleting controller ${controller.id} as it is associated with a connection that has been deleted ${controller.connection.kind}:${controller.id}`,
 						);
 						controller.dispose();
 					});
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.kernelFinder.onDidChangeRegistrations((e) => {
 			if (e.removed.includes(finder)) {
@@ -324,7 +324,7 @@ export class ControllerRegistration
 					c.connection.serverProviderHandle.handle === item.handle
 				) {
 					traceWarning(
-						`Deleting controller ${c.id} as it is associated with a connection that has been removed`
+						`Deleting controller ${c.id} as it is associated with a connection that has been removed`,
 					);
 					c.dispose();
 				}
@@ -341,7 +341,7 @@ export class ControllerRegistration
 
 		// Try to re-create the missing controllers.
 		metadatas.forEach((c) =>
-			this.addOrUpdate(c, [JupyterNotebookView, InteractiveWindowView])
+			this.addOrUpdate(c, [JupyterNotebookView, InteractiveWindowView]),
 		);
 
 		// Go through all controllers that have been created and hide them.
@@ -355,7 +355,7 @@ export class ControllerRegistration
 				this.canControllerBeDisposed(item)
 			) {
 				traceWarning(
-					`Deleting controller ${item.id} as it is associated with a connection that has been hidden`
+					`Deleting controller ${item.id} as it is associated with a connection that has been hidden`,
 				);
 				item.dispose();
 			}
@@ -363,7 +363,7 @@ export class ControllerRegistration
 	}
 	private batchAdd(
 		metadatas: KernelConnectionMetadata[],
-		types: ("jupyter-notebook" | "interactive")[]
+		types: ("jupyter-notebook" | "interactive")[],
 	) {
 		const addedList: IVSCodeNotebookController[] = [];
 		metadatas.forEach((metadata) => {
@@ -377,10 +377,10 @@ export class ControllerRegistration
 	}
 	private _activeInterpreterControllerIds = new Set<string>();
 	trackActiveInterpreterControllers(
-		controllers: IVSCodeNotebookController[]
+		controllers: IVSCodeNotebookController[],
 	) {
 		controllers.forEach((controller) =>
-			this._activeInterpreterControllerIds.add(controller.id)
+			this._activeInterpreterControllerIds.add(controller.id),
 		);
 	}
 	private canControllerBeDisposed(controller: IVSCodeNotebookController) {
@@ -390,13 +390,13 @@ export class ControllerRegistration
 		);
 	}
 	public getSelected(
-		document: NotebookDocument
+		document: NotebookDocument,
 	): IVSCodeNotebookController | undefined {
 		return this.selectedControllers.get(document.uri.toString());
 	}
 	addOrUpdate(
 		metadata: KernelConnectionMetadata,
-		types: ("jupyter-notebook" | "interactive")[]
+		types: ("jupyter-notebook" | "interactive")[],
 	): IVSCodeNotebookController[] {
 		const { added, existing } = this.addImpl(metadata, types, true);
 		return added.concat(existing);
@@ -404,7 +404,7 @@ export class ControllerRegistration
 	addImpl(
 		metadata: KernelConnectionMetadata,
 		types: ("jupyter-notebook" | "interactive")[],
-		triggerChangeEvent: boolean
+		triggerChangeEvent: boolean,
 	): {
 		added: IVSCodeNotebookController[];
 		existing: IVSCodeNotebookController[];
@@ -414,7 +414,7 @@ export class ControllerRegistration
 		traceInfoIfCI(
 			`Create Controller for ${metadata.kind} and id '${
 				metadata.id
-			}' for view ${types.join(", ")}`
+			}' for view ${types.join(", ")}`,
 		);
 		try {
 			// Create notebook selector
@@ -440,18 +440,18 @@ export class ControllerRegistration
 						existing.push(controller);
 
 						traceInfoIfCI(
-							`Found existing controller '${controller.id}', not creating a new one just updating it`
+							`Found existing controller '${controller.id}', not creating a new one just updating it`,
 						);
 						return false;
 					} else if (this.isFiltered(metadata)) {
 						// Filter out those in our kernel filter
 						traceInfoIfCI(
-							`Existing controller '${id}' will be excluded as it is filtered`
+							`Existing controller '${id}' will be excluded as it is filtered`,
 						);
 						return false;
 					}
 					traceInfoIfCI(
-						`Existing controller not found for '${id}', hence creating a new one`
+						`Existing controller not found for '${id}', hence creating a new one`,
 					);
 					return true;
 				})
@@ -461,30 +461,30 @@ export class ControllerRegistration
 						id,
 						viewType,
 						this.serviceContainer.get<IKernelProvider>(
-							IKernelProvider
+							IKernelProvider,
 						),
 						this.serviceContainer.get<IExtensionContext>(
-							IExtensionContext
+							IExtensionContext,
 						),
 						this.disposables,
 						this.serviceContainer.get<NotebookCellLanguageService>(
-							NotebookCellLanguageService
+							NotebookCellLanguageService,
 						),
 						this.serviceContainer.get<IConfigurationService>(
-							IConfigurationService
+							IConfigurationService,
 						),
 						this.extensionChecker,
 						this.serviceContainer,
 						this.serviceContainer.get<IConnectionDisplayDataProvider>(
-							IConnectionDisplayDataProvider
-						)
+							IConnectionDisplayDataProvider,
+						),
 					);
 					// Hook up to if this NotebookController is selected or de-selected
 					const controllerDisposables: IDisposable[] = [];
 					controller.onDidDispose(
 						() => {
 							traceInfoIfCI(
-								`Deleting controller '${controller.id}' associated with view ${viewType} from registration as it was disposed`
+								`Deleting controller '${controller.id}' associated with view ${viewType} from registration as it was disposed`,
 							);
 							this.registeredControllers.delete(controller.id);
 							controllerDisposables.forEach((d) => d.dispose());
@@ -493,7 +493,7 @@ export class ControllerRegistration
 							// and forth between local and remote
 						},
 						this,
-						this.disposables
+						this.disposables,
 					);
 					// We are disposing as documents are closed, but do this as well
 					this.disposables.push(controller);
@@ -502,18 +502,19 @@ export class ControllerRegistration
 					controller.onNotebookControllerSelected(
 						(e) => {
 							traceInfoIfCI(
-								`Controller ${e.controller
-									?.id} selected for ${e.notebook.uri.toString()}`
+								`Controller ${
+									e.controller?.id
+								} selected for ${e.notebook.uri.toString()}`,
 							);
 							this.selectedControllers.set(
 								e.notebook.uri.toString(),
-								e.controller
+								e.controller,
 							);
 							// Now notify out that we have updated a notebooks controller
 							this.selectedEmitter.fire(e);
 						},
 						this,
-						controllerDisposables
+						controllerDisposables,
 					);
 					controller.onNotebookControllerSelectionChanged(
 						(e) =>
@@ -522,7 +523,7 @@ export class ControllerRegistration
 								controller,
 							}),
 						this,
-						controllerDisposables
+						controllerDisposables,
 					);
 				});
 			if (triggerChangeEvent && added.length) {
@@ -536,14 +537,14 @@ export class ControllerRegistration
 			}
 			traceError(
 				`Failed to create notebook controller for ${metadata.id}`,
-				ex
+				ex,
 			);
 		}
 		return { added, existing };
 	}
 	get(
 		metadata: KernelConnectionMetadata,
-		notebookType: "jupyter-notebook" | "interactive"
+		notebookType: "jupyter-notebook" | "interactive",
 	): IVSCodeNotebookController | undefined {
 		const id = this.getControllerId(metadata, notebookType);
 		return this.registeredControllers.get(id);
@@ -555,7 +556,7 @@ export class ControllerRegistration
 
 	private getControllerId(
 		metadata: KernelConnectionMetadata,
-		viewType: typeof JupyterNotebookView | typeof InteractiveWindowView
+		viewType: typeof JupyterNotebookView | typeof InteractiveWindowView,
 	) {
 		return viewType === JupyterNotebookView
 			? metadata.id
@@ -563,10 +564,10 @@ export class ControllerRegistration
 	}
 
 	private isControllerAttachedToADocument(
-		controller: IVSCodeNotebookController
+		controller: IVSCodeNotebookController,
 	) {
 		return workspace.notebookDocuments.some((doc) =>
-			controller.isAssociatedWithDocument(doc)
+			controller.isAssociatedWithDocument(doc),
 		);
 	}
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type * as nbformat from "@jupyterlab/nbformat";
 import type {
 	KernelMessage,
 	ServerConnection,
@@ -15,26 +16,11 @@ import type {
 	NotebookDocument,
 	Uri,
 } from "vscode";
-import type * as nbformat from "@jupyterlab/nbformat";
-import { PythonEnvironment } from "../platform/pythonEnvironments/info";
-import * as path from "../platform/vscode-path/path";
-import {
-	IAsyncDisposable,
-	IDisplayOptions,
-	IDisposable,
-	ReadWrite,
-	Resource,
-} from "../platform/common/types";
-import { IJupyterKernel, JupyterServerProviderHandle } from "./jupyter/types";
-import { PythonEnvironment_PythonApi } from "../platform/api/types";
 import {
 	deserializePythonEnvironment,
 	serializePythonEnvironment,
 } from "../platform/api/pythonApi";
-import { IContributedKernelFinder } from "./internalTypes";
-import { isWeb, noop } from "../platform/common/utils/misc";
-import { getTelemetrySafeHashedString } from "../platform/telemetry/helpers";
-import { getNormalizedInterpreterPath } from "../platform/pythonEnvironments/info/interpreter";
+import { PythonEnvironment_PythonApi } from "../platform/api/types";
 import {
 	InteractiveWindowView,
 	JVSC_EXTENSION_ID,
@@ -42,9 +28,23 @@ import {
 	PYTHON_LANGUAGE,
 	Telemetry,
 } from "../platform/common/constants";
+import {
+	IAsyncDisposable,
+	IDisplayOptions,
+	IDisposable,
+	ReadWrite,
+	Resource,
+} from "../platform/common/types";
+import { isWeb, noop } from "../platform/common/utils/misc";
+import { PythonEnvironment } from "../platform/pythonEnvironments/info";
+import { getNormalizedInterpreterPath } from "../platform/pythonEnvironments/info/interpreter";
+import { getTelemetrySafeHashedString } from "../platform/telemetry/helpers";
+import * as path from "../platform/vscode-path/path";
 import { sendTelemetryEvent } from "../telemetry";
-import { generateIdFromRemoteProvider } from "./jupyter/jupyterUtils";
 import { ICodeExecution } from "./execution/types";
+import { IContributedKernelFinder } from "./internalTypes";
+import { generateIdFromRemoteProvider } from "./jupyter/jupyterUtils";
+import { IJupyterKernel, JupyterServerProviderHandle } from "./jupyter/types";
 
 export type WebSocketData = string | Buffer | ArrayBuffer | Buffer[];
 
@@ -66,12 +66,12 @@ async function getConnectionIdHash(connection: KernelConnectionMetadata) {
 		const interpreterPath = connection.interpreter.uri.fsPath;
 		// eslint-disable-next-line local-rules/dont-use-fspath
 		const normalizedPath = getNormalizedInterpreterPath(
-			connection.interpreter.uri
+			connection.interpreter.uri,
 		).fsPath;
 		// Connection ids can contain Python paths in them.
 		const normalizedId = connection.id.replace(
 			interpreterPath,
-			normalizedPath
+			normalizedPath,
 		);
 		return getTelemetrySafeHashedString(normalizedId);
 	}
@@ -84,40 +84,40 @@ export class BaseKernelConnectionMetadata {
 			| ReadWrite<LocalKernelSpecConnectionMetadata>
 			| ReadWrite<LiveRemoteKernelConnectionMetadata>
 			| ReadWrite<RemoteKernelSpecConnectionMetadata>
-			| ReadWrite<PythonKernelConnectionMetadata>
+			| ReadWrite<PythonKernelConnectionMetadata>,
 	) {
 		const clone = Object.assign(json, {});
 		if (clone.interpreter) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			clone.interpreter = deserializePythonEnvironment(
 				clone.interpreter as any,
-				""
+				"",
 			)!;
 		}
 		switch (json.kind) {
 			case "startUsingLocalKernelSpec":
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
 				return LocalKernelSpecConnectionMetadata.create(
-					clone as LocalKernelSpecConnectionMetadata
+					clone as LocalKernelSpecConnectionMetadata,
 				);
 			case "connectToLiveRemoteKernel":
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
 				return LiveRemoteKernelConnectionMetadata.create(
-					clone as LiveRemoteKernelConnectionMetadata
+					clone as LiveRemoteKernelConnectionMetadata,
 				);
 			case "startUsingRemoteKernelSpec":
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
 				return RemoteKernelSpecConnectionMetadata.create(
-					clone as RemoteKernelSpecConnectionMetadata
+					clone as RemoteKernelSpecConnectionMetadata,
 				);
 			case "startUsingPythonInterpreter":
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
 				return PythonKernelConnectionMetadata.create(
-					clone as PythonKernelConnectionMetadata
+					clone as PythonKernelConnectionMetadata,
 				);
 			default:
 				throw new Error(
-					`Invalid object to be deserialized into a connection, kind = ${clone.kind}`
+					`Invalid object to be deserialized into a connection, kind = ${clone.kind}`,
 				);
 		}
 	}
@@ -183,10 +183,10 @@ export class LiveRemoteKernelConnectionMetadata {
 		};
 	}
 	public static fromJSON(
-		json: Record<string, unknown> | LiveRemoteKernelConnectionMetadata
+		json: Record<string, unknown> | LiveRemoteKernelConnectionMetadata,
 	) {
 		return BaseKernelConnectionMetadata.fromJSON(
-			json
+			json,
 		) as LiveRemoteKernelConnectionMetadata;
 	}
 }
@@ -240,10 +240,10 @@ export class LocalKernelSpecConnectionMetadata {
 		};
 	}
 	public static fromJSON(
-		options: Record<string, unknown> | LocalKernelSpecConnectionMetadata
+		options: Record<string, unknown> | LocalKernelSpecConnectionMetadata,
 	) {
 		return BaseKernelConnectionMetadata.fromJSON(
-			options
+			options,
 		) as LocalKernelSpecConnectionMetadata;
 	}
 }
@@ -298,10 +298,10 @@ export class RemoteKernelSpecConnectionMetadata {
 		};
 	}
 	public static fromJSON(
-		options: Record<string, unknown> | RemoteKernelSpecConnectionMetadata
+		options: Record<string, unknown> | RemoteKernelSpecConnectionMetadata,
 	) {
 		return BaseKernelConnectionMetadata.fromJSON(
-			options
+			options,
 		) as RemoteKernelSpecConnectionMetadata;
 	}
 }
@@ -348,10 +348,10 @@ export class PythonKernelConnectionMetadata {
 		Object.assign(this.interpreter, interpreter);
 	}
 	public static fromJSON(
-		options: Record<string, unknown> | PythonKernelConnectionMetadata
+		options: Record<string, unknown> | PythonKernelConnectionMetadata,
 	) {
 		return BaseKernelConnectionMetadata.fromJSON(
-			options
+			options,
 		) as PythonKernelConnectionMetadata;
 	}
 }
@@ -378,7 +378,7 @@ export type RemoteKernelConnectionMetadata =
 	| Readonly<RemoteKernelSpecConnectionMetadata>;
 
 export function isLocalConnection(
-	kernelConnection: KernelConnectionMetadata
+	kernelConnection: KernelConnectionMetadata,
 ): kernelConnection is LocalKernelConnectionMetadata {
 	return (
 		kernelConnection.kind === "startUsingLocalKernelSpec" ||
@@ -387,7 +387,7 @@ export function isLocalConnection(
 }
 
 export function isRemoteConnection(
-	kernelConnection: KernelConnectionMetadata
+	kernelConnection: KernelConnectionMetadata,
 ): kernelConnection is RemoteKernelConnectionMetadata {
 	return !isLocalConnection(kernelConnection);
 }
@@ -453,16 +453,16 @@ export interface IBaseKernel extends IAsyncDisposable {
 		event: "didStart",
 		hook: (
 			session: IKernelSession | undefined,
-			token: CancellationToken
+			token: CancellationToken,
 		) => Promise<void>,
 		thisArgs?: unknown,
-		disposables?: IDisposable[]
+		disposables?: IDisposable[],
 	): IDisposable;
 	addHook(
 		event: "willRestart",
 		hook: (sessionPromise?: Promise<IKernelSession>) => Promise<void>,
 		thisArgs?: unknown,
-		disposables?: IDisposable[]
+		disposables?: IDisposable[],
 	): IDisposable;
 	addHook(
 		event:
@@ -473,7 +473,7 @@ export interface IBaseKernel extends IAsyncDisposable {
 			| "willCancel",
 		hook: () => Promise<void>,
 		thisArgs?: unknown,
-		disposables?: IDisposable[]
+		disposables?: IDisposable[],
 	): IDisposable;
 }
 
@@ -517,7 +517,7 @@ export interface INotebookKernelExecution {
 	 */
 	executeCell(
 		cell: NotebookCell,
-		codeOverride?: string
+		codeOverride?: string,
 	): Promise<NotebookCellRunState>;
 	/**
 	 * Executes 3rd party code against the kernel.
@@ -525,7 +525,7 @@ export interface INotebookKernelExecution {
 	executeCode(
 		code: string,
 		extensionId: string,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<ICodeExecution>;
 	/**
 	 * Given the cell execution message Id and the like , this will resume the execution of a cell from a detached state.
@@ -533,7 +533,7 @@ export interface INotebookKernelExecution {
 	 */
 	resumeCellExecution(
 		cell: NotebookCell,
-		info: ResumeCellExecutionInformation
+		info: ResumeCellExecutionInformation,
 	): Promise<NotebookCellRunState>;
 	/**
 	 * Executes arbitrary code against the kernel without incrementing the execution count.
@@ -664,9 +664,10 @@ export interface IBaseKernelSession<
 	waitForIdle(timeout: number, token: CancellationToken): Promise<void>;
 }
 
-export interface IJupyterKernelSession
-	extends IBaseKernelSession<"remoteJupyter" | "localJupyter"> {}
-export interface IRawKernelSession extends IBaseKernelSession<"localRaw"> {}
+export type IJupyterKernelSession = IBaseKernelSession<
+	"remoteJupyter" | "localJupyter"
+>;
+export type IRawKernelSession = IBaseKernelSession<"localRaw">;
 export type IKernelSession = IJupyterKernelSession | IRawKernelSession;
 
 export interface IJupyterKernelSpec {
@@ -777,7 +778,7 @@ export interface IJupyterServerConnector {
 	 * In the case of remote, this will resolve the server information along and return the URI and auth/token information to connect to the remote server.
 	 */
 	connect(
-		options: ConnectNotebookProviderOptions
+		options: ConnectNotebookProviderOptions,
 	): Promise<IJupyterConnection>;
 }
 
@@ -807,7 +808,7 @@ export interface IKernelSocket {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	addSendHook(
-		hook: (data: any, cb?: (err?: Error) => void) => Promise<void>
+		hook: (data: any, cb?: (err?: Error) => void) => Promise<void>,
 	): void;
 	/**
 	 * Removes a send hook from the socket.
@@ -815,7 +816,7 @@ export interface IKernelSocket {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	removeSendHook(
-		hook: (data: any, cb?: (err?: Error) => void) => Promise<void>
+		hook: (data: any, cb?: (err?: Error) => void) => Promise<void>,
 	): void;
 }
 
@@ -890,7 +891,7 @@ export interface IKernelDependencyService {
 	areDependenciesInstalled(
 		kernelConnection: KernelConnectionMetadata,
 		token?: CancellationToken,
-		ignoreCache?: boolean
+		ignoreCache?: boolean,
 	): Promise<boolean>;
 }
 
@@ -905,7 +906,7 @@ export interface IKernelFinder {
 	 * For a given kernel connection metadata return what kernel finder found it
 	 */
 	getFinderForConnection(
-		kernelMetadata: KernelConnectionMetadata
+		kernelMetadata: KernelConnectionMetadata,
 	): IContributedKernelFinder | undefined;
 	/*
 	 * Return basic info on all currently registered kernel finders
@@ -936,7 +937,7 @@ export interface ITracebackFormatter {
 	format(cell: NotebookCell, traceback: string[]): string[];
 }
 
-export const enum StartupCodePriority {
+export enum StartupCodePriority {
 	Base = 0,
 	Debugging = 5,
 }
@@ -949,13 +950,13 @@ export interface IStartupCodeProviders {
 	getProviders(
 		notebookViewType:
 			| typeof JupyterNotebookView
-			| typeof InteractiveWindowView
+			| typeof InteractiveWindowView,
 	): IStartupCodeProvider[];
 	register(
 		provider: IStartupCodeProvider,
 		notebookViewType:
 			| typeof JupyterNotebookView
-			| typeof InteractiveWindowView
+			| typeof InteractiveWindowView,
 	): void;
 }
 
@@ -1029,8 +1030,8 @@ function sendKernelTelemetry(kernel: KernelConnectionMetadata) {
 	const kernelIdHash = getTelemetrySafeHashedString(kernel.id);
 	const serverIdHashPromise = isRemoteConnection(kernel)
 		? getTelemetrySafeHashedString(
-				generateIdFromRemoteProvider(kernel.serverProviderHandle)
-			)
+				generateIdFromRemoteProvider(kernel.serverProviderHandle),
+		  )
 		: Promise.resolve("");
 	const providerExtensionId = isRemoteConnection(kernel)
 		? kernel.serverProviderHandle.extensionId
@@ -1057,7 +1058,7 @@ function sendKernelTelemetry(kernel: KernelConnectionMetadata) {
 				isArgv0SameAsInterpreter,
 				argv0,
 				argv,
-			})
+			}),
 		)
 		.catch(noop);
 }

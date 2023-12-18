@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const path = require("path");
 const Lint = require("tslint");
@@ -11,7 +10,7 @@ class BaseRuleWalker extends Lint.RuleWalker {
 		if (sourceFile && sourceFile.fileName) {
 			const filename = path.resolve(
 				util.ExtensionRootDir,
-				sourceFile.fileName
+				sourceFile.fileName,
 			);
 			if (filesToIgnore.indexOf(filename.replace(/\//g, path.sep)) >= 0) {
 				return true;

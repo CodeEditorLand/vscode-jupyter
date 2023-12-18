@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as path from "path";
-import * as esbuild from "esbuild";
-import { green } from "colors";
-import type { BuildOptions, Charset, Plugin, SameShape } from "esbuild";
 import fs from "fs";
+import * as path from "path";
+import { green } from "colors";
+import * as esbuild from "esbuild";
+import type { BuildOptions, Charset, Plugin, SameShape } from "esbuild";
 
 const isDevbuild = !process.argv.includes("--production");
 const isWatchMode = process.argv.includes("--watch");
@@ -60,7 +60,7 @@ function style({
 					path: args.path,
 					namespace: "style-helper",
 					sideEffects: false,
-				})
+				}),
 			);
 
 			onLoad({ filter: /.*/, namespace: "style-helper" }, async () => ({
@@ -96,7 +96,7 @@ function style({
 						contents: outputFiles![0].text,
 						loader: "text",
 					};
-				}
+				},
 			);
 		},
 	};
@@ -104,7 +104,7 @@ function style({
 
 function createConfig(
 	source: string,
-	outfile: string
+	outfile: string,
 ): SameShape<BuildOptions, BuildOptions> {
 	return {
 		entryPoints: [source],
@@ -123,7 +123,7 @@ function createConfig(
 		inject: [
 			path.join(
 				__dirname,
-				isDevbuild ? "process.development.js" : "process.production.js"
+				isDevbuild ? "process.development.js" : "process.production.js",
 			),
 		],
 		plugins: [style()],
@@ -138,7 +138,7 @@ async function build(source: string, outfile: string) {
 		const size = fs.statSync(outfile).size;
 		const relativePath = `./${path.relative(extensionFolder, outfile)}`;
 		console.log(
-			`asset ${green(relativePath)} size: ${(size / 1024).toFixed()} KiB`
+			`asset ${green(relativePath)} size: ${(size / 1024).toFixed()} KiB`,
 		);
 	}
 }
@@ -154,7 +154,7 @@ async function buildAll() {
 				"webview-side",
 				"ipywidgets",
 				"kernel",
-				"index.ts"
+				"index.ts",
 			),
 			path.join(
 				extensionFolder,
@@ -162,8 +162,8 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"ipywidgetsKernel",
-				"ipywidgetsKernel.js"
-			)
+				"ipywidgetsKernel.js",
+			),
 		),
 		build(
 			path.join(
@@ -173,7 +173,7 @@ async function buildAll() {
 				"webview-side",
 				"ipywidgets",
 				"renderer",
-				"index.ts"
+				"index.ts",
 			),
 			path.join(
 				extensionFolder,
@@ -181,8 +181,8 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"ipywidgetsRenderer",
-				"ipywidgetsRenderer.js"
-			)
+				"ipywidgetsRenderer.js",
+			),
 		),
 		isDevbuild
 			? build(
@@ -192,7 +192,7 @@ async function buildAll() {
 						"test",
 						"datascience",
 						"widgets",
-						"rendererUtils.ts"
+						"rendererUtils.ts",
 					),
 					path.join(
 						extensionFolder,
@@ -200,9 +200,9 @@ async function buildAll() {
 						"webviews",
 						"webview-side",
 						"widgetTester",
-						"widgetTester.js"
-					)
-				)
+						"widgetTester.js",
+					),
+			  )
 			: Promise.resolve(),
 	]);
 }

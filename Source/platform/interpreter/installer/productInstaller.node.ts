@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable, named } from "inversify";
 import {
 	CancellationTokenSource,
@@ -9,49 +10,48 @@ import {
 	Memento,
 	Uri,
 } from "vscode";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
+import { STANDARD_OUTPUT_CHANNEL } from "../../common/constants";
+import { IProcessServiceFactory } from "../../common/process/types.node";
+import {
+	GLOBAL_MEMENTO,
+	IConfigurationService,
+	IMemento,
+	IOutputChannel,
+	IPersistentStateFactory,
+	InterpreterUri,
+} from "../../common/types";
+import { raceTimeout } from "../../common/utils/async";
+import { noop } from "../../common/utils/misc";
+import { IServiceContainer } from "../../ioc/types";
+import { logValue, traceDecoratorVerbose } from "../../logging";
+import { traceError } from "../../logging";
+import { PythonEnvironment } from "../../pythonEnvironments/info";
+import { getInterpreterHash } from "../../pythonEnvironments/info/interpreter";
+import { InterpreterPackages } from "../interpreterPackages.node";
+import { IInterpreterPackages } from "../types";
+import { IPythonExecutionFactory } from "../types.node";
+import { trackPackageInstalledIntoInterpreter } from "./productInstaller";
 import { ProductNames } from "./productNames";
 import {
 	IInstallationChannelManager,
 	IInstaller,
-	InstallerResponse,
 	IProductPathService,
 	IProductService,
+	InstallerResponse,
 	ModuleInstallFlags,
 	Product,
 	ProductType,
 } from "./types";
-import { logValue, traceDecoratorVerbose } from "../../logging";
-import { PythonEnvironment } from "../../pythonEnvironments/info";
-import { traceError } from "../../logging";
-import { IProcessServiceFactory } from "../../common/process/types.node";
-import {
-	IConfigurationService,
-	IPersistentStateFactory,
-	GLOBAL_MEMENTO,
-	IMemento,
-	IOutputChannel,
-	InterpreterUri,
-} from "../../common/types";
-import { noop } from "../../common/utils/misc";
-import { IServiceContainer } from "../../ioc/types";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
-import { InterpreterPackages } from "../interpreterPackages.node";
-import { getInterpreterHash } from "../../pythonEnvironments/info/interpreter";
-import { STANDARD_OUTPUT_CHANNEL } from "../../common/constants";
-import { raceTimeout } from "../../common/utils/async";
-import { trackPackageInstalledIntoInterpreter } from "./productInstaller";
 import { translateProductToModule } from "./utils";
-import { IInterpreterPackages } from "../types";
-import { IPythonExecutionFactory } from "../types.node";
-import { Environment } from "@vscode/python-extension";
 
 export async function isModulePresentInEnvironment(
 	memento: Memento,
 	product: Product,
-	interpreter: PythonEnvironment
+	interpreter: PythonEnvironment,
 ) {
 	const key = `${await getInterpreterHash(interpreter)}#${ProductNames.get(
-		product
+		product,
 	)}`;
 	if (memento.get(key, false)) {
 		return true;
@@ -61,7 +61,7 @@ export async function isModulePresentInEnvironment(
 		? InterpreterPackages.instance
 				.getPackageVersion(interpreter, packageName)
 				.then((version) =>
-					typeof version === "string" ? "found" : "notfound"
+					typeof version === "string" ? "found" : "notfound",
 				)
 				.catch((ex) => {
 					traceError("Failed to get interpreter package version", ex);
@@ -76,7 +76,7 @@ export async function isModulePresentInEnvironment(
 		}
 	} catch (ex) {
 		traceError(
-			`Failed to check if package exists ${ProductNames.get(product)}`
+			`Failed to check if package exists ${ProductNames.get(product)}`,
 		);
 	}
 }
@@ -93,16 +93,16 @@ export class DataScienceInstaller {
 
 	constructor(
 		protected serviceContainer: IServiceContainer,
-		_outputChannel: IOutputChannel
+		_outputChannel: IOutputChannel,
 	) {
 		this.configService = serviceContainer.get<IConfigurationService>(
-			IConfigurationService
+			IConfigurationService,
 		);
 		this.productService =
 			serviceContainer.get<IProductService>(IProductService);
 		this.persistentStateFactory =
 			serviceContainer.get<IPersistentStateFactory>(
-				IPersistentStateFactory
+				IPersistentStateFactory,
 			);
 	}
 
@@ -111,14 +111,14 @@ export class DataScienceInstaller {
 		interpreter: PythonEnvironment,
 		cancelTokenSource: CancellationTokenSource,
 		reInstallAndUpdate?: boolean,
-		installPipIfRequired?: boolean
+		installPipIfRequired?: boolean,
 	): Promise<InstallerResponse> {
 		const channels = this.serviceContainer.get<IInstallationChannelManager>(
-			IInstallationChannelManager
+			IInstallationChannelManager,
 		);
 		const installer = await channels.getInstallationChannel(
 			product,
-			interpreter
+			interpreter,
 		);
 		if (!installer) {
 			return InstallerResponse.Ignore;
@@ -129,7 +129,7 @@ export class DataScienceInstaller {
 		let flags =
 			reInstallAndUpdate === true
 				? ModuleInstallFlags.updateDependencies |
-					ModuleInstallFlags.reInstall
+				  ModuleInstallFlags.reInstall
 				: undefined;
 		if (installPipIfRequired === true) {
 			flags = flags
@@ -140,7 +140,7 @@ export class DataScienceInstaller {
 			product,
 			interpreter,
 			cancelTokenSource,
-			flags
+			flags,
 		);
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return InstallerResponse.Cancelled;
@@ -158,11 +158,11 @@ export class DataScienceInstaller {
 	@traceDecoratorVerbose("Checking if product is installed")
 	public async isInstalled(
 		product: Product,
-		@logValue("path") interpreter: PythonEnvironment | Environment
+		@logValue("path") interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
 		const executableName = this.getExecutableNameFromSettings(
 			product,
-			undefined
+			undefined,
 		);
 		const isModule = this.isExecutableAModule(product, undefined);
 		if (isModule) {
@@ -186,17 +186,17 @@ export class DataScienceInstaller {
 
 	protected getExecutableNameFromSettings(
 		product: Product,
-		resource?: Uri
+		resource?: Uri,
 	): string {
 		const productType = this.productService.getProductType(product);
 		const productPathService =
 			this.serviceContainer.get<IProductPathService>(
 				IProductPathService,
-				productType
+				productType,
 			);
 		return productPathService.getExecutableNameFromSettings(
 			product,
-			resource
+			resource,
 		);
 	}
 
@@ -205,7 +205,7 @@ export class DataScienceInstaller {
 		const productPathService =
 			this.serviceContainer.get<IProductPathService>(
 				IProductPathService,
-				productType
+				productType,
 			);
 		return productPathService.isExecutableAModule(product, resource);
 	}
@@ -252,7 +252,7 @@ export class ProductInstaller implements IInstaller {
 		interpreter: PythonEnvironment,
 		cancelTokenSource: CancellationTokenSource,
 		reInstallAndUpdate?: boolean,
-		installPipIfRequired?: boolean
+		installPipIfRequired?: boolean,
 	): Promise<InstallerResponse> {
 		if (interpreter) {
 			this.interpreterPackages.trackPackages(interpreter);
@@ -269,12 +269,12 @@ export class ProductInstaller implements IInstaller {
 				interpreter,
 				cancelTokenSource,
 				reInstallAndUpdate,
-				installPipIfRequired
+				installPipIfRequired,
 			);
 			trackPackageInstalledIntoInterpreter(
 				this.memento,
 				product,
-				interpreter
+				interpreter,
 			).catch(noop);
 			if (result === InstallerResponse.Installed) {
 				this._onInstalled.fire({ product, resource: interpreter });
@@ -309,7 +309,7 @@ export class ProductInstaller implements IInstaller {
 
 	public async isInstalled(
 		product: Product,
-		interpreter: PythonEnvironment | Environment
+		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
 		return this.createInstaller(product).isInstalled(product, interpreter);
 	}
@@ -325,7 +325,7 @@ export class ProductInstaller implements IInstaller {
 			case ProductType.DataScience:
 				return new DataScienceInstaller(
 					this.serviceContainer,
-					this.output
+					this.output,
 				);
 			default:
 				break;

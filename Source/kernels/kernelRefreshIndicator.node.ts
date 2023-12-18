@@ -9,21 +9,21 @@ import {
 	InteractiveWindowView,
 	JupyterNotebookView,
 } from "../platform/common/constants";
-import { dispose } from "../platform/common/utils/lifecycle";
 import { IDisposable, IDisposableRegistry } from "../platform/common/types";
+import { isJupyterNotebook } from "../platform/common/utils";
+import { dispose } from "../platform/common/utils/lifecycle";
+import { DisposableStore } from "../platform/common/utils/lifecycle";
+import { noop } from "../platform/common/utils/misc";
 import { IInterpreterService } from "../platform/interpreter/contracts";
 import { traceInfo } from "../platform/logging";
 import { IKernelFinder } from "./types";
-import { isJupyterNotebook } from "../platform/common/utils";
-import { noop } from "../platform/common/utils/misc";
-import { DisposableStore } from "../platform/common/utils/lifecycle";
 
 /**
  * Ensures we refresh the list of Python environments upon opening a Notebook.
  */
 @injectable()
 export class KernelRefreshIndicator implements IExtensionSyncActivationService {
-	private refreshedOnceBefore: boolean = false;
+	private refreshedOnceBefore = false;
 	private readonly disposables: IDisposable[] = [];
 	constructor(
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
@@ -50,7 +50,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 					}
 				},
 				this,
-				this.disposables
+				this.disposables,
 			);
 		}
 	}
@@ -65,10 +65,10 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			traceInfo(`Start refreshing Kernel Picker (${id})`);
 			const taskNb =
 				notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView
+					JupyterNotebookView,
 				);
 			const taskIW = notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView
+				InteractiveWindowView,
 			);
 			this.disposables.push(taskNb);
 			this.disposables.push(taskIW);
@@ -82,7 +82,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 					}
 				},
 				this,
-				this.disposables
+				this.disposables,
 			);
 		};
 		if (this.kernelFinder.status === "discovering") {
@@ -101,7 +101,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private startRefreshWithPython() {
@@ -123,7 +123,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		workspace.onDidOpenNotebookDocument(
 			(e) => {
@@ -134,11 +134,11 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		let kernelProgress: DisposableStore | undefined;
-		let id: string = "";
+		let id = "";
 		const createProgressIndicator = () => {
 			if (kernelProgress && !kernelProgress.isDisposed) {
 				return kernelProgress;
@@ -147,11 +147,11 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			traceInfo(`Start refreshing Kernel Picker (${id})`);
 			kernelProgress = new DisposableStore(
 				notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView
+					JupyterNotebookView,
 				),
 				notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView
-				)
+					InteractiveWindowView,
+				),
 			);
 			this.disposables.push(kernelProgress);
 			return kernelProgress;
@@ -173,7 +173,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

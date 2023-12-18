@@ -3,17 +3,20 @@
 
 import type { IOutput } from "@jupyterlab/nbformat";
 import {
-	NotebookCell,
-	NotebookCellKind,
-	EventEmitter,
-	notebooks,
-	NotebookCellExecutionState,
-	NotebookDocument,
-	workspace,
 	CancellationToken,
+	EventEmitter,
+	NotebookCell,
+	NotebookCellExecutionState,
+	NotebookCellKind,
+	NotebookDocument,
+	notebooks,
+	workspace,
 } from "vscode";
 import { getDisplayPath } from "../platform/common/platform/fs-paths";
 import { IDisposable, IExtensionContext } from "../platform/common/types";
+import { noop } from "../platform/common/utils/misc";
+import { StopWatch } from "../platform/common/utils/stopWatch";
+import { SessionDisposedError } from "../platform/errors/sessionDisposedError";
 import { traceInfo, traceVerbose } from "../platform/logging";
 import { Telemetry } from "../telemetry";
 import { DisplayOptions } from "./displayOptions";
@@ -21,6 +24,7 @@ import { CellExecutionFactory } from "./execution/cellExecution";
 import { CellExecutionMessageHandlerService } from "./execution/cellExecutionMessageHandlerService";
 import { CellExecutionQueue } from "./execution/cellExecutionQueue";
 import { traceCellMessage } from "./execution/helpers";
+import { ICodeExecution } from "./execution/types";
 import { executeSilently } from "./helpers";
 import { initializeInteractiveOrNotebookTelemetryBasedOnUserAction } from "./telemetry/helper";
 import { sendKernelTelemetryEvent } from "./telemetry/sendKernelTelemetryEvent";
@@ -32,10 +36,6 @@ import {
 	NotebookCellRunState,
 	ResumeCellExecutionInformation,
 } from "./types";
-import { SessionDisposedError } from "../platform/errors/sessionDisposedError";
-import { ICodeExecution } from "./execution/types";
-import { StopWatch } from "../platform/common/utils/stopWatch";
-import { noop } from "../platform/common/utils/misc";
 
 // Disable ES Lint rule for now, as this is only for telemetry (hence not a layer breaking change)
 import {
@@ -66,18 +66,18 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		private readonly kernel: IKernel,
 		context: IExtensionContext,
 		formatters: ITracebackFormatter[],
-		private readonly notebook: NotebookDocument
+		private readonly notebook: NotebookDocument,
 	) {
 		const requestListener = new CellExecutionMessageHandlerService(
 			kernel.controller,
 			context,
 			formatters,
-			notebook
+			notebook,
 		);
 		this.disposables.push(requestListener);
 		this.executionFactory = new CellExecutionFactory(
 			kernel.controller,
-			requestListener
+			requestListener,
 		);
 
 		notebooks.onDidChangeNotebookCellExecutionState((e) => {
@@ -88,7 +88,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 				) {
 					this._visibleExecutionCount = Math.max(
 						this._visibleExecutionCount,
-						e.cell.executionSummary.executionOrder
+						e.cell.executionSummary.executionOrder,
 					);
 				}
 			}
@@ -96,25 +96,25 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		kernel.onRestarted(
 			() => (this._visibleExecutionCount = 0),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.onStarted(
 			() => (this._visibleExecutionCount = 0),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.addHook(
 			"willInterrupt",
 			this.onWillInterrupt,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		kernel.addHook("willCancel", this.onWillCancel, this, this.disposables);
 		kernel.addHook(
 			"willRestart",
 			(sessionPromise) => this.onWillRestart(sessionPromise),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.disposables.push(this._onPreExecute);
 	}
@@ -124,13 +124,13 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 
 	public async resumeCellExecution(
 		cell: NotebookCell,
-		info: ResumeCellExecutionInformation
+		info: ResumeCellExecutionInformation,
 	): Promise<NotebookCellRunState> {
 		traceCellMessage(
 			cell,
 			`NotebookKernelExecution.resumeCellExecution (start), ${getDisplayPath(
-				cell.notebook.uri
-			)}`
+				cell.notebook.uri,
+			)}`,
 		);
 		if (cell.kind == NotebookCellKind.Markup) {
 			return NotebookCellRunState.Success;
@@ -138,16 +138,16 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 
 		await initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			this.kernel.resourceUri,
-			this.kernel.kernelConnectionMetadata
+			this.kernel.kernelConnectionMetadata,
 		);
 		sendKernelTelemetryEvent(
 			this.kernel.resourceUri,
-			Telemetry.ResumeCellExecution
+			Telemetry.ResumeCellExecution,
 		);
 		const sessionPromise = this.kernel.start(new DisplayOptions(false));
 		const executionQueue = this.getOrCreateCellExecutionQueue(
 			cell.notebook,
-			sessionPromise
+			sessionPromise,
 		);
 		executionQueue.resumeCell(cell, info);
 		const result = await executionQueue.waitForCompletion([cell]);
@@ -155,8 +155,8 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		traceCellMessage(
 			cell,
 			`NotebookKernelExecution.resumeCellExecution (completed), ${getDisplayPath(
-				cell.notebook.uri
-			)}`
+				cell.notebook.uri,
+			)}`,
 		);
 		traceVerbose(`Cell ${cell.index} executed with state ${result[0]}`);
 
@@ -164,13 +164,13 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	}
 	public async executeCell(
 		cell: NotebookCell,
-		codeOverride?: string | undefined
+		codeOverride?: string | undefined,
 	): Promise<NotebookCellRunState> {
 		traceCellMessage(
 			cell,
 			`NotebookKernelExecution.executeCell (1), ${getDisplayPath(
-				cell.notebook.uri
-			)}`
+				cell.notebook.uri,
+			)}`,
 		);
 		const pendingInspectRequestsBefore = this.kernel.session?.kernel
 			? pendingInspectRequests.get(this.kernel.session.kernel)?.count || 0
@@ -183,12 +183,12 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		traceCellMessage(
 			cell,
 			`NotebookKernelExecution.executeCell, ${getDisplayPath(
-				cell.notebook.uri
-			)}`
+				cell.notebook.uri,
+			)}`,
 		);
 		await initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			this.kernel.resourceUri,
-			this.kernel.kernelConnectionMetadata
+			this.kernel.kernelConnectionMetadata,
 		);
 		const sessionPromise = this.kernel.start(new DisplayOptions(false));
 
@@ -198,12 +198,12 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		traceCellMessage(
 			cell,
 			`NotebookKernelExecution.executeCell (2), ${getDisplayPath(
-				cell.notebook.uri
-			)}`
+				cell.notebook.uri,
+			)}`,
 		);
 		const executionQueue = this.getOrCreateCellExecutionQueue(
 			cell.notebook,
-			sessionPromise
+			sessionPromise,
 		);
 		executionQueue.queueCell(cell, codeOverride);
 		const result = await executionQueue.waitForCompletion([cell]);
@@ -211,8 +211,8 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		traceCellMessage(
 			cell,
 			`NotebookKernelExecution.executeCell completed (3), ${getDisplayPath(
-				cell.notebook.uri
-			)}`
+				cell.notebook.uri,
+			)}`,
 		);
 		traceVerbose(`Cell ${cell.index} executed with state ${result[0]}`);
 		const pendingInspectRequestsAfter = this.kernel.session?.kernel
@@ -225,7 +225,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 				duration: stopWatch.elapsedTime,
 				pendingInspectRequestsAfter,
 				pendingInspectRequestsBefore,
-			}
+			},
 		);
 
 		return result[0];
@@ -233,12 +233,12 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	public async executeCode(
 		code: string,
 		extensionId: string,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<ICodeExecution> {
 		const stopWatch = new StopWatch();
 		await initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			this.kernel.resourceUri,
-			this.kernel.kernelConnectionMetadata
+			this.kernel.kernelConnectionMetadata,
 		);
 		const sessionPromise = this.kernel.start(new DisplayOptions(false));
 
@@ -247,23 +247,23 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 
 		const executionQueue = this.getOrCreateCellExecutionQueue(
 			this.notebook,
-			sessionPromise
+			sessionPromise,
 		);
 		const result = executionQueue.queueCode(code, extensionId, token);
 		traceVerbose(
-			`Queue code ${result.executionId} from ${extensionId} after ${stopWatch.elapsedTime}ms:\n${code}`
+			`Queue code ${result.executionId} from ${extensionId} after ${stopWatch.elapsedTime}ms:\n${code}`,
 		);
 		result.result
 			.finally(() => {
 				!token.isCancellationRequested &&
 					traceInfo(
-						`Execution of code ${result.executionId} completed in ${stopWatch.elapsedTime}ms`
+						`Execution of code ${result.executionId} completed in ${stopWatch.elapsedTime}ms`,
 					);
 				sendKernelTelemetryEvent(
 					this.kernel.resourceUri,
 					Telemetry.ExecuteCode,
 					{ duration: stopWatch.elapsedTime },
-					{ extensionId }
+					{ extensionId },
 				);
 			})
 			.catch(noop);
@@ -274,7 +274,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		return sessionPromise.then((session) =>
 			session.kernel
 				? executeSilently(session.kernel, code)
-				: Promise.reject(new SessionDisposedError())
+				: Promise.reject(new SessionDisposedError()),
 		);
 	}
 	private async onWillInterrupt() {
@@ -329,7 +329,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	}
 	private getOrCreateCellExecutionQueue(
 		document: NotebookDocument,
-		sessionPromise: Promise<IKernelSession>
+		sessionPromise: Promise<IKernelSession>,
 	) {
 		const existingExecutionQueue = this.documentExecutions.get(document);
 		// Re-use the existing Queue if it can be used.
@@ -345,7 +345,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			sessionPromise,
 			this.executionFactory,
 			this.kernel.kernelConnectionMetadata,
-			this.kernel.resourceUri
+			this.kernel.resourceUri,
 		);
 		this.disposables.push(newCellExecutionQueue);
 
@@ -355,8 +355,8 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 				if (e === document) {
 					traceVerbose(
 						`Cancel executions after closing notebook ${getDisplayPath(
-							e.uri
-						)}`
+							e.uri,
+						)}`,
 					);
 					if (
 						!newCellExecutionQueue.failed ||
@@ -367,17 +367,17 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		newCellExecutionQueue.onPreExecute(
 			(c) => this._onPreExecute.fire(c),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		newCellExecutionQueue.onPostExecute(
 			(c) => this._onPostExecute.fire(c),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.documentExecutions.set(document, newCellExecutionQueue);
 		return newCellExecutionQueue;

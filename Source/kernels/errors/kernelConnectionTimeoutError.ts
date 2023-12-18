@@ -20,9 +20,9 @@ export class KernelConnectionTimeoutError extends BaseKernelError {
 		super(
 			"timeout",
 			DataScience.rawKernelStartFailedDueToTimeout(
-				getDisplayNameOrNameOfKernelConnection(kernelConnection)
+				getDisplayNameOrNameOfKernelConnection(kernelConnection),
 			),
-			kernelConnection
+			kernelConnection,
 		);
 	}
 }

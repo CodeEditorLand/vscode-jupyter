@@ -4,10 +4,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { injectable } from "inversify";
-import { commands, Disposable, TextEditor, TextEditorEdit } from "vscode";
+import { Disposable, TextEditor, TextEditorEdit, commands } from "vscode";
+import { ICommandNameArgumentTypeMapping } from "../../../commands";
 import { sendTelemetryEvent } from "../../../telemetry";
 import { Telemetry } from "../constants";
-import { ICommandNameArgumentTypeMapping } from "../../../commands";
 import { ICommandManager } from "./types";
 
 // This contains a list of commands to be ignored when sending telemetry in the command handler.
@@ -46,7 +46,7 @@ export class CommandManager implements ICommandManager {
 					return callback(...args);
 				}
 			},
-			thisArg
+			thisArg,
 		);
 	}
 
@@ -71,7 +71,7 @@ export class CommandManager implements ICommandManager {
 			edit: TextEditorEdit,
 			...args: any[]
 		) => void,
-		thisArg?: any
+		thisArg?: any,
 	): Disposable {
 		commandsToIgnore.add(command);
 		return commands.registerTextEditorCommand(
@@ -86,7 +86,7 @@ export class CommandManager implements ICommandManager {
 					return callback(textEditor, edit, ...args);
 				}
 			},
-			thisArg
+			thisArg,
 		);
 	}
 

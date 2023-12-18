@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const path = require("path");
 const tsconfig_paths_webpack_plugin = require("tsconfig-paths-webpack-plugin");
@@ -11,7 +10,7 @@ const common = require("./common");
 // tslint:disable-next-line:no-var-requires no-require-imports
 const configFileName = path.join(
 	constants.ExtensionRootDir,
-	"src/tsconfig.extension.web.json"
+	"src/tsconfig.extension.web.json",
 );
 const config = {
 	mode: "development",
@@ -100,7 +99,7 @@ const config = {
 			VSC_JUPYTER_CI_TEST_GREP: JSON.stringify(
 				typeof process.env.VSC_JUPYTER_CI_TEST_GREP === "string"
 					? process.env.VSC_JUPYTER_CI_TEST_GREP
-					: ""
+					: "",
 			),
 		}),
 		new webpack.optimize.LimitChunkCountPlugin({
@@ -121,7 +120,7 @@ const config = {
 			fs: "./fs-empty.js",
 			"vscode-jupyter-release-version": path.join(
 				__dirname,
-				"vscode-jupyter-release-version.js"
+				"vscode-jupyter-release-version.js",
 			),
 			moment: path.join(__dirname, "moment.js"),
 			sinon: path.join(
@@ -129,7 +128,7 @@ const config = {
 				"node_modules",
 				"sinon",
 				"lib",
-				"sinon.js"
+				"sinon.js",
 			),
 		},
 		fallback: {

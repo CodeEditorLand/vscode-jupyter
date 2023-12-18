@@ -28,7 +28,7 @@ export class ExtensionActivationManager implements IExtensionActivationManager {
 					`Error in activating extension, failed in ${
 						(item as Object).constructor.name
 					}`,
-					ex
+					ex,
 				);
 			}
 		});

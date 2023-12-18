@@ -4,10 +4,10 @@
 import { expect, use } from "chai";
 import chaiPromise from "chai-as-promised";
 import {
-	isUnitTestExecution,
 	isTestExecution,
-	setUnitTestExecution,
+	isUnitTestExecution,
 	setTestExecution,
+	setUnitTestExecution,
 } from "../../../platform/common/constants";
 import { clearCache } from "../../../platform/common/utils/cacheUtils";
 import { cache } from "../../../platform/common/utils/decorators";

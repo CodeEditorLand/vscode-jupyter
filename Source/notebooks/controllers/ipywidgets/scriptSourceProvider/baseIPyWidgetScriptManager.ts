@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import stripComments from "strip-comments";
 import { Uri } from "vscode";
+import { IKernel, isLocalConnection } from "../../../../kernels/types";
+import { isCI } from "../../../../platform/common/constants";
 import { splitLines, trimQuotes } from "../../../../platform/common/helpers";
 import { getDisplayPath } from "../../../../platform/common/platform/fs-paths";
 import { IDisposable } from "../../../../platform/common/types";
+import { dispose } from "../../../../platform/common/utils/lifecycle";
+import { StopWatch } from "../../../../platform/common/utils/stopWatch";
 import {
 	traceError,
 	traceInfoIfCI,
 	traceWarning,
 } from "../../../../platform/logging";
-import { sendTelemetryEvent, Telemetry } from "../../../../telemetry";
-import { IKernel, isLocalConnection } from "../../../../kernels/types";
 import { getTelemetrySafeHashedString } from "../../../../platform/telemetry/helpers";
-import stripComments from "strip-comments";
+import { Telemetry, sendTelemetryEvent } from "../../../../telemetry";
 import { IIPyWidgetScriptManager } from "../types";
-import { StopWatch } from "../../../../platform/common/utils/stopWatch";
-import { isCI } from "../../../../platform/common/constants";
-import { dispose } from "../../../../platform/common/utils/lifecycle";
 
 const REQUIRE_PATTERNS = [
 	"require.config({",
@@ -36,10 +36,10 @@ const REQUIRE_PATTERNS = [
 export async function extractRequireConfigFromWidgetEntry(
 	baseUrl: Uri,
 	widgetFolderName: string,
-	contents: string
+	contents: string,
 ) {
 	// Look for `require.config(` or `window["require"].config` or `window['requirejs'].config`
-	let patternsToLookFor = [...REQUIRE_PATTERNS];
+	const patternsToLookFor = [...REQUIRE_PATTERNS];
 	const widgetFolderNameHash =
 		await getTelemetrySafeHashedString(widgetFolderName);
 	let indexOfRequireConfig = 0;
@@ -50,14 +50,14 @@ export async function extractRequireConfigFromWidgetEntry(
 			break;
 		}
 		indexOfRequireConfig = contents.indexOf(
-			patternUsedToRegisterRequireConfig
+			patternUsedToRegisterRequireConfig,
 		);
 	}
 
 	if (indexOfRequireConfig < 0) {
 		// Try without the `{`
-		let patternsToLookFor = [...REQUIRE_PATTERNS].map((pattern) =>
-			pattern.substring(0, pattern.length - 2)
+		const patternsToLookFor = [...REQUIRE_PATTERNS].map((pattern) =>
+			pattern.substring(0, pattern.length - 2),
 		);
 		while (indexOfRequireConfig <= 0 && patternsToLookFor.length) {
 			patternUsedToRegisterRequireConfig = patternsToLookFor.pop();
@@ -65,7 +65,7 @@ export async function extractRequireConfigFromWidgetEntry(
 				break;
 			}
 			indexOfRequireConfig = contents.indexOf(
-				patternUsedToRegisterRequireConfig
+				patternUsedToRegisterRequireConfig,
 			);
 		}
 	}
@@ -124,14 +124,14 @@ export async function extractRequireConfigFromWidgetEntry(
 		const parts = mapping.split(":");
 		// Found in k3d scripts that \\r\\n is gets set, the require config is dynamically injected (with line breaks).
 		const key = trimQuotes(
-			parts[0].replace(/\\r/g, "").replace(/\\n/g, "").trim()
+			parts[0].replace(/\\r/g, "").replace(/\\n/g, "").trim(),
 		).trim();
 		const value = trimQuotes(
 			mapping
 				.substring(mapping.indexOf(":") + 1)
 				.replace(/\\r/g, "")
 				.replace(/\\n/g, "")
-				.trim()
+				.trim(),
 		).trim();
 		requireConfig[key] = value.startsWith("http")
 			? Uri.parse(value)
@@ -153,7 +153,7 @@ export async function extractRequireConfigFromWidgetEntry(
 		{
 			widgetFolderNameHash,
 			patternUsedToRegisterRequireConfig,
-		}
+		},
 	);
 
 	return requireConfig;
@@ -202,7 +202,7 @@ export abstract class BaseIPyWidgetScriptManager
 	async getConfigFromWidget(
 		baseUrl: Uri,
 		script: Uri,
-		widgetFolderName: string
+		widgetFolderName: string,
 	) {
 		const contents = await this.getWidgetScriptSource(script);
 
@@ -210,11 +210,11 @@ export abstract class BaseIPyWidgetScriptManager
 			const config = await extractRequireConfigFromWidgetEntry(
 				baseUrl,
 				widgetFolderName,
-				contents
+				contents,
 			);
 			if (!config) {
 				let message = `Failed to extract require.config from widget for ${widgetFolderName} from ${getDisplayPath(
-					script
+					script,
 				)}`;
 				if (isCI) {
 					message += `with contents ${contents}`;
@@ -225,9 +225,9 @@ export abstract class BaseIPyWidgetScriptManager
 		} catch (ex) {
 			traceError(
 				`Failed to extract require.config entry for ${widgetFolderName} from ${getDisplayPath(
-					script
+					script,
 				)}`,
-				ex
+				ex,
 			);
 		}
 	}
@@ -247,14 +247,14 @@ export abstract class BaseIPyWidgetScriptManager
 				this.getConfigFromWidget(
 					baseUrl,
 					entry.uri,
-					entry.widgetFolderName
-				)
-			)
+					entry.widgetFolderName,
+				),
+			),
 		);
 
 		const config = widgetConfigs.reduce(
 			(prev, curr) => Object.assign(prev || {}, curr),
-			{}
+			{},
 		);
 		// Exclude entries that are not required (widgets that we have already bundled with our code).
 		if (config && Object.keys(config).length) {
@@ -265,8 +265,8 @@ export abstract class BaseIPyWidgetScriptManager
 		} else {
 			traceInfoIfCI(
 				`No config, entryPoints = ${JSON.stringify(
-					entryPoints
-				)}, widgetConfigs = ${JSON.stringify(widgetConfigs)}`
+					entryPoints,
+				)}, widgetConfigs = ${JSON.stringify(widgetConfigs)}`,
 			);
 		}
 		sendTelemetryEvent(
@@ -276,7 +276,7 @@ export abstract class BaseIPyWidgetScriptManager
 				type: isLocalConnection(this.kernel.kernelConnectionMetadata)
 					? "local"
 					: "remote",
-			}
+			},
 		);
 		return config && Object.keys(config).length ? config : undefined;
 	}

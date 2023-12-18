@@ -3,21 +3,21 @@
 
 import assert from "assert";
 import { SemVer } from "semver";
+import { anything, instance, mock, when } from "ts-mockito";
+import { Uri } from "vscode";
 import { IPlatformService } from "../../../platform/common/platform/types";
 import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { InstallationChannelManager } from "../../../platform/interpreter/installer/channelManager.node";
+import {
+	IModuleInstaller,
+	Product,
+} from "../../../platform/interpreter/installer/types";
 import { ServiceContainer } from "../../../platform/ioc/container";
 import { IServiceContainer } from "../../../platform/ioc/types";
 import {
 	EnvironmentType,
 	PythonEnvironment,
 } from "../../../platform/pythonEnvironments/info";
-import { InstallationChannelManager } from "../../../platform/interpreter/installer/channelManager.node";
-import {
-	IModuleInstaller,
-	Product,
-} from "../../../platform/interpreter/installer/types";
-import { Uri } from "vscode";
-import { anything, instance, mock, when } from "ts-mockito";
 import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 
 const info: PythonEnvironment = {
@@ -44,13 +44,13 @@ suite("Installation - channel messages", () => {
 		interpreters = mock<IInterpreterService>();
 		moduleInstaller = mock<IModuleInstaller>();
 		when(
-			serviceContainer.get<IPlatformService>(IPlatformService)
+			serviceContainer.get<IPlatformService>(IPlatformService),
 		).thenReturn(instance(platform));
 		when(
-			serviceContainer.get<IInterpreterService>(IInterpreterService)
+			serviceContainer.get<IInterpreterService>(IInterpreterService),
 		).thenReturn(instance(interpreters));
 		when(
-			serviceContainer.getAll<IModuleInstaller>(IModuleInstaller)
+			serviceContainer.getAll<IModuleInstaller>(IModuleInstaller),
 		).thenReturn([instance(moduleInstaller)]);
 	});
 
@@ -61,7 +61,7 @@ suite("Installation - channel messages", () => {
 			async (message: string, url: string) => {
 				verifyMessage(message, ["Pip"], ["Conda"]);
 				verifyUrl(url, ["Windows", "Pip"]);
-			}
+			},
 		);
 	});
 
@@ -72,7 +72,7 @@ suite("Installation - channel messages", () => {
 			async (message: string, url: string) => {
 				verifyMessage(message, ["Pip", "Conda"], []);
 				verifyUrl(url, ["Windows", "Pip", "Conda"]);
-			}
+			},
 		);
 	});
 
@@ -84,7 +84,7 @@ suite("Installation - channel messages", () => {
 			async (message: string, url: string) => {
 				verifyMessage(message, ["Pip"], ["Conda"]);
 				verifyUrl(url, ["Mac", "Pip"]);
-			}
+			},
 		);
 	});
 
@@ -96,7 +96,7 @@ suite("Installation - channel messages", () => {
 			async (message: string, url: string) => {
 				verifyMessage(message, ["Pip", "Conda"], []);
 				verifyUrl(url, ["Mac", "Pip", "Conda"]);
-			}
+			},
 		);
 	});
 
@@ -109,7 +109,7 @@ suite("Installation - channel messages", () => {
 			async (message: string, url: string) => {
 				verifyMessage(message, ["Pip"], ["Conda"]);
 				verifyUrl(url, ["Linux", "Pip"]);
-			}
+			},
 		);
 	});
 
@@ -122,7 +122,7 @@ suite("Installation - channel messages", () => {
 			async (message: string, url: string) => {
 				verifyMessage(message, ["Pip", "Conda"], []);
 				verifyUrl(url, ["Linux", "Pip", "Conda"]);
-			}
+			},
 		);
 	});
 
@@ -134,27 +134,27 @@ suite("Installation - channel messages", () => {
 				verifyMessage(message, ["Pip"], ["Conda"]);
 				verifyUrl(url, ["Windows", "Pip"]);
 			},
-			"getInstallationChannel"
+			"getInstallationChannel",
 		);
 	});
 
 	function verifyMessage(
 		message: string,
 		present: string[],
-		missing: string[]
+		missing: string[],
 	) {
 		for (const p of present) {
 			assert.strictEqual(
 				message.indexOf(p) >= 0,
 				true,
-				`Message '${message}' does not contain ${p}.`
+				`Message '${message}' does not contain ${p}.`,
 			);
 		}
 		for (const m of missing) {
 			assert.strictEqual(
 				message.indexOf(m) < 0,
 				true,
-				`Message '${message}' incorrectly contains ${m}.`
+				`Message '${message}' incorrectly contains ${m}.`,
 			);
 		}
 	}
@@ -163,13 +163,13 @@ suite("Installation - channel messages", () => {
 		assert.strictEqual(
 			url.indexOf("https://") >= 0,
 			true,
-			"Search Url must be https."
+			"Search Url must be https.",
 		);
 		for (const term of terms) {
 			assert.strictEqual(
 				url.indexOf(term) >= 0,
 				true,
-				`Search Url does not contain ${term}.`
+				`Search Url does not contain ${term}.`,
 			);
 		}
 	}
@@ -179,7 +179,7 @@ suite("Installation - channel messages", () => {
 		verify: (m: string, u: string) => Promise<void>,
 		methodType:
 			| "showNoInstallersMessage"
-			| "getInstallationChannel" = "showNoInstallersMessage"
+			| "getInstallationChannel" = "showNoInstallersMessage",
 	): Promise<void> {
 		const activeInterpreter: PythonEnvironment = {
 			...info,
@@ -187,10 +187,10 @@ suite("Installation - channel messages", () => {
 			uri: Uri.file(""),
 		};
 		when(interpreters.getActiveInterpreter(anything())).thenResolve(
-			activeInterpreter
+			activeInterpreter,
 		);
 		const channels = new InstallationChannelManager(
-			instance(serviceContainer)
+			instance(serviceContainer),
 		);
 
 		let url = "";
@@ -200,8 +200,8 @@ suite("Installation - channel messages", () => {
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((m: string, _, s: string) => {
 			message = m;
 			search = s;
@@ -210,8 +210,8 @@ suite("Installation - channel messages", () => {
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((m: string, s: string) => {
 			message = m;
 			search = s;
@@ -220,7 +220,7 @@ suite("Installation - channel messages", () => {
 		when(mockedVSCodeNamespaces.env.openExternal(anything())).thenCall(
 			(s: Uri) => {
 				url = s.toString(true);
-			}
+			},
 		);
 		if (methodType === "showNoInstallersMessage") {
 			await channels.showNoInstallersMessage(activeInterpreter);

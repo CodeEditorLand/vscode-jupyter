@@ -8,7 +8,7 @@ const path = require("path");
 // For stable we only ship the api.d.ts file.
 fs.copyFileSync(
 	path.join(__dirname, "../src/api.d.ts"),
-	path.join(__dirname, "api.d.ts")
+	path.join(__dirname, "api.d.ts"),
 );
 
 // For proposed API, we need to merge all proposed API files into a single file.
@@ -27,7 +27,7 @@ const newModuleDeclaration = `declare module '@vscode/jupyter-extension' {`;
 fs.readdirSync(path.join(__dirname, "../src")).forEach((file) => {
 	if (file.startsWith("api.proposed.") && file.endsWith(".d.ts")) {
 		console.error(file);
-		let source = fs
+		const source = fs
 			.readFileSync(path.join(__dirname, "../src", file), "utf8")
 			.toString();
 		let foundFirstExport = false;
@@ -41,7 +41,7 @@ fs.readdirSync(path.join(__dirname, "../src")).forEach((file) => {
 				if (line.startsWith("import ") && line.trim().endsWith(";")) {
 					if (!proposedApiImports.includes(line)) {
 						proposedApiImports.push(
-							"// @ts-ignore Ignore Duplicate types"
+							"// @ts-ignore Ignore Duplicate types",
 						);
 						proposedApiImports.push(line);
 					}
@@ -110,5 +110,5 @@ fs.writeFileSync(
 		`1${proposedApi}`.trim().substring(1) +
 		EOL +
 		"}" +
-		EOL
+		EOL,
 );

@@ -19,22 +19,21 @@ export class RestartNotSupportedController implements IDebuggingDelegate {
 	}
 
 	public async willSendResponse(
-		response: DebugProtocol.Response
+		response: DebugProtocol.Response,
 	): Promise<void> {
 		if (response.command === "initialize" && response.body) {
-			(
-				response as DebugProtocol.InitializeResponse
-			).body!.supportsRestartRequest = true;
+			(response as DebugProtocol.InitializeResponse)
+				.body!.supportsRestartRequest = true;
 		}
 	}
 
 	public async willSendRequest(
-		request: DebugProtocol.Request
+		request: DebugProtocol.Request,
 	): Promise<undefined | DebugProtocol.Response> {
 		if (request.command === "restart") {
 			this.trace(
 				"restart",
-				"Showing warning for unsupported restart request"
+				"Showing warning for unsupported restart request",
 			);
 			window
 				.showWarningMessage(DataScience.restartNotSupported, {

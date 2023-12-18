@@ -3,10 +3,10 @@
 
 import { injectable } from "inversify";
 import { ConfigurationTarget, commands, extensions } from "vscode";
-import { IExtensionSyncActivationService } from "../../../activation/types";
-import { PythonExtension, PylanceExtension } from "../../constants";
-import { noop } from "../../utils/misc";
 import { workspace } from "vscode";
+import { IExtensionSyncActivationService } from "../../../activation/types";
+import { PylanceExtension, PythonExtension } from "../../constants";
+import { noop } from "../../utils/misc";
 
 /**
  * Allows the jupyter extension to run in a different process than other extensions.
@@ -19,7 +19,7 @@ export class RunInDedicatedExtensionHostCommandHandler
 		commands.registerCommand(
 			"jupyter.runInDedicatedExtensionHost",
 			this.updateAffinity,
-			this
+			this,
 		);
 	}
 	private async updateAffinity() {
@@ -37,7 +37,7 @@ export class RunInDedicatedExtensionHostCommandHandler
 
 		const targetAffinity = maxAffinity + 1;
 
-		let update: { [key: string]: number } = {
+		const update: { [key: string]: number } = {
 			"ms-toolsai.jupyter": targetAffinity,
 			"ms-toolsai.jupyter-renderers": targetAffinity,
 		};
@@ -56,7 +56,7 @@ export class RunInDedicatedExtensionHostCommandHandler
 				...(affinity ?? {}),
 				...update,
 			},
-			ConfigurationTarget.Global
+			ConfigurationTarget.Global,
 		);
 
 		commands

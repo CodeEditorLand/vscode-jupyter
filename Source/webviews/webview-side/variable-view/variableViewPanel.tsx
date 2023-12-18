@@ -26,7 +26,7 @@ function mapStateToProps(state: IStore): IMainWithVariables {
 // It mimics the structure and state of InteractivePanel to be able to share creation / redux / actions
 // with the existing variable panels, but the UI contains only the Variable part of the UI
 export class VariableViewPanel extends React.Component<IVariableViewPanelProps> {
-	private renderCount: number = 0;
+	private renderCount = 0;
 	private resizeTimer?: number;
 	private panelRef: React.RefObject<HTMLDivElement>;
 
@@ -128,7 +128,7 @@ ${buildSettingsCss(this.props.settings)}`}</style>
 			startIndex,
 			pageSize,
 			this.props.variableState.sortColumn,
-			this.props.variableState.sortAscending
+			this.props.variableState.sortAscending,
 		);
 	};
 

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { injectable } from "inversify";
+import { extensions } from "vscode";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { noop } from "../../platform/common/utils/misc";
-import { extensions } from "vscode";
 
 /**
  * 3rd party extensions contribute kernels. We need to activate them so that they can register their kernel providers.
@@ -41,13 +41,13 @@ export class EagerlyActivateJupyterUriProviders
 			extensions.all
 				.filter(
 					(e) =>
-						e.packageJSON?.contributes?.pythonRemoteServerProvider
+						e.packageJSON?.contributes?.pythonRemoteServerProvider,
 				)
 				.map((e) =>
 					e.isActive
 						? Promise.resolve()
-						: e.activate().then(noop, noop)
-				)
+						: e.activate().then(noop, noop),
+				),
 		);
 	}
 }

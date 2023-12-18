@@ -4,26 +4,26 @@
 // reflect-metadata is needed by inversify, this must come before any inversify references
 import "./platform/ioc/reflectMetadata";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import * as ts from "typescript";
-import * as fs from "fs-extra";
-import glob from "glob";
-import { initialize } from "./test/vscode-mock";
-import { Parser } from "json2csv";
-import colors from "colors";
 // eslint-disable-next-line local-rules/node-imports
 import * as path from "path";
+import colors from "colors";
+import * as fs from "fs-extra";
+import glob from "glob";
+import { Parser } from "json2csv";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as ts from "typescript";
+import { initialize } from "./test/vscode-mock";
 
 initialize();
 
 import {
+	CommonProperties,
+	CommonPropertyAndMeasureTypeNames,
 	IEventData,
 	IEventNamePropertyMapping,
-	CommonProperties,
-	IPropertyDataNonMeasurement,
 	IPropertyDataMeasurement,
+	IPropertyDataNonMeasurement,
 	TelemetryEventInfo,
-	CommonPropertyAndMeasureTypeNames,
 } from "./telemetry";
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from "./test/constants.node";
 const GDPRData = new IEventNamePropertyMapping();
@@ -68,7 +68,7 @@ class TypeScriptLanguageServiceHost implements ts.LanguageServiceHost {
 	getScriptSnapshot(fileName: string): ts.IScriptSnapshot {
 		if (this._files.includes(fileName)) {
 			return ts.ScriptSnapshot.fromString(
-				fs.readFileSync(fileName).toString()
+				fs.readFileSync(fileName).toString(),
 			);
 		} else {
 			return ts.ScriptSnapshot.fromString("");
@@ -91,7 +91,7 @@ class TypeScriptLanguageServiceHost implements ts.LanguageServiceHost {
 function findNode(
 	sourceFile: ts.SourceFile,
 	position: number,
-	length?: number
+	length?: number,
 ): ts.Node | undefined {
 	let found: ts.Node | undefined;
 	let lastFoundNode: ts.Node | undefined;
@@ -138,7 +138,7 @@ type TelemetryEntry = {
 
 function computePropertiesForLiteralType(
 	literalType: ts.TypeLiteralNode,
-	typeChecker: ts.TypeChecker
+	typeChecker: ts.TypeChecker,
 ) {
 	const properties: TelemetryProperty[] = [];
 
@@ -176,7 +176,7 @@ function computePropertiesForLiteralType(
 							const declaration = t.symbol?.declarations?.length
 								? (t.symbol.declarations[0] as unknown as {
 										jsDoc?: { comment: string }[];
-									})
+								  })
 								: undefined;
 							const comment = [];
 							if (
@@ -184,7 +184,7 @@ function computePropertiesForLiteralType(
 								parseInt(value, 10).toString() === value.trim()
 							) {
 								comment.push(
-									`Enum Member: ${enumName}.${t.symbol.escapedName}`
+									`Enum Member: ${enumName}.${t.symbol.escapedName}`,
 								);
 							}
 							if (
@@ -203,7 +203,7 @@ function computePropertiesForLiteralType(
 					mType.kind === ts.SyntaxKind.UnionType &&
 					ts.isUnionTypeNode(mType) &&
 					possibleValues.every(
-						(item) => (item.comment || "").length === 0
+						(item) => (item.comment || "").length === 0,
 					)
 				) {
 					// Support comments in union string literals.
@@ -278,8 +278,8 @@ function computePropertiesForLiteralType(
 								gdprEntryOfCurrentlyComputingTelemetryEventName[1][
 									"properties"
 								] as any
-							)[name]
-						)
+							)[name],
+						),
 					) as IPropertyDataNonMeasurement;
 					(
 						gdprEntryOfCurrentlyComputingTelemetryEventName[1][
@@ -303,8 +303,8 @@ function computePropertiesForLiteralType(
 								gdprEntryOfCurrentlyComputingTelemetryEventName[1][
 									"measures"
 								] as any
-							)[name]
-						)
+							)[name],
+						),
 					) as IPropertyDataNonMeasurement;
 					// All measures must be marked as isMeasurement=true
 					(gdprEntry as any).isMeasurement = true;
@@ -330,7 +330,7 @@ function computePropertiesForLiteralType(
 									gdprEntry.comment
 										.split(/\r?\n/)
 										.map((line) => line.trim())
-										.join()
+										.join(),
 								)
 						) {
 							descriptions.push(gdprEntry.comment);
@@ -345,7 +345,7 @@ function computePropertiesForLiteralType(
 								comment
 									.split(/\r?\n/)
 									.map((line) => line.trim())
-									.join()
+									.join(),
 							)
 					) {
 						gdprEntry.comment = `${gdprEntry.comment}${
@@ -369,7 +369,7 @@ function computePropertiesForLiteralType(
 							problems: [],
 						});
 					eventIssues.problems.push(
-						`Gdpr entry for ${name} not found.`
+						`Gdpr entry for ${name} not found.`,
 					);
 				}
 			}
@@ -389,7 +389,7 @@ function computePropertiesForLiteralType(
 }
 function comptePropertyGroupsFromReferenceNode(
 	t: ts.TypeReferenceNode,
-	typeChecker: ts.TypeChecker
+	typeChecker: ts.TypeChecker,
 ) {
 	if (t.typeName.getText() === "Partial" && t.typeArguments?.length) {
 		return computePropertyForType(t.typeArguments[0], typeChecker);
@@ -410,7 +410,7 @@ function comptePropertyGroupsFromReferenceNode(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				type.aliasTypeArguments[0].symbol
 					.declarations[0] as unknown as any,
-				typeChecker
+				typeChecker,
 			);
 			props.forEach((prop) => (prop.isNullable = true));
 			return props;
@@ -427,7 +427,7 @@ function comptePropertyGroupsFromReferenceNode(
 				) {
 					const props = computePropertiesForLiteralType(
 						item.symbol.declarations[0],
-						typeChecker
+						typeChecker,
 					);
 					props.forEach((prop) => (prop.isNullable = true));
 					allProps.push(...props);
@@ -446,23 +446,23 @@ function comptePropertyGroupsFromReferenceNode(
 }
 function comptePropertyGroupsForIntersectionTypes(
 	type: ts.IntersectionTypeNode,
-	typeChecker: ts.TypeChecker
+	typeChecker: ts.TypeChecker,
 ) {
 	const properties: TelemetryProperty[] = [];
 	type.types.forEach((t) =>
-		properties.push(...computePropertyForType(t, typeChecker))
+		properties.push(...computePropertyForType(t, typeChecker)),
 	);
 	return properties;
 }
 function comptePropertyGroupsForPrenthesizedTypes(
 	type: ts.ParenthesizedTypeNode,
-	typeChecker: ts.TypeChecker
+	typeChecker: ts.TypeChecker,
 ) {
 	return computePropertyForType(type.type, typeChecker);
 }
 function computePropertyForType(
 	type: ts.TypeNode | ts.Node,
-	typeChecker: ts.TypeChecker
+	typeChecker: ts.TypeChecker,
 ): TelemetryProperty[] {
 	if (ts.isTypeLiteralNode(type)) {
 		return computePropertiesForLiteralType(type, typeChecker);
@@ -530,15 +530,15 @@ function isNodeExported(node: ts.Node): boolean {
 function getTsCompilerOptionsJson(): any {
 	const tsconfigPath = path.join(
 		EXTENSION_ROOT_DIR_FOR_TESTS,
-		"tsconfig.json"
+		"tsconfig.json",
 	);
 	const jsonContent = ts.parseConfigFileTextToJson(
 		tsconfigPath,
-		fs.readFileSync(tsconfigPath, "utf8")
+		fs.readFileSync(tsconfigPath, "utf8"),
 	);
 	return ts.convertCompilerOptionsFromJson(
 		jsonContent.config.compilerOptions,
-		""
+		"",
 	);
 }
 
@@ -580,7 +580,7 @@ function generateDocumentationForCommonTypes(fileNames: string[]): void {
 						: (prop.descriptions || []).join(" ");
 				commonPropertyComments.set(
 					prop.name,
-					comment.split(/\n?\r/).join(" ")
+					comment.split(/\n?\r/).join(" "),
 				);
 			});
 			return;
@@ -592,12 +592,12 @@ function generateDocumentation(fileNames: string[]): void {
 	const configFile = getTsCompilerOptionsJson();
 	const host = new TypeScriptLanguageServiceHost(
 		fileNames,
-		configFile.options
+		configFile.options,
 	);
 	const languageService = ts.createLanguageService(
 		host,
 		undefined,
-		ts.LanguageServiceMode.Semantic
+		ts.LanguageServiceMode.Semantic,
 	);
 	const program = languageService.getProgram()!;
 	const typeChecker = program!.getTypeChecker();
@@ -662,17 +662,17 @@ function generateDocumentation(fileNames: string[]): void {
 							const defs =
 								languageService.getDefinitionAtPosition(
 									m.getSourceFile().fileName,
-									m.name.end - 1
+									m.name.end - 1,
 								);
 							if (defs) {
 								const refSourceFile = program!.getSourceFile(
-									defs[0].fileName
+									defs[0].fileName,
 								);
 								if (refSourceFile) {
 									const refNode = findNode(
 										refSourceFile,
 										defs[0].textSpan.start,
-										defs[0].textSpan.length
+										defs[0].textSpan.length,
 									);
 									refNode?.parent
 										?.getChildren()
@@ -740,14 +740,14 @@ function generateDocumentation(fileNames: string[]): void {
 						if (ts.isTypeLiteralNode(type)) {
 							const properties = computePropertiesForLiteralType(
 								type,
-								typeChecker
+								typeChecker,
 							);
 							groups.push({ properties });
 						} else if (ts.isUnionTypeNode(type)) {
 							type.types.forEach((t) => {
 								const properties = computePropertyForType(
 									t,
-									typeChecker
+									typeChecker,
 								);
 								const comment = getCommentForUnions(t);
 								groups.push({
@@ -759,7 +759,7 @@ function generateDocumentation(fileNames: string[]): void {
 							const properties =
 								comptePropertyGroupsFromReferenceNode(
 									type,
-									typeChecker
+									typeChecker,
 								);
 							const comment = getCommentForUnions(type);
 							groups.push({ description: comment, properties });
@@ -767,7 +767,7 @@ function generateDocumentation(fileNames: string[]): void {
 							const properties =
 								comptePropertyGroupsForIntersectionTypes(
 									type,
-									typeChecker
+									typeChecker,
 								);
 							const comment = getCommentForUnions(type);
 							groups.push({ description: comment, properties });
@@ -778,12 +778,12 @@ function generateDocumentation(fileNames: string[]): void {
 							// Ignore
 						} else {
 							console.error(
-								`Unknown type ${type.kind} in generating the Telemetry Documentation`
+								`Unknown type ${type.kind} in generating the Telemetry Documentation`,
 							);
 						}
 
 						const propertyGroups = groups.filter(
-							(group) => group.properties.length
+							(group) => group.properties.length,
 						);
 						entries.set(name, {
 							name,
@@ -798,13 +798,13 @@ function generateDocumentation(fileNames: string[]): void {
 		} catch (ex) {
 			console.error(
 				`Failure in generating telemetry documentation for ${node.getText()}`,
-				ex
+				ex,
 			);
 		}
 	}
 
 	const values = Array.from(entries.values()).sort((a, b) =>
-		a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+		a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
 	);
 	// Uncomment if we need the CSV file for searching telemetry events.
 	if (false) {
@@ -821,8 +821,8 @@ function generateDocumentation(fileNames: string[]): void {
 				const problems: EventProblem = eventProblems[eventName];
 				console.error(
 					colors.red(
-						`    ${eventName} (${problems.eventConstantName}):`
-					)
+						`    ${eventName} (${problems.eventConstantName}):`,
+					),
 				);
 				problems.problems.forEach((error, index) => {
 					console.error(colors.red(`        ${index + 1}. ${error}`));
@@ -877,7 +877,7 @@ function generateTelemetryCSV(output: TelemetryEntry[]) {
 												item.comment
 													? `(${item.comment})`
 													: ""
-											}`
+											}`,
 									)
 									.join("\n")
 							: "";
@@ -938,7 +938,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 		}${jsDocComment}`.trim();
 		if (!comment) {
 			console.error(
-				`No comments for common property ${key}, Update CommonPropertyAndMeasureTypeNames in telemetry.ts`
+				`No comments for common property ${key}, Update CommonPropertyAndMeasureTypeNames in telemetry.ts`,
 			);
 		}
 
@@ -972,14 +972,14 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 				? (item.gdpr["properties"] as Record<
 						string,
 						IPropertyDataNonMeasurement
-					>)
+				  >)
 				: {};
 		const measures: Record<string, IPropertyDataMeasurement> =
 			"measures" in item.gdpr
 				? (item.gdpr["measures"] as Record<
 						string,
 						IPropertyDataMeasurement
-					>)
+				  >)
 				: {};
 		const entries: string[] = [];
 		Object.keys(properties).forEach((key) => {
@@ -1019,7 +1019,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 			file,
 			`${header.join("\n")}\n${entries.join("\n")}${
 				entries.length ? "\n" : ""
-			}${commonFields.join("\n")}\n${footer.join("\n")}`.trim()
+			}${commonFields.join("\n")}\n${footer.join("\n")}`.trim(),
 		);
 		fs.appendFileSync(file, `\n`);
 	});
@@ -1035,7 +1035,7 @@ async function generateTelemetryOutput() {
 				} else {
 					resolve(res);
 				}
-			}
+			},
 		);
 	});
 	// Print out the source tree

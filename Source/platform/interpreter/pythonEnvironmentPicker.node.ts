@@ -1,35 +1,35 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { QuickPickItem, workspace } from "vscode";
 import { Environment } from "@vscode/python-extension";
+import { QuickPickItem, workspace } from "vscode";
+import { getDisplayPath } from "../common/platform/fs-paths";
+import { PlatformService } from "../common/platform/platformService.node";
 import { BaseProviderBasedQuickPick } from "../common/providerBasedQuickPick";
+import { DataScience } from "../common/utils/localize";
+import { EnvironmentType } from "../pythonEnvironments/info";
 import {
 	getEnvironmentType,
 	getPythonEnvDisplayName,
 	isCondaEnvironmentWithoutPython,
 } from "./helpers";
-import { getDisplayPath } from "../common/platform/fs-paths";
-import { PlatformService } from "../common/platform/platformService.node";
-import { DataScience } from "../common/utils/localize";
-import { EnvironmentType } from "../pythonEnvironments/info";
 
 export function pythonEnvironmentQuickPick(
 	item: Environment,
-	quickPick: BaseProviderBasedQuickPick<Environment>
+	quickPick: BaseProviderBasedQuickPick<Environment>,
 ) {
 	const label = getPythonEnvDisplayName(item);
 	const icon =
 		item.id === quickPick.recommended?.id
 			? "$(star-full) "
 			: isCondaEnvironmentWithoutPython(item)
-				? "$(warning) "
-				: "";
+			  ? "$(warning) "
+			  : "";
 	const quickPickItem: QuickPickItem = { label: `${icon}${label}` };
 	quickPickItem.description = getDisplayPath(
 		item.executable.uri || item.path,
 		workspace.workspaceFolders || [],
-		new PlatformService().homeDir
+		new PlatformService().homeDir,
 	);
 	quickPickItem.tooltip = isCondaEnvironmentWithoutPython(item)
 		? DataScience.pythonCondaKernelsWithoutPython
@@ -46,7 +46,7 @@ export function getPythonEnvironmentCategory(item: Environment): {
 				? {
 						label: DataScience.kernelCategoryForCondaWithoutPython,
 						sortKey: "Z",
-					}
+				  }
 				: { label: DataScience.kernelCategoryForConda };
 		case EnvironmentType.Pipenv:
 			return { label: DataScience.kernelCategoryForPipEnv };

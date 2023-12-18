@@ -4,6 +4,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
 import { inject, injectable } from "inversify";
+import {
+	JVSC_EXTENSION_ID,
+	TestingKernelPickerProviderId,
+} from "../../../platform/common/constants";
 import { traceError } from "../../../platform/logging";
 import {
 	IJupyterServerProviderRegistry,
@@ -11,10 +15,6 @@ import {
 	JupyterServerProviderHandle,
 } from "../types";
 import { JupyterConnection } from "./jupyterConnection";
-import {
-	JVSC_EXTENSION_ID,
-	TestingKernelPickerProviderId,
-} from "../../../platform/common/constants";
 
 export type SelectJupyterUriCommandSource =
 	| "nonUser"
@@ -40,7 +40,7 @@ export class JupyterServerSelector {
 	) {}
 
 	public async addJupyterServer(
-		provider: JupyterServerProviderHandle
+		provider: JupyterServerProviderHandle,
 	): Promise<void> {
 		// Double check this server can be connected to. Might need a password, might need a allowUnauthorized
 		try {
@@ -48,7 +48,7 @@ export class JupyterServerSelector {
 		} catch (err) {
 			traceError(
 				`Error in validating the Remote Uri ${provider.id}.${provider.handle}`,
-				err
+				err,
 			);
 			return;
 		}
@@ -67,7 +67,7 @@ export class JupyterServerSelector {
 		if (
 			![JVSC_EXTENSION_ID].includes(provider.extensionId) &&
 			!this.serverProviderRegistry.jupyterCollections.some(
-				(c) => c.extensionId === provider.extensionId
+				(c) => c.extensionId === provider.extensionId,
 			)
 		) {
 			await this.serverUriStorage.add(provider);

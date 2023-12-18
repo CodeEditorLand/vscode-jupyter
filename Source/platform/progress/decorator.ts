@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { traceError } from "../logging";
 import { PromiseFunction } from "../common/utils/async";
+import { traceError } from "../logging";
 import { IProgressReporter, Progress, ReportableAction } from "./types";
 
 const _reporters = new Set<IProgressReporter>();
@@ -32,11 +32,11 @@ function report(progress: Progress) {
  * @returns
  */
 export function reportAction(action: ReportableAction) {
-	return function (
+	return (
 		_target: Object,
 		_propertyName: string,
-		descriptor: TypedPropertyDescriptor<PromiseFunction>
-	) {
+		descriptor: TypedPropertyDescriptor<PromiseFunction>,
+	) => {
 		const originalMethod = descriptor.value!;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any,
 		descriptor.value = async function (...args: any[]) {

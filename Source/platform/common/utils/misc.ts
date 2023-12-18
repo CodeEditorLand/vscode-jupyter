@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import type { TextDocument, Uri } from "vscode";
 import { NotebookCellScheme } from "../constants";
 import { InterpreterUri, Resource } from "../types";
 import { isPromise } from "./async";
 import { StopWatch } from "./stopWatch";
-import { Environment } from "@vscode/python-extension";
 
 // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
 export function noop() {}
@@ -34,7 +34,7 @@ export type DeepReadonly<T> = T extends any[]
 	? IDeepReadonlyArray<T[number]>
 	: DeepReadonlyNonArray<T>;
 type DeepReadonlyNonArray<T> = T extends object ? DeepReadonlyObject<T> : T;
-interface IDeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
+type IDeepReadonlyArray<T> = ReadonlyArray<DeepReadonly<T>>;
 type DeepReadonlyObject<T> = {
 	readonly [P in NonFunctionPropertyNames<T>]: DeepReadonly<T[P]>;
 };
@@ -49,7 +49,9 @@ type NonFunctionPropertyNames<T> = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type UnionToIntersection<U> = (
-	U extends any ? (k: U) => void : never
+	U extends any
+		? (k: U) => void
+		: never
 ) extends (k: infer I) => void
 	? I
 	: never;
@@ -75,7 +77,7 @@ export type TraceInfo =
 export function tracing<T>(
 	log: (t: TraceInfo) => void,
 	run: () => T,
-	logBeforeCall?: boolean
+	logBeforeCall?: boolean,
 ): T {
 	const timer = new StopWatch();
 	try {
@@ -119,7 +121,7 @@ export function tracing<T>(
  * @returns {resource is Resource}
  */
 export function isResource(
-	resource?: InterpreterUri | Environment
+	resource?: InterpreterUri | Environment,
 ): resource is Resource {
 	if (!resource) {
 		return true;

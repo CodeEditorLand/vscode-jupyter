@@ -21,7 +21,7 @@ function reportIfMissing(context, node, allowed, name) {
 	if (importType.default(name, context) === "builtin" && name === "path") {
 		context.report(
 			node,
-			`Do not import path builtin module. Use the custom vscode-path instead.`
+			`Do not import path builtin module. Use the custom vscode-path instead.`,
 		);
 	}
 }
@@ -51,7 +51,7 @@ module.exports = {
 	},
 	rules: {
 		"node-imports": {
-			create: function (context) {
+			create: (context) => {
 				const options = context.options[0] || {};
 				const allowed = options.allow || [];
 
@@ -59,81 +59,75 @@ module.exports = {
 					(source, node) => {
 						reportIfMissing(context, node, allowed, source.value);
 					},
-					{ commonjs: true }
+					{ commonjs: true },
 				);
 			},
 		},
 		"dont-use-process": {
-			create: function (context) {
-				return {
-					MemberExpression(node) {
-						const objectName = node.object.name;
-						const propertyName = node.property.name;
-						const fileName = context.getFilename();
+			create: (context) => ({
+				MemberExpression(node) {
+					const objectName = node.object.name;
+					const propertyName = node.property.name;
+					const fileName = context.getFilename();
 
-						if (
-							!fileName.endsWith(".node.ts") &&
-							objectName === "process" &&
-							!node.computed &&
-							propertyName &&
-							propertyName === "env"
-						) {
-							context.report(
-								node,
-								`process.env is not allowed in anything but .node files`
-							);
-						}
-					},
-				};
-			},
+					if (
+						!fileName.endsWith(".node.ts") &&
+						objectName === "process" &&
+						!node.computed &&
+						propertyName &&
+						propertyName === "env"
+					) {
+						context.report(
+							node,
+							`process.env is not allowed in anything but .node files`,
+						);
+					}
+				},
+			}),
 		},
 		"dont-use-fspath": {
-			create: function (context) {
-				return {
-					MemberExpression(node) {
-						const objectName = node.object.name;
-						const propertyName = node.property.name;
-						const fileName = context.getFilename();
+			create: (context) => ({
+				MemberExpression(node) {
+					const objectName = node.object.name;
+					const propertyName = node.property.name;
+					const fileName = context.getFilename();
 
-						if (
-							!fileName.endsWith(".node.ts") &&
-							!fileName.endsWith(".test.ts") &&
-							!node.computed &&
-							propertyName &&
-							propertyName === "fsPath"
-						) {
-							context.report(
-								node,
-								`fsPath is not allowed in anything but .node files`
-							);
-						}
-					},
-				};
-			},
+					if (
+						!fileName.endsWith(".node.ts") &&
+						!fileName.endsWith(".test.ts") &&
+						!node.computed &&
+						propertyName &&
+						propertyName === "fsPath"
+					) {
+						context.report(
+							node,
+							`fsPath is not allowed in anything but .node files`,
+						);
+					}
+				},
+			}),
 		},
 		"dont-use-filename": {
-			create: function (context) {
-				return {
-					Identifier(node) {
-						const objectName = node.name;
-						const fileName = context.getFilename();
+			create: (context) => ({
+				Identifier(node) {
+					const objectName = node.name;
+					const fileName = context.getFilename();
 
-						if (
-							!fileName.endsWith(".node.ts") &&
-							!fileName.endsWith(".test.ts") &&
-							!node.computed &&
-							objectName &&
-							(objectName === "__dirname" ||
-								objectName === "__filename")
-						) {
-							context.report(
-								node,
-								`${objectName} is not allowed in anything but .node files`
-							);
-						}
-					},
-				};
-			},
+					if (
+						!fileName.endsWith(".node.ts") &&
+						!fileName.endsWith(".test.ts") &&
+						!node.computed &&
+						objectName &&
+						(objectName === "__dirname" ||
+							objectName === "__filename")
+					) {
+						context.report(
+							node,
+							`${objectName} is not allowed in anything but .node files`,
+						);
+					}
+				},
+			}),
 		},
 	},
 };

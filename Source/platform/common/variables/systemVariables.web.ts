@@ -5,7 +5,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { Uri, Range, workspace, window } from "vscode";
+import { Range, Uri, window, workspace } from "vscode";
 import { AbstractSystemVariables } from "./systemVariables";
 
 /**
@@ -32,8 +32,8 @@ export class SystemVariables extends AbstractSystemVariables {
 			this._selectedText = window.activeTextEditor.document.getText(
 				new Range(
 					window.activeTextEditor.selection.start,
-					window.activeTextEditor.selection.end
-				)
+					window.activeTextEditor.selection.end,
+				),
 			);
 		}
 	}

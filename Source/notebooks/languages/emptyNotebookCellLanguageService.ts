@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { languages, NotebookCellKind, NotebookDocument, window } from "vscode";
+import { NotebookCellKind, NotebookDocument, languages, window } from "vscode";
+import { chainWithPendingUpdates } from "../../kernels/execution/notebookUpdater";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { PYTHON_LANGUAGE } from "../../platform/common/constants";
-import { traceError } from "../../platform/logging";
 import { IDisposableRegistry } from "../../platform/common/types";
-import { noop } from "../../platform/common/utils/misc";
-import { chainWithPendingUpdates } from "../../kernels/execution/notebookUpdater";
 import {
 	isJupyterNotebook,
 	translateKernelLanguageToMonaco,
 } from "../../platform/common/utils";
+import { noop } from "../../platform/common/utils/misc";
+import { traceError } from "../../platform/logging";
 import {
 	IControllerRegistration,
 	IVSCodeNotebookController,
@@ -38,7 +38,7 @@ export class EmptyNotebookCellLanguageService
 		this.controllerRegistration.onControllerSelected(
 			this.onDidChangeNotebookController,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -53,7 +53,7 @@ export class EmptyNotebookCellLanguageService
 			return;
 		}
 		const editor = window.visibleNotebookEditors.find(
-			(item) => item.notebook === document
+			(item) => item.notebook === document,
 		);
 		if (!editor) {
 			return;
@@ -64,7 +64,7 @@ export class EmptyNotebookCellLanguageService
 			.filter(
 				(cell) =>
 					cell.kind === NotebookCellKind.Code &&
-					cell.document.getText().trim().length === 0
+					cell.document.getText().trim().length === 0,
 			);
 		const codeCells = document
 			.getCells()

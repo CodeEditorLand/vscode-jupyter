@@ -3,14 +3,14 @@
 
 import { inject, injectable } from "inversify";
 import { Event, EventEmitter, NotebookDocument } from "vscode";
+import { IKernel, IKernelProvider } from "../../../../kernels/types";
+import { IPyWidgetMessages } from "../../../../messageTypes";
 import {
 	IDisposable,
 	IDisposableRegistry,
 } from "../../../../platform/common/types";
-import { IPyWidgetMessages } from "../../../../messageTypes";
-import { IKernel, IKernelProvider } from "../../../../kernels/types";
-import { IPyWidgetMessageDispatcher } from "./ipyWidgetMessageDispatcher";
 import { IIPyWidgetMessageDispatcher, IPyWidgetMessage } from "../types";
+import { IPyWidgetMessageDispatcher } from "./ipyWidgetMessageDispatcher";
 
 /**
  * This just wraps the iPyWidgetMessageDispatcher class.
@@ -27,12 +27,12 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	private readonly disposables: IDisposable[] = [];
 	constructor(
 		private readonly baseMulticaster: IPyWidgetMessageDispatcher,
-		private oldMessages: ReadonlyArray<IPyWidgetMessage>
+		private oldMessages: ReadonlyArray<IPyWidgetMessage>,
 	) {
 		baseMulticaster.postMessage(
 			this.raisePostMessage,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
@@ -118,7 +118,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		if (!baseDispatcher) {
 			baseDispatcher = new IPyWidgetMessageDispatcher(
 				this.kernelProvider,
-				document
+				document,
 			);
 			this.messageDispatchers.set(document, baseDispatcher);
 
@@ -126,8 +126,8 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			this.disposables.push(
 				baseDispatcher.postMessage(
 					(msg) => this.onMessage(msg, document),
-					this
-				)
+					this,
+				),
 			);
 		}
 
@@ -141,7 +141,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		}
 		const dispatcher = new IPyWidgetMessageDispatcherWithOldMessages(
 			baseDispatcher,
-			messages
+			messages,
 		);
 		this.disposables.push(dispatcher);
 		return dispatcher;
@@ -168,7 +168,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		}
 		this.messagesPerNotebook.set(
 			document,
-			this.messagesPerNotebook.get(document) || []
+			this.messagesPerNotebook.get(document) || [],
 		);
 		if (
 			message.message === IPyWidgetMessages.IPyWidgets_kernelOptions ||

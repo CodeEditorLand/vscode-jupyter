@@ -2,10 +2,23 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import * as path from "../../../platform/vscode-path/path";
 import { Event, EventEmitter, Uri, ViewColumn, window } from "vscode";
+import * as path from "../../../platform/vscode-path/path";
 
+import { IWebviewPanelProvider } from "../../../platform/common/application/types";
+import { IFileSystem } from "../../../platform/common/platform/types";
+import {
+	IConfigurationService,
+	IDisposable,
+	IExtensionContext,
+} from "../../../platform/common/types";
+import * as localize from "../../../platform/common/utils/localize";
+import { noop } from "../../../platform/common/utils/misc";
+import { StopWatch } from "../../../platform/common/utils/stopWatch";
 import { traceError, traceInfo } from "../../../platform/logging";
+import { joinPath } from "../../../platform/vscode-path/resources";
+import { WebviewPanelHost } from "../../../platform/webviews/webviewPanelHost";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
 import { PlotViewerMessageListener } from "./plotViewerMessageListener";
 import {
 	IExportPlotRequest,
@@ -13,19 +26,6 @@ import {
 	IPlotViewerMapping,
 	PlotViewerMessages,
 } from "./types";
-import { IWebviewPanelProvider } from "../../../platform/common/application/types";
-import {
-	IConfigurationService,
-	IDisposable,
-	IExtensionContext,
-} from "../../../platform/common/types";
-import { IFileSystem } from "../../../platform/common/platform/types";
-import * as localize from "../../../platform/common/utils/localize";
-import { WebviewPanelHost } from "../../../platform/webviews/webviewPanelHost";
-import { joinPath } from "../../../platform/vscode-path/resources";
-import { noop } from "../../../platform/common/utils/misc";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
-import { StopWatch } from "../../../platform/common/utils/stopWatch";
 
 @injectable()
 export class PlotViewer
@@ -93,7 +93,7 @@ export class PlotViewer
 
 			// Send a message with our data
 			this.postMessage(PlotViewerMessages.SendPlot, imageHtml).catch(
-				noop
+				noop,
 			);
 		}
 	};
@@ -160,7 +160,7 @@ export class PlotViewer
 					case ".png":
 						const buffer = Buffer.from(
 							payload.png.replace("data:image/png;base64", ""),
-							"base64"
+							"base64",
 						);
 						await this.fs.writeFile(file, buffer);
 						break;
@@ -176,7 +176,7 @@ export class PlotViewer
 			traceError(e);
 			window
 				.showErrorMessage(
-					localize.DataScience.exportImageFailed(e.toString())
+					localize.DataScience.exportImageFailed(e.toString()),
 				)
 				.then(noop, noop);
 		}

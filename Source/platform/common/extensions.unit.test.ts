@@ -38,27 +38,27 @@ suite("String Extensions", () => {
 	test("Should quote file argument with spaces", () => {
 		const fileToTest = "one two three";
 		expect(fileToCommandArgument(fileToTest)).to.be.equal(
-			`"${fileToTest}"`
+			`"${fileToTest}"`,
 		);
 	});
 	test("Should replace all back slashes with forward slashes (irrespective of OS)", () => {
 		const fileToTest = "c:\\users\\user\\conda\\scripts\\python.exe";
 		expect(fileToCommandArgument(fileToTest)).to.be.equal(
-			fileToTest.replace(/\\/g, "/")
+			fileToTest.replace(/\\/g, "/"),
 		);
 	});
 	test("Should replace all back slashes with forward slashes (irrespective of OS) and quoted when file has spaces", () => {
 		const fileToTest =
 			"c:\\users\\user namne\\conda path\\scripts\\python.exe";
 		expect(fileToCommandArgument(fileToTest)).to.be.equal(
-			`"${fileToTest.replace(/\\/g, "/")}"`
+			`"${fileToTest.replace(/\\/g, "/")}"`,
 		);
 	});
 	test("Should replace all back slashes with forward slashes (irrespective of OS) and quoted when file has spaces", () => {
 		const fileToTest =
 			"c:\\users\\user namne\\conda path\\scripts\\python.exe";
 		expect(fileToCommandArgument(fileToTest)).to.be.equal(
-			`"${fileToTest.replace(/\\/g, "/")}"`
+			`"${fileToTest.replace(/\\/g, "/")}"`,
 		);
 	});
 	test("Should leave string unchanged", () => {
@@ -83,14 +83,14 @@ suite("String Extensions", () => {
 		const formatString = "something {1}";
 		const expectedString = "something two";
 		expect(format(formatString, "one", "two", "three")).to.be.equal(
-			expectedString
+			expectedString,
 		);
 	});
 	test("String should be formatted with multiple args", () => {
 		const formatString = "something {1}, {0}";
 		const expectedString = "something two, one";
 		expect(format(formatString, "one", "two", "three")).to.be.equal(
-			expectedString
+			expectedString,
 		);
 	});
 	test("String should remove quotes", () => {

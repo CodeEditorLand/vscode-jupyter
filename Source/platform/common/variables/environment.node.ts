@@ -3,14 +3,14 @@
 
 import * as os from "os";
 import { inject, injectable } from "inversify";
-import * as path from "../../vscode-path/path";
-import { sendTelemetryEvent } from "../../../telemetry";
-import { EventName } from "../../telemetry/constants";
-import { traceError } from "../../logging";
-import { isFileNotFoundError } from "../platform/errors";
-import { EnvironmentVariables, IEnvironmentVariablesService } from "./types";
 import { Uri } from "vscode";
+import { sendTelemetryEvent } from "../../../telemetry";
+import { traceError } from "../../logging";
+import { EventName } from "../../telemetry/constants";
+import * as path from "../../vscode-path/path";
+import { isFileNotFoundError } from "../platform/errors";
 import { IFileSystem } from "../platform/types";
+import { EnvironmentVariables, IEnvironmentVariablesService } from "./types";
 
 /**
  * Singleton utitility for managing environment variables. Allows merging, concating etc. Handles environment variables with different casing.
@@ -23,7 +23,7 @@ export class EnvironmentVariablesService
 
 	public async parseFile(
 		filePath?: string,
-		baseVars?: EnvironmentVariables
+		baseVars?: EnvironmentVariables,
 	): Promise<EnvironmentVariables | undefined> {
 		if (!filePath) {
 			return;
@@ -31,7 +31,7 @@ export class EnvironmentVariablesService
 		try {
 			return parseEnvFile(
 				await this.fs.readFile(Uri.file(filePath)),
-				baseVars
+				baseVars,
 			);
 		} catch (ex) {
 			if (!isFileNotFoundError(ex)) {
@@ -42,7 +42,7 @@ export class EnvironmentVariablesService
 
 	public mergeVariables(
 		source: EnvironmentVariables,
-		target: EnvironmentVariables
+		target: EnvironmentVariables,
 	) {
 		if (!target) {
 			return;
@@ -56,7 +56,7 @@ export class EnvironmentVariablesService
 			}
 			const targetSetting =
 				Object.keys(target).find(
-					(k) => k.toLowerCase() === lowerCase
+					(k) => k.toLowerCase() === lowerCase,
 				) || setting;
 			target[targetSetting] = source[setting];
 		});
@@ -64,11 +64,11 @@ export class EnvironmentVariablesService
 
 	public mergePaths(
 		source: EnvironmentVariables,
-		target: EnvironmentVariables
+		target: EnvironmentVariables,
 	) {
 		// Figure out path key for both
 		const sourcePathKey = Object.keys(source).find(
-			(k) => k.toLowerCase() === "path"
+			(k) => k.toLowerCase() === "path",
 		);
 		const targetPathKey =
 			Object.keys(target).find((k) => k.toLowerCase() === "path") ||
@@ -103,7 +103,7 @@ export class EnvironmentVariablesService
 	) {
 		const valueToAppendOrPrepend = pathsToAppend
 			.filter(
-				(item) => typeof item === "string" && item.trim().length > 0
+				(item) => typeof item === "string" && item.trim().length > 0,
 			)
 			.map((item) => item.trim())
 			.join(path.delimiter);
@@ -116,8 +116,8 @@ export class EnvironmentVariablesService
 		const variableNameLower = variableName.toLowerCase();
 		const matchingKey = vars
 			? Object.keys(vars).find(
-					(k) => k.toLowerCase() == variableNameLower
-				)
+					(k) => k.toLowerCase() == variableNameLower,
+			  )
 			: undefined;
 		const existingValue =
 			vars && matchingKey ? vars[matchingKey] : undefined;
@@ -130,7 +130,7 @@ export class EnvironmentVariablesService
 			if (
 				append &&
 				!(vars[setKey] || "").endsWith(
-					path.delimiter + valueToAppendOrPrepend
+					path.delimiter + valueToAppendOrPrepend,
 				)
 			) {
 				vars[setKey] =
@@ -138,7 +138,7 @@ export class EnvironmentVariablesService
 			} else if (
 				!append &&
 				!(vars[setKey] || "").startsWith(
-					valueToAppendOrPrepend + path.delimiter
+					valueToAppendOrPrepend + path.delimiter,
 				)
 			) {
 				vars[setKey] =
@@ -167,7 +167,7 @@ export class EnvironmentVariablesService
 				if (
 					append &&
 					!(vars[setKey] || "").endsWith(
-						path.delimiter + valueToAppendOrPrepend
+						path.delimiter + valueToAppendOrPrepend,
 					)
 				) {
 					vars[setKey] =
@@ -175,7 +175,7 @@ export class EnvironmentVariablesService
 				} else if (
 					!append &&
 					!(vars[setKey] || "").startsWith(
-						valueToAppendOrPrepend + path.delimiter
+						valueToAppendOrPrepend + path.delimiter,
 					)
 				) {
 					vars[setKey] =
@@ -191,7 +191,7 @@ export class EnvironmentVariablesService
 
 export function parseEnvFile(
 	lines: string | Buffer,
-	baseVars?: EnvironmentVariables
+	baseVars?: EnvironmentVariables,
 ): EnvironmentVariables {
 	const globalVars = baseVars ? baseVars : {};
 	const vars: EnvironmentVariables = {};
@@ -241,7 +241,7 @@ function substituteEnvVars(
 	value: string,
 	localVars: EnvironmentVariables,
 	globalVars: EnvironmentVariables,
-	missing = ""
+	missing = "",
 ): string {
 	// Substitution here is inspired a little by dotenv-expand:
 	//   https://github.com/motdotla/dotenv-expand/blob/master/lib/main.js
@@ -259,7 +259,7 @@ function substituteEnvVars(
 				return match;
 			}
 			return localVars[substName] || globalVars[substName] || missing;
-		}
+		},
 	);
 	if (!invalid && replacement !== value) {
 		value = replacement;

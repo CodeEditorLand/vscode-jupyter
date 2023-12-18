@@ -8,13 +8,13 @@ import { Resource } from "../types";
 export type EnvironmentVariables = Object & Record<string, string | undefined>;
 
 export const IEnvironmentVariablesService = Symbol(
-	"IEnvironmentVariablesService"
+	"IEnvironmentVariablesService",
 );
 
 export interface IEnvironmentVariablesService {
 	parseFile(
 		filePath?: string,
-		baseVars?: EnvironmentVariables
+		baseVars?: EnvironmentVariables,
 	): Promise<EnvironmentVariables | undefined>;
 	/**
 	 * The variables in `source` trumps variables already in `target`.
@@ -25,7 +25,7 @@ export interface IEnvironmentVariablesService {
 	 */
 	mergeVariables(
 		source: EnvironmentVariables,
-		target: EnvironmentVariables
+		target: EnvironmentVariables,
 	): void;
 	appendPythonPath(
 		vars: EnvironmentVariables,
@@ -39,7 +39,7 @@ export interface IEnvironmentVariablesService {
 	 */
 	mergePaths(
 		source: EnvironmentVariables,
-		target: EnvironmentVariables
+		target: EnvironmentVariables,
 	): void;
 }
 
@@ -57,7 +57,7 @@ export interface ISystemVariables {
 	resolve(value: IStringDictionary<string>): IStringDictionary<string>;
 	resolve(value: IStringDictionary<string[]>): IStringDictionary<string[]>;
 	resolve(
-		value: IStringDictionary<IStringDictionary<string>>
+		value: IStringDictionary<IStringDictionary<string>>,
 	): IStringDictionary<IStringDictionary<string>>;
 	resolveAny<T>(value: T): T;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +67,7 @@ export interface ISystemVariables {
 export type ISystemVariablesConstructor = ClassType<ISystemVariables>;
 
 export const ICustomEnvironmentVariablesProvider = Symbol(
-	"ICustomEnvironmentVariablesProvider"
+	"ICustomEnvironmentVariablesProvider",
 );
 
 export interface ICustomEnvironmentVariablesProvider {
@@ -81,7 +81,7 @@ export interface ICustomEnvironmentVariablesProvider {
 	getEnvironmentVariables(
 		resource: Resource,
 		purpose: "RunPythonCode" | "RunNonPythonCode",
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<EnvironmentVariables>;
 	/**
 	 * Gets the env variables defined in the .env file.
@@ -89,6 +89,6 @@ export interface ICustomEnvironmentVariablesProvider {
 	getCustomEnvironmentVariables(
 		resource: Resource,
 		purpose: "RunPythonCode" | "RunNonPythonCode",
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<EnvironmentVariables | undefined>;
 }

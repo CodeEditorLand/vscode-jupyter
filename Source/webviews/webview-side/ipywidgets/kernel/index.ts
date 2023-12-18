@@ -2,36 +2,36 @@
 // Licensed under the MIT License.
 
 import type * as nbformat from "@jupyterlab/nbformat";
-import { KernelMessagingApi, PostOffice } from "../../react-common/postOffice";
 import { OutputItem } from "vscode-notebook-renderer";
 import {
-	SharedMessages,
 	IInteractiveWindowMapping,
-	InteractiveWindowMessages,
 	IPyWidgetMessages,
+	InteractiveWindowMessages,
+	SharedMessages,
 } from "../../../../messageTypes";
+import { NotebookMetadata } from "../../../../platform/common/utils";
 import { logErrorMessage, logMessage } from "../../react-common/logger";
+import { KernelMessagingApi, PostOffice } from "../../react-common/postOffice";
 import { WidgetManager } from "./manager";
 import { ScriptManager } from "./scriptManager";
 import { IJupyterLabWidgetManagerCtor, INotebookModel } from "./types";
-import { NotebookMetadata } from "../../../../platform/common/utils";
 
 class WidgetManagerComponent {
 	private readonly widgetManager: WidgetManager;
 	private readonly scriptManager: ScriptManager;
-	private widgetsCanLoadFromCDN: boolean = false;
+	private widgetsCanLoadFromCDN = false;
 	constructor(
 		private postOffice: PostOffice,
 		JupyterLabWidgetManager: IJupyterLabWidgetManagerCtor,
-		widgetState?: NotebookMetadata["widgets"]
+		widgetState?: NotebookMetadata["widgets"],
 	) {
 		this.scriptManager = new ScriptManager(postOffice);
 		this.scriptManager.onWidgetLoadError(this.handleLoadError.bind(this));
 		this.scriptManager.onWidgetLoadSuccess(
-			this.handleLoadSuccess.bind(this)
+			this.handleLoadSuccess.bind(this),
 		);
 		this.scriptManager.onWidgetVersionNotSupported(
-			this.handleUnsupportedWidgetVersion.bind(this)
+			this.handleUnsupportedWidgetVersion.bind(this),
 		);
 		this.widgetManager = new WidgetManager(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +39,7 @@ class WidgetManagerComponent {
 			postOffice,
 			this.scriptManager.getScriptLoader(),
 			JupyterLabWidgetManager,
-			widgetState
+			widgetState,
 		);
 
 		postOffice.addHandler({
@@ -76,11 +76,11 @@ class WidgetManagerComponent {
 				isOnline: data.isOnline,
 				timedout: data.timedout,
 				error: JSON.stringify(data.error),
-			}
+			},
 		);
 		console.error(
 			`Failed to to Widget load class ${data.moduleName}${data.className}`,
-			data
+			data,
 		);
 	}
 
@@ -93,7 +93,7 @@ class WidgetManagerComponent {
 			{
 				moduleName: data.moduleName,
 				moduleVersion: data.moduleVersion,
-			}
+			},
 		);
 	}
 
@@ -108,7 +108,7 @@ class WidgetManagerComponent {
 				className: data.className,
 				moduleName: data.moduleName,
 				moduleVersion: data.moduleVersion,
-			}
+			},
 		);
 	}
 }
@@ -138,7 +138,7 @@ export async function renderOutput(
 		_vsc_test_cellIndex?: number;
 	},
 	element: HTMLElement,
-	logger: (message: string, category?: "info" | "error") => void
+	logger: (message: string, category?: "info" | "error") => void,
 ) {
 	try {
 		stackOfWidgetsRenderStatusByOutputId.push({
@@ -149,7 +149,7 @@ export async function renderOutput(
 	} catch (ex) {
 		logger(
 			`Error: render output ${outputItem.id} failed ${ex.toString()}`,
-			"error"
+			"error",
 		);
 		throw ex;
 	}
@@ -161,7 +161,7 @@ export function disposeOutput(outputId?: string) {
 		// However we can mark them as not being currently rendered.
 		stackOfWidgetsRenderStatusByOutputId =
 			stackOfWidgetsRenderStatusByOutputId.filter(
-				(item) => !(outputId in item)
+				(item) => !(outputId in item),
 			);
 	}
 }
@@ -176,10 +176,10 @@ function renderIPyWidget(
 		_vsc_test_cellIndex?: number;
 	},
 	container: HTMLElement,
-	logger: (message: string, category?: "info" | "error") => void
+	logger: (message: string, category?: "info" | "error") => void,
 ) {
 	logger(
-		`Rendering IPyWidget ${outputId} with model ${model.model_id} in ${container.id}`
+		`Rendering IPyWidget ${outputId} with model ${model.model_id} in ${container.id}`,
 	);
 	if (
 		renderedWidgets.has(outputId) &&
@@ -197,7 +197,7 @@ function renderIPyWidget(
 		// in the widget not getting rendered.
 		timeout = 100;
 		logger(
-			"Widget was already rendering for another container, dispose that widget so we can re-render it"
+			"Widget was already rendering for another container, dispose that widget so we can re-render it",
 		);
 		try {
 			renderedWidgets.get(outputId)?.widget?.dispose();
@@ -234,7 +234,7 @@ function renderIPyWidget(
 						renderedWidgets.get(outputId)?.container !== container
 					) {
 						logger(
-							"Widget container changed, hence disposing the widget"
+							"Widget container changed, hence disposing the widget",
 						);
 						w?.dispose();
 						return;
@@ -253,7 +253,7 @@ function renderIPyWidget(
 					// Keep track of the fact that we have successfully rendered a widget for this outputId.
 					const statusInfo =
 						stackOfWidgetsRenderStatusByOutputId.find(
-							(item) => item.outputId === outputId
+							(item) => item.outputId === outputId,
 						);
 					if (statusInfo) {
 						statusInfo.success = true;
@@ -262,14 +262,14 @@ function renderIPyWidget(
 				.catch((ex) => {
 					logger(
 						`Error: Failed to render ${outputId}, ${ex.toString()}`,
-						"error"
+						"error",
 					);
 				});
 		})
 		.catch((ex) => {
 			logger(
 				`Error: Failed to render ${outputId}, ${ex.toString()}`,
-				"error"
+				"error",
 			);
 		});
 }
@@ -278,7 +278,7 @@ let widgetManagerPromise: Promise<WidgetManager> | undefined;
 async function getWidgetManager(): Promise<WidgetManager> {
 	if (!widgetManagerPromise) {
 		function reInitializeWidgetManager(
-			resolve?: (value: WidgetManager) => void
+			resolve?: (value: WidgetManager) => void,
 		) {
 			function initializeInstance() {
 				const wm = WidgetManager.instance;
@@ -301,7 +301,7 @@ async function getWidgetManager(): Promise<WidgetManager> {
 		}
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any
 		widgetManagerPromise = new Promise((resolve) =>
-			reInitializeWidgetManager(resolve as any)
+			reInitializeWidgetManager(resolve as any),
 		);
 	}
 	return widgetManagerPromise;
@@ -312,7 +312,7 @@ async function createWidgetView(
 		model_id: string;
 		version_major: number;
 	},
-	element: HTMLElement
+	element: HTMLElement,
 ) {
 	try {
 		const wm = await getWidgetManager();
@@ -322,7 +322,7 @@ async function createWidgetView(
 		logErrorMessage(
 			`Error: Failed to render widget ${
 				widgetData.model_id
-			}, ${ex.toString()}`
+			}, ${ex.toString()}`,
 		);
 	}
 }
@@ -360,7 +360,7 @@ async function restoreWidgets(widgetState: NotebookMetadata["widgets"]) {
 	} catch (ex) {
 		// eslint-disable-next-line no-console
 		logErrorMessage(
-			`Error: Failed to render widget state ${widgetState}, ${ex.toString()}`
+			`Error: Failed to render widget state ${widgetState}, ${ex.toString()}`,
 		);
 	}
 }
@@ -369,7 +369,7 @@ let initialized = false;
 function initialize(
 	JupyterLabWidgetManager: IJupyterLabWidgetManagerCtor,
 	context: KernelMessagingApi,
-	widgetState?: NotebookMetadata["widgets"]
+	widgetState?: NotebookMetadata["widgets"],
 ) {
 	if (initialized) {
 		logErrorMessage(`Error: WidgetManager already initialized`);
@@ -381,7 +381,7 @@ function initialize(
 		const mgr = new WidgetManagerComponent(
 			postOffice,
 			JupyterLabWidgetManager,
-			widgetState
+			widgetState,
 		);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(window as any)._mgr = mgr;
@@ -389,7 +389,7 @@ function initialize(
 	} catch (ex) {
 		// eslint-disable-next-line no-console
 		logErrorMessage(
-			`Error: Exception initializing WidgetManager, ${ex.toString()}`
+			`Error: Exception initializing WidgetManager, ${ex.toString()}`,
 		);
 	}
 }
@@ -420,7 +420,7 @@ function initializeWidgetManager(widgetState?: NotebookMetadata["widgets"]) {
 		.WidgetManager as IJupyterLabWidgetManagerCtor;
 	if (!JupyterLabWidgetManager) {
 		throw new Error(
-			"JupyterLabWidgetManager not defined. Please include/check ipywidgets.js file"
+			"JupyterLabWidgetManager not defined. Please include/check ipywidgets.js file",
 		);
 	}
 	initialize(JupyterLabWidgetManager, capturedContext, widgetState);
@@ -430,7 +430,7 @@ export function activate(context: KernelMessagingApi) {
 	capturedContext = context;
 	hookWindowFunctions(context);
 	logMessage(
-		`Attempt Initialize IpyWidgets kernel.js : ${JSON.stringify(context)}`
+		`Attempt Initialize IpyWidgets kernel.js : ${JSON.stringify(context)}`,
 	);
 	context.onDidReceiveKernelMessage(async (e) => {
 		if (
@@ -501,7 +501,7 @@ export function activate(context: KernelMessagingApi) {
 				initializeWidgetManager();
 			} catch (ex) {
 				logErrorMessage(
-					`Failed to load IPyWidget Version ${e.payload}, ${ex}`
+					`Failed to load IPyWidget Version ${e.payload}, ${ex}`,
 				);
 			}
 		}
@@ -527,7 +527,7 @@ function hookWindowFunctions(context: KernelMessagingApi) {
 					url: url.toString(),
 				});
 				throw new Error(
-					"window.open not supported in VS Code Renderers"
+					"window.open not supported in VS Code Renderers",
 				);
 			}
 			return null;

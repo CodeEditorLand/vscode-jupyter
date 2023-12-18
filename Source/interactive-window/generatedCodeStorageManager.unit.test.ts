@@ -3,6 +3,15 @@
 
 import { anything, instance, mock, reset, verify, when } from "ts-mockito";
 import { EventEmitter, NotebookDocument, Uri } from "vscode";
+import { IKernel, IKernelProvider } from "../kernels/types";
+import {
+	IControllerRegistration,
+	IVSCodeNotebookController,
+} from "../notebooks/controllers/types";
+import { InteractiveWindowView } from "../platform/common/constants";
+import { IDisposable } from "../platform/common/types";
+import { dispose } from "../platform/common/utils/lifecycle";
+import { mockedVSCodeNamespaces } from "../test/vscode-mock";
 import {
 	ICodeGeneratorFactory,
 	IGeneratedCodeStorageFactory,
@@ -10,15 +19,6 @@ import {
 	IInteractiveWindowCodeGenerator,
 } from "./editor-integration/types";
 import { GeneratedCodeStorageManager } from "./generatedCodeStoreManager";
-import { IKernel, IKernelProvider } from "../kernels/types";
-import {
-	IControllerRegistration,
-	IVSCodeNotebookController,
-} from "../notebooks/controllers/types";
-import { InteractiveWindowView } from "../platform/common/constants";
-import { dispose } from "../platform/common/utils/lifecycle";
-import { IDisposable } from "../platform/common/types";
-import { mockedVSCodeNamespaces } from "../test/vscode-mock";
 
 suite("GeneratedCodeStorageManager", () => {
 	let disposables: IDisposable[] = [];
@@ -45,17 +45,17 @@ suite("GeneratedCodeStorageManager", () => {
 		codeGeneratorFactory = mock<ICodeGeneratorFactory>();
 		controllers = mock<IControllerRegistration>();
 		when(kernelProvider.onDidCreateKernel).thenReturn(
-			onDidCreateKernel.event
+			onDidCreateKernel.event,
 		);
 		when(controllers.onControllerSelected).thenReturn(
-			onNotebookControllerSelected.event
+			onNotebookControllerSelected.event,
 		);
 		storageManager = new GeneratedCodeStorageManager(
 			instance(kernelProvider),
 			disposables,
 			instance(codeGeneratorFactory),
 			instance(storageFactory),
-			instance(controllers)
+			instance(controllers),
 		);
 		storageManager.activate();
 	});
@@ -71,10 +71,10 @@ suite("GeneratedCodeStorageManager", () => {
 		const randomNotebook = instance(mock<NotebookDocument>());
 		when(storageFactory.get(anything())).thenCall(
 			(options: { notebook: NotebookDocument }) =>
-				options.notebook === notebook ? instance(storage) : undefined
+				options.notebook === notebook ? instance(storage) : undefined,
 		);
 		when(codeGeneratorFactory.get(notebook)).thenReturn(
-			instance(codeGenerator)
+			instance(codeGenerator),
 		);
 
 		// Closing some random notebook will have no effect.
@@ -121,10 +121,10 @@ suite("GeneratedCodeStorageManager", () => {
 			(options: { notebook: NotebookDocument }) =>
 				options.notebook === iwNotebookInstance
 					? instance(storage)
-					: undefined
+					: undefined,
 		);
 		when(codeGeneratorFactory.getOrCreate(iwNotebookInstance)).thenReturn(
-			instance(codeGenerator)
+			instance(codeGenerator),
 		);
 
 		// Creating some random kernel will have no effect.

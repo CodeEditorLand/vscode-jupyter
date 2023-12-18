@@ -2,27 +2,27 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
+import { commands } from "vscode";
+import {
+	Commands,
+	EditorContexts,
+	Telemetry,
+} from "../../../platform/common/constants";
+import { ContextKey } from "../../../platform/common/contextKey";
+import { debounce } from "../../../platform/common/decorators";
+import {
+	IAsyncDisposable,
+	IAsyncDisposableRegistry,
+	IDisposableRegistry,
+} from "../../../platform/common/types";
+import { noop } from "../../../platform/common/utils/misc";
+import { IServiceContainer } from "../../../platform/ioc/types";
 import { capturePerfTelemetry } from "../../../telemetry";
 import {
 	IDataViewer,
 	IDataViewerDataProvider,
 	IDataViewerFactory,
 } from "./types";
-import { ContextKey } from "../../../platform/common/contextKey";
-import {
-	IAsyncDisposable,
-	IAsyncDisposableRegistry,
-	IDisposableRegistry,
-} from "../../../platform/common/types";
-import { IServiceContainer } from "../../../platform/ioc/types";
-import { noop } from "../../../platform/common/utils/misc";
-import {
-	Commands,
-	EditorContexts,
-	Telemetry,
-} from "../../../platform/common/constants";
-import { debounce } from "../../../platform/common/decorators";
-import { commands } from "vscode";
 
 @injectable()
 export class DataViewerFactory implements IDataViewerFactory, IAsyncDisposable {
@@ -55,7 +55,7 @@ export class DataViewerFactory implements IDataViewerFactory, IAsyncDisposable {
 	@capturePerfTelemetry(Telemetry.StartShowDataViewer)
 	public async create(
 		dataProvider: IDataViewerDataProvider,
-		title: string
+		title: string,
 	): Promise<IDataViewer> {
 		let result: IDataViewer | undefined;
 
@@ -68,12 +68,12 @@ export class DataViewerFactory implements IDataViewerFactory, IAsyncDisposable {
 			dataExplorer.onDidDisposeDataViewer(
 				this.updateOpenDataViewers,
 				this,
-				this.disposables
+				this.disposables,
 			);
 			dataExplorer.onDidChangeDataViewerViewState(
 				this.updateViewStateContext,
 				this,
-				this.disposables
+				this.disposables,
 			);
 			// Show the window and the data
 			await dataExplorer.showData(dataProvider, title);

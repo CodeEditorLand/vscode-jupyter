@@ -12,12 +12,12 @@ import { IInterpreterService } from "../../../platform/interpreter/contracts";
 import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { MockMemento } from "../../../test/mocks/mementos";
 import { createPythonInterpreter } from "../../../test/utils/interpreters";
+import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 import { JupyterInterpreterDependencyResponse } from "../types";
 import { JupyterInterpreterDependencyService } from "./jupyterInterpreterDependencyService.node";
 import { JupyterInterpreterSelector } from "./jupyterInterpreterSelector.node";
 import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
 import { JupyterInterpreterStateStore } from "./jupyterInterpreterStateStore";
-import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 
 /* eslint-disable  */
 
@@ -55,29 +55,29 @@ suite("Jupyter Interpreter Service", () => {
 		const onDidGrantWorkspaceTrust = new EventEmitter<void>();
 		disposables.push(onDidGrantWorkspaceTrust);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust
+			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust,
 		).thenReturn(onDidGrantWorkspaceTrust.event);
 		jupyterInterpreterService = new JupyterInterpreterService(
 			instance(interpreterSelectionState),
 			instance(interpreterSelector),
 			instance(interpreterConfiguration),
 			instance(interpreterService),
-			disposables
+			disposables,
 		);
 		when(
-			interpreterService.getInterpreterDetails(pythonInterpreter.uri)
+			interpreterService.getInterpreterDetails(pythonInterpreter.uri),
 		).thenResolve(pythonInterpreter);
 		when(
 			interpreterService.getInterpreterDetails(
-				secondPythonInterpreter.uri
-			)
+				secondPythonInterpreter.uri,
+			),
 		).thenResolve(secondPythonInterpreter);
 		when(memento.update(anything(), anything())).thenResolve();
 		jupyterInterpreterService.onDidChangeInterpreter(
-			(e) => (selectedInterpreterEventArgs = e)
+			(e) => (selectedInterpreterEventArgs = e),
 		);
 		when(interpreterSelector.selectPythonInterpreter()).thenResolve(
-			pythonInterpreter
+			pythonInterpreter,
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -86,8 +86,8 @@ suite("Jupyter Interpreter Service", () => {
 		when(
 			interpreterConfiguration.installMissingDependencies(
 				pythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(JupyterInterpreterDependencyResponse.cancel);
 
 		const response = await jupyterInterpreterService.selectInterpreter();
@@ -99,8 +99,8 @@ suite("Jupyter Interpreter Service", () => {
 		when(
 			interpreterConfiguration.installMissingDependencies(
 				pythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(JupyterInterpreterDependencyResponse.ok);
 
 		const response = await jupyterInterpreterService.selectInterpreter();
@@ -108,8 +108,8 @@ suite("Jupyter Interpreter Service", () => {
 		verify(
 			interpreterConfiguration.installMissingDependencies(
 				pythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).once();
 		assert.equal(response, pythonInterpreter);
 		assert.equal(selectedInterpreterEventArgs, pythonInterpreter);
@@ -124,16 +124,16 @@ suite("Jupyter Interpreter Service", () => {
 		when(
 			interpreterConfiguration.installMissingDependencies(
 				pythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(
-			JupyterInterpreterDependencyResponse.selectAnotherInterpreter
+			JupyterInterpreterDependencyResponse.selectAnotherInterpreter,
 		);
 		when(
 			interpreterConfiguration.installMissingDependencies(
 				secondPythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(JupyterInterpreterDependencyResponse.ok);
 		let interpreterSelection = 0;
 		when(interpreterSelector.selectPythonInterpreter()).thenCall(() => {
@@ -162,34 +162,34 @@ suite("Jupyter Interpreter Service", () => {
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve();
 
 		const response =
 			await jupyterInterpreterService.installMissingDependencies(
-				new JupyterInstallError("Kaboom")
+				new JupyterInstallError("Kaboom"),
 			);
 
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				"Kaboom",
 				deepEqual({ modal: true }),
-				DataScience.selectDifferentJupyterInterpreter
-			)
+				DataScience.selectDifferentJupyterInterpreter,
+			),
 		).once();
 		verify(interpreterSelector.selectPythonInterpreter()).never();
 		assert.equal(response, JupyterInterpreterDependencyResponse.cancel);
 	});
 	test("setInitialInterpreter use saved interpreter if valid", async () => {
 		when(interpreterSelectionState.selectedPythonPath).thenReturn(
-			pythonInterpreter.uri
+			pythonInterpreter.uri,
 		);
 		when(
 			interpreterConfiguration.areDependenciesInstalled(
 				pythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(true);
 		const initialInterpreter =
 			await jupyterInterpreterService.setInitialInterpreter(undefined);
@@ -197,22 +197,22 @@ suite("Jupyter Interpreter Service", () => {
 	});
 	test("setInitialInterpreter saved interpreter invalid, clear it and use active interpreter", async () => {
 		when(interpreterSelectionState.selectedPythonPath).thenReturn(
-			secondPythonInterpreter.uri
+			secondPythonInterpreter.uri,
 		);
 		when(
 			interpreterConfiguration.areDependenciesInstalled(
 				secondPythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(false);
 		when(interpreterService.getActiveInterpreter(anything())).thenResolve(
-			pythonInterpreter
+			pythonInterpreter,
 		);
 		when(
 			interpreterConfiguration.areDependenciesInstalled(
 				pythonInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(true);
 		const initialInterpreter =
 			await jupyterInterpreterService.setInitialInterpreter(undefined);
@@ -220,60 +220,60 @@ suite("Jupyter Interpreter Service", () => {
 		// Make sure we set our saved interpreter to the new active interpreter
 		// it should have been cleared to undefined, then set to a new value
 		verify(
-			interpreterSelectionState.updateSelectedPythonPath(undefined)
+			interpreterSelectionState.updateSelectedPythonPath(undefined),
 		).once();
 		verify(
 			interpreterSelectionState.updateSelectedPythonPath(
-				pythonInterpreter.uri
-			)
+				pythonInterpreter.uri,
+			),
 		).once();
 	});
 	test("Install missing dependencies into active interpreter", async () => {
 		when(interpreterService.getActiveInterpreter(anything())).thenResolve(
-			pythonInterpreter
+			pythonInterpreter,
 		);
 		await jupyterInterpreterService.installMissingDependencies(undefined);
 		verify(
 			interpreterConfiguration.installMissingDependencies(
 				pythonInterpreter,
-				undefined
-			)
+				undefined,
+			),
 		).once();
 	});
 	test("Install missing dependencies into jupyter interpreter", async () => {
 		when(interpreterService.getActiveInterpreter(anything())).thenResolve(
-			undefined
+			undefined,
 		);
 		when(interpreterSelector.selectPythonInterpreter()).thenResolve(
-			selectedJupyterInterpreter
+			selectedJupyterInterpreter,
 		);
 		when(
 			interpreterConfiguration.installMissingDependencies(
 				selectedJupyterInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(JupyterInterpreterDependencyResponse.ok);
 		// First select our interpreter
 		await jupyterInterpreterService.selectInterpreter();
 		verify(
 			interpreterConfiguration.installMissingDependencies(
 				selectedJupyterInterpreter,
-				undefined
-			)
+				undefined,
+			),
 		).once();
 	});
 	test("Display picker if no interpreters are selected", async () => {
 		when(interpreterService.getActiveInterpreter(undefined)).thenResolve(
-			undefined
+			undefined,
 		);
 		when(interpreterSelector.selectPythonInterpreter()).thenResolve(
-			selectedJupyterInterpreter
+			selectedJupyterInterpreter,
 		);
 		when(
 			interpreterConfiguration.installMissingDependencies(
 				selectedJupyterInterpreter,
-				anything()
-			)
+				anything(),
+			),
 		).thenResolve(JupyterInterpreterDependencyResponse.ok);
 		await jupyterInterpreterService.installMissingDependencies(undefined);
 		verify(interpreterSelector.selectPythonInterpreter()).once();

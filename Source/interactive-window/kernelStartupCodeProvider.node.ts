@@ -2,19 +2,12 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import {
-	CodeSnippets,
-	InteractiveWindowView,
-} from "../platform/common/constants";
-import { format } from "../platform/common/helpers";
-import { splitLines } from "../platform/common/helpers";
-import { getFilePath } from "../platform/common/platform/fs-paths";
-import * as path from "../platform/vscode-path/path";
 import { Uri, workspace } from "vscode";
-import { IFileSystem } from "../platform/common/platform/types";
-import { IConfigurationService, Resource } from "../platform/common/types";
-import { untildify } from "../platform/common/platform/fileUtils.node";
-import { IExtensionSyncActivationService } from "../platform/activation/types";
+import {
+	isLocalHostConnection,
+	isPythonKernelConnection,
+} from "../kernels/helpers";
+import { expandWorkingDir } from "../kernels/jupyter/jupyterUtils";
 import {
 	IKernel,
 	IStartupCodeProvider,
@@ -22,12 +15,19 @@ import {
 	StartupCodePriority,
 	isLocalConnection,
 } from "../kernels/types";
-import {
-	isLocalHostConnection,
-	isPythonKernelConnection,
-} from "../kernels/helpers";
-import { expandWorkingDir } from "../kernels/jupyter/jupyterUtils";
+import { IExtensionSyncActivationService } from "../platform/activation/types";
 import { getRootFolder } from "../platform/common/application/workspace.base";
+import {
+	CodeSnippets,
+	InteractiveWindowView,
+} from "../platform/common/constants";
+import { format } from "../platform/common/helpers";
+import { splitLines } from "../platform/common/helpers";
+import { untildify } from "../platform/common/platform/fileUtils.node";
+import { getFilePath } from "../platform/common/platform/fs-paths";
+import { IFileSystem } from "../platform/common/platform/types";
+import { IConfigurationService, Resource } from "../platform/common/types";
+import * as path from "../platform/vscode-path/path";
 
 @injectable()
 export class KernelStartupCodeProvider
@@ -52,9 +52,9 @@ export class KernelStartupCodeProvider
 			return splitLines(
 				format(
 					CodeSnippets.UpdateCWDAndPath,
-					getFilePath(suggestedDir)
+					getFilePath(suggestedDir),
 				),
-				{ trim: false }
+				{ trim: false },
 			);
 		}
 		return [];
@@ -79,7 +79,7 @@ export class KernelStartupCodeProvider
 				: kernel.resourceUri;
 
 		let suggestedDir = await this.calculateWorkingDirectory(
-			kernel.resourceUri
+			kernel.resourceUri,
 		);
 		if (suggestedDir && (await this.fs.exists(suggestedDir))) {
 			return suggestedDir;
@@ -93,8 +93,8 @@ export class KernelStartupCodeProvider
 				expandWorkingDir(
 					getFilePath(suggestedDir),
 					launchingFile,
-					this.configService.getSettings(launchingFile)
-				)
+					this.configService.getSettings(launchingFile),
+				),
 			);
 			if (suggestedDir && (await this.fs.exists(suggestedDir))) {
 				return suggestedDir;
@@ -103,7 +103,7 @@ export class KernelStartupCodeProvider
 	}
 
 	private async calculateWorkingDirectory(
-		resource: Resource
+		resource: Resource,
 	): Promise<Uri | undefined> {
 		let workingDir: Uri | undefined;
 		// For a local launch calculate the working directory that we should switch into
@@ -123,11 +123,14 @@ export class KernelStartupCodeProvider
 					// User setting is absolute and doesn't exist, use workspace
 					workingDir = workspaceFolderPath;
 				}
-			} else if (!fileRootStr.includes("${")) {
+			} else if (fileRootStr.includes("${")) {
+				// fileRoot is a variable that hasn't been expanded
+				workingDir = fileRoot;
+			} else {
 				// fileRoot is a relative path, combine it with the workspace folder
 				const combinedPath = Uri.joinPath(
 					workspaceFolderPath,
-					fileRootStr
+					fileRootStr,
 				);
 				if (await this.fs.exists(combinedPath)) {
 					// combined path exists, use it
@@ -136,9 +139,6 @@ export class KernelStartupCodeProvider
 					// Combined path doesn't exist, use workspace
 					workingDir = workspaceFolderPath;
 				}
-			} else {
-				// fileRoot is a variable that hasn't been expanded
-				workingDir = fileRoot;
 			}
 		}
 		return workingDir;

@@ -1,13 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { EventEmitter, Memento, env } from "vscode";
 import { inject, injectable, named } from "inversify";
+import { EventEmitter, Memento, env } from "vscode";
+import { Settings } from "../../../platform/common/constants";
 import {
-	IMemento,
 	GLOBAL_MEMENTO,
 	IDisposableRegistry,
+	IMemento,
 } from "../../../platform/common/types";
+import { DisposableBase } from "../../../platform/common/utils/lifecycle";
+import { noop } from "../../../platform/common/utils/misc";
 import { traceError, traceInfoIfCI } from "../../../platform/logging";
 import { generateIdFromRemoteProvider } from "../jupyterUtils";
 import {
@@ -15,9 +18,6 @@ import {
 	IJupyterServerUriStorage,
 	JupyterServerProviderHandle,
 } from "../types";
-import { noop } from "../../../platform/common/utils/misc";
-import { DisposableBase } from "../../../platform/common/utils/lifecycle";
-import { Settings } from "../../../platform/common/constants";
 
 export type StorageMRUItem = {
 	displayName: string;
@@ -55,13 +55,13 @@ export class JupyterServerUriStorage
 		return this._onDidChangeUri.event;
 	}
 	private _onDidRemoveUris = this._register(
-		new EventEmitter<JupyterServerProviderHandle[]>()
+		new EventEmitter<JupyterServerProviderHandle[]>(),
 	);
 	public get onDidRemove() {
 		return this._onDidRemoveUris.event;
 	}
 	private _onDidAddUri = this._register(
-		new EventEmitter<IJupyterServerUriEntry>()
+		new EventEmitter<IJupyterServerUriEntry>(),
 	);
 	public get onDidAdd() {
 		return this._onDidAddUri.event;
@@ -76,7 +76,7 @@ export class JupyterServerUriStorage
 	constructor(
 		@inject(IMemento) @named(GLOBAL_MEMENTO) globalMemento: Memento,
 		@inject(IDisposableRegistry)
-		disposables: IDisposableRegistry
+		disposables: IDisposableRegistry,
 	) {
 		super();
 		disposables.push(this);
@@ -89,19 +89,19 @@ export class JupyterServerUriStorage
 		}
 		this.storageEventsHooked = true;
 		this._register(
-			this.newStorage.onDidAdd((e) => this._onDidAddUri.fire(e), this)
+			this.newStorage.onDidAdd((e) => this._onDidAddUri.fire(e), this),
 		);
 		this._register(
 			this.newStorage.onDidChange(
 				(e) => this._onDidChangeUri.fire(e),
-				this
-			)
+				this,
+			),
 		);
 		this._register(
 			this.newStorage.onDidRemove(
 				(e) => this._onDidRemoveUris.fire(e),
-				this
-			)
+				this,
+			),
 		);
 	}
 	private updateStore(): IJupyterServerUriEntry[] {
@@ -124,7 +124,7 @@ export class JupyterServerUriStorage
 	}
 	public async add(
 		jupyterHandle: JupyterServerProviderHandle,
-		options?: { time: number }
+		options?: { time: number },
 	): Promise<void> {
 		this.hookupStorageEvents();
 		traceInfoIfCI(`setUri: ${jupyterHandle.id}.${jupyterHandle.handle}`);
@@ -184,7 +184,7 @@ class NewStorage {
 				const existingEntry = all.find(
 					(entry) =>
 						generateIdFromRemoteProvider(entry.provider) ===
-						generateIdFromRemoteProvider(item.provider)
+						generateIdFromRemoteProvider(item.provider),
 				);
 				// Check if we have already found a display name for this server
 				const newItem: StorageMRUItem = {
@@ -202,7 +202,7 @@ class NewStorage {
 						.filter(
 							(entry) =>
 								generateIdFromRemoteProvider(entry.provider) !==
-								generateIdFromRemoteProvider(item.provider)
+								generateIdFromRemoteProvider(item.provider),
 						)
 						.map((item) => {
 							return <StorageMRUItem>{
@@ -210,10 +210,10 @@ class NewStorage {
 								serverHandle: item.provider,
 								time: item.time,
 							};
-						})
+						}),
 				);
 				const removedItems = newList.splice(
-					Settings.JupyterServerUriListMax
+					Settings.JupyterServerUriListMax,
 				);
 
 				await this.memento.update(this.mementoKey, newList);
@@ -229,10 +229,10 @@ class NewStorage {
 								time: removedItem.time,
 								displayName: removedItem.displayName || "",
 							};
-						}
+						},
 					);
 					this._onDidRemoveUris.fire(
-						removeJupyterUris.map((item) => item.provider)
+						removeJupyterUris.map((item) => item.provider),
 					);
 				}
 				this._onDidChangeUri.fire();
@@ -245,7 +245,7 @@ class NewStorage {
 		const existingEntry = uriList.find(
 			(entry) =>
 				entry.provider.id === server.id &&
-				entry.provider.handle === server.handle
+				entry.provider.handle === server.handle,
 		);
 		const entry: IJupyterServerUriEntry = {
 			provider: server,
@@ -266,12 +266,12 @@ class NewStorage {
 					const editedList = all.filter(
 						(f) =>
 							f.provider.id !== server.id ||
-							f.provider.handle !== server.handle
+							f.provider.handle !== server.handle,
 					);
 					const removedItems = all.filter(
 						(f) =>
 							f.provider.id === server.id &&
-							f.provider.handle === server.handle
+							f.provider.handle === server.handle,
 					);
 
 					if (editedList.length === 0) {
@@ -287,7 +287,7 @@ class NewStorage {
 						removedTriggered = true;
 						await this.memento.update(this.mementoKey, items);
 						this._onDidRemoveUris.fire(
-							removedItems.map((item) => item.provider)
+							removedItems.map((item) => item.provider),
 						);
 					}
 				} finally {
@@ -306,8 +306,8 @@ class NewStorage {
 			.catch((ex) =>
 				traceError(
 					`Failed to remove Server handle ${JSON.stringify(server)}`,
-					ex
-				)
+					ex,
+				),
 			));
 	}
 	public getAll(): IJupyterServerUriEntry[] {

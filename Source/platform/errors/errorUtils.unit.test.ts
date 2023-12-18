@@ -9,7 +9,7 @@ suite("Error Utils", () => {
 		function getHtmlMessage(markdown: string) {
 			const output = createOutputWithErrorMessageForDisplay(markdown);
 			const { stack } = JSON.parse(
-				Buffer.from(output!.items[0].data).toString()
+				Buffer.from(output!.items[0].data).toString(),
 			) as { stack: string };
 			return stack.replace("\u001b[1;31m", "");
 		}

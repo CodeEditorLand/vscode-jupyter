@@ -1,31 +1,31 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable, inject } from "inversify";
+import type { KernelMessage } from "@jupyterlab/services";
+import type { IAnyMessageArgs } from "@jupyterlab/services/lib/kernel/kernel";
+import { inject, injectable } from "inversify";
+import { NotebookCell, NotebookDocument, Uri } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { IFileSystem } from "../../platform/common/platform/types";
 import {
 	IDisposable,
 	IDisposableRegistry,
 	IExtensionContext,
 } from "../../platform/common/types";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { DisposableBase } from "../../platform/common/utils/lifecycle";
+import { swallowExceptions } from "../../platform/common/utils/misc";
+import { generateIdFromRemoteProvider } from "../jupyter/jupyterUtils";
+import {
+	IJupyterServerUriStorage,
+	JupyterServerProviderHandle,
+} from "../jupyter/types";
 import {
 	IKernel,
 	ResumeCellExecutionInformation,
 	isRemoteConnection,
 } from "../types";
-import type { KernelMessage } from "@jupyterlab/services";
-import type { IAnyMessageArgs } from "@jupyterlab/services/lib/kernel/kernel";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import { NotebookCell, NotebookDocument, Uri } from "vscode";
-import { swallowExceptions } from "../../platform/common/utils/misc";
 import { getParentHeaderMsgId } from "./cellExecutionMessageHandler";
-import {
-	IJupyterServerUriStorage,
-	JupyterServerProviderHandle,
-} from "../jupyter/types";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IFileSystem } from "../../platform/common/platform/types";
-import { generateIdFromRemoteProvider } from "../jupyter/jupyterUtils";
-import { DisposableBase } from "../../platform/common/utils/lifecycle";
 
 const MAX_TRACKING_TIME = 1_000 * 60 * 60 * 24 * 2; // 2 days
 type CellExecutionInfo = Omit<ResumeCellExecutionInformation, "token"> & {
@@ -71,12 +71,12 @@ export class LastCellExecutionTracker
 	}
 	public activate(): void {
 		this._register(
-			this.serverStorage.onDidRemove(this.onDidRemoveServers, this)
+			this.serverStorage.onDidRemove(this.onDidRemoveServers, this),
 		);
 	}
 	public async getLastTrackedCellExecution(
 		notebook: NotebookDocument,
-		kernel: IKernel
+		kernel: IKernel,
 	): Promise<CellExecutionInfo | undefined> {
 		if (notebook.isUntitled) {
 			return;
@@ -148,7 +148,7 @@ export class LastCellExecutionTracker
 						try {
 							// Time from the kernel is more accurate.
 							info.startTime = new Date(
-								ioPub.header.date
+								ioPub.header.date,
 							).getTime();
 						} catch {
 							// Ignore.
@@ -182,8 +182,8 @@ export class LastCellExecutionTracker
 			session.anyMessage.connect(anyMessageHandler);
 			disposables.push({
 				dispose: () =>
-					swallowExceptions(
-						() => session.anyMessage?.disconnect(anyMessageHandler)
+					swallowExceptions(() =>
+						session.anyMessage?.disconnect(anyMessageHandler),
 					),
 			});
 		};
@@ -207,7 +207,7 @@ export class LastCellExecutionTracker
 			let store: Record<string, StorageExecutionInfo> = {};
 			try {
 				const data = await this.getStorageFile().then(() =>
-					this.fs.readFile(this.storageFile)
+					this.fs.readFile(this.storageFile),
 				);
 				store = JSON.parse(data.toString()) as Record<
 					string,
@@ -223,7 +223,7 @@ export class LastCellExecutionTracker
 				this.staleState = store;
 				await this.fs.writeFile(
 					this.storageFile,
-					JSON.stringify(store)
+					JSON.stringify(store),
 				);
 			}
 		});
@@ -240,7 +240,7 @@ export class LastCellExecutionTracker
 	private trackLastExecution(
 		cell: NotebookCell,
 		kernel: IKernel,
-		info: Partial<CellExecutionInfo>
+		info: Partial<CellExecutionInfo>,
 	) {
 		if (!info.executionCount || !info.msg_id || !info.startTime) {
 			return;
@@ -257,7 +257,7 @@ export class LastCellExecutionTracker
 			kernelId: kernel.session?.kernel?.id || "",
 			msg_id: info.msg_id,
 			serverId: generateIdFromRemoteProvider(
-				kernel.kernelConnectionMetadata.serverProviderHandle
+				kernel.kernelConnectionMetadata.serverProviderHandle,
 			),
 			sessionId: kernel.session?.id,
 			startTime: info.startTime,
@@ -266,7 +266,7 @@ export class LastCellExecutionTracker
 			let store: Record<string, StorageExecutionInfo> = {};
 			try {
 				const data = await this.getStorageFile().then(() =>
-					this.fs.readFile(this.storageFile)
+					this.fs.readFile(this.storageFile),
 				);
 				store = JSON.parse(data.toString()) as Record<
 					string,
@@ -300,7 +300,7 @@ export class LastCellExecutionTracker
 			}
 			let removed = false;
 			const removedServerIds = new Set(
-				removedServers.map((s) => generateIdFromRemoteProvider(s))
+				removedServers.map((s) => generateIdFromRemoteProvider(s)),
 			);
 			Object.keys(store).forEach((key) => {
 				const data = store[key];
@@ -318,7 +318,7 @@ export class LastCellExecutionTracker
 				this.staleState = store;
 				await this.fs.writeFile(
 					this.storageFile,
-					JSON.stringify(store)
+					JSON.stringify(store),
 				);
 			}
 		});

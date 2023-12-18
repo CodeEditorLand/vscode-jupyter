@@ -6,8 +6,8 @@ import { languages } from "vscode";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { NOTEBOOK_SELECTOR } from "../../platform/common/constants";
 import {
-	IDisposableRegistry,
 	IConfigurationService,
+	IDisposableRegistry,
 } from "../../platform/common/types";
 import { PythonKernelCompletionProvider } from "./pythonKernelCompletionProvider";
 
@@ -50,7 +50,7 @@ export class PythonKernelCompletionProviderRegistration
 		const disposable = languages.registerCompletionItemProvider(
 			NOTEBOOK_SELECTOR,
 			this.completionProvider,
-			...triggerChars
+			...triggerChars,
 		);
 		this.disposables.push(disposable);
 	}

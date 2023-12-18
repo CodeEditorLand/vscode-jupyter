@@ -23,14 +23,14 @@ export class RemoteJupyterServerConnectionError extends BaseError {
 			handle: string;
 			extensionId: string;
 		},
-		public readonly originalError: Error
+		public readonly originalError: Error,
 	) {
 		super(
 			"remotejupyterserverconnection",
 			DataScience.remoteJupyterConnectionFailedWithServerWithError(
 				getBaseUrl(url),
-				originalError.message || originalError.toString()
-			)
+				originalError.message || originalError.toString(),
+			),
 		);
 		this.baseUrl = getBaseUrl(url);
 	}

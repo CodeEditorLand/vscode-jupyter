@@ -2,23 +2,23 @@
 // Licensed under the MIT License.
 
 import { window } from "vscode";
+import { splitLines } from "../../platform/common/helpers";
 import {
 	IDisposableRegistry,
 	IOutputChannel,
 } from "../../platform/common/types";
 import * as localize from "../../platform/common/utils/localize";
 import { traceVerbose } from "../../platform/logging";
-import { splitLines } from "../../platform/common/helpers";
 
 /**
  * Returns the output panel for output related to Jupyter Server.
  */
 export function getJupyterOutputChannel(
-	disposables: IDisposableRegistry
+	disposables: IDisposableRegistry,
 ): IOutputChannel {
 	const jupyterServerOutputChannel = window.createOutputChannel(
 		localize.DataScience.jupyterServerConsoleOutputChannel,
-		"log"
+		"log",
 	);
 	disposables.push(jupyterServerOutputChannel);
 	const handler: ProxyHandler<IOutputChannel> = {
@@ -51,7 +51,7 @@ function formatMessageAndLog(...args: Parameters<IOutputChannel["append"]>) {
 		traceVerbose(
 			splitLines(args[0])
 				.map((line, i) => (i === 0 ? line : `    ${line}`))
-				.join("\n")
+				.join("\n"),
 		);
 	} else {
 		traceVerbose(...args);

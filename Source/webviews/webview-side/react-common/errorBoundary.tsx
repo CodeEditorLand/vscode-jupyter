@@ -16,7 +16,7 @@ export class ErrorBoundary extends React.Component<{}, IErrorState> {
 
 	public override componentDidCatch(
 		error: Error,
-		errorInfo: React.ErrorInfo
+		errorInfo: React.ErrorInfo,
 	) {
 		const stack = errorInfo.componentStack;
 

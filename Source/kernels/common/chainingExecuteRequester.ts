@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { JSONObject } from "@lumino/coreutils";
 import type { Kernel, KernelMessage } from "@jupyterlab/services";
+import type { JSONObject } from "@lumino/coreutils";
 import { DelayedFutureExecute } from "./delayedFutureExecute";
 
 // Class that makes sure when doing a requestExecute on an IKernelConnection, that only one request happens
@@ -19,7 +19,7 @@ export class ChainingExecuteRequester {
 		kernel: Kernel.IKernelConnection,
 		content: KernelMessage.IExecuteRequestMsg["content"],
 		disposeOnDone?: boolean,
-		metadata?: JSONObject
+		metadata?: JSONObject,
 	): Kernel.IShellFuture<
 		KernelMessage.IExecuteRequestMsg,
 		KernelMessage.IExecuteReplyMsg
@@ -40,8 +40,8 @@ export class ChainingExecuteRequester {
 						this.previousExecute,
 						content,
 						disposeOnDone,
-						metadata
-					)
+						metadata,
+				  )
 				: kernel.requestExecute(content, disposeOnDone, metadata);
 		this.previousExecute = nextExecute;
 		this.previousKernel = kernel;

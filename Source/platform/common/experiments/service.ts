@@ -4,13 +4,14 @@
 import { inject, injectable, named } from "inversify";
 import { Memento, workspace } from "vscode";
 import {
-	getExperimentationService,
 	IExperimentationService,
 	TargetPopulation,
+	getExperimentationService,
 } from "vscode-tas-client";
+import { traceInfo, traceVerbose } from "../../logging";
+import { getVSCodeChannel } from "../application/applicationEnvironment";
 import { IApplicationEnvironment } from "../application/types";
 import { JVSC_EXTENSION_ID, isPreReleaseVersion } from "../constants";
-import { traceInfo, traceVerbose } from "../../logging";
 import {
 	GLOBAL_MEMENTO,
 	IConfigurationService,
@@ -18,10 +19,9 @@ import {
 	IJupyterSettings,
 	IMemento,
 } from "../types";
-import { Experiments } from "../utils/localize";
 import { Experiments as ExperimentGroups } from "../types";
+import { Experiments } from "../utils/localize";
 import { ExperimentationTelemetry } from "./telemetry.node";
-import { getVSCodeChannel } from "../application/applicationEnvironment";
 
 // This is a hacky way to determine what experiments have been loaded by the Experiments service.
 // There's no public API yet, hence we access the global storage that is updated by the experiments package.
@@ -96,7 +96,7 @@ export class ExperimentService implements IExperimentService {
 	public async activate() {
 		if (this.experimentationService && this.enabled) {
 			traceVerbose(
-				`Experimentation service retrieved: ${this.experimentationService}`
+				`Experimentation service retrieved: ${this.experimentationService}`,
 			);
 			await this.experimentationService.initializePromise;
 			if (this.getFeatures().length === 0) {
@@ -135,7 +135,7 @@ export class ExperimentService implements IExperimentService {
 			// synced with the experiment server.
 			this.experimentationService.getTreatmentVariable(
 				EXP_CONFIG_ID,
-				experiment as unknown as string
+				experiment as unknown as string,
 			);
 			return true;
 		}
@@ -159,13 +159,13 @@ export class ExperimentService implements IExperimentService {
 		const treatmentVariable =
 			this.experimentationService.getTreatmentVariable(
 				EXP_CONFIG_ID,
-				experiment as unknown as string
+				experiment as unknown as string,
 			);
 		return treatmentVariable === true;
 	}
 
 	public async getExperimentValue<T extends boolean | number | string>(
-		experiment: ExperimentGroups
+		experiment: ExperimentGroups,
 	): Promise<T | undefined> {
 		if (
 			!this.experimentationService ||
@@ -177,7 +177,7 @@ export class ExperimentService implements IExperimentService {
 
 		return this.experimentationService.getTreatmentVariable<T>(
 			EXP_CONFIG_ID,
-			experiment as unknown as string
+			experiment as unknown as string,
 		);
 	}
 	private getFeatures() {
@@ -206,7 +206,7 @@ export class ExperimentService implements IExperimentService {
 
 		if (experimentsDisabled) {
 			traceInfo(
-				"Experiments are disabled, only manually opted experiments are active."
+				"Experiments are disabled, only manually opted experiments are active.",
 			);
 		}
 
@@ -254,14 +254,14 @@ export class ExperimentService implements IExperimentService {
 		if (
 			experimentsDisabled &&
 			!enabledExperiments.has(
-				ExperimentGroups.DoNotWaitForZmqPortsToBeUsed
+				ExperimentGroups.DoNotWaitForZmqPortsToBeUsed,
 			) &&
 			(getVSCodeChannel() === "insiders" || isPreReleaseVersion())
 		) {
 			traceInfo(
 				Experiments.inGroup(
-					ExperimentGroups.DoNotWaitForZmqPortsToBeUsed
-				)
+					ExperimentGroups.DoNotWaitForZmqPortsToBeUsed,
+				),
 			);
 		}
 

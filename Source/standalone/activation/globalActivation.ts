@@ -2,7 +2,12 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, multiInject, optional } from "inversify";
+import { window } from "vscode";
+import { hasCells } from "../../interactive-window/editor-integration/cellFactory";
+import { IRawNotebookSupportedService } from "../../kernels/raw/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { PYTHON_LANGUAGE } from "../../platform/common/constants";
+import { EditorContexts } from "../../platform/common/constants";
 import { ContextKey } from "../../platform/common/contextKey";
 import {
 	IConfigurationService,
@@ -11,11 +16,6 @@ import {
 	IDisposableRegistry,
 } from "../../platform/common/types";
 import { noop } from "../../platform/common/utils/misc";
-import { EditorContexts } from "../../platform/common/constants";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IRawNotebookSupportedService } from "../../kernels/raw/types";
-import { hasCells } from "../../interactive-window/editor-integration/cellFactory";
-import { window } from "vscode";
 
 /**
  * Singleton class that activate a bunch of random things that didn't fit anywhere else.
@@ -23,7 +23,7 @@ import { window } from "vscode";
  */
 @injectable()
 export class GlobalActivation implements IExtensionSyncActivationService {
-	public isDisposed: boolean = false;
+	public isDisposed = false;
 	private changeHandler: IDisposable | undefined;
 	private startTime: number = Date.now();
 	constructor(
@@ -53,8 +53,8 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 		// Listen for active editor changes so we can detect have code cells or not
 		this.disposableRegistry.push(
 			window.onDidChangeActiveTextEditor(() =>
-				this.onChangedActiveTextEditor()
-			)
+				this.onChangedActiveTextEditor(),
+			),
 		);
 		this.onChangedActiveTextEditor();
 
@@ -102,8 +102,8 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 				.set(
 					hasCells(
 						activeEditor.document,
-						this.configuration.getSettings()
-					)
+						this.configuration.getSettings(),
+					),
 				)
 				.catch(noop);
 		} else {

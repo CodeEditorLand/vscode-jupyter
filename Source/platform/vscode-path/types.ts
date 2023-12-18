@@ -43,12 +43,12 @@ export type TypeConstraint = string | Function;
 
 export function validateConstraint(
 	arg: unknown,
-	constraint: TypeConstraint | undefined
+	constraint: TypeConstraint | undefined,
 ): void {
 	if (isString(constraint)) {
 		if (typeof arg !== constraint) {
 			throw new Error(
-				`argument does not match constraint: typeof ${constraint}`
+				`argument does not match constraint: typeof ${constraint}`,
 			);
 		}
 	} else if (isFunction(constraint)) {
@@ -72,7 +72,7 @@ export function validateConstraint(
 			return;
 		}
 		throw new Error(
-			`argument does not match one of these constraints: arg instanceof constraint, arg.constructor === constraint, nor constraint(arg) === true`
+			`argument does not match one of these constraints: arg instanceof constraint, arg.constructor === constraint, nor constraint(arg) === true`,
 		);
 	}
 }

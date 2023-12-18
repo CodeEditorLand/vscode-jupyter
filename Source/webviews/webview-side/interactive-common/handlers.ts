@@ -3,7 +3,7 @@
 
 export function handleLinkClick(
 	ev: MouseEvent,
-	linkClick: (href: string) => void
+	linkClick: (href: string) => void,
 ) {
 	// If this is an anchor element, forward the click as Jupyter does.
 	let anchor = ev.target as HTMLAnchorElement;
@@ -27,9 +27,7 @@ export function handleLinkClick(
 		ev.preventDefault();
 
 		// Look for a blob link.
-		if (!anchor.href.startsWith("blob:")) {
-			linkClick(anchor.href);
-		} else {
+		if (anchor.href.startsWith("blob:")) {
 			// We an have an image (as a blob) and the reference is blob://null:<someguid>
 			// We need to get the blob, for that make a http request and the response will be the Blob
 			// Next convert the blob into something that can be sent to the client side.
@@ -48,6 +46,8 @@ export function handleLinkClick(
 				};
 			};
 			xhr.send();
+		} else {
+			linkClick(anchor.href);
 		}
 	}
 }

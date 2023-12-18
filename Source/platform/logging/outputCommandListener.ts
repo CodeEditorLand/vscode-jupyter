@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, named } from "inversify";
+import { commands } from "vscode";
 import { Commands, STANDARD_OUTPUT_CHANNEL } from "../common/constants";
 import {
 	IDataScienceCommandListener,
 	IDisposableRegistry,
 	IOutputChannel,
 } from "../common/types";
-import { commands } from "vscode";
 
 @injectable()
 export class OutputCommandListener implements IDataScienceCommandListener {
@@ -24,8 +24,8 @@ export class OutputCommandListener implements IDataScienceCommandListener {
 			commands.registerCommand(
 				Commands.ViewJupyterOutput,
 				this.viewJupyterOutput,
-				this
-			)
+				this,
+			),
 		);
 	}
 

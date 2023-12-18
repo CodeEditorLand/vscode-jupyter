@@ -6,19 +6,19 @@ import { inject, injectable, optional } from "inversify";
 
 import { Uri, window } from "vscode";
 import { CellMatcher } from "../../interactive-window/editor-integration/cellMatcher";
-import { traceError } from "../../platform/logging";
-import { IFileSystem } from "../../platform/common/platform/types";
-import { ICell, IConfigurationService } from "../../platform/common/types";
-import { pruneCell } from "../../platform/common/utils";
-import { DataScience } from "../../platform/common/utils/localize";
-import { defaultNotebookFormat } from "../../platform/common/constants";
+import { IDataScienceErrorHandler } from "../../kernels/errors/types";
 import {
 	IJupyterServerHelper,
 	INotebookExporter,
 } from "../../kernels/jupyter/types";
-import { openAndShowNotebook } from "../../platform/common/utils/notebooks";
+import { defaultNotebookFormat } from "../../platform/common/constants";
+import { IFileSystem } from "../../platform/common/platform/types";
+import { ICell, IConfigurationService } from "../../platform/common/types";
+import { pruneCell } from "../../platform/common/utils";
+import { DataScience } from "../../platform/common/utils/localize";
 import { noop } from "../../platform/common/utils/misc";
-import { IDataScienceErrorHandler } from "../../kernels/errors/types";
+import { openAndShowNotebook } from "../../platform/common/utils/notebooks";
+import { traceError } from "../../platform/logging";
 
 /**
  * Provides export for the interactive window
@@ -43,7 +43,7 @@ export class JupyterExporter implements INotebookExporter {
 	public async exportToFile(
 		cells: ICell[],
 		file: string,
-		showOpenPrompt: boolean = true
+		showOpenPrompt = true,
 	): Promise<void> {
 		const notebook = await this.translateToNotebook(cells);
 
@@ -58,7 +58,7 @@ export class JupyterExporter implements INotebookExporter {
 			window
 				.showInformationMessage(
 					DataScience.exportDialogComplete(file),
-					openQuestion1
+					openQuestion1,
 				)
 				.then(async (str: string | undefined) => {
 					try {
@@ -75,14 +75,14 @@ export class JupyterExporter implements INotebookExporter {
 			window
 				.showInformationMessage(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					DataScience.exportDialogFailed(exc as any)
+					DataScience.exportDialogFailed(exc as any),
 				)
 				.then(noop, noop);
 		}
 	}
 	public async translateToNotebook(
 		cells: ICell[],
-		kernelSpec?: nbformat.IKernelspecMetadata
+		kernelSpec?: nbformat.IKernelspecMetadata,
 	): Promise<nbformat.INotebookContent | undefined> {
 		const pythonNumber = await this.extractPythonMainVersion();
 
@@ -118,7 +118,7 @@ export class JupyterExporter implements INotebookExporter {
 
 	private pruneCells = (
 		cells: ICell[],
-		cellMatcher: CellMatcher
+		cellMatcher: CellMatcher,
 	): nbformat.IBaseCell[] => {
 		// First filter out sys info cells. Jupyter doesn't understand these
 		const filtered = cells;
@@ -129,7 +129,7 @@ export class JupyterExporter implements INotebookExporter {
 
 	private pruneCell = (
 		cell: ICell,
-		cellMatcher: CellMatcher
+		cellMatcher: CellMatcher,
 	): nbformat.IBaseCell => {
 		// Prune with the common pruning function first.
 		const copy = pruneCell({ ...cell.data });
@@ -142,7 +142,7 @@ export class JupyterExporter implements INotebookExporter {
 
 	private pruneSource = (
 		source: nbformat.MultilineString,
-		cellMatcher: CellMatcher
+		cellMatcher: CellMatcher,
 	): nbformat.MultilineString => {
 		// Remove the comments on the top if there.
 		if (Array.isArray(source) && source.length > 0) {

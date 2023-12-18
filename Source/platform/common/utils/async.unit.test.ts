@@ -3,8 +3,8 @@
 
 import { assert, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
-import { createDeferred, raceTimeout, raceTimeoutError } from "./async";
 import { CancellationError } from "vscode";
+import { createDeferred, raceTimeout, raceTimeoutError } from "./async";
 use(chaiAsPromised);
 
 suite("async", () => {
@@ -18,7 +18,7 @@ suite("async", () => {
 					assert.equal(
 						def.resolved,
 						true,
-						"resolved property value is not `true`"
+						"resolved property value is not `true`",
 					);
 				})
 				.then(done)
@@ -27,17 +27,17 @@ suite("async", () => {
 			assert.equal(
 				def.resolved,
 				false,
-				"Promise is resolved even when it should not be"
+				"Promise is resolved even when it should not be",
 			);
 			assert.equal(
 				def.rejected,
 				false,
-				"Promise is rejected even when it should not be"
+				"Promise is rejected even when it should not be",
 			);
 			assert.equal(
 				def.completed,
 				false,
-				"Promise is completed even when it should not be"
+				"Promise is completed even when it should not be",
 			);
 
 			def.resolve(valueToSent);
@@ -45,17 +45,17 @@ suite("async", () => {
 			assert.equal(
 				def.resolved,
 				true,
-				"Promise is not resolved even when it should not be"
+				"Promise is not resolved even when it should not be",
 			);
 			assert.equal(
 				def.rejected,
 				false,
-				"Promise is rejected even when it should not be"
+				"Promise is rejected even when it should not be",
 			);
 			assert.equal(
 				def.completed,
 				true,
-				"Promise is not completed even when it should not be"
+				"Promise is not completed even when it should not be",
 			);
 		});
 		test("Reject", (done) => {
@@ -66,7 +66,7 @@ suite("async", () => {
 					assert.fail(
 						"Error",
 						"Was expecting promise to get rejected, however it was resolved",
-						""
+						"",
 					);
 					done();
 				})
@@ -74,7 +74,7 @@ suite("async", () => {
 					assert.equal(
 						reason,
 						errorToSend,
-						"Error received is not the same"
+						"Error received is not the same",
 					);
 					done();
 				})
@@ -83,17 +83,17 @@ suite("async", () => {
 			assert.equal(
 				def.resolved,
 				false,
-				"Promise is resolved even when it should not be"
+				"Promise is resolved even when it should not be",
 			);
 			assert.equal(
 				def.rejected,
 				false,
-				"Promise is rejected even when it should not be"
+				"Promise is rejected even when it should not be",
 			);
 			assert.equal(
 				def.completed,
 				false,
-				"Promise is completed even when it should not be"
+				"Promise is completed even when it should not be",
 			);
 
 			def.reject(errorToSend);
@@ -101,17 +101,17 @@ suite("async", () => {
 			assert.equal(
 				def.resolved,
 				false,
-				"Promise is resolved even when it should not be"
+				"Promise is resolved even when it should not be",
 			);
 			assert.equal(
 				def.rejected,
 				true,
-				"Promise is not rejected even when it should not be"
+				"Promise is not rejected even when it should not be",
 			);
 			assert.equal(
 				def.completed,
 				true,
-				"Promise is not completed even when it should not be"
+				"Promise is not completed even when it should not be",
 			);
 		});
 	});
@@ -136,7 +136,7 @@ suite("async", () => {
 			const result = raceTimeout(
 				10,
 				"Foo Bar",
-				createTimeout(200, "Hello World")
+				createTimeout(200, "Hello World"),
 			);
 
 			assert.equal(await result, "Foo Bar");
@@ -146,7 +146,7 @@ suite("async", () => {
 				10,
 				createTimeout(200, "Hello World"),
 				createTimeout(200, "Hello World"),
-				createTimeout(200, "Hello World")
+				createTimeout(200, "Hello World"),
 			);
 
 			assert.equal(await result, undefined);
@@ -157,7 +157,7 @@ suite("async", () => {
 				"Foo Bar",
 				createTimeout(200, "Hello World"),
 				createTimeout(200, "Hello World"),
-				createTimeout(200, "Hello World")
+				createTimeout(200, "Hello World"),
 			);
 
 			assert.equal(await result, "Foo Bar");
@@ -167,7 +167,7 @@ suite("async", () => {
 				1000,
 				createTimeout(100, "Hello World"),
 				createTimeout(10, "Hello World2"),
-				createTimeout(100, "Hello World3")
+				createTimeout(100, "Hello World3"),
 			);
 
 			assert.equal(await result, "Hello World2");
@@ -178,7 +178,7 @@ suite("async", () => {
 				"Foo Bar",
 				createTimeout(100, "Hello World"),
 				createTimeout(10, "Hello World2"),
-				createTimeout(100, "Hello World3")
+				createTimeout(100, "Hello World3"),
 			);
 
 			assert.equal(await result, "Hello World2");
@@ -187,7 +187,7 @@ suite("async", () => {
 			const result = raceTimeoutError(
 				10,
 				new CancellationError(),
-				createTimeout(100, "Hello World")
+				createTimeout(100, "Hello World"),
 			);
 
 			await assert.isRejected(result, new CancellationError().message);
@@ -196,7 +196,7 @@ suite("async", () => {
 			const result = raceTimeoutError(
 				100,
 				new CancellationError(),
-				createTimeout(10, "Hello World")
+				createTimeout(10, "Hello World"),
 			);
 
 			assert.equal(await result, "Hello World");
@@ -207,7 +207,7 @@ suite("async", () => {
 				new CancellationError(),
 				createTimeout(100, "Hello World"),
 				createTimeout(100, "Hello World"),
-				createTimeout(100, "Hello World")
+				createTimeout(100, "Hello World"),
 			);
 
 			await assert.isRejected(result, new CancellationError().message);
@@ -218,7 +218,7 @@ suite("async", () => {
 				new CancellationError(),
 				createTimeout(100, "Hello World"),
 				createTimeout(10, "Hello World2"),
-				createTimeout(100, "Hello World3")
+				createTimeout(100, "Hello World3"),
 			);
 
 			assert.equal(await result, "Hello World2");

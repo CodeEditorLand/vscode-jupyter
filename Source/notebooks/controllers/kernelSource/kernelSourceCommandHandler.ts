@@ -4,15 +4,16 @@
 import { inject, injectable } from "inversify";
 import {
 	CancellationTokenSource,
-	commands,
 	EventEmitter,
 	NotebookControllerAffinity,
 	NotebookDocument,
 	NotebookKernelSourceAction,
-	notebooks,
 	Uri,
+	commands,
+	notebooks,
 	window,
 } from "vscode";
+import { JupyterServerCollection } from "../../../api";
 import { DisplayOptions } from "../../../kernels/displayOptions";
 import {
 	isPythonKernelConnection,
@@ -25,8 +26,8 @@ import { sendKernelTelemetryEvent } from "../../../kernels/telemetry/sendKernelT
 import {
 	IKernelDependencyService,
 	IKernelFinder,
-	isLocalConnection,
 	KernelConnectionMetadata,
+	isLocalConnection,
 } from "../../../kernels/types";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
 import {
@@ -36,11 +37,11 @@ import {
 	TestingKernelPickerProviderId,
 	isWebExtension,
 } from "../../../platform/common/constants";
-import { dispose } from "../../../platform/common/utils/lifecycle";
 import {
 	IDisposable,
 	IDisposableRegistry,
 } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { DataScience } from "../../../platform/common/utils/localize";
 import { noop } from "../../../platform/common/utils/misc";
 import { ServiceContainer } from "../../../platform/ioc/container";
@@ -53,7 +54,6 @@ import {
 	IRemoteNotebookKernelSourceSelector,
 	IVSCodeNotebookController,
 } from "../types";
-import { JupyterServerCollection } from "../../../api";
 
 @injectable()
 export class KernelSourceCommandHandler
@@ -91,15 +91,15 @@ export class KernelSourceCommandHandler
 								{
 									label: DataScience.localPythonEnvironments,
 									documentation: Uri.parse(
-										"https://aka.ms/vscodeJupyterExtKernelPickerPythonEnv"
+										"https://aka.ms/vscodeJupyterExtKernelPickerPythonEnv",
 									),
 									command:
 										"jupyter.kernel.selectLocalPythonEnvironment",
 								},
 							];
 						},
-					}
-				)
+					},
+				),
 			);
 			this.localDisposables.push(
 				notebooks.registerKernelSourceActionProvider(
@@ -110,15 +110,15 @@ export class KernelSourceCommandHandler
 								{
 									label: DataScience.localPythonEnvironments,
 									documentation: Uri.parse(
-										"https://aka.ms/vscodeJupyterExtKernelPickerPythonEnv"
+										"https://aka.ms/vscodeJupyterExtKernelPickerPythonEnv",
 									),
 									command:
 										"jupyter.kernel.selectLocalPythonEnvironment",
 								},
 							];
 						},
-					}
-				)
+					},
+				),
 			);
 
 			let kernelSpecActions: NotebookKernelSourceAction[] = [];
@@ -132,8 +132,8 @@ export class KernelSourceCommandHandler
 						provideNotebookKernelSourceActions: () => {
 							return kernelSpecActions;
 						},
-					}
-				)
+					},
+				),
 			);
 
 			this.localDisposables.push(
@@ -145,8 +145,8 @@ export class KernelSourceCommandHandler
 						provideNotebookKernelSourceActions: () => {
 							return kernelSpecActions;
 						},
-					}
-				)
+					},
+				),
 			);
 
 			const registerKernelSpecsSource = () => {
@@ -156,7 +156,7 @@ export class KernelSourceCommandHandler
 
 				if (
 					this.kernelFinder.kernels.some((k) =>
-						isUserRegisteredKernelSpecConnection(k)
+						isUserRegisteredKernelSpecConnection(k),
 					)
 				) {
 					this.kernelSpecsSourceRegistered = true;
@@ -164,7 +164,7 @@ export class KernelSourceCommandHandler
 						{
 							label: DataScience.localKernelSpecs,
 							documentation: Uri.parse(
-								"https://aka.ms/vscodeJupyterExtKernelPickerJupyterKernels"
+								"https://aka.ms/vscodeJupyterExtKernelPickerJupyterKernels",
 							),
 							command: "jupyter.kernel.selectLocalKernelSpec",
 						},
@@ -178,51 +178,51 @@ export class KernelSourceCommandHandler
 			this.kernelFinder.onDidChangeKernels(
 				() => registerKernelSpecsSource(),
 				this,
-				this.localDisposables
+				this.localDisposables,
 			);
 			this.localDisposables.push(
 				commands.registerCommand(
 					"jupyter.kernel.selectLocalKernelSpec",
 					this.onSelectLocalKernel.bind(
 						this,
-						ContributedKernelFinderKind.LocalKernelSpec
+						ContributedKernelFinderKind.LocalKernelSpec,
 					),
-					this
-				)
+					this,
+				),
 			);
 			this.localDisposables.push(
 				commands.registerCommand(
 					"jupyter.kernel.selectLocalPythonEnvironment",
 					this.onSelectLocalKernel.bind(
 						this,
-						ContributedKernelFinderKind.LocalPythonEnvironment
+						ContributedKernelFinderKind.LocalPythonEnvironment,
 					),
-					this
-				)
+					this,
+				),
 			);
 		}
 		this.localDisposables.push(
 			commands.registerCommand(
 				"jupyter.kernel.selectJupyterServerKernel",
 				this.onSelectRemoteKernel,
-				this
-			)
+				this,
+			),
 		);
 		const uriRegistration =
 			ServiceContainer.instance.get<IJupyterServerProviderRegistry>(
-				IJupyterServerProviderRegistry
+				IJupyterServerProviderRegistry,
 			);
 		uriRegistration.onDidChangeCollections(
 			this.registerUriCommands,
 			this,
-			this.localDisposables
+			this.localDisposables,
 		);
 		this.registerUriCommands();
 	}
 	private registerUriCommands() {
 		const uriRegistration =
 			ServiceContainer.instance.get<IJupyterServerProviderRegistry>(
-				IJupyterServerProviderRegistry
+				IJupyterServerProviderRegistry,
 			);
 		const existingItems = new Set<string>();
 		uriRegistration.jupyterCollections.map((collection) => {
@@ -258,7 +258,7 @@ export class KernelSourceCommandHandler
 							},
 						];
 					},
-				}
+				},
 			);
 			const providerItemIW = notebooks.registerKernelSourceActionProvider(
 				InteractiveWindowView,
@@ -284,7 +284,7 @@ export class KernelSourceCommandHandler
 							},
 						];
 					},
-				}
+				},
 			);
 			this.localDisposables.push(providerItemNb);
 			this.localDisposables.push(providerItemIW);
@@ -304,7 +304,7 @@ export class KernelSourceCommandHandler
 		kind:
 			| ContributedKernelFinderKind.LocalKernelSpec
 			| ContributedKernelFinderKind.LocalPythonEnvironment,
-		notebook?: NotebookDocument
+		notebook?: NotebookDocument,
 	) {
 		notebook = notebook || window.activeNotebookEditor?.notebook;
 		if (!notebook) {
@@ -313,14 +313,14 @@ export class KernelSourceCommandHandler
 		if (kind === ContributedKernelFinderKind.LocalPythonEnvironment) {
 			const selector =
 				ServiceContainer.instance.get<ILocalPythonNotebookKernelSourceSelector>(
-					ILocalPythonNotebookKernelSourceSelector
+					ILocalPythonNotebookKernelSourceSelector,
 				);
 			const kernel = await selector.selectLocalKernel(notebook);
 			return this.getSelectedController(notebook, kernel);
 		} else {
 			const selector =
 				ServiceContainer.instance.get<ILocalNotebookKernelSourceSelector>(
-					ILocalNotebookKernelSourceSelector
+					ILocalNotebookKernelSourceSelector,
 				);
 			const kernel = await selector.selectLocalKernel(notebook);
 			return this.getSelectedController(notebook, kernel);
@@ -329,13 +329,13 @@ export class KernelSourceCommandHandler
 	private async onSelectRemoteKernel(
 		extensionId: string,
 		providerId: string,
-		notebook?: NotebookDocument
+		notebook?: NotebookDocument,
 	) {
 		notebook = notebook || window.activeNotebookEditor?.notebook;
 		if (!notebook && window.activeTextEditor) {
 			// find associated notebook document for the active text editor
 			notebook = this.notebookEditorProvider.findNotebookEditor(
-				window.activeTextEditor.document.uri
+				window.activeTextEditor.document.uri,
 			)?.notebook;
 		}
 		if (!notebook) {
@@ -348,14 +348,14 @@ export class KernelSourceCommandHandler
 		}
 		const selector =
 			ServiceContainer.instance.get<IRemoteNotebookKernelSourceSelector>(
-				IRemoteNotebookKernelSourceSelector
+				IRemoteNotebookKernelSourceSelector,
 			);
 		const kernel = await selector.selectRemoteKernel(notebook, provider);
 		return this.getSelectedController(notebook, kernel);
 	}
 	private async getSelectedController(
 		notebook: NotebookDocument,
-		kernel?: KernelConnectionMetadata
+		kernel?: KernelConnectionMetadata,
 	) {
 		if (!kernel) {
 			return;
@@ -367,28 +367,28 @@ export class KernelSourceCommandHandler
 		]);
 		if (!Array.isArray(controllers) || controllers.length === 0) {
 			traceWarning(
-				`No controller created for selected kernel connection ${kernel.kind}:${kernel.id}`
+				`No controller created for selected kernel connection ${kernel.kind}:${kernel.id}`,
 			);
 			return;
 		}
 		initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			notebook.uri,
-			kernel
+			kernel,
 		)
 			.finally(() =>
 				sendKernelTelemetryEvent(
 					notebook.uri,
 					Telemetry.SwitchKernel,
 					undefined,
-					{ newKernelPicker: true }
-				)
+					{ newKernelPicker: true },
+				),
 			)
 			.catch(noop);
 		controllers
 			.find((item) => item.viewType === notebook.notebookType)
 			?.controller.updateNotebookAffinity(
 				notebook,
-				NotebookControllerAffinity.Preferred
+				NotebookControllerAffinity.Preferred,
 			);
 
 		const controller = controllers[0];
@@ -397,7 +397,7 @@ export class KernelSourceCommandHandler
 	}
 	private async onControllerSelected(
 		notebook: NotebookDocument,
-		controller: IVSCodeNotebookController
+		controller: IVSCodeNotebookController,
 	) {
 		if (
 			isLocalConnection(controller.connection) &&
@@ -423,7 +423,7 @@ export class KernelSourceCommandHandler
 			} catch (ex) {
 				traceError(
 					`Failed to install missing dependencies for Conda kernel ${controller.connection.id}`,
-					ex
+					ex,
 				);
 			} finally {
 				dispose(disposables);

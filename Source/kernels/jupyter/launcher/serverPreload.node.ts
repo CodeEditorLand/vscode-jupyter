@@ -10,19 +10,19 @@ import {
 } from "vscode";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
 import { PYTHON_LANGUAGE } from "../../../platform/common/constants";
-import { traceInfo, traceError } from "../../../platform/logging";
 import {
 	IConfigurationService,
 	IDisposableRegistry,
 	IMemento,
 	WORKSPACE_MEMENTO,
 } from "../../../platform/common/types";
-import { getKernelConnectionLanguage } from "../../helpers";
-import { IKernel, IKernelProvider, IJupyterServerConnector } from "../../types";
-import { DisplayOptions } from "../../displayOptions";
-import { IRawNotebookSupportedService } from "../../raw/types";
 import { isJupyterNotebook } from "../../../platform/common/utils";
 import { noop } from "../../../platform/common/utils/misc";
+import { traceError, traceInfo } from "../../../platform/logging";
+import { DisplayOptions } from "../../displayOptions";
+import { getKernelConnectionLanguage } from "../../helpers";
+import { IRawNotebookSupportedService } from "../../raw/types";
+import { IJupyterServerConnector, IKernel, IKernelProvider } from "../../types";
 
 const LastPythonNotebookCreatedKey = "last-python-notebook-created";
 const LastNotebookCreatedKey = "last-notebook-created";
@@ -63,13 +63,13 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		this.checkDateForServerStart();
 
 		this.disposables.push(
-			this.kernelProvider.onDidStartKernel(this.kernelStarted, this)
+			this.kernelProvider.onDidStartKernel(this.kernelStarted, this),
 		);
 	}
 
 	private get lastNotebookCreated() {
 		const time = this.mementoStorage.get<number | undefined>(
-			LastNotebookCreatedKey
+			LastNotebookCreatedKey,
 		);
 		return time ? new Date(time) : undefined;
 	}
@@ -97,7 +97,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		const ui = new DisplayOptions(true);
 		try {
 			traceInfo(
-				`Attempting to start a server because of preload conditions ...`
+				`Attempting to start a server because of preload conditions ...`,
 			);
 
 			// If it didn't start, attempt for local and if allowed.
@@ -132,7 +132,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 	// Note the time as well as an extra time for python specific notebooks
 	private kernelStarted(kernel: IKernel) {
 		const language = getKernelConnectionLanguage(
-			kernel.kernelConnectionMetadata
+			kernel.kernelConnectionMetadata,
 		);
 
 		this.mementoStorage

@@ -21,7 +21,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 				code: cell.document.getText().replace(/\r\n/g, "\n"),
 			});
 			const norm = path.normalize(
-				(response as IDumpCellResponse).sourcePath
+				(response as IDumpCellResponse).sourcePath,
 			);
 			this.fileToCell.set(norm, cell.document.uri);
 			this.cellToFile.set(cell.document.uri.toString(), norm);

@@ -3,21 +3,21 @@
 
 import * as fsapi from "fs-extra";
 import * as path from "../../../platform/vscode-path/path";
+import { IServiceContainer } from "../../ioc/types";
 import {
-	ShellOptions,
 	ExecutionResult,
 	IProcessServiceFactory,
+	ShellOptions,
 } from "../process/types.node";
 import { IConfigurationService } from "../types";
-import { IServiceContainer } from "../../ioc/types";
 import { normCasePath } from "./fileUtils";
 export { arePathsSame } from "./fileUtils";
-import { untildify as untilidfyCommon } from "../utils/platform";
 import { homedir } from "os";
+import { untildify as untilidfyCommon } from "../utils/platform";
 
 let internalServiceContainer: IServiceContainer;
 export function initializeExternalDependencies(
-	serviceContainer: IServiceContainer
+	serviceContainer: IServiceContainer,
 ): void {
 	internalServiceContainer = serviceContainer;
 }
@@ -26,7 +26,7 @@ export function initializeExternalDependencies(
 
 export async function shellExecute(
 	command: string,
-	options: ShellOptions = {}
+	options: ShellOptions = {},
 ): Promise<ExecutionResult<string>> {
 	const service = await internalServiceContainer
 		.get<IProcessServiceFactory>(IProcessServiceFactory)
@@ -95,7 +95,7 @@ export function getEnvironmentDirFromPath(interpreterPath: string): string {
  * @returns {boolean} : Returns true if the interpreter belongs to a virtualenv environment.
  */
 export async function isVirtualenvEnvironment(
-	interpreterPath: string
+	interpreterPath: string,
 ): Promise<boolean> {
 	// Check if there are any activate.* files in the same directory as the interpreter.
 	//

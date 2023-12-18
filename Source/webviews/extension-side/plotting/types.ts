@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { IDisposable } from "../../../platform/common/types";
 import { Event } from "vscode";
 import { SharedMessages } from "../../../messageTypes";
+import { IDisposable } from "../../../platform/common/types";
 
 export namespace PlotViewerMessages {
 	export const Started = SharedMessages.Started;

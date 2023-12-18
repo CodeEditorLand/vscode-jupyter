@@ -7,19 +7,19 @@ import {
 	Uri,
 	WorkspaceFolder,
 } from "vscode";
+import * as path from "../../platform/vscode-path/resources";
+import { splitLines } from "../common/helpers";
 import { getDisplayPath } from "../common/platform/fs-paths";
 import { DataScience } from "../common/utils/localize";
 import { JupyterConnectError } from "./jupyterConnectError";
-import { BaseError } from "./types";
-import * as path from "../../platform/vscode-path/resources";
-import { splitLines } from "../common/helpers";
 import { SessionDisposedError } from "./sessionDisposedError";
+import { BaseError } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class ErrorUtils {
 	public static outputHasModuleNotInstalledError(
 		moduleName: string,
-		content?: string
+		content?: string,
 	): boolean {
 		return content &&
 			(content!.indexOf(`No module named ${moduleName}`) > 0 ||
@@ -34,7 +34,7 @@ export class ErrorUtils {
  * Generally Python error messages are at the bottom of the traceback.
  */
 export function getTelemetrySafeErrorMessageFromPythonTraceback(
-	traceback: string = ""
+	traceback = "",
 ) {
 	if (!traceback) {
 		return;
@@ -62,7 +62,7 @@ export function getTelemetrySafeErrorMessageFromPythonTraceback(
  * Given a python traceback, attempt to get the Python error message.
  * Note: Python error messages are at the bottom of the traceback.
  */
-export function getErrorMessageFromPythonTraceback(traceback: string = "") {
+export function getErrorMessageFromPythonTraceback(traceback = "") {
 	const lines = getLastTwoLinesFromPythonTracebackWithErrorMessage(traceback);
 	return lines ? lines[1] : undefined;
 }
@@ -73,7 +73,7 @@ export function getErrorMessageFromPythonTraceback(traceback: string = "") {
  * Note: Python error messages are at the bottom of the traceback.
  */
 export function getLastTwoLinesFromPythonTracebackWithErrorMessage(
-	traceback: string = ""
+	traceback = "",
 ): undefined | [string, string] {
 	if (!traceback) {
 		return;
@@ -88,18 +88,18 @@ export function getLastTwoLinesFromPythonTracebackWithErrorMessage(
 		return;
 	}
 	// If last line doesn't contain the error, return the traceback as is.
-	if (!reversedLines[0].includes("Error")) {
-		return;
-	} else {
+	if (reversedLines[0].includes("Error")) {
 		return [
 			reversedLines.length > 1 ? reversedLines[1] : "",
 			reversedLines[0],
 		];
+	} else {
+		return;
 	}
 }
 
 export function getLastFrameFromPythonTraceback(
-	traceback: string
+	traceback: string,
 ): { fileName: string; folderName: string; packageName: string } | undefined {
 	if (!traceback) {
 		return;
@@ -120,7 +120,7 @@ export function getLastFrameFromPythonTraceback(
 				line.startsWith("file ") &&
 				line.includes(", line ") &&
 				line.includes(".py") &&
-				line.includes(".py")
+				line.includes(".py"),
 		);
 	if (!lastFrame) {
 		return;
@@ -128,7 +128,7 @@ export function getLastFrameFromPythonTraceback(
 	const file = lastFrame.substring(0, lastFrame.lastIndexOf(".py")) + ".py";
 	const parts = file.replace(/\\/g, "/").split("/");
 	const indexOfSitePackages = parts.indexOf("site-packages");
-	let packageName =
+	const packageName =
 		indexOfSitePackages >= 0 && parts.length > indexOfSitePackages + 1
 			? parts[indexOfSitePackages + 1]
 			: "";
@@ -313,8 +313,8 @@ export function analyzeKernelErrors(
 	workspaceFolders: readonly WorkspaceFolder[],
 	error: Error | string,
 	kernelDisplayName: string | undefined,
-	pythonSysPrefix: string = "",
-	filesInCwd: Uri[] = []
+	pythonSysPrefix = "",
+	filesInCwd: Uri[] = [],
 ): KernelFailure | undefined {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const stdErrOrStackTrace =
@@ -391,7 +391,7 @@ export function analyzeKernelErrors(
 	}
 	if (
 		stdErr.includes(
-			"AssertionError: Couldn't find Class NSProcessInfo".toLowerCase()
+			"AssertionError: Couldn't find Class NSProcessInfo".toLowerCase(),
 		)
 	) {
 		// Conda environment with IPython 5.8.0 fails with this message.
@@ -444,7 +444,7 @@ export function analyzeKernelErrors(
 		if (
 			stdErr.includes("ImportError: cannot import name".toLowerCase()) &&
 			stdErr.includes(
-				"from partially initialized module".toLowerCase()
+				"from partially initialized module".toLowerCase(),
 			) &&
 			stdErr.includes("zmq.backend.cython".toLowerCase())
 		) {
@@ -484,7 +484,7 @@ export function analyzeKernelErrors(
 		lastTwolinesOfError[1].toLowerCase().startsWith("importerror")
 	) {
 		const info = extractModuleAndFileFromImportError(
-			lastTwolinesOfError[1]
+			lastTwolinesOfError[1],
 		);
 		if (info && pythonSysPrefix) {
 			// First check if we're overriding any built in modules.
@@ -492,7 +492,7 @@ export function analyzeKernelErrors(
 				info.moduleName,
 				info.fileName,
 				workspaceFolders,
-				pythonSysPrefix
+				pythonSysPrefix,
 			);
 			if (error) {
 				return error;
@@ -505,11 +505,11 @@ export function analyzeKernelErrors(
 				message: info.fileName
 					? DataScience.failedToStartKernelDueToImportFailureFromFile(
 							info.moduleName,
-							info.fileName
-						)
+							info.fileName,
+					  )
 					: DataScience.failedToStartKernelDueToImportFailure(
-							info.moduleName
-						),
+							info.moduleName,
+					  ),
 				moreInfoLink: info.fileName
 					? "https://aka.ms/kernelFailuresModuleImportErrFromFile"
 					: "https://aka.ms/kernelFailuresModuleImportErr",
@@ -529,7 +529,7 @@ export function analyzeKernelErrors(
 		const moduleName = line
 			? line
 					.substring(
-						line.toLowerCase().indexOf(noModule) + noModule.length
+						line.toLowerCase().indexOf(noModule) + noModule.length,
 					)
 					.trim()
 			: "";
@@ -539,7 +539,7 @@ export function analyzeKernelErrors(
 				moduleName,
 				message:
 					DataScience.failedToStartKernelDueToMissingModule(
-						moduleName
+						moduleName,
 					),
 				moreInfoLink: "https://aka.ms/kernelFailuresMissingModule",
 				telemetrySafeTags: ["module.notfound.error"],
@@ -553,7 +553,7 @@ export function analyzeKernelErrors(
 		let moduleName = line
 			? line
 					.substring(
-						line.toLowerCase().indexOf(noModule) + noModule.length
+						line.toLowerCase().indexOf(noModule) + noModule.length,
 					)
 					.trim()
 			: "";
@@ -567,7 +567,7 @@ export function analyzeKernelErrors(
 		}
 		const modulesInCwd = filesInCwd
 			.filter(
-				(file) => path.basename(file).toLowerCase() === "__init__.py"
+				(file) => path.basename(file).toLowerCase() === "__init__.py",
 			)
 			.map((file) => path.basename(path.dirname(file)));
 		if (
@@ -576,7 +576,8 @@ export function analyzeKernelErrors(
 			moduleName !== fileName &&
 			filesInCwd.some(
 				(file) =>
-					path.basename(file).toLowerCase() === fileName.toLowerCase()
+					path.basename(file).toLowerCase() ===
+					fileName.toLowerCase(),
 			)
 		) {
 			return {
@@ -585,7 +586,7 @@ export function analyzeKernelErrors(
 				moduleName,
 				message:
 					DataScience.fileSeemsToBeInterferingWithKernelStartup(
-						fileName
+						fileName,
 					),
 				moreInfoLink:
 					"https://aka.ms/kernelFailuresOverridingBuiltInModules",
@@ -596,7 +597,7 @@ export function analyzeKernelErrors(
 			modulesInCwd &&
 			moduleName !== folderName &&
 			modulesInCwd.some(
-				(folder) => folder.toLowerCase() === folderName.toLowerCase()
+				(folder) => folder.toLowerCase() === folderName.toLowerCase(),
 			)
 		) {
 			return {
@@ -605,7 +606,7 @@ export function analyzeKernelErrors(
 				moduleName,
 				message:
 					DataScience.moduleSeemsToBeInterferingWithKernelStartup(
-						folderName
+						folderName,
 					),
 				moreInfoLink:
 					"https://aka.ms/kernelFailuresOverridingBuiltInModules",
@@ -617,7 +618,7 @@ export function analyzeKernelErrors(
 				moduleName,
 				message:
 					DataScience.failedToStartKernelDueToMissingModule(
-						moduleName
+						moduleName,
 					),
 				moreInfoLink: "https://aka.ms/kernelFailuresMissingModule",
 				telemetrySafeTags: ["module.notfound.error"],
@@ -649,14 +650,14 @@ export function analyzeKernelErrors(
 			.startsWith("ModuleNotFoundError".toLowerCase())
 	) {
 		const info = extractModuleAndFileFromImportError(
-			lastTwolinesOfError[1]
+			lastTwolinesOfError[1],
 		);
 		if (info) {
 			return {
 				reason: KernelFailureReason.moduleNotFoundFailure,
 				moduleName: info.moduleName,
 				message: DataScience.failedToStartKernelDueToMissingModule(
-					info.moduleName
+					info.moduleName,
 				),
 				moreInfoLink: "https://aka.ms/kernelFailuresMissingModule",
 				telemetrySafeTags: ["module.notfound.error"],
@@ -695,7 +696,7 @@ export function analyzeKernelErrors(
 			errorMessage =
 				DataScience.failedToStartJupyterDueToOutdatedTraitlets(
 					kernelDisplayName || "",
-					pythonError || ""
+					pythonError || "",
 				);
 			telemetrySafeTags.push("outdated.traitlets");
 			link = "https://aka.ms/kernelFailuresJupyterTrailtletsOutdated";
@@ -703,8 +704,8 @@ export function analyzeKernelErrors(
 			errorMessage = pythonError
 				? DataScience.failedToStartJupyterWithErrorInfo(
 						kernelDisplayName || "",
-						pythonError
-					)
+						pythonError,
+				  )
 				: DataScience.failedToStartJupyter(kernelDisplayName || "");
 			link = undefined;
 		}
@@ -745,7 +746,7 @@ function isBuiltInModuleOverwritten(
 	moduleName: string,
 	fileName: string | undefined,
 	workspaceFolders: readonly WorkspaceFolder[],
-	pythonSysPrefix?: string
+	pythonSysPrefix?: string,
 ): KernelFailure | undefined {
 	// If we cannot tell whether this belongs to python environment,
 	// then we cannot tell if it overwrites any built in modules.
@@ -769,7 +770,7 @@ function isBuiltInModuleOverwritten(
 	// eslint-disable-next-line local-rules/dont-use-fspath
 	if (
 		!workspaceFolders.some((folder) =>
-			fileName.toLowerCase().startsWith(folder.uri.fsPath.toLowerCase())
+			fileName.toLowerCase().startsWith(folder.uri.fsPath.toLowerCase()),
 		)
 	) {
 		return;
@@ -780,7 +781,7 @@ function isBuiltInModuleOverwritten(
 		fileName,
 		moduleName,
 		message: DataScience.fileSeemsToBeInterferingWithKernelStartup(
-			getDisplayPath(Uri.file(fileName), workspaceFolders || [])
+			getDisplayPath(Uri.file(fileName), workspaceFolders || []),
 		),
 		moreInfoLink: "https://aka.ms/kernelFailuresOverridingBuiltInModules",
 		telemetrySafeTags: ["import.error", "override.modules"],
@@ -798,7 +799,7 @@ export function createOutputWithErrorMessageForDisplay(errorMessage: string) {
 		if (matches.length === 3) {
 			errorMessage = errorMessage.replace(
 				matches[0],
-				`<a href='${matches[2]}'>${matches[1]}</a>`
+				`<a href='${matches[2]}'>${matches[1]}</a>`,
 			);
 		}
 	}

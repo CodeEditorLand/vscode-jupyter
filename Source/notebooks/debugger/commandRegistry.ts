@@ -26,28 +26,28 @@ export class CommandRegistry
 
 	public activate() {
 		this.disposables.push(
-			commands.registerCommand(Commands.RunByLine, this.runByLine, this)
+			commands.registerCommand(Commands.RunByLine, this.runByLine, this),
 		);
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RunByLineNext,
 				this.runByLineNext,
-				this
-			)
+				this,
+			),
 		);
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RunByLineStop,
 				this.runByLineStop,
-				this
-			)
+				this,
+			),
 		);
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RunAndDebugCell,
 				this.runAndDebugCell,
-				this
-			)
+				this,
+			),
 		);
 	}
 
@@ -60,7 +60,7 @@ export class CommandRegistry
 
 		await this.debuggingManager.tryToStartDebugging(
 			KernelDebugMode.RunByLine,
-			cell
+			cell,
 		);
 	}
 
@@ -91,7 +91,7 @@ export class CommandRegistry
 
 		await this.debuggingManager.tryToStartDebugging(
 			KernelDebugMode.Cell,
-			cell
+			cell,
 		);
 	}
 

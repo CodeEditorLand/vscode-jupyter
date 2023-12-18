@@ -48,7 +48,7 @@ export class InterpreterStatusBarVisibility
 			this.pythonApi.onDidActivatePythonExtension(
 				this.registerStatusFilter,
 				this,
-				this.disposables
+				this.disposables,
 			);
 		}
 	}

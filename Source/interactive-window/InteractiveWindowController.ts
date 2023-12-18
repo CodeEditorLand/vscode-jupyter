@@ -2,30 +2,30 @@
 // Licensed under the MIT License.
 
 import { Disposable, NotebookController, NotebookDocument, Uri } from "vscode";
+import { IDataScienceErrorHandler } from "../kernels/errors/types";
 import {
 	IKernel,
 	IKernelProvider,
 	KernelConnectionMetadata,
 } from "../kernels/types";
+import { SysInfoReason } from "../messageTypes";
+import { IVSCodeNotebookController } from "../notebooks/controllers/types";
+import { getFilePath } from "../platform/common/platform/fs-paths";
+import { InteractiveWindowMode, Resource } from "../platform/common/types";
 import { Deferred, createDeferred } from "../platform/common/utils/async";
 import { noop } from "../platform/common/utils/misc";
-import { InteractiveWindowMode, Resource } from "../platform/common/types";
-import { IInteractiveControllerHelper } from "./types";
-import { IVSCodeNotebookController } from "../notebooks/controllers/types";
-import {
-	SystemInfoCell,
-	getFinishConnectMessage,
-	getStartConnectMessage,
-} from "./systemInfoCell";
 import {
 	traceError,
 	traceInfoIfCI,
 	traceVerbose,
 	traceWarning,
 } from "../platform/logging";
-import { getFilePath } from "../platform/common/platform/fs-paths";
-import { SysInfoReason } from "../messageTypes";
-import { IDataScienceErrorHandler } from "../kernels/errors/types";
+import {
+	SystemInfoCell,
+	getFinishConnectMessage,
+	getStartConnectMessage,
+} from "./systemInfoCell";
+import { IInteractiveControllerHelper } from "./types";
 
 export class InteractiveWindowController {
 	public kernel: Deferred<IKernel> | undefined;
@@ -43,7 +43,7 @@ export class InteractiveWindowController {
 		private readonly errorHandler: IDataScienceErrorHandler,
 		private readonly kernelProvider: IKernelProvider,
 		private owner: Resource,
-		controller: IVSCodeNotebookController | undefined
+		controller: IVSCodeNotebookController | undefined,
 	) {
 		this.controller = controller?.controller;
 		this.metadata = controller?.connection;
@@ -78,7 +78,7 @@ export class InteractiveWindowController {
 			};
 			// Hook pre interrupt so we can stick in a message
 			this.disposables.push(
-				kernel.addHook("willRestart", kernelEventHookForRestart)
+				kernel.addHook("willRestart", kernelEventHookForRestart),
 			);
 			// When restart finishes, rerun our initialization code
 			kernel.onRestarted(
@@ -89,17 +89,17 @@ export class InteractiveWindowController {
 						await this.setFileInKernel(kernel);
 					} catch (ex) {
 						traceError(
-							`Failed to run initialization after restarting`
+							`Failed to run initialization after restarting`,
 						);
 					} finally {
 						this.finishSysInfoMessage(
 							kernel,
-							SysInfoReason.Restart
+							SysInfoReason.Restart,
 						);
 					}
 				},
 				this,
-				this.disposables
+				this.disposables,
 			);
 			this.fileInKernel = undefined;
 			await this.setFileInKernel(kernel);
@@ -139,7 +139,7 @@ export class InteractiveWindowController {
 					this.controller,
 					this.owner,
 					this.notebook!,
-					this.disposables
+					this.disposables,
 				);
 			this.metadata = kernel.kernelConnectionMetadata;
 			this.controller = actualController;
@@ -165,11 +165,11 @@ export class InteractiveWindowController {
 		const execution = this.kernelProvider.getKernelExecution(kernel!);
 		if (this.mode === "perFile" && !this.fileInKernel) {
 			traceVerbose(
-				`Initializing __file__ in setFileInKernel with ${file} for mode ${this.mode}`
+				`Initializing __file__ in setFileInKernel with ${file} for mode ${this.mode}`,
 			);
 			this.fileInKernel = file;
 			await execution.executeHidden(
-				`__file__ = '${path.replace(/\\/g, "\\\\")}'`
+				`__file__ = '${path.replace(/\\/g, "\\\\")}'`,
 			);
 		} else if (
 			(!this.fileInKernel ||
@@ -177,16 +177,16 @@ export class InteractiveWindowController {
 			this.mode !== "perFile"
 		) {
 			traceVerbose(
-				`Initializing __file__ in setFileInKernel with ${file} for mode ${this.mode}`
+				`Initializing __file__ in setFileInKernel with ${file} for mode ${this.mode}`,
 			);
 			// Otherwise we need to reset it every time
 			this.fileInKernel = file;
 			await execution.executeHidden(
-				`__file__ = '${path.replace(/\\/g, "\\\\")}'`
+				`__file__ = '${path.replace(/\\/g, "\\\\")}'`,
 			);
 		} else {
 			traceVerbose(
-				`Not Initializing __file__ in setFileInKernel with ${path} for mode ${this.mode} currently ${this.fileInKernel}`
+				`Not Initializing __file__ in setFileInKernel with ${path} for mode ${this.mode} currently ${this.fileInKernel}`,
 			);
 		}
 	}
@@ -194,7 +194,7 @@ export class InteractiveWindowController {
 	public setPendingCellAdd(cellAddedPromise: Promise<void>) {
 		if (this.metadata && this.notebook) {
 			const controller = this.controllerService.getRegisteredController(
-				this.metadata
+				this.metadata,
 			);
 			controller?.setPendingCellAddition(this.notebook, cellAddedPromise);
 		}
@@ -226,33 +226,33 @@ export class InteractiveWindowController {
 						this.connectingListener = e.controller.onConnecting(
 							() => {
 								this.startKernel().catch(noop);
-							}
+							},
 						);
 						this.disposables.push(this.connectingListener);
 					}
 				}
 			},
-			this
+			this,
 		);
 	}
 
 	public setInfoMessageCell(message: string) {
-		if (!this.systemInfoCell) {
-			this.systemInfoCell = new SystemInfoCell(this.notebook, message);
-		} else {
+		if (this.systemInfoCell) {
 			this.systemInfoCell
 				.updateMessage(message)
 				.catch((error) =>
 					traceWarning(
-						`could not update info cell with message: "${message}", error: ${error}`
-					)
+						`could not update info cell with message: "${message}", error: ${error}`,
+					),
 				);
+		} else {
+			this.systemInfoCell = new SystemInfoCell(this.notebook, message);
 		}
 	}
 
 	private setInfoMessage(
 		metadata: KernelConnectionMetadata,
-		reason: SysInfoReason
+		reason: SysInfoReason,
 	) {
 		const message = getStartConnectMessage(metadata, reason);
 		this.setInfoMessageCell(message);
@@ -261,14 +261,14 @@ export class InteractiveWindowController {
 	private finishSysInfoMessage(kernel: IKernel, reason: SysInfoReason) {
 		const message = getFinishConnectMessage(
 			kernel.kernelConnectionMetadata,
-			reason
+			reason,
 		);
 		this.systemInfoCell
 			?.updateMessage(message)
 			.catch((error) =>
 				traceWarning(
-					`System info message was not updated: "${message}" because of error: ${error}`
-				)
+					`System info message was not updated: "${message}" because of error: ${error}`,
+				),
 			);
 		this.systemInfoCell = undefined;
 	}
@@ -277,7 +277,7 @@ export class InteractiveWindowController {
 		let message = await this.errorHandler.getErrorMessageForDisplayInCell(
 			error,
 			"start",
-			this.owner
+			this.owner,
 		);
 		// As message is displayed in markdown, ensure linebreaks are formatted accordingly.
 		message = message.split("\n").join("  \n");
@@ -285,8 +285,8 @@ export class InteractiveWindowController {
 			?.updateMessage(message)
 			.catch((error) =>
 				traceWarning(
-					`System info message was not updated: "${message}" because of error: ${error}`
-				)
+					`System info message was not updated: "${message}" because of error: ${error}`,
+				),
 			);
 		this.systemInfoCell = undefined;
 	}
@@ -307,14 +307,14 @@ export class InteractiveControllerFactory {
 	constructor(
 		private readonly controllerService: IInteractiveControllerHelper,
 		private readonly mode: InteractiveWindowMode,
-		private readonly initialController?: IVSCodeNotebookController
+		private readonly initialController?: IVSCodeNotebookController,
 	) {}
 
 	public create(
 		notebook: NotebookDocument,
 		errorHandler: IDataScienceErrorHandler,
 		kernelProvider: IKernelProvider,
-		owner: Resource
+		owner: Resource,
 	) {
 		let controller = this.initialController;
 		const selected = this.controllerService.getSelectedController(notebook);
@@ -329,7 +329,7 @@ export class InteractiveControllerFactory {
 			errorHandler,
 			kernelProvider,
 			owner,
-			controller
+			controller,
 		);
 	}
 }

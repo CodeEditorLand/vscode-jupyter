@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-"use strict";
 
 const path = require("path");
 const Lint = require("tslint");
@@ -29,7 +28,7 @@ class NoStringLiteralsInMessages extends baseRuleWalker.BaseRuleWalker {
 			node.arguments
 				.filter(
 					(arg) =>
-						ts.isStringLiteral(arg) || ts.isTemplateLiteral(arg)
+						ts.isStringLiteral(arg) || ts.isTemplateLiteral(arg),
 				)
 				.forEach((arg) => {
 					this.addFailureAtNode(arg, failureMessage);
@@ -69,7 +68,7 @@ class NoStringLiteralsInMessages extends baseRuleWalker.BaseRuleWalker {
 class Rule extends Lint.Rules.AbstractRule {
 	apply(sourceFile) {
 		return this.applyWithWalker(
-			new NoStringLiteralsInMessages(sourceFile, this.getOptions())
+			new NoStringLiteralsInMessages(sourceFile, this.getOptions()),
 		);
 	}
 }

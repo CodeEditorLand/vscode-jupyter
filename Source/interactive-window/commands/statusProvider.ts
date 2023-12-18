@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { Disposable, ProgressLocation, ProgressOptions, window } from "vscode";
-import { createDeferred, Deferred } from "../../platform/common/utils/async";
+import { Deferred, createDeferred } from "../../platform/common/utils/async";
 import { noop } from "../../platform/common/utils/misc";
 
 class StatusItem implements Disposable {
 	private deferred: Deferred<void>;
-	private disposed: boolean = false;
+	private disposed = false;
 	private timeout: NodeJS.Timer | number | undefined;
 	private disposeCallback: () => void;
 
@@ -50,12 +50,12 @@ class StatusItem implements Disposable {
  * Turns a withProgress callback into a promise.
  */
 export class StatusProvider {
-	private statusCount: number = 0;
+	private statusCount = 0;
 
 	private set(
 		message: string,
 		timeout?: number,
-		cancel?: () => void
+		cancel?: () => void,
 	): Disposable {
 		// Start our progress
 		this.incrementCount();
@@ -64,7 +64,7 @@ export class StatusProvider {
 		const statusItem = new StatusItem(
 			message,
 			() => this.decrementCount(),
-			timeout
+			timeout,
 		);
 
 		const progressOptions: ProgressOptions = {
@@ -95,7 +95,7 @@ export class StatusProvider {
 		promise: () => Promise<T>,
 		message: string,
 		timeout?: number,
-		cancel?: () => void
+		cancel?: () => void,
 	): Promise<T> {
 		// Create a status item and wait for our promise to either finish or reject
 		const status = this.set(message, timeout, cancel);

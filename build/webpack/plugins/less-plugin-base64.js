@@ -36,7 +36,7 @@ class Base64Visitor {
 			"data-uri",
 			[new Base64MimeTypeNode(), URLNode.value],
 			URLNode.index || 0,
-			URLNode.currentFileInfo
+			URLNode.currentFileInfo,
 		);
 	}
 }
@@ -58,7 +58,7 @@ class Base64Plugin {
 
 	printUsage() {
 		console.log(
-			"Base64 Plugin. Add to your webpack.config.js as a plugin to convert URLs to base64 inline"
+			"Base64 Plugin. Add to your webpack.config.js as a plugin to convert URLs to base64 inline",
 		);
 	}
 }

@@ -10,13 +10,13 @@ interface IServiceRegistry {
 	addSingleton<T>(
 		serviceIdentifier: interfaces.ServiceIdentifier<T>,
 		constructor: ClassType<T>,
-		name?: string | number | symbol
+		name?: string | number | symbol,
 	): void;
 }
 
 export function registerTypes(serviceManager: IServiceRegistry) {
 	serviceManager.addSingleton<ICodeExecutionHelper>(
 		ICodeExecutionHelper,
-		CodeExecutionHelper
+		CodeExecutionHelper,
 	);
 }

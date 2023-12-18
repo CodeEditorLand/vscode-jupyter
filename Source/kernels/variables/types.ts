@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type { JSONObject } from "@lumino/coreutils";
 import { CancellationToken, Event, Uri } from "vscode";
 import { IKernel } from "../types";
-import type { JSONObject } from "@lumino/coreutils";
 
 // Get variables from the currently running active Jupyter server or debugger
 // Note: This definition is used implicitly by getJupyterVariableValue.py file
@@ -31,36 +31,36 @@ export interface IJupyterVariables {
 	readonly refreshRequired: Event<void>;
 	getVariables(
 		request: IJupyterVariablesRequest,
-		kernel?: IKernel
+		kernel?: IKernel,
 	): Promise<IJupyterVariablesResponse>;
 	getFullVariable(
 		variable: IJupyterVariable,
 		kernel?: IKernel,
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<IJupyterVariable>;
 	getDataFrameInfo(
 		targetVariable: IJupyterVariable,
 		kernel?: IKernel,
 		sliceExpression?: string,
-		isRefresh?: boolean
+		isRefresh?: boolean,
 	): Promise<IJupyterVariable>;
 	getDataFrameRows(
 		targetVariable: IJupyterVariable,
 		start: number,
 		end: number,
 		kernel?: IKernel,
-		sliceExpression?: string
+		sliceExpression?: string,
 	): Promise<{ data: Record<string, unknown>[] }>;
 	getMatchingVariable(
 		name: string,
 		kernel?: IKernel,
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<IJupyterVariable | undefined>;
 	// This is currently only defined in kernelVariables.ts
 	getVariableProperties?(
 		name: string,
 		kernel?: IKernel,
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<JSONObject>;
 }
 
@@ -92,27 +92,27 @@ export const IKernelVariableRequester = Symbol("IKernelVariableRequester");
 export interface IKernelVariableRequester {
 	getVariableNamesAndTypesFromKernel(
 		kernel: IKernel,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<IJupyterVariable[]>;
 	getFullVariable(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<IJupyterVariable>;
 	getDataFrameRows(
 		start: number,
 		end: number,
 		kernel: IKernel,
-		expression: string
+		expression: string,
 	): Promise<{ data: Record<string, unknown>[] }>;
 	getVariableProperties(
 		word: string,
 		cancelToken: CancellationToken | undefined,
-		matchingVariable: IJupyterVariable | undefined
+		matchingVariable: IJupyterVariable | undefined,
 	): Promise<{ [attributeName: string]: string }>;
 	getDataFrameInfo(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		expression: string
+		expression: string,
 	): Promise<IJupyterVariable>;
 }

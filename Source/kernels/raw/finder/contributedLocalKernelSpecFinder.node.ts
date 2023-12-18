@@ -3,28 +3,28 @@
 
 import { inject, injectable } from "inversify";
 import { EventEmitter, extensions } from "vscode";
-import { IKernelFinder, LocalKernelConnectionMetadata } from "../../types";
-import { LocalKnownPathKernelSpecFinder } from "./localKnownPathKernelSpecFinder.node";
-import { traceDecoratorError, traceError } from "../../../platform/logging";
-import { IDisposableRegistry } from "../../../platform/common/types";
-import { areObjectsWithUrisTheSame } from "../../../platform/common/utils/misc";
-import { KernelFinder } from "../../kernelFinder";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
-import { DataScience } from "../../../platform/common/utils/localize";
 import { IPythonExtensionChecker } from "../../../platform/api/types";
-import { IInterpreterService } from "../../../platform/interpreter/contracts";
-import {
-	ContributedKernelFinderKind,
-	IContributedKernelFinder,
-} from "../../internalTypes";
 import { PYTHON_LANGUAGE } from "../../../platform/common/constants";
+import { IDisposableRegistry } from "../../../platform/common/types";
+import { Deferred, createDeferred } from "../../../platform/common/utils/async";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { areObjectsWithUrisTheSame } from "../../../platform/common/utils/misc";
 import { PromiseMonitor } from "../../../platform/common/utils/promises";
+import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { traceDecoratorError, traceError } from "../../../platform/logging";
 import {
 	getKernelRegistrationInfo,
 	isUserRegisteredKernelSpecConnection,
 } from "../../helpers";
-import { createDeferred, Deferred } from "../../../platform/common/utils/async";
+import {
+	ContributedKernelFinderKind,
+	IContributedKernelFinder,
+} from "../../internalTypes";
+import { KernelFinder } from "../../kernelFinder";
+import { IKernelFinder, LocalKernelConnectionMetadata } from "../../types";
 import { ILocalKernelFinder } from "./localKernelSpecFinderBase.node";
+import { LocalKnownPathKernelSpecFinder } from "./localKnownPathKernelSpecFinder.node";
 import { LocalPythonAndRelatedNonPythonKernelSpecFinder } from "./localPythonAndRelatedNonPythonKernelSpecFinder.node";
 
 // This class searches for local kernels.
@@ -117,23 +117,23 @@ export class ContributedLocalKernelSpecFinder
 		this.nonPythonKernelFinder.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.pythonKernelFinder.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.interpreters.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.updateCache();
 		this.interpreters.onDidChangeInterpreters(
 			this.updateCache,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		extensions.onDidChange(
 			() => {
@@ -146,17 +146,17 @@ export class ContributedLocalKernelSpecFinder
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.nonPythonKernelFinder.onDidChangeKernels(
 			this.updateCache,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.pythonKernelFinder.onDidChangeKernels(
 			this.updateCache,
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.wasPythonInstalledWhenFetchingControllers =
 			this.extensionChecker.isPythonExtensionInstalled;
@@ -185,11 +185,11 @@ export class ContributedLocalKernelSpecFinder
 						return item.kernelSpec.language !== PYTHON_LANGUAGE;
 					}
 					return true;
-				}
+				},
 			);
 			const kernelSpecsFromPythonKernelFinder =
 				this.pythonKernelFinder.kernels.filter((item) =>
-					isUserRegisteredKernelSpecConnection(item)
+					isUserRegisteredKernelSpecConnection(item),
 				) as LocalKernelConnectionMetadata[];
 			kernels = kernels
 				.concat(kernelSpecs)
@@ -207,7 +207,7 @@ export class ContributedLocalKernelSpecFinder
 		// This is because the python kernel finder would have more information about the kernel (such as the matching python env).
 		this.pythonKernelFinder.kernels.forEach((connection) => {
 			const kernelSpecKind = getKernelRegistrationInfo(
-				connection.kernelSpec
+				connection.kernelSpec,
 			);
 			if (
 				connection.kernelSpec.specFile &&
@@ -246,7 +246,7 @@ export class ContributedLocalKernelSpecFinder
 		const updated = values.filter(
 			(k) =>
 				oldKernels.has(k.id) &&
-				!areObjectsWithUrisTheSame(k, oldKernels.get(k.id))
+				!areObjectsWithUrisTheSame(k, oldKernels.get(k.id)),
 		);
 		const removed = oldValues.filter((k) => !kernels.has(k.id));
 

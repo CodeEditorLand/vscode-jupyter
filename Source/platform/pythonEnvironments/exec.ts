@@ -25,7 +25,7 @@ export type PythonExecInfo = {
  */
 export function buildPythonExecInfo(
 	python: string | string[],
-	pythonArgs?: string[]
+	pythonArgs?: string[],
 ): PythonExecInfo {
 	if (Array.isArray(python)) {
 		const args = python.slice(1);
@@ -57,7 +57,7 @@ export function buildPythonExecInfo(
  */
 export function copyPythonExecInfo(
 	orig: PythonExecInfo,
-	extraPythonArgs?: string[]
+	extraPythonArgs?: string[],
 ): PythonExecInfo {
 	const info = {
 		command: orig.command,

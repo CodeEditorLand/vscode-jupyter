@@ -5,17 +5,17 @@ import { assert } from "chai";
 import * as sinon from "sinon";
 import { instance, mock, when } from "ts-mockito";
 import { EventEmitter, NotebookDocument } from "vscode";
-import { dispose } from "../../platform/common/utils/lifecycle";
 import {
 	IConfigurationService,
 	IDisposable,
 } from "../../platform/common/types";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { mockedVSCodeNamespaces } from "../../test/vscode-mock";
 import { CodeGenerator } from "./codeGenerator";
 import { CodeGeneratorFactory } from "./codeGeneratorFactory";
 import { GeneratedCodeStorage } from "./generatedCodeStorage";
 import { GeneratedCodeStorageFactory } from "./generatedCodeStorageFactory";
 import { IGeneratedCodeStorageFactory } from "./types";
-import { mockedVSCodeNamespaces } from "../../test/vscode-mock";
 
 suite("CodeGeneratorFactory", () => {
 	let factory: CodeGeneratorFactory;
@@ -29,18 +29,18 @@ suite("CodeGeneratorFactory", () => {
 		storageFactory = new GeneratedCodeStorageFactory();
 		onDidCloseNotebookDocument = new EventEmitter<NotebookDocument>();
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
 		).thenReturn(onDidCloseNotebookDocument.event);
 		disposables.push(onDidCloseNotebookDocument);
 		factory = new CodeGeneratorFactory(
 			instance(configService),
 			storageFactory,
-			disposables
+			disposables,
 		);
 		factory.activate();
 		clearMethodOnStorage = sinon.spy(
 			GeneratedCodeStorage.prototype,
-			"clear"
+			"clear",
 		);
 	});
 	teardown(() => {
@@ -59,12 +59,12 @@ suite("CodeGeneratorFactory", () => {
 		assert.equal(
 			generator1,
 			factory.get(nb1),
-			"generator for nb1 should be the same"
+			"generator for nb1 should be the same",
 		);
 		assert.equal(
 			generator1,
 			factory.getOrCreate(nb1),
-			"generator for nb1 should be the same"
+			"generator for nb1 should be the same",
 		);
 
 		const nb2 = instance(mock<NotebookDocument>());
@@ -72,64 +72,64 @@ suite("CodeGeneratorFactory", () => {
 		assert.notEqual(
 			generator2,
 			generator1,
-			"generators should not be the same"
+			"generators should not be the same",
 		);
 		assert.equal(
 			generator2,
 			factory.get(nb2),
-			"generator for nb2 should be the same"
+			"generator for nb2 should be the same",
 		);
 		assert.equal(
 			generator2,
 			factory.getOrCreate(nb2),
-			"generator for nb2 should be the same"
+			"generator for nb2 should be the same",
 		);
 
 		const nb3 = instance(mock<NotebookDocument>());
 		assert.isUndefined(
 			factory.get(nb3),
-			"There should be no generator associated with nb3"
+			"There should be no generator associated with nb3",
 		);
 
 		// Dispose nb1
 		assert.strictEqual(
 			clearMethodOnStorage.callCount,
 			0,
-			"Should not have been invoked"
+			"Should not have been invoked",
 		);
 		onDidCloseNotebookDocument.fire(nb1);
 		assert.isUndefined(
 			factory.get(nb1),
-			"There should be no generator associated with nb1"
+			"There should be no generator associated with nb1",
 		);
 		assert.strictEqual(
 			clearMethodOnStorage.callCount,
 			1,
-			"Should have been invoked once"
+			"Should have been invoked once",
 		);
 
 		// Dispose nb2
 		onDidCloseNotebookDocument.fire(nb2);
 		assert.isUndefined(
 			factory.get(nb2),
-			"There should be no generator associated with nb2"
+			"There should be no generator associated with nb2",
 		);
 		assert.strictEqual(
 			clearMethodOnStorage.callCount,
 			2,
-			"Should have been invoked 2 times"
+			"Should have been invoked 2 times",
 		);
 
 		// Dispose nb3
 		onDidCloseNotebookDocument.fire(nb3);
 		assert.isUndefined(
 			factory.get(nb3),
-			"There should be no generator associated with nb3"
+			"There should be no generator associated with nb3",
 		);
 		assert.strictEqual(
 			clearMethodOnStorage.callCount,
 			2,
-			"Invocation count should not change"
+			"Invocation count should not change",
 		);
 	});
 });

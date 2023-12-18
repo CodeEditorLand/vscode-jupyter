@@ -3,10 +3,10 @@
 
 import { IJupyterVariablesRequest } from "../../../../../kernels/variables/types";
 import {
+	ILoadIPyWidgetClassFailureAction,
 	IShowDataViewer,
 	InteractiveWindowMessages,
 	LoadIPyWidgetClassLoadAction,
-	ILoadIPyWidgetClassFailureAction,
 	NotifyIPyWidgetWidgetVersionNotSupportedAction,
 } from "../../../../../messageTypes";
 import { BaseReduxActionPayload } from "../../../../types";
@@ -59,7 +59,7 @@ export type CommonActionTypeMapping = {
 	[CommonActionType.VARIABLE_VIEW_LOADED]: never | undefined;
 };
 
-export interface IShowDataViewerAction extends IShowDataViewer {}
+export type IShowDataViewerAction = IShowDataViewer;
 
 export interface ILinkClickAction {
 	href: string;
@@ -74,7 +74,7 @@ export type CommonReducerArg<
 export interface ICellAction {
 	cellId: string | undefined;
 }
-export interface IShowDataViewerAction extends IShowDataViewer {}
+export type IShowDataViewerAction = IShowDataViewer;
 
 export interface IVariableExplorerHeight {
 	containerHeight: number;

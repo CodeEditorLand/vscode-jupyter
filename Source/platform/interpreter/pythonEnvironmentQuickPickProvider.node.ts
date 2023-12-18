@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { EventEmitter } from "vscode";
-import { injectable, inject } from "inversify";
-import { IQuickPickItemProvider } from "../common/providerBasedQuickPick";
 import { Environment, PythonExtension } from "@vscode/python-extension";
+import { inject, injectable } from "inversify";
+import { EventEmitter } from "vscode";
 import { IExtensionSyncActivationService } from "../activation/types";
-import { IDisposable, IDisposableRegistry } from "../common/types";
-import { PromiseMonitor } from "../common/utils/promises";
 import { IPythonApiProvider, IPythonExtensionChecker } from "../api/types";
-import { traceError } from "../logging";
+import { IQuickPickItemProvider } from "../common/providerBasedQuickPick";
+import { IDisposable, IDisposableRegistry } from "../common/types";
+import { dispose } from "../common/utils/lifecycle";
 import { DataScience } from "../common/utils/localize";
 import { noop } from "../common/utils/misc";
-import { dispose } from "../common/utils/lifecycle";
+import { PromiseMonitor } from "../common/utils/promises";
+import { traceError } from "../logging";
 
 @injectable()
 export class PythonEnvironmentQuickPickItemProvider
@@ -51,7 +51,7 @@ export class PythonEnvironmentQuickPickItemProvider
 		@inject(IPythonApiProvider) api: IPythonApiProvider,
 		@inject(IPythonExtensionChecker)
 		extensionChecker: IPythonExtensionChecker,
-		@inject(IDisposableRegistry) disposables: IDisposableRegistry
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 	) {
 		disposables.push(this);
 		this.promiseMonitor.onStateChange(
@@ -60,7 +60,7 @@ export class PythonEnvironmentQuickPickItemProvider
 					? "idle"
 					: "discovering"),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		const initializeApi = () => {
 			const apiPromise = api.getNewApi();
@@ -77,7 +77,7 @@ export class PythonEnvironmentQuickPickItemProvider
 					api.environments.onDidChangeEnvironments(
 						() => this._onDidChange.fire(),
 						this,
-						this.disposables
+						this.disposables,
 					);
 				})
 				.catch((ex) => traceError("Failed to get python api", ex));
@@ -92,7 +92,7 @@ export class PythonEnvironmentQuickPickItemProvider
 					}
 				},
 				this,
-				this.disposables
+				this.disposables,
 			);
 		}
 	}
@@ -117,12 +117,12 @@ export class PythonEnvironmentQuickPickItemProvider
 	 * Returns the same class with the ability to filer environments.
 	 */
 	withFilter(
-		filter: (env: Environment) => boolean
+		filter: (env: Environment) => boolean,
 	): PythonEnvironmentQuickPickItemProvider {
 		return new Proxy(this, {
 			get(
 				target: PythonEnvironmentQuickPickItemProvider,
-				propKey: keyof PythonEnvironmentQuickPickItemProvider
+				propKey: keyof PythonEnvironmentQuickPickItemProvider,
 			) {
 				switch (propKey) {
 					case "items":

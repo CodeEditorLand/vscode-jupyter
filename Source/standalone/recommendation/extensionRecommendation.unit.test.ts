@@ -4,22 +4,22 @@
 import type * as nbformat from "@jupyterlab/nbformat";
 import { anything, instance, mock, verify, when } from "ts-mockito";
 import { EventEmitter, Memento, NotebookDocument } from "vscode";
-import { dispose } from "../../platform/common/utils/lifecycle";
-import { IDisposable } from "../../platform/common/types";
-import { sleep } from "../../platform/common/utils/async";
-import { Common } from "../../platform/common/utils/localize";
-import { VSCodeNotebookController } from "../../notebooks/controllers/vscodeNotebookController";
 import {
 	IJupyterKernelSpec,
 	LocalKernelSpecConnectionMetadata,
 } from "../../kernels/types";
-import { ExtensionRecommendationService } from "./extensionRecommendation.node";
-import { JupyterNotebookView } from "../../platform/common/constants";
 import { IControllerRegistration } from "../../notebooks/controllers/types";
+import { VSCodeNotebookController } from "../../notebooks/controllers/vscodeNotebookController";
+import { JupyterNotebookView } from "../../platform/common/constants";
+import { IDisposable } from "../../platform/common/types";
+import { sleep } from "../../platform/common/utils/async";
+import { dispose } from "../../platform/common/utils/lifecycle";
+import { Common } from "../../platform/common/utils/localize";
 import {
 	mockedVSCodeNamespaces,
 	resetVSCodeMocks,
 } from "../../test/vscode-mock";
+import { ExtensionRecommendationService } from "./extensionRecommendation.node";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 suite("Extension Recommendation", () => {
@@ -50,18 +50,18 @@ suite("Extension Recommendation", () => {
 						}>();
 						when(
 							mockedVSCodeNamespaces.workspace
-								.onDidOpenNotebookDocument
+								.onDidOpenNotebookDocument,
 						).thenReturn(onDidOpenNotebookDocument.event);
 						controllerRegistration =
 							mock<IControllerRegistration>();
 						when(
-							controllerRegistration.onControllerSelected
+							controllerRegistration.onControllerSelected,
 						).thenReturn(onNotebookControllerSelected.event);
 						memento = mock<Memento>();
 						recommendation = new ExtensionRecommendationService(
 							instance(controllerRegistration),
 							disposables,
-							instance(memento)
+							instance(memento),
 						);
 
 						when(
@@ -69,16 +69,16 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).thenReturn();
 						when(
 							mockedVSCodeNamespaces.extensions.getExtension(
-								anything()
-							)
+								anything(),
+							),
 						).thenReturn();
 						when(memento.get(anything(), anything())).thenReturn(
-							[]
+							[],
 						);
 						recommendation.activate();
 					}
@@ -111,7 +111,7 @@ suite("Extension Recommendation", () => {
 								},
 							};
 						when(notebook.notebookType).thenReturn(
-							JupyterNotebookView
+							JupyterNotebookView,
 						);
 						when(notebook.metadata).thenReturn({
 							custom: notebookContent,
@@ -127,7 +127,7 @@ suite("Extension Recommendation", () => {
 							LocalKernelSpecConnectionMetadata.create({
 								kernelSpec,
 								id: "",
-							})
+							}),
 						);
 						return instance(controller);
 					}
@@ -139,8 +139,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).never();
 					});
 					test("No recommendations for python kernels", async () => {
@@ -155,8 +155,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).never();
 					});
 					test("No recommendations for julia Notebooks", async () => {
@@ -167,8 +167,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).never();
 					});
 					test("No recommendations for julia kernels", async () => {
@@ -183,8 +183,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).never();
 					});
 					test(`Got recommendations once per session when opening a notebook`, async () => {
@@ -202,8 +202,8 @@ suite("Extension Recommendation", () => {
 								expectedMessage,
 								Common.bannerLabelYes,
 								Common.bannerLabelNo,
-								Common.doNotShowAgain
-							)
+								Common.doNotShowAgain,
+							),
 						).once();
 					});
 					test(`Got recommendations once per session when selecting a kernel`, async () => {
@@ -226,8 +226,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).once();
 					});
 					test(`Never show prompt again when opening a notebook in a new session`, async () => {
@@ -236,8 +236,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).thenResolve(Common.doNotShowAgain as any);
 
 						const nb = createNotebook(languageToBeTested);
@@ -247,8 +247,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).once();
 
 						// New session
@@ -263,8 +263,8 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).never();
 					});
 					test(`Open extension page to install the recommended extension`, async () => {
@@ -273,14 +273,14 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).thenResolve(Common.bannerLabelYes as any);
 						when(
 							mockedVSCodeNamespaces.commands.executeCommand(
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).thenResolve();
 
 						const nb = createNotebook(languageToBeTested);
@@ -291,17 +291,17 @@ suite("Extension Recommendation", () => {
 								anything(),
 								anything(),
 								anything(),
-								anything()
-							)
+								anything(),
+							),
 						).once();
 						verify(
 							mockedVSCodeNamespaces.commands.executeCommand(
 								"extension.open",
-								"ms-dotnettools.dotnet-interactive-vscode"
-							)
+								"ms-dotnettools.dotnet-interactive-vscode",
+							),
 						).once();
 					});
-				}
+				},
 			);
 		});
 	});

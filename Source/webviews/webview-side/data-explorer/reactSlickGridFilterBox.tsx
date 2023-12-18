@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as React from "react";
 import { IIconProps, SearchBox } from "@fluentui/react";
+import * as React from "react";
 
 import "./reactSlickGridFilterBox.css";
 
@@ -61,7 +61,7 @@ export class ReactSlickGridFilterBox extends React.Component<IFilterProps> {
 
 	private updateInputValue = (
 		_event?: React.ChangeEvent<HTMLInputElement> | undefined,
-		newValue?: string | undefined
+		newValue?: string | undefined,
 	) => {
 		this.props.onChange(newValue ?? "", this.props.column);
 	};

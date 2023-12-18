@@ -8,16 +8,16 @@ import {
 	Event,
 	ExtensionContext,
 	OutputChannel,
-	Uri,
 	Range,
+	Uri,
 } from "vscode";
-import { PythonEnvironment } from "../pythonEnvironments/info";
 import { CommandIds } from "../../commands";
+import { PythonEnvironment } from "../pythonEnvironments/info";
 import { ISystemVariables } from "./variables/types";
 
 export const IsDevMode = Symbol("IsDevMode");
 export const IOutputChannel = Symbol("IOutputChannel");
-export interface IOutputChannel extends OutputChannel {}
+export type IOutputChannel = OutputChannel;
 export const IsWindows = Symbol("IS_WINDOWS");
 export const IDisposableRegistry = Symbol("IDisposableRegistry");
 export type IDisposableRegistry = Disposable[];
@@ -36,8 +36,8 @@ export type ReadWrite<T> = {
 };
 
 export enum BannerType {
-	InsidersNotebookSurvey,
-	ExperimentNotebookSurvey,
+	InsidersNotebookSurvey = 0,
+	ExperimentNotebookSurvey = 1,
 }
 
 export const IPersistentStateFactory = Symbol("IPersistentStateFactory");
@@ -46,12 +46,12 @@ export interface IPersistentStateFactory {
 	createGlobalPersistentState<T>(
 		key: string,
 		defaultValue?: T,
-		expiryDurationMs?: number
+		expiryDurationMs?: number,
 	): IPersistentState<T>;
 	createWorkspacePersistentState<T>(
 		key: string,
 		defaultValue?: T,
-		expiryDurationMs?: number
+		expiryDurationMs?: number,
 	): IPersistentState<T>;
 }
 
@@ -181,14 +181,14 @@ export interface IConfigurationService {
 		setting: string,
 		value?: {},
 		resource?: Uri,
-		configTarget?: ConfigurationTarget
+		configTarget?: ConfigurationTarget,
 	): Promise<void>;
 	updateSectionSetting(
 		section: string,
 		setting: string,
 		value?: {},
 		resource?: Uri,
-		configTarget?: ConfigurationTarget
+		configTarget?: ConfigurationTarget,
 	): Promise<void>;
 }
 
@@ -222,7 +222,7 @@ export interface IHttpClient {
 }
 
 export const IExtensionContext = Symbol("ExtensionContext");
-export interface IExtensionContext extends ExtensionContext {}
+export type IExtensionContext = ExtensionContext;
 
 export const IExtensions = Symbol("IExtensions");
 export interface IExtensions {
@@ -251,7 +251,7 @@ export type DeprecatedFeatureInfo = {
 	setting?: DeprecatedSettingAndValue;
 };
 
-export interface IFeatureSet {}
+export type IFeatureSet = {};
 
 export const IFeaturesManager = Symbol("IFeaturesManager");
 
@@ -282,7 +282,7 @@ export interface ICryptoUtils {
 	 */
 	createHash(
 		data: string,
-		algorithm?: "SHA-512" | "SHA-256"
+		algorithm?: "SHA-512" | "SHA-256",
 	): Promise<string>;
 }
 
@@ -305,14 +305,14 @@ export interface IExperimentService {
 	activate(): Promise<void>;
 	inExperiment(experimentName: Experiments): boolean;
 	getExperimentValue<T extends boolean | number | string>(
-		experimentName: Experiments
+		experimentName: Experiments,
 	): Promise<T | undefined>;
 }
 
 export type InterpreterUri = Resource | PythonEnvironment;
 
 export const IDataScienceCommandListener = Symbol(
-	"IDataScienceCommandListener"
+	"IDataScienceCommandListener",
 );
 export interface IDataScienceCommandListener {
 	register(): void;

@@ -8,8 +8,8 @@ import {
 	InteractiveWindowView,
 	JupyterNotebookView,
 } from "../platform/common/constants";
-import { dispose } from "../platform/common/utils/lifecycle";
 import { IDisposable, IDisposableRegistry } from "../platform/common/types";
+import { dispose } from "../platform/common/utils/lifecycle";
 import { traceInfo } from "../platform/logging";
 import { IKernelFinder } from "./types";
 /**
@@ -52,7 +52,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	private displayProgressIndicator() {
@@ -60,10 +60,10 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 		traceInfo(`Start refreshing Kernel Picker (${id})`);
 		const taskNb =
 			notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView
+				JupyterNotebookView,
 			);
 		const taskIW = notebooks.createNotebookControllerDetectionTask(
-			InteractiveWindowView
+			InteractiveWindowView,
 		);
 		this.disposables.push(taskNb);
 		this.disposables.push(taskIW);
@@ -77,7 +77,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 }

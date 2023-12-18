@@ -17,7 +17,7 @@ export class DataViewerMessageListener implements IWebviewPanelMessageListener {
 	constructor(
 		callback: (message: string, payload: any) => void,
 		viewChanged: (panel: IWebviewPanel) => void,
-		disposed: () => void
+		disposed: () => void,
 	) {
 		// Save our dispose callback so we remove our interactive window
 		this.disposedCallback = disposed;

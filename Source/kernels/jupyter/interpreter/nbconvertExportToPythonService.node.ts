@@ -24,7 +24,7 @@ export class NbConvertExportToPythonService {
 		file: Uri,
 		interpreter: PythonEnvironment,
 		template?: string,
-		token?: CancellationToken
+		token?: CancellationToken,
 	): Promise<string> {
 		const daemon =
 			await this.pythonExecutionFactory.createActivatedEnvironment({
@@ -40,7 +40,7 @@ export class NbConvertExportToPythonService {
 					"--stdout",
 					"--template",
 					template,
-				]
+			  ]
 			: [file.fsPath, "--to", "python", "--stdout"];
 
 		// Ignore stderr, as nbconvert writes conversion result to stderr.

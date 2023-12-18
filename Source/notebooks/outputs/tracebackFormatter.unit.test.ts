@@ -5,10 +5,10 @@ import { assert } from "chai";
 import { instance, mock, when } from "ts-mockito";
 import { NotebookCell, NotebookDocument, TextDocument, Uri } from "vscode";
 import { JupyterNotebookView } from "../../platform/common/constants";
-import { NotebookTracebackFormatter } from "./tracebackFormatter";
 import { IConfigurationService } from "../../platform/common/types";
+import { NotebookTracebackFormatter } from "./tracebackFormatter";
 
-suite(`Notebook trace formatter`, function () {
+suite(`Notebook trace formatter`, () => {
 	let notebook: NotebookDocument;
 	let cell: NotebookCell;
 	let document: TextDocument;
@@ -27,7 +27,7 @@ suite(`Notebook trace formatter`, function () {
 		when(cell.document).thenReturn(instance(document));
 	});
 
-	test("ipython: 8.3.0, ipykernel: 6.13.0", function () {
+	test("ipython: 8.3.0, ipykernel: 6.13.0", () => {
 		const formatter = new NotebookTracebackFormatter(config);
 		/**
 		 * To generate the traceback, install a specific version of ipykernel and ipython.
@@ -56,7 +56,7 @@ suite(`Notebook trace formatter`, function () {
 		assert.deepEqual(formated, expected);
 	});
 
-	test("ipython 8.5.0, ipykernel 6.16.0", function () {
+	test("ipython 8.5.0, ipykernel 6.16.0", () => {
 		const formatter = new NotebookTracebackFormatter(config);
 		const traceback = [
 			"[0;31m---------------------------------------------------------------------------[0m",

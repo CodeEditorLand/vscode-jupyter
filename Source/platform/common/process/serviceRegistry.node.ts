@@ -8,6 +8,6 @@ import { IProcessServiceFactory } from "./types.node";
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IProcessServiceFactory>(
 		IProcessServiceFactory,
-		ProcessServiceFactory
+		ProcessServiceFactory,
 	);
 }

@@ -6,10 +6,10 @@ import { CancellationToken, workspace } from "vscode";
 import { traceDecoratorVerbose } from "../../logging";
 import { TraceOptions } from "../../logging/types";
 import { Resource } from "../types";
+import { trackDisposable } from "../utils/lifecycle";
 import { ICustomEnvironmentVariablesProvider } from "../variables/types";
 import { ProcessService } from "./proc.node";
 import { IProcessService, IProcessServiceFactory } from "./types.node";
-import { trackDisposable } from "../utils/lifecycle";
 
 /**
  * Factory for creating ProcessService objects. Get the current interpreter from a URI to determine the starting environment.
@@ -22,11 +22,11 @@ export class ProcessServiceFactory implements IProcessServiceFactory {
 	) {}
 	@traceDecoratorVerbose(
 		"Create ProcessService",
-		TraceOptions.BeforeCall | TraceOptions.Arguments
+		TraceOptions.BeforeCall | TraceOptions.Arguments,
 	)
 	public async create(
 		resource: Resource,
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<IProcessService> {
 		// This should never happen, but if it does ensure we never run code accidentally in untrusted workspaces.
 		if (!workspace.isTrusted) {
@@ -35,7 +35,7 @@ export class ProcessServiceFactory implements IProcessServiceFactory {
 		const customEnvVars = await this.envVarsService.getEnvironmentVariables(
 			resource,
 			"RunNonPythonCode",
-			cancelToken
+			cancelToken,
 		);
 		return trackDisposable(new ProcessService(customEnvVars));
 	}

@@ -9,16 +9,16 @@ import type {
 } from "@jupyterlab/services";
 import { Signal } from "@lumino/signaling";
 import uuid from "uuid/v4";
-import { traceInfoIfCI, traceWarning } from "../../../platform/logging";
+import { CancellationToken, Uri } from "vscode";
 import { Resource } from "../../../platform/common/types";
+import { noop } from "../../../platform/common/utils/misc";
+import { traceInfoIfCI, traceWarning } from "../../../platform/logging";
 import { Telemetry } from "../../../telemetry";
+import { getNameOfKernelConnection } from "../../helpers";
+import { trackKernelResourceInformation } from "../../telemetry/helper";
+import { sendKernelTelemetryEvent } from "../../telemetry/sendKernelTelemetryEvent";
 import { LocalKernelConnectionMetadata } from "../../types";
 import { IKernelLauncher } from "../types";
-import { sendKernelTelemetryEvent } from "../../telemetry/sendKernelTelemetryEvent";
-import { noop } from "../../../platform/common/utils/misc";
-import { getNameOfKernelConnection } from "../../helpers";
-import { CancellationToken, Uri } from "vscode";
-import { trackKernelResourceInformation } from "../../telemetry/helper";
 import { RawKernelConnection } from "./rawKernelConnection.node";
 
 /*
@@ -27,13 +27,13 @@ This provides enough of the ISession interface so that our direct
 ZMQ Kernel connection can pretend to be a jupyterlab Session
 */
 export class RawSessionConnection implements Session.ISessionConnection {
-	public isDisposed: boolean = false;
+	public isDisposed = false;
 	public readonly id: string;
 	public readonly path: string;
 	public readonly name: string;
 	private readonly _kernel: RawKernelConnection;
 	public readonly statusChanged = new Signal<this, KernelMessage.Status>(
-		this
+		this,
 	);
 	public readonly kernelChanged = new Signal<
 		this,
@@ -45,7 +45,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 		KernelMessage.IIOPubMessage
 	>(this);
 	public readonly unhandledMessage = new Signal<this, KernelMessage.IMessage>(
-		this
+		this,
 	);
 	public readonly anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
 	public readonly disposed = new Signal<this, void>(this);
@@ -122,7 +122,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 		workingDirectory: Uri,
 		private readonly kernelConnectionMetadata: LocalKernelConnectionMetadata,
 		launchTimeout: number,
-		public readonly type: "notebook" | "console"
+		public readonly type: "notebook" | "console",
 	) {
 		// Unique ID for this session instance
 		this.id = uuid();
@@ -139,13 +139,13 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			kernelLauncher,
 			workingDirectory,
 			launchTimeout,
-			kernelConnectionMetadata
+			kernelConnectionMetadata,
 		);
 		this._kernel.statusChanged.connect(this.onKernelStatus, this);
 		this._kernel.iopubMessage.connect(this.onIOPubMessage, this);
 		this._kernel.connectionStatusChanged.connect(
 			this.onKernelConnectionStatus,
-			this
+			this,
 		);
 		this._kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
 		this._kernel.anyMessage.connect(this.onAnyMessage, this);
@@ -167,7 +167,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			this.resource,
 			Telemetry.RawKernelSessionDisposed,
 			undefined,
-			{ stacktrace }
+			{ stacktrace },
 		);
 
 		// Since we're disposing, we don't want to be notified of any more messages, hence this can be done early.
@@ -176,11 +176,11 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			this._kernel.iopubMessage.disconnect(this.onIOPubMessage, this);
 			this._kernel.connectionStatusChanged.disconnect(
 				this.onKernelConnectionStatus,
-				this
+				this,
 			);
 			this._kernel.unhandledMessage.disconnect(
 				this.onUnhandledMessage,
-				this
+				this,
 			);
 			this._kernel.anyMessage.disconnect(this.onAnyMessage, this);
 			this._kernel.disposed.disconnect(this.onDisposed, this);
@@ -211,8 +211,8 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			.catch((ex) =>
 				traceWarning(
 					`Failed to shutdown kernel, ${this.kernelConnectionMetadata.id}`,
-					ex
-				)
+					ex,
+				),
 			);
 		this.isTerminating = false;
 		// Before triggering any status events ensure this is marked as disposed.
@@ -224,7 +224,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 	}
 	private onKernelStatus(
 		_sender: Kernel.IKernelConnection,
-		state: KernelMessage.Status
+		state: KernelMessage.Status,
 	) {
 		traceInfoIfCI(`RawSession status changed to ${state}`);
 		this.statusChanged.emit(state);
@@ -240,7 +240,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 		throw new Error("Not yet implemented");
 	}
 	public changeKernel(
-		_options: Partial<Kernel.IModel>
+		_options: Partial<Kernel.IModel>,
 	): Promise<Kernel.IKernelConnection> {
 		throw new Error("Not yet implemented");
 	}
@@ -249,7 +249,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 	// Send out a message when our kernel changes state
 	private onIOPubMessage(
 		_sender: Kernel.IKernelConnection,
-		msg: KernelMessage.IIOPubMessage
+		msg: KernelMessage.IIOPubMessage,
 	) {
 		if (
 			!this.cellExecutedSuccessfully &&
@@ -265,19 +265,19 @@ export class RawSessionConnection implements Session.ISessionConnection {
 	}
 	private onAnyMessage(
 		_sender: Kernel.IKernelConnection,
-		msg: Kernel.IAnyMessageArgs
+		msg: Kernel.IAnyMessageArgs,
 	) {
 		this.anyMessage.emit(msg);
 	}
 	private onUnhandledMessage(
 		_sender: Kernel.IKernelConnection,
-		msg: KernelMessage.IMessage
+		msg: KernelMessage.IMessage,
 	) {
 		this.unhandledMessage.emit(msg);
 	}
 	private onKernelConnectionStatus(
 		_sender: Kernel.IKernelConnection,
-		state: Kernel.ConnectionStatus
+		state: Kernel.ConnectionStatus,
 	) {
 		this.connectionStatusChanged.emit(state);
 	}

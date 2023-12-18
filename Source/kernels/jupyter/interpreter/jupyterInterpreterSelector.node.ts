@@ -1,30 +1,30 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { IServiceContainer } from "../../../platform/ioc/types";
 import { CancellationTokenSource, workspace } from "vscode";
-import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
+import { PlatformService } from "../../../platform/common/platform/platformService.node";
+import { BaseProviderBasedQuickPick } from "../../../platform/common/providerBasedQuickPick";
+import { IDisposable } from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
+import { DataScience } from "../../../platform/common/utils/localize";
 import { InputFlowAction } from "../../../platform/common/utils/multiStepInput";
-import { traceError } from "../../../platform/logging";
+import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { PythonEnvironmentFilter } from "../../../platform/interpreter/filter/filterService";
+import { isCondaEnvironmentWithoutPython } from "../../../platform/interpreter/helpers";
 import {
 	getPythonEnvironmentCategory,
 	pythonEnvironmentQuickPick,
 } from "../../../platform/interpreter/pythonEnvironmentPicker.node";
-import { JupyterInterpreterStateStore } from "./jupyterInterpreterStateStore";
-import { areInterpreterPathsSame } from "../../../platform/pythonEnvironments/info/interpreter";
-import { PlatformService } from "../../../platform/common/platform/platformService.node";
-import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { ServiceContainer } from "../../../platform/ioc/container";
 import { PythonEnvironmentQuickPickItemProvider } from "../../../platform/interpreter/pythonEnvironmentQuickPickProvider.node";
-import { IDisposable } from "../../../platform/common/types";
-import { dispose } from "../../../platform/common/utils/lifecycle";
-import { isCondaEnvironmentWithoutPython } from "../../../platform/interpreter/helpers";
-import { PythonEnvironmentFilter } from "../../../platform/interpreter/filter/filterService";
-import { BaseProviderBasedQuickPick } from "../../../platform/common/providerBasedQuickPick";
-import { Environment } from "@vscode/python-extension";
+import { ServiceContainer } from "../../../platform/ioc/container";
+import { IServiceContainer } from "../../../platform/ioc/types";
+import { traceError } from "../../../platform/logging";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import { areInterpreterPathsSame } from "../../../platform/pythonEnvironments/info/interpreter";
+import { JupyterInterpreterStateStore } from "./jupyterInterpreterStateStore";
 
 /**
  * Displays interpreter select and returns the selection to the user.
@@ -57,27 +57,27 @@ export class JupyterInterpreterSelector {
 		const platformService = new PlatformService();
 		const selectedInterpreter =
 			this.serviceContainer.get<JupyterInterpreterStateStore>(
-				JupyterInterpreterStateStore
+				JupyterInterpreterStateStore,
 			).selectedPythonPath;
 		const filter = ServiceContainer.instance.get<PythonEnvironmentFilter>(
-			PythonEnvironmentFilter
+			PythonEnvironmentFilter,
 		);
 		const provider = ServiceContainer.instance
 			.get<PythonEnvironmentQuickPickItemProvider>(
-				PythonEnvironmentQuickPickItemProvider
+				PythonEnvironmentQuickPickItemProvider,
 			)
 			.withFilter(
 				(item) =>
 					!isCondaEnvironmentWithoutPython(item) &&
-					!filter.isPythonEnvironmentExcluded(item)
+					!filter.isPythonEnvironmentExcluded(item),
 			);
 		const findSelectedEnvironment = () =>
 			provider.items.find((item) =>
 				areInterpreterPathsSame(
 					item.executable.uri,
 					selectedInterpreter,
-					platformService.osType
-				)
+					platformService.osType,
+				),
 			);
 
 		const placeholder = selectedInterpreter
@@ -85,9 +85,9 @@ export class JupyterInterpreterSelector {
 					getDisplayPath(
 						selectedInterpreter,
 						workspace.workspaceFolders || [],
-						platformService.homeDir
-					)
-				)
+						platformService.homeDir,
+					),
+			  )
 			: "";
 
 		const disposables: IDisposable[] = [];
@@ -98,7 +98,7 @@ export class JupyterInterpreterSelector {
 			getPythonEnvironmentCategory,
 			{ supportsBack: false },
 			undefined,
-			DataScience.quickPickSelectPythonEnvironmentTitle
+			DataScience.quickPickSelectPythonEnvironmentTitle,
 		);
 		selector.placeholder = placeholder;
 		selector.selected = findSelectedEnvironment();
@@ -123,7 +123,7 @@ export class JupyterInterpreterSelector {
 		} catch (ex) {
 			traceError(
 				`Failed to select a Python Environment to start Jupyter`,
-				ex
+				ex,
 			);
 		} finally {
 			dispose(disposables);

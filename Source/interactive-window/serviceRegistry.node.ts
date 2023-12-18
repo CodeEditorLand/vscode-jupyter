@@ -2,122 +2,122 @@
 // Licensed under the MIT License.
 
 import { ITracebackFormatter } from "../kernels/types";
+import { IExtensionSyncActivationService } from "../platform/activation/types";
 import { IJupyterExtensionBanner } from "../platform/common/types";
 import { IServiceManager } from "../platform/ioc/types";
+import { InteractiveControllerHelper } from "./InteractiveControllerHelper";
 import { CommandRegistry } from "./commands/commandRegistry";
+import { InteractiveWindowDebugger } from "./debugger/interactiveWindowDebugger.node";
+import { InteractiveWindowDebuggingManager } from "./debugger/jupyter/debuggingManager";
+import { InteractiveWindowDebuggingStartupCodeProvider } from "./debugger/startupCodeProvider";
 import { CodeGeneratorFactory } from "./editor-integration/codeGeneratorFactory";
 import { CodeLensFactory } from "./editor-integration/codeLensFactory";
+import { CodeLensProviderActivator } from "./editor-integration/codelensProviderActivator";
 import { DataScienceCodeLensProvider } from "./editor-integration/codelensprovider";
 import { CodeWatcher } from "./editor-integration/codewatcher";
 import { Decorator } from "./editor-integration/decorator";
 import { GeneratedCodeStorageFactory } from "./editor-integration/generatedCodeStorageFactory";
 import { HoverProvider } from "./editor-integration/hoverProvider";
-import { InteractiveWindowProvider } from "./interactiveWindowProvider";
+import { PythonCellFoldingProvider } from "./editor-integration/pythonCellFoldingProvider";
 import {
-	ICodeWatcher,
+	ICodeGeneratorFactory,
 	ICodeLensFactory,
+	ICodeWatcher,
 	IDataScienceCodeLensProvider,
 	IGeneratedCodeStorageFactory,
-	ICodeGeneratorFactory,
 } from "./editor-integration/types";
 import { GeneratedCodeStorageManager } from "./generatedCodeStoreManager";
+import { InteractiveWindowProvider } from "./interactiveWindowProvider";
+import { KernelStartupCodeProvider } from "./kernelStartupCodeProvider.node";
 import { InteractiveWindowTracebackFormatter } from "./outputs/tracebackFormatter";
+import {
+	BANNER_NAME_INTERACTIVE_SHIFTENTER,
+	InteractiveShiftEnterBanner,
+} from "./shiftEnterBanner";
 import {
 	IInteractiveControllerHelper,
 	IInteractiveWindowDebugger,
 	IInteractiveWindowDebuggingManager,
 	IInteractiveWindowProvider,
 } from "./types";
-import { InteractiveWindowDebugger } from "./debugger/interactiveWindowDebugger.node";
-import { InteractiveWindowDebuggingManager } from "./debugger/jupyter/debuggingManager";
-import {
-	BANNER_NAME_INTERACTIVE_SHIFTENTER,
-	InteractiveShiftEnterBanner,
-} from "./shiftEnterBanner";
-import { InteractiveWindowDebuggingStartupCodeProvider } from "./debugger/startupCodeProvider";
-import { PythonCellFoldingProvider } from "./editor-integration/pythonCellFoldingProvider";
-import { CodeLensProviderActivator } from "./editor-integration/codelensProviderActivator";
-import { IExtensionSyncActivationService } from "../platform/activation/types";
-import { InteractiveControllerHelper } from "./InteractiveControllerHelper";
-import { KernelStartupCodeProvider } from "./kernelStartupCodeProvider.node";
 
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IInteractiveWindowProvider>(
 		IInteractiveWindowProvider,
-		InteractiveWindowProvider
+		InteractiveWindowProvider,
 	);
 	serviceManager.addSingleton<IInteractiveControllerHelper>(
 		IInteractiveControllerHelper,
-		InteractiveControllerHelper
+		InteractiveControllerHelper,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CommandRegistry
+		CommandRegistry,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		HoverProvider
+		HoverProvider,
 	);
 	serviceManager.add<ICodeWatcher>(ICodeWatcher, CodeWatcher);
 	serviceManager.addSingleton<ICodeLensFactory>(
 		ICodeLensFactory,
-		CodeLensFactory
+		CodeLensFactory,
 	);
 	serviceManager.addSingleton<IDataScienceCodeLensProvider>(
 		IDataScienceCodeLensProvider,
-		DataScienceCodeLensProvider
+		DataScienceCodeLensProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodeLensProviderActivator
+		CodeLensProviderActivator,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonCellFoldingProvider
+		PythonCellFoldingProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		Decorator
+		Decorator,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GeneratedCodeStorageManager
+		GeneratedCodeStorageManager,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelStartupCodeProvider
+		KernelStartupCodeProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InteractiveWindowDebuggingStartupCodeProvider
+		InteractiveWindowDebuggingStartupCodeProvider,
 	);
 	serviceManager.addSingleton<ICodeGeneratorFactory>(
 		ICodeGeneratorFactory,
 		CodeGeneratorFactory,
 		undefined,
-		[IExtensionSyncActivationService]
+		[IExtensionSyncActivationService],
 	);
 	serviceManager.addSingleton<IGeneratedCodeStorageFactory>(
 		IGeneratedCodeStorageFactory,
-		GeneratedCodeStorageFactory
+		GeneratedCodeStorageFactory,
 	);
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
-		InteractiveWindowTracebackFormatter
+		InteractiveWindowTracebackFormatter,
 	);
 	serviceManager.addSingleton<IInteractiveWindowDebugger>(
 		IInteractiveWindowDebugger,
-		InteractiveWindowDebugger
+		InteractiveWindowDebugger,
 	);
 	serviceManager.addSingleton<IInteractiveWindowDebuggingManager>(
 		IInteractiveWindowDebuggingManager,
 		InteractiveWindowDebuggingManager,
 		undefined,
-		[IExtensionSyncActivationService]
+		[IExtensionSyncActivationService],
 	);
 	serviceManager.addSingleton<IJupyterExtensionBanner>(
 		IJupyterExtensionBanner,
 		InteractiveShiftEnterBanner,
-		BANNER_NAME_INTERACTIVE_SHIFTENTER
+		BANNER_NAME_INTERACTIVE_SHIFTENTER,
 	);
 }

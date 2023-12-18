@@ -4,10 +4,14 @@
 import { inject, injectable, named, optional } from "inversify";
 import { DebugConfiguration, Uri, commands, window, workspace } from "vscode";
 import { DebugProtocol } from "vscode-debugprotocol";
+import { ICommandNameArgumentTypeMapping } from "../../../commands";
+import { IInteractiveWindowProvider } from "../../../interactive-window/types";
+import { IDataScienceErrorHandler } from "../../../kernels/errors/types";
+import { IKernelProvider } from "../../../kernels/types";
 import { convertDebugProtocolVariableToIJupyterVariable } from "../../../kernels/variables/helpers";
 import { IJupyterVariables } from "../../../kernels/variables/types";
+import { IShowDataViewerFromVariablePanel } from "../../../messageTypes";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
-import { ICommandNameArgumentTypeMapping } from "../../../commands";
 import { IDebugService } from "../../../platform/common/application/types";
 import {
 	Commands,
@@ -25,19 +29,15 @@ import { noop } from "../../../platform/common/utils/misc";
 import { untildify } from "../../../platform/common/utils/platform";
 import { IInterpreterService } from "../../../platform/interpreter/contracts";
 import { traceError, traceInfo } from "../../../platform/logging";
-import { IShowDataViewerFromVariablePanel } from "../../../messageTypes";
-import { sendTelemetryEvent } from "../../../telemetry";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { EventName } from "../../../platform/telemetry/constants";
-import { IDataScienceErrorHandler } from "../../../kernels/errors/types";
+import { sendTelemetryEvent } from "../../../telemetry";
 import { DataViewerChecker } from "./dataViewerChecker";
 import {
 	IDataViewerDependencyService,
 	IDataViewerFactory,
 	IJupyterVariableDataProviderFactory,
 } from "./types";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { IKernelProvider } from "../../../kernels/types";
-import { IInteractiveWindowProvider } from "../../../interactive-window/types";
 
 @injectable()
 export class DataViewerCommandRegistry
@@ -98,7 +98,7 @@ export class DataViewerCommandRegistry
 		}
 		this.registerCommand(
 			Commands.ShowDataViewer,
-			this.onVariablePanelShowDataViewerRequest
+			this.onVariablePanelShowDataViewerRequest,
 		);
 	}
 	private registerCommand<
@@ -110,10 +110,10 @@ export class DataViewerCommandRegistry
 		this.disposables.push(disposable);
 	}
 	private async onVariablePanelShowDataViewerRequest(
-		request: IShowDataViewerFromVariablePanel
+		request: IShowDataViewerFromVariablePanel,
 	) {
 		sendTelemetryEvent(
-			EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_REQUEST
+			EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_REQUEST,
 		);
 		if (
 			this.debugService?.activeDebugSession &&
@@ -130,23 +130,23 @@ export class DataViewerCommandRegistry
 				) {
 					// Check the debug adapter session to get the python env that launched it
 					const pythonEnv = await this.getDebugAdapterPython(
-						this.debugService.activeDebugSession.configuration
+						this.debugService.activeDebugSession.configuration,
 					);
 
 					pythonEnv &&
 						(await this.dataViewerDependencyService.checkAndInstallMissingDependencies(
-							pythonEnv
+							pythonEnv,
 						));
 				}
 
 				const variable = convertDebugProtocolVariableToIJupyterVariable(
-					request.variable as DebugProtocol.Variable
+					request.variable as DebugProtocol.Variable,
 				);
 				const jupyterVariable =
 					await this.variableProvider.getFullVariable(variable);
 				const jupyterVariableDataProvider =
 					await this.jupyterVariableDataProviderFactory.create(
-						jupyterVariable
+						jupyterVariable,
 					);
 				const dataFrameInfo =
 					await jupyterVariableDataProvider.getDataFrameInfo();
@@ -154,16 +154,16 @@ export class DataViewerCommandRegistry
 				if (
 					columnSize &&
 					(await this.dataViewerChecker.isRequestedColumnSizeAllowed(
-						columnSize
+						columnSize,
 					))
 				) {
 					const title: string = `${DataScience.dataExplorerTitle} - ${jupyterVariable.name}`;
 					const dv = await this.dataViewerFactory.create(
 						jupyterVariableDataProvider,
-						title
+						title,
 					);
 					sendTelemetryEvent(
-						EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS
+						EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS,
 					);
 					return dv;
 				}
@@ -172,7 +172,7 @@ export class DataViewerCommandRegistry
 					EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_ERROR,
 					undefined,
 					undefined,
-					e
+					e,
 				);
 				traceError(e);
 				this.errorHandler.handleError(e).then(noop, noop);
@@ -190,13 +190,13 @@ export class DataViewerCommandRegistry
 					const jupyterVariableDataProvider =
 						await this.jupyterVariableDataProviderFactory.create(
 							request.variable,
-							activeKernel
+							activeKernel,
 						);
 
 					const title: string = `${DataScience.dataExplorerTitle} - ${request.variable.name}`;
 					return await this.dataViewerFactory.create(
 						jupyterVariableDataProvider,
-						title
+						title,
 					);
 				}
 			} catch (e) {
@@ -230,8 +230,8 @@ export class DataViewerCommandRegistry
 		const activeDataViewer = this.dataViewerFactory?.activeViewer;
 		return activeDataViewer
 			? this.kernelProvider.kernels.find(
-					(item) => item === activeDataViewer.kernel
-				)
+					(item) => item === activeDataViewer.kernel,
+			  )
 			: undefined;
 	}
 
@@ -243,7 +243,7 @@ export class DataViewerCommandRegistry
 		}
 		return workspace.notebookDocuments.find(
 			(notebookDocument) =>
-				notebookDocument === interactiveWindow?.notebookDocument
+				notebookDocument === interactiveWindow?.notebookDocument,
 		);
 	}
 
@@ -251,18 +251,18 @@ export class DataViewerCommandRegistry
 	// Mirrors the logic from Python extension here:
 	// https://github.com/microsoft/vscode-python/blob/35b813f37d1ceec547277180e3aa07bd24d86f89/src/client/debugger/extension/adapter/factory.ts#L116
 	private async getDebugAdapterPython(
-		debugConfiguration: DebugConfiguration
+		debugConfiguration: DebugConfiguration,
 	): Promise<PythonEnvironment | undefined> {
 		if (!this.interpreterService) {
 			// Interpreter service is optional
 			traceInfo(
-				"Interpreter Service missing when trying getDebugAdapterPython"
+				"Interpreter Service missing when trying getDebugAdapterPython",
 			);
 			return;
 		}
 
 		// Check debugAdapterPython and pythonPath
-		let pythonPath: string = "";
+		let pythonPath = "";
 		if (debugConfiguration.debugAdapterPython !== undefined) {
 			traceInfo("Found debugAdapterPython on Debug Configuration to use");
 			pythonPath = debugConfiguration.debugAdapterPython;
@@ -276,12 +276,12 @@ export class DataViewerCommandRegistry
 			if (untildePath.startsWith("~") && this.platformService.homeDir) {
 				untildePath = untildify(
 					untildePath,
-					this.platformService.homeDir.path
+					this.platformService.homeDir.path,
 				);
 			}
 
 			return this.interpreterService.getInterpreterDetails(
-				Uri.file(untildePath)
+				Uri.file(untildePath),
 			);
 		} else {
 			// Failed to find the expected configuration items, use active interpreter (might be attach scenario)

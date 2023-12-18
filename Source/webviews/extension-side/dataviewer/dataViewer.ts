@@ -4,8 +4,32 @@
 import { inject, injectable, named } from "inversify";
 import { EventEmitter, Memento, Uri, ViewColumn, env, window } from "vscode";
 
-import { capturePerfTelemetry, sendTelemetryEvent } from "../../../telemetry";
+import { IDataScienceErrorHandler } from "../../../kernels/errors/types";
+import { IKernel } from "../../../kernels/types";
+import { IWebviewPanelProvider } from "../../../platform/common/application/types";
+import { HelpLinks, Telemetry } from "../../../platform/common/constants";
+import {
+	GLOBAL_MEMENTO,
+	IConfigurationService,
+	IDisposable,
+	IExtensionContext,
+	IMemento,
+	Resource,
+} from "../../../platform/common/types";
+import * as localize from "../../../platform/common/utils/localize";
+import { noop } from "../../../platform/common/utils/misc";
+import { StopWatch } from "../../../platform/common/utils/stopWatch";
 import { JupyterDataRateLimitError } from "../../../platform/errors/jupyterDataRateLimitError";
+import { traceError, traceInfo } from "../../../platform/logging";
+import { CheckboxState } from "../../../platform/telemetry/constants";
+import { joinPath } from "../../../platform/vscode-path/resources";
+import { WebViewViewChangeEventArgs } from "../../../platform/webviews/types";
+import { WebviewPanelHost } from "../../../platform/webviews/webviewPanelHost";
+import { capturePerfTelemetry, sendTelemetryEvent } from "../../../telemetry";
+import {
+	isValidSliceExpression,
+	preselectedSliceExpression,
+} from "../../webview-side/data-explorer/helpers";
 import { DataViewerMessageListener } from "./dataViewerMessageListener";
 import {
 	DataViewerMessages,
@@ -17,30 +41,6 @@ import {
 	IGetSliceRequest,
 	IJupyterVariableDataProvider,
 } from "./types";
-import {
-	isValidSliceExpression,
-	preselectedSliceExpression,
-} from "../../webview-side/data-explorer/helpers";
-import { CheckboxState } from "../../../platform/telemetry/constants";
-import { IKernel } from "../../../kernels/types";
-import { IWebviewPanelProvider } from "../../../platform/common/application/types";
-import { HelpLinks, Telemetry } from "../../../platform/common/constants";
-import { traceError, traceInfo } from "../../../platform/logging";
-import {
-	IConfigurationService,
-	IMemento,
-	GLOBAL_MEMENTO,
-	Resource,
-	IDisposable,
-	IExtensionContext,
-} from "../../../platform/common/types";
-import * as localize from "../../../platform/common/utils/localize";
-import { StopWatch } from "../../../platform/common/utils/stopWatch";
-import { WebViewViewChangeEventArgs } from "../../../platform/webviews/types";
-import { WebviewPanelHost } from "../../../platform/webviews/webviewPanelHost";
-import { noop } from "../../../platform/common/utils/misc";
-import { joinPath } from "../../../platform/vscode-path/resources";
-import { IDataScienceErrorHandler } from "../../../kernels/errors/types";
 
 const PREFERRED_VIEWGROUP = "JupyterDataViewerPreferredViewColumn";
 @injectable()
@@ -53,7 +53,7 @@ export class DataViewer
 		| IJupyterVariableDataProvider
 		| undefined;
 	private rowsTimer: StopWatch | undefined;
-	private pendingRowsCount: number = 0;
+	private pendingRowsCount = 0;
 	private dataFrameInfoPromise: Promise<IDataFrameInfo> | undefined;
 	private currentSliceExpression: string | undefined;
 	private sentDataViewerSliceDimensionalityTelemetry = false;
@@ -109,7 +109,7 @@ export class DataViewer
 	@capturePerfTelemetry(Telemetry.DataViewerWebviewLoaded)
 	public async showData(
 		dataProvider: IDataViewerDataProvider | IJupyterVariableDataProvider,
-		title: string
+		title: string,
 	): Promise<void> {
 		if (!this.isDisposed) {
 			// Save the data provider
@@ -128,7 +128,7 @@ export class DataViewer
 			// If higher dimensional data, preselect a slice to show
 			if (dataFrameInfo.shape && dataFrameInfo.shape.length > 2) {
 				this.maybeSendSliceDataDimensionalityTelemetry(
-					dataFrameInfo.shape.length
+					dataFrameInfo.shape.length,
 				);
 				const slice = preselectedSliceExpression(dataFrameInfo.shape);
 				dataFrameInfo = await this.getDataFrameInfo(slice);
@@ -137,7 +137,7 @@ export class DataViewer
 			// Send a message with our data
 			this.postMessage(
 				DataViewerMessages.InitializeData,
-				dataFrameInfo
+				dataFrameInfo,
 			).catch(noop);
 		}
 	}
@@ -169,17 +169,17 @@ export class DataViewer
 			if (
 				isValidSliceExpression(
 					currentSliceExpression,
-					dataFrameInfo.shape
+					dataFrameInfo.shape,
 				)
 			) {
 				dataFrameInfo = await this.getDataFrameInfo(
-					currentSliceExpression
+					currentSliceExpression,
 				);
 			} else {
 				// Previously applied slice expression isn't valid anymore
 				// Generate a preselected slice
 				const newSlice = preselectedSliceExpression(
-					dataFrameInfo.shape
+					dataFrameInfo.shape,
 				);
 				dataFrameInfo = await this.getDataFrameInfo(newSlice);
 			}
@@ -188,7 +188,7 @@ export class DataViewer
 		// Send a message with our data
 		this.postMessage(
 			DataViewerMessages.InitializeData,
-			dataFrameInfo
+			dataFrameInfo,
 		).catch(noop);
 	}
 
@@ -203,7 +203,7 @@ export class DataViewer
 	}
 
 	protected override async onViewStateChanged(
-		args: WebViewViewChangeEventArgs
+		args: WebViewViewChangeEventArgs,
 	) {
 		if (
 			args.current.active &&
@@ -213,7 +213,7 @@ export class DataViewer
 		) {
 			await this.globalMemento.update(
 				PREFERRED_VIEWGROUP,
-				this.webPanel?.viewColumn
+				this.webPanel?.viewColumn,
 			);
 		}
 		this._onDidChangeDataViewerViewState.fire();
@@ -251,7 +251,7 @@ export class DataViewer
 						newState: payload.newState
 							? CheckboxState.Checked
 							: CheckboxState.Unchecked,
-					}
+					},
 				);
 				break;
 
@@ -264,7 +264,7 @@ export class DataViewer
 
 	private getDataFrameInfo(
 		sliceExpression?: string,
-		isRefresh?: boolean
+		isRefresh?: boolean,
 	): Promise<IDataFrameInfo> {
 		// If requesting a new slice, refresh our cached info promise
 		if (
@@ -308,7 +308,7 @@ export class DataViewer
 				this.pendingRowsCount = 0;
 				return this.postMessage(
 					DataViewerMessages.GetAllRowsResponse,
-					allRows
+					allRows,
 				);
 			}
 		});
@@ -320,17 +320,17 @@ export class DataViewer
 				const payload = await this.getDataFrameInfo(request.slice);
 				if (payload.shape?.length) {
 					this.maybeSendSliceDataDimensionalityTelemetry(
-						payload.shape.length
+						payload.shape.length,
 					);
 				}
 				sendTelemetryEvent(
 					Telemetry.DataViewerSliceOperation,
 					undefined,
-					{ source: request.source }
+					{ source: request.source },
 				);
 				return this.postMessage(
 					DataViewerMessages.InitializeData,
-					payload
+					payload,
 				);
 			}
 		});
@@ -340,19 +340,19 @@ export class DataViewer
 		return this.wrapRequest(async () => {
 			if (this.dataProvider) {
 				const dataFrameInfo = await this.getDataFrameInfo(
-					request.sliceExpression
+					request.sliceExpression,
 				);
 				const rows = await this.dataProvider.getRows(
 					request.start,
 					Math.min(
 						request.end,
-						dataFrameInfo.rowCount ? dataFrameInfo.rowCount : 0
+						dataFrameInfo.rowCount ? dataFrameInfo.rowCount : 0,
 					),
-					request.sliceExpression
+					request.sliceExpression,
 				);
 				this.pendingRowsCount = Math.max(
 					0,
-					this.pendingRowsCount - rows.length
+					this.pendingRowsCount - rows.length,
 				);
 				return this.postMessage(DataViewerMessages.GetRowsResponse, {
 					rows,
@@ -374,13 +374,13 @@ export class DataViewer
 				window
 					.showErrorMessage(
 						localize.DataScience.jupyterDataRateExceeded,
-						actionTitle
+						actionTitle,
 					)
 					.then((v) => {
 						// User clicked on the link, open it.
 						if (v === actionTitle) {
 							void env.openExternal(
-								Uri.parse(HelpLinks.JupyterDataRateHelpLink)
+								Uri.parse(HelpLinks.JupyterDataRateHelpLink),
 							);
 						}
 					}, noop);
@@ -402,7 +402,7 @@ export class DataViewer
 	}
 
 	private maybeSendSliceDataDimensionalityTelemetry(
-		numberOfDimensions: number
+		numberOfDimensions: number,
 	) {
 		if (!this.sentDataViewerSliceDimensionalityTelemetry) {
 			sendTelemetryEvent(Telemetry.DataViewerDataDimensionality, {

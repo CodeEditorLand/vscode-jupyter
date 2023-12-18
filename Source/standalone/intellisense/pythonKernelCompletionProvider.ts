@@ -13,40 +13,40 @@ import {
 	TextDocument,
 	workspace,
 } from "vscode";
+import { isPythonKernelConnection } from "../../kernels/helpers";
+import { IKernel, IKernelProvider, IKernelSession } from "../../kernels/types";
+import {
+	INotebookCompletionProvider,
+	INotebookEditorProvider,
+} from "../../notebooks/types";
 import { raceCancellation } from "../../platform/common/cancellation";
 import {
-	traceError,
-	traceInfoIfCI,
-	traceVerbose,
-} from "../../platform/logging";
+	PYTHON_LANGUAGE,
+	Settings,
+	Telemetry,
+	isTestExecution,
+} from "../../platform/common/constants";
 import { getDisplayPath } from "../../platform/common/platform/fs-paths";
 import {
 	IConfigurationService,
 	IDisposableRegistry,
 } from "../../platform/common/types";
-import { isNotebookCell, noop } from "../../platform/common/utils/misc";
-import { StopWatch } from "../../platform/common/utils/stopWatch";
-import { IKernelSession, IKernelProvider, IKernel } from "../../kernels/types";
-import {
-	INotebookCompletionProvider,
-	INotebookEditorProvider,
-} from "../../notebooks/types";
-import { mapJupyterKind } from "./conversion";
-import {
-	isTestExecution,
-	PYTHON_LANGUAGE,
-	Settings,
-	Telemetry,
-} from "../../platform/common/constants";
-import { INotebookCompletion } from "./types";
 import { getAssociatedJupyterNotebook } from "../../platform/common/utils";
 import { raceTimeout } from "../../platform/common/utils/async";
-import { isPythonKernelConnection } from "../../kernels/helpers";
-import { sendTelemetryEvent } from "../../telemetry";
+import { DisposableStore } from "../../platform/common/utils/lifecycle";
+import { isNotebookCell, noop } from "../../platform/common/utils/misc";
+import { StopWatch } from "../../platform/common/utils/stopWatch";
+import {
+	traceError,
+	traceInfoIfCI,
+	traceVerbose,
+} from "../../platform/logging";
 import { getTelemetrySafeHashedString } from "../../platform/telemetry/helpers";
+import { sendTelemetryEvent } from "../../telemetry";
+import { mapJupyterKind } from "./conversion";
 import { generateSortString } from "./helpers";
 import { resolveCompletionItem } from "./resolveCompletionItem";
-import { DisposableStore } from "../../platform/common/utils/lifecycle";
+import { INotebookCompletion } from "./types";
 
 let IntellisenseTimeout = Settings.IntellisenseTimeout;
 export function setIntellisenseTimeout(timeoutMs: number) {
@@ -142,7 +142,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		document: TextDocument,
 		position: Position,
 		token: CancellationToken,
-		context: CompletionContext
+		context: CompletionContext,
 	): Promise<CompletionItem[]> {
 		const stopWatch = new StopWatch();
 		if (!isNotebookCell(document)) {
@@ -150,11 +150,11 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		}
 		const notebookDocument =
 			this.notebookEditorProvider.findAssociatedNotebookDocument(
-				document.uri
+				document.uri,
 			);
 		if (!notebookDocument) {
 			traceError(
-				`Notebook not found for Cell ${getDisplayPath(document.uri)}`
+				`Notebook not found for Cell ${getDisplayPath(document.uri)}`,
 			);
 			return [];
 		}
@@ -163,16 +163,16 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		if (!kernel || !kernel.session || !kernel.session.kernel) {
 			traceVerbose(
 				`Live Notebook not available for ${getDisplayPath(
-					notebookDocument.uri
-				)}`
+					notebookDocument.uri,
+				)}`,
 			);
 			return [];
 		}
 		// Allow slower timeouts for CI (testing).
 		traceInfoIfCI(
 			`Notebook completion request for ${document.getText()}, ${document.offsetAt(
-				position
-			)}`
+				position,
+			)}`,
 		);
 		const [result, pylanceResults, kernelId] = await Promise.all([
 			raceTimeout(
@@ -181,24 +181,24 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 					kernel.session,
 					document.getText(),
 					document.offsetAt(position),
-					token
-				)
+					token,
+				),
 			),
 			raceTimeout(
 				IntellisenseTimeout,
-				this.getPylanceCompletions(document, position, context, token)
+				this.getPylanceCompletions(document, position, context, token),
 			),
 			getTelemetrySafeHashedString(kernel.kernelConnectionMetadata.id),
 		]);
-		if (!result) {
-			traceInfoIfCI(`Notebook completions not found.`);
-			return [];
-		} else {
+		if (result) {
 			traceInfoIfCI(
 				`Completions found, filtering the list: ${JSON.stringify(
-					result
-				)}.`
+					result,
+				)}.`,
 			);
+		} else {
+			traceInfoIfCI(`Notebook completions not found.`);
+			return [];
 		}
 
 		// Format results into a list of completions
@@ -217,7 +217,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 				(item) =>
 					typeof item.start === "number" &&
 					typeof item.end === "number" &&
-					typeof item.text === "string"
+					typeof item.text === "string",
 			)
 		) {
 			completions = experimentMatches.map((item, index) => {
@@ -226,7 +226,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 					itemText: item.text,
 					range: new Range(
 						document.positionAt(item.start),
-						document.positionAt(item.end)
+						document.positionAt(item.end),
 					),
 					kind: item.type
 						? mapJupyterKind.get(item.type)
@@ -259,7 +259,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 			completions,
 			pylanceResults,
 			document,
-			position
+			position,
 		);
 		const documentRef = new WeakRef(document);
 		const kernelRef = new WeakRef(kernel);
@@ -271,7 +271,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 				duration,
 				kernelId,
 				position,
-			})
+			}),
 		);
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletion,
@@ -289,13 +289,13 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 				completed: true,
 				requestSent: true,
 				kernelStatusAfterRequest: kernel.status,
-			}
+			},
 		);
 		return completions;
 	}
 	async resolveCompletionItem(
 		item: CompletionItem,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<CompletionItem> {
 		const info = this.completionItemsSent.get(item);
 		if (!info) {
@@ -315,7 +315,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 			PYTHON_LANGUAGE,
 			document,
 			position,
-			this.toDispose
+			this.toDispose,
 		);
 	}
 
@@ -323,7 +323,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		session: IKernelSession,
 		cellCode: string,
 		offsetInCode: number,
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<INotebookCompletion> {
 		const stopWatch = new StopWatch();
 		if (!session.kernel) {
@@ -348,12 +348,12 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 			session.kernel.requestComplete({
 				code: cellCode,
 				cursor_pos: offsetInCode,
-			})
+			}),
 		);
 		traceInfoIfCI(
-			`Got jupyter notebook completions. Is cancel? ${cancelToken?.isCancellationRequested}: ${
-				result ? JSON.stringify(result) : "empty"
-			}`
+			`Got jupyter notebook completions. Is cancel? ${
+				cancelToken?.isCancellationRequested
+			}: ${result ? JSON.stringify(result) : "empty"}`,
 		);
 		traceVerbose(`Jupyter completion time: ${stopWatch.elapsedTime}`);
 		if (result && result.content) {
@@ -379,7 +379,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		document: TextDocument,
 		position: Position,
 		context: CompletionContext,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	) {
 		const notebook = getAssociatedJupyterNotebook(document);
 		if (notebook && this.notebookCompletionProvider) {
@@ -388,7 +388,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 				document,
 				position,
 				context,
-				cancelToken
+				cancelToken,
 			);
 		}
 	}
@@ -416,7 +416,7 @@ export function filterCompletions(
 	completions: JupyterCompletionItem[],
 	pylanceResults: CompletionItem[] | null | undefined,
 	cell: TextDocument,
-	position: Position
+	position: Position,
 ) {
 	let result = completions;
 	const charBeforeCursorPosition =
@@ -426,8 +426,8 @@ export function filterCompletions(
 					position.line,
 					position.character - 1,
 					position.line,
-					position.character
-				);
+					position.character,
+			  );
 	const charBeforeCursor = charBeforeCursorPosition
 		? cell.getText(charBeforeCursorPosition)
 		: undefined;
@@ -435,7 +435,7 @@ export function filterCompletions(
 	const wordRange = cell.getWordRangeAtPosition(
 		isPreviousCharTriggerCharacter || triggerCharacter === "."
 			? new Position(position.line, position.character - 1)
-			: position
+			: position,
 	);
 	const wordRangeWithTriggerCharacter =
 		wordRange && charBeforeCursorPosition
@@ -453,7 +453,7 @@ export function filterCompletions(
 			positionInsideString(line, position));
 
 	traceInfoIfCI(
-		`Jupyter completions filtering applied: ${insideString} on ${line}`
+		`Jupyter completions filtering applied: ${insideString} on ${line}`,
 	);
 
 	// Update magics to have a much lower sort order than other strings.
@@ -483,10 +483,10 @@ export function filterCompletions(
 		// Example, user typed 'df.' and r.itemText is 'df.PassengerId'. Word would be 'df.' in this case.
 		if (word && wordDot && r.itemText.includes(word)) {
 			newLabel = r.itemText.substring(
-				r.itemText.indexOf(word) + (wordDot ? word.length : 0)
+				r.itemText.indexOf(word) + (wordDot ? word.length : 0),
 			);
 			newText = r.itemText.substring(
-				r.itemText.indexOf(word) + word.length
+				r.itemText.indexOf(word) + word.length,
 			);
 			const changeInCharacters =
 				(typeof r.label === "string"
@@ -497,20 +497,20 @@ export function filterCompletions(
 					? new Range(
 							new Position(
 								r.range.start.line,
-								r.range.start.character + changeInCharacters
+								r.range.start.character + changeInCharacters,
 							),
-							r.range.end
-						)
+							r.range.end,
+					  )
 					: r.range;
 		}
 		// We're after the '.' and the user is typing more. We are in the middle of the string then.
 		// Example, user typed 'df.Pass' and r.itemText is 'df.PassengerId'. Word would be 'Pass' in this case.
 		if (!newText && wordIndex > 0) {
 			newLabel = r.itemText.substring(
-				r.itemText.indexOf(word) + (wordDot ? word.length : 0)
+				r.itemText.indexOf(word) + (wordDot ? word.length : 0),
 			);
 			newText = r.itemText.substring(
-				r.itemText.indexOf(word) + word.length
+				r.itemText.indexOf(word) + word.length,
 			);
 			const changeInCharacters =
 				(typeof r.label === "string"
@@ -521,10 +521,10 @@ export function filterCompletions(
 					? new Range(
 							new Position(
 								r.range.start.line,
-								r.range.start.character + changeInCharacters
+								r.range.start.character + changeInCharacters,
 							),
-							r.range.end
-						)
+							r.range.end,
+					  )
 					: r.range;
 		}
 		if (newLabel && newText && newRange) {
@@ -539,11 +539,7 @@ export function filterCompletions(
 	});
 
 	// If not inside of a string, filter out file names (things that end with '/')
-	if (!insideString) {
-		result = result.filter(
-			(r) => !r.itemText.includes(".") && !r.itemText.endsWith("/")
-		);
-	} else {
+	if (insideString) {
 		// If inside a string and ending with '/', then add a command to force a suggestion right after
 		result = result.map((r) => {
 			if (r.itemText.endsWith("/")) {
@@ -566,6 +562,10 @@ export function filterCompletions(
 			}
 			return r;
 		});
+	} else {
+		result = result.filter(
+			(r) => !r.itemText.includes(".") && !r.itemText.endsWith("/"),
+		);
 	}
 
 	// Remove any duplicates (picking pylance over jupyter)
@@ -579,7 +579,7 @@ export function filterCompletions(
 			position.character
 		} with trigger: ${triggerCharacter}\n   ${completions
 			.map((r) => r.label)
-			.join(",")}`
+			.join(",")}`,
 	);
 
 	traceInfoIfCI(
@@ -587,7 +587,7 @@ export function filterCompletions(
 			position.character
 		} with trigger: ${triggerCharacter}\n   ${result
 			.map((r) => r.label)
-			.join(",")}`
+			.join(",")}`,
 	);
 
 	return result;

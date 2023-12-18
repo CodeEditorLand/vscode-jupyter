@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Uri } from "vscode";
 import type { KernelMessage } from "@jupyterlab/services";
-import {
-	IVariableExplorerHeight, // eslint-disable-next-line
-} from "./webviews/webview-side/interactive-common/redux/reducers/types";
+import { Uri } from "vscode";
 // eslint-disable-next-line
 import { KernelSocketOptions } from "./kernels/types";
-import { ICell } from "./platform/common/types";
 import {
 	IJupyterVariable,
 	IJupyterVariablesRequest,
 	IJupyterVariablesResponse,
 } from "./kernels/variables/types";
 import { WidgetScriptSource } from "./notebooks/controllers/ipywidgets/types";
+import { ICell } from "./platform/common/types";
+import {
+	IVariableExplorerHeight, // eslint-disable-next-line
+} from "./webviews/webview-side/interactive-common/redux/reducers/types";
 
 export type NotifyIPyWidgetWidgetVersionNotSupportedAction = {
 	moduleName: "qgrid";
@@ -105,8 +105,8 @@ export enum IPyWidgetMessages {
 }
 
 export enum SysInfoReason {
-	Start,
-	Restart,
+	Start = 0,
+	Restart = 1,
 }
 
 export interface IFinishCell {
@@ -252,7 +252,7 @@ export class IInteractiveWindowMapping {
 	public [InteractiveWindowMessages.GetHTMLByIdResponse]: string;
 }
 
-export const enum ErrorRendererMessageType {
+export enum ErrorRendererMessageType {
 	RequestLoadLoc = 2,
 	ResponseLoadLoc = 3,
 }

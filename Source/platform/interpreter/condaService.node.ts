@@ -5,12 +5,12 @@ import { inject, injectable, named } from "inversify";
 import { SemVer } from "semver";
 import { Memento, Uri } from "vscode";
 import { IPythonApiProvider } from "../api/types";
-import { traceVerbose } from "../logging";
 import { IFileSystem } from "../common/platform/types";
 import { GLOBAL_MEMENTO, IMemento } from "../common/types";
 import { createDeferredFromPromise } from "../common/utils/async";
-import * as path from "../vscode-path/path";
 import { noop } from "../common/utils/misc";
+import { traceVerbose } from "../logging";
+import * as path from "../vscode-path/path";
 
 const CACHEKEY_FOR_CONDA_INFO = "CONDA_INFORMATION_CACHE";
 
@@ -64,7 +64,7 @@ export class CondaService {
 				})
 				.catch(noop);
 			const cachedInfo = createDeferredFromPromise(
-				this.getCachedInformation()
+				this.getCachedInformation(),
 			);
 			await Promise.race([cachedInfo.promise, latestInfo]);
 			if (cachedInfo.completed && cachedInfo.value?.version) {
@@ -86,19 +86,19 @@ export class CondaService {
 			const latestInfo = this.pythonApi
 				.getApi()
 				.then((api) =>
-					api.getCondaFile ? api.getCondaFile() : undefined
+					api.getCondaFile ? api.getCondaFile() : undefined,
 				);
 			latestInfo
 				.then((file) => {
 					traceVerbose(
-						`Conda file returned by Python Extension is ${file}`
+						`Conda file returned by Python Extension is ${file}`,
 					);
 					this._file = file ? Uri.file(file) : undefined;
 					this.updateCache().catch(noop);
 				})
 				.catch(noop);
 			const cachedInfo = createDeferredFromPromise(
-				this.getCachedInformation()
+				this.getCachedInformation(),
 			);
 			await Promise.race([cachedInfo.promise, latestInfo]);
 			if (cachedInfo.completed && cachedInfo.value?.file) {
@@ -163,7 +163,7 @@ export class CondaService {
 		return this.pythonApi
 			.getApi()
 			.then((api) =>
-				api.getCondaVersion ? api.getCondaVersion() : undefined
+				api.getCondaVersion ? api.getCondaVersion() : undefined,
 			);
 	}
 }

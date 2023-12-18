@@ -3,6 +3,15 @@
 
 import { inject, injectable, named, optional } from "inversify";
 
+import { IKernel } from "../../../kernels/types";
+import {
+	IJupyterVariable,
+	IJupyterVariables,
+} from "../../../kernels/variables/types";
+import { Identifiers } from "../../../platform/common/constants";
+import { getFilePath } from "../../../platform/common/platform/fs-paths";
+import { isWeb } from "../../../platform/common/utils/misc";
+import { traceError } from "../../../platform/logging";
 import {
 	ColumnType,
 	IDataFrameInfo,
@@ -10,21 +19,12 @@ import {
 	IJupyterVariableDataProvider,
 	IRowsResponse,
 } from "./types";
-import { IKernel } from "../../../kernels/types";
-import {
-	IJupyterVariable,
-	IJupyterVariables,
-} from "../../../kernels/variables/types";
-import { traceError } from "../../../platform/logging";
-import { Identifiers } from "../../../platform/common/constants";
-import { getFilePath } from "../../../platform/common/platform/fs-paths";
-import { isWeb } from "../../../platform/common/utils/misc";
 
 @injectable()
 export class JupyterVariableDataProvider
 	implements IJupyterVariableDataProvider
 {
-	private initialized: boolean = false;
+	private initialized = false;
 	private _kernel: IKernel | undefined;
 	private variable: IJupyterVariable | undefined;
 
@@ -48,7 +48,7 @@ export class JupyterVariableDataProvider
 	 * @returns Array of columns with normalized type
 	 */
 	private static getNormalizedColumns(
-		columns: { key: string; type: string }[]
+		columns: { key: string; type: string }[],
 	): { key: string; type: ColumnType }[] {
 		return columns.map((column: { key: string; type: string }) => {
 			let normalizedType: ColumnType;
@@ -86,7 +86,7 @@ export class JupyterVariableDataProvider
 			}
 		} catch (e) {
 			traceError(
-				`Could not parse IJupyterVariable with malformed shape: ${shape}`
+				`Could not parse IJupyterVariable with malformed shape: ${shape}`,
 			);
 		}
 		return undefined;
@@ -103,7 +103,7 @@ export class JupyterVariableDataProvider
 
 	public async getDataFrameInfo(
 		sliceExpression?: string,
-		isRefresh?: boolean
+		isRefresh?: boolean,
 	): Promise<IDataFrameInfo> {
 		let dataFrameInfo: IDataFrameInfo = {};
 		await this.ensureInitialized();
@@ -114,14 +114,14 @@ export class JupyterVariableDataProvider
 					variable,
 					this._kernel,
 					sliceExpression,
-					isRefresh
+					isRefresh,
 				);
 			}
 			dataFrameInfo = {
 				columns: variable.columns
 					? JupyterVariableDataProvider.getNormalizedColumns(
-							variable.columns
-						)
+							variable.columns,
+					  )
 					: variable.columns,
 				indexColumn: variable.indexColumn,
 				rowCount: variable.rowCount,
@@ -149,7 +149,7 @@ export class JupyterVariableDataProvider
 				0,
 				this.variable.rowCount,
 				this._kernel,
-				sliceExpression
+				sliceExpression,
 			);
 			allRows = dataFrameRows.data;
 		}
@@ -165,7 +165,7 @@ export class JupyterVariableDataProvider
 				start,
 				end,
 				this._kernel,
-				sliceExpression
+				sliceExpression,
 			);
 			rows = dataFrameRows.data;
 		}
@@ -184,12 +184,12 @@ export class JupyterVariableDataProvider
 					isWeb()
 						? this._kernel
 						: this._kernel?.kernelConnectionMetadata.interpreter ||
-								this._kernel
+						  this._kernel,
 				);
 			}
 			this.variable = await this.variableManager.getDataFrameInfo(
 				this.variable,
-				this._kernel
+				this._kernel,
 			);
 		}
 	}

@@ -22,13 +22,13 @@ interface IVariableExplorerButtonCellFormatterProps {
 	value?: IButtonCellValue;
 	showDataExplorer(
 		targetVariable: IJupyterVariable,
-		numberOfColumns: number
+		numberOfColumns: number,
 	): void;
 }
 
 export class VariableExplorerButtonCellFormatter extends React.Component<IVariableExplorerButtonCellFormatterProps> {
 	public override shouldComponentUpdate(
-		nextProps: IVariableExplorerButtonCellFormatterProps
+		nextProps: IVariableExplorerButtonCellFormatterProps,
 	) {
 		return nextProps.value !== this.props.value;
 	}
@@ -43,9 +43,10 @@ export class VariableExplorerButtonCellFormatter extends React.Component<IVariab
 							baseTheme={this.props.baseTheme}
 							tooltip={getLocString(
 								"showDataExplorerTooltip",
-								"Show variable snapshot in data viewer"
+								"Show variable snapshot in data viewer",
 							)}
-							onClick={this.onDataExplorerClick}>
+							onClick={this.onDataExplorerClick}
+						>
 							<Image
 								baseTheme={this.props.baseTheme}
 								class="image-button-image"
@@ -69,7 +70,7 @@ export class VariableExplorerButtonCellFormatter extends React.Component<IVariab
 		) {
 			this.props.showDataExplorer(
 				this.props.value.variable,
-				this.props.value.numberOfColumns
+				this.props.value.numberOfColumns,
 			);
 		}
 	};

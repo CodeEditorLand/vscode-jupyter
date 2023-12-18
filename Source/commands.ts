@@ -12,12 +12,12 @@ import {
 	ViewColumn,
 } from "vscode";
 import { IShowDataViewerFromVariablePanel } from "./messageTypes";
+import { Channel } from "./platform/common/application/types";
 import {
-	Commands as DSCommands,
 	CommandSource,
+	Commands as DSCommands,
 } from "./platform/common/constants";
 import { PythonEnvironment } from "./platform/pythonEnvironments/info";
-import { Channel } from "./platform/common/application/types";
 
 export type CommandIds = keyof ICommandNameArgumentTypeMapping;
 

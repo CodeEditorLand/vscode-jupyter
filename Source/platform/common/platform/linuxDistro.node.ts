@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as fs from "fs-extra";
 import * as os from "os";
-import { splitLines } from "../helpers";
+import * as fs from "fs-extra";
 import { traceError } from "../../logging";
+import { splitLines } from "../helpers";
 export type DistroInfo = {
 	id: string;
 	version_id: string;

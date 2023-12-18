@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { EnvironmentType, PythonEnvironment } from "../pythonEnvironments/info";
-import { getTelemetrySafeVersion } from "../telemetry/helpers";
-import { basename } from "../../platform/vscode-path/resources";
 import {
 	Environment,
 	KnownEnvironmentTools,
 	KnownEnvironmentTypes,
 } from "@vscode/python-extension";
+import { basename } from "../../platform/vscode-path/resources";
+import { EnvironmentType, PythonEnvironment } from "../pythonEnvironments/info";
+import { getTelemetrySafeVersion } from "../telemetry/helpers";
 
 export function getPythonEnvDisplayName(
-	interpreter: PythonEnvironment | Environment
+	interpreter: PythonEnvironment | Environment,
 ) {
 	if ("executable" in interpreter) {
 		const versionParts: string[] = [];

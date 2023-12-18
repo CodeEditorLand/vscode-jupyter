@@ -11,54 +11,54 @@ import {
 	env,
 	window,
 } from "vscode";
+import { isPythonKernelConnection } from "../../../../kernels/helpers";
+import { IKernel, IKernelProvider } from "../../../../kernels/types";
+import {
+	ILoadIPyWidgetClassFailureAction,
+	IPyWidgetMessages,
+	InteractiveWindowMessages,
+	LoadIPyWidgetClassLoadAction,
+	NotifyIPyWidgetWidgetVersionNotSupportedAction,
+} from "../../../../messageTypes";
 import {
 	STANDARD_OUTPUT_CHANNEL,
 	WIDGET_VERSION_NON_PYTHON_KERNELS,
 } from "../../../../platform/common/constants";
+import { Commands } from "../../../../platform/common/constants";
 import {
-	traceVerbose,
-	traceError,
-	traceInfo,
-	traceInfoIfCI,
-} from "../../../../platform/logging";
-import {
-	IDisposableRegistry,
-	IOutputChannel,
 	IConfigurationService,
 	IDisposable,
+	IDisposableRegistry,
+	IOutputChannel,
 } from "../../../../platform/common/types";
+import { createDeferred } from "../../../../platform/common/utils/async";
+import { swallowExceptions } from "../../../../platform/common/utils/decorators";
+import { dispose } from "../../../../platform/common/utils/lifecycle";
 import {
 	Common,
 	DataScience,
 } from "../../../../platform/common/utils/localize";
 import { noop } from "../../../../platform/common/utils/misc";
 import { stripAnsi } from "../../../../platform/common/utils/regexp";
-import {
-	ILoadIPyWidgetClassFailureAction,
-	InteractiveWindowMessages,
-	IPyWidgetMessages,
-	LoadIPyWidgetClassLoadAction,
-	NotifyIPyWidgetWidgetVersionNotSupportedAction,
-} from "../../../../messageTypes";
+import { StopWatch } from "../../../../platform/common/utils/stopWatch";
 import { IServiceContainer } from "../../../../platform/ioc/types";
-import { sendTelemetryEvent, Telemetry } from "../../../../telemetry";
+import {
+	traceError,
+	traceInfo,
+	traceInfoIfCI,
+	traceVerbose,
+} from "../../../../platform/logging";
+import { ConsoleForegroundColors } from "../../../../platform/logging/types";
 import { getTelemetrySafeHashedString } from "../../../../platform/telemetry/helpers";
-import { Commands } from "../../../../platform/common/constants";
-import { IKernel, IKernelProvider } from "../../../../kernels/types";
-import { IPyWidgetMessageDispatcherFactory } from "./ipyWidgetMessageDispatcherFactory";
+import { IWebviewCommunication } from "../../../../platform/webviews/types";
+import { Telemetry, sendTelemetryEvent } from "../../../../telemetry";
+import { CDNWidgetScriptSourceProvider } from "../scriptSourceProvider/cdnWidgetScriptSourceProvider";
 import { IPyWidgetScriptSource } from "../scriptSourceProvider/ipyWidgetScriptSource";
 import {
 	IIPyWidgetMessageDispatcher,
 	IWidgetScriptSourceProviderFactory,
 } from "../types";
-import { ConsoleForegroundColors } from "../../../../platform/logging/types";
-import { IWebviewCommunication } from "../../../../platform/webviews/types";
-import { swallowExceptions } from "../../../../platform/common/utils/decorators";
-import { CDNWidgetScriptSourceProvider } from "../scriptSourceProvider/cdnWidgetScriptSourceProvider";
-import { createDeferred } from "../../../../platform/common/utils/async";
-import { dispose } from "../../../../platform/common/utils/lifecycle";
-import { StopWatch } from "../../../../platform/common/utils/stopWatch";
-import { isPythonKernelConnection } from "../../../../kernels/helpers";
+import { IPyWidgetMessageDispatcherFactory } from "./ipyWidgetMessageDispatcherFactory";
 
 /**
  * This class wraps all of the ipywidgets communication with a backing notebook
@@ -94,16 +94,16 @@ export class CommonMessageCoordinator {
 
 	public constructor(
 		private readonly document: NotebookDocument,
-		private readonly serviceContainer: IServiceContainer
+		private readonly serviceContainer: IServiceContainer,
 	) {
 		this.disposables =
 			this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry);
 		this.jupyterOutput = this.serviceContainer.get<IOutputChannel>(
 			IOutputChannel,
-			STANDARD_OUTPUT_CHANNEL
+			STANDARD_OUTPUT_CHANNEL,
 		);
 		this.configService = this.serviceContainer.get<IConfigurationService>(
-			IConfigurationService
+			IConfigurationService,
 		);
 		this.initialize();
 	}
@@ -125,7 +125,7 @@ export class CommonMessageCoordinator {
 		this.postMessage(
 			(e) => {
 				traceInfoIfCI(
-					`${ConsoleForegroundColors.Green}Widget Coordinator sent ${e.message}`
+					`${ConsoleForegroundColors.Green}Widget Coordinator sent ${e.message}`,
 				);
 				// Special case for webview URI translation
 				if (
@@ -138,7 +138,7 @@ export class CommonMessageCoordinator {
 						{
 							request: e.payload,
 							response: webview.asWebviewUri(e.payload),
-						}
+						},
 					);
 				} else {
 					if (!this.readyMessageReceived) {
@@ -156,7 +156,7 @@ export class CommonMessageCoordinator {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		const deferred = createDeferred<7 | 8>();
 		const sendIPyWidgetsVersion = async () => {
@@ -178,14 +178,14 @@ export class CommonMessageCoordinator {
 							}
 						},
 						this,
-						disposables
+						disposables,
 					);
 				}
 				const kernel = await kernelPromise.promise;
 				if (kernel) {
 					if (
 						isPythonKernelConnection(
-							kernel.kernelConnectionMetadata
+							kernel.kernelConnectionMetadata,
 						)
 					) {
 						if (kernel.ipywidgetsVersion) {
@@ -199,14 +199,14 @@ export class CommonMessageCoordinator {
 									if (kernel.ipywidgetsVersion) {
 										if (!deferred.completed) {
 											deferred.resolve(
-												kernel.ipywidgetsVersion
+												kernel.ipywidgetsVersion,
 											);
 										}
 										dispose(disposables);
 									}
 								},
 								this,
-								disposables
+								disposables,
 							);
 						}
 					} else {
@@ -226,7 +226,7 @@ export class CommonMessageCoordinator {
 			traceVerbose(
 				`Version of IPyWidgets ${version} determined after ${
 					stopWatch.elapsedTime / 1000
-				}s`
+				}s`,
 			);
 			webview
 				.postMessage({
@@ -238,7 +238,7 @@ export class CommonMessageCoordinator {
 		webview.onDidReceiveMessage(
 			async (m) => {
 				traceInfoIfCI(
-					`${ConsoleForegroundColors.Green}Widget Coordinator received ${m.type}`
+					`${ConsoleForegroundColors.Green}Widget Coordinator received ${m.type}`,
 				);
 				this.onMessage(webview, m.type, m.payload);
 				if (
@@ -255,14 +255,14 @@ export class CommonMessageCoordinator {
 				}
 				if (m.type === IPyWidgetMessages.IPyWidgets_Ready) {
 					traceVerbose(
-						"Web view is ready to receive widget messages"
+						"Web view is ready to receive widget messages",
 					);
 					this.readyMessageReceived = true;
 					this.sendPendingWebViewMessages(webview);
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		// In case the webview loaded earlier and it already sent the IPyWidgetMessages.IPyWidgets_Ready message
 		// This way we don't make assumptions, we just query widgets and ask its its ready (avoids timing issues etc).
@@ -281,7 +281,7 @@ export class CommonMessageCoordinator {
 	public onMessage(
 		webview: IWebviewCommunication,
 		message: string,
-		payload?: any
+		payload?: any,
 	): void {
 		if (message === InteractiveWindowMessages.IPyWidgetLoadSuccess) {
 			this.sendLoadSucceededTelemetry(payload).catch(noop);
@@ -292,7 +292,7 @@ export class CommonMessageCoordinator {
 			InteractiveWindowMessages.IPyWidgetWidgetVersionNotSupported
 		) {
 			this.sendUnsupportedWidgetVersionFailureTelemetry(payload).catch(
-				noop
+				noop,
 			);
 		} else if (
 			message === InteractiveWindowMessages.IPyWidgetRenderFailure
@@ -331,12 +331,12 @@ export class CommonMessageCoordinator {
 	}
 
 	private async sendLoadSucceededTelemetry(
-		payload: LoadIPyWidgetClassLoadAction
+		payload: LoadIPyWidgetClassLoadAction,
 	) {
 		try {
 			sendTelemetryEvent(Telemetry.IPyWidgetLoadSuccess, 0, {
 				moduleHash: await getTelemetrySafeHashedString(
-					payload.moduleName
+					payload.moduleName,
 				),
 				moduleVersion: payload.moduleVersion,
 			});
@@ -347,7 +347,7 @@ export class CommonMessageCoordinator {
 
 	private async handleWidgetLoadFailure(
 		webview: IWebviewCommunication,
-		payload: ILoadIPyWidgetClassFailureAction
+		payload: ILoadIPyWidgetClassFailureAction,
 	) {
 		try {
 			let errorMessage: string = payload.error.toString();
@@ -358,7 +358,7 @@ export class CommonMessageCoordinator {
 			if (!payload.isOnline) {
 				errorMessage = DataScience.loadClassFailedWithNoInternet(
 					payload.moduleName,
-					payload.moduleVersion
+					payload.moduleVersion,
 				);
 				window.showErrorMessage(errorMessage).then(noop, noop);
 			} else if (
@@ -370,19 +370,19 @@ export class CommonMessageCoordinator {
 				const enableDownloads = DataScience.enableCDNForWidgetsButton;
 				errorMessage = DataScience.enableCDNForWidgetsSetting(
 					payload.moduleName,
-					payload.moduleVersion
+					payload.moduleVersion,
 				);
 				window
 					.showErrorMessage(
 						errorMessage,
 						{ modal: true },
-						...[enableDownloads, moreInfo]
+						...[enableDownloads, moreInfo],
 					)
 					.then((selection) => {
 						switch (selection) {
 							case moreInfo:
 								void env.openExternal(
-									Uri.parse("https://aka.ms/PVSCIPyWidgets")
+									Uri.parse("https://aka.ms/PVSCIPyWidgets"),
 								);
 								break;
 							case enableDownloads:
@@ -398,7 +398,7 @@ export class CommonMessageCoordinator {
 			sendTelemetryEvent(Telemetry.IPyWidgetLoadFailure, 0, {
 				isOnline: payload.isOnline,
 				moduleHash: await getTelemetrySafeHashedString(
-					payload.moduleName
+					payload.moduleName,
 				),
 				moduleVersion: payload.moduleVersion,
 				timedout: payload.timedout,
@@ -410,14 +410,14 @@ export class CommonMessageCoordinator {
 	@swallowExceptions()
 	private async enableCDNForWidgets(webview: IWebviewCommunication) {
 		await commands.executeCommand(
-			Commands.EnableLoadingWidgetsFrom3rdPartySource
+			Commands.EnableLoadingWidgetsFrom3rdPartySource,
 		);
 		await webview.postMessage({
 			type: IPyWidgetMessages.IPyWidgets_AttemptToDownloadFailedWidgetsAgain,
 		});
 	}
 	private async sendUnsupportedWidgetVersionFailureTelemetry(
-		payload: NotifyIPyWidgetWidgetVersionNotSupportedAction
+		payload: NotifyIPyWidgetWidgetVersionNotSupportedAction,
 	) {
 		try {
 			sendTelemetryEvent(
@@ -425,10 +425,10 @@ export class CommonMessageCoordinator {
 				0,
 				{
 					moduleHash: await getTelemetrySafeHashedString(
-						payload.moduleName
+						payload.moduleName,
 					),
 					moduleVersion: payload.moduleVersion,
-				}
+				},
 			);
 		} catch {
 			// do nothing on failure
@@ -454,18 +454,18 @@ export class CommonMessageCoordinator {
 						errorMsg.content.traceback.map(stripAnsi);
 				}
 				traceInfo(
-					`Unhandled widget kernel message: ${msg.header.msg_type} ${msg.content}`
+					`Unhandled widget kernel message: ${msg.header.msg_type} ${msg.content}`,
 				);
 				this.jupyterOutput.appendLine(
 					DataScience.unhandledMessage(
 						msg.header.msg_type,
-						JSON.stringify(msg.content)
-					)
+						JSON.stringify(msg.content),
+					),
 				);
 				sendTelemetryEvent(
 					Telemetry.IPyWidgetUnhandledMessage,
 					undefined,
-					{ msg_type: msg.header.msg_type }
+					{ msg_type: msg.header.msg_type },
 				);
 			} catch {
 				// Don't care if this doesn't get logged
@@ -476,14 +476,14 @@ export class CommonMessageCoordinator {
 		if (!this.ipyWidgetMessageDispatcher) {
 			this.ipyWidgetMessageDispatcher = this.serviceContainer
 				.get<IPyWidgetMessageDispatcherFactory>(
-					IPyWidgetMessageDispatcherFactory
+					IPyWidgetMessageDispatcherFactory,
 				)
 				.create(this.document);
 			this.disposables.push(
 				this.ipyWidgetMessageDispatcher.postMessage(
 					this.cacheOrSend,
-					this
-				)
+					this,
+				),
 			);
 		}
 		return this.ipyWidgetMessageDispatcher;
@@ -495,20 +495,20 @@ export class CommonMessageCoordinator {
 				this.document,
 				this.serviceContainer.get<IKernelProvider>(IKernelProvider),
 				this.serviceContainer.get<IDisposableRegistry>(
-					IDisposableRegistry
+					IDisposableRegistry,
 				),
 				this.serviceContainer.get<IConfigurationService>(
-					IConfigurationService
+					IConfigurationService,
 				),
 				this.serviceContainer.get<IWidgetScriptSourceProviderFactory>(
-					IWidgetScriptSourceProviderFactory
+					IWidgetScriptSourceProviderFactory,
 				),
 				this.serviceContainer.get<CDNWidgetScriptSourceProvider>(
-					CDNWidgetScriptSourceProvider
-				)
+					CDNWidgetScriptSourceProvider,
+				),
 			);
 			this.disposables.push(
-				this.ipyWidgetScriptSource.postMessage(this.cacheOrSend, this)
+				this.ipyWidgetScriptSource.postMessage(this.cacheOrSend, this),
 			);
 		}
 		return this.ipyWidgetScriptSource;
@@ -519,7 +519,7 @@ export class CommonMessageCoordinator {
 		// It means its too early to dispatch the messages, we need to wait for the event handlers to get bound.
 		if (!this.listeningToPostMessageEvent) {
 			traceInfoIfCI(
-				`${ConsoleForegroundColors.Green}Queuing messages (no listeners)`
+				`${ConsoleForegroundColors.Green}Queuing messages (no listeners)`,
 			);
 			this.cachedMessages.push(data);
 			return;

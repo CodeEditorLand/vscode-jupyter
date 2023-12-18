@@ -3,8 +3,8 @@
 
 import { injectable } from "inversify";
 import { CompletionItemProvider, DocumentSelector, languages } from "vscode";
-import { ILanguageService } from "./types";
 import { IDisposable } from "../types";
+import { ILanguageService } from "./types";
 
 /**
  * Wrapper around vscode's languages namespace.
@@ -19,7 +19,7 @@ export class LanguageService implements ILanguageService {
 		return languages.registerCompletionItemProvider(
 			selector,
 			provider,
-			...triggerCharacters
+			...triggerCharacters,
 		);
 	}
 }

@@ -13,16 +13,16 @@ import { RemoteKernelConnectionHandler } from "./controllers/remoteKernelConnect
 import { RemoteKernelControllerWatcher } from "./controllers/remoteKernelControllerWatcher";
 import { registerTypes as registerControllerTypes } from "./controllers/serviceRegistry.web";
 import { CommandRegistry } from "./debugger/commandRegistry";
+import { DebugLocationTrackerFactory } from "./debugger/debugLocationTrackerFactory";
 import { DebuggerVariables } from "./debugger/debuggerVariables";
 import { DebuggingManager } from "./debugger/debuggingManager";
 import {
-	IDebuggingManager,
 	IDebugLocationTracker,
 	IDebugLocationTrackerFactory,
+	IDebuggingManager,
 	IJupyterDebugService,
 	INotebookDebuggingManager,
 } from "./debugger/debuggingTypes";
-import { DebugLocationTrackerFactory } from "./debugger/debugLocationTrackerFactory";
 import { MultiplexingDebugService } from "./debugger/multiplexingDebugService";
 import { ExportBase } from "./export/exportBase.web";
 import { ExportUtil } from "./export/exportUtil.web";
@@ -38,83 +38,83 @@ import { INotebookEditorProvider } from "./types";
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	isDevMode: boolean
+	isDevMode: boolean,
 ) {
 	registerControllerTypes(serviceManager, isDevMode);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		LiveKernelSwitcher
+		LiveKernelSwitcher,
 	);
 	serviceManager.addSingleton<INotebookEditorProvider>(
 		INotebookEditorProvider,
-		NotebookEditorProvider
+		NotebookEditorProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RemoteKernelControllerWatcher
+		RemoteKernelControllerWatcher,
 	);
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
-		NotebookTracebackFormatter
+		NotebookTracebackFormatter,
 	);
 	serviceManager.addSingleton<NotebookIPyWidgetCoordinator>(
 		NotebookIPyWidgetCoordinator,
-		NotebookIPyWidgetCoordinator
+		NotebookIPyWidgetCoordinator,
 	);
 	serviceManager.addBinding(
 		NotebookIPyWidgetCoordinator,
-		IExtensionSyncActivationService
+		IExtensionSyncActivationService,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RemoteKernelConnectionHandler
+		RemoteKernelConnectionHandler,
 	);
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
-		NotebookCommandListener
+		NotebookCommandListener,
 	);
 	serviceManager.addSingleton<NotebookCellLanguageService>(
 		NotebookCellLanguageService,
-		NotebookCellLanguageService
+		NotebookCellLanguageService,
 	);
 	serviceManager.addBinding(
 		NotebookCellLanguageService,
-		IExtensionSyncActivationService
+		IExtensionSyncActivationService,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		EmptyNotebookCellLanguageService
+		EmptyNotebookCellLanguageService,
 	);
 
 	serviceManager.addSingleton<IDebuggingManager>(
 		INotebookDebuggingManager,
 		DebuggingManager,
 		undefined,
-		[IExtensionSyncActivationService]
+		[IExtensionSyncActivationService],
 	);
 	serviceManager.addSingleton<IJupyterDebugService>(
 		IJupyterDebugService,
 		MultiplexingDebugService,
-		Identifiers.MULTIPLEXING_DEBUGSERVICE
+		Identifiers.MULTIPLEXING_DEBUGSERVICE,
 	);
 	serviceManager.addSingleton<IDebugLocationTracker>(
 		IDebugLocationTracker,
 		DebugLocationTrackerFactory,
 		undefined,
-		[IDebugLocationTrackerFactory]
+		[IDebugLocationTrackerFactory],
 	);
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		DebuggerVariables,
-		Identifiers.DEBUGGER_VARIABLES
+		Identifiers.DEBUGGER_VARIABLES,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CommandRegistry
+		CommandRegistry,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CellOutputMimeTypeTracker
+		CellOutputMimeTypeTracker,
 	);
 
 	serviceManager.addSingleton<IExportBase>(IExportBase, ExportBase);

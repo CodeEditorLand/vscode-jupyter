@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { expect } from "chai";
+import { instance, mock, verify, when } from "ts-mockito";
 import { ConfigurationTarget, Uri, WorkspaceConfiguration } from "vscode";
+import { uriEquals } from "../../../test/datascience/helpers";
+import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 import { JupyterSettings } from "../configSettings";
 import { ConfigurationService } from "./service.node";
-import { instance, mock, verify, when } from "ts-mockito";
-import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
-import { uriEquals } from "../../../test/datascience/helpers";
 
 suite("Configuration Service", () => {
 	const resource = Uri.parse("a");
@@ -15,8 +15,8 @@ suite("Configuration Service", () => {
 	setup(() => {
 		when(
 			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(
-				uriEquals(resource)
-			)
+				uriEquals(resource),
+			),
 		).thenReturn({
 			uri: resource,
 			index: 0,
@@ -30,8 +30,8 @@ suite("Configuration Service", () => {
 		when(
 			mockedVSCodeNamespaces.workspace.getConfiguration(
 				"jupyter",
-				uriEquals(resource)
-			)
+				uriEquals(resource),
+			),
 		).thenReturn(instance(workspaceConfig));
 		return workspaceConfig;
 	}
@@ -50,23 +50,23 @@ suite("Configuration Service", () => {
 			workspaceConfig.update(
 				"setting",
 				"globalValue",
-				ConfigurationTarget.Global
-			)
+				ConfigurationTarget.Global,
+			),
 		).thenResolve();
 
 		await configService.updateSetting(
 			"setting",
 			"globalValue",
 			resource,
-			ConfigurationTarget.Global
+			ConfigurationTarget.Global,
 		);
 
 		verify(
 			workspaceConfig.update(
 				"setting",
 				"globalValue",
-				ConfigurationTarget.Global
-			)
+				ConfigurationTarget.Global,
+			),
 		).never();
 	});
 
@@ -79,23 +79,23 @@ suite("Configuration Service", () => {
 			workspaceConfig.update(
 				"setting",
 				"newGlobalValue",
-				ConfigurationTarget.Global
-			)
+				ConfigurationTarget.Global,
+			),
 		).thenResolve();
 
 		await configService.updateSetting(
 			"setting",
 			"newGlobalValue",
 			resource,
-			ConfigurationTarget.Global
+			ConfigurationTarget.Global,
 		);
 
 		verify(
 			workspaceConfig.update(
 				"setting",
 				"newGlobalValue",
-				ConfigurationTarget.Global
-			)
+				ConfigurationTarget.Global,
+			),
 		).once();
 	});
 
@@ -108,23 +108,23 @@ suite("Configuration Service", () => {
 			workspaceConfig.update(
 				"setting",
 				"workspaceValue",
-				ConfigurationTarget.Workspace
-			)
+				ConfigurationTarget.Workspace,
+			),
 		).thenReturn();
 
 		await configService.updateSetting(
 			"setting",
 			"workspaceValue",
 			resource,
-			ConfigurationTarget.Workspace
+			ConfigurationTarget.Workspace,
 		);
 
 		verify(
 			workspaceConfig.update(
 				"setting",
 				"workspaceValue",
-				ConfigurationTarget.Workspace
-			)
+				ConfigurationTarget.Workspace,
+			),
 		).never();
 	});
 
@@ -137,23 +137,23 @@ suite("Configuration Service", () => {
 			workspaceConfig.update(
 				"setting",
 				"newWorkspaceValue",
-				ConfigurationTarget.Workspace
-			)
+				ConfigurationTarget.Workspace,
+			),
 		).thenResolve();
 
 		await configService.updateSetting(
 			"setting",
 			"newWorkspaceValue",
 			resource,
-			ConfigurationTarget.Workspace
+			ConfigurationTarget.Workspace,
 		);
 
 		verify(
 			workspaceConfig.update(
 				"setting",
 				"newWorkspaceValue",
-				ConfigurationTarget.Workspace
-			)
+				ConfigurationTarget.Workspace,
+			),
 		).once();
 	});
 
@@ -166,23 +166,23 @@ suite("Configuration Service", () => {
 			workspaceConfig.update(
 				"setting",
 				"workspaceFolderValue",
-				ConfigurationTarget.WorkspaceFolder
-			)
+				ConfigurationTarget.WorkspaceFolder,
+			),
 		).thenResolve();
 
 		await configService.updateSetting(
 			"setting",
 			"workspaceFolderValue",
 			resource,
-			ConfigurationTarget.WorkspaceFolder
+			ConfigurationTarget.WorkspaceFolder,
 		);
 
 		verify(
 			workspaceConfig.update(
 				"setting",
 				"workspaceFolderValue",
-				ConfigurationTarget.WorkspaceFolder
-			)
+				ConfigurationTarget.WorkspaceFolder,
+			),
 		).never();
 	});
 
@@ -195,23 +195,23 @@ suite("Configuration Service", () => {
 			workspaceConfig.update(
 				"setting",
 				"newWorkspaceFolderValue",
-				ConfigurationTarget.WorkspaceFolder
-			)
+				ConfigurationTarget.WorkspaceFolder,
+			),
 		).thenResolve();
 
 		await configService.updateSetting(
 			"setting",
 			"newWorkspaceFolderValue",
 			resource,
-			ConfigurationTarget.WorkspaceFolder
+			ConfigurationTarget.WorkspaceFolder,
 		);
 
 		verify(
 			workspaceConfig.update(
 				"setting",
 				"newWorkspaceFolderValue",
-				ConfigurationTarget.WorkspaceFolder
-			)
+				ConfigurationTarget.WorkspaceFolder,
+			),
 		).once();
 	});
 });

@@ -16,15 +16,15 @@ import {
 	TextDocument,
 	languages,
 } from "vscode";
-import { IExtensionSyncActivationService } from "../../activation/types";
-import { IDisposableRegistry } from "../../common/types";
 import * as path from "../../../platform/vscode-path/path";
-import { IInterpreterService } from "../contracts";
+import { IExtensionSyncActivationService } from "../../activation/types";
 import { IPythonExtensionChecker } from "../../api/types";
 import { getDisplayPath } from "../../common/platform/fs-paths";
+import { IDisposableRegistry } from "../../common/types";
+import { traceWarning } from "../../logging";
+import { IInterpreterService } from "../contracts";
 import { getPythonEnvDisplayName } from "../helpers";
 import { isPythonEnvInListOfHiddenEnvs } from "./filterService";
-import { traceWarning } from "../../logging";
 
 @injectable()
 export class PythonEnvFilterCompletionProvider
@@ -50,23 +50,23 @@ export class PythonEnvFilterCompletionProvider
 				{ language: "json" },
 				this,
 				",",
-				"["
-			)
+				"[",
+			),
 		);
 		this.disposableRegistry.push(
 			languages.registerCompletionItemProvider(
 				{ language: "jsonc" },
 				this,
 				",",
-				"["
-			)
+				"[",
+			),
 		);
 	}
 
 	public async provideCompletionItems(
 		document: TextDocument,
 		position: Position,
-		_token: CancellationToken
+		_token: CancellationToken,
 	): Promise<CompletionItem[]> {
 		if (
 			!this.pythonExtChecker.isPythonExtensionInstalled ||
@@ -74,7 +74,7 @@ export class PythonEnvFilterCompletionProvider
 			this.interpreters.resolvedEnvironments.length === 0 ||
 			!PythonEnvFilterCompletionProvider.canProvideCompletions(
 				document,
-				position
+				position,
 			)
 		) {
 			return [];
@@ -102,14 +102,14 @@ export class PythonEnvFilterCompletionProvider
 
 	public static canProvideCompletions(
 		document: TextDocument,
-		position: Position
+		position: Position,
 	): boolean {
 		if (path.basename(document.uri.fsPath) !== "settings.json") {
 			return false;
 		}
 		const location = getLocation(
 			document.getText(),
-			document.offsetAt(position)
+			document.offsetAt(position),
 		);
 		// Cursor must be inside the configurations array and not in any nested items.
 		// Hence path[0] = array, path[1] = array element index.
@@ -120,7 +120,7 @@ export class PythonEnvFilterCompletionProvider
 	}
 	private getCurrentItemsInList(
 		document: TextDocument,
-		position: Position
+		position: Position,
 	): string[] {
 		try {
 			const settings = document.getText();
@@ -135,7 +135,7 @@ export class PythonEnvFilterCompletionProvider
 		} catch (ex) {
 			traceWarning(
 				`Failed to provide completions for python env filter`,
-				ex
+				ex,
 			);
 			return [];
 		}

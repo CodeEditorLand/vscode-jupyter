@@ -37,11 +37,11 @@ export class JupyterNotebookNotInstalled extends BaseError {
 	constructor(
 		message: string,
 		stderr: string | string,
-		public readonly interpreter?: PythonEnvironment
+		public readonly interpreter?: PythonEnvironment,
 	) {
 		super(
 			"jupyternotebooknotinstalled",
-			message + (stderr ? `\n${stderr}` : "")
+			message + (stderr ? `\n${stderr}` : ""),
 		);
 	}
 }

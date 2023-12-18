@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type { Session } from "@jupyterlab/services";
 import type {
 	CancellationToken,
 	Disposable,
@@ -8,7 +9,6 @@ import type {
 	NotebookDocument,
 	Uri,
 } from "vscode";
-import type { Session } from "@jupyterlab/services";
 
 declare module "./api" {
 	export interface Jupyter {
@@ -23,7 +23,7 @@ declare module "./api" {
 		 * @param serverProvider object called back when picking jupyter server URI
 		 */
 		registerRemoteServerProvider(
-			serverProvider: IJupyterUriProvider
+			serverProvider: IJupyterUriProvider,
 		): Disposable;
 		/**
 		 * Adds a remote Jupyter Server to the list of Remote Jupyter servers.
@@ -31,7 +31,7 @@ declare module "./api" {
 		 */
 		addRemoteJupyterServer(
 			providerId: string,
-			handle: string
+			handle: string,
 		): Promise<void>;
 		/**
 		 * Gets the service that provides access to kernels.
@@ -279,7 +279,7 @@ declare module "./api" {
 		startKernel(
 			metadata: KernelConnectionMetadata,
 			uri: Uri,
-			token?: CancellationToken
+			token?: CancellationToken,
 		): Promise<Session.ISessionConnection>;
 		/**
 		 * Connects an existing kernel to a resource.
@@ -288,7 +288,7 @@ declare module "./api" {
 		 */
 		connect(
 			metadata: LiveRemoteKernelConnectionMetadata,
-			uri: Uri
+			uri: Uri,
 		): Promise<Session.ISessionConnection>;
 	}
 }

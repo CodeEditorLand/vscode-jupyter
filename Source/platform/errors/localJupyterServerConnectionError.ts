@@ -18,8 +18,8 @@ export class LocalJupyterServerConnectionError extends BaseError {
 		super(
 			"localjupyterserverconnection",
 			DataScience.jupyterNotebookFailure(
-				originalError.message || originalError.toString()
-			)
+				originalError.message || originalError.toString(),
+			),
 		);
 	}
 }

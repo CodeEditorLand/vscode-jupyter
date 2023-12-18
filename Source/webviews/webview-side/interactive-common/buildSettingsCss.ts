@@ -7,7 +7,7 @@ import { IJupyterExtraSettings } from "../../../platform/webviews/types";
 // inserted into our StyleSetter divs some things like pseudo elements
 // can't be put into inline styles
 export function buildSettingsCss(
-	settings: IJupyterExtraSettings | undefined
+	settings: IJupyterExtraSettings | undefined,
 ): string {
 	return settings
 		? `#main-panel-content::-webkit-scrollbar {

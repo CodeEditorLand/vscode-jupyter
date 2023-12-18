@@ -3,20 +3,20 @@
 
 import { anything, instance, mock, verify, when } from "ts-mockito";
 import { ConfigurationChangeEvent, EventEmitter, Uri } from "vscode";
+import { IDataScienceErrorHandler } from "../../../kernels/errors/types";
 import { IWebviewPanelProvider } from "../../../platform/common/application/types";
-import { WebviewPanelProvider } from "../../../platform/webviews/webviewPanelProvider";
 import { JupyterSettings } from "../../../platform/common/configSettings";
 import { ConfigurationService } from "../../../platform/common/configuration/service.node";
 import {
 	IConfigurationService,
 	IExtensionContext,
 } from "../../../platform/common/types";
-import { IDataScienceErrorHandler } from "../../../kernels/errors/types";
+import { WebviewPanelProvider } from "../../../platform/webviews/webviewPanelProvider";
+import { MockMemento } from "../../../test/mocks/mementos";
+import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 import { DataViewer } from "./dataViewer";
 import { JupyterVariableDataProvider } from "./jupyterVariableDataProvider";
 import { IDataViewer, IDataViewerDataProvider } from "./types";
-import { MockMemento } from "../../../test/mocks/mementos";
-import { mockedVSCodeNamespaces } from "../../../test/vscode-mock";
 
 suite("DataViewer", () => {
 	let dataViewer: IDataViewer;
@@ -35,16 +35,16 @@ suite("DataViewer", () => {
 
 		when(settings.onDidChange).thenReturn(settingsChangedEvent.event);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(settings)
+			instance(settings),
 		);
 
 		const configChangeEvent = new EventEmitter<ConfigurationChangeEvent>();
 
 		when(
-			mockedVSCodeNamespaces.workspace.onDidChangeConfiguration
+			mockedVSCodeNamespaces.workspace.onDidChangeConfiguration,
 		).thenReturn(configChangeEvent.event);
 		when(dataProvider.getDataFrameInfo(anything(), anything())).thenResolve(
-			{}
+			{},
 		);
 		when(context.extensionUri).thenReturn(Uri.parse("/"));
 
@@ -53,7 +53,7 @@ suite("DataViewer", () => {
 			instance(configService),
 			new MockMemento(),
 			instance(mock<IDataScienceErrorHandler>()),
-			instance(context)
+			instance(context),
 		);
 	});
 	test("Data viewer showData calls gets dataFrame info from data provider", async () => {

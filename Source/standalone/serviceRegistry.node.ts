@@ -1,71 +1,71 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { INotebookExporter, INotebookImporter } from "../kernels/jupyter/types";
 import {
 	IExtensionActivationManager,
 	IExtensionSyncActivationService,
 } from "../platform/activation/types";
+import { IExtensionContext } from "../platform/common/types";
 import { IServiceManager } from "../platform/ioc/types";
-import { INotebookExporter, INotebookImporter } from "../kernels/jupyter/types";
-import { JupyterExporter } from "./import-export/jupyterExporter";
-import { JupyterImporter } from "./import-export/jupyterImporter.node";
-import { CommandRegistry as ExportCommandRegistry } from "./import-export/commandRegistry";
-import { ExtensionRecommendationService } from "./recommendation/extensionRecommendation.node";
-import { ActiveEditorContextService } from "./context/activeEditorContext";
-import { IImportTracker, ImportTracker } from "./import-export/importTracker";
+import { ExtensionActivationManager } from "./activation/activationManager";
 import { GlobalActivation } from "./activation/globalActivation";
-import { JupyterKernelServiceFactory } from "./api/kernelApi";
+import { WorkspaceActivation } from "./activation/workspaceActivation.node";
+import { EagerlyActivateJupyterUriProviders } from "./api/activateJupyterProviderExtensions";
 import { IExportedKernelServiceFactory } from "./api/api";
 import { ApiAccessService } from "./api/apiAccessService";
-import { WorkspaceActivation } from "./activation/workspaceActivation.node";
-import { ExtensionActivationManager } from "./activation/activationManager";
+import { JupyterKernelServiceFactory } from "./api/kernelApi";
+import { ExposeUsedAzMLServerHandles } from "./api/usedAzMLServerHandles";
+import { CommandRegistry as CodespaceCommandRegistry } from "./codespace/commandRegistry";
+import { ActiveEditorContextService } from "./context/activeEditorContext";
+import { registerTypes as registerDevToolTypes } from "./devTools/serviceRegistry";
+import { CommandRegistry as ExportCommandRegistry } from "./import-export/commandRegistry";
+import { IImportTracker, ImportTracker } from "./import-export/importTracker";
+import { JupyterExporter } from "./import-export/jupyterExporter";
+import { JupyterImporter } from "./import-export/jupyterImporter.node";
+import { registerTypes as registerIntellisenseTypes } from "./intellisense/serviceRegistry.node";
+import { PythonExtensionRestartNotification } from "./notification/pythonExtensionRestartNotification";
+import { ExtensionRecommendationService } from "./recommendation/extensionRecommendation.node";
 import {
 	DataScienceSurveyBanner,
 	ISurveyBanner,
 } from "./survey/dataScienceSurveyBanner.node";
-import { IExtensionContext } from "../platform/common/types";
-import { registerTypes as registerDevToolTypes } from "./devTools/serviceRegistry";
-import { registerTypes as registerIntellisenseTypes } from "./intellisense/serviceRegistry.node";
-import { PythonExtensionRestartNotification } from "./notification/pythonExtensionRestartNotification";
-import { UserJupyterServerUrlProvider } from "./userJupyterServer/userServerUrlProvider";
 import { JupyterServerSelectorCommand } from "./userJupyterServer/serverSelectorForTests";
-import { CommandRegistry as CodespaceCommandRegistry } from "./codespace/commandRegistry";
-import { EagerlyActivateJupyterUriProviders } from "./api/activateJupyterProviderExtensions";
-import { ExposeUsedAzMLServerHandles } from "./api/usedAzMLServerHandles";
+import { UserJupyterServerUrlProvider } from "./userJupyterServer/userServerUrlProvider";
 
 export function registerTypes(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	isDevMode: boolean
+	isDevMode: boolean,
 ) {
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GlobalActivation
+		GlobalActivation,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		WorkspaceActivation
+		WorkspaceActivation,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExtensionRecommendationService
+		ExtensionRecommendationService,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ActiveEditorContextService
+		ActiveEditorContextService,
 	);
 	serviceManager.addSingleton<IImportTracker>(IImportTracker, ImportTracker);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ImportTracker
+		ImportTracker,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		EagerlyActivateJupyterUriProviders
+		EagerlyActivateJupyterUriProviders,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		JupyterServerSelectorCommand
+		JupyterServerSelectorCommand,
 	);
 
 	// Import/Export
@@ -73,39 +73,39 @@ export function registerTypes(
 	serviceManager.add<INotebookImporter>(INotebookImporter, JupyterImporter);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExportCommandRegistry
+		ExportCommandRegistry,
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodespaceCommandRegistry
+		CodespaceCommandRegistry,
 	);
 
 	serviceManager.addSingleton<ISurveyBanner>(
 		ISurveyBanner,
-		DataScienceSurveyBanner
+		DataScienceSurveyBanner,
 	);
 	serviceManager.addBinding(ISurveyBanner, IExtensionSyncActivationService);
 	// Activation Manager
 	serviceManager.add<IExtensionActivationManager>(
 		IExtensionActivationManager,
-		ExtensionActivationManager
+		ExtensionActivationManager,
 	);
 
 	// API
 	serviceManager.addSingleton<IExportedKernelServiceFactory>(
 		IExportedKernelServiceFactory,
-		JupyterKernelServiceFactory
+		JupyterKernelServiceFactory,
 	);
 	serviceManager.addSingleton<ApiAccessService>(
 		ApiAccessService,
-		ApiAccessService
+		ApiAccessService,
 	);
 
 	// Notification
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonExtensionRestartNotification
+		PythonExtensionRestartNotification,
 	);
 
 	// Intellisense
@@ -117,10 +117,10 @@ export function registerTypes(
 	// User jupyter server url provider
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		UserJupyterServerUrlProvider
+		UserJupyterServerUrlProvider,
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExposeUsedAzMLServerHandles
+		ExposeUsedAzMLServerHandles,
 	);
 }

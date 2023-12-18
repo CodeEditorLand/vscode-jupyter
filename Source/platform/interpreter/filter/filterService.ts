@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Environment } from "@vscode/python-extension";
 import { inject, injectable } from "inversify";
 import { EventEmitter, Uri, workspace } from "vscode";
-import { dispose } from "../../common/utils/lifecycle";
-import { IDisposable, IDisposableRegistry } from "../../common/types";
 import { sendTelemetryEvent } from "../../../telemetry";
 import { Telemetry, isWebExtension } from "../../common/constants";
 import { getDisplayPath } from "../../common/platform/fs-paths";
+import { IDisposable, IDisposableRegistry } from "../../common/types";
+import { dispose } from "../../common/utils/lifecycle";
 import { traceVerbose } from "../../logging";
-import { Environment } from "@vscode/python-extension";
 
 /**
  * Determine whether a Python environment should be excluded from the Kernel filter.
@@ -40,7 +40,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 		dispose(this.disposables);
 	}
 	public isPythonEnvironmentExcluded(
-		interpreter: { uri: Uri; envPath?: Uri } | Environment
+		interpreter: { uri: Uri; envPath?: Uri } | Environment,
 	): boolean {
 		if (isWebExtension()) {
 			return false;
@@ -53,8 +53,8 @@ export class PythonEnvironmentFilter implements IDisposable {
 			sendTelemetryEvent(Telemetry.JupyterKernelHiddenViaFilter);
 			traceVerbose(
 				`Python Env hidden via filter: ${getDisplayPath(
-					interpreterUri
-				)}`
+					interpreterUri,
+				)}`,
 			);
 		}
 		return hidden;
@@ -75,7 +75,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 			filters.push(
 				...workspace
 					.getConfiguration("jupyter", item.uri)
-					.get<string[]>("kernels.excludePythonEnvironments", [])
+					.get<string[]>("kernels.excludePythonEnvironments", []),
 			);
 		});
 		return filters;
@@ -84,7 +84,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 
 export function isPythonEnvInListOfHiddenEnvs(
 	interpreter: { uri: Uri; envPath?: Uri } | Environment,
-	hiddenList: string[]
+	hiddenList: string[],
 ): boolean {
 	const envFolderUri =
 		"uri" in interpreter

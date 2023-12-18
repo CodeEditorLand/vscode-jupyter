@@ -1,32 +1,42 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import fastDeepEqual from "fast-deep-equal";
 import type * as nbformat from "@jupyterlab/nbformat";
 import type * as KernelMessage from "@jupyterlab/services/lib/kernel/messages";
+import fastDeepEqual from "fast-deep-equal";
 import {
-	NotebookCell,
-	NotebookCellExecution,
-	NotebookCellKind,
-	NotebookCellExecutionSummary,
-	NotebookDocument,
-	workspace,
-	WorkspaceEdit,
-	NotebookCellData,
-	Range,
-	NotebookCellOutput,
 	CancellationTokenSource,
+	Disposable,
 	EventEmitter,
 	ExtensionMode,
-	NotebookEdit,
+	NotebookCell,
+	NotebookCellData,
+	NotebookCellExecution,
+	NotebookCellExecutionSummary,
+	NotebookCellKind,
+	NotebookCellOutput,
 	NotebookCellOutputItem,
-	Disposable,
+	NotebookDocument,
+	NotebookEdit,
+	Range,
+	WorkspaceEdit,
 	window,
+	workspace,
 } from "vscode";
 
 import type { Kernel } from "@jupyterlab/services";
-import { CellExecutionCreator } from "./cellExecutionCreator";
+import { IKernelController, ITracebackFormatter } from "../../kernels/types";
+import { Identifiers, WIDGET_MIMETYPE } from "../../platform/common/constants";
+import { IDisposable, IExtensionContext } from "../../platform/common/types";
+import {
+	concatMultilineString,
+	formatStreamText,
+	isJupyterNotebook,
+} from "../../platform/common/utils";
+import { createDeferred } from "../../platform/common/utils/async";
+import { swallowExceptions } from "../../platform/common/utils/decorators";
 import { dispose } from "../../platform/common/utils/lifecycle";
+import { noop } from "../../platform/common/utils/misc";
 import {
 	traceError,
 	traceInfo,
@@ -34,25 +44,15 @@ import {
 	traceVerbose,
 	traceWarning,
 } from "../../platform/logging";
-import { IDisposable, IExtensionContext } from "../../platform/common/types";
-import {
-	concatMultilineString,
-	formatStreamText,
-	isJupyterNotebook,
-} from "../../platform/common/utils";
-import {
-	traceCellMessage,
-	cellOutputToVSCCellOutput,
-	translateCellDisplayOutput,
-	CellOutputMimeTypes,
-} from "./helpers";
-import { swallowExceptions } from "../../platform/common/utils/decorators";
-import { noop } from "../../platform/common/utils/misc";
-import { IKernelController, ITracebackFormatter } from "../../kernels/types";
-import { handleTensorBoardDisplayDataOutput } from "./executionHelpers";
-import { Identifiers, WIDGET_MIMETYPE } from "../../platform/common/constants";
 import { CellOutputDisplayIdTracker } from "./cellDisplayIdTracker";
-import { createDeferred } from "../../platform/common/utils/async";
+import { CellExecutionCreator } from "./cellExecutionCreator";
+import { handleTensorBoardDisplayDataOutput } from "./executionHelpers";
+import {
+	CellOutputMimeTypes,
+	cellOutputToVSCCellOutput,
+	traceCellMessage,
+	translateCellDisplayOutput,
+} from "./helpers";
 
 // Helper interface for the set_next_input execute reply payload
 interface ISetNextInputPayload {
@@ -83,7 +83,7 @@ export const activeNotebookCellExecution = new WeakMap<
 >();
 
 export function getParentHeaderMsgId(
-	msg: KernelMessage.IMessage
+	msg: KernelMessage.IMessage,
 ): string | undefined {
 	if (msg.parent_header && "msg_id" in msg.parent_header) {
 		return msg.parent_header.msg_id;
@@ -215,7 +215,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			  >
 			| undefined,
 		cellExecution: NotebookCellExecution,
-		executionMessageId: string
+		executionMessageId: string,
 	) {
 		this._completed.promise.catch(noop);
 		this.executeRequestMessageId = executionMessageId;
@@ -226,7 +226,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					return;
 				}
 				const thisCellChange = e.cellChanges.find(
-					({ cell }) => cell === this.cell
+					({ cell }) => cell === this.cell,
 				);
 				if (!thisCellChange) {
 					return;
@@ -238,7 +238,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.execution = cellExecution;
 		// We're in all messages.
@@ -321,7 +321,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 	}
 	private onKernelAnyMessage(
 		_: unknown,
-		{ direction, msg }: Kernel.IAnyMessageArgs
+		{ direction, msg }: Kernel.IAnyMessageArgs,
 	) {
 		if (this.cell.document.isClosed) {
 			return this.endCellExecution();
@@ -365,7 +365,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// I.e. previous request is done.
 			const gotANewMessage = parentMsgId
 				? parentMsgId !== this.executeRequestMessageId &&
-					!isBusyProcessingAnotherRequest
+				  !isBusyProcessingAnotherRequest
 				: false;
 			const isResponseToInterruptRequest =
 				typeof msg.parent_header === "object" &&
@@ -416,13 +416,13 @@ export class CellExecutionMessageHandler implements IDisposable {
 					},
 					// If we got an idle response to an interrupt request, this means the previous request has ended.
 					// However its very likely we will get a valid response to end the previous request, hence lets wait 1s for that response to come back.
-					isResponseToInterruptRequest ? 1000 : 100
+					isResponseToInterruptRequest ? 1000 : 100,
 				);
 				this.disposables.push(
 					new Disposable(() => {
 						clearTimeout(this.endAbnormallyTimeout);
 						this.endAbnormallyTimeout = undefined;
-					})
+					}),
 				);
 				return;
 			}
@@ -443,7 +443,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 	}
 	private onKernelIOPubMessage(
 		_: unknown,
-		msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
+		msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
 	) {
 		if (this.cell.document.isClosed) {
 			return this.endCellExecution();
@@ -469,7 +469,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			traceError(
 				`Failed to handle iopub message as a result of some comm message`,
 				msg,
-				ex
+				ex,
 			);
 			if (!this.completedExecution && !this.cell.document.isClosed) {
 				// If there are problems handling the execution, then bubble those to the calling code.
@@ -495,7 +495,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		}
 		// If we have an active task, use that instead of creating a new task.
 		const existingTask = activeNotebookCellExecution.get(
-			this.cell.notebook
+			this.cell.notebook,
 		);
 		if (existingTask) {
 			return existingTask;
@@ -507,7 +507,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		};
 		this.temporaryExecution = CellExecutionCreator.getOrCreate(
 			this.cell,
-			this.controller
+			this.controller,
 		);
 		this.temporaryExecution?.start();
 		if (this.previousResultsToRestore?.executionOrder && this.execution) {
@@ -528,7 +528,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			}
 			this.temporaryExecution.end(
 				this.previousResultsToRestore.success,
-				this.previousResultsToRestore.timing?.endTime
+				this.previousResultsToRestore.timing?.endTime,
 			);
 		} else {
 			// Undefined for not success or failure
@@ -552,7 +552,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// }
 			this.execution?.start(this.startTime);
 			traceInfo(
-				`Kernel acknowledged execution of cell ${this.cell.index} @ ${this.startTime}`
+				`Kernel acknowledged execution of cell ${this.cell.index} @ ${this.startTime}`,
 			);
 		}
 
@@ -590,7 +590,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			traceWarning(
 				`Unknown message ${msg.header.msg_type} : hasData=${
 					"data" in msg.content
-				}`
+				}`,
 			);
 		}
 
@@ -670,26 +670,26 @@ export class CellExecutionMessageHandler implements IDisposable {
 				if (typeof item !== "string") {
 					return traceWarning(
 						`Came across a comm update message a child that isn't a string`,
-						item
+						item,
 					);
 				}
 				if (!item.startsWith(IPY_MODEL_PREFIX)) {
 					return traceWarning(
 						`Came across a comm update message a child that start start with ${IPY_MODEL_PREFIX}`,
-						item
+						item,
 					);
 				}
 				const commId = item.substring(IPY_MODEL_PREFIX.length);
 				this.ownedCommIds.add(commId);
 				this.commIdsMappedToParentWidgetModel.set(
 					commId,
-					msg.content.comm_id
+					msg.content.comm_id,
 				);
 			});
 		}
 	}
 	private clearOutputIfNecessary(
-		execution: NotebookCellExecution | undefined
+		execution: NotebookCellExecution | undefined,
 	): {
 		previousValueOfClearOutputOnNextUpdateToOutput: boolean;
 	} {
@@ -709,7 +709,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			| nbformat.IStream
 			| nbformat.IError
 			| nbformat.IOutput,
-		originalMessage: KernelMessage.IMessage
+		originalMessage: KernelMessage.IMessage,
 	) {
 		if (
 			output.data &&
@@ -727,12 +727,12 @@ export class CellExecutionMessageHandler implements IDisposable {
 			if (widgetData && "model_id" in widgetData) {
 				const modelIds =
 					CellExecutionMessageHandler.modelIdsOwnedByCells.get(
-						this.cell
+						this.cell,
 					) || new Set<string>();
 				modelIds.add(widgetData.model_id);
 				CellExecutionMessageHandler.modelIdsOwnedByCells.set(
 					this.cell,
-					modelIds
+					modelIds,
 				);
 			}
 		}
@@ -762,7 +762,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				this.cell,
 				displayId,
 				cellOutput,
-				cellOutput.items
+				cellOutput.items,
 			);
 		}
 
@@ -778,7 +778,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			].msgIdsToSwallow === parentHeaderMsgId &&
 			cellOutput.items.every((item) =>
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				this.canMimeTypeBeRenderedByWidgetManager(item)
+				this.canMimeTypeBeRenderedByWidgetManager(item),
 			)
 		) {
 			// Plain text outputs will be displayed by the widget.
@@ -796,7 +796,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					].handlingCommId,
 					outputToAppend: cellOutput,
 				},
-				task
+				task,
 			);
 
 			if (result?.outputAdded) {
@@ -814,7 +814,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 	 * However some of them like the Output Widget & vendored mimetypes cannot be handled by it.
 	 */
 	private canMimeTypeBeRenderedByWidgetManager(
-		outputItem: NotebookCellOutputItem
+		outputItem: NotebookCellOutputItem,
 	) {
 		const mime = outputItem.mime;
 		if (
@@ -827,7 +827,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		}
 		if (mime === WIDGET_MIMETYPE) {
 			const data: WidgetData = JSON.parse(
-				Buffer.from(outputItem.data).toString()
+				Buffer.from(outputItem.data).toString(),
 			);
 			// Jupyter Output widgets cannot be rendered properly by the widget manager,
 			// We need to render that.
@@ -864,13 +864,13 @@ export class CellExecutionMessageHandler implements IDisposable {
 		options:
 			| { outputToAppend: NotebookCellOutput; commId: string }
 			| { clearOutput: true },
-		task?: NotebookCellExecution
+		task?: NotebookCellExecution,
 	): { outputAdded: true } | undefined {
 		const outputAreSpecificToAWidgetHandlingCommId = this
 			.outputsAreSpecificToAWidget.length
 			? this.outputsAreSpecificToAWidget[
 					this.outputsAreSpecificToAWidget.length - 1
-				].handlingCommId
+			  ].handlingCommId
 			: undefined;
 		const commId =
 			"commId" in options
@@ -887,15 +887,14 @@ export class CellExecutionMessageHandler implements IDisposable {
 		// Find the cell that owns the widget (where its model_id = commId).
 		const cell = this.cell.notebook
 			.getCells()
-			.find(
-				(cell) =>
-					CellExecutionMessageHandler.modelIdsOwnedByCells
-						.get(cell)
-						?.has(expectedModelId)
+			.find((cell) =>
+				CellExecutionMessageHandler.modelIdsOwnedByCells
+					.get(cell)
+					?.has(expectedModelId),
 			);
 		if (!cell) {
 			traceWarning(
-				`Unable to find a cell that owns the model ${expectedModelId}`
+				`Unable to find a cell that owns the model ${expectedModelId}`,
 			);
 			return;
 		}
@@ -906,7 +905,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				}
 				try {
 					const value = JSON.parse(
-						Buffer.from(outputItem.data).toString()
+						Buffer.from(outputItem.data).toString(),
 					) as { model_id?: string };
 					return value.model_id === expectedModelId;
 				} catch (ex) {
@@ -920,7 +919,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		}
 		const outputsOwnedByWidgetModel =
 			CellExecutionMessageHandler.outputsOwnedByWidgetModel.get(
-				expectedModelId
+				expectedModelId,
 			) || new Set<string>();
 
 		// We have some new outputs, that need to be placed immediately after the widget and before any other output
@@ -932,7 +931,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			(this.outputsAreSpecificToAWidget.length
 				? this.outputsAreSpecificToAWidget[
 						this.outputsAreSpecificToAWidget.length - 1
-					].clearOutputOnNextUpdateToOutput === true
+				  ].clearOutputOnNextUpdateToOutput === true
 				: false);
 		if (this.outputsAreSpecificToAWidget.length) {
 			this.outputsAreSpecificToAWidget[
@@ -952,15 +951,15 @@ export class CellExecutionMessageHandler implements IDisposable {
 
 		const outputsUptoWidget = newOutputs.slice(
 			0,
-			newOutputs.indexOf(widgetOutput) + 1
+			newOutputs.indexOf(widgetOutput) + 1,
 		);
 		const outputsAfterWidget = newOutputs.slice(
-			newOutputs.indexOf(widgetOutput) + 1
+			newOutputs.indexOf(widgetOutput) + 1,
 		);
 
 		CellExecutionMessageHandler.outputsOwnedByWidgetModel.set(
 			expectedModelId,
-			outputsOwnedByWidgetModel
+			outputsOwnedByWidgetModel,
 		);
 		if (outputToAppend) {
 			// Keep track of the output added that belongs to the widget.
@@ -1007,7 +1006,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 						ignoreFocusOut: true,
 						password: hasPassword,
 					},
-					cancelToken.token
+					cancelToken.token,
 				)
 				.then((v) => {
 					this.kernel.sendInputReply({
@@ -1032,7 +1031,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				transient: msg.content.transient as any, // NOSONAR
 				execution_count: msg.content.execution_count,
 			},
-			msg
+			msg,
 		);
 	}
 
@@ -1047,7 +1046,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					"replace" in payload
 				) {
 					this.handleSetNextInput(
-						payload as unknown as ISetNextInputPayload
+						payload as unknown as ISetNextInputPayload,
 					);
 				}
 				if (payload.data && payload.data.hasOwnProperty("text/plain")) {
@@ -1063,7 +1062,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 							metadata: {},
 							execution_count: reply.execution_count,
 						},
-						msg
+						msg,
 					);
 				}
 			});
@@ -1079,11 +1078,10 @@ export class CellExecutionMessageHandler implements IDisposable {
 				this.cell.document.uri,
 				new Range(
 					this.cell.document.lineAt(0).range.start,
-					this.cell.document.lineAt(
-						this.cell.document.lineCount - 1
-					).range.end
+					this.cell.document.lineAt(this.cell.document.lineCount - 1)
+						.range.end,
 				),
-				payload.text
+				payload.text,
 			);
 		} else {
 			// Add a new cell after the current with text
@@ -1091,7 +1089,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			const cellData = new NotebookCellData(
 				NotebookCellKind.Code,
 				payload.text,
-				this.cell.document.languageId
+				this.cell.document.languageId,
 			);
 			cellData.outputs = [];
 			cellData.metadata = {};
@@ -1112,7 +1110,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 	private handleStatusMessage(msg: KernelMessage.IStatusMsg) {
 		traceCellMessage(
 			this.cell,
-			`Kernel switching to ${msg.content.execution_state}`
+			`Kernel switching to ${msg.content.execution_state}`,
 		);
 	}
 	private handleStreamMessage(msg: KernelMessage.IStreamMsg) {
@@ -1132,8 +1130,8 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.cell,
 			`Update streamed output, new output '${msg.content.text.substring(
 				0,
-				100
-			)}'`
+				100,
+			)}'`,
 		);
 		// Possible execution of cell has completed (the task would have been disposed).
 		// This message could have come from a background thread.
@@ -1157,7 +1155,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				this.cell.outputs[this.cell.outputs.length - 1].items.length >=
 					1 &&
 				this.cell.outputs[this.cell.outputs.length - 1].items.every(
-					(item) => item.mime === outputName
+					(item) => item.mime === outputName,
 				)
 			) {
 				this.lastUsedStreamOutput = {
@@ -1181,14 +1179,12 @@ export class CellExecutionMessageHandler implements IDisposable {
 			});
 			traceCellMessage(
 				this.cell,
-				`Append output items '${msg.content.text.substring(0, 100)}`
+				`Append output items '${msg.content.text.substring(0, 100)}`,
 			);
-			task
-				?.appendOutputItems(
-					output.items,
-					this.lastUsedStreamOutput.output
-				)
-				.then(noop, noop);
+			task?.appendOutputItems(
+				output.items,
+				this.lastUsedStreamOutput.output,
+			).then(noop, noop);
 		} else if (previousValueOfClearOutputOnNextUpdateToOutput) {
 			// Replace the current outputs with a single new output.
 			const text = concatMultilineString(msg.content.text);
@@ -1200,13 +1196,13 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.lastUsedStreamOutput = { output, stream: msg.content.name };
 			traceCellMessage(
 				this.cell,
-				`Replace output with '${text.substring(0, 100)}'`
+				`Replace output with '${text.substring(0, 100)}'`,
 			);
 			task?.replaceOutput([output]).then(noop, noop);
 		} else {
 			// Create a new output
 			const text = formatStreamText(
-				concatMultilineString(msg.content.text)
+				concatMultilineString(msg.content.text),
 			);
 			const output = cellOutputToVSCCellOutput({
 				output_type: "stream",
@@ -1216,7 +1212,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.lastUsedStreamOutput = { output, stream: msg.content.name };
 			traceCellMessage(
 				this.cell,
-				`Append new output '${text.substring(0, 100)}'`
+				`Append new output '${text.substring(0, 100)}'`,
 			);
 			task?.appendOutput([output]).then(noop, noop);
 		}
@@ -1252,7 +1248,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				const task = this.execution || this.createTemporaryTask();
 				this.updateJupyterOutputWidgetWithOutput(
 					{ clearOutput: true },
-					task
+					task,
 				);
 				this.endTemporaryTask();
 			}
@@ -1315,39 +1311,39 @@ export class CellExecutionMessageHandler implements IDisposable {
 	 * Execution of Cell B could result in updates to output in Cell A.
 	 */
 	private handleUpdateDisplayDataMessage(
-		msg: KernelMessage.IUpdateDisplayDataMsg
+		msg: KernelMessage.IUpdateDisplayDataMsg,
 	) {
 		const displayId = msg.content.transient.display_id;
 		if (!displayId) {
 			traceWarning(
 				"Update display data message received, but no display id",
-				msg.content
+				msg.content,
 			);
 			return;
 		}
 		const outputToBeUpdated = CellOutputDisplayIdTracker.getMappedOutput(
 			this.cell.notebook,
-			displayId
+			displayId,
 		);
 		if (!outputToBeUpdated) {
 			traceWarning(
 				"Update display data message received, but no output found to update",
-				msg.content
+				msg.content,
 			);
 			return;
 		}
 		if (outputToBeUpdated.cell.document.isClosed) {
 			traceWarning(
 				"Update display data message received, but output cell is closed",
-				msg.content
+				msg.content,
 			);
 			return;
 		}
 		const output = translateCellDisplayOutput(
 			new NotebookCellOutput(
 				outputToBeUpdated.outputItems,
-				outputToBeUpdated.outputContainer.metadata
-			)
+				outputToBeUpdated.outputContainer.metadata,
+			),
 		);
 		const newOutput = cellOutputToVSCCellOutput({
 			...output,
@@ -1361,7 +1357,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		) {
 			traceVerbose(
 				"Update display data message received, but no output to update",
-				msg.content
+				msg.content,
 			);
 			return;
 		}
@@ -1373,7 +1369,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			if (
 				!fastDeepEqual(
 					outputToBeUpdated.outputContainer.metadata || {},
-					newOutput.metadata || {}
+					newOutput.metadata || {},
 				)
 			) {
 				outputMetadataHasChanged = true;
@@ -1388,7 +1384,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					if (
 						!fastDeepEqual(
 							outputToBeUpdated.outputItems[index],
-							newOutput.items[index]
+							newOutput.items[index],
 						)
 					) {
 						allAllOutputItemsSame = false;
@@ -1400,7 +1396,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				// If everything is still the same, then there's nothing to update.
 				traceVerbose(
 					"Update display data message received, but no output to update (data is the same)",
-					msg.content
+					msg.content,
 				);
 				return;
 			}
@@ -1411,7 +1407,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		const task = this.execution || this.createTemporaryTask();
 		traceCellMessage(
 			this.cell,
-			`Replace output items in display data ${newOutput.items.length}`
+			`Replace output items in display data ${newOutput.items.length}`,
 		);
 		if (outputMetadataHasChanged) {
 			// https://github.com/microsoft/vscode/issues/181369
@@ -1434,28 +1430,27 @@ export class CellExecutionMessageHandler implements IDisposable {
 				}
 				return o;
 			});
-			task
-				?.replaceOutput(newOutputs, outputToBeUpdated.cell)
-				.then(noop, noop);
+			task?.replaceOutput(newOutputs, outputToBeUpdated.cell).then(
+				noop,
+				noop,
+			);
 			CellOutputDisplayIdTracker.trackOutputByDisplayId(
 				outputToBeUpdated.cell,
 				displayId,
 				newOutput,
-				newOutput.items
+				newOutput.items,
 			);
 		} else {
-			task
-				?.replaceOutputItems(
-					newOutput.items,
-					outputToBeUpdated.outputContainer
-				)
-				.then(noop, noop);
+			task?.replaceOutputItems(
+				newOutput.items,
+				outputToBeUpdated.outputContainer,
+			).then(noop, noop);
 			CellOutputDisplayIdTracker.trackOutputByDisplayId(
 				outputToBeUpdated.cell,
 				// Though the items have been replaced, the output container is still the same, hence keep track of the last output object.
 				displayId,
 				outputToBeUpdated.outputContainer,
-				newOutput.items
+				newOutput.items,
 			);
 		}
 		this.endTemporaryTask();

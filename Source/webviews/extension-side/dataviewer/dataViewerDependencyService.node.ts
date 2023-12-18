@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { IInstaller } from "../../../platform/interpreter/installer/types";
 import { IKernel } from "../../../kernels/types";
 import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { IInstaller } from "../../../platform/interpreter/installer/types";
 import { IPythonExecutionFactory } from "../../../platform/interpreter/types.node";
 import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { InterpreterDataViewerDependencyImplementation } from "./interpreterDataViewerDependencyImplementation.node";
@@ -30,28 +30,28 @@ export class DataViewerDependencyService
 	constructor(
 		@inject(IInstaller) installer: IInstaller,
 		@inject(IPythonExecutionFactory) pythonFactory: IPythonExecutionFactory,
-		@inject(IInterpreterService) interpreterService: IInterpreterService
+		@inject(IInterpreterService) interpreterService: IInterpreterService,
 	) {
 		this.withKernel = new KernelDataViewerDependencyImplementation();
 		this.withInterpreter =
 			new InterpreterDataViewerDependencyImplementation(
 				installer,
 				pythonFactory,
-				interpreterService
+				interpreterService,
 			);
 	}
 
 	async checkAndInstallMissingDependencies(
-		executionEnvironment: IKernel | PythonEnvironment
+		executionEnvironment: IKernel | PythonEnvironment,
 	): Promise<void> {
 		// IKernel and PythonEnvironment are only types, so I can't compare prototypes or instances of.
 		if (isPythonEnvironment(executionEnvironment)) {
 			return this.withInterpreter.checkAndInstallMissingDependencies(
-				executionEnvironment
+				executionEnvironment,
 			);
 		} else {
 			return this.withKernel.checkAndInstallMissingDependencies(
-				executionEnvironment
+				executionEnvironment,
 			);
 		}
 	}

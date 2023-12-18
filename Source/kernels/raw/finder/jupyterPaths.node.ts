@@ -2,14 +2,27 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, named } from "inversify";
-import * as path from "../../../platform/vscode-path/path";
-import * as uriPath from "../../../platform/vscode-path/resources";
 import { CancellationToken, Memento, Uri } from "vscode";
+import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
 import {
 	IFileSystem,
 	IPlatformService,
 } from "../../../platform/common/platform/types";
 import { IFileSystemNode } from "../../../platform/common/platform/types.node";
+import {
+	GLOBAL_MEMENTO,
+	IDisposableRegistry,
+	IExtensionContext,
+	IMemento,
+	Resource,
+} from "../../../platform/common/types";
+import { tryGetRealPath } from "../../../platform/common/utils.node";
+import { ResourceMap, ResourceSet } from "../../../platform/common/utils/map";
+import { noop } from "../../../platform/common/utils/misc";
+import { OSType } from "../../../platform/common/utils/platform.node";
+import { StopWatch } from "../../../platform/common/utils/stopWatch";
+import { ICustomEnvironmentVariablesProvider } from "../../../platform/common/variables/types";
+import { IPythonExecutionFactory } from "../../../platform/interpreter/types.node";
 import {
 	ignoreLogging,
 	logValue,
@@ -17,24 +30,11 @@ import {
 	traceVerbose,
 	traceWarning,
 } from "../../../platform/logging";
-import {
-	IDisposableRegistry,
-	IMemento,
-	GLOBAL_MEMENTO,
-	IExtensionContext,
-	Resource,
-} from "../../../platform/common/types";
-import { tryGetRealPath } from "../../../platform/common/utils.node";
-import { ICustomEnvironmentVariablesProvider } from "../../../platform/common/variables/types";
 import { traceDecoratorVerbose } from "../../../platform/logging";
-import { OSType } from "../../../platform/common/utils/platform.node";
-import { noop } from "../../../platform/common/utils/misc";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { TraceOptions } from "../../../platform/logging/types";
-import { IPythonExecutionFactory } from "../../../platform/interpreter/types.node";
-import { getDisplayPath } from "../../../platform/common/platform/fs-paths";
-import { StopWatch } from "../../../platform/common/utils/stopWatch";
-import { ResourceMap, ResourceSet } from "../../../platform/common/utils/map";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import * as path from "../../../platform/vscode-path/path";
+import * as uriPath from "../../../platform/vscode-path/resources";
 
 const winJupyterPath = path.join("AppData", "Roaming", "jupyter", "kernels");
 const linuxJupyterPath = path.join(".local", "share", "jupyter", "kernels");
@@ -43,7 +43,7 @@ const winJupyterRuntimePath = path.join(
 	"AppData",
 	"Roaming",
 	"jupyter",
-	"runtime"
+	"runtime",
 );
 const macJupyterRuntimePath = path.join("Library", "Jupyter", "runtime");
 
@@ -94,7 +94,7 @@ export class JupyterPaths {
 			this.context.extensionUri,
 			"temp",
 			"jupyter",
-			"kernels"
+			"kernels",
 		);
 		await this.fs.createDirectory(dir);
 		return dir;
@@ -115,7 +115,7 @@ export class JupyterPaths {
 					// On windows the path is not correct if we combine those variables.
 					// It won't point to a path that you can actually read from.
 					return tryGetRealPath(
-						uriPath.joinPath(userHomeDir, winJupyterPath)
+						uriPath.joinPath(userHomeDir, winJupyterPath),
 					);
 				} else if (this.platformService.isMac) {
 					return uriPath.joinPath(userHomeDir, macJupyterPath);
@@ -127,7 +127,7 @@ export class JupyterPaths {
 		this.cachedKernelSpecRootPath
 			.then((value) => {
 				traceVerbose(
-					`Getting Jupyter KernelSpec Root Path ${value?.toString()}`
+					`Getting Jupyter KernelSpec Root Path ${value?.toString()}`,
 				);
 				this.updateCachedRootPath(value);
 			})
@@ -146,12 +146,12 @@ export class JupyterPaths {
 				// On windows the path is not correct if we combine those variables.
 				// It won't point to a path that you can actually read from.
 				runtimeDir = await tryGetRealPath(
-					uriPath.joinPath(userHomeDir, winJupyterRuntimePath)
+					uriPath.joinPath(userHomeDir, winJupyterRuntimePath),
 				);
 			} else if (this.platformService.isMac) {
 				runtimeDir = uriPath.joinPath(
 					userHomeDir,
-					macJupyterRuntimePath
+					macJupyterRuntimePath,
 				);
 			} else {
 				runtimeDir = process.env["$XDG_RUNTIME_DIR"]
@@ -159,16 +159,16 @@ export class JupyterPaths {
 							path.join(
 								process.env["$XDG_RUNTIME_DIR"],
 								"jupyter",
-								"runtime"
-							)
-						)
+								"runtime",
+							),
+					  )
 					: uriPath.joinPath(
 							userHomeDir,
 							".local",
 							"share",
 							"jupyter",
-							"runtime"
-						);
+							"runtime",
+					  );
 			}
 		}
 		if (!runtimeDir) {
@@ -183,7 +183,7 @@ export class JupyterPaths {
 		} catch (ex) {
 			traceError(
 				`Failed to create runtime directory, reverting to temp directory ${runtimeDir}`,
-				ex
+				ex,
 			);
 		}
 	}
@@ -202,7 +202,7 @@ export class JupyterPaths {
 		if (!this.cachedDataDirs.has(key)) {
 			this.cachedDataDirs.set(
 				key,
-				this.getDataDirsImpl(options.resource, options.interpreter)
+				this.getDataDirsImpl(options.resource, options.interpreter),
 			);
 		}
 		return this.cachedDataDirs.get(key)!;
@@ -210,11 +210,11 @@ export class JupyterPaths {
 
 	@traceDecoratorVerbose(
 		"getDataDirsImpl",
-		TraceOptions.BeforeCall | TraceOptions.Arguments
+		TraceOptions.BeforeCall | TraceOptions.Arguments,
 	)
 	private async getDataDirsImpl(
 		resource: Resource,
-		@logValue<PythonEnvironment>("id") interpreter?: PythonEnvironment
+		@logValue<PythonEnvironment>("id") interpreter?: PythonEnvironment,
 	): Promise<Uri[]> {
 		// When adding paths keep distinct values and preserve the order.
 		const dataDir = new ResourceMap<number>();
@@ -238,7 +238,7 @@ export class JupyterPaths {
 				const pythonFile = Uri.joinPath(
 					this.context.extensionUri,
 					"pythonFiles",
-					"printJupyterDataDir.py"
+					"printJupyterDataDir.py",
 				);
 				const result = await factory.exec([pythonFile.fsPath], {});
 				if (result.stdout.trim().length) {
@@ -249,14 +249,14 @@ export class JupyterPaths {
 						}
 					} else {
 						traceWarning(
-							`Got a non-existent Jupyer Data Dir ${sitePath}`
+							`Got a non-existent Jupyer Data Dir ${sitePath}`,
 						);
 					}
 				}
 			} catch (ex) {
 				traceError(
 					`Failed to get DataDir based on ENABLE_USER_SITE for ${interpreter.displayName}`,
-					ex
+					ex,
 				);
 			}
 		}
@@ -283,7 +283,7 @@ export class JupyterPaths {
 		// other than 'no', 'n', 'false', 'off', '0', or '0.0' (case insensitive)
 		if (
 			["no", "n", "false", "off", "0", "0.0"].includes(
-				jupyterPreferEnvPath
+				jupyterPreferEnvPath,
 			)
 		) {
 			[userDataDirectory, envJupyterPath].forEach((item) => {
@@ -307,7 +307,7 @@ export class JupyterPaths {
 		});
 
 		const sortedEntries = Array.from(dataDir.entries()).sort(
-			(a, b) => a[1] - b[1]
+			(a, b) => a[1] - b[1],
 		);
 		return sortedEntries.map((item) => item[0]);
 	}
@@ -346,7 +346,7 @@ export class JupyterPaths {
 				return Uri.joinPath(
 					this.platformService.homeDir,
 					"Library",
-					"Jupyter"
+					"Jupyter",
 				);
 			case OSType.Windows:
 				const appData = process.env["APPDATA"]
@@ -362,7 +362,7 @@ export class JupyterPaths {
 				return Uri.joinPath(
 					this.platformService.homeDir,
 					"Library",
-					"Jupyter"
+					"Jupyter",
 				);
 			default: {
 				// Linux, non-OS X Unix, AIX, etc.
@@ -371,8 +371,8 @@ export class JupyterPaths {
 					: Uri.joinPath(
 							this.platformService.homeDir,
 							".local",
-							"share"
-						);
+							"share",
+					  );
 				return Uri.joinPath(xdgDataHome, "jupyter");
 			}
 		}
@@ -386,7 +386,7 @@ export class JupyterPaths {
 	 * https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs
 	 */
 	public async getKernelSpecRootPaths(
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<Uri[]> {
 		if (
 			this.cachedKernelSpecRootPaths?.promise &&
@@ -406,11 +406,11 @@ export class JupyterPaths {
 		return promise;
 	}
 	private async getKernelSpecRootPathsImpl(
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<Uri[]> {
 		// Paths specified in JUPYTER_PATH are supposed to come first in searching
 		const paths = new ResourceSet(
-			await this.getJupyterPathKernelPaths(cancelToken)
+			await this.getJupyterPathKernelPaths(cancelToken),
 		);
 		if (cancelToken.isCancellationRequested) {
 			return [];
@@ -427,8 +427,12 @@ export class JupyterPaths {
 			if (process.env.PROGRAMDATA) {
 				paths.add(
 					Uri.file(
-						path.join(process.env.PROGRAMDATA, "jupyter", "kernels")
-					)
+						path.join(
+							process.env.PROGRAMDATA,
+							"jupyter",
+							"kernels",
+						),
+					),
 				);
 			}
 		} else {
@@ -438,7 +442,7 @@ export class JupyterPaths {
 				: linuxJupyterPath;
 
 			paths.add(
-				Uri.file(path.join("/", "usr", "share", "jupyter", "kernels"))
+				Uri.file(path.join("/", "usr", "share", "jupyter", "kernels")),
 			);
 			paths.add(
 				Uri.file(
@@ -448,13 +452,13 @@ export class JupyterPaths {
 						"local",
 						"share",
 						"jupyter",
-						"kernels"
-					)
-				)
+						"kernels",
+					),
+				),
 			);
 			if (this.platformService.homeDir) {
 				paths.add(
-					uriPath.joinPath(this.platformService.homeDir, secondPart)
+					uriPath.joinPath(this.platformService.homeDir, secondPart),
 				);
 			}
 		}
@@ -462,7 +466,7 @@ export class JupyterPaths {
 		traceVerbose(
 			`Kernel Spec Root Paths, ${Array.from(paths)
 				.map((uri) => getDisplayPath(uri))
-				.join(", ")}`
+				.join(", ")}`,
 		);
 		return Array.from(paths);
 	}
@@ -484,7 +488,7 @@ export class JupyterPaths {
 	}
 
 	private async getJupyterPaths(
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<Uri[]> {
 		this.cachedJupyterPaths =
 			this.cachedJupyterPaths || this.getJupyterPathSubPaths(cancelToken);
@@ -498,12 +502,12 @@ export class JupyterPaths {
 	 */
 	private async getJupyterPathSubPaths(
 		cancelToken?: CancellationToken,
-		subDir?: string
+		subDir?: string,
 	): Promise<Uri[]> {
 		const paths = new ResourceSet();
 		const vars = await this.envVarsProvider.getEnvironmentVariables(
 			undefined,
-			"RunPythonCode"
+			"RunPythonCode",
 		);
 		if (cancelToken?.isCancellationRequested) {
 			return [];
@@ -513,15 +517,15 @@ export class JupyterPaths {
 					return subDir
 						? path.join(jupyterPath, subDir)
 						: jupyterPath;
-				})
+			  })
 			: [];
 
 		if (jupyterPathVars.length > 0) {
 			// Preserve the order of the items.
 			const jupyterPaths = await Promise.all(
 				jupyterPathVars.map(async (jupyterPath) =>
-					tryGetRealPath(Uri.file(jupyterPath))
-				)
+					tryGetRealPath(Uri.file(jupyterPath)),
+				),
 			);
 			jupyterPaths.forEach((jupyterPath) => {
 				if (jupyterPath) {
@@ -532,8 +536,8 @@ export class JupyterPaths {
 
 		traceVerbose(
 			`Jupyter Paths ${getDisplayPath(subDir)}: ${Array.from(paths).map(
-				(uri) => getDisplayPath(uri)
-			)}`
+				(uri) => getDisplayPath(uri),
+			)}`,
 		);
 		return Array.from(paths);
 	}
@@ -547,13 +551,13 @@ export class JupyterPaths {
 	private async updateCachedPaths(paths: Uri[]) {
 		const currentValue = this.globalState.get<string[]>(
 			CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS,
-			[]
+			[],
 		);
 		const newValue = paths.map(Uri.toString);
 		if (currentValue.join(",") !== newValue.join(",")) {
 			await this.globalState.update(
 				CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS,
-				newValue
+				newValue,
 			);
 		}
 	}
@@ -561,7 +565,7 @@ export class JupyterPaths {
 	private getCachedRootPath(): Uri | undefined {
 		if (this.globalState.get(CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH)) {
 			const cached = this.globalState.get<string>(
-				CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH
+				CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH,
 			);
 			if (cached) {
 				return Uri.parse(cached);
@@ -574,7 +578,7 @@ export class JupyterPaths {
 			this.globalState
 				.update(
 					CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH,
-					path.toString()
+					path.toString(),
 				)
 				.then(noop, noop);
 		} else {

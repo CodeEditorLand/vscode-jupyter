@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as vscode from "vscode";
+import { JupyterServerCollection } from "../../api";
 import {
 	KernelConnectionMetadata,
 	LocalKernelConnectionMetadata,
@@ -11,11 +12,10 @@ import {
 	RemoteKernelConnectionMetadata,
 } from "../../kernels/types";
 import {
-	JupyterNotebookView,
 	InteractiveWindowView,
+	JupyterNotebookView,
 } from "../../platform/common/constants";
 import { IDisposable } from "../../platform/common/types";
-import { JupyterServerCollection } from "../../api";
 
 export const InteractiveControllerIdSuffix = " (Interactive)";
 
@@ -44,7 +44,7 @@ export interface IVSCodeNotebookController extends IDisposable {
 	restoreConnection(notebook: vscode.NotebookDocument): Promise<void>;
 	postMessage(
 		message: any,
-		editor?: vscode.NotebookEditor
+		editor?: vscode.NotebookEditor,
 	): Thenable<boolean>;
 	asWebviewUri(localResource: vscode.Uri): vscode.Uri;
 	isAssociatedWithDocument(notebook: vscode.NotebookDocument): boolean;
@@ -52,7 +52,7 @@ export interface IVSCodeNotebookController extends IDisposable {
 	updateConnection(connection: KernelConnectionMetadata): void;
 	setPendingCellAddition(
 		notebook: vscode.NotebookDocument,
-		promise: Promise<void>
+		promise: Promise<void>,
 	): void;
 }
 
@@ -86,14 +86,14 @@ export interface IControllerRegistration {
 		selected: boolean;
 	}>;
 	getSelected(
-		document: vscode.NotebookDocument
+		document: vscode.NotebookDocument,
 	): IVSCodeNotebookController | undefined;
 	/**
 	 * Keeps track of controllers created for the active interpreter.
 	 * These are very special controllers, as they are created out of band even before kernel discovery completes.
 	 */
 	trackActiveInterpreterControllers(
-		controllers: IVSCodeNotebookController[]
+		controllers: IVSCodeNotebookController[],
 	): void;
 	/**
 	 * Registers a new controller or updates one. Disposing a controller unregisters it.
@@ -101,7 +101,7 @@ export interface IControllerRegistration {
 	 */
 	addOrUpdate(
 		metadata: KernelConnectionMetadata,
-		types: (typeof JupyterNotebookView | typeof InteractiveWindowView)[]
+		types: (typeof JupyterNotebookView | typeof InteractiveWindowView)[],
 	): IVSCodeNotebookController[];
 	/**
 	 * Gets the controller for a particular connection
@@ -110,7 +110,7 @@ export interface IControllerRegistration {
 	 */
 	get(
 		connection: KernelConnectionMetadata,
-		notebookType: typeof JupyterNotebookView | typeof InteractiveWindowView
+		notebookType: typeof JupyterNotebookView | typeof InteractiveWindowView,
 	): IVSCodeNotebookController | undefined;
 	/**
 	 * Event fired when controllers are added or removed
@@ -129,28 +129,28 @@ export enum PreferredKernelExactMatchReason {
 }
 
 export const IRemoteNotebookKernelSourceSelector = Symbol(
-	"IRemoteNotebookKernelSourceSelector"
+	"IRemoteNotebookKernelSourceSelector",
 );
 export interface IRemoteNotebookKernelSourceSelector {
 	selectRemoteKernel(
 		notebook: vscode.NotebookDocument,
-		provider: JupyterServerCollection
+		provider: JupyterServerCollection,
 	): Promise<RemoteKernelConnectionMetadata | undefined>;
 }
 export const ILocalNotebookKernelSourceSelector = Symbol(
-	"ILocalNotebookKernelSourceSelector"
+	"ILocalNotebookKernelSourceSelector",
 );
 export interface ILocalNotebookKernelSourceSelector {
 	selectLocalKernel(
-		notebook: vscode.NotebookDocument
+		notebook: vscode.NotebookDocument,
 	): Promise<LocalKernelConnectionMetadata | undefined>;
 }
 export const ILocalPythonNotebookKernelSourceSelector = Symbol(
-	"ILocalPythonNotebookKernelSourceSelector"
+	"ILocalPythonNotebookKernelSourceSelector",
 );
 export interface ILocalPythonNotebookKernelSourceSelector {
 	selectLocalKernel(
-		notebook: vscode.NotebookDocument
+		notebook: vscode.NotebookDocument,
 	): Promise<PythonKernelConnectionMetadata | undefined>;
 }
 
@@ -166,6 +166,6 @@ export interface IConnectionDisplayData extends IDisposable {
 export const IConnectionDisplayDataProvider = Symbol("IConnectionDisplayData");
 export interface IConnectionDisplayDataProvider {
 	getDisplayData(
-		connection: KernelConnectionMetadata
+		connection: KernelConnectionMetadata,
 	): IConnectionDisplayData;
 }

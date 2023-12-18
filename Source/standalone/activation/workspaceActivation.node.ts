@@ -3,15 +3,15 @@
 
 import { inject, injectable } from "inversify";
 import { TextDocument, workspace } from "vscode";
-import { sendActivationTelemetry } from "../../platform/telemetry/envFileTelemetry.node";
-import { PYTHON_LANGUAGE } from "../../platform/common/constants";
-import { IDisposable, Resource } from "../../platform/common/types";
-import { traceDecoratorError } from "../../platform/logging";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { IFileSystem } from "../../platform/common/platform/types";
-import { noop } from "../../platform/common/utils/misc";
-import { getWorkspaceFolderIdentifier } from "../../platform/common/application/workspace.base";
 import { window } from "vscode";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
+import { getWorkspaceFolderIdentifier } from "../../platform/common/application/workspace.base";
+import { PYTHON_LANGUAGE } from "../../platform/common/constants";
+import { IFileSystem } from "../../platform/common/platform/types";
+import { IDisposable, Resource } from "../../platform/common/types";
+import { noop } from "../../platform/common/utils/misc";
+import { traceDecoratorError } from "../../platform/logging";
+import { sendActivationTelemetry } from "../../platform/telemetry/envFileTelemetry.node";
 
 /**
  * Responsible for sending workspace level telemetry.
@@ -74,8 +74,8 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 		this.disposables.push(
 			workspace.onDidChangeWorkspaceFolders(
 				this.onWorkspaceFoldersChanged,
-				this
-			)
+				this,
+			),
 		);
 	}
 	protected addRemoveDocOpenedHandlers() {
@@ -83,7 +83,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 			if (!this.docOpenedHandler) {
 				this.docOpenedHandler = workspace.onDidOpenTextDocument(
 					this.onDocOpened,
-					this
+					this,
 				);
 			}
 			return;
@@ -96,11 +96,11 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 	protected onWorkspaceFoldersChanged() {
 		//If an activated workspace folder was removed, delete its key
 		const workspaceKeys = (workspace.workspaceFolders || [])!.map(
-			(workspaceFolder) => this.getWorkspaceKey(workspaceFolder.uri)
+			(workspaceFolder) => this.getWorkspaceKey(workspaceFolder.uri),
 		);
 		const activatedWkspcKeys = Array.from(this.activatedWorkspaces.keys());
 		const activatedWkspcFoldersRemoved = activatedWkspcKeys.filter(
-			(item) => workspaceKeys.indexOf(item) < 0
+			(item) => workspaceKeys.indexOf(item) < 0,
 		);
 		if (activatedWkspcFoldersRemoved.length > 0) {
 			for (const folder of activatedWkspcFoldersRemoved) {

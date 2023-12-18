@@ -2,7 +2,10 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { Disposable, extensions, Uri, workspace, window } from "vscode";
+import { Disposable, Uri, extensions, window, workspace } from "vscode";
+import { isInteractiveInputTab } from "../../interactive-window/helpers";
+import { isRemoteConnection } from "../../kernels/types";
+import { IControllerRegistration } from "../../notebooks/controllers/types";
 import { INotebookEditorProvider } from "../../notebooks/types";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import {
@@ -14,11 +17,8 @@ import {
 	getDisplayPath,
 	getFilePath,
 } from "../../platform/common/platform/fs-paths";
-import { traceInfo } from "../../platform/logging";
-import { IControllerRegistration } from "../../notebooks/controllers/types";
-import { isInteractiveInputTab } from "../../interactive-window/helpers";
-import { isRemoteConnection } from "../../kernels/types";
 import { noop } from "../../platform/common/utils/misc";
+import { traceInfo } from "../../platform/logging";
 
 /**
  * Manages use of the Python extension's registerJupyterPythonPathFunction API which
@@ -63,7 +63,7 @@ export class NotebookPythonPathService
 			.then((api) => {
 				if (api.registerJupyterPythonPathFunction !== undefined) {
 					api.registerJupyterPythonPathFunction((uri) =>
-						this._jupyterPythonPathFunction(uri)
+						this._jupyterPythonPathFunction(uri),
 					);
 				}
 				if (
@@ -71,7 +71,7 @@ export class NotebookPythonPathService
 					undefined
 				) {
 					api.registerGetNotebookUriForTextDocumentUriFunction(
-						(uri) => this._getNotebookUriForTextDocumentUri(uri)
+						(uri) => this._getNotebookUriForTextDocumentUri(uri),
 					);
 				}
 			})
@@ -127,7 +127,7 @@ export class NotebookPythonPathService
 	 * path used by Pylance. Return undefined to allow Python to determine the path.
 	 */
 	private async _jupyterPythonPathFunction(
-		uri: Uri
+		uri: Uri,
 	): Promise<string | undefined> {
 		const notebook =
 			this.notebookEditorProvider.findAssociatedNotebookDocument(uri);
@@ -147,8 +147,8 @@ export class NotebookPythonPathService
 			// Empty string is special, means do not use any interpreter at all.
 			traceInfo(
 				`No interpreter for Pylance for Notebook URI "${getDisplayPath(
-					notebook.uri
-				)}"`
+					notebook.uri,
+				)}"`,
 			);
 			return "";
 		}
@@ -156,7 +156,7 @@ export class NotebookPythonPathService
 	}
 
 	private _getNotebookUriForTextDocumentUri(
-		textDocumentUri: Uri
+		textDocumentUri: Uri,
 	): Uri | undefined {
 		const notebookUri = getNotebookUriFromInputBoxUri(textDocumentUri);
 		if (!notebookUri) {
@@ -180,7 +180,7 @@ export class NotebookPythonPathService
 }
 
 export function getNotebookUriFromInputBoxUri(
-	textDocumentUri: Uri
+	textDocumentUri: Uri,
 ): Uri | undefined {
 	if (textDocumentUri.scheme !== "vscode-interactive-input") {
 		return undefined;
@@ -188,9 +188,9 @@ export function getNotebookUriFromInputBoxUri(
 
 	const notebookPath = `${textDocumentUri.path.replace(
 		"InteractiveInput-",
-		"Interactive-"
+		"Interactive-",
 	)}.interactive`;
 	return workspace.notebookDocuments.find(
-		(doc) => doc.uri.path === notebookPath
+		(doc) => doc.uri.path === notebookPath,
 	)?.uri;
 }

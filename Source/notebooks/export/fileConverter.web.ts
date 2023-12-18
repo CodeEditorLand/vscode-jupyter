@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import { FileConverterBase } from "./fileConverter";
 import { IConfigurationService } from "../../platform/common/types";
 import { ProgressReporter } from "../../platform/progress/progressReporter";
+import { FileConverterBase } from "./fileConverter";
 import { IExportUtil } from "./types";
 
 /**

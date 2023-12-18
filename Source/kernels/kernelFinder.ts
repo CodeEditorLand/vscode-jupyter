@@ -49,7 +49,7 @@ export class KernelFinder implements IKernelFinder {
 	}
 
 	public registerKernelFinder(
-		finder: IContributedKernelFinder<KernelConnectionMetadata>
+		finder: IContributedKernelFinder<KernelConnectionMetadata>,
 	): IDisposable {
 		this._finders.push(finder);
 		if (finder.status === "discovering") {
@@ -62,10 +62,10 @@ export class KernelFinder implements IKernelFinder {
 					? "idle"
 					: "discovering"),
 			this,
-			this.disposables
+			this.disposables,
 		);
 		const onDidChangeDisposable = finder.onDidChangeKernels(() =>
-			this._onDidChangeKernels.fire()
+			this._onDidChangeKernels.fire(),
 		);
 		this.disposables.push(onDidChangeDisposable);
 
@@ -105,7 +105,7 @@ export class KernelFinder implements IKernelFinder {
 			.filter(
 				(finder) =>
 					finder.kind ===
-					ContributedKernelFinderKind.LocalPythonEnvironment
+					ContributedKernelFinderKind.LocalPythonEnvironment,
 			)
 			.forEach((finder) => {
 				// Add our connection => finder mapping
@@ -117,7 +117,7 @@ export class KernelFinder implements IKernelFinder {
 						connection.kernelSpec.specFile
 					) {
 						loadedKernelSpecFiles.add(
-							connection.kernelSpec.specFile
+							connection.kernelSpec.specFile,
 						);
 					}
 					kernels.push(connection);
@@ -127,7 +127,7 @@ export class KernelFinder implements IKernelFinder {
 		this._finders
 			.filter(
 				(finder) =>
-					finder.kind === ContributedKernelFinderKind.LocalKernelSpec
+					finder.kind === ContributedKernelFinderKind.LocalKernelSpec,
 			)
 			.forEach((finder) => {
 				// Add our connection => finder mapping
@@ -138,7 +138,7 @@ export class KernelFinder implements IKernelFinder {
 								"startUsingPythonInterpreter") &&
 						connection.kernelSpec.specFile &&
 						loadedKernelSpecFiles.has(
-							connection.kernelSpec.specFile
+							connection.kernelSpec.specFile,
 						)
 					) {
 						return;
@@ -149,7 +149,7 @@ export class KernelFinder implements IKernelFinder {
 			});
 
 		const remoteFinders = this._finders.filter(
-			(finder) => finder.kind === ContributedKernelFinderKind.Remote
+			(finder) => finder.kind === ContributedKernelFinderKind.Remote,
 		);
 		for (const finder of remoteFinders) {
 			const contributedKernels = finder.kernels;
@@ -168,7 +168,7 @@ export class KernelFinder implements IKernelFinder {
 	// Check our mappings to see what connection supplies this metadata, since metadatas can be created outside of finders
 	// allow for undefined as a return value
 	public getFinderForConnection(
-		kernelMetadata: KernelConnectionMetadata
+		kernelMetadata: KernelConnectionMetadata,
 	): IContributedKernelFinder | undefined {
 		return this.connectionFinderMapping.get(kernelMetadata.id);
 	}

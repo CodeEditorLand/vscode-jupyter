@@ -3,18 +3,18 @@
 
 import { inject, injectable } from "inversify";
 import { NotebookDocument, commands, window, workspace } from "vscode";
-import { IExtensionSyncActivationService } from "../../platform/activation/types";
-import { traceVerbose, traceWarning } from "../../platform/logging";
-import { IDisposableRegistry } from "../../platform/common/types";
 import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
 import { KernelConnectionMetadata } from "../../kernels/types";
+import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { JVSC_EXTENSION_ID } from "../../platform/common/constants";
-import { waitForCondition } from "../../platform/common/utils/async";
-import { IControllerRegistration } from "./types";
-import { swallowExceptions } from "../../platform/common/utils/decorators";
-import { isJupyterNotebook } from "../../platform/common/utils";
-import { noop } from "../../platform/common/utils/misc";
 import { getDisplayPath } from "../../platform/common/platform/fs-paths";
+import { IDisposableRegistry } from "../../platform/common/types";
+import { isJupyterNotebook } from "../../platform/common/utils";
+import { waitForCondition } from "../../platform/common/utils/async";
+import { swallowExceptions } from "../../platform/common/utils/decorators";
+import { noop } from "../../platform/common/utils/misc";
+import { traceVerbose, traceWarning } from "../../platform/logging";
+import { IControllerRegistration } from "./types";
 
 /**
  * This class listens tracks notebook controller selection. When a notebook runs
@@ -36,7 +36,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		workspace.onDidOpenNotebookDocument(
 			this.onDidOpenNotebook,
 			this,
-			this.disposables
+			this.disposables,
 		);
 
 		// For all currently open notebooks, need to run the same code
@@ -50,7 +50,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		}
 		const preferredRemote =
 			await this.preferredRemoteKernelIdProvider.getPreferredRemoteKernelId(
-				notebook.uri
+				notebook.uri,
 			);
 		if (!preferredRemote) {
 			return;
@@ -58,7 +58,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		const findAndSelectRemoteController = () => {
 			const active = this.controllerRegistration.getSelected(notebook);
 			const matching = this.controllerRegistration.registered.find(
-				(l) => l.id === preferredRemote
+				(l) => l.id === preferredRemote,
 			);
 			if (matching && active?.id !== matching.id) {
 				// This controller is the one we want, but it's not currently set.
@@ -82,7 +82,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 		this.controllerRegistration.onControllerSelected(
 			(e) => {
@@ -92,18 +92,18 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 
 	private async switchKernel(
 		n: NotebookDocument,
-		kernel: Readonly<KernelConnectionMetadata>
+		kernel: Readonly<KernelConnectionMetadata>,
 	) {
 		traceVerbose(
 			`Using notebook.selectKernel to force remote kernel for ${getDisplayPath(
-				n.uri
-			)} to ${kernel.id}`
+				n.uri,
+			)} to ${kernel.id}`,
 		);
 		// Do this in a loop as it may fail
 		await commands.executeCommand("notebook.selectKernel", {
@@ -122,19 +122,19 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 				return false;
 			},
 			2000,
-			100
+			100,
 		);
 		if (success) {
 			traceVerbose(
 				`Successfully switched remote kernel for ${getDisplayPath(
-					n.uri
-				)} to ${kernel.id}`
+					n.uri,
+				)} to ${kernel.id}`,
 			);
 		} else {
 			traceWarning(
 				`Failed to switch remote kernel for ${getDisplayPath(
-					n.uri
-				)} to ${kernel.id}`
+					n.uri,
+				)} to ${kernel.id}`,
 			);
 		}
 	}

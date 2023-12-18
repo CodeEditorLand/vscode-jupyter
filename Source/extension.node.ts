@@ -26,23 +26,42 @@ const stopWatch = new StopWatch();
 //===============================================
 // loading starts here
 
+import { arch, homedir, platform, userInfo } from "os";
+import { Container } from "inversify/lib/container/container";
 import {
-	commands,
 	Disposable,
-	env,
 	ExtensionMode,
-	extensions,
 	Memento,
 	OutputChannel,
 	ProgressLocation,
 	ProgressOptions,
 	UIKind,
+	commands,
+	env,
+	extensions,
 	version,
 	window,
 	workspace,
 } from "vscode";
-import { buildApi, IExtensionApi } from "./standalone/api/api";
-import { setHomeDirectory, traceError } from "./platform/logging";
+import { registerTypes as registerInteractiveTypes } from "./interactive-window/serviceRegistry.node";
+import { registerTypes as registerKernelTypes } from "./kernels/serviceRegistry.node";
+import { registerTypes as registerNotebookTypes } from "./notebooks/serviceRegistry.node";
+import { IExtensionActivationManager } from "./platform/activation/types";
+import { getVSCodeChannel } from "./platform/common/application/applicationEnvironment";
+import {
+	Exiting,
+	JUPYTER_OUTPUT_CHANNEL,
+	PylanceExtension,
+	PythonExtension,
+	STANDARD_OUTPUT_CHANNEL,
+	Telemetry,
+	isCI,
+	isTestExecution,
+	setIsCodeSpace,
+	setIsWebExtension,
+} from "./platform/common/constants";
+import { getDisplayPath } from "./platform/common/platform/fs-paths";
+import { homePath } from "./platform/common/platform/fs-paths.node";
 import {
 	GLOBAL_MEMENTO,
 	IAsyncDisposableRegistry,
@@ -57,52 +76,33 @@ import {
 	WORKSPACE_MEMENTO,
 } from "./platform/common/types";
 import { createDeferred } from "./platform/common/utils/async";
+import { setDisposableTracker } from "./platform/common/utils/lifecycle";
 import { Common, OutputChannelNames } from "./platform/common/utils/localize";
+import { noop } from "./platform/common/utils/misc";
+import { getUserHomeDir } from "./platform/common/utils/platform.node";
+import { IInterpreterPackages } from "./platform/interpreter/types";
+import { ServiceContainer } from "./platform/ioc/container";
+import { ServiceManager } from "./platform/ioc/serviceManager";
 import { IServiceContainer, IServiceManager } from "./platform/ioc/types";
+import { setHomeDirectory, traceError } from "./platform/logging";
+import { registerLogger, setLoggingLevel } from "./platform/logging";
+import { ConsoleLogger } from "./platform/logging/consoleLogger";
+import { OutputChannelLogger } from "./platform/logging/outputChannelLogger";
+import { registerTypes as registerPlatformTypes } from "./platform/serviceRegistry.node";
 import {
 	sendErrorTelemetry,
 	sendStartupTelemetry,
 } from "./platform/telemetry/startupTelemetry";
-import { noop } from "./platform/common/utils/misc";
-import { registerTypes as registerPlatformTypes } from "./platform/serviceRegistry.node";
-import { registerTypes as registerKernelTypes } from "./kernels/serviceRegistry.node";
-import { registerTypes as registerNotebookTypes } from "./notebooks/serviceRegistry.node";
-import { registerTypes as registerInteractiveTypes } from "./interactive-window/serviceRegistry.node";
-import { registerTypes as registerStandaloneTypes } from "./standalone/serviceRegistry.node";
-import { registerTypes as registerWebviewTypes } from "./webviews/extension-side/serviceRegistry.node";
-import { IExtensionActivationManager } from "./platform/activation/types";
-import {
-	Exiting,
-	isCI,
-	isTestExecution,
-	JUPYTER_OUTPUT_CHANNEL,
-	PylanceExtension,
-	PythonExtension,
-	setIsCodeSpace,
-	setIsWebExtension,
-	STANDARD_OUTPUT_CHANNEL,
-	Telemetry,
-} from "./platform/common/constants";
-import { getDisplayPath } from "./platform/common/platform/fs-paths";
-import { getJupyterOutputChannel } from "./standalone/devTools/jupyterOutputChannel";
-import { registerLogger, setLoggingLevel } from "./platform/logging";
-import { Container } from "inversify/lib/container/container";
-import { ServiceContainer } from "./platform/ioc/container";
-import { ServiceManager } from "./platform/ioc/serviceManager";
-import { OutputChannelLogger } from "./platform/logging/outputChannelLogger";
-import { ConsoleLogger } from "./platform/logging/consoleLogger";
 import { initializeGlobals as initializeTelemetryGlobals } from "./platform/telemetry/telemetry";
-import { IInterpreterPackages } from "./platform/interpreter/types";
-import { homedir, platform, arch, userInfo } from "os";
-import { getUserHomeDir } from "./platform/common/utils/platform.node";
-import { homePath } from "./platform/common/platform/fs-paths.node";
+import { IExtensionApi, buildApi } from "./standalone/api/api";
+import { getJupyterOutputChannel } from "./standalone/devTools/jupyterOutputChannel";
 import {
 	activate as activateExecutionAnalysis,
 	deactivate as deactivateExecutionAnalysis,
 } from "./standalone/executionAnalysis/extension";
-import { setDisposableTracker } from "./platform/common/utils/lifecycle";
+import { registerTypes as registerStandaloneTypes } from "./standalone/serviceRegistry.node";
 import { sendTelemetryEvent } from "./telemetry";
-import { getVSCodeChannel } from "./platform/common/application/applicationEnvironment";
+import { registerTypes as registerWebviewTypes } from "./webviews/extension-side/serviceRegistry.node";
 
 durations.codeLoadingTime = stopWatch.elapsedTime;
 
@@ -116,7 +116,7 @@ let activatedServiceContainer: IServiceContainer | undefined;
 // public functions
 
 export async function activate(
-	context: IExtensionContext
+	context: IExtensionContext,
 ): Promise<IExtensionApi> {
 	setDisposableTracker(context.subscriptions);
 	setIsCodeSpace(env.uiKind == UIKind.Web);
@@ -161,7 +161,7 @@ export function deactivate(): Thenable<void> {
 	if (activatedServiceContainer) {
 		const registry =
 			activatedServiceContainer.get<IAsyncDisposableRegistry>(
-				IAsyncDisposableRegistry
+				IAsyncDisposableRegistry,
 			);
 		if (registry) {
 			return registry.dispose();
@@ -183,7 +183,7 @@ async function activateUnsafe(
 	startupDurations: {
 		startActivateTime: number;
 		endActivateTime: number;
-	}
+	},
 ): Promise<[IExtensionApi, Promise<void>, IServiceContainer]> {
 	const activationDeferred = createDeferred<void>();
 	try {
@@ -198,12 +198,12 @@ async function activateUnsafe(
 		initializeTelemetryGlobals((interpreter) =>
 			serviceContainer
 				.get<IInterpreterPackages>(IInterpreterPackages)
-				.getPackageVersions(interpreter)
+				.getPackageVersions(interpreter),
 		);
 		const activationPromise = activateComponents(
 			context,
 			serviceManager,
-			serviceContainer
+			serviceContainer,
 		);
 
 		//===============================================
@@ -220,7 +220,7 @@ async function activateUnsafe(
 			activationPromise,
 			serviceManager,
 			serviceContainer,
-			context
+			context,
 		);
 		return [api, activationPromise, serviceContainer];
 	} finally {
@@ -262,7 +262,7 @@ function notifyUser(msg: string) {
 async function activateComponents(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	serviceContainer: IServiceContainer
+	serviceContainer: IServiceContainer,
 ) {
 	// We will be pulling code over from activateLegacy().
 	return activateLegacy(context, serviceManager, serviceContainer);
@@ -290,7 +290,7 @@ function tryGetUsername() {
 		return new RegExp(username, "ig");
 	} catch (e) {
 		console.info(
-			`jupyter extension failed to get username info with ${e}\n username will not be obfuscated in local logs`
+			`jupyter extension failed to get username info with ${e}\n username will not be obfuscated in local logs`,
 		);
 	}
 }
@@ -301,48 +301,48 @@ function tryGetHomePath() {
 		return new RegExp(homeDir, "ig");
 	} catch (e) {
 		console.info(
-			`jupyter extension failed to get home directory path with ${e}\n home Path will not be obfuscated in local logs`
+			`jupyter extension failed to get home directory path with ${e}\n home Path will not be obfuscated in local logs`,
 		);
 	}
 }
 
 function addOutputChannel(
 	context: IExtensionContext,
-	serviceManager: IServiceManager
+	serviceManager: IServiceManager,
 ) {
 	const standardOutputChannel = window.createOutputChannel(
 		OutputChannelNames.jupyter,
-		"log"
+		"log",
 	);
 	registerLogger(
 		new OutputChannelLogger(
 			standardOutputChannel,
 			tryGetHomePath(),
-			tryGetUsername()
-		)
+			tryGetUsername(),
+		),
 	);
 	serviceManager.addSingletonInstance<OutputChannel>(
 		IOutputChannel,
 		standardOutputChannel,
-		STANDARD_OUTPUT_CHANNEL
+		STANDARD_OUTPUT_CHANNEL,
 	);
 	serviceManager.addSingletonInstance<OutputChannel>(
 		IOutputChannel,
 		getJupyterOutputChannel(context.subscriptions),
-		JUPYTER_OUTPUT_CHANNEL
+		JUPYTER_OUTPUT_CHANNEL,
 	);
 
 	// Log env info.
 	standardOutputChannel.appendLine(
-		`${env.appName} (${version}, ${env.remoteName}, ${env.appHost})`
+		`${env.appName} (${version}, ${env.remoteName}, ${env.appHost})`,
 	);
 	standardOutputChannel.appendLine(
-		`Jupyter Extension Version: ${context.extension.packageJSON["version"]}.`
+		`Jupyter Extension Version: ${context.extension.packageJSON["version"]}.`,
 	);
 	const pythonExtension = extensions.getExtension(PythonExtension);
 	if (pythonExtension) {
 		standardOutputChannel.appendLine(
-			`Python Extension Version: ${pythonExtension.packageJSON["version"]}.`
+			`Python Extension Version: ${pythonExtension.packageJSON["version"]}.`,
 		);
 	} else {
 		standardOutputChannel.appendLine("Python Extension not installed.");
@@ -350,7 +350,7 @@ function addOutputChannel(
 	const pylanceExtension = extensions.getExtension(PylanceExtension);
 	if (pylanceExtension) {
 		standardOutputChannel.appendLine(
-			`Pylance Extension Version: ${pylanceExtension.packageJSON["version"]}.`
+			`Pylance Extension Version: ${pylanceExtension.packageJSON["version"]}.`,
 		);
 	} else {
 		standardOutputChannel.appendLine("Pylance Extension not installed.");
@@ -364,14 +364,14 @@ function addOutputChannel(
 	} else if (workspace.workspaceFolders.length === 1) {
 		standardOutputChannel.appendLine(
 			`Workspace folder ${getDisplayPath(
-				workspace.workspaceFolders[0].uri
-			)}, Home = ${homePath.fsPath}`
+				workspace.workspaceFolders[0].uri,
+			)}, Home = ${homePath.fsPath}`,
 		);
 	} else {
 		standardOutputChannel.appendLine(
 			`Multiple Workspace folders opened ${workspace.workspaceFolders
 				.map((item) => getDisplayPath(item.uri))
-				.join(", ")}`
+				.join(", ")}`,
 		);
 	}
 }
@@ -389,7 +389,7 @@ function addOutputChannel(
 async function activateLegacy(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	serviceContainer: IServiceContainer
+	serviceContainer: IServiceContainer,
 ) {
 	// register "services"
 	const isDevMode =
@@ -434,7 +434,7 @@ async function activateLegacy(
 	const duration = stopWatch.elapsedTime;
 	sendTelemetryEvent(Telemetry.ExperimentLoad, { duration });
 	const configuration = serviceManager.get<IConfigurationService>(
-		IConfigurationService
+		IConfigurationService,
 	);
 
 	// We should start logging using the log level as soon as possible, so set it as soon as we can access the level.
@@ -451,7 +451,7 @@ async function activateLegacy(
 		.executeCommand(
 			"setContext",
 			"jupyter.vscode.channel",
-			getVSCodeChannel()
+			getVSCodeChannel(),
 		)
 		.then(noop, noop);
 
@@ -467,7 +467,7 @@ async function activateLegacy(
 }
 
 function initializeGlobals(
-	context: IExtensionContext
+	context: IExtensionContext,
 ): [IServiceManager, IServiceContainer] {
 	const cont = new Container({ skipBaseClassChecks: true });
 	const serviceManager = new ServiceManager(cont);
@@ -475,30 +475,30 @@ function initializeGlobals(
 
 	serviceManager.addSingletonInstance<IServiceContainer>(
 		IServiceContainer,
-		serviceContainer
+		serviceContainer,
 	);
 	serviceManager.addSingletonInstance<IServiceManager>(
 		IServiceManager,
-		serviceManager
+		serviceManager,
 	);
 
 	serviceManager.addSingletonInstance<Disposable[]>(
 		IDisposableRegistry,
-		context.subscriptions
+		context.subscriptions,
 	);
 	serviceManager.addSingletonInstance<Memento>(
 		IMemento,
 		context.globalState,
-		GLOBAL_MEMENTO
+		GLOBAL_MEMENTO,
 	);
 	serviceManager.addSingletonInstance<Memento>(
 		IMemento,
 		context.workspaceState,
-		WORKSPACE_MEMENTO
+		WORKSPACE_MEMENTO,
 	);
 	serviceManager.addSingletonInstance<IExtensionContext>(
 		IExtensionContext,
-		context
+		context,
 	);
 
 	return [serviceManager, serviceContainer];

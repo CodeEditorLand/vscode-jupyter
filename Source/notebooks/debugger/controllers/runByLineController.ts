@@ -32,7 +32,7 @@ export class RunByLineController implements IDebuggingDelegate {
 		private readonly debugAdapter: IKernelDebugAdapter,
 		public readonly debugCell: NotebookCell,
 		private readonly execution: INotebookKernelExecution,
-		private readonly settings: IConfigurationService
+		private readonly settings: IConfigurationService,
 	) {
 		sendTelemetryEvent(DebuggingTelemetry.successfullyStartedRunByLine);
 	}
@@ -79,7 +79,7 @@ export class RunByLineController implements IDebuggingDelegate {
 	}
 
 	public async willSendRequest(
-		request: DebugProtocol.Request
+		request: DebugProtocol.Request,
 	): Promise<undefined> {
 		traceInfoIfCI(`willSendRequest: ${request.command}`);
 		if (request.command === "configurationDone") {
@@ -147,7 +147,7 @@ export class RunByLineController implements IDebuggingDelegate {
 				if (s.trim().length !== 0) {
 					lineList.push(i);
 				}
-			}
+			},
 		);
 		lineList.sort();
 
@@ -167,7 +167,7 @@ export class RunByLineController implements IDebuggingDelegate {
 
 			// Open variables view
 			const settings = this.settings.getSettings(
-				this.debugCell.notebook.uri
+				this.debugCell.notebook.uri,
 			);
 			if (settings.showVariableViewWhenDebugging) {
 				commands

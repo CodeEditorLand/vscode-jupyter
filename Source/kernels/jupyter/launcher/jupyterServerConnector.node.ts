@@ -3,14 +3,14 @@
 
 import { inject, injectable } from "inversify";
 import { IPythonExtensionChecker } from "../../../platform/api/types";
+import { PythonExtensionNotInstalledError } from "../../../platform/errors/pythonExtNotInstalledError";
+import { DisplayOptions } from "../../displayOptions";
 import {
 	ConnectNotebookProviderOptions,
 	IJupyterConnection,
 	IJupyterServerConnector,
 } from "../../types";
-import { DisplayOptions } from "../../displayOptions";
 import { IJupyterServerProvider } from "../types";
-import { PythonExtensionNotInstalledError } from "../../../platform/errors/pythonExtNotInstalledError";
 
 @injectable()
 export class JupyterServerConnector implements IJupyterServerConnector {
@@ -23,7 +23,7 @@ export class JupyterServerConnector implements IJupyterServerConnector {
 	) {}
 
 	public async connect(
-		options: ConnectNotebookProviderOptions
+		options: ConnectNotebookProviderOptions,
 	): Promise<IJupyterConnection> {
 		if (!options.ui.disableUI) {
 			this.startupUi.disableUI = false;

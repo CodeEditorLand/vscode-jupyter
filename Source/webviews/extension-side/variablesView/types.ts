@@ -2,19 +2,19 @@
 // Licensed under the MIT License.
 
 import { Event } from "vscode";
-import { IVariableExplorerHeight } from "../../../webviews/webview-side/interactive-common/redux/reducers/types";
-import {
-	InteractiveWindowMessages,
-	IShowDataViewer,
-	IFinishCell,
-	SharedMessages,
-} from "../../../messageTypes";
 import { IKernel } from "../../../kernels/types";
 import {
 	IJupyterVariablesRequest,
 	IJupyterVariablesResponse,
 } from "../../../kernels/variables/types";
+import {
+	IFinishCell,
+	IShowDataViewer,
+	InteractiveWindowMessages,
+	SharedMessages,
+} from "../../../messageTypes";
 import { IVSCWebviewViewProvider } from "../../../platform/webviews/types";
+import { IVariableExplorerHeight } from "../../../webviews/webview-side/interactive-common/redux/reducers/types";
 
 // Mapping of Message to payload that our VariableViewPanel needs to support
 export class IVariableViewPanelMapping {
@@ -56,7 +56,7 @@ export interface INotebookWatcher {
 }
 
 export const IVariableViewProvider = Symbol("IVariableViewProvider");
-export interface IVariableViewProvider extends IVSCWebviewViewProvider {}
+export type IVariableViewProvider = IVSCWebviewViewProvider;
 
 export interface IVariableViewer {
 	command: string;

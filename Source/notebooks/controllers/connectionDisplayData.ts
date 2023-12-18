@@ -26,7 +26,7 @@ export class ConnectionDisplayData
 		public detail: string,
 		public category: string,
 		public serverDisplayName?: string,
-		private readonly getDescription?: () => string
+		private readonly getDescription?: () => string,
 	) {}
 	dispose(): void | undefined {
 		this._onDidChange.dispose();
@@ -37,7 +37,7 @@ export class ConnectionDisplayData
 }
 
 export function getKernelConnectionCategory(
-	kernelConnection: KernelConnectionMetadata
+	kernelConnection: KernelConnectionMetadata,
 ): string {
 	switch (kernelConnection.kind) {
 		case "connectToLiveRemoteKernel":
@@ -49,7 +49,7 @@ export function getKernelConnectionCategory(
 	}
 }
 export function getKernelConnectionCategorySync(
-	kernelConnection: KernelConnectionMetadata
+	kernelConnection: KernelConnectionMetadata,
 ): string {
 	switch (kernelConnection.kind) {
 		case "startUsingLocalKernelSpec":

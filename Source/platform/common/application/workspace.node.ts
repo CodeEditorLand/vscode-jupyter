@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Resource } from "../types";
-import { BaseWorkspaceService, getRootFolder } from "./workspace.base";
 import * as fs from "fs-extra";
-import * as path from "../../vscode-path/path";
 import { injectable } from "inversify";
 import { workspace } from "vscode";
+import * as path from "../../vscode-path/path";
+import { Resource } from "../types";
+import { BaseWorkspaceService, getRootFolder } from "./workspace.base";
 
 /**
  * Node implementation of the workspace service. Computing working directory is different for node.
@@ -18,7 +18,7 @@ export class WorkspaceService extends BaseWorkspaceService {
 	}
 }
 export async function computeWorkingDirectory(
-	resource: Resource
+	resource: Resource,
 ): Promise<string> {
 	const fileExists =
 		resource && resource.scheme === "file"

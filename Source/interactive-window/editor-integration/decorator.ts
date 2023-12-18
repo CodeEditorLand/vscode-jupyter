@@ -4,6 +4,7 @@
 import { inject, injectable } from "inversify";
 import * as vscode from "vscode";
 
+import { window } from "vscode";
 import { IExtensionSyncActivationService } from "../../platform/activation/types";
 import { IPythonExtensionChecker } from "../../platform/api/types";
 import { PYTHON_LANGUAGE } from "../../platform/common/constants";
@@ -15,7 +16,6 @@ import {
 } from "../../platform/common/types";
 import { getAssociatedJupyterNotebook } from "../../platform/common/utils";
 import { generateCellRangesFromDocument } from "./cellFactory";
-import { window } from "vscode";
 
 /**
  * Provides the lines that show up between cells in the editor.
@@ -109,7 +109,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 	private computeDecorations() {
 		this.currentCellTopUnfocused = window.createTextEditorDecorationType({
 			borderColor: new vscode.ThemeColor(
-				"interactive.inactiveCodeBorder"
+				"interactive.inactiveCodeBorder",
 			),
 			borderWidth: "2px 0px 0px 0px",
 			borderStyle: "solid",
@@ -118,12 +118,12 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 		this.currentCellBottomUnfocused = window.createTextEditorDecorationType(
 			{
 				borderColor: new vscode.ThemeColor(
-					"interactive.inactiveCodeBorder"
+					"interactive.inactiveCodeBorder",
 				),
 				borderWidth: "0px 0px 1px 0px",
 				borderStyle: "solid",
 				isWholeLine: true,
-			}
+			},
 		);
 		this.currentCellTop = window.createTextEditorDecorationType({
 			borderColor: new vscode.ThemeColor("interactive.activeCodeBorder"),
@@ -173,13 +173,13 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 				this.extensionChecker.isPythonExtensionInstalled
 			) {
 				const settings = this.configuration.getSettings(
-					editor.document.uri
+					editor.document.uri,
 				);
 				if (this.cellDecorationEnabled(settings)) {
 					// Find all of the cells
 					const cells = generateCellRangesFromDocument(
 						editor.document,
-						settings
+						settings,
 					);
 					// Find the range for our active cell.
 					const currentRange = cells
@@ -190,9 +190,9 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							? [
 									new vscode.Range(
 										currentRange[0].start,
-										currentRange[0].start
+										currentRange[0].start,
 									),
-								]
+							  ]
 							: [];
 					// no need to decorate the bottom if we're decorating all cells
 					const rangeBottom =
@@ -201,9 +201,9 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							? [
 									new vscode.Range(
 										currentRange[0].end,
-										currentRange[0].end
+										currentRange[0].end,
 									),
-								]
+							  ]
 							: [];
 					const nonCurrentCells: vscode.Range[] = [];
 					if (settings.decorateCells === "allCells")
@@ -211,7 +211,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							const cellTop = cell.range.start;
 							if (cellTop !== currentRange[0].start) {
 								nonCurrentCells.push(
-									new vscode.Range(cellTop, cellTop)
+									new vscode.Range(cellTop, cellTop),
 								);
 							}
 						});
@@ -219,15 +219,15 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 						editor.setDecorations(this.currentCellTop, rangeTop);
 						editor.setDecorations(
 							this.currentCellBottom,
-							rangeBottom
+							rangeBottom,
 						);
 						editor.setDecorations(
 							this.currentCellTopUnfocused,
-							nonCurrentCells
+							nonCurrentCells,
 						);
 						editor.setDecorations(
 							this.currentCellBottomUnfocused,
-							[]
+							[],
 						);
 					} else {
 						editor.setDecorations(this.currentCellTop, []);
@@ -238,7 +238,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 						]);
 						editor.setDecorations(
 							this.currentCellBottomUnfocused,
-							rangeBottom
+							rangeBottom,
 						);
 					}
 				} else {

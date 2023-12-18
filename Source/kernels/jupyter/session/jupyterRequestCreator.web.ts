@@ -6,8 +6,8 @@ import WebSocketIsomorphic from "isomorphic-ws";
 import { ClassType } from "../../../platform/ioc/types";
 import { traceError } from "../../../platform/logging";
 import { KernelSocketWrapper } from "../../common/kernelSocketWrapper";
-import { IJupyterRequestCreator } from "../types";
 import { KernelSocketMap } from "../../kernelSocket";
+import { IJupyterRequestCreator } from "../types";
 
 // Function for creating node Request object that prevents jupyterlab services from writing its own
 // authorization header.
@@ -17,7 +17,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 	public getRequestCtor(
 		cookieString?: string,
 		allowUnauthorized?: boolean,
-		getAuthHeaders?: () => Record<string, string>
+		getAuthHeaders?: () => Record<string, string>,
 	) {
 		class AuthorizingRequest extends Request {
 			constructor(input: RequestInfo, init?: RequestInit) {
@@ -30,7 +30,10 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					const authorizationHeader = getAuthHeaders();
 					const keys = Object.keys(authorizationHeader);
 					keys.forEach((k) =>
-						origHeaders.append(k, authorizationHeader[k].toString())
+						origHeaders.append(
+							k,
+							authorizationHeader[k].toString(),
+						),
 					);
 					origHeaders.set("Content-Type", "application/json");
 
@@ -57,7 +60,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 		return AuthorizingRequest;
 	}
 	public wrapWebSocketCtor(
-		websocketCtor: ClassType<WebSocketIsomorphic>
+		websocketCtor: ClassType<WebSocketIsomorphic>,
 	): ClassType<WebSocketIsomorphic> {
 		class JupyterWebSocket extends KernelSocketWrapper(websocketCtor) {
 			private kernelId: string | undefined;
@@ -66,10 +69,10 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 			constructor(
 				url: string,
-				protocols?: string | string[] | undefined
+				protocols?: string | string[] | undefined,
 			) {
 				super(url, protocols);
-				let timer: NodeJS.Timeout | undefined = undefined;
+				const timer: NodeJS.Timeout | undefined = undefined;
 				// Parse the url for the kernel id
 				const parsed = /.*\/kernels\/(.*)\/.*/.exec(url);
 				if (parsed && parsed.length > 1) {
@@ -87,7 +90,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					};
 				} else {
 					traceError(
-						"KernelId not extracted from Kernel WebSocket URL"
+						"KernelId not extracted from Kernel WebSocket URL",
 					);
 				}
 
@@ -120,7 +123,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 							return true;
 						},
 						"message",
-						ev.data
+						ev.data,
 					);
 				};
 
@@ -132,10 +135,10 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 	public getWebsocketCtor(
 		_cookieString?: string,
 		_allowUnauthorized?: boolean,
-		_getAuthHeaders?: () => Record<string, string>
+		_getAuthHeaders?: () => Record<string, string>,
 	) {
 		class JupyterWebSocket extends KernelSocketWrapper(
-			WebSocketIsomorphic
+			WebSocketIsomorphic,
 		) {
 			private kernelId: string | undefined;
 			private timer: NodeJS.Timeout | number = 0;
@@ -143,10 +146,10 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 			constructor(
 				url: string,
-				protocols?: string | string[] | undefined
+				protocols?: string | string[] | undefined,
 			) {
 				super(url, protocols);
-				let timer: NodeJS.Timeout | undefined = undefined;
+				const timer: NodeJS.Timeout | undefined = undefined;
 				// Parse the url for the kernel id
 				const parsed = /.*\/kernels\/(.*)\/.*/.exec(url);
 				if (parsed && parsed.length > 1) {
@@ -164,7 +167,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					};
 				} else {
 					traceError(
-						"KernelId not extracted from Kernel WebSocket URL"
+						"KernelId not extracted from Kernel WebSocket URL",
 					);
 				}
 
@@ -195,7 +198,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 							return true;
 						},
 						"message",
-						ev.data
+						ev.data,
 					);
 				};
 
@@ -207,7 +210,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 	public getFetchMethod(): (
 		input: RequestInfo,
-		init?: RequestInit
+		init?: RequestInit,
 	) => Promise<Response> {
 		return fetch;
 	}

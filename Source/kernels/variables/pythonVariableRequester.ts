@@ -4,19 +4,19 @@
 import type * as nbformat from "@jupyterlab/nbformat";
 import { inject, injectable } from "inversify";
 import { CancellationToken } from "vscode";
-import { traceError } from "../../platform/logging";
-import { DataScience } from "../../platform/common/utils/localize";
-import { stripAnsi } from "../../platform/common/utils/regexp";
-import { JupyterDataRateLimitError } from "../../platform/errors/jupyterDataRateLimitError";
-import { Telemetry } from "../../telemetry";
-import { executeSilently, SilentExecutionErrorOptions } from "../helpers";
-import { IKernel } from "../types";
-import { IKernelVariableRequester, IJupyterVariable } from "./types";
 import {
 	IDataFrameScriptGenerator,
 	IVariableScriptGenerator,
 } from "../../platform/common/types";
+import { DataScience } from "../../platform/common/utils/localize";
+import { stripAnsi } from "../../platform/common/utils/regexp";
+import { JupyterDataRateLimitError } from "../../platform/errors/jupyterDataRateLimitError";
 import { SessionDisposedError } from "../../platform/errors/sessionDisposedError";
+import { traceError } from "../../platform/logging";
+import { Telemetry } from "../../telemetry";
+import { SilentExecutionErrorOptions, executeSilently } from "../helpers";
+import { IKernel } from "../types";
+import { IJupyterVariable, IKernelVariableRequester } from "./types";
 
 type DataFrameSplitFormat = {
 	index: (number | string)[];
@@ -47,7 +47,7 @@ async function safeExecuteSilently(
 		initializeCode,
 		cleanupCode,
 	}: { code: string; initializeCode?: string; cleanupCode?: string },
-	errorOptions?: SilentExecutionErrorOptions
+	errorOptions?: SilentExecutionErrorOptions,
 ): Promise<nbformat.IOutput[]> {
 	if (
 		kernel.disposed ||
@@ -63,7 +63,7 @@ async function safeExecuteSilently(
 			await executeSilently(
 				kernel.session.kernel,
 				initializeCode,
-				errorOptions
+				errorOptions,
 			);
 		}
 		return await executeSilently(kernel.session.kernel, code, errorOptions);
@@ -77,7 +77,7 @@ async function safeExecuteSilently(
 			await executeSilently(
 				kernel.session.kernel,
 				cleanupCode,
-				errorOptions
+				errorOptions,
 			);
 		}
 	}
@@ -98,7 +98,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 	public async getDataFrameInfo(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		expression: string
+		expression: string,
 	): Promise<IJupyterVariable> {
 		// Then execute a call to get the info and turn it into JSON
 		const { code, cleanupCode, initializeCode } =
@@ -114,7 +114,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				traceErrorsMessage:
 					"Failure in execute_request for getDataFrameInfo",
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-			}
+			},
 		);
 
 		const fileName =
@@ -132,7 +132,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		start: number,
 		end: number,
 		kernel: IKernel,
-		expression: string
+		expression: string,
 	): Promise<{ data: Record<string, unknown>[] }> {
 		// Then execute a call to get the rows and turn it into JSON
 		const { code, cleanupCode, initializeCode } =
@@ -150,22 +150,22 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				traceErrorsMessage:
 					"Failure in execute_request for getDataFrameRows",
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-			}
+			},
 		);
 		if (results.length === 0) {
 			return { data: [] };
 		}
 		return parseDataFrame(
-			this.deserializeJupyterResult<DataFrameSplitFormat>(results)
+			this.deserializeJupyterResult<DataFrameSplitFormat>(results),
 		);
 	}
 
 	public async getVariableProperties(
 		word: string,
 		_cancelToken: CancellationToken | undefined,
-		matchingVariable: IJupyterVariable | undefined
+		matchingVariable: IJupyterVariable | undefined,
 	): Promise<{ [attributeName: string]: string }> {
-		let result: { [attributeName: string]: string } = {};
+		const result: { [attributeName: string]: string } = {};
 		if (matchingVariable && matchingVariable.value) {
 			result[`${word}`] = matchingVariable.value;
 		}
@@ -174,7 +174,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 
 	public async getVariableNamesAndTypesFromKernel(
 		kernel: IKernel,
-		_token?: CancellationToken
+		_token?: CancellationToken,
 	): Promise<IJupyterVariable[]> {
 		if (kernel.session) {
 			// VariableTypesFunc takes in list of vars and the corresponding var names
@@ -190,15 +190,15 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 					traceErrorsMessage:
 						"Failure in execute_request for getVariableNamesAndTypesFromKernel",
 					telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-				}
+				},
 			);
 
 			if (kernel.disposed || kernel.disposing) {
 				return [];
 			}
 			const varNameTypeMap = this.deserializeJupyterResult(
-				results
-			) as Map<String, String>;
+				results,
+			) as Map<string, string>;
 
 			const vars = [];
 			for (const [name, type] of Object.entries(varNameTypeMap)) {
@@ -223,7 +223,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 	public async getFullVariable(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		_token?: CancellationToken
+		_token?: CancellationToken,
 	): Promise<IJupyterVariable> {
 		// Then execute a call to get the info and turn it into JSON
 		const { code, cleanupCode, initializeCode } =
@@ -239,7 +239,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				traceErrorsMessage:
 					"Failure in execute_request for getFullVariable",
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-			}
+			},
 		);
 
 		// Combine with the original result (the call only returns the new fields)
@@ -265,7 +265,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				} else {
 					const error =
 						DataScience.jupyterGetVariablesExecutionError(
-							resultString
+							resultString,
 						);
 					traceError(error);
 					throw new Error(error);

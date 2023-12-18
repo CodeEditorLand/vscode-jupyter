@@ -3,15 +3,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any, , no-invalid-this, max-classes-per-file */
 
-import { expect } from "chai";
 import { ChildProcess, spawn } from "child_process";
-import { ProcessService } from "./proc.node";
-import { createDeferred, Deferred } from "../utils/async";
+import { expect } from "chai";
 import { PYTHON_PATH } from "../../../test/common.node";
+import { Deferred, createDeferred } from "../utils/async";
+import { ProcessService } from "./proc.node";
 
 interface IProcData {
 	proc: ChildProcess;
-	exited: Deferred<Boolean>;
+	exited: Deferred<boolean>;
 }
 
 suite("Process - Process Service", function () {
@@ -31,7 +31,7 @@ suite("Process - Process Service", function () {
 			"-c",
 			"while(True): import time;time.sleep(0.5);print(1)",
 		]);
-		const exited = createDeferred<Boolean>();
+		const exited = createDeferred<boolean>();
 		proc.on("exit", () => exited.resolve(true));
 		procsToKill.push({ proc, exited });
 
@@ -50,7 +50,7 @@ suite("Process - Process Service", function () {
 
 		expect(ProcessService.isAlive(proc.proc.pid)).to.equal(
 			true,
-			"process is not alive"
+			"process is not alive",
 		);
 	});
 });

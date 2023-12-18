@@ -10,7 +10,7 @@ const jupyterNotebookModuleNames = [
 ];
 export function getPinnedPackages(
 	installer: "conda" | "pip",
-	moduleName: string
+	moduleName: string,
 ): string[] {
 	if (!jupyterNotebookModuleNames.includes(moduleName)) {
 		return [];

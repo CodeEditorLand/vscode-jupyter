@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import * as jupyterlab from "@jupyter-widgets/base/lib";
-import type { Kernel, KernelMessage } from "@jupyterlab/services";
 import type * as nbformat from "@jupyterlab/nbformat";
+import type { Kernel, KernelMessage } from "@jupyterlab/services";
 import { ISignal } from "@lumino/signaling";
 import { Widget } from "@lumino/widgets";
 import { NotebookMetadata } from "../../../../platform/common/utils";
@@ -15,13 +15,13 @@ export type ScriptLoader = {
 		className: string,
 		moduleName: string,
 		moduleVersion: string,
-		error: any
+		error: any,
 	): void;
 	loadWidgetScript(moduleName: string, moduleVersion: string): Promise<void>;
 	successHandler(
 		className: string,
 		moduleName: string,
-		moduleVersion: string
+		moduleVersion: string,
 	): void;
 };
 export type IJupyterLabWidgetManagerCtor = new (
@@ -29,7 +29,7 @@ export type IJupyterLabWidgetManagerCtor = new (
 	el: HTMLElement,
 	scriptLoader: ScriptLoader,
 	logger: (message: string) => void,
-	widgetState?: NotebookMetadata["widgets"]
+	widgetState?: NotebookMetadata["widgets"],
 ) => IJupyterLabWidgetManager;
 
 export type INotebookModel = {
@@ -69,7 +69,7 @@ export interface IJupyterLabWidgetManager {
 	display_view(
 		msg: any,
 		view: Backbone.View<Backbone.Model>,
-		options: any
+		options: any,
 	): Promise<Widget>;
 	/**
 	 * Creates a promise for a view of a given model
@@ -80,7 +80,7 @@ export interface IJupyterLabWidgetManager {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	create_view(
 		model: jupyterlab.DOMWidgetModel,
-		options: any
+		options: any,
 	): Promise<jupyterlab.DOMWidgetView>;
 	/**
 	 * Restore widgets from kernel and saved state.
@@ -91,7 +91,7 @@ export interface IJupyterLabWidgetManager {
 		options?: {
 			loadKernel: false;
 			loadNotebook: boolean;
-		}
+		},
 	): Promise<void>;
 }
 
@@ -117,6 +117,6 @@ export interface IIPyWidgetManager {
 	 */
 	renderWidget(
 		data: nbformat.IMimeBundle,
-		ele: HTMLElement
+		ele: HTMLElement,
 	): Promise<Widget | undefined>;
 }

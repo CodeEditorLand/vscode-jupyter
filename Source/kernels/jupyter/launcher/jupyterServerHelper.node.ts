@@ -1,29 +1,29 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { inject, injectable, optional } from "inversify";
 import uuid from "uuid/v4";
 import { CancellationToken, Uri, workspace } from "vscode";
-import { inject, injectable, optional } from "inversify";
-import { traceError, traceInfo, traceVerbose } from "../../../platform/logging";
-import {
-	IDisposableRegistry,
-	IAsyncDisposableRegistry,
-	IConfigurationService,
-	Resource,
-} from "../../../platform/common/types";
-import { IInterpreterService } from "../../../platform/interpreter/contracts";
-import { IJupyterServerHelper, INotebookStarter } from "../types";
-import * as urlPath from "../../../platform/vscode-path/resources";
-import { IJupyterSubCommandExecutionService } from "../types.node";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { raceCancellationError } from "../../../platform/common/cancellation";
-import { IJupyterConnection } from "../../types";
-import { JupyterWaitForIdleError } from "../../errors/jupyterWaitForIdleError";
-import { expandWorkingDir } from "../jupyterUtils";
-import { noop } from "../../../platform/common/utils/misc";
 import { getRootFolder } from "../../../platform/common/application/workspace.base";
 import { computeWorkingDirectory } from "../../../platform/common/application/workspace.node";
+import { raceCancellationError } from "../../../platform/common/cancellation";
+import {
+	IAsyncDisposableRegistry,
+	IConfigurationService,
+	IDisposableRegistry,
+	Resource,
+} from "../../../platform/common/types";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { noop } from "../../../platform/common/utils/misc";
+import { IInterpreterService } from "../../../platform/interpreter/contracts";
+import { traceError, traceInfo, traceVerbose } from "../../../platform/logging";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import * as urlPath from "../../../platform/vscode-path/resources";
+import { JupyterWaitForIdleError } from "../../errors/jupyterWaitForIdleError";
+import { IJupyterConnection } from "../../types";
+import { expandWorkingDir } from "../jupyterUtils";
+import { IJupyterServerHelper, INotebookStarter } from "../types";
+import { IJupyterSubCommandExecutionService } from "../types.node";
 
 /**
  * Jupyter server implementation that uses the JupyterExecutionBase class to launch Jupyter.
@@ -32,7 +32,7 @@ import { computeWorkingDirectory } from "../../../platform/common/application/wo
 export class JupyterServerHelper implements IJupyterServerHelper {
 	private usablePythonInterpreter: PythonEnvironment | undefined;
 	private cache?: Promise<IJupyterConnection>;
-	private disposed: boolean = false;
+	private disposed = false;
 	private _disposed = false;
 	constructor(
 		@inject(IInterpreterService)
@@ -88,7 +88,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 
 	public async startServer(
 		resource: Resource,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<IJupyterConnection> {
 		if (this._disposed) {
 			throw new Error("Notebook server is disposed");
@@ -96,7 +96,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 		if (!this.cache) {
 			const promise = (this.cache = this.startJupyterWithRetry(
 				resource,
-				cancelToken
+				cancelToken,
 			));
 			promise.catch((ex) => {
 				traceError(`Failed to start the Jupyter Server`, ex);
@@ -113,7 +113,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	}
 
 	public async isJupyterServerSupported(
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<boolean> {
 		// See if we can find the command notebook
 		return this.jupyterInterpreterService
@@ -128,7 +128,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	}
 
 	public async getUsableJupyterPython(
-		cancelToken?: CancellationToken
+		cancelToken?: CancellationToken,
 	): Promise<PythonEnvironment | undefined> {
 		// Only try to compute this once.
 		if (
@@ -139,8 +139,8 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			this.usablePythonInterpreter = await raceCancellationError(
 				cancelToken,
 				this.jupyterInterpreterService!.getSelectedInterpreter(
-					cancelToken
-				)
+					cancelToken,
+				),
 			);
 		}
 		return this.usablePythonInterpreter;
@@ -149,7 +149,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	/* eslint-disable complexity,  */
 	private startJupyterWithRetry(
 		resource: Resource,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<IJupyterConnection> {
 		const work = async () => {
 			let connection: IJupyterConnection | undefined;
@@ -158,7 +158,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			let tryCount = 1;
 			const maxTries = Math.max(
 				1,
-				this.configuration.getSettings(undefined).jupyterLaunchRetries
+				this.configuration.getSettings(undefined).jupyterLaunchRetries,
 			);
 			let lastTryError: Error;
 			while (tryCount <= maxTries && !this.disposed) {
@@ -200,7 +200,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 
 	private async startImpl(
 		resource: Resource,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<IJupyterConnection> {
 		// If our uri is undefined or if it's set to local launch we need to launch a server locally
 		// If that works, then attempt to start the server
@@ -215,7 +215,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			rootFolder
 				? urlPath.joinPath(rootFolder, `${uuid()}.txt`)
 				: undefined,
-			settings
+			settings,
 		);
 
 		if (!this.notebookStarter) {
@@ -228,7 +228,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			this.configuration.getSettings(undefined)
 				.jupyterCommandLineArguments,
 			Uri.file(workingDirectory),
-			cancelToken
+			cancelToken,
 		);
 	}
 

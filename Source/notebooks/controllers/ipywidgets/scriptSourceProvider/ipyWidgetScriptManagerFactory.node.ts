@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { injectable, inject } from "inversify";
+import { inject, injectable } from "inversify";
+import { JupyterPaths } from "../../../../kernels/raw/finder/jupyterPaths.node";
+import { IKernel } from "../../../../kernels/types";
 import { IFileSystemNode } from "../../../../platform/common/platform/types.node";
 import {
 	IDisposableRegistry,
 	IExtensionContext,
 } from "../../../../platform/common/types";
-import { IKernel } from "../../../../kernels/types";
 import {
 	IIPyWidgetScriptManager,
 	IIPyWidgetScriptManagerFactory,
 	INbExtensionsPathProvider,
 } from "../types";
-import { RemoteIPyWidgetScriptManager } from "./remoteIPyWidgetScriptManager";
 import { LocalIPyWidgetScriptManager } from "./localIPyWidgetScriptManager.node";
-import { JupyterPaths } from "../../../../kernels/raw/finder/jupyterPaths.node";
+import { RemoteIPyWidgetScriptManager } from "./remoteIPyWidgetScriptManager";
 
 /**
  * Determines the IPyWidgetScriptManager for use in a node environment
@@ -45,13 +45,13 @@ export class IPyWidgetScriptManagerFactory
 				const scriptManager = new RemoteIPyWidgetScriptManager(
 					kernel,
 					this.context,
-					this.fs
+					this.fs,
 				);
 				this.managers.set(kernel, scriptManager);
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
-					this.disposables
+					this.disposables,
 				);
 			} else {
 				const scriptManager = new LocalIPyWidgetScriptManager(
@@ -59,13 +59,13 @@ export class IPyWidgetScriptManagerFactory
 					this.fs,
 					this.nbExtensionsPathProvider,
 					this.context,
-					this.jupyterPaths
+					this.jupyterPaths,
 				);
 				this.managers.set(kernel, scriptManager);
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
-					this.disposables
+					this.disposables,
 				);
 			}
 		}

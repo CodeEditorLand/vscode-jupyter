@@ -7,6 +7,6 @@ export class Debugger {
 	constructor(
 		public readonly document: NotebookDocument,
 		public readonly config: DebugConfiguration,
-		public readonly session: DebugSession
+		public readonly session: DebugSession,
 	) {}
 }

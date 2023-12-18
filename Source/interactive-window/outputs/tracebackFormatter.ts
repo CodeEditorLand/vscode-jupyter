@@ -4,20 +4,20 @@
 import { inject, injectable } from "inversify";
 import { NotebookCell, Uri } from "vscode";
 import { ITracebackFormatter } from "../../kernels/types";
-import {
-	IGeneratedCode,
-	IFileGeneratedCodes,
-	IGeneratedCodeStorageFactory,
-} from "../editor-integration/types";
-import { untildify } from "../../platform/common/utils/platform";
-import { traceInfoIfCI } from "../../platform/logging";
+import { InteractiveWindowView } from "../../platform/common/constants";
 import {
 	getDisplayPath,
 	getFilePath,
 } from "../../platform/common/platform/fs-paths";
 import { IPlatformService } from "../../platform/common/platform/types";
+import { untildify } from "../../platform/common/utils/platform";
 import { stripAnsi } from "../../platform/common/utils/regexp";
-import { InteractiveWindowView } from "../../platform/common/constants";
+import { traceInfoIfCI } from "../../platform/logging";
+import {
+	IFileGeneratedCodes,
+	IGeneratedCode,
+	IGeneratedCodeStorageFactory,
+} from "../editor-integration/types";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const _escapeRegExp =
@@ -44,7 +44,7 @@ export class InteractiveWindowTracebackFormatter
 		}
 		const storage = this.storageFactory.get({ notebook: cell.notebook });
 		const useIPython8Format = traceback.some((traceFrame) =>
-			/^[Input|Cell|File].*?\n.*/.test(traceFrame)
+			/^[Input|Cell|File].*?\n.*/.test(traceFrame),
 		);
 		if (!useIPython8Format && !storage) {
 			// nothing to modify for IPython7 if we don't have any code to look up (standalone Interactive Window)
@@ -55,19 +55,19 @@ export class InteractiveWindowTracebackFormatter
 			if (useIPython8Format) {
 				return this.modifyTracebackFrameIPython8(
 					traceFrame,
-					storage?.all
+					storage?.all,
 				);
 			} else {
 				return this.modifyTracebackFrameIPython7(
 					traceFrame,
-					storage!.all
+					storage!.all,
 				);
 			}
 		});
 	}
 	private modifyTracebackFrameIPython8(
 		traceFrame: string,
-		generatedCodes: IFileGeneratedCodes[] | undefined
+		generatedCodes: IFileGeneratedCodes[] | undefined,
 	): string {
 		// Ansi colors are described here:
 		// https://en.wikipedia.org/wiki/ANSI_escape_code under the SGR section
@@ -86,7 +86,7 @@ export class InteractiveWindowTracebackFormatter
 			(_s, prefix, num, suffix) => {
 				suffix = suffix.replace(/\u001b\[3\d+m/g, "\u001b[39m");
 				return `${prefix}${num}${suffix}\n`;
-			}
+			},
 		);
 
 		traceInfoIfCI(`Trace frame to match: ${traceFrame}`);
@@ -94,10 +94,10 @@ export class InteractiveWindowTracebackFormatter
 		let executionCount: number | undefined;
 		let location: string | undefined;
 		const inputMatch = /^Input.*?\[.*32mIn\s+\[(\d+).*?0;36m(.*?)\n.*/.exec(
-			traceFrame
+			traceFrame,
 		);
 		const cellMatch = /^Cell.*?\[.*32mIn\s*\[(\d+)\], (.*).\[0m\n/.exec(
-			traceFrame
+			traceFrame,
 		);
 
 		if (inputMatch && inputMatch.length > 1) {
@@ -113,9 +113,9 @@ export class InteractiveWindowTracebackFormatter
 			let matchUri: Uri | undefined;
 			let match: IGeneratedCode | undefined;
 			// eslint-disable-next-line no-restricted-syntax
-			for (let entry of generatedCodes) {
+			for (const entry of generatedCodes) {
 				match = entry.generatedCodes.find(
-					(h) => h.executionCount === executionCount
+					(h) => h.executionCount === executionCount,
 				);
 				if (match) {
 					matchUri = entry.uri;
@@ -140,27 +140,27 @@ export class InteractiveWindowTracebackFormatter
 						return `${prefix}<a href='${matchUri?.toString()}?line=${
 							newLine - 1
 						}'>${newLine}</a>${suffix}`;
-					}
+					},
 				);
 
 				// Then replace the input line with our uri for this cell
 				return afterLineReplace.replace(
 					/.*?\n/,
 					`\u001b[1;32m${getFilePath(
-						matchUri
-					)}\u001b[0m in \u001b[0;36m${location}\n`
+						matchUri,
+					)}\u001b[0m in \u001b[0;36m${location}\n`,
 				);
 			}
 		}
 
 		const fileMatch = /^File.*?\[\d;32m(.*):\d+.*\u001b.*\n/.exec(
-			traceFrame
+			traceFrame,
 		);
 		if (fileMatch && fileMatch.length > 1) {
 			// We need to untilde the file path here for the link to work in VS Code
 			const detildePath = untildify(
 				fileMatch[1],
-				getFilePath(this.platformService.homeDir)
+				getFilePath(this.platformService.homeDir),
 			);
 			const fileUri = Uri.file(detildePath);
 			// We have a match, replace source lines with hrefs
@@ -171,7 +171,7 @@ export class InteractiveWindowTracebackFormatter
 					return `${prefix}<a href='${fileUri?.toString()}?line=${
 						n - 1
 					}'>${n}</a>${suffix}`;
-				}
+				},
 			);
 		}
 
@@ -179,7 +179,7 @@ export class InteractiveWindowTracebackFormatter
 	}
 	private modifyTracebackFrameIPython7(
 		traceFrame: string,
-		allGeneratedCodes: IFileGeneratedCodes[]
+		allGeneratedCodes: IFileGeneratedCodes[],
 	): string {
 		const allUris = allGeneratedCodes.map((item) => item.uri);
 		allUris.forEach((uri) => {
@@ -193,11 +193,11 @@ export class InteractiveWindowTracebackFormatter
 			if (
 				(traceFrame.includes(filePath) &&
 					new RegExp(`\\[.*?;32m${_escapeRegExp(filePath)}`).test(
-						traceFrame
+						traceFrame,
 					)) ||
 				(traceFrame.includes(displayPath) &&
 					new RegExp(`\\[.*?;32m${_escapeRegExp(displayPath)}`).test(
-						traceFrame
+						traceFrame,
 					))
 			) {
 				// We have a match, pull out the source lines
@@ -215,7 +215,7 @@ export class InteractiveWindowTracebackFormatter
 				// Now attempt to find a cell that matches these source lines
 				const offset = this.findCellOffset(
 					storage.getFileGeneratedCode(uri),
-					sourceLines
+					sourceLines,
 				);
 				if (offset !== undefined) {
 					traceFrame = traceFrame.replace(
@@ -226,7 +226,7 @@ export class InteractiveWindowTracebackFormatter
 							return `${prefix}<a href='${uri.toString()}?line=${newLine}'>${
 								newLine + 1
 							}</a>${suffix}`;
-						}
+						},
 					);
 				}
 			}
@@ -234,7 +234,7 @@ export class InteractiveWindowTracebackFormatter
 			if (traceFrame.includes(filePath)) {
 				const offset = this.findCellOffset(
 					storage.getFileGeneratedCode(uri),
-					traceFrame
+					traceFrame,
 				);
 				if (offset) {
 					return traceFrame.replace(
@@ -245,7 +245,7 @@ export class InteractiveWindowTracebackFormatter
 							return `${prefix}<a href='${uri.toString()}?line=${newLine}'>${
 								newLine + 1
 							}</a>${suffix}`;
-						}
+						},
 					);
 				}
 			}
@@ -255,7 +255,7 @@ export class InteractiveWindowTracebackFormatter
 	}
 	private findCellOffset(
 		generatedCodes: IGeneratedCode[] | undefined,
-		codeLines: string
+		codeLines: string,
 	): number | undefined {
 		if (generatedCodes) {
 			// Go through all cell code looking for these code lines exactly

@@ -6,20 +6,20 @@
 import { assert, expect } from "chai";
 import * as sinon from "sinon";
 import * as TypeMoq from "typemoq";
+import { Uri } from "vscode";
 import { IApplicationShell } from "../../../platform/common/application/types";
 import { IPlatformService } from "../../../platform/common/platform/types";
 import { Installer } from "../../../platform/common/utils/localize";
-import { IServiceContainer } from "../../../platform/ioc/types";
-import {
-	EnvironmentType,
-	PythonEnvironment,
-} from "../../../platform/pythonEnvironments/info";
 import { InstallationChannelManager } from "../../../platform/interpreter/installer/channelManager.node";
 import {
 	IModuleInstaller,
 	Product,
 } from "../../../platform/interpreter/installer/types";
-import { Uri } from "vscode";
+import { IServiceContainer } from "../../../platform/ioc/types";
+import {
+	EnvironmentType,
+	PythonEnvironment,
+} from "../../../platform/pythonEnvironments/info";
 
 suite("InstallationChannelManager - getInstallationChannel()", () => {
 	let serviceContainer: TypeMoq.IMock<IServiceContainer>;
@@ -54,21 +54,21 @@ suite("InstallationChannelManager - getInstallationChannel()", () => {
 		moduleInstaller.setup((m) => (m as any).then).returns(() => undefined);
 		getInstallationChannels = sinon.stub(
 			InstallationChannelManager.prototype,
-			"getInstallationChannels"
+			"getInstallationChannels",
 		);
 		getInstallationChannels.resolves([moduleInstaller.object]);
 		showNoInstallersMessage = sinon.stub(
 			InstallationChannelManager.prototype,
-			"showNoInstallersMessage"
+			"showNoInstallersMessage",
 		);
 		showNoInstallersMessage.resolves();
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 
 		const channel = await installChannelManager.getInstallationChannel(
 			undefined as any,
-			interpreter
+			interpreter,
 		);
 		expect(channel).to.not.equal(undefined, "Channel should be set");
 		expect(channel!.name).to.equal("singleChannel");
@@ -77,21 +77,21 @@ suite("InstallationChannelManager - getInstallationChannel()", () => {
 	test("If no channels are returned by the resource, show no installer message and return", async () => {
 		getInstallationChannels = sinon.stub(
 			InstallationChannelManager.prototype,
-			"getInstallationChannels"
+			"getInstallationChannels",
 		);
 		getInstallationChannels.resolves([]);
 		showNoInstallersMessage = sinon.stub(
 			InstallationChannelManager.prototype,
-			"showNoInstallersMessage"
+			"showNoInstallersMessage",
 		);
 		showNoInstallersMessage.resolves();
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 
 		const channel = await installChannelManager.getInstallationChannel(
 			Product.jupyter,
-			interpreter
+			interpreter,
 		);
 		expect(channel).to.equal(undefined, "should be undefined");
 		assert.ok(showNoInstallersMessage.calledOnceWith(interpreter));
@@ -110,13 +110,13 @@ suite("InstallationChannelManager - getInstallationChannel()", () => {
 		moduleInstaller2.setup((m) => (m as any).then).returns(() => undefined);
 		appShell
 			.setup((a) =>
-				a.showQuickPick(TypeMoq.It.isAny(), TypeMoq.It.isAny())
+				a.showQuickPick(TypeMoq.It.isAny(), TypeMoq.It.isAny()),
 			)
 			.returns(() => Promise.resolve(undefined))
 			.verifiable(TypeMoq.Times.never());
 		getInstallationChannels = sinon.stub(
 			InstallationChannelManager.prototype,
-			"getInstallationChannels"
+			"getInstallationChannels",
 		);
 		getInstallationChannels.resolves([
 			moduleInstaller1.object,
@@ -124,22 +124,22 @@ suite("InstallationChannelManager - getInstallationChannel()", () => {
 		]);
 		showNoInstallersMessage = sinon.stub(
 			InstallationChannelManager.prototype,
-			"showNoInstallersMessage"
+			"showNoInstallersMessage",
 		);
 		showNoInstallersMessage.resolves();
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 
 		const channel = await installChannelManager.getInstallationChannel(
 			Product.jupyter,
-			interpreter
+			interpreter,
 		);
 		assert.ok(showNoInstallersMessage.notCalled);
 		appShell.verifyAll();
 		expect(channel).to.equal(
 			moduleInstaller1.object,
-			"Channel should be set"
+			"Channel should be set",
 		);
 	});
 });
@@ -164,7 +164,7 @@ suite("InstallationChannelManager - getInstallationChannels()", () => {
 			.setup((s) => s.getAll<IModuleInstaller>(IModuleInstaller))
 			.returns(() => []);
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 		const channel =
 			await installChannelManager.getInstallationChannels(interpreter);
@@ -213,7 +213,7 @@ suite("InstallationChannelManager - getInstallationChannels()", () => {
 			.setup((s) => s.getAll<IModuleInstaller>(IModuleInstaller))
 			.returns(() => moduleInstallers);
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 		const channels =
 			await installChannelManager.getInstallationChannels(interpreter);
@@ -250,12 +250,12 @@ suite("InstallationChannelManager - showNoInstallersMessage()", () => {
 				a.showErrorMessage(
 					Installer.noCondaOrPipInstaller,
 					TypeMoq.It.isAny(),
-					Installer.searchForHelp
-				)
+					Installer.searchForHelp,
+				),
 			)
 			.verifiable(TypeMoq.Times.once());
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 		await installChannelManager.showNoInstallersMessage(activeInterpreter);
 		serviceContainer.verifyAll();
@@ -274,12 +274,12 @@ suite("InstallationChannelManager - showNoInstallersMessage()", () => {
 				a.showErrorMessage(
 					Installer.noPipInstaller,
 					TypeMoq.It.isAny(),
-					Installer.searchForHelp
-				)
+					Installer.searchForHelp,
+				),
 			)
 			.verifiable(TypeMoq.Times.once());
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 		await installChannelManager.showNoInstallersMessage(activeInterpreter);
 		serviceContainer.verifyAll();
@@ -338,8 +338,8 @@ suite("InstallationChannelManager - showNoInstallersMessage()", () => {
 							a.showErrorMessage(
 								TypeMoq.It.isAny(),
 								TypeMoq.It.isAny(),
-								Installer.searchForHelp
-							)
+								Installer.searchForHelp,
+							),
 						)
 						.returns(() => Promise.resolve(Installer.searchForHelp))
 						.verifiable(TypeMoq.Times.once());
@@ -348,16 +348,16 @@ suite("InstallationChannelManager - showNoInstallersMessage()", () => {
 						.returns(() => undefined)
 						.verifiable(TypeMoq.Times.once());
 					installChannelManager = new InstallationChannelManager(
-						serviceContainer.object
+						serviceContainer.object,
 					);
 					await installChannelManager.showNoInstallersMessage(
-						activeInterpreter
+						activeInterpreter,
 					);
 					serviceContainer.verifyAll();
 					appShell.verifyAll();
 				});
 			});
-		}
+		},
 	);
 	test("If 'Search for help' is not selected in error prompt, don't open URL", async () => {
 		const activeInterpreter = {
@@ -377,8 +377,8 @@ suite("InstallationChannelManager - showNoInstallersMessage()", () => {
 				a.showErrorMessage(
 					TypeMoq.It.isAnyString(),
 					TypeMoq.It.isAny(),
-					Installer.searchForHelp
-				)
+					Installer.searchForHelp,
+				),
 			)
 			.returns(() => Promise.resolve(undefined))
 			.verifiable(TypeMoq.Times.once());
@@ -387,7 +387,7 @@ suite("InstallationChannelManager - showNoInstallersMessage()", () => {
 			.returns(() => undefined)
 			.verifiable(TypeMoq.Times.never());
 		installChannelManager = new InstallationChannelManager(
-			serviceContainer.object
+			serviceContainer.object,
 		);
 		await installChannelManager.showNoInstallersMessage(activeInterpreter);
 		serviceContainer.verifyAll();

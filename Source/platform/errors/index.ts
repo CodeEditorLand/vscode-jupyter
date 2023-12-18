@@ -4,19 +4,19 @@
 import { FetchError } from "node-fetch";
 import * as stackTrace from "stack-trace";
 import { getTelemetrySafeHashedString } from "../telemetry/helpers";
-import { getErrorTags } from "./errors";
 import { getLastFrameFromPythonTraceback } from "./errorUtils";
+import { getErrorTags } from "./errors";
 import {
-	getErrorCategory,
-	TelemetryErrorProperties,
 	BaseError,
+	TelemetryErrorProperties,
 	WrappedError,
+	getErrorCategory,
 } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function populateTelemetryWithErrorInfo(
 	props: Partial<TelemetryErrorProperties>,
-	error: Error
+	error: Error,
 ) {
 	props.failed = true;
 	// Don't blow away what we already have.
@@ -60,15 +60,15 @@ export async function populateTelemetryWithErrorInfo(
 		await Promise.all([
 			Promise.resolve(
 				props.pythonErrorFile ||
-					getTelemetrySafeHashedString(info.fileName)
+					getTelemetrySafeHashedString(info.fileName),
 			),
 			Promise.resolve(
 				props.pythonErrorFolder ||
-					getTelemetrySafeHashedString(info.folderName)
+					getTelemetrySafeHashedString(info.folderName),
 			),
 			Promise.resolve(
 				props.pythonErrorPackage ||
-					getTelemetrySafeHashedString(info.packageName)
+					getTelemetrySafeHashedString(info.packageName),
 			),
 		]);
 }
@@ -93,7 +93,7 @@ function serializeStackTrace(ex: Error): string {
 			const lineno = frame.getLineNumber();
 			const colno = frame.getColumnNumber();
 			trace += `\n\tat ${getCallSite(
-				frame
+				frame,
 			)} ${filename}:${lineno}:${colno}`;
 		} else {
 			trace += "\n\tat <anonymous>";

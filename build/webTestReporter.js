@@ -21,25 +21,25 @@ const settingsFile = path.join(
 	"test",
 	"datascience",
 	".vscode",
-	"settings.json"
+	"settings.json",
 );
 const webTestSummaryJsonFile = path.join(
 	__dirname,
 	"..",
 	"logs",
-	"testresults.json"
+	"testresults.json",
 );
 const webTestSummaryNb = path.join(
 	__dirname,
 	"..",
 	"logs",
-	"testresults.ipynb"
+	"testresults.ipynb",
 );
 const failedWebTestSummaryNb = path.join(
 	__dirname,
 	"..",
 	"logs",
-	"failedtestresults.ipynb"
+	"failedtestresults.ipynb",
 );
 const progress = [];
 const logsDir = path.join(ExtensionRootDir, "logs");
@@ -57,8 +57,8 @@ async function captureScreenShot(name, res) {
 	res.writeHead(200);
 	res.end();
 }
-exports.startReportServer = async function () {
-	return new Promise((resolve) => {
+exports.startReportServer = async () =>
+	new Promise((resolve) => {
 		console.log(`Creating test server`);
 		server = createServer((req, res) => {
 			res.setHeader("Access-Control-Allow-Origin", "*");
@@ -113,7 +113,7 @@ exports.startReportServer = async function () {
 				settingsJson,
 				["jupyter.REPORT_SERVER_PORT"],
 				port,
-				{}
+				{},
 			);
 			const updatedSettingsJson = jsonc.applyEdits(settingsJson, edits);
 			fs.writeFileSync(settingsFile, updatedSettingsJson);
@@ -123,14 +123,13 @@ exports.startReportServer = async function () {
 					fs.ensureDirSync(path.dirname(webTestSummaryJsonFile));
 					fs.writeFileSync(
 						webTestSummaryJsonFile,
-						JSON.stringify(progress)
+						JSON.stringify(progress),
 					);
 					server.close();
 				},
 			});
 		});
 	});
-};
 
 async function addCell(cells, output, failed, executionCount) {
 	const stackFrames = failed ? (output.err.stack || "").split(/\r?\n/) : [];
@@ -140,7 +139,7 @@ async function addCell(cells, output, failed, executionCount) {
 		const inputBuffer = new TextEncoder().encode(data);
 		const hashBuffer = await webcrypto.subtle.digest(
 			{ name: algorithm },
-			inputBuffer
+			inputBuffer,
 		);
 
 		// Turn into hash string (got this logic from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest)
@@ -152,7 +151,7 @@ async function addCell(cells, output, failed, executionCount) {
 	).substring(0, 10);
 	const fileNamePrefix = `${output.title}_${fullTestNameHash}`.replace(
 		/[\W]+/g,
-		"_"
+		"_",
 	);
 	const assertionError = failed
 		? [
@@ -165,7 +164,7 @@ async function addCell(cells, output, failed, executionCount) {
 						stackFrames.join("\n"),
 					],
 				},
-			]
+		  ]
 		: [];
 	const consoleOutputs = (output.consoleOutput || [])
 		.map((item) => {
@@ -209,10 +208,10 @@ async function addCell(cells, output, failed, executionCount) {
 					} catch (ex) {
 						console.error(
 							`Failed to read screenshot file ${file} at stage ${stage}`,
-							ex
+							ex,
 						);
 					}
-				})
+				}),
 		)
 	).filter((item) => !!item);
 	// Add a markdown cell so we can see this in the outline.
@@ -238,7 +237,7 @@ async function addCell(cells, output, failed, executionCount) {
 exports.dumpTestSummary = async () => {
 	try {
 		const summary = JSON.parse(
-			fs.readFileSync(webTestSummaryJsonFile).toString()
+			fs.readFileSync(webTestSummaryJsonFile).toString(),
 		);
 		const runner = new EventEmitter();
 		runner.stats = {};
@@ -337,7 +336,7 @@ exports.dumpTestSummary = async () => {
 			// Temporarily reduced to 1 since #11917 disabled tests
 			// the non-python suite only has 4 tests passing currently, so that's the highest bar we can use.
 			core.setFailed(
-				"Not enough tests were run - are too many being skipped?"
+				"Not enough tests were run - are too many being skipped?",
 			);
 		}
 
@@ -345,10 +344,10 @@ exports.dumpTestSummary = async () => {
 		if (failedCells.length) {
 			fs.writeFileSync(
 				failedWebTestSummaryNb,
-				JSON.stringify({ cells: failedCells })
+				JSON.stringify({ cells: failedCells }),
 			);
 			console.info(
-				`Created failed test summary notebook file ${failedWebTestSummaryNb}`
+				`Created failed test summary notebook file ${failedWebTestSummaryNb}`,
 			);
 		}
 		fs.writeFileSync(webTestSummaryNb, JSON.stringify({ cells: cells }));

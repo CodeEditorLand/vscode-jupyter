@@ -3,7 +3,7 @@
 
 import * as fsExtra from "fs-extra";
 import { Uri } from "vscode";
-import { getOSType, OSType } from "./utils/platform";
+import { OSType, getOSType } from "./utils/platform";
 
 export async function tryGetRealPath(expectedPath: Uri): Promise<Uri> {
 	try {

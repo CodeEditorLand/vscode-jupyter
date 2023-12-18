@@ -18,7 +18,7 @@ export function handleTensorBoardDisplayDataOutput(data: nbformat.IMimeBundle) {
 		) {
 			data["text/html"] = text.replace(
 				/new URL\((.*), window.location\)/,
-				'new URL("http://localhost")'
+				'new URL("http://localhost")',
 			);
 		}
 	}

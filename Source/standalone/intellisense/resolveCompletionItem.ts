@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type { Kernel, KernelMessage } from "@jupyterlab/services";
 import {
 	CancellationToken,
 	CompletionItem,
@@ -8,33 +9,32 @@ import {
 	Position,
 	TextDocument,
 } from "vscode";
+import {
+	getDisplayNameOrNameOfKernelConnection,
+	getKernelConnectionLanguage,
+} from "../../kernels/helpers";
 import { IKernel } from "../../kernels/types";
+import { raceCancellation } from "../../platform/common/cancellation";
+import { Settings } from "../../platform/common/constants";
+import { splitLines } from "../../platform/common/helpers";
+import { IDisposable } from "../../platform/common/types";
+import { translateKernelLanguageToMonaco } from "../../platform/common/utils";
+import { raceTimeoutError } from "../../platform/common/utils/async";
+import { once } from "../../platform/common/utils/events";
+import {
+	DisposableStore,
+	dispose,
+} from "../../platform/common/utils/lifecycle";
+import { stripAnsi } from "../../platform/common/utils/regexp";
 import { StopWatch } from "../../platform/common/utils/stopWatch";
+import { traceInfo, traceVerbose, traceWarning } from "../../platform/logging";
 import {
 	Telemetry,
 	TelemetryMeasures,
 	TelemetryProperties,
 	sendTelemetryEvent,
 } from "../../telemetry";
-import type { Kernel, KernelMessage } from "@jupyterlab/services";
-import { raceTimeoutError } from "../../platform/common/utils/async";
-import { raceCancellation } from "../../platform/common/cancellation";
-import {
-	DisposableStore,
-	dispose,
-} from "../../platform/common/utils/lifecycle";
-import { stripAnsi } from "../../platform/common/utils/regexp";
-import { traceInfo, traceVerbose, traceWarning } from "../../platform/logging";
-import {
-	getDisplayNameOrNameOfKernelConnection,
-	getKernelConnectionLanguage,
-} from "../../kernels/helpers";
-import { Settings } from "../../platform/common/constants";
 import { convertDocumentationToMarkdown } from "./completionDocumentationFormatter";
-import { once } from "../../platform/common/utils/events";
-import { IDisposable } from "../../platform/common/types";
-import { splitLines } from "../../platform/common/helpers";
-import { translateKernelLanguageToMonaco } from "../../platform/common/utils";
 
 // Not all kernels support requestInspect method.
 // E.g. deno does not support this, hence waiting for this to complete is poinless.
@@ -71,7 +71,7 @@ export async function resolveCompletionItem(
 	monacoLanguage: string,
 	document: TextDocument,
 	position: Position,
-	toDispose: DisposableStore
+	toDispose: DisposableStore,
 ): Promise<CompletionItem> {
 	if (!item.range || !kernel.session?.kernel) {
 		// We always set a range in the completion item we send.
@@ -80,7 +80,7 @@ export async function resolveCompletionItem(
 	}
 	if (
 		kernelIdsThatToNotSupportCompletionResolveOrAreTooSlowToReply.has(
-			kernelId
+			kernelId,
 		)
 	) {
 		return item;
@@ -97,11 +97,11 @@ export async function resolveCompletionItem(
 			kernelId: kernelId,
 			kernelConnectionType: kernel.kernelConnectionMetadata.kind,
 			kernelLanguage: getKernelConnectionLanguage(
-				kernel.kernelConnectionMetadata
+				kernel.kernelConnectionMetadata,
 			),
 			monacoLanguage: translateKernelLanguageToMonaco(
 				getKernelConnectionLanguage(kernel.kernelConnectionMetadata) ||
-					""
+					"",
 			),
 			cancelled: false,
 			completed: false,
@@ -116,7 +116,7 @@ export async function resolveCompletionItem(
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletionResolve,
 			measures,
-			properties
+			properties,
 		);
 		return item;
 	}
@@ -128,14 +128,14 @@ export async function resolveCompletionItem(
 		token,
 		properties,
 		measures,
-		toDispose
+		toDispose,
 	);
 
 	try {
 		const content = await raceTimeoutError(
 			MAX_TIMEOUT_WAITING_FOR_RESOLVE_COMPLETION,
 			new RequestTimedoutError(),
-			raceCancellation(token, request)
+			raceCancellation(token, request),
 		);
 
 		properties.kernelStatusAfterRequest = kernel.status;
@@ -151,7 +151,7 @@ export async function resolveCompletionItem(
 			const documentation = getDocumentation(content);
 			item.documentation = convertDocumentationToMarkdown(
 				documentation,
-				monacoLanguage
+				monacoLanguage,
 			);
 			properties.completedWithData = documentation.length > 0;
 		}
@@ -163,7 +163,7 @@ export async function resolveCompletionItem(
 	sendTelemetryEvent(
 		Telemetry.KernelCodeCompletionResolve,
 		measures,
-		properties
+		properties,
 	);
 	return item;
 }
@@ -184,19 +184,19 @@ function handleKernelRequestTimeout(kernel: IKernel, monacoLanguage: string) {
 	const kernelId = kernel.kernelConnectionMetadata.id;
 	if (
 		kernelIdsThatToNotSupportCompletionResolveOrAreTooSlowToReply.has(
-			kernelId
+			kernelId,
 		)
 	) {
 		return;
 	}
 	let numberOfFailedAttempts =
 		totalNumberOfTimeoutsWaitingForResolveCompletionPerKernel.get(
-			kernelId
+			kernelId,
 		) || 0;
 	numberOfFailedAttempts += 1;
 	totalNumberOfTimeoutsWaitingForResolveCompletionPerKernel.set(
 		kernelId,
-		numberOfFailedAttempts
+		numberOfFailedAttempts,
 	);
 	if (
 		numberOfFailedAttempts >=
@@ -204,8 +204,8 @@ function handleKernelRequestTimeout(kernel: IKernel, monacoLanguage: string) {
 	) {
 		traceWarning(
 			`Failed to inspect code in kernel ${getDisplayNameOrNameOfKernelConnection(
-				kernel.kernelConnectionMetadata
-			)} ${numberOfFailedAttempts} times.}`
+				kernel.kernelConnectionMetadata,
+			)} ${numberOfFailedAttempts} times.}`,
 		);
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletionCannotResolve,
@@ -214,10 +214,10 @@ function handleKernelRequestTimeout(kernel: IKernel, monacoLanguage: string) {
 				kernelId: kernelId,
 				kernelConnectionType: kernel.kernelConnectionMetadata.kind,
 				kernelLanguage: monacoLanguage,
-			}
+			},
 		);
 		kernelIdsThatToNotSupportCompletionResolveOrAreTooSlowToReply.add(
-			kernelId
+			kernelId,
 		);
 		return;
 	}
@@ -234,18 +234,18 @@ async function sendInspectRequest(
 	token: CancellationToken,
 	properties: TelemetryProperties<Telemetry.KernelCodeCompletionResolve>,
 	measures: TelemetryMeasures<Telemetry.KernelCodeCompletionResolve>,
-	toDispose: DisposableStore
+	toDispose: DisposableStore,
 ): Promise<KernelMessage.IInspectReplyMsg["content"]> {
 	measures.pendingRequests = getPendingRequestCount(kernel);
 	if (doesKernelHaveTooManyPendingRequests(kernel)) {
 		traceInfo(
 			`Too many pending requests ${getPendingRequestCount(
-				kernel
-			)} for kernel ${kernel.id}, waiting for it to be ready.`
+				kernel,
+			)} for kernel ${kernel.id}, waiting for it to be ready.`,
 		);
 		await raceCancellation(
 			token,
-			waitForKernelToBeReadyToHandleRequest(kernel, token)
+			waitForKernelToBeReadyToHandleRequest(kernel, token),
 		);
 	}
 	if (token.isCancellationRequested) {
@@ -273,17 +273,17 @@ async function sendInspectRequest(
 		properties,
 		measures,
 		toDispose,
-		codeForLogging
+		codeForLogging,
 	);
 	// No need to raceCancel with the token, thats expected in the calling code.
 	return request.then(({ content }) => {
 		if (token.isCancellationRequested) {
 			traceVerbose(
-				`Inspected code ${codeForLogging} in ${stopWatch.elapsedTime}ms (but cancelled)`
+				`Inspected code ${codeForLogging} in ${stopWatch.elapsedTime}ms (but cancelled)`,
 			);
 		} else {
 			traceVerbose(
-				`Inspected code ${codeForLogging} in ${stopWatch.elapsedTime}ms`
+				`Inspected code ${codeForLogging} in ${stopWatch.elapsedTime}ms`,
 			);
 		}
 		return content;
@@ -293,7 +293,7 @@ async function sendInspectRequest(
 function generateInspectRequestMessage(
 	item: CompletionItem,
 	document: TextDocument,
-	position: Position
+	position: Position,
 ): KernelMessage.IInspectRequestMsg["content"] {
 	const code = document.getText();
 	const insertText =
@@ -318,7 +318,7 @@ function checkHowLongKernelTakesToReplyEvenAfterTimeoutOrCancellation(
 	properties: TelemetryProperties<Telemetry.KernelCodeCompletionResolve>,
 	measures: TelemetryMeasures<Telemetry.KernelCodeCompletionResolve>,
 	toDispose: DisposableStore,
-	codeForLogging: string
+	codeForLogging: string,
 ) {
 	// Do not wait too long
 	// Some kernels do not support this request, this will give
@@ -330,11 +330,11 @@ function checkHowLongKernelTakesToReplyEvenAfterTimeoutOrCancellation(
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletionResolve,
 			measures,
-			properties
+			properties,
 		);
 
 		traceWarning(
-			`Timeout (after ${maxTime}ms) waiting to inspect code '${codeForLogging}'`
+			`Timeout (after ${maxTime}ms) waiting to inspect code '${codeForLogging}'`,
 		);
 	}, maxTime);
 	const timeoutDisposable = new Disposable(() => clearTimeout(timeout));
@@ -355,7 +355,7 @@ function checkHowLongKernelTakesToReplyEvenAfterTimeoutOrCancellation(
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletionResolve,
 			measures,
-			properties
+			properties,
 		);
 	});
 }
@@ -366,7 +366,7 @@ export const pendingInspectRequests = new WeakMap<
 >();
 
 function doesKernelHaveTooManyPendingRequests(
-	kernel: Kernel.IKernelConnection
+	kernel: Kernel.IKernelConnection,
 ) {
 	if (!pendingInspectRequests.has(kernel)) {
 		pendingInspectRequests.set(kernel, { count: 0 });
@@ -395,7 +395,7 @@ function incrementPendingCounter(kernel: Kernel.IKernelConnection) {
 
 async function waitForKernelToBeReadyToHandleRequest(
 	kernel: Kernel.IKernelConnection,
-	token: CancellationToken
+	token: CancellationToken,
 ): Promise<void> {
 	const disposables: IDisposable[] = [];
 	await raceCancellation(
@@ -419,7 +419,7 @@ async function waitForKernelToBeReadyToHandleRequest(
 					kernel.statusChanged.disconnect(statusChangeHandler);
 				},
 				undefined,
-				disposables
+				disposables,
 			);
 			kernel.statusChanged.connect(statusChangeHandler);
 			disposables.push({
@@ -428,6 +428,6 @@ async function waitForKernelToBeReadyToHandleRequest(
 					kernel.statusChanged.disconnect(statusChangeHandler);
 				},
 			});
-		})
+		}),
 	);
 }

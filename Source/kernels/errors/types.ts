@@ -30,7 +30,7 @@ export interface IDataScienceErrorHandler {
 		errorContext: KernelAction,
 		kernelConnection: KernelConnectionMetadata,
 		resource: Resource,
-		actionSource: KernelActionSource
+		actionSource: KernelActionSource,
 	): Promise<KernelInterpreterDependencyResponse>;
 	/**
 	 * The value of `errorContext` is used to determine the context of the error message, whether it applies to starting or interrupting kernels or the like.
@@ -39,7 +39,7 @@ export interface IDataScienceErrorHandler {
 	getErrorMessageForDisplayInCell(
 		err: Error,
 		errorContext: KernelAction,
-		resource: Resource
+		resource: Resource,
 	): Promise<string>;
 }
 
@@ -48,7 +48,7 @@ export abstract class BaseKernelError extends BaseError {
 	constructor(
 		category: ErrorCategory,
 		message: string,
-		public readonly kernelConnectionMetadata: KernelConnectionMetadata
+		public readonly kernelConnectionMetadata: KernelConnectionMetadata,
 	) {
 		super(category, message);
 	}
@@ -58,7 +58,7 @@ export class WrappedKernelError extends WrappedError {
 	constructor(
 		message: string,
 		originalException: Error | undefined,
-		public readonly kernelConnectionMetadata: KernelConnectionMetadata
+		public readonly kernelConnectionMetadata: KernelConnectionMetadata,
 	) {
 		super(message, originalException);
 	}

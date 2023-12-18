@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
+import { commands } from "vscode";
 import { IExtensionSyncActivationService } from "../../../platform/activation/types";
 import { IDisposableRegistry } from "../../../platform/common/types";
 import { noop } from "../../../platform/common/utils/misc";
 import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
-import { commands } from "vscode";
 
 /**
  * Registers the command for setting the interpreter to launch jupyter with
@@ -25,7 +25,7 @@ export class JupyterInterpreterSelectionCommand
 		this.disposables.push(
 			commands.registerCommand("jupyter.selectJupyterInterpreter", () => {
 				this.service.selectInterpreter().catch(noop);
-			})
+			}),
 		);
 	}
 }

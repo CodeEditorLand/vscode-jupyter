@@ -2,15 +2,15 @@
 // Licensed under the MIT License.
 
 import { Uri, commands, workspace } from "vscode";
+import { RemoteKernelSpecCacheFileName } from "../../kernels/jupyter/constants";
+import { Commands } from "../../platform/common/constants";
 import { IExtensionContext } from "../../platform/common/types";
 import { noop } from "../../platform/common/utils/misc";
-import { Commands } from "../../platform/common/constants";
 import { traceInfo } from "../../platform/logging";
-import { RemoteKernelSpecCacheFileName } from "../../kernels/jupyter/constants";
 
 export function addClearCacheCommand(
 	context: IExtensionContext,
-	isDevMode: boolean
+	isDevMode: boolean,
 ) {
 	if (!isDevMode) {
 		return;
@@ -20,19 +20,19 @@ export function addClearCacheCommand(
 		// eslint-disable-next-line no-restricted-syntax
 		for (const key of context.globalState.keys()) {
 			promises.push(
-				context.globalState.update(key, undefined).then(noop, noop)
+				context.globalState.update(key, undefined).then(noop, noop),
 			);
 		}
 		// eslint-disable-next-line no-restricted-syntax
 		for (const key of context.workspaceState.keys()) {
 			promises.push(
-				context.workspaceState.update(key, undefined).then(noop, noop)
+				context.workspaceState.update(key, undefined).then(noop, noop),
 			);
 		}
 		promises.push(
 			commands
 				.executeCommand(Commands.ClearSavedJupyterUris)
-				.then(noop, noop)
+				.then(noop, noop),
 		);
 		await Promise.all(promises).catch(noop);
 		// Delete the files after clearing the cache.
@@ -41,24 +41,24 @@ export function addClearCacheCommand(
 				.delete(
 					Uri.joinPath(
 						context.globalStorageUri,
-						"lastExecutedRemoteCell.json"
-					)
+						"lastExecutedRemoteCell.json",
+					),
 				)
 				.then(noop, noop),
 			workspace.fs
 				.delete(
 					Uri.joinPath(
 						context.globalStorageUri,
-						"remoteServersMRUList.json"
-					)
+						"remoteServersMRUList.json",
+					),
 				)
 				.then(noop, noop),
 			workspace.fs
 				.delete(
 					Uri.joinPath(
 						context.globalStorageUri,
-						RemoteKernelSpecCacheFileName
-					)
+						RemoteKernelSpecCacheFileName,
+					),
 				)
 				.then(noop, noop),
 		]);

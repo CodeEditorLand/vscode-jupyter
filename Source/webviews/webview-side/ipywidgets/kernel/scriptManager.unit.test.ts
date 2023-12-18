@@ -6,14 +6,14 @@
 import { assert } from "chai";
 import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { Disposable } from "vscode";
-import { dispose } from "../../../../platform/common/utils/lifecycle";
-import { IDisposable } from "../../../../platform/common/types";
 import {
 	IInteractiveWindowMapping,
 	IPyWidgetMessages,
 } from "../../../../messageTypes";
-import { IMessageHandler, PostOffice } from "../../react-common/postOffice";
+import { IDisposable } from "../../../../platform/common/types";
+import { dispose } from "../../../../platform/common/utils/lifecycle";
 import { sleep } from "../../../../test/core";
+import { IMessageHandler, PostOffice } from "../../react-common/postOffice";
 import { scriptsAlreadyRegisteredInRequireJs } from "./requirejsRegistry";
 import { ScriptManager } from "./scriptManager";
 
@@ -40,7 +40,7 @@ suite("IPyWidget Script Manager", () => {
 		when(postOffice.addHandler(anything())).thenCall(
 			(handler: IMessageHandler) => {
 				postOfficeCallBack = handler;
-			}
+			},
 		);
 	});
 	teardown(() => {
@@ -56,7 +56,7 @@ suite("IPyWidget Script Manager", () => {
 	function createManager(isOnline: boolean) {
 		scriptManager = new ScriptManager(
 			instance(postOffice),
-			Promise.resolve(isOnline)
+			Promise.resolve(isOnline),
 		);
 	}
 	test("Verify we send the isOnline flag when we are online", async () => {
@@ -65,8 +65,8 @@ suite("IPyWidget Script Manager", () => {
 		verify(
 			postOffice.sendMessage<IInteractiveWindowMapping>(
 				IPyWidgetMessages.IPyWidgets_IsOnline,
-				deepEqual({ isOnline: true })
-			)
+				deepEqual({ isOnline: true }),
+			),
 		).once();
 	});
 	test("Verify we send the isOnline flag when we are not online", async () => {
@@ -75,8 +75,8 @@ suite("IPyWidget Script Manager", () => {
 		verify(
 			postOffice.sendMessage<IInteractiveWindowMapping>(
 				IPyWidgetMessages.IPyWidgets_IsOnline,
-				deepEqual({ isOnline: false })
-			)
+				deepEqual({ isOnline: false }),
+			),
 		).once();
 	});
 	test("Register scripts as and when they are provided by extension host", async () => {
@@ -88,7 +88,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "widget1",
 				source: "local",
 				scriptUri: "http://bogus.com/1",
-			}
+			},
 		);
 		postOfficeCallBack.handleMessage(
 			IPyWidgetMessages.IPyWidgets_WidgetScriptSourceResponse,
@@ -96,7 +96,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "widget2",
 				source: "local",
 				scriptUri: "http://bogus.com/2",
-			}
+			},
 		);
 
 		// Verify we registered the modules in requirejs.
@@ -114,7 +114,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "widget1",
 				source: "local",
 				scriptUri: "http://bogus.com/1",
-			}
+			},
 		);
 		postOfficeCallBack.handleMessage(
 			IPyWidgetMessages.IPyWidgets_WidgetScriptSourceResponse,
@@ -122,7 +122,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "widget2",
 				source: "local",
 				scriptUri: "http://bogus.com/2",
-			}
+			},
 		);
 
 		// Verify we registered the modules in requirejs.
@@ -137,8 +137,8 @@ suite("IPyWidget Script Manager", () => {
 		when(
 			postOffice.sendMessage<IInteractiveWindowMapping>(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((arg1, arg2) => {
 			if (
 				arg1 === IPyWidgetMessages.IPyWidgets_WidgetScriptSourceRequest
@@ -157,7 +157,7 @@ suite("IPyWidget Script Manager", () => {
 				source: "cdn",
 				requestId: payload?.requestId,
 				scriptUri: "http://bogus.com/1cdn",
-			}
+			},
 		);
 
 		// Promise should now complete.
@@ -178,7 +178,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "widget1",
 				source: "cdn",
 				scriptUri: "http://bogus.com/1cdn",
-			}
+			},
 		);
 		postOfficeCallBack.handleMessage(
 			IPyWidgetMessages.IPyWidgets_WidgetScriptSourceResponse,
@@ -186,7 +186,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "widget2",
 				source: "local",
 				scriptUri: "http://bogus.com/2",
-			}
+			},
 		);
 
 		// Verify we registered the modules in requirejs.
@@ -201,8 +201,8 @@ suite("IPyWidget Script Manager", () => {
 		when(
 			postOffice.sendMessage<IInteractiveWindowMapping>(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((arg1, arg2) => {
 			if (
 				arg1 === IPyWidgetMessages.IPyWidgets_WidgetScriptSourceRequest
@@ -221,7 +221,7 @@ suite("IPyWidget Script Manager", () => {
 				source: "local",
 				requestId: payload?.requestId,
 				scriptUri: "http://bogus.com/1local",
-			}
+			},
 		);
 
 		// Promise should now complete.
@@ -242,8 +242,8 @@ suite("IPyWidget Script Manager", () => {
 		when(
 			postOffice.sendMessage<IInteractiveWindowMapping>(
 				anything(),
-				anything()
-			)
+				anything(),
+			),
 		).thenCall((arg1, arg2) => {
 			if (
 				arg1 === IPyWidgetMessages.IPyWidgets_WidgetScriptSourceRequest
@@ -261,17 +261,17 @@ suite("IPyWidget Script Manager", () => {
 					{
 						moduleName: "helloWorld",
 						requestId: payload?.requestId,
-					}
+					},
 				);
-			})
+			}),
 		);
 		// Verify we sent the request to fetch the widget script source
 		await sleep(0);
 		verify(
 			postOffice.sendMessage<IInteractiveWindowMapping>(
 				IPyWidgetMessages.IPyWidgets_WidgetScriptSourceRequest,
-				anything()
-			)
+				anything(),
+			),
 		).once();
 
 		assert.strictEqual(payload?.moduleName, "helloWorld");
@@ -284,7 +284,7 @@ suite("IPyWidget Script Manager", () => {
 				moduleName: "helloWorld",
 				requestId: payload?.requestId,
 				scriptUri: "http://bogus.com/helloWorld",
-			}
+			},
 		);
 
 		// Promise should now complete.

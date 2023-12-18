@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience, Common } from "../../../platform/common/utils/localize";
-import { IKernel } from "../../../kernels/types";
-import { IDataViewerDependencyService } from "./types";
-import { pandasMinimumVersionSupportedByVariableViewer } from "./constants";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { parseSemVer } from "../../../platform/common/utils";
 import { SemVer } from "semver";
-import {
-	capturePerfTelemetry,
-	sendTelemetryEvent,
-	Telemetry,
-} from "../../../telemetry";
+import { CancellationToken, CancellationTokenSource, window } from "vscode";
+import { IKernel } from "../../../kernels/types";
+import { parseSemVer } from "../../../platform/common/utils";
+import { Common, DataScience } from "../../../platform/common/utils/localize";
+import { isCodeSpace } from "../../../platform/constants";
 import { ProductNames } from "../../../platform/interpreter/installer/productNames";
 import { Product } from "../../../platform/interpreter/installer/types";
-import { CancellationToken, CancellationTokenSource, window } from "vscode";
 import { traceWarning } from "../../../platform/logging";
-import { isCodeSpace } from "../../../platform/constants";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
+import {
+	Telemetry,
+	capturePerfTelemetry,
+	sendTelemetryEvent,
+} from "../../../telemetry";
+import { pandasMinimumVersionSupportedByVariableViewer } from "./constants";
+import { IDataViewerDependencyService } from "./types";
 
 /**
  * base class of the data viewer dependency implementation.
@@ -26,21 +26,21 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 	implements IDataViewerDependencyService
 {
 	abstract checkAndInstallMissingDependencies(
-		executionEnvironment: IKernel | PythonEnvironment
+		executionEnvironment: IKernel | PythonEnvironment,
 	): Promise<void>;
 
 	protected abstract _getVersion(
 		executer: TExecuter,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<string | undefined>;
 	protected abstract _doInstall(
 		executer: TExecuter,
-		tokenSource: CancellationTokenSource
+		tokenSource: CancellationTokenSource,
 	): Promise<void>;
 
 	protected async getVersion(
 		executer: TExecuter,
-		token: CancellationToken
+		token: CancellationToken,
 	): Promise<SemVer | undefined> {
 		try {
 			const version = await this._getVersion(executer, token);
@@ -58,24 +58,24 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 	protected async promptInstall(
 		executer: TExecuter,
 		tokenSource: CancellationTokenSource,
-		version?: string
+		version?: string,
 	): Promise<void> {
-		let message = version
+		const message = version
 			? DataScience.pandasTooOldForViewingFormat(
 					version,
-					pandasMinimumVersionSupportedByVariableViewer
-				)
+					pandasMinimumVersionSupportedByVariableViewer,
+			  )
 			: DataScience.pandasRequiredForViewing(
-					pandasMinimumVersionSupportedByVariableViewer
-				);
+					pandasMinimumVersionSupportedByVariableViewer,
+			  );
 
-		let selection = isCodeSpace()
+		const selection = isCodeSpace()
 			? Common.install
 			: await window.showErrorMessage(
 					message,
 					{ modal: true },
-					Common.install
-				);
+					Common.install,
+			  );
 
 		if (selection === Common.install) {
 			await this._doInstall(executer, tokenSource);
@@ -91,7 +91,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 		try {
 			const pandasVersion = await this.getVersion(
 				executer,
-				tokenSource.token
+				tokenSource.token,
 			);
 
 			if (tokenSource.token.isCancellationRequested) {
@@ -102,7 +102,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 			if (pandasVersion) {
 				if (
 					pandasVersion.compare(
-						pandasMinimumVersionSupportedByVariableViewer
+						pandasMinimumVersionSupportedByVariableViewer,
 					) > 0
 				) {
 					sendTelemetryEvent(Telemetry.PandasOK);

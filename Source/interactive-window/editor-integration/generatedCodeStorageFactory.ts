@@ -4,7 +4,7 @@
 import { injectable } from "inversify";
 import { NotebookDocument, Uri, workspace } from "vscode";
 import { GeneratedCodeStorage } from "./generatedCodeStorage";
-import { IGeneratedCodeStore, IGeneratedCodeStorageFactory } from "./types";
+import { IGeneratedCodeStorageFactory, IGeneratedCodeStore } from "./types";
 
 /**
  * Creates GeneratedCodeStorages for a given notebook document.
@@ -24,7 +24,7 @@ export class GeneratedCodeStorageFactory
 		return this.storages.get(notebook)!;
 	}
 	get(
-		options: { notebook: NotebookDocument } | { fileUri: Uri }
+		options: { notebook: NotebookDocument } | { fileUri: Uri },
 	): IGeneratedCodeStore | undefined {
 		if ("notebook" in options) {
 			return this.storages.get(options.notebook)!;
@@ -32,7 +32,8 @@ export class GeneratedCodeStorageFactory
 			const notebook = workspace.notebookDocuments.find((nb) => {
 				const storage = this.storages.get(nb);
 				return storage?.all.find(
-					(item) => item.uri.toString() === options.fileUri.toString()
+					(item) =>
+						item.uri.toString() === options.fileUri.toString(),
 				);
 			});
 			return notebook ? this.storages.get(notebook) : undefined;

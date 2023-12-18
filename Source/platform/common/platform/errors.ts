@@ -44,7 +44,7 @@ namespace vscErrors {
 	];
 	function errorMatches(
 		err: Error,
-		expectedName: string
+		expectedName: string,
 	): boolean | undefined {
 		if (!known.includes(err.name)) {
 			return undefined;

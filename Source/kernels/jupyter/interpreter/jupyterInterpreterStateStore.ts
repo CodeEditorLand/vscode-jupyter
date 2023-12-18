@@ -9,9 +9,9 @@ import {
 	IPythonExtensionChecker,
 } from "../../../platform/api/types";
 import {
-	IMemento,
 	GLOBAL_MEMENTO,
 	IDisposableRegistry,
+	IMemento,
 } from "../../../platform/common/types";
 import { noop } from "../../../platform/common/utils/misc";
 
@@ -83,7 +83,7 @@ export class MigrateJupyterInterpreterStateService
 		this.api.onDidActivatePythonExtension(
 			this.activateBackground,
 			this,
-			this.disposables
+			this.disposables,
 		);
 	}
 	public async activateBackground() {

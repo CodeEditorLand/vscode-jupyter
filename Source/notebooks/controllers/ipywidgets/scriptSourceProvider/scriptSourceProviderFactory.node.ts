@@ -2,22 +2,22 @@
 // Licensed under the MIT License.
 
 import { inject, injectable, named } from "inversify";
+import { Memento } from "vscode";
+import { IKernel } from "../../../../kernels/types";
 import {
 	GLOBAL_MEMENTO,
 	IConfigurationService,
 	IMemento,
 } from "../../../../platform/common/types";
-import { IKernel } from "../../../../kernels/types";
-import { LocalWidgetScriptSourceProvider } from "./localWidgetScriptSourceProvider.node";
-import { RemoteWidgetScriptSourceProvider } from "./remoteWidgetScriptSourceProvider";
 import {
 	IIPyWidgetScriptManagerFactory,
 	ILocalResourceUriConverter,
 	IWidgetScriptSourceProvider,
 	IWidgetScriptSourceProviderFactory,
 } from "../types";
-import { Memento } from "vscode";
 import { CDNWidgetScriptSourceProvider } from "./cdnWidgetScriptSourceProvider";
+import { LocalWidgetScriptSourceProvider } from "./localWidgetScriptSourceProvider.node";
+import { RemoteWidgetScriptSourceProvider } from "./remoteWidgetScriptSourceProvider";
 
 /**
  * Returns the IWidgetScriptSourceProvider for use in a node environment
@@ -38,7 +38,7 @@ export class ScriptSourceProviderFactory
 
 	public getProviders(
 		kernel: IKernel,
-		uriConverter: ILocalResourceUriConverter
+		uriConverter: ILocalResourceUriConverter,
 	) {
 		const scriptProviders: IWidgetScriptSourceProvider[] = [];
 
@@ -46,8 +46,8 @@ export class ScriptSourceProviderFactory
 		scriptProviders.push(
 			new CDNWidgetScriptSourceProvider(
 				this.globalMemento,
-				this.configurationSettings
-			)
+				this.configurationSettings,
+			),
 		);
 		switch (kernel.kernelConnectionMetadata.kind) {
 			case "connectToLiveRemoteKernel":
@@ -55,8 +55,8 @@ export class ScriptSourceProviderFactory
 				scriptProviders.push(
 					new RemoteWidgetScriptSourceProvider(
 						kernel,
-						this.widgetScriptManagerFactory
-					)
+						this.widgetScriptManagerFactory,
+					),
 				);
 				break;
 
@@ -65,8 +65,8 @@ export class ScriptSourceProviderFactory
 					new LocalWidgetScriptSourceProvider(
 						kernel,
 						uriConverter,
-						this.widgetScriptManagerFactory
-					)
+						this.widgetScriptManagerFactory,
+					),
 				);
 		}
 

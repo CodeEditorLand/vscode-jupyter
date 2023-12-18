@@ -5,21 +5,7 @@
 
 import { assert } from "chai";
 import * as sinon from "sinon";
-import { KernelLauncher } from "./kernelLauncher.node";
-import { IPlatformService } from "../../../platform/common/platform/types";
-import {
-	IConfigurationService,
-	IDisposable,
-} from "../../../platform/common/types";
-import { IProcessServiceFactory } from "../../../platform/common/process/types.node";
-import { IPythonExtensionChecker } from "../../../platform/api/types";
-import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
-import { JupyterPaths } from "../finder/jupyterPaths.node";
-import { PythonKernelInterruptDaemon } from "../finder/pythonKernelInterruptDaemon.node";
-import { dispose } from "../../../platform/common/utils/lifecycle";
 import { anything, instance, mock, when } from "ts-mockito";
-import { IFileSystemNode } from "../../../platform/common/platform/types.node";
-import { PythonKernelConnectionMetadata } from "../../types";
 import {
 	CancellationTokenSource,
 	Disposable,
@@ -27,13 +13,27 @@ import {
 	PortAutoForwardAction,
 	Uri,
 } from "vscode";
-import { KernelProcess } from "./kernelProcess.node";
-import { PortAttributesProviders } from "../../portAttributeProvider.node";
+import { IPythonExtensionChecker } from "../../../platform/api/types";
+import { IPlatformService } from "../../../platform/common/platform/types";
+import { IFileSystemNode } from "../../../platform/common/platform/types.node";
+import { IProcessServiceFactory } from "../../../platform/common/process/types.node";
+import {
+	IConfigurationService,
+	IDisposable,
+} from "../../../platform/common/types";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import {
 	IPythonExecutionFactory,
 	IPythonExecutionService,
 } from "../../../platform/interpreter/types.node";
 import { UsedPorts } from "../../common/usedPorts";
+import { PortAttributesProviders } from "../../portAttributeProvider.node";
+import { PythonKernelConnectionMetadata } from "../../types";
+import { JupyterPaths } from "../finder/jupyterPaths.node";
+import { PythonKernelInterruptDaemon } from "../finder/pythonKernelInterruptDaemon.node";
+import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
+import { KernelLauncher } from "./kernelLauncher.node";
+import { KernelProcess } from "./kernelProcess.node";
 
 suite("kernel Launcher", () => {
 	let disposables: IDisposable[] = [];
@@ -62,7 +62,7 @@ suite("kernel Launcher", () => {
 
 		(instance(pythonExecService) as any).then = undefined;
 		when(
-			pythonExecutionFactory.createActivatedEnvironment(anything())
+			pythonExecutionFactory.createActivatedEnvironment(anything()),
 		).thenResolve(instance(pythonExecService));
 		when(pythonExecService.exec(anything(), anything())).thenResolve({
 			stdout: "",
@@ -80,7 +80,7 @@ suite("kernel Launcher", () => {
 			instance(configService),
 			instance(jupyterPaths),
 			instance(pythonKernelInterruptDaemon),
-			instance(platform)
+			instance(platform),
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -121,7 +121,7 @@ suite("kernel Launcher", () => {
 			10_000,
 			undefined,
 			__dirname,
-			cancellation.token
+			cancellation.token,
 		);
 	}
 	test("Verify used ports are listed", async () => {
@@ -132,7 +132,7 @@ suite("kernel Launcher", () => {
 		assert.notDeepEqual(
 			Array.from(UsedPorts),
 			oldPorts,
-			"Ports not updated"
+			"Ports not updated",
 		);
 	});
 	test("Verify Kernel ports are not forwarded", async () => {
@@ -145,10 +145,10 @@ suite("kernel Launcher", () => {
 			assert.equal(
 				portAttributeProvider.providePortAttributes(
 					{ port },
-					cancellation.token
+					cancellation.token,
 				)?.autoForwardAction,
 				PortAutoForwardAction.Ignore,
-				"Kernel Port should not be forwarded"
+				"Kernel Port should not be forwarded",
 			);
 		}
 	});

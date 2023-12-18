@@ -39,7 +39,7 @@ class VsCodeMessageApi implements IMessageApi {
 		| ((msg: WebviewMessage) => Promise<void>)
 		| undefined;
 	private vscodeApi: IVsCodeApi | undefined;
-	private registered: boolean = false;
+	private registered = false;
 	private baseHandler = this.handleVSCodeApiMessages.bind(this);
 
 	public register(msgCallback: (msg: WebviewMessage) => Promise<void>) {
@@ -120,7 +120,7 @@ class KernelMessageApi implements IMessageApi {
 			: {
 					onDidReceiveKernelMessage,
 					postKernelMessage,
-				};
+			  };
 	}
 
 	public register(msgCallback: (msg: WebviewMessage) => Promise<void>) {
@@ -128,7 +128,7 @@ class KernelMessageApi implements IMessageApi {
 		if (!this.kernelHandler) {
 			this.kernelHandler =
 				this.kernelMessagingApi.onDidReceiveKernelMessage(
-					this.handleKernelMessage.bind(this)
+					this.handleKernelMessage.bind(this),
 				);
 		}
 	}
@@ -173,7 +173,7 @@ export class PostOffice implements IDisposable {
 
 	public sendMessage<M, T extends keyof M = keyof M>(
 		type: T,
-		payload?: M[T]
+		payload?: M[T],
 	) {
 		return this.sendUnsafeMessage(type.toString(), payload);
 	}

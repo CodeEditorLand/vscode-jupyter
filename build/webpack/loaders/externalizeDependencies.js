@@ -7,7 +7,7 @@ function replaceModule(prefixRegex, prefix, contents, moduleName, quotes) {
 	const stringToReplaceWith = `${prefix}${quotes}./node_modules/${moduleName}${quotes}`;
 	return contents.replace(
 		new RegExp(stringToSearch, "gm"),
-		stringToReplaceWith
+		stringToReplaceWith,
 	);
 }
 // tslint:disable:no-default-export no-invalid-this
@@ -19,28 +19,28 @@ function default_1(source) {
 				"import(",
 				source,
 				moduleName,
-				'"'
+				'"',
 			);
 			source = replaceModule(
 				"import\\(",
 				"import(",
 				source,
 				moduleName,
-				"'"
+				"'",
 			);
 			source = replaceModule(
 				"require\\(",
 				"require(",
 				source,
 				moduleName,
-				'"'
+				'"',
 			);
 			source = replaceModule(
 				"require\\(",
 				"require(",
 				source,
 				moduleName,
-				"'"
+				"'",
 			);
 			source = replaceModule("from ", "from ", source, moduleName, '"');
 			source = replaceModule("from ", "from ", source, moduleName, "'");

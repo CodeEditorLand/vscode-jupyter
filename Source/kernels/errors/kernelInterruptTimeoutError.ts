@@ -20,7 +20,7 @@ export class KernelInterruptTimeoutError extends BaseKernelError {
 		super(
 			"kernelpromisetimeout",
 			DataScience.interruptingKernelFailed,
-			kernelConnection
+			kernelConnection,
 		);
 	}
 }

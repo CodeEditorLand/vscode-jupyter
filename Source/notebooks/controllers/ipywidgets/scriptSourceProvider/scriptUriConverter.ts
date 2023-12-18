@@ -10,7 +10,7 @@ import { ILocalResourceUriConverter } from "../types";
 export class ScriptUriConverter implements ILocalResourceUriConverter {
 	constructor(
 		private readonly isWebExtension: boolean,
-		private readonly converter: (input: Uri) => Promise<Uri>
+		private readonly converter: (input: Uri) => Promise<Uri>,
 	) {}
 
 	/**

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as path from "../../vscode-path/path";
 import { workspace } from "vscode";
+import * as path from "../../vscode-path/path";
 import { Resource } from "../types";
-import { getOSType, OSType } from "../utils/platform";
+import { OSType, getOSType } from "../utils/platform";
 import { IWorkspaceService } from "./types";
 
 /**
@@ -12,25 +12,25 @@ import { IWorkspaceService } from "./types";
  */
 export abstract class BaseWorkspaceService implements IWorkspaceService {
 	public abstract computeWorkingDirectory(
-		resource: Resource
+		resource: Resource,
 	): Promise<string>;
 }
 
 export function getWorkspaceFolderIdentifier(
 	resource: Resource,
-	defaultValue: string = ""
+	defaultValue = "",
 ): string {
 	const workspaceFolder = resource
 		? workspace.getWorkspaceFolder(resource)
 		: workspace.workspaceFolders
-			? workspace.workspaceFolders[0] // Default to first folder if resource not passed in.
-			: undefined;
+		  ? workspace.workspaceFolders[0] // Default to first folder if resource not passed in.
+		  : undefined;
 	return workspaceFolder
 		? path.normalize(
 				getOSType() === OSType.Windows
 					? workspaceFolder.uri.path.toUpperCase()
-					: workspaceFolder.uri.path
-			)
+					: workspaceFolder.uri.path,
+		  )
 		: defaultValue;
 }
 

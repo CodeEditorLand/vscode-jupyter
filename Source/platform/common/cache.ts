@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { inject, injectable, named } from "inversify";
 import { Memento, env, workspace } from "vscode";
-import { noop } from "./utils/misc";
 import { IExtensionSyncActivationService } from "../activation/types";
+import { getRootFolder } from "./application/workspace.base";
+import { Settings } from "./constants";
+import { getFilePath } from "./platform/fs-paths";
 import {
 	GLOBAL_MEMENTO,
 	ICryptoUtils,
@@ -11,10 +14,7 @@ import {
 	IMemento,
 	WORKSPACE_MEMENTO,
 } from "./types";
-import { inject, injectable, named } from "inversify";
-import { getFilePath } from "./platform/fs-paths";
-import { getRootFolder } from "./application/workspace.base";
-import { Settings } from "./constants";
+import { noop } from "./utils/misc";
 
 const GlobalMementoKeyPrefixesToRemove = [
 	"currentServerHash",
@@ -56,37 +56,39 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 			[await this.getUriAccountKey()]
 				.concat(GlobalMementoKeyPrefixesToRemove)
 				.filter(
-					(key) => this.globalState.get(key, undefined) !== undefined
+					(key) => this.globalState.get(key, undefined) !== undefined,
 				)
 				.map((key) =>
-					this.globalState.update(key, undefined).then(noop, noop)
-				)
+					this.globalState.update(key, undefined).then(noop, noop),
+				),
 		);
 		const workspaceStateKeysToRemove = this.workspaceState
 			.keys()
 			.filter(
 				(key) =>
 					key.startsWith("LAST_EXECUTED_CELL_") &&
-					!key.startsWith("LAST_EXECUTED_CELL_V2_")
+					!key.startsWith("LAST_EXECUTED_CELL_V2_"),
 			);
 		await Promise.all(
 			workspaceStateKeysToRemove.map((key) =>
-				this.workspaceState.update(key, undefined)
-			)
+				this.workspaceState.update(key, undefined),
+			),
 		);
 		await Promise.all(
-			GlobalMementoKeyPrefixesToRemove.map((keyPrefix) =>
+			GlobalMementoKeyPrefixesToRemove.flatMap((keyPrefix) =>
 				this.globalState
 					.keys()
 					.filter((key) => key.startsWith(keyPrefix))
 					.map((key) =>
-						this.globalState.update(key, undefined).then(noop, noop)
-					)
-			).flat()
+						this.globalState
+							.update(key, undefined)
+							.then(noop, noop),
+					),
+			),
 		);
 		await this.extensionContext.secrets
 			.delete(
-				`${Settings.JupyterServerRemoteLaunchService}.remote-uri-list`
+				`${Settings.JupyterServerRemoteLaunchService}.remote-uri-list`,
 			)
 			.then(noop, noop);
 	}
@@ -100,7 +102,7 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 			// Workspace situation
 			return this.crypto.createHash(
 				getFilePath(workspace.workspaceFile),
-				"SHA-512"
+				"SHA-512",
 			);
 		}
 		return env.machineId; // Global key when no folder or workspace file

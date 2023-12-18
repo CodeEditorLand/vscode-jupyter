@@ -54,7 +54,7 @@ async function isWebSiteReachable(url: string, signal: AbortSignal) {
 		logErrorMessage(
 			`Failed to access CDN ${url} after ${retries} attempt(s), ${(
 				ex || ""
-			).toString()}`
+			).toString()}`,
 		);
 		return false;
 	}

@@ -22,8 +22,8 @@ export interface IKeyIterator<K> {
 }
 
 export class StringIterator implements IKeyIterator<string> {
-	private _value: string = "";
-	private _pos: number = 0;
+	private _value = "";
+	private _pos = 0;
 
 	reset(key: string): this {
 		this._value = key;
@@ -96,16 +96,16 @@ export class ConfigKeysIterator implements IKeyIterator<string> {
 					0,
 					a.length,
 					this._from,
-					this._to
-				)
+					this._to,
+			  )
 			: compareSubstringIgnoreCase(
 					a,
 					this._value,
 					0,
 					a.length,
 					this._from,
-					this._to
-				);
+					this._to,
+			  );
 	}
 
 	value(): string {
@@ -121,7 +121,7 @@ export class PathIterator implements IKeyIterator<string> {
 
 	constructor(
 		private readonly _splitOnBackslash: boolean = true,
-		private readonly _caseSensitive: boolean = true
+		private readonly _caseSensitive: boolean = true,
 	) {}
 
 	reset(key: string): this {
@@ -178,16 +178,16 @@ export class PathIterator implements IKeyIterator<string> {
 					0,
 					a.length,
 					this._from,
-					this._to
-				)
+					this._to,
+			  )
 			: compareSubstringIgnoreCase(
 					a,
 					this._value,
 					0,
 					a.length,
 					this._from,
-					this._to
-				);
+					this._to,
+			  );
 	}
 
 	value(): string {
@@ -195,7 +195,7 @@ export class PathIterator implements IKeyIterator<string> {
 	}
 }
 
-const enum UriIteratorState {
+enum UriIteratorState {
 	Scheme = 1,
 	Authority = 2,
 	Path = 3,
@@ -207,11 +207,11 @@ export class UriIterator implements IKeyIterator<URI> {
 	private _pathIterator!: PathIterator;
 	private _value!: URI;
 	private _states: UriIteratorState[] = [];
-	private _stateIdx: number = 0;
+	private _stateIdx = 0;
 
 	constructor(
 		private readonly _ignorePathCasing: (uri: URI) => boolean,
-		private readonly _ignoreQueryAndFragment: (uri: URI) => boolean
+		private readonly _ignoreQueryAndFragment: (uri: URI) => boolean,
 	) {}
 
 	reset(key: URI): this {
@@ -226,7 +226,7 @@ export class UriIterator implements IKeyIterator<URI> {
 		if (this._value.path) {
 			this._pathIterator = new PathIterator(
 				false,
-				!this._ignorePathCasing(key)
+				!this._ignorePathCasing(key),
 			);
 			this._pathIterator.reset(key.path);
 			if (this._pathIterator.value()) {
@@ -305,10 +305,7 @@ interface ResourceMapKeyFn {
 }
 
 class ResourceMapEntry<T> {
-	constructor(
-		readonly uri: URI,
-		readonly value: T
-	) {}
+	constructor(readonly uri: URI, readonly value: T) {}
 }
 
 export class ResourceMap<T> implements Map<URI, T> {
@@ -335,7 +332,7 @@ export class ResourceMap<T> implements Map<URI, T> {
 
 	constructor(
 		mapOrKeyFn?: ResourceMap<T> | ResourceMapKeyFn,
-		toKey?: ResourceMapKeyFn
+		toKey?: ResourceMapKeyFn,
 	) {
 		if (mapOrKeyFn instanceof ResourceMap) {
 			this.map = new Map(mapOrKeyFn.map);
@@ -349,7 +346,7 @@ export class ResourceMap<T> implements Map<URI, T> {
 	set(resource: URI, value: T): this {
 		this.map.set(
 			this.toKey(resource),
-			new ResourceMapEntry(resource, value)
+			new ResourceMapEntry(resource, value),
 		);
 		return this;
 	}
@@ -376,37 +373,37 @@ export class ResourceMap<T> implements Map<URI, T> {
 
 	forEach(
 		clb: (value: T, key: URI, map: Map<URI, T>) => void,
-		thisArg?: any
+		thisArg?: any,
 	): void {
 		if (typeof thisArg !== "undefined") {
 			clb = clb.bind(thisArg);
 		}
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		for (let [_, entry] of this.map) {
+		for (const [_, entry] of this.map) {
 			clb(entry.value, entry.uri, <any>this);
 		}
 	}
 
 	*values(): IterableIterator<T> {
-		for (let entry of this.map.values()) {
+		for (const entry of this.map.values()) {
 			yield entry.value;
 		}
 	}
 
 	*keys(): IterableIterator<URI> {
-		for (let entry of this.map.values()) {
+		for (const entry of this.map.values()) {
 			yield entry.uri;
 		}
 	}
 
 	*entries(): IterableIterator<[URI, T]> {
-		for (let entry of this.map.values()) {
+		for (const entry of this.map.values()) {
 			yield [entry.uri, entry.value];
 		}
 	}
 
 	*[Symbol.iterator](): IterableIterator<[URI, T]> {
-		for (let [, entry] of this.map) {
+		for (const [, entry] of this.map) {
 			yield [entry.uri, entry.value];
 		}
 	}
@@ -421,7 +418,7 @@ export class ResourceSet implements Set<URI> {
 	constructor(entries: readonly URI[], toKey?: ResourceMapKeyFn);
 	constructor(
 		entriesOrKey?: readonly URI[] | ResourceMapKeyFn,
-		toKey?: ResourceMapKeyFn
+		toKey?: ResourceMapKeyFn,
 	) {
 		if (!entriesOrKey || typeof entriesOrKey === "function") {
 			this._map = new ResourceMap(entriesOrKey);
@@ -450,10 +447,10 @@ export class ResourceSet implements Set<URI> {
 
 	forEach(
 		callbackfn: (value: URI, value2: URI, set: Set<URI>) => void,
-		thisArg?: any
+		thisArg?: any,
 	): void {
 		this._map.forEach((_value, key) =>
-			callbackfn.call(thisArg, key, key, this)
+			callbackfn.call(thisArg, key, key, this),
 		);
 	}
 
@@ -478,7 +475,7 @@ export class ResourceSet implements Set<URI> {
 	}
 }
 
-export const enum Touch {
+export enum Touch {
 	None = 0,
 	AsOld = 1,
 	AsNew = 2,

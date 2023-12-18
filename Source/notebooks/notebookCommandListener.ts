@@ -14,34 +14,34 @@ import {
 	window,
 	workspace,
 } from "vscode";
+import { DisplayOptions } from "../kernels/displayOptions";
+import { IDataScienceErrorHandler } from "../kernels/errors/types";
+import { endCellAndDisplayErrorsInCell } from "../kernels/execution/helpers";
+import { chainWithPendingUpdates } from "../kernels/execution/notebookUpdater";
+import { IKernel, IKernelProvider } from "../kernels/types";
+import { Commands } from "../platform/common/constants";
+import { getDisplayPath } from "../platform/common/platform/fs-paths";
 import {
 	IConfigurationService,
 	IDataScienceCommandListener,
 	IDisposableRegistry,
 } from "../platform/common/types";
-import { Commands } from "../platform/common/constants";
-import { noop } from "../platform/common/utils/misc";
-import { NotebookCellLanguageService } from "./languages/cellLanguageService";
-import { DisplayOptions } from "../kernels/displayOptions";
-import { IKernel, IKernelProvider } from "../kernels/types";
-import { getDisplayPath } from "../platform/common/platform/fs-paths";
-import { DataScience } from "../platform/common/utils/localize";
-import { traceInfo, traceVerbose } from "../platform/logging";
-import { INotebookEditorProvider } from "./types";
-import { IServiceContainer } from "../platform/ioc/types";
-import { endCellAndDisplayErrorsInCell } from "../kernels/execution/helpers";
-import { chainWithPendingUpdates } from "../kernels/execution/notebookUpdater";
-import { IDataScienceErrorHandler } from "../kernels/errors/types";
 import { getNotebookMetadata } from "../platform/common/utils";
+import { DataScience } from "../platform/common/utils/localize";
+import { noop } from "../platform/common/utils/misc";
+import { IServiceContainer } from "../platform/ioc/types";
+import { traceInfo, traceVerbose } from "../platform/logging";
 import { KernelConnector } from "./controllers/kernelConnector";
 import { IControllerRegistration } from "./controllers/types";
+import { NotebookCellLanguageService } from "./languages/cellLanguageService";
+import { INotebookEditorProvider } from "./types";
 
 /**
  * Registers commands specific to the notebook UI
  */
 @injectable()
 export class NotebookCommandListener implements IDataScienceCommandListener {
-	private kernelInterruptedDontAskToRestart: boolean = false;
+	private kernelInterruptedDontAskToRestart = false;
 	constructor(
 		@inject(IDisposableRegistry)
 		private disposableRegistry: IDisposableRegistry,
@@ -63,37 +63,37 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.NotebookEditorRemoveAllCells,
-				() => this.removeAllCells()
-			)
+				() => this.removeAllCells(),
+			),
 		);
 		this.disposableRegistry.push(
 			commands.registerCommand(Commands.NotebookEditorRunAllCells, () =>
-				this.runAllCells()
-			)
+				this.runAllCells(),
+			),
 		);
 		this.disposableRegistry.push(
 			commands.registerCommand(Commands.NotebookEditorAddCellBelow, () =>
-				this.addCellBelow()
-			)
+				this.addCellBelow(),
+			),
 		);
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.NotebookEditorCollapseAllCells,
-				() => this.collapseAll()
-			)
+				() => this.collapseAll(),
+			),
 		);
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.NotebookEditorExpandAllCells,
-				() => this.expandAll()
-			)
+				() => this.expandAll(),
+			),
 		);
 		this.disposableRegistry.push(
 			// TODO: if contributed anywhere, add context support
 			commands.registerCommand(
 				Commands.RestartKernelAndRunUpToSelectedCell,
-				() => this.restartKernelAndRunUpToSelectedCell()
-			)
+				() => this.restartKernelAndRunUpToSelectedCell(),
+			),
 		);
 
 		this.disposableRegistry.push(
@@ -102,20 +102,20 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 				(context?: { notebookEditor: { notebookUri: Uri } } | Uri) => {
 					if (context && "notebookEditor" in context) {
 						return this.restartKernel(
-							context?.notebookEditor?.notebookUri
+							context?.notebookEditor?.notebookUri,
 						).catch(noop);
 					} else {
 						return this.restartKernel(context).catch(noop);
 					}
-				}
-			)
+				},
+			),
 		);
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.InterruptKernel,
 				(context?: { notebookEditor: { notebookUri: Uri } }) =>
-					this.interruptKernel(context?.notebookEditor?.notebookUri)
-			)
+					this.interruptKernel(context?.notebookEditor?.notebookUri),
+			),
 		);
 		this.disposableRegistry.push(
 			commands.registerCommand(
@@ -123,13 +123,13 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 				(context?: { notebookEditor: { notebookUri: Uri } }) => {
 					if (context && "notebookEditor" in context) {
 						this.restartKernelAndRunAllCells(
-							context?.notebookEditor?.notebookUri
+							context?.notebookEditor?.notebookUri,
 						).catch(noop);
 					} else {
 						this.restartKernelAndRunAllCells(context).catch(noop);
 					}
-				}
-			)
+				},
+			),
 		);
 	}
 
@@ -153,7 +153,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			return;
 		}
 		const defaultLanguage = this.languageService.getPreferredLanguage(
-			getNotebookMetadata(document)
+			getNotebookMetadata(document),
 		);
 		chainWithPendingUpdates(document, (edit) => {
 			const nbEdit = NotebookEdit.replaceCells(
@@ -162,9 +162,9 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 					new NotebookCellData(
 						NotebookCellKind.Code,
 						"",
-						defaultLanguage
+						defaultLanguage,
 					),
-				]
+				],
 			);
 			edit.set(document.uri, [nbEdit]);
 		}).then(noop, noop);
@@ -214,14 +214,14 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			notebookUri ??
 			this.notebookEditorProvider.activeNotebookEditor?.notebook.uri;
 		const document = workspace.notebookDocuments.find(
-			(document) => document.uri.toString() === uri?.toString()
+			(document) => document.uri.toString() === uri?.toString(),
 		);
 
 		if (document === undefined) {
 			return;
 		}
 		traceVerbose(
-			`Command interrupted kernel for ${getDisplayPath(document.uri)}`
+			`Command interrupted kernel for ${getDisplayPath(document.uri)}`,
 		);
 
 		const kernel = this.kernelProvider.get(document);
@@ -256,7 +256,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			notebookUri ??
 			this.notebookEditorProvider.activeNotebookEditor?.notebook.uri;
 		const document = workspace.notebookDocuments.find(
-			(document) => document.uri.toString() === uri?.toString()
+			(document) => document.uri.toString() === uri?.toString(),
 		);
 
 		if (document === undefined) {
@@ -268,8 +268,8 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		if (kernel) {
 			traceVerbose(
 				`Restart kernel command handler for ${getDisplayPath(
-					document.uri
-				)}`
+					document.uri,
+				)}`,
 			);
 			if (await this.shouldAskForRestart(document.uri)) {
 				// Ask the user if they want us to restart or not.
@@ -282,7 +282,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 					message,
 					{ modal: true },
 					yes,
-					dontAskAgain
+					dontAskAgain,
 				);
 				if (response === dontAskAgain) {
 					await this.disableAskForRestart(document.uri);
@@ -302,7 +302,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 	>();
 	private async wrapKernelMethod(
 		currentContext: "interrupt" | "restart",
-		kernel: IKernel
+		kernel: IKernel,
 	) {
 		const notebook = kernel.notebook;
 		// We don't want to create multiple restarts/interrupt requests for the same kernel.
@@ -332,7 +332,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 						controller: controller.controller,
 					},
 					new DisplayOptions(false),
-					this.disposableRegistry
+					this.disposableRegistry,
 				);
 			} catch (ex) {
 				if (currentCell) {
@@ -342,9 +342,9 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 						await this.errorHandler.getErrorMessageForDisplayInCell(
 							ex,
 							currentContext,
-							kernel.resourceUri
+							kernel.resourceUri,
 						),
-						false
+						false,
 					);
 				} else {
 					window.showErrorMessage(ex.toString()).then(noop, noop);
@@ -378,7 +378,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 					"askForKernelRestart",
 					false,
 					undefined,
-					ConfigurationTarget.Global
+					ConfigurationTarget.Global,
 				)
 				.catch(noop);
 		}

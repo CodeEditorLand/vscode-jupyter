@@ -40,19 +40,19 @@ export class DebugLocationTrackerFactory
 	}
 
 	public createDebugAdapterTracker(
-		session: DebugSession
+		session: DebugSession,
 	): DebugAdapterTracker {
 		const result = new DebugLocationTracker(session.id);
 		this.activeTrackers.set(session, result);
 		result.sessionEnded(
 			() => this.activeTrackers.delete(session),
 			this,
-			this.disposableRegistry
+			this.disposableRegistry,
 		);
 		result.debugLocationUpdated(
 			this.onLocationUpdated,
 			this,
-			this.disposableRegistry
+			this.disposableRegistry,
 		);
 		this.onLocationUpdated();
 		return result;

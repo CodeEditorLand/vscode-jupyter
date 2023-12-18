@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from "inversify";
-import {
-	EnvironmentType,
-	PythonEnvironment,
-} from "../../pythonEnvironments/info";
+import { Uri, env, window } from "vscode";
 import {} from "../../common/application/types";
 import { IPlatformService } from "../../common/platform/types";
 import { Installer } from "../../common/utils/localize";
 import { IServiceContainer } from "../../ioc/types";
 import {
+	EnvironmentType,
+	PythonEnvironment,
+} from "../../pythonEnvironments/info";
+import {
 	IInstallationChannelManager,
 	IModuleInstaller,
 	Product,
 } from "./types";
-import { Uri, env, window } from "vscode";
 
 /**
  * Finds IModuleInstaller instances for a particular environment (like pip, poetry, conda).
@@ -28,7 +28,7 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 
 	public async getInstallationChannel(
 		_product: Product,
-		interpreter: PythonEnvironment
+		interpreter: PythonEnvironment,
 	): Promise<IModuleInstaller | undefined> {
 		const channels = await this.getInstallationChannels(interpreter);
 
@@ -44,7 +44,7 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 	}
 
 	public async getInstallationChannels(
-		interpreter: PythonEnvironment
+		interpreter: PythonEnvironment,
 	): Promise<IModuleInstaller[]> {
 		const installers =
 			this.serviceContainer.getAll<IModuleInstaller>(IModuleInstaller);
@@ -71,14 +71,14 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 	}
 
 	public async showNoInstallersMessage(
-		interpreter: PythonEnvironment
+		interpreter: PythonEnvironment,
 	): Promise<void> {
 		const result = await window.showErrorMessage(
 			interpreter.envType === EnvironmentType.Conda
 				? Installer.noCondaOrPipInstaller
 				: Installer.noPipInstaller,
 			{ modal: true },
-			Installer.searchForHelp
+			Installer.searchForHelp,
 		);
 		if (result === Installer.searchForHelp) {
 			const platform =
@@ -86,16 +86,16 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 			const osName = platform.isWindows
 				? "Windows"
 				: platform.isMac
-					? "MacOS"
-					: "Linux";
+				  ? "MacOS"
+				  : "Linux";
 			void env.openExternal(
 				Uri.parse(
 					`https://www.bing.com/search?q=Install Pip ${osName} ${
 						interpreter.envType === EnvironmentType.Conda
 							? "Conda"
 							: ""
-					}`
-				)
+					}`,
+				),
 			);
 		}
 	}

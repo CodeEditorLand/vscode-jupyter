@@ -4,8 +4,8 @@
 import { Uri, WorkspaceFolder } from "vscode";
 import * as path from "../../vscode-path/path";
 import * as uriPath from "../../vscode-path/resources";
-import { getOSType, OSType } from "../utils/platform";
 import { isWeb } from "../utils/misc";
+import { OSType, getOSType } from "../utils/platform";
 
 function getHomeDir() {
 	if (isWeb()) {
@@ -39,7 +39,7 @@ export function getFilePath(file: Uri | undefined) {
 export function getDisplayPath(
 	filename: Uri | string | undefined,
 	workspaceFolders: readonly WorkspaceFolder[] | WorkspaceFolder[] = [],
-	homePathUri?: Uri
+	homePathUri?: Uri,
 ) {
 	homePathUri = homePathUri || getHomeDir();
 	let fileUri: Uri | undefined = undefined;
@@ -51,7 +51,7 @@ export function getDisplayPath(
 	}
 	const relativeToHome = getDisplayPathImpl(fileUri, undefined, homePathUri);
 	const relativeToWorkspaceFolders = workspaceFolders.map((folder) =>
-		getDisplayPathImpl(fileUri, folder.uri, homePathUri)
+		getDisplayPathImpl(fileUri, folder.uri, homePathUri),
 	);
 	// Pick the shortest path for display purposes.
 	// As those are most likely relative to some workspace folder.
@@ -68,7 +68,7 @@ export function getDisplayPath(
 function getDisplayPathImpl(
 	file: Uri | undefined,
 	cwd: Uri | undefined,
-	homePath: Uri | undefined
+	homePath: Uri | undefined,
 ): string {
 	const isWindows = getOSType() === OSType.Windows;
 	if (file && cwd && uriPath.isEqualOrParent(file, cwd, true)) {

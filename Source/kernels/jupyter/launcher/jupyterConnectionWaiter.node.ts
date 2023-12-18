@@ -3,40 +3,40 @@
 
 import { Disposable, Uri } from "vscode";
 import {
-	IConfigurationService,
-	IDisposable,
-} from "../../../platform/common/types";
-import {
-	traceError,
-	traceWarning,
-	traceVerbose,
-} from "../../../platform/logging";
+	JVSC_EXTENSION_ID,
+	RegExpValues,
+} from "../../../platform/common/constants";
+import { arePathsSame } from "../../../platform/common/platform/fileUtils";
+import { getFilePath } from "../../../platform/common/platform/fs-paths";
 import {
 	ObservableExecutionResult,
 	Output,
 } from "../../../platform/common/process/types.node";
+import {
+	IConfigurationService,
+	IDisposable,
+} from "../../../platform/common/types";
 import { createDeferred } from "../../../platform/common/utils/async";
+import { dispose } from "../../../platform/common/utils/lifecycle";
 import { DataScience } from "../../../platform/common/utils/localize";
+import { JupyterCannotBeLaunchedWithRootError } from "../../../platform/errors/jupyterCannotBeLaunchedWithRootError";
+import { JupyterConnectError } from "../../../platform/errors/jupyterConnectError";
+import { JupyterNotebookNotInstalled } from "../../../platform/errors/jupyterNotebookNotInstalled";
 import { IServiceContainer } from "../../../platform/ioc/types";
 import {
-	JVSC_EXTENSION_ID,
-	RegExpValues,
-} from "../../../platform/common/constants";
-import { JupyterConnectError } from "../../../platform/errors/jupyterConnectError";
+	traceError,
+	traceVerbose,
+	traceWarning,
+} from "../../../platform/logging";
+import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { IJupyterConnection } from "../../types";
+import { getJupyterConnectionDisplayName } from "../helpers";
+import { createJupyterConnectionInfo } from "../jupyterUtils";
 import {
 	IJupyterRequestAgentCreator,
 	IJupyterRequestCreator,
 	JupyterServerInfo,
 } from "../types";
-import { getJupyterConnectionDisplayName } from "../helpers";
-import { arePathsSame } from "../../../platform/common/platform/fileUtils";
-import { getFilePath } from "../../../platform/common/platform/fs-paths";
-import { JupyterNotebookNotInstalled } from "../../../platform/errors/jupyterNotebookNotInstalled";
-import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
-import { JupyterCannotBeLaunchedWithRootError } from "../../../platform/errors/jupyterCannotBeLaunchedWithRootError";
-import { createJupyterConnectionInfo } from "../jupyterUtils";
-import { dispose } from "../../../platform/common/utils/lifecycle";
 
 const urlMatcher = new RegExp(RegExpValues.UrlPatternRegEx);
 
@@ -58,11 +58,11 @@ export class JupyterConnectionWaiter implements IDisposable {
 			JupyterServerInfo[] | undefined
 		>,
 		private readonly serviceContainer: IServiceContainer,
-		private readonly interpreter: PythonEnvironment | undefined
+		private readonly interpreter: PythonEnvironment | undefined,
 	) {
 		// We want to reject our Jupyter connection after a specific timeout
 		const configService = serviceContainer.get<IConfigurationService>(
-			IConfigurationService
+			IConfigurationService,
 		);
 		const jupyterLaunchTimeout =
 			configService.getSettings(undefined).jupyterLaunchTimeout;
@@ -90,23 +90,23 @@ export class JupyterConnectionWaiter implements IDisposable {
 					// .then so that we can keep from pushing aync up to the subscribed observable function
 					this.getServerInfo()
 						.then((serverInfos) =>
-							this.getJupyterURL(serverInfos, this.output)
+							this.getJupyterURL(serverInfos, this.output),
 						)
 						.catch((ex) =>
-							traceWarning("Failed to get server info", ex)
+							traceWarning("Failed to get server info", ex),
 						);
 				}
 
 				// Sometimes jupyter will return a 403 error. Not sure why. We used
 				// to fail on this, but it looks like jupyter works with this error in place.
-			})
+			}),
 		);
 		// If the process dies, we can't extract connection information.
 		launchResult.out.done
 			.then(() =>
 				this.rejectStartPromise(
-					DataScience.jupyterServerCrashed(exitCode)
-				)
+					DataScience.jupyterServerCrashed(exitCode),
+				),
 			)
 			.catch((e) => this.rejectStartPromise(e));
 	}
@@ -119,7 +119,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 	// From a list of jupyter server infos try to find the matching jupyter that we launched
 	private getJupyterURL(
 		serverInfos: JupyterServerInfo[] | undefined,
-		data: string
+		data: string,
 	) {
 		if (
 			serverInfos &&
@@ -129,7 +129,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 			const matchInfo = serverInfos.find((info) => {
 				return arePathsSame(
 					getFilePath(this.notebookDir),
-					getFilePath(Uri.file(info.notebook_dir))
+					getFilePath(Uri.file(info.notebook_dir)),
 				);
 			});
 			if (matchInfo) {
@@ -169,7 +169,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 				// Here we parsed the URL correctly
 				this.resolveStartPromise(
 					`${url.protocol}//${url.host}${pathName}`,
-					`${url.searchParams.get("token")}`
+					`${url.searchParams.get("token")}`,
 				);
 			}
 		}
@@ -181,11 +181,11 @@ export class JupyterConnectionWaiter implements IDisposable {
 		if (!this.startPromise.rejected) {
 			const configService =
 				this.serviceContainer.get<IConfigurationService>(
-					IConfigurationService
+					IConfigurationService,
 				);
 			const requestCreator =
 				this.serviceContainer.get<IJupyterRequestCreator>(
-					IJupyterRequestCreator
+					IJupyterRequestCreator,
 				);
 			const requestAgentCreator = this.serviceContainer.get<
 				IJupyterRequestAgentCreator | undefined
@@ -201,14 +201,14 @@ export class JupyterConnectionWaiter implements IDisposable {
 					token,
 					displayName: getJupyterConnectionDisplayName(
 						token,
-						baseUrl
+						baseUrl,
 					),
 				},
 				requestCreator,
 				requestAgentCreator,
 				configService,
 				this.rootDir,
-				new Disposable(() => this.launchResult.dispose())
+				new Disposable(() => this.launchResult.dispose()),
 			);
 			this.startPromise.resolve(connection);
 		}
@@ -228,23 +228,23 @@ export class JupyterConnectionWaiter implements IDisposable {
 				error = new JupyterNotebookNotInstalled(
 					message,
 					stderr,
-					this.interpreter
+					this.interpreter,
 				);
 			} else if (
 				stderr.includes(
-					"Running as root is not recommended. Use --allow-root to bypass"
+					"Running as root is not recommended. Use --allow-root to bypass",
 				)
 			) {
 				error = new JupyterCannotBeLaunchedWithRootError(
 					message,
 					stderr,
-					this.interpreter
+					this.interpreter,
 				);
 			} else {
 				error = new JupyterConnectError(
 					message,
 					stderr,
-					this.interpreter
+					this.interpreter,
 				);
 			}
 			this.startPromise.reject(error);

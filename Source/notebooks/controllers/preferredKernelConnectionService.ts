@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CancellationToken, NotebookDocument, workspace, Uri } from "vscode";
+import { CancellationToken, NotebookDocument, Uri, workspace } from "vscode";
 import {
 	ContributedKernelFinderKind,
 	IContributedKernelFinder,
 } from "../../kernels/internalTypes";
+import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
 import { PreferredRemoteKernelIdProvider } from "../../kernels/jupyter/connection/preferredRemoteKernelIdProvider";
+import { getRemoteSessionOptions } from "../../kernels/jupyter/session/jupyterSession";
 import {
 	IKernelFinder,
 	KernelConnectionMetadata,
@@ -17,20 +19,18 @@ import {
 	RemoteKernelSpecConnectionMetadata,
 	isRemoteConnection,
 } from "../../kernels/types";
-import { dispose } from "../../platform/common/utils/lifecycle";
+import { isParentPath } from "../../platform/common/platform/fileUtils";
 import { IDisposable } from "../../platform/common/types";
 import {
 	getNotebookMetadata,
 	translateKernelLanguageToMonaco,
 } from "../../platform/common/utils";
+import { dispose } from "../../platform/common/utils/lifecycle";
 import { IInterpreterService } from "../../platform/interpreter/contracts";
 import { ServiceContainer } from "../../platform/ioc/container";
-import { getLanguageOfNotebookDocument } from "../languages/helpers";
-import * as path from "../../platform/vscode-path/resources";
-import { isParentPath } from "../../platform/common/platform/fileUtils";
 import { EnvironmentType } from "../../platform/pythonEnvironments/info";
-import { JupyterConnection } from "../../kernels/jupyter/connection/jupyterConnection";
-import { getRemoteSessionOptions } from "../../kernels/jupyter/session/jupyterSession";
+import * as path from "../../platform/vscode-path/resources";
+import { getLanguageOfNotebookDocument } from "../languages/helpers";
 
 /**
  * Attempt to clean up https://github.com/microsoft/vscode-jupyter/issues/11914
@@ -46,33 +46,33 @@ export class PreferredKernelConnectionService {
 	public async findPreferredRemoteKernelConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<RemoteKernelConnectionMetadata | undefined> {
 		return this.findPreferredRemoteKernelConnectionImpl(
 			notebook,
 			kernelFinder,
 			cancelToken,
-			false
+			false,
 		);
 	}
 	private async findPreferredRemoteKernelConnectionImpl(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
 		cancelToken: CancellationToken,
-		findExactMatch: boolean
+		findExactMatch: boolean,
 	): Promise<RemoteKernelConnectionMetadata | undefined> {
 		const preferredRemoteKernelId = await ServiceContainer.instance
 			.get<PreferredRemoteKernelIdProvider>(
-				PreferredRemoteKernelIdProvider
+				PreferredRemoteKernelIdProvider,
 			)
 			.getPreferredRemoteKernelId(notebook.uri);
 
 		const findLiveKernelConnection = async () => {
-			let liveKernelMatchingIdFromCurrentKernels =
+			const liveKernelMatchingIdFromCurrentKernels =
 				kernelFinder.kernels.find(
 					(item) =>
 						item.kind === "connectToLiveRemoteKernel" &&
-						item.id === preferredRemoteKernelId
+						item.id === preferredRemoteKernelId,
 				) as LiveRemoteKernelConnectionMetadata;
 			if (liveKernelMatchingIdFromCurrentKernels) {
 				return liveKernelMatchingIdFromCurrentKernels;
@@ -91,7 +91,7 @@ export class PreferredKernelConnectionService {
 						const kernel = kernelFinder.kernels.find(
 							(item) =>
 								item.kind === "connectToLiveRemoteKernel" &&
-								item.id === preferredRemoteKernelId
+								item.id === preferredRemoteKernelId,
 						) as LiveRemoteKernelConnectionMetadata;
 						if (kernel) {
 							resolve(kernel);
@@ -104,8 +104,8 @@ export class PreferredKernelConnectionService {
 						}
 					},
 					this,
-					this.disposables
-				)
+					this.disposables,
+				),
 			);
 			if (liveKernelMatchingId) {
 				return liveKernelMatchingId;
@@ -136,7 +136,7 @@ export class PreferredKernelConnectionService {
 				await this.jupyterConnection.createConnectionInfo(serverId);
 			const sessionOptions = getRemoteSessionOptions(
 				connection,
-				notebook.uri
+				notebook.uri,
 			);
 			const matchingSession =
 				sessionOptions &&
@@ -146,7 +146,7 @@ export class PreferredKernelConnectionService {
 						item.kind === "connectToLiveRemoteKernel" &&
 						item.kernelModel.model &&
 						item.kernelModel.model.path === sessionOptions.path &&
-						item.kernelModel.model.name === sessionOptions.name
+						item.kernelModel.model.name === sessionOptions.name,
 				);
 			if (matchingSession) {
 				return matchingSession as RemoteKernelConnectionMetadata;
@@ -157,26 +157,26 @@ export class PreferredKernelConnectionService {
 			notebook,
 			kernelFinder,
 			cancelToken,
-			findExactMatch!
+			findExactMatch!,
 		) as Promise<RemoteKernelConnectionMetadata | undefined>;
 	}
 	public async findPreferredLocalKernelSpecConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<LocalKernelSpecConnectionMetadata | undefined> {
 		return this.findPreferredKernelSpecConnection(
 			notebook,
 			kernelFinder,
 			cancelToken,
-			false
+			false,
 		) as Promise<LocalKernelSpecConnectionMetadata | undefined>;
 	}
 	private async findPreferredKernelSpecConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
 		cancelToken: CancellationToken,
-		findExactMatch: boolean
+		findExactMatch: boolean,
 	): Promise<
 		| LocalKernelSpecConnectionMetadata
 		| RemoteKernelSpecConnectionMetadata
@@ -190,11 +190,11 @@ export class PreferredKernelConnectionService {
 						(item) =>
 							(item.kind === "startUsingLocalKernelSpec" ||
 								item.kind === "startUsingRemoteKernelSpec") &&
-							item.kernelSpec.name === kernelSpecName
-					) as (
+							item.kernelSpec.name === kernelSpecName,
+				  ) as (
 						| LocalKernelSpecConnectionMetadata
 						| RemoteKernelSpecConnectionMetadata
-					)[])
+				  )[])
 				: [];
 			if (kernelsMatchingKernelName.length || findExactMatch) {
 				return kernelsMatchingKernelName;
@@ -211,8 +211,8 @@ export class PreferredKernelConnectionService {
 					item.kernelSpec.language &&
 					(item.kernelSpec.language === language ||
 						translateKernelLanguageToMonaco(
-							item.kernelSpec.language
-						) === translateKernelLanguageToMonaco(language))
+							item.kernelSpec.language,
+						) === translateKernelLanguageToMonaco(language)),
 			) as (
 				| LocalKernelSpecConnectionMetadata
 				| RemoteKernelSpecConnectionMetadata
@@ -259,25 +259,25 @@ export class PreferredKernelConnectionService {
 					}
 				},
 				this,
-				this.disposables
-			)
+				this.disposables,
+			),
 		).finally(() => dispose(disposables));
 	}
 	public async findPreferredPythonKernelConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<PythonKernelConnectionMetadata | undefined> {
 		return this.findPreferredPythonKernelConnectionImpl(
 			notebook,
 			kernelFinder,
-			cancelToken
+			cancelToken,
 		);
 	}
 	private async findPreferredPythonKernelConnectionImpl(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
-		cancelToken: CancellationToken
+		cancelToken: CancellationToken,
 	): Promise<PythonKernelConnectionMetadata | undefined> {
 		kernelFinder =
 			kernelFinder ||
@@ -286,12 +286,12 @@ export class PreferredKernelConnectionService {
 				.registered.find(
 					(item) =>
 						item.kind ===
-						ContributedKernelFinderKind.LocalPythonEnvironment
+						ContributedKernelFinderKind.LocalPythonEnvironment,
 				)!;
 
 		const interpreterService =
 			ServiceContainer.instance.get<IInterpreterService>(
-				IInterpreterService
+				IInterpreterService,
 			);
 
 		// 1. Check if we have a .conda or .venv virtual env in the local workspace folder.
@@ -302,7 +302,7 @@ export class PreferredKernelConnectionService {
 
 		// 2. Fall back to the active interpreter.
 		const activeInterpreter = await interpreterService.getActiveInterpreter(
-			notebook.uri
+			notebook.uri,
 		);
 		if (!activeInterpreter) {
 			return;
@@ -329,18 +329,18 @@ export class PreferredKernelConnectionService {
 				kernelFinder.onDidChangeStatus(
 					() => kernelFinder.status === "idle" && resolve(),
 					this,
-					this.disposables
+					this.disposables,
 				);
 				kernelFinder.onDidChangeKernels(
 					() =>
 						(findPythonEnvClosesToNotebook(
 							notebook,
-							kernelFinder
+							kernelFinder,
 						) ||
 							findMatchingActiveInterpreterKernel()) &&
 						resolve(),
 					this,
-					this.disposables
+					this.disposables,
 				);
 			});
 			// Try again
@@ -354,7 +354,7 @@ export class PreferredKernelConnectionService {
 
 function findPythonEnvClosesToNotebook(
 	notebook: NotebookDocument,
-	kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>
+	kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
 ) {
 	const defaultFolder =
 		workspace.getWorkspaceFolder(notebook.uri)?.uri ||
@@ -363,7 +363,7 @@ function findPythonEnvClosesToNotebook(
 			: undefined);
 	const localEnvNextToNbFile = findLocalPythonEnv(
 		path.dirname(notebook.uri),
-		kernelFinder
+		kernelFinder,
 	);
 	if (localEnvNextToNbFile) {
 		return localEnvNextToNbFile;
@@ -374,7 +374,7 @@ function findPythonEnvClosesToNotebook(
 }
 function findLocalPythonEnv(
 	folder: Uri,
-	kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>
+	kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
 ) {
 	const pythonEnvs = kernelFinder.kernels
 		.filter((k) => k.kind === "startUsingPythonInterpreter")
@@ -384,14 +384,14 @@ function findLocalPythonEnv(
 		// eslint-disable-next-line local-rules/dont-use-fspath
 		isParentPath(
 			p.interpreter.envPath?.fsPath || p.interpreter.uri.fsPath,
-			folder.fsPath
-		)
+			folder.fsPath,
+		),
 	);
 
 	const venv = localEnvs.find(
 		(e) =>
 			e.interpreter.envType === EnvironmentType.Venv &&
-			e.interpreter.envName?.toLowerCase() === ".venv"
+			e.interpreter.envName?.toLowerCase() === ".venv",
 	);
 	if (venv) {
 		return venv;
@@ -399,7 +399,7 @@ function findLocalPythonEnv(
 	const conda = localEnvs.find(
 		(e) =>
 			e.interpreter.envType === EnvironmentType.Venv &&
-			e.interpreter.envName?.toLowerCase() === ".venv"
+			e.interpreter.envName?.toLowerCase() === ".venv",
 	);
 	if (conda) {
 		return conda;
@@ -407,7 +407,7 @@ function findLocalPythonEnv(
 	const anyVenv = localEnvs.find(
 		(e) =>
 			e.interpreter.envType === EnvironmentType.Venv &&
-			e.interpreter.envName?.toLowerCase() === ".venv"
+			e.interpreter.envName?.toLowerCase() === ".venv",
 	);
 	if (anyVenv) {
 		return anyVenv;

@@ -11,24 +11,24 @@ import {
 	window,
 	workspace,
 } from "vscode";
-import * as localize from "../../platform/common/utils/localize";
 import { ICommandNameArgumentTypeMapping } from "../../commands";
-import { traceInfo } from "../../platform/logging";
+import { IInteractiveWindowProvider } from "../../interactive-window/types";
+import { isPythonNotebook } from "../../kernels/helpers";
+import { ContributedKernelFinderKind } from "../../kernels/internalTypes";
+import { IKernelFinder } from "../../kernels/types";
+import { PreferredKernelConnectionService } from "../../notebooks/controllers/preferredKernelConnectionService";
+import { IControllerRegistration } from "../../notebooks/controllers/types";
+import { ExportFormat, IFileConverter } from "../../notebooks/export/types";
+import { Commands, Telemetry } from "../../platform/common/constants";
+import { IFileSystem } from "../../platform/common/platform/types";
 import { IDisposable } from "../../platform/common/types";
+import { getNotebookMetadata } from "../../platform/common/utils";
+import * as localize from "../../platform/common/utils/localize";
 import { DataScience } from "../../platform/common/utils/localize";
 import { isUri, noop } from "../../platform/common/utils/misc";
+import { traceInfo } from "../../platform/logging";
 import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
 import { sendTelemetryEvent } from "../../telemetry";
-import { Commands, Telemetry } from "../../platform/common/constants";
-import { IFileConverter, ExportFormat } from "../../notebooks/export/types";
-import { IInteractiveWindowProvider } from "../../interactive-window/types";
-import { IFileSystem } from "../../platform/common/platform/types";
-import { getNotebookMetadata } from "../../platform/common/utils";
-import { isPythonNotebook } from "../../kernels/helpers";
-import { IControllerRegistration } from "../../notebooks/controllers/types";
-import { PreferredKernelConnectionService } from "../../notebooks/controllers/preferredKernelConnectionService";
-import { IKernelFinder } from "../../kernels/types";
-import { ContributedKernelFinderKind } from "../../kernels/internalTypes";
 
 interface IExportQuickPickItem extends QuickPickItem {
 	handler(): void;
@@ -47,7 +47,7 @@ export class ExportCommands implements IDisposable {
 			| undefined,
 		private readonly controllerRegistration: IControllerRegistration,
 		private readonly preferredKernel: PreferredKernelConnectionService,
-		private readonly kernelFinder: IKernelFinder
+		private readonly kernelFinder: IKernelFinder,
 	) {}
 	public register() {
 		this.registerCommand(
@@ -57,8 +57,8 @@ export class ExportCommands implements IDisposable {
 					sourceDocument,
 					ExportFormat.python,
 					undefined,
-					interpreter
-				)
+					interpreter,
+				),
 		);
 		this.registerCommand(
 			Commands.ExportToHTML,
@@ -67,8 +67,8 @@ export class ExportCommands implements IDisposable {
 					sourceDocument,
 					ExportFormat.html,
 					defaultFileName,
-					interpreter
-				)
+					interpreter,
+				),
 		);
 		this.registerCommand(
 			Commands.ExportToPDF,
@@ -77,8 +77,8 @@ export class ExportCommands implements IDisposable {
 					sourceDocument,
 					ExportFormat.pdf,
 					defaultFileName,
-					interpreter
-				)
+					interpreter,
+				),
 		);
 		this.registerCommand(
 			Commands.Export,
@@ -87,11 +87,11 @@ export class ExportCommands implements IDisposable {
 					sourceDocument,
 					undefined,
 					defaultFileName,
-					interpreter
-				)
+					interpreter,
+				),
 		);
 		this.registerCommand(Commands.NativeNotebookExport, (uri) =>
-			this.nativeNotebookExport(uri)
+			this.nativeNotebookExport(uri),
 		);
 	}
 
@@ -109,15 +109,15 @@ export class ExportCommands implements IDisposable {
 	}
 
 	private async nativeNotebookExport(
-		context?: Uri | { notebookEditor: { notebookUri: Uri } }
+		context?: Uri | { notebookEditor: { notebookUri: Uri } },
 	) {
 		const notebookUri = isUri(context)
 			? context
 			: context?.notebookEditor?.notebookUri;
 		const document = notebookUri
 			? workspace.notebookDocuments.find((item) =>
-					this.fs.arePathsSame(item.uri, notebookUri)
-				)
+					this.fs.arePathsSame(item.uri, notebookUri),
+			  )
 			: window.activeNotebookEditor?.notebook;
 
 		if (document) {
@@ -125,7 +125,7 @@ export class ExportCommands implements IDisposable {
 			const pythonEnvFinder = this.kernelFinder.registered.find(
 				(item) =>
 					item.kind ===
-					ContributedKernelFinderKind.LocalPythonEnvironment
+					ContributedKernelFinderKind.LocalPythonEnvironment,
 			);
 			const token = new CancellationTokenSource();
 			try {
@@ -134,7 +134,7 @@ export class ExportCommands implements IDisposable {
 							.findPreferredLocalKernelSpecConnection(
 								document,
 								pythonEnvFinder,
-								token.token
+								token.token,
 							)
 							.then((k) => k?.interpreter)
 					: undefined;
@@ -154,7 +154,7 @@ export class ExportCommands implements IDisposable {
 		sourceDocument?: NotebookDocument,
 		exportMethod?: ExportFormat,
 		defaultFileName?: string,
-		interpreter?: PythonEnvironment
+		interpreter?: PythonEnvironment,
 	) {
 		if (!sourceDocument) {
 			// if no source document was passed then this was called from the command palette,
@@ -165,7 +165,7 @@ export class ExportCommands implements IDisposable {
 					?.notebookDocument;
 			if (!sourceDocument) {
 				traceInfo(
-					"Export called without a valid exportable document active"
+					"Export called without a valid exportable document active",
 				);
 				return;
 			}
@@ -179,7 +179,7 @@ export class ExportCommands implements IDisposable {
 				sendTelemetryEvent(
 					Telemetry.ExportNotebookAsCommand,
 					undefined,
-					{ format: exportMethod }
+					{ format: exportMethod },
 				);
 			}
 		}
@@ -189,7 +189,7 @@ export class ExportCommands implements IDisposable {
 				exportMethod,
 				sourceDocument,
 				defaultFileName,
-				interpreter
+				interpreter,
 			);
 		} else {
 			// if we don't have an export method we need to ask for one and display the
@@ -197,7 +197,7 @@ export class ExportCommands implements IDisposable {
 			const pickedItem = await this.showExportQuickPickMenu(
 				sourceDocument,
 				defaultFileName,
-				interpreter
+				interpreter,
 			).then((item) => item);
 			if (pickedItem !== undefined) {
 				pickedItem.handler();
@@ -209,7 +209,7 @@ export class ExportCommands implements IDisposable {
 	private getExportQuickPickItems(
 		sourceDocument: NotebookDocument,
 		defaultFileName?: string,
-		interpreter?: PythonEnvironment
+		interpreter?: PythonEnvironment,
 	): IExportQuickPickItem[] {
 		const items: IExportQuickPickItem[] = [];
 
@@ -227,13 +227,13 @@ export class ExportCommands implements IDisposable {
 						undefined,
 						{
 							format: ExportFormat.python,
-						}
+						},
 					);
 					commands
 						.executeCommand(
 							Commands.ExportAsPythonScript,
 							sourceDocument,
-							interpreter
+							interpreter,
 						)
 						.then(noop, noop);
 				},
@@ -251,14 +251,14 @@ export class ExportCommands implements IDisposable {
 							undefined,
 							{
 								format: ExportFormat.html,
-							}
+							},
 						);
 						commands
 							.executeCommand(
 								Commands.ExportToHTML,
 								sourceDocument,
 								defaultFileName,
-								interpreter
+								interpreter,
 							)
 							.then(noop, noop);
 					},
@@ -272,19 +272,19 @@ export class ExportCommands implements IDisposable {
 							undefined,
 							{
 								format: ExportFormat.pdf,
-							}
+							},
 						);
 						commands
 							.executeCommand(
 								Commands.ExportToPDF,
 								sourceDocument,
 								defaultFileName,
-								interpreter
+								interpreter,
 							)
 							.then(noop, noop);
 					},
 				},
-			]
+			],
 		);
 
 		return items;
@@ -293,12 +293,12 @@ export class ExportCommands implements IDisposable {
 	private async showExportQuickPickMenu(
 		sourceDocument: NotebookDocument,
 		defaultFileName?: string,
-		interpreter?: PythonEnvironment
+		interpreter?: PythonEnvironment,
 	): Promise<IExportQuickPickItem | undefined> {
 		const items = this.getExportQuickPickItems(
 			sourceDocument,
 			defaultFileName,
-			interpreter
+			interpreter,
 		);
 
 		const options: QuickPickOptions = {

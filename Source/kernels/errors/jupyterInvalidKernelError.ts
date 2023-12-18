@@ -22,9 +22,11 @@ export class JupyterInvalidKernelError extends BaseKernelError {
 		super(
 			"invalidkernel",
 			DataScience.kernelInvalid(
-				getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)
+				getDisplayNameOrNameOfKernelConnection(
+					kernelConnectionMetadata,
+				),
 			),
-			kernelConnectionMetadata
+			kernelConnectionMetadata,
 		);
 	}
 }

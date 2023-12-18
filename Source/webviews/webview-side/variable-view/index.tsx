@@ -4,7 +4,6 @@
 // eslint-disable-next-line import/order
 import "../common/index.css";
 
-import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 
@@ -33,5 +32,5 @@ ReactDOM.render(
 	<Provider store={store}>
 		<ConnectedVariableViewPanel />
 	</Provider>,
-	document.getElementById("root") as HTMLElement
+	document.getElementById("root") as HTMLElement,
 );

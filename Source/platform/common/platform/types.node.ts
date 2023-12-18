@@ -19,6 +19,6 @@ export interface IFileSystemNode extends IFileSystem {
 	searchLocal(
 		globPattern: string,
 		cwd?: string,
-		dot?: boolean
+		dot?: boolean,
 	): Promise<string[]>;
 }

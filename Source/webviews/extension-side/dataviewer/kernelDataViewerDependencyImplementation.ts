@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { traceWarning } from "../../../platform/logging";
-import { DataScience } from "../../../platform/common/utils/localize";
-import { EnvironmentType } from "../../../platform/pythonEnvironments/info";
-import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
 import { executeSilently } from "../../../kernels/helpers";
 import { IKernel } from "../../../kernels/types";
-import { BaseDataViewerDependencyImplementation } from "./baseDataViewerDependencyImplementation";
-import { SessionDisposedError } from "../../../platform/errors/sessionDisposedError";
 import { splitLines } from "../../../platform/common/helpers";
+import { DataScience } from "../../../platform/common/utils/localize";
+import { SessionDisposedError } from "../../../platform/errors/sessionDisposedError";
+import { traceWarning } from "../../../platform/logging";
+import { EnvironmentType } from "../../../platform/pythonEnvironments/info";
+import { Telemetry, sendTelemetryEvent } from "../../../telemetry";
+import { BaseDataViewerDependencyImplementation } from "./baseDataViewerDependencyImplementation";
 
 const separator = "5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d";
 export const kernelGetPandasVersion = `import pandas as _VSCODE_pandas;print(_VSCODE_pandas.__version__);print("${separator}"); del _VSCODE_pandas`;
@@ -27,7 +27,7 @@ function kernelPackaging(kernel: IKernel): "%conda" | "%pip" {
 export class KernelDataViewerDependencyImplementation extends BaseDataViewerDependencyImplementation<IKernel> {
 	protected async execute(
 		command: string,
-		kernel: IKernel
+		kernel: IKernel,
 	): Promise<(string | undefined)[]> {
 		if (!kernel.session?.kernel) {
 			throw new SessionDisposedError();
@@ -48,7 +48,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 		if (!output?.includes(separator)) {
 			traceWarning(
 				DataScience.failedToGetVersionOfPandas,
-				`Output is ${output}`
+				`Output is ${output}`,
 			);
 			return "";
 		}
@@ -68,7 +68,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 				Telemetry.UserInstalledPandas,
 				undefined,
 				undefined,
-				e
+				e,
 			);
 			throw new Error(DataScience.failedToInstallPandas);
 		}

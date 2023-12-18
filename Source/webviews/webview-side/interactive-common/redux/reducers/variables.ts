@@ -8,18 +8,18 @@ import {
 	IJupyterVariablesResponse,
 } from "../../../../../kernels/variables/types";
 import {
-	InteractiveWindowMessages,
 	IFinishCell,
 	IInteractiveWindowMapping,
+	InteractiveWindowMessages,
 	SharedMessages,
 } from "../../../../../messageTypes";
 import { IJupyterExtraSettings } from "../../../../../platform/webviews/types";
 import { BaseReduxActionPayload } from "../../../../types";
 import {
-	combineReducers,
 	QueuableAction,
 	ReducerArg,
 	ReducerFunc,
+	combineReducers,
 } from "../../../react-common/reduxUtils";
 import { postActionToExtension } from "../helpers";
 import {
@@ -59,7 +59,7 @@ type VariableReducerArg<T = never | undefined> = ReducerArg<
 >;
 
 function handleRequest(
-	arg: VariableReducerArg<IJupyterVariablesRequest>
+	arg: VariableReducerArg<IJupyterVariablesRequest>,
 ): IVariableState {
 	const newExecutionCount =
 		arg.payload.data.executionCount !== undefined
@@ -92,7 +92,7 @@ function toggleVariableExplorer(arg: VariableReducerArg): IVariableState {
 	postActionToExtension(
 		arg,
 		InteractiveWindowMessages.VariableExplorerToggle,
-		newState.visible
+		newState.visible,
 	);
 
 	// If going visible for the first time, refresh our variables
@@ -118,7 +118,7 @@ function toggleVariableExplorer(arg: VariableReducerArg): IVariableState {
 }
 
 function handleSort(
-	arg: VariableReducerArg<ISortVariablesRequest>
+	arg: VariableReducerArg<ISortVariablesRequest>,
 ): IVariableState {
 	const sortColumn = arg.payload.data.sortColumn;
 	const sortAscending = arg.payload.data.sortAscending;
@@ -150,7 +150,7 @@ function handleIsWebUpdate(arg: VariableReducerArg<string>): IVariableState {
 }
 
 function handleVariableExplorerHeightResponse(
-	arg: VariableReducerArg<IVariableExplorerHeight>
+	arg: VariableReducerArg<IVariableExplorerHeight>,
 ): IVariableState {
 	if (arg.payload.data) {
 		const containerHeight = arg.payload.data.containerHeight;
@@ -170,7 +170,7 @@ function handleVariableExplorerHeightResponse(
 
 // When in view mode, set the new height of the variable view
 function setVariableViewHeight(
-	arg: VariableReducerArg<IVariableViewHeight>
+	arg: VariableReducerArg<IVariableViewHeight>,
 ): IVariableState {
 	const viewHeight = arg.payload.data.viewHeight;
 
@@ -186,7 +186,7 @@ function setVariableViewHeight(
 }
 
 function setVariableExplorerHeight(
-	arg: VariableReducerArg<IVariableExplorerHeight>
+	arg: VariableReducerArg<IVariableExplorerHeight>,
 ): IVariableState {
 	const containerHeight = arg.payload.data.containerHeight;
 	const gridHeight = arg.payload.data.gridHeight;
@@ -198,7 +198,7 @@ function setVariableExplorerHeight(
 			{
 				containerHeight,
 				gridHeight,
-			}
+			},
 		);
 		return {
 			...arg.prevState,
@@ -212,7 +212,7 @@ function setVariableExplorerHeight(
 }
 
 function handleResponse(
-	arg: VariableReducerArg<IJupyterVariablesResponse>
+	arg: VariableReducerArg<IJupyterVariablesResponse>,
 ): IVariableState {
 	const response = arg.payload.data;
 
@@ -251,7 +251,7 @@ function handleResponse(
 		// See if we need to remove any from this page
 		const removeCount = Math.max(
 			0,
-			arg.prevState.variables.length - response.totalCount
+			arg.prevState.variables.length - response.totalCount,
 		);
 		if (removeCount) {
 			variables.splice(response.pageStartIndex, removeCount);
@@ -298,7 +298,7 @@ function handleRestarted(arg: VariableReducerArg): IVariableState {
 
 // Update the execution count associated with the currently active variable view
 function updateExecutionCount(
-	arg: VariableReducerArg<{ executionCount: number }>
+	arg: VariableReducerArg<{ executionCount: number }>,
 ): IVariableState {
 	const executionCount = arg.payload.data.executionCount;
 
@@ -326,7 +326,7 @@ function updateExecutionCount(
 }
 
 function handleFinishCell(
-	arg: VariableReducerArg<IFinishCell>
+	arg: VariableReducerArg<IFinishCell>,
 ): IVariableState {
 	const executionCount = arg.payload.data.cell.data.execution_count
 		? parseInt(arg.payload.data.cell.data.execution_count.toString(), 10)
@@ -383,7 +383,7 @@ function handleRefresh(arg: VariableReducerArg): IVariableState {
 }
 
 function handleDebugStart(
-	arg: VariableReducerArg<ICellAction>
+	arg: VariableReducerArg<ICellAction>,
 ): IVariableState {
 	// If we haven't already turned on variables, do so now
 	if (arg.prevState.showVariablesOnDebug) {
@@ -427,7 +427,7 @@ const reducerMap: Partial<VariableActionMapping> = {
 
 export function generateVariableReducer(
 	showVariablesOnDebug: boolean,
-	startOpen: boolean
+	startOpen: boolean,
 ): Reducer<IVariableState, QueuableAction<Partial<VariableActionMapping>>> {
 	// First create our default state.
 	const defaultState: IVariableState = {
@@ -449,6 +449,6 @@ export function generateVariableReducer(
 	// Then combine that with our map of state change message to reducer
 	return combineReducers<IVariableState, Partial<VariableActionMapping>>(
 		defaultState,
-		reducerMap
+		reducerMap,
 	);
 }

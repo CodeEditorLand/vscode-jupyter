@@ -5,9 +5,9 @@ import { inject, injectable } from "inversify";
 // eslint-disable-next-line
 import { ConfigurationChangeEvent } from "vscode";
 import {
-	IWorkspaceService,
 	IApplicationShell,
 	ICommandManager,
+	IWorkspaceService,
 } from "../../../platform/common/application/types";
 import { DataScience } from "../../../platform/common/utils/localize";
 import { noop } from "../../../platform/common/utils/misc";
@@ -32,7 +32,7 @@ export class JupyterCommandLineSelector {
 			const reload = DataScience.jupyterCommandLineReloadAnswer;
 			const item = await this.appShell.showInformationMessage(
 				DataScience.jupyterCommandLineReloadQuestion,
-				reload
+				reload,
 			);
 			if (item === reload) {
 				this.commandManager

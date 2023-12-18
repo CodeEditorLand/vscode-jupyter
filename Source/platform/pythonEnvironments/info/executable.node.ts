@@ -3,7 +3,7 @@
 
 import { Uri } from "vscode";
 import { getExecutable as getPythonExecutableCommand } from "../../interpreter/internal/python.node";
-import { copyPythonExecInfo, PythonExecInfo } from "../exec";
+import { PythonExecInfo, copyPythonExecInfo } from "../exec";
 
 type ExecResult = {
 	stdout: string;
@@ -20,7 +20,7 @@ type ExecFunc = (command: string, args: string[]) => Promise<ExecResult>;
  */
 export async function getExecutablePath(
 	python: PythonExecInfo,
-	exec: ExecFunc
+	exec: ExecFunc,
 ): Promise<Uri> {
 	const [args, parse] = getPythonExecutableCommand();
 	const info = copyPythonExecInfo(python, args);
