@@ -19,7 +19,7 @@ export class ChainingExecuteRequester {
 		kernel: Kernel.IKernelConnection,
 		content: KernelMessage.IExecuteRequestMsg["content"],
 		disposeOnDone?: boolean,
-		metadata?: JSONObject,
+		metadata?: JSONObject
 	): Kernel.IShellFuture<
 		KernelMessage.IExecuteRequestMsg,
 		KernelMessage.IExecuteReplyMsg
@@ -40,8 +40,8 @@ export class ChainingExecuteRequester {
 						this.previousExecute,
 						content,
 						disposeOnDone,
-						metadata,
-				  )
+						metadata
+					)
 				: kernel.requestExecute(content, disposeOnDone, metadata);
 		this.previousExecute = nextExecute;
 		this.previousKernel = kernel;

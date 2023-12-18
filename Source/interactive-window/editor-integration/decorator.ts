@@ -33,18 +33,33 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 	private timer: NodeJS.Timer | undefined | number;
 
 	constructor(
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IConfigurationService) private configuration: IConfigurationService,
-        @inject(IPythonExtensionChecker) private extensionChecker: IPythonExtensionChecker
-    ) {
-        this.computeDecorations();
-        disposables.push(this);
-        disposables.push(this.configuration.getSettings(undefined).onDidChange(this.settingsChanged, this));
-        disposables.push(vscode.window.onDidChangeActiveTextEditor(this.changedEditor, this));
-        disposables.push(vscode.window.onDidChangeTextEditorSelection(this.changedSelection, this));
-        disposables.push(vscode.workspace.onDidChangeTextDocument(this.changedDocument, this));
-        this.settingsChanged();
-    }
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IConfigurationService)
+		private configuration: IConfigurationService,
+		@inject(IPythonExtensionChecker)
+		private extensionChecker: IPythonExtensionChecker
+	) {
+		this.computeDecorations();
+		disposables.push(this);
+		disposables.push(
+			this.configuration
+				.getSettings(undefined)
+				.onDidChange(this.settingsChanged, this)
+		);
+		disposables.push(
+			vscode.window.onDidChangeActiveTextEditor(this.changedEditor, this)
+		);
+		disposables.push(
+			vscode.window.onDidChangeTextEditorSelection(
+				this.changedSelection,
+				this
+			)
+		);
+		disposables.push(
+			vscode.workspace.onDidChangeTextDocument(this.changedDocument, this)
+		);
+		this.settingsChanged();
+	}
 
 	public activate() {
 		// We don't need to do anything here as we already did all of our work in the
@@ -94,7 +109,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 	private computeDecorations() {
 		this.currentCellTopUnfocused = window.createTextEditorDecorationType({
 			borderColor: new vscode.ThemeColor(
-				"interactive.inactiveCodeBorder",
+				"interactive.inactiveCodeBorder"
 			),
 			borderWidth: "2px 0px 0px 0px",
 			borderStyle: "solid",
@@ -103,12 +118,12 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 		this.currentCellBottomUnfocused = window.createTextEditorDecorationType(
 			{
 				borderColor: new vscode.ThemeColor(
-					"interactive.inactiveCodeBorder",
+					"interactive.inactiveCodeBorder"
 				),
 				borderWidth: "0px 0px 1px 0px",
 				borderStyle: "solid",
 				isWholeLine: true,
-			},
+			}
 		);
 		this.currentCellTop = window.createTextEditorDecorationType({
 			borderColor: new vscode.ThemeColor("interactive.activeCodeBorder"),
@@ -158,13 +173,13 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 				this.extensionChecker.isPythonExtensionInstalled
 			) {
 				const settings = this.configuration.getSettings(
-					editor.document.uri,
+					editor.document.uri
 				);
 				if (this.cellDecorationEnabled(settings)) {
 					// Find all of the cells
 					const cells = generateCellRangesFromDocument(
 						editor.document,
-						settings,
+						settings
 					);
 					// Find the range for our active cell.
 					const currentRange = cells
@@ -175,9 +190,9 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							? [
 									new vscode.Range(
 										currentRange[0].start,
-										currentRange[0].start,
+										currentRange[0].start
 									),
-							  ]
+								]
 							: [];
 					// no need to decorate the bottom if we're decorating all cells
 					const rangeBottom =
@@ -186,9 +201,9 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							? [
 									new vscode.Range(
 										currentRange[0].end,
-										currentRange[0].end,
+										currentRange[0].end
 									),
-							  ]
+								]
 							: [];
 					const nonCurrentCells: vscode.Range[] = [];
 					if (settings.decorateCells === "allCells")
@@ -196,7 +211,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							const cellTop = cell.range.start;
 							if (cellTop !== currentRange[0].start) {
 								nonCurrentCells.push(
-									new vscode.Range(cellTop, cellTop),
+									new vscode.Range(cellTop, cellTop)
 								);
 							}
 						});
@@ -204,15 +219,15 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 						editor.setDecorations(this.currentCellTop, rangeTop);
 						editor.setDecorations(
 							this.currentCellBottom,
-							rangeBottom,
+							rangeBottom
 						);
 						editor.setDecorations(
 							this.currentCellTopUnfocused,
-							nonCurrentCells,
+							nonCurrentCells
 						);
 						editor.setDecorations(
 							this.currentCellBottomUnfocused,
-							[],
+							[]
 						);
 					} else {
 						editor.setDecorations(this.currentCellTop, []);
@@ -223,7 +238,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 						]);
 						editor.setDecorations(
 							this.currentCellBottomUnfocused,
-							rangeBottom,
+							rangeBottom
 						);
 					}
 				} else {

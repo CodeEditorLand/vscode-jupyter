@@ -52,7 +52,7 @@ export class QuickPickKernelItemProvider
 			| IContributedKernelFinder
 			| Promise<IContributedKernelFinder>,
 		private readonly pythonEnvFilter: PythonEnvironmentFilter | undefined,
-		private readonly connection: JupyterConnection,
+		private readonly connection: JupyterConnection
 	) {
 		this.refresh = async () => {
 			this.refreshInvoked = true;
@@ -64,7 +64,7 @@ export class QuickPickKernelItemProvider
 			finderPromise
 				.then((finder) => this.setupFinder(finder))
 				.catch((ex) =>
-					traceError(`Failed to setup finder for ${this.title}`, ex),
+					traceError(`Failed to setup finder for ${this.title}`, ex)
 				);
 		} else {
 			this.setupFinder(finderPromise);
@@ -83,10 +83,7 @@ export class QuickPickKernelItemProvider
 			finder
 				.refresh()
 				.catch((ex) =>
-					traceError(
-						`Failed to refresh finder for ${this.title}`,
-						ex,
-					),
+					traceError(`Failed to refresh finder for ${this.title}`, ex)
 				);
 		} else if (
 			// If we're dealing with remote and we are idle and there are no kernels,
@@ -98,10 +95,7 @@ export class QuickPickKernelItemProvider
 			finder
 				.refresh()
 				.catch((ex) =>
-					traceError(
-						`Failed to refresh finder for ${this.title}`,
-						ex,
-					),
+					traceError(`Failed to refresh finder for ${this.title}`, ex)
 				);
 		}
 		switch (finder.kind) {
@@ -114,7 +108,7 @@ export class QuickPickKernelItemProvider
 			default:
 				this.title =
 					DataScience.kernelPickerSelectKernelFromRemoteTitle(
-						finder.displayName,
+						finder.displayName
 					);
 				break;
 		}
@@ -125,7 +119,7 @@ export class QuickPickKernelItemProvider
 				this._onDidChange.fire();
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		finder.onDidChangeStatus(() => {
 			this.status = finder.status;
@@ -158,13 +152,13 @@ export class QuickPickKernelItemProvider
 			this.computePreferredRemoteKernel(
 				finder,
 				preferred,
-				cancellationToken.token,
+				cancellationToken.token
 			);
 		} else {
 			this.computePreferredLocalKernel(
 				finder,
 				preferred,
-				cancellationToken.token,
+				cancellationToken.token
 			);
 		}
 	}
@@ -176,19 +170,19 @@ export class QuickPickKernelItemProvider
 		return kernels.filter(
 			(k) =>
 				k.kind !== "startUsingPythonInterpreter" ||
-				!filter!.isPythonEnvironmentExcluded(k.interpreter),
+				!filter!.isPythonEnvironmentExcluded(k.interpreter)
 		);
 	}
 	private computePreferredRemoteKernel(
 		finder: IContributedKernelFinder,
 		preferred: PreferredKernelConnectionService,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	) {
 		preferred
 			.findPreferredRemoteKernelConnection(
 				this.notebook,
 				finder,
-				cancelToken,
+				cancelToken
 			)
 			.then((kernel) => {
 				this.recommended = kernel;
@@ -197,16 +191,16 @@ export class QuickPickKernelItemProvider
 			.catch((ex) =>
 				traceError(
 					`Preferred connection failure ${getDisplayPath(
-						this.notebook.uri,
+						this.notebook.uri
 					)}`,
-					ex,
-				),
+					ex
+				)
 			);
 	}
 	private computePreferredLocalKernel(
 		finder: IContributedKernelFinder,
 		preferred: PreferredKernelConnectionService,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	) {
 		const computePreferred = () => {
 			// Check if the preferred kernel is in the list of kernels
@@ -219,11 +213,11 @@ export class QuickPickKernelItemProvider
 			const preferredMethod =
 				finder.kind === ContributedKernelFinderKind.LocalKernelSpec
 					? preferred.findPreferredLocalKernelSpecConnection.bind(
-							preferred,
-					  )
+							preferred
+						)
 					: preferred.findPreferredPythonKernelConnection.bind(
-							preferred,
-					  );
+							preferred
+						);
 
 			preferredMethod(this.notebook, finder, cancelToken)
 				.then((kernel) => {
@@ -236,10 +230,10 @@ export class QuickPickKernelItemProvider
 				.catch((ex) =>
 					traceError(
 						`Preferred connection failure ${getDisplayPath(
-							this.notebook?.uri,
+							this.notebook?.uri
 						)}`,
-						ex,
-					),
+						ex
+					)
 				);
 		};
 		computePreferred();

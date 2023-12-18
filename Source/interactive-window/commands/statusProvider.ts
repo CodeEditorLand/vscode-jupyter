@@ -55,7 +55,7 @@ export class StatusProvider {
 	private set(
 		message: string,
 		timeout?: number,
-		cancel?: () => void,
+		cancel?: () => void
 	): Disposable {
 		// Start our progress
 		this.incrementCount();
@@ -64,7 +64,7 @@ export class StatusProvider {
 		const statusItem = new StatusItem(
 			message,
 			() => this.decrementCount(),
-			timeout,
+			timeout
 		);
 
 		const progressOptions: ProgressOptions = {
@@ -95,7 +95,7 @@ export class StatusProvider {
 		promise: () => Promise<T>,
 		message: string,
 		timeout?: number,
-		cancel?: () => void,
+		cancel?: () => void
 	): Promise<T> {
 		// Create a status item and wait for our promise to either finish or reject
 		const status = this.set(message, timeout, cancel);

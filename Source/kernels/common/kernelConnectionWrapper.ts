@@ -48,24 +48,24 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 		await this._kernelConnection.restart();
 	}
 	protected override startHandleKernelMessages(
-		kernelConnection: Kernel.IKernelConnection,
+		kernelConnection: Kernel.IKernelConnection
 	) {
 		super.startHandleKernelMessages(kernelConnection);
 		this._kernelConnection = kernelConnection;
 		kernelConnection.connectionStatusChanged.connect(
 			this.onConnectionStatusChanged,
-			this,
+			this
 		);
 		kernelConnection.statusChanged.connect(this.onStatusChanged, this);
 		kernelConnection.disposed.connect(this.onDisposed, this);
 	}
 	protected override stopHandlingKernelMessages(
-		kernelConnection: Kernel.IKernelConnection,
+		kernelConnection: Kernel.IKernelConnection
 	): void {
 		super.stopHandlingKernelMessages(kernelConnection);
 		kernelConnection.connectionStatusChanged.disconnect(
 			this.onConnectionStatusChanged,
-			this,
+			this
 		);
 		kernelConnection.statusChanged.disconnect(this.onStatusChanged, this);
 		kernelConnection.disposed.disconnect(this.onDisposed, this);
@@ -77,7 +77,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 	}
 	private onStatusChanged(
 		connection: Kernel.IKernelConnection,
-		args: Kernel.Status,
+		args: Kernel.Status
 	) {
 		if (connection === this.possibleKernelConnection) {
 			this.statusChanged.emit(args);
@@ -85,7 +85,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 	}
 	private onConnectionStatusChanged(
 		connection: Kernel.IKernelConnection,
-		args: Kernel.ConnectionStatus,
+		args: Kernel.ConnectionStatus
 	) {
 		if (connection === this.possibleKernelConnection) {
 			this.connectionStatusChanged.emit(args);

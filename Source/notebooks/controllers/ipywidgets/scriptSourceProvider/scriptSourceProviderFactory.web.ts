@@ -26,15 +26,18 @@ export class ScriptSourceProviderFactory
 	implements IWidgetScriptSourceProviderFactory
 {
 	constructor(
-        @inject(IConfigurationService) private readonly configurationSettings: IConfigurationService,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento,
-        @inject(IIPyWidgetScriptManagerFactory)
-        private readonly widgetScriptManagerFactory: IIPyWidgetScriptManagerFactory
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configurationSettings: IConfigurationService,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly globalMemento: Memento,
+		@inject(IIPyWidgetScriptManagerFactory)
+		private readonly widgetScriptManagerFactory: IIPyWidgetScriptManagerFactory
+	) {}
 
 	public getProviders(
 		kernel: IKernel,
-		_uriConverter: ILocalResourceUriConverter,
+		_uriConverter: ILocalResourceUriConverter
 	) {
 		const scriptProviders: IWidgetScriptSourceProvider[] = [];
 
@@ -42,8 +45,8 @@ export class ScriptSourceProviderFactory
 		scriptProviders.push(
 			new CDNWidgetScriptSourceProvider(
 				this.globalMemento,
-				this.configurationSettings,
-			),
+				this.configurationSettings
+			)
 		);
 
 		// Only remote is supported at the moment
@@ -53,8 +56,8 @@ export class ScriptSourceProviderFactory
 				scriptProviders.push(
 					new RemoteWidgetScriptSourceProvider(
 						kernel,
-						this.widgetScriptManagerFactory,
-					),
+						this.widgetScriptManagerFactory
+					)
 				);
 				break;
 		}

@@ -23,15 +23,21 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 	private readonly interpreterService: IInterpreterService;
 	private readonly processServiceFactory: IProcessServiceFactory;
 
-	constructor(@inject(IServiceContainer) serviceContainer: IServiceContainer) {
-        super();
-        this.processServiceFactory = serviceContainer.get<IProcessServiceFactory>(IProcessServiceFactory);
-        this.interpreterService = serviceContainer.get<IInterpreterService>(IInterpreterService);
-    }
+	constructor(
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super();
+		this.processServiceFactory =
+			serviceContainer.get<IProcessServiceFactory>(
+				IProcessServiceFactory
+			);
+		this.interpreterService =
+			serviceContainer.get<IInterpreterService>(IInterpreterService);
+	}
 
 	public override async normalizeLines(
 		code: string,
-		resource?: Uri,
+		resource?: Uri
 	): Promise<string> {
 		const disposables: IDisposable[] = [];
 		try {
@@ -58,7 +64,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				args,
 				{
 					throwOnStdErr: true,
-				},
+				}
 			);
 
 			// Read result from the normalization script from stdout, and resolve the promise when done.
@@ -70,7 +76,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 					}
 				},
 				this,
-				disposables,
+				disposables
 			);
 
 			// The normalization script expects a serialized JSON object, with the selection under the "code" key.
@@ -95,7 +101,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				{
 					trim: true,
 					removeEmptyEntries: false,
-				},
+				}
 			).findIndex((line) => line.length);
 			if (
 				indexOfFirstNonEmptyLineInOriginalCode >
@@ -111,7 +117,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 		} catch (ex) {
 			traceError(
 				ex,
-				"Python: Failed to normalize code for execution in Interactive Window",
+				"Python: Failed to normalize code for execution in Interactive Window"
 			);
 			return code;
 		} finally {

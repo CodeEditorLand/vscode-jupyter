@@ -17,7 +17,7 @@ import { homedir } from "os";
 
 let internalServiceContainer: IServiceContainer;
 export function initializeExternalDependencies(
-	serviceContainer: IServiceContainer,
+	serviceContainer: IServiceContainer
 ): void {
 	internalServiceContainer = serviceContainer;
 }
@@ -26,7 +26,7 @@ export function initializeExternalDependencies(
 
 export async function shellExecute(
 	command: string,
-	options: ShellOptions = {},
+	options: ShellOptions = {}
 ): Promise<ExecutionResult<string>> {
 	const service = await internalServiceContainer
 		.get<IProcessServiceFactory>(IProcessServiceFactory)
@@ -95,7 +95,7 @@ export function getEnvironmentDirFromPath(interpreterPath: string): string {
  * @returns {boolean} : Returns true if the interpreter belongs to a virtualenv environment.
  */
 export async function isVirtualenvEnvironment(
-	interpreterPath: string,
+	interpreterPath: string
 ): Promise<boolean> {
 	// Check if there are any activate.* files in the same directory as the interpreter.
 	//

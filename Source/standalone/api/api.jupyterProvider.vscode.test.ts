@@ -71,7 +71,7 @@ suite("Jupyter Provider Tests", function () {
 		sinon
 			.stub(
 				api.serviceContainer.get<IExtensions>(IExtensions),
-				"determineExtensionFromCallStack",
+				"determineExtensionFromCallStack"
 			)
 			.returns({
 				extensionId: "GitHub",
@@ -83,7 +83,7 @@ suite("Jupyter Provider Tests", function () {
 				const disposable =
 					registerKernelSourceActionProviderStub.wrappedMethod(
 						notebookType,
-						provider,
+						provider
 					);
 				nbProviders.push({ provider, disposable });
 				return disposable;
@@ -111,12 +111,12 @@ suite("Jupyter Provider Tests", function () {
 		const collection1 = api.createJupyterServerCollection(
 			"sample1",
 			"First Collection",
-			serverProvider1,
+			serverProvider1
 		);
 		const collection2 = api.createJupyterServerCollection(
 			"sample2",
 			"Second Collection",
-			serverProvider2,
+			serverProvider2
 		);
 		disposables.push(collection1);
 		disposables.push(collection2);
@@ -128,7 +128,7 @@ suite("Jupyter Provider Tests", function () {
 					// We could have other providers being registered in the test env, such as github code spaces, azml, etc
 					const actions =
 						await provider.provideNotebookKernelSourceActions(
-							token,
+							token
 						);
 					assert.strictEqual(actions?.length, 1);
 					if (actions![0].label === "First Collection") {
@@ -144,7 +144,7 @@ suite("Jupyter Provider Tests", function () {
 				return false;
 			},
 			120_000,
-			"Providers not registered for IW and Notebook",
+			"Providers not registered for IW and Notebook"
 		);
 		if (!matchingDisposable1 || !matchingDisposable2) {
 			throw new Error("Provider not registered");
@@ -157,19 +157,19 @@ suite("Jupyter Provider Tests", function () {
 		await waitForCondition(
 			() => disposeStub1.called,
 			10_000,
-			"Kernel Source Action not removed",
+			"Kernel Source Action not removed"
 		);
 		assert.strictEqual(
 			disposeStub2.called,
 			false,
-			"Second collection should not be disposed",
+			"Second collection should not be disposed"
 		);
 
 		collection2.dispose();
 		await waitForCondition(
 			() => disposeStub2.called,
 			10_000,
-			"Kernel Source Action not removed for second collection",
+			"Kernel Source Action not removed for second collection"
 		);
 	});
 	// Flaky test, leaving as I'd like to try to get this working in debt week.
@@ -288,7 +288,7 @@ suite("Jupyter Provider Tests", function () {
 		const collection = api.createJupyterServerCollection(
 			"sampleServerProvider2",
 			"First Collection For Third Test",
-			serverProvider,
+			serverProvider
 		);
 		disposables.push(collection);
 		const server1: JupyterServer = {
@@ -330,7 +330,7 @@ suite("Jupyter Provider Tests", function () {
 					// We could have other providers being registered in the test env, such as github code spaces, azml, etc
 					const actions =
 						await provider.provideNotebookKernelSourceActions(
-							token,
+							token
 						);
 					assert.strictEqual(actions?.length, 1);
 					if (
@@ -343,7 +343,7 @@ suite("Jupyter Provider Tests", function () {
 				return false;
 			},
 			120_000,
-			"Providers not registered for IW and Notebook",
+			"Providers not registered for IW and Notebook"
 		);
 		if (!matchingProvider) {
 			throw new Error("Provider not registered");
@@ -372,7 +372,7 @@ suite("Jupyter Provider Tests", function () {
 			.command as unknown as Command;
 		const controllerId = await commands.executeCommand(
 			actionCommand.command,
-			...(actionCommand.arguments || []),
+			...(actionCommand.arguments || [])
 		);
 
 		// Verify a controller is not selected
@@ -380,13 +380,13 @@ suite("Jupyter Provider Tests", function () {
 		// Verify quick pick was displayed with three items.
 		assert.strictEqual(multiStepStub.callCount, 1);
 		let quickPickItems = multiStepStub.args[0][0].items.filter(
-			(q) => q.kind !== QuickPickItemKind.Separator,
+			(q) => q.kind !== QuickPickItemKind.Separator
 		);
 		assert.strictEqual(quickPickItems.length, 3);
 		assert.deepEqual(
 			quickPickItems.map((e) => e.label).sort(),
 			["Server 1", "Server 2", "Server 3"],
-			"Jupyter Servers not displayed in quick picks",
+			"Jupyter Servers not displayed in quick picks"
 		);
 
 		// Ok, now remove one server and verify the quick pick now displays 2 items.
@@ -394,19 +394,19 @@ suite("Jupyter Provider Tests", function () {
 		onDidChangeServers.fire();
 		const controllerId2 = await commands.executeCommand(
 			actionCommand.command,
-			...(actionCommand.arguments || []),
+			...(actionCommand.arguments || [])
 		);
 		// Verify a controller is not selected
 		assert.isUndefined(controllerId2);
 		assert.strictEqual(multiStepStub.callCount, 2);
 		quickPickItems = multiStepStub.args[1][0].items.filter(
-			(q) => q.kind !== QuickPickItemKind.Separator,
+			(q) => q.kind !== QuickPickItemKind.Separator
 		);
 		assert.strictEqual(quickPickItems.length, 2);
 		assert.deepEqual(
 			quickPickItems.map((e) => e.label).sort(),
 			["Server 1", "Server 3"],
-			"Jupyter Servers not displayed in quick picks",
+			"Jupyter Servers not displayed in quick picks"
 		);
 
 		// Add a command and that command should be displayed along with the 2 servers.
@@ -419,13 +419,13 @@ suite("Jupyter Provider Tests", function () {
 
 		const controllerId3 = await commands.executeCommand(
 			actionCommand.command,
-			...(actionCommand.arguments || []),
+			...(actionCommand.arguments || [])
 		);
 		// Verify a controller is not selected
 		assert.isUndefined(controllerId3);
 		assert.strictEqual(multiStepStub.callCount, 3);
 		quickPickItems = multiStepStub.args[2][0].items.filter(
-			(q) => q.kind !== QuickPickItemKind.Separator,
+			(q) => q.kind !== QuickPickItemKind.Separator
 		);
 		assert.strictEqual(quickPickItems.length, 3); // One separator and one item
 		assert.deepEqual(
@@ -434,7 +434,7 @@ suite("Jupyter Provider Tests", function () {
 				.map((e) => e.label)
 				.sort(),
 			["Server 1", "Server 3", "Sample Command"].sort(),
-			"Jupyter Servers not displayed in quick picks",
+			"Jupyter Servers not displayed in quick picks"
 		);
 
 		// Remove the command and try again.
@@ -442,13 +442,13 @@ suite("Jupyter Provider Tests", function () {
 
 		const controllerId4 = await commands.executeCommand(
 			actionCommand.command,
-			...(actionCommand.arguments || []),
+			...(actionCommand.arguments || [])
 		);
 		// Verify a controller is not selected
 		assert.isUndefined(controllerId4);
 		assert.strictEqual(multiStepStub.callCount, 4);
 		quickPickItems = multiStepStub.args[3][0].items.filter(
-			(q) => q.kind !== QuickPickItemKind.Separator,
+			(q) => q.kind !== QuickPickItemKind.Separator
 		);
 		assert.strictEqual(quickPickItems.length, 2);
 		assert.deepEqual(
@@ -457,7 +457,7 @@ suite("Jupyter Provider Tests", function () {
 				.map((e) => e.label)
 				.sort(),
 			["Server 1", "Server 3"].sort(),
-			"Jupyter Servers not displayed in quick picks",
+			"Jupyter Servers not displayed in quick picks"
 		);
 	});
 });

@@ -27,7 +27,7 @@ export class ExportToPythonPlain implements IExport {
 		this.fs = ServiceContainer.instance.get<IFileSystem>(IFileSystem);
 		this.configuration =
 			ServiceContainer.instance.get<IConfigurationService>(
-				IConfigurationService,
+				IConfigurationService
 			);
 		this.platform =
 			ServiceContainer.instance.get<IPlatformService>(IPlatformService);
@@ -45,7 +45,7 @@ export class ExportToPythonPlain implements IExport {
 	public async export(
 		sourceDocument: NotebookDocument,
 		target: Uri,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<void> {
 		if (token.isCancellationRequested) {
 			return;
@@ -62,12 +62,12 @@ export class ExportToPythonPlain implements IExport {
 			.filter(
 				(cell) =>
 					!cell.metadata.custom?.metadata
-						?.isInteractiveWindowMessageCell,
+						?.isInteractiveWindowMessageCell
 			) // We don't want interactive window sys info cells
 			.reduce(
 				(previousValue, currentValue) =>
 					previousValue + this.exportCell(currentValue),
-				"",
+				""
 			);
 	}
 
@@ -80,11 +80,11 @@ export class ExportToPythonPlain implements IExport {
 			switch (cell.kind) {
 				case NotebookCellKind.Code:
 					return `${cellMarker}${eol}${this.exportCodeCell(
-						cell,
+						cell
 					)}${eol}${eol}`;
 				case NotebookCellKind.Markup:
 					return `${cellMarker} [markdown]${eol}${this.exportMarkdownCell(
-						cell,
+						cell
 					)}${eol}${eol}`;
 			}
 		}
@@ -107,7 +107,7 @@ export class ExportToPythonPlain implements IExport {
 		return appendLineFeed(
 			code,
 			this.getEOL(),
-			commentMagic ? commentMagicCommands : undefined,
+			commentMagic ? commentMagicCommands : undefined
 		).join("");
 	}
 

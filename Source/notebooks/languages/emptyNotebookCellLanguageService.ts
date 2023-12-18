@@ -29,14 +29,16 @@ export class EmptyNotebookCellLanguageService
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IControllerRegistration) private readonly controllerRegistration: IControllerRegistration
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IControllerRegistration)
+		private readonly controllerRegistration: IControllerRegistration
+	) {}
 	public activate() {
 		this.controllerRegistration.onControllerSelected(
 			this.onDidChangeNotebookController,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -51,7 +53,7 @@ export class EmptyNotebookCellLanguageService
 			return;
 		}
 		const editor = window.visibleNotebookEditors.find(
-			(item) => item.notebook === document,
+			(item) => item.notebook === document
 		);
 		if (!editor) {
 			return;
@@ -62,7 +64,7 @@ export class EmptyNotebookCellLanguageService
 			.filter(
 				(cell) =>
 					cell.kind === NotebookCellKind.Code &&
-					cell.document.getText().trim().length === 0,
+					cell.document.getText().trim().length === 0
 			);
 		const codeCells = document
 			.getCells()

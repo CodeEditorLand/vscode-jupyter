@@ -22,12 +22,14 @@ export class RemoteJupyterServerMruUpdate
 	private readonly monitoredKernels = new WeakSet<IKernel>();
 	private readonly timeouts = new Set<Disposable>();
 	constructor(
-        @inject(IJupyterServerUriStorage) private readonly serverStorage: IJupyterServerUriStorage,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry
-    ) {
-        disposables.push(this);
-    }
+		@inject(IJupyterServerUriStorage)
+		private readonly serverStorage: IJupyterServerUriStorage,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry
+	) {
+		disposables.push(this);
+	}
 	dispose() {
 		dispose(this.disposables);
 		dispose(Array.from(this.timeouts.values()));
@@ -36,12 +38,12 @@ export class RemoteJupyterServerMruUpdate
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.kernelProvider.onDidRestartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private onDidStartKernel(kernel: IKernel) {

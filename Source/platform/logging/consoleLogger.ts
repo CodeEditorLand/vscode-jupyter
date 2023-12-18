@@ -28,29 +28,25 @@ export class ConsoleLogger implements ILogger {
 
 	public traceError(message: string, ...data: Arguments): void {
 		console.error(
-			formatMessage("error", `${this.prefix || ""} ${message}`, ...data),
+			formatMessage("error", `${this.prefix || ""} ${message}`, ...data)
 		);
 	}
 
 	public traceWarn(message: string, ...data: Arguments): void {
 		console.warn(
-			formatMessage("warn", `${this.prefix || ""} ${message}`, ...data),
+			formatMessage("warn", `${this.prefix || ""} ${message}`, ...data)
 		);
 	}
 
 	public traceInfo(message: string, ...data: Arguments): void {
 		console.info(
-			formatMessage("info", `${this.prefix || ""} ${message}`, ...data),
+			formatMessage("info", `${this.prefix || ""} ${message}`, ...data)
 		);
 	}
 
 	public traceVerbose(message: string, ...data: Arguments): void {
 		console.log(
-			formatMessage(
-				"verbose",
-				`${this.prefix || ""} ${message}`,
-				...data,
-			),
+			formatMessage("verbose", `${this.prefix || ""} ${message}`, ...data)
 		);
 	}
 }

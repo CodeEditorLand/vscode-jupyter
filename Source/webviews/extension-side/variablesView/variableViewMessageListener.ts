@@ -14,7 +14,7 @@ export class VariableViewMessageListener
 
 	constructor(
 		callback: (message: string, payload: any) => void,
-		disposed: () => void,
+		disposed: () => void
 	) {
 		// Save our dispose callback so we remove our history window
 		this.disposedCallback = disposed;

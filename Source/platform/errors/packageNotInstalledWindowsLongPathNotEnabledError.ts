@@ -12,7 +12,7 @@ export class PackageNotInstalledWindowsLongPathNotEnabledError extends BaseError
 	constructor(
 		public readonly product: Product | string,
 		public readonly interpreter: PythonEnvironment | Environment,
-		public readonly originalMessage: string,
+		public readonly originalMessage: string
 	) {
 		super("windowsLongPathNotEnabled", originalMessage);
 	}

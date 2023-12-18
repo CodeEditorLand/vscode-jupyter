@@ -27,33 +27,37 @@ export class DebuggerVariableRegistration
 	implements IExtensionSyncActivationService, DebugAdapterTrackerFactory
 {
 	constructor(
-        @inject(IJupyterDebugService) @named(Identifiers.MULTIPLEXING_DEBUGSERVICE) private debugService: IDebugService,
-        @inject(IDisposableRegistry) private disposables: IDisposableRegistry,
-        @inject(IJupyterVariables) @named(Identifiers.DEBUGGER_VARIABLES) private debugVariables: DebugAdapterTracker
-    ) {}
+		@inject(IJupyterDebugService)
+		@named(Identifiers.MULTIPLEXING_DEBUGSERVICE)
+		private debugService: IDebugService,
+		@inject(IDisposableRegistry) private disposables: IDisposableRegistry,
+		@inject(IJupyterVariables)
+		@named(Identifiers.DEBUGGER_VARIABLES)
+		private debugVariables: DebugAdapterTracker
+	) {}
 	public activate() {
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				PYTHON_LANGUAGE,
-				this,
-			),
+				this
+			)
 		);
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				pythonKernelDebugAdapter,
-				this,
-			),
+				this
+			)
 		);
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				pythonIWKernelDebugAdapter,
-				this,
-			),
+				this
+			)
 		);
 	}
 
 	public createDebugAdapterTracker(
-		_session: DebugSession,
+		_session: DebugSession
 	): ProviderResult<DebugAdapterTracker> {
 		return this.debugVariables;
 	}

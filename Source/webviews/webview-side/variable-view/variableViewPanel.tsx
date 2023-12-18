@@ -128,7 +128,7 @@ ${buildSettingsCss(this.props.settings)}`}</style>
 			startIndex,
 			pageSize,
 			this.props.variableState.sortColumn,
-			this.props.variableState.sortAscending,
+			this.props.variableState.sortAscending
 		);
 	};
 

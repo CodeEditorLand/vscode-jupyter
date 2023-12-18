@@ -33,7 +33,7 @@ import {
 export function expandWorkingDir(
 	workingDir: string | undefined,
 	launchingFile: Resource,
-	settings: IWatchableJupyterSettings,
+	settings: IWatchableJupyterSettings
 ): string {
 	if (workingDir) {
 		const variables = settings.createSystemVariables(launchingFile);
@@ -50,7 +50,7 @@ export function expandWorkingDir(
 
 export async function handleSelfCertsError(
 	config: IConfigurationService,
-	message: string,
+	message: string
 ): Promise<boolean> {
 	// On a self cert error, warn the user and ask if they want to change the setting
 	const enableOption: string = DataScience.jupyterSelfCertEnable;
@@ -59,7 +59,7 @@ export async function handleSelfCertsError(
 		DataScience.jupyterSelfCertFail(message),
 		{ modal: true },
 		enableOption,
-		closeOption,
+		closeOption
 	);
 	if (value === enableOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
@@ -67,7 +67,7 @@ export async function handleSelfCertsError(
 			"allowUnauthorizedRemoteConnection",
 			true,
 			undefined,
-			ConfigurationTarget.Workspace,
+			ConfigurationTarget.Workspace
 		);
 		return true;
 	} else if (value === closeOption) {
@@ -78,7 +78,7 @@ export async function handleSelfCertsError(
 
 export async function handleExpiredCertsError(
 	config: IConfigurationService,
-	message: string,
+	message: string
 ): Promise<boolean> {
 	// On a self cert error, warn the user and ask if they want to change the setting
 	const enableOption: string = DataScience.jupyterSelfCertEnable;
@@ -87,7 +87,7 @@ export async function handleExpiredCertsError(
 		DataScience.jupyterExpiredCertFail(message),
 		{ modal: true },
 		enableOption,
-		closeOption,
+		closeOption
 	);
 	if (value === enableOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
@@ -95,7 +95,7 @@ export async function handleExpiredCertsError(
 			"allowUnauthorizedRemoteConnection",
 			true,
 			undefined,
-			ConfigurationTarget.Workspace,
+			ConfigurationTarget.Workspace
 		);
 		return true;
 	} else if (value === closeOption) {
@@ -111,7 +111,7 @@ export function createJupyterConnectionInfo(
 	requestAgentCreator: IJupyterRequestAgentCreator | undefined,
 	configService: IConfigurationService,
 	rootDirectory: Uri,
-	toDispose?: IDisposable,
+	toDispose?: IDisposable
 ): IJupyterConnection {
 	const baseUrl = serverUri.baseUrl;
 	const token = serverUri.token;
@@ -163,18 +163,18 @@ export function createJupyterConnectionInfo(
 		init: requestInit,
 		WebSocket: serverUri.WebSocket
 			? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-			  requestCreator.wrapWebSocketCtor(serverUri.WebSocket as any)
+				requestCreator.wrapWebSocketCtor(serverUri.WebSocket as any)
 			: (requestCreator.getWebsocketCtor(
 					undefined,
 					allowUnauthorized,
-					getAuthHeader,
+					getAuthHeader
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			  ) as any),
+				) as any),
 		fetch: serverUri.fetch || requestCreator.getFetchMethod(),
 		Request: requestCreator.getRequestCtor(
 			undefined,
 			allowUnauthorized,
-			getAuthHeader,
+			getAuthHeader
 		),
 		Headers: requestCreator.getHeadersCtor(),
 	};
@@ -206,12 +206,12 @@ export async function computeServerId(provider: JupyterServerProviderHandle) {
 
 const ExtensionsWithKnownProviderIds = new Set(
 	[JVSC_EXTENSION_ID, "ms-toolsai.vscode-ai", "GitHub.codespaces"].map((e) =>
-		e.toLowerCase(),
-	),
+		e.toLowerCase()
+	)
 );
 
 export function generateIdFromRemoteProvider(
-	provider: JupyterServerProviderHandle,
+	provider: JupyterServerProviderHandle
 ) {
 	if (
 		ExtensionsWithKnownProviderIds.has(provider.extensionId.toLowerCase())
@@ -230,16 +230,16 @@ export function generateIdFromRemoteProvider(
 		return `${Identifiers.REMOTE_URI}?${Identifiers.REMOTE_URI_ID_PARAM}=${
 			provider.id
 		}&${Identifiers.REMOTE_URI_HANDLE_PARAM}=${encodeURI(
-			provider.handle,
+			provider.handle
 		)}&${Identifiers.REMOTE_URI_EXTENSION_ID_PARAM}=${encodeURI(
-			provider.extensionId,
+			provider.extensionId
 		)}`;
 	}
 }
 
 class FailedToDetermineExtensionId extends Error {}
 export function extractJupyterServerHandleAndId(
-	uri: string,
+	uri: string
 ): JupyterServerProviderHandle {
 	try {
 		const url: URL = new URL(uri);
@@ -247,7 +247,7 @@ export function extractJupyterServerHandleAndId(
 		// Id has to be there too.
 		const id = url.searchParams.get(Identifiers.REMOTE_URI_ID_PARAM);
 		const uriHandle = url.searchParams.get(
-			Identifiers.REMOTE_URI_HANDLE_PARAM,
+			Identifiers.REMOTE_URI_HANDLE_PARAM
 		);
 		const extensionId =
 			url.searchParams.get(Identifiers.REMOTE_URI_EXTENSION_ID_PARAM) ||
@@ -255,7 +255,7 @@ export function extractJupyterServerHandleAndId(
 		if (id && uriHandle) {
 			if (!extensionId) {
 				throw new FailedToDetermineExtensionId(
-					`Unable to determine the extension id for the remote server handle', { ${id}, ${uriHandle} }`,
+					`Unable to determine the extension id for the remote server handle', { ${id}, ${uriHandle} }`
 				);
 			}
 			return { handle: uriHandle, id, extensionId };
@@ -266,7 +266,7 @@ export function extractJupyterServerHandleAndId(
 			throw ex;
 		}
 		throw new Error(
-			`'Failed to parse remote URI ${getSafeUrlForLogging(uri)}`,
+			`'Failed to parse remote URI ${getSafeUrlForLogging(uri)}`
 		);
 	}
 }

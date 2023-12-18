@@ -12,12 +12,12 @@ import { DataScienceErrorHandler } from "./kernelErrorHandler";
 export class DataScienceErrorHandlerWeb extends DataScienceErrorHandler {
 	protected override async addErrorMessageIfPythonArePossiblyOverridingPythonModules(
 		_messages: string[],
-		_resource: Resource,
+		_resource: Resource
 	) {
 		//
 	}
 	protected override async getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
-		_resource: Resource,
+		_resource: Resource
 	) {
 		return [];
 	}

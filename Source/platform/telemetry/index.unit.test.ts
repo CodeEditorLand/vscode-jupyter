@@ -49,7 +49,7 @@ suite("Telemetry", () => {
 	async function asyncAssertReporterState(
 		expectedEventName: string[],
 		expectedMeasures: any[],
-		expectedProperties: Record<string, string>[],
+		expectedProperties: Record<string, string>[]
 	): Promise<void> {
 		await waitForCondition(
 			async () => {
@@ -59,7 +59,7 @@ suite("Telemetry", () => {
 				return true;
 			},
 			1_000,
-			"Unexpected reporter state",
+			"Unexpected reporter state"
 		);
 		expect(Reporter.eventName).to.deep.equal(expectedEventName);
 		expect(Reporter.measures).to.deep.equal(expectedMeasures);
@@ -110,21 +110,21 @@ suite("Telemetry", () => {
 				reset(mockedVSCodeNamespaces.workspace);
 				when(
 					mockedVSCodeNamespaces.workspace.getConfiguration(
-						"telemetry",
-					),
+						"telemetry"
+					)
 				).thenReturn(instance(workspaceConfig));
 				when(
-					workspaceConfig.inspect<string>("enableTelemetry"),
+					workspaceConfig.inspect<string>("enableTelemetry")
 				).thenReturn(testParams.settings as any);
 
 				expect(isTelemetryDisabled()).to.equal(
-					testParams.expectedResult,
+					testParams.expectedResult
 				);
 
 				verify(
 					mockedVSCodeNamespaces.workspace.getConfiguration(
-						"telemetry",
-					),
+						"telemetry"
+					)
 				).once();
 			});
 		});
@@ -161,7 +161,7 @@ suite("Telemetry", () => {
 		await asyncAssertReporterState(
 			[eventName],
 			[measures],
-			[expectedProperties],
+			[expectedProperties]
 		);
 	});
 	test("Shared properties will replace existing ones", async () => {
@@ -178,7 +178,7 @@ suite("Telemetry", () => {
 		await asyncAssertReporterState(
 			[eventName],
 			[measures],
-			[expectedProperties],
+			[expectedProperties]
 		);
 	});
 	test("Send Error Telemetry", async () => {
@@ -193,7 +193,7 @@ suite("Telemetry", () => {
 			eventName as any,
 			measures,
 			properties as any,
-			error,
+			error
 		);
 		await sleep(1);
 		const expectedErrorProperties = {
@@ -243,7 +243,7 @@ suite("Telemetry", () => {
 			eventName as any,
 			measures,
 			properties as any,
-			error,
+			error
 		);
 		await sleep(1);
 		const expectedErrorProperties = {

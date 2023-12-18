@@ -20,8 +20,8 @@ suite("Common Process Service Registry", () => {
 		verify(
 			serviceManager.addSingleton<IProcessServiceFactory>(
 				IProcessServiceFactory,
-				ProcessServiceFactory,
-			),
+				ProcessServiceFactory
+			)
 		).once();
 	});
 });

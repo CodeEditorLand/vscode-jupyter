@@ -21,7 +21,7 @@ export abstract class ExportUtilBase implements IExportUtil {
 		}>("vscode.ipynb");
 		if (!serializerApi) {
 			throw new Error(
-				"Unable to export notebook as the built-in vscode.ipynb extension is currently unavailable.",
+				"Unable to export notebook as the built-in vscode.ipynb extension is currently unavailable."
 			);
 		}
 		// Via the interactive window export this might not be activated
@@ -34,7 +34,7 @@ export abstract class ExportUtilBase implements IExportUtil {
 			const data = new NotebookCellData(
 				c.kind,
 				c.document.getText(),
-				c.document.languageId,
+				c.document.languageId
 			);
 			data.metadata = c.metadata;
 			data.mime = c.mime;
@@ -49,12 +49,12 @@ export abstract class ExportUtilBase implements IExportUtil {
 	async getTargetFile(
 		format: ExportFormat,
 		source: Uri,
-		defaultFileName?: string | undefined,
+		defaultFileName?: string | undefined
 	): Promise<Uri | undefined> {
 		let target = await new ExportDialog().showDialog(
 			format,
 			source,
-			defaultFileName,
+			defaultFileName
 		);
 
 		return target;

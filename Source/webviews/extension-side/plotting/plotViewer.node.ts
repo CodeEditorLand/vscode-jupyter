@@ -20,16 +20,16 @@ import {
 @injectable()
 export class PlotViewer extends PlotViewerBase {
 	constructor(
-        @inject(IWebviewPanelProvider) provider: IWebviewPanelProvider,
-        @inject(IConfigurationService) configuration: IConfigurationService,
-        @inject(IFileSystemNode) private fsNode: IFileSystemNode,
-        @inject(IExtensionContext) context: IExtensionContext
-    ) {
-        super(provider, configuration, fsNode, context);
-    }
+		@inject(IWebviewPanelProvider) provider: IWebviewPanelProvider,
+		@inject(IConfigurationService) configuration: IConfigurationService,
+		@inject(IFileSystemNode) private fsNode: IFileSystemNode,
+		@inject(IExtensionContext) context: IExtensionContext
+	) {
+		super(provider, configuration, fsNode, context);
+	}
 
 	protected override async exportPlot(
-		payload: IExportPlotRequest,
+		payload: IExportPlotRequest
 	): Promise<void> {
 		traceInfo("exporting plot...");
 		const filtersObject: Record<string, string[]> = {};
@@ -53,7 +53,7 @@ export class PlotViewer extends PlotViewerBase {
 					case ".png":
 						const buffer = Buffer.from(
 							payload.png.replace("data:image/png;base64", ""),
-							"base64",
+							"base64"
 						);
 						await this.fs.writeFile(file, buffer);
 						break;
@@ -77,7 +77,7 @@ export class PlotViewer extends PlotViewerBase {
 export async function saveSvgToPdf(
 	svg: string,
 	fs: IFileSystemNode,
-	file: Uri,
+	file: Uri
 ) {
 	traceInfo("Attempting pdf write...");
 	// Import here since pdfkit is so huge.

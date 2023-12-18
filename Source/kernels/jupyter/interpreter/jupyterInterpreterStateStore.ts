@@ -27,7 +27,11 @@ const keySelected = "INTERPRETER_PATH_WAS_SELECTED_FOR_JUPYTER_SERVER";
 @injectable()
 export class JupyterInterpreterStateStore {
 	private _interpreterPath?: Uri;
-	constructor(@inject(IMemento) @named(GLOBAL_MEMENTO) private readonly memento: Memento) {}
+	constructor(
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly memento: Memento
+	) {}
 
 	/**
 	 * Whether the user set an interpreter at least once (an interpreter for starting of jupyter).
@@ -63,11 +67,15 @@ export class MigrateJupyterInterpreterStateService
 {
 	private settingsMigrated?: boolean;
 	constructor(
-        @inject(IPythonApiProvider) private readonly api: IPythonApiProvider,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly memento: Memento,
-        @inject(IPythonExtensionChecker) private readonly checker: IPythonExtensionChecker,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(IPythonApiProvider) private readonly api: IPythonApiProvider,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly memento: Memento,
+		@inject(IPythonExtensionChecker)
+		private readonly checker: IPythonExtensionChecker,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 
 	// Migrate the interpreter path selected for Jupyter server from the Python extension's globalState memento
 	public activate() {
@@ -75,7 +83,7 @@ export class MigrateJupyterInterpreterStateService
 		this.api.onDidActivatePythonExtension(
 			this.activateBackground,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public async activateBackground() {

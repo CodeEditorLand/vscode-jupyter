@@ -14,14 +14,17 @@ import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
  */
 @injectable()
 export class NbConvertExportToPythonService {
-	constructor(@inject(IPythonExecutionFactory) private readonly pythonExecutionFactory: IPythonExecutionFactory) {}
+	constructor(
+		@inject(IPythonExecutionFactory)
+		private readonly pythonExecutionFactory: IPythonExecutionFactory
+	) {}
 
 	@reportAction(ReportableAction.ExportNotebookToPython)
 	public async exportNotebookToPython(
 		file: Uri,
 		interpreter: PythonEnvironment,
 		template?: string,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<string> {
 		const daemon =
 			await this.pythonExecutionFactory.createActivatedEnvironment({
@@ -37,7 +40,7 @@ export class NbConvertExportToPythonService {
 					"--stdout",
 					"--template",
 					template,
-			  ]
+				]
 			: [file.fsPath, "--to", "python", "--stdout"];
 
 		// Ignore stderr, as nbconvert writes conversion result to stderr.

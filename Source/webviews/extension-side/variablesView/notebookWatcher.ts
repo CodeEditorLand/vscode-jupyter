@@ -69,8 +69,8 @@ export class NotebookWatcher implements INotebookWatcher {
 		const activeDataViewer = this.dataViewerFactory.activeViewer;
 		return activeDataViewer
 			? this.kernelProvider.kernels.find(
-					(item) => item === activeDataViewer.kernel,
-			  )
+					(item) => item === activeDataViewer.kernel
+				)
 			: undefined;
 	}
 
@@ -93,27 +93,42 @@ export class NotebookWatcher implements INotebookWatcher {
 	private _executionCountTracker = new WeakMap<NotebookDocument, number>();
 
 	constructor(
-        @inject(IInteractiveWindowProvider) private interactiveWindowProvider: IInteractiveWindowProvider,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IDataViewerFactory) private readonly dataViewerFactory: IDataViewerFactory,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {
-        // We need to know if kernel state changes or if the active notebook editor is changed
-        window.onDidChangeActiveNotebookEditor(this.activeEditorChanged, this, this.disposables);
-        workspace.onDidCloseNotebookDocument(this.notebookEditorClosed, this, this.disposables);
-        this.kernelProvider.onDidRestartKernel(
-            (kernel) => {
-                this.handleRestart({ state: KernelState.restarted, notebook: kernel.notebook });
-            },
-            this,
-            this.disposables
-        );
-        notebooks.onDidChangeNotebookCellExecutionState(
-            this.onDidChangeNotebookCellExecutionState,
-            this,
-            this.disposables
-        );
-    }
+		@inject(IInteractiveWindowProvider)
+		private interactiveWindowProvider: IInteractiveWindowProvider,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IDataViewerFactory)
+		private readonly dataViewerFactory: IDataViewerFactory,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {
+		// We need to know if kernel state changes or if the active notebook editor is changed
+		window.onDidChangeActiveNotebookEditor(
+			this.activeEditorChanged,
+			this,
+			this.disposables
+		);
+		workspace.onDidCloseNotebookDocument(
+			this.notebookEditorClosed,
+			this,
+			this.disposables
+		);
+		this.kernelProvider.onDidRestartKernel(
+			(kernel) => {
+				this.handleRestart({
+					state: KernelState.restarted,
+					notebook: kernel.notebook,
+				});
+			},
+			this,
+			this.disposables
+		);
+		notebooks.onDidChangeNotebookCellExecutionState(
+			this.onDidChangeNotebookCellExecutionState,
+			this,
+			this.disposables
+		);
+	}
 	private getActiveInteractiveWindowDocument() {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getActiveOrAssociatedInteractiveWindow();
@@ -122,13 +137,13 @@ export class NotebookWatcher implements INotebookWatcher {
 		}
 		return workspace.notebookDocuments.find(
 			(notebookDocument) =>
-				notebookDocument === interactiveWindow?.notebookDocument,
+				notebookDocument === interactiveWindow?.notebookDocument
 		);
 	}
 
 	// Handle when a cell finishes execution
 	private onDidChangeNotebookCellExecutionState(
-		cellStateChange: NotebookCellExecutionStateChangeEvent,
+		cellStateChange: NotebookCellExecutionStateChangeEvent
 	) {
 		if (!isJupyterNotebook(cellStateChange.cell.notebook)) {
 			return;
@@ -156,7 +171,7 @@ export class NotebookWatcher implements INotebookWatcher {
 			) {
 				this._executionCountTracker.set(
 					kernelStateEvent.notebook,
-					kernelStateEvent.cell.executionSummary?.executionOrder,
+					kernelStateEvent.cell.executionSummary?.executionOrder
 				);
 			}
 
@@ -203,7 +218,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 		if (editor && isJupyterNotebook(editor.notebook)) {
 			const executionCount = this._executionCountTracker.get(
-				editor.notebook,
+				editor.notebook
 			);
 			executionCount && (changeEvent.executionCount = executionCount);
 		}
@@ -213,7 +228,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 	// Check to see if this is a non-silent execution that we want to update on
 	private isNonSilentExecution(
-		kernelStateEvent: KernelStateEventArgs,
+		kernelStateEvent: KernelStateEventArgs
 	): boolean {
 		if (
 			kernelStateEvent.state === KernelState.executed &&
@@ -228,7 +243,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 	// Check to see if this event was on the active notebook
 	private isActiveNotebookEvent(
-		kernelStateEvent: KernelStateEventArgs,
+		kernelStateEvent: KernelStateEventArgs
 	): boolean {
 		return this.activeKernel?.notebook === kernelStateEvent.notebook;
 	}

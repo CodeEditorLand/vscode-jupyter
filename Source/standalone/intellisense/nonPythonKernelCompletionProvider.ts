@@ -57,7 +57,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 		private readonly kernelId: string,
 		private readonly kernel: IKernel,
 		private readonly monacoLanguage: string,
-		private readonly toDispose: DisposableStore,
+		private readonly toDispose: DisposableStore
 	) {}
 
 	private pendingCompletionRequest = new WeakMap<
@@ -72,7 +72,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 		document: TextDocument,
 		position: Position,
 		token: CancellationToken,
-		_context: CompletionContext,
+		_context: CompletionContext
 	): Promise<CompletionItem[]> {
 		if (!this.kernel.session?.kernel) {
 			return [];
@@ -101,10 +101,10 @@ export class NotebookCellSpecificKernelCompletionProvider
 						commands.executeCommand(
 							"vscode.executeCompletionItemProvider",
 							document.uri,
-							position,
-						),
+							position
+						)
 					) as Promise<CompletionList | undefined>
-				).then((result) => result?.items || []),
+				).then((result) => result?.items || [])
 			);
 
 			// Wait for 100ms, as we do not want to flood the kernel with too many messages.
@@ -116,7 +116,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 			const completions = await this.provideCompletionItemsFromKernel(
 				document,
 				position,
-				token,
+				token
 			);
 			if (token.isCancellationRequested) {
 				return [];
@@ -127,23 +127,23 @@ export class NotebookCellSpecificKernelCompletionProvider
 			// NOTE: We have already waited for 100ms earlier.
 			const otherCompletions = await raceTimeout(
 				0,
-				completionsFromOtherSourcesPromise,
+				completionsFromOtherSourcesPromise
 			);
 
 			const existingCompletionItems = new Set(
 				(otherCompletions || []).map((item) =>
 					typeof item.label === "string"
 						? item.label
-						: item.label.label,
-				),
+						: item.label.label
+				)
 			);
 			return completions.filter(
 				(item) =>
 					!existingCompletionItems.has(
 						typeof item.label === "string"
 							? item.label
-							: item.label.label,
-					),
+							: item.label.label
+					)
 			);
 		} finally {
 			if (
@@ -160,7 +160,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 	async provideCompletionItemsFromKernel(
 		document: TextDocument,
 		position: Position,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<CompletionItem[]> {
 		if (token.isCancellationRequested || !this.kernel.session?.kernel) {
 			return [];
@@ -189,7 +189,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 			sendTelemetryEvent(
 				Telemetry.KernelCodeCompletion,
 				measures,
-				properties,
+				properties
 			);
 			return [];
 		}
@@ -202,7 +202,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 			this.kernel.session.kernel.requestComplete({
 				code,
 				cursor_pos,
-			}),
+			})
 		);
 		traceVerbose(`Jupyter completion time: ${stopWatch.elapsedTime}`);
 		properties.cancelled = token.isCancellationRequested;
@@ -220,7 +220,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 			sendTelemetryEvent(
 				Telemetry.KernelCodeCompletion,
 				measures,
-				properties,
+				properties
 			);
 			return [];
 		}
@@ -240,7 +240,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletion,
 			measures,
-			properties,
+			properties
 		);
 
 		// Check if we have more information about the completion items & whether its valid.
@@ -254,14 +254,14 @@ export class NotebookCellSpecificKernelCompletionProvider
 		};
 		const range = new Range(
 			document.positionAt(result.cursor.start),
-			document.positionAt(result.cursor.end),
+			document.positionAt(result.cursor.end)
 		);
 
 		if (
 			Array.isArray(experimentMatches) &&
 			experimentMatches.length >= result.matches.length &&
 			experimentMatches.every(
-				(item) => item && typeof item.text === "string",
+				(item) => item && typeof item.text === "string"
 			)
 		) {
 			// This works for Julia and Python kernels, haven't tested others.
@@ -279,7 +279,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 				) {
 					completionItem.range = new Range(
 						document.positionAt(item.start),
-						document.positionAt(item.end),
+						document.positionAt(item.end)
 					);
 				} else {
 					completionItem.range = range;
@@ -306,7 +306,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 	 */
 	async resolveCompletionItem(
 		item: CompletionItem,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<CompletionItem> {
 		if (!item.range || !this.kernel.session?.kernel) {
 			// We always set a range in the completion item we send.
@@ -329,7 +329,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 			this.monacoLanguage,
 			document,
 			position,
-			this.toDispose,
+			this.toDispose
 		);
 	}
 }
@@ -348,12 +348,12 @@ class KernelSpecificCompletionProvider
 	>();
 	private completionProvider?: IDisposable;
 	private readonly monacoLanguage = getKernelLanguageAsMonacoLanguage(
-		this.kernel,
+		this.kernel
 	);
 	private readonly toDispose = this._register(new DisposableStore());
 	constructor(
 		private readonly kernel: IKernel,
-		private readonly notebookEditorProvider: INotebookEditorProvider,
+		private readonly notebookEditorProvider: INotebookEditorProvider
 	) {
 		super();
 		this.registerCompletionProvider();
@@ -370,7 +370,7 @@ class KernelSpecificCompletionProvider
 				}
 				if (
 					!e.affectsConfiguration(
-						"jupyter.completionTriggerCharacters",
+						"jupyter.completionTriggerCharacters"
 					)
 				) {
 					return;
@@ -378,7 +378,7 @@ class KernelSpecificCompletionProvider
 				this.completionProvider?.dispose();
 				this.completionProvider = undefined;
 				this.registerCompletionProvider();
-			}),
+			})
 		);
 	}
 	private registerCompletionProvider() {
@@ -394,13 +394,13 @@ class KernelSpecificCompletionProvider
 
 		traceInfo(
 			`Registering Kernel Completion Provider from kernel ${getDisplayNameOrNameOfKernelConnection(
-				this.kernel.kernelConnectionMetadata,
-			)} for language ${this.monacoLanguage}`,
+				this.kernel.kernelConnectionMetadata
+			)} for language ${this.monacoLanguage}`
 		);
 		this.completionProvider = languages.registerCompletionItemProvider(
 			this.monacoLanguage,
 			this,
-			...triggerCharacters,
+			...triggerCharacters
 		);
 		return;
 	}
@@ -412,11 +412,11 @@ class KernelSpecificCompletionProvider
 		document: TextDocument,
 		position: Position,
 		token: CancellationToken,
-		_context: CompletionContext,
+		_context: CompletionContext
 	): Promise<CompletionItem[]> {
 		if (
 			this.notebookEditorProvider.findAssociatedNotebookDocument(
-				document.uri,
+				document.uri
 			) !== this.kernel.notebook
 		) {
 			return [];
@@ -424,13 +424,13 @@ class KernelSpecificCompletionProvider
 		let provider = this.cellCompletionProviders.get(document);
 		if (!provider) {
 			const kernelId = await getTelemetrySafeHashedString(
-				this.kernel.kernelConnectionMetadata.id,
+				this.kernel.kernelConnectionMetadata.id
 			);
 			provider = new NotebookCellSpecificKernelCompletionProvider(
 				kernelId,
 				this.kernel,
 				this.monacoLanguage,
-				this.toDispose,
+				this.toDispose
 			);
 			this.cellCompletionProviders.set(document, provider);
 		}
@@ -438,14 +438,14 @@ class KernelSpecificCompletionProvider
 			.provideCompletionItems(document, position, token, _context)
 			.then((items) => {
 				items.forEach((item) =>
-					this.completionItemsSent.set(item, provider!),
+					this.completionItemsSent.set(item, provider!)
 				);
 				return items;
 			});
 	}
 	async resolveCompletionItem(
 		item: CompletionItem,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<CompletionItem> {
 		const provider = this.completionItemsSent.get(item);
 		return provider ? provider.resolveCompletionItem(item, token) : item;
@@ -465,9 +465,9 @@ export class NonPythonKernelCompletionProvider
 		KernelSpecificCompletionProvider
 	>();
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        super();
-        disposables.push(this);
-    }
+		super();
+		disposables.push(this);
+	}
 	public activate(): void {
 		const kernelProvider =
 			ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
@@ -475,7 +475,7 @@ export class NonPythonKernelCompletionProvider
 			kernelProvider.onDidStartKernel(async (e) => {
 				const experiment =
 					ServiceContainer.instance.get<IExperimentService>(
-						IExperimentService,
+						IExperimentService
 					);
 				if (!experiment.inExperiment(Experiments.KernelCompletions)) {
 					return;
@@ -492,18 +492,18 @@ export class NonPythonKernelCompletionProvider
 				}
 				const notebookProvider =
 					ServiceContainer.instance.get<INotebookEditorProvider>(
-						INotebookEditorProvider,
+						INotebookEditorProvider
 					);
 				const completionProvider = this._register(
-					new KernelSpecificCompletionProvider(e, notebookProvider),
+					new KernelSpecificCompletionProvider(e, notebookProvider)
 				);
 				this.kernelCompletionProviders.set(e, completionProvider);
-			}),
+			})
 		);
 		this._register(
 			kernelProvider.onDidDisposeKernel((e) => {
 				this.kernelCompletionProviders.get(e)?.dispose();
-			}),
+			})
 		);
 	}
 }
@@ -580,21 +580,21 @@ function logHowToEnableKernelCompletion(kernel: IKernel) {
 			l10n.t(
 				`Kernel completions not enabled for '{0}'. \nTo enable Kernel completion for this language please add the following setting \njupyter.completionTriggerCharacters = {1}: [<List of characters that will trigger completions>]}. \nFor more information please see https://aka.ms/vscodeJupyterCompletion`,
 				getDisplayNameOrNameOfKernelConnection(
-					kernel.kernelConnectionMetadata,
+					kernel.kernelConnectionMetadata
 				),
-				`{${kernelLanguage}`,
-			),
+				`{${kernelLanguage}`
+			)
 		);
 	} else {
 		traceWarning(
 			l10n.t(
 				`Kernel completions not enabled for '{0}'. \nTo enable Kernel completion for this language please add the following setting \njupyter.completionTriggerCharacters = {1}: [<List of characters that will trigger completions>]}. \n or the following: \njupyter.completionTriggerCharacters = {2}: [<List of characters that will trigger completions>]}. \nFor more information please see https://aka.ms/vscodeJupyterCompletion`,
 				getDisplayNameOrNameOfKernelConnection(
-					kernel.kernelConnectionMetadata,
+					kernel.kernelConnectionMetadata
 				),
 				`{${kernelLanguage}`,
-				`{${monacoLanguage}`,
-			),
+				`{${monacoLanguage}`
+			)
 		);
 	}
 }

@@ -22,13 +22,13 @@ import { ServiceContainer } from "../../platform/ioc/container";
 @injectable()
 export class ExportUtil extends ExportUtilBase {
 	constructor(@inject(IFileSystemNode) private fs: IFileSystemNode) {
-        super();
-    }
+		super();
+	}
 
 	override async getTargetFile(
 		format: ExportFormat,
 		source: Uri,
-		defaultFileName?: string | undefined,
+		defaultFileName?: string | undefined
 	): Promise<Uri | undefined> {
 		let target;
 
@@ -36,11 +36,11 @@ export class ExportUtil extends ExportUtilBase {
 			target = await new ExportDialog().showDialog(
 				format,
 				source,
-				defaultFileName,
+				defaultFileName
 			);
 		} else {
 			target = Uri.file(
-				(await this.fs.createTemporaryLocalFile(".py")).filePath,
+				(await this.fs.createTemporaryLocalFile(".py")).filePath
 			);
 		}
 
@@ -78,7 +78,7 @@ export class ExportUtilNode {
 	public async makeFileInDirectory(
 		contents: string,
 		fileName: string,
-		dirPath: string,
+		dirPath: string
 	): Promise<string> {
 		const newFilePath = path.join(dirPath, fileName);
 		const fs =

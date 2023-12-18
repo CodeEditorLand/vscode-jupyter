@@ -39,26 +39,26 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 		onStatusChanged = new EventEmitter<Status>();
 		when(kernel.onStatusChanged).thenReturn(onStatusChanged.event);
 		when(kernel.kernelConnectionMetadata).thenReturn(
-			instance(kernelConnectionMetadata),
+			instance(kernelConnectionMetadata)
 		);
 		onDidChangeSelectedNotebooks = new EventEmitter<{
 			readonly notebook: NotebookDocument;
 			readonly selected: boolean;
 		}>();
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
 		).thenReturn(onDidCloseNotebookDocument.event);
 		when(controller.onDidChangeSelectedNotebooks).thenReturn(
-			onDidChangeSelectedNotebooks.event,
+			onDidChangeSelectedNotebooks.event
 		);
 		when(controller.createNotebookExecution(anything())).thenReturn(
-			instance(execution),
+			instance(execution)
 		);
 
 		indicator = new RemoteKernelReconnectBusyIndicator(
 			instance(kernel),
 			instance(controller),
-			instance(notebook),
+			instance(notebook)
 		);
 	});
 	teardown(() => {
@@ -68,7 +68,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 	test("Not busy for Local Kernel Specs", async () => {
 		when(kernel.status).thenReturn("busy");
 		when(kernelConnectionMetadata.kind).thenReturn(
-			"startUsingLocalKernelSpec",
+			"startUsingLocalKernelSpec"
 		);
 
 		indicator.initialize();
@@ -77,7 +77,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 	});
 	test("Not busy for Local Python Envs", async () => {
 		when(kernelConnectionMetadata.kind).thenReturn(
-			"startUsingPythonInterpreter",
+			"startUsingPythonInterpreter"
 		);
 
 		indicator.initialize();
@@ -86,7 +86,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 	});
 	test("Not busy for Local Remote Kernel Specs", async () => {
 		when(kernelConnectionMetadata.kind).thenReturn(
-			"startUsingRemoteKernelSpec",
+			"startUsingRemoteKernelSpec"
 		);
 
 		indicator.initialize();
@@ -96,7 +96,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 	test("Not busy for Live Remote Kernel", async () => {
 		when(kernel.status).thenReturn("idle");
 		when(kernelConnectionMetadata.kind).thenReturn(
-			"connectToLiveRemoteKernel",
+			"connectToLiveRemoteKernel"
 		);
 
 		indicator.initialize();
@@ -108,7 +108,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 			test("Busy for Remote Kernel", async () => {
 				when(kernel.status).thenReturn(status);
 				when(kernelConnectionMetadata.kind).thenReturn(
-					"connectToLiveRemoteKernel",
+					"connectToLiveRemoteKernel"
 				);
 
 				indicator.initialize();
@@ -119,7 +119,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 			test("Dispose indicator when notebook is closed", async () => {
 				when(kernel.status).thenReturn(status);
 				when(kernelConnectionMetadata.kind).thenReturn(
-					"connectToLiveRemoteKernel",
+					"connectToLiveRemoteKernel"
 				);
 
 				indicator.initialize();
@@ -134,7 +134,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 			test("Do not dispose indicator when some random notebook is closed", async () => {
 				when(kernel.status).thenReturn(status);
 				when(kernelConnectionMetadata.kind).thenReturn(
-					"connectToLiveRemoteKernel",
+					"connectToLiveRemoteKernel"
 				);
 
 				indicator.initialize();
@@ -143,7 +143,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 				verify(execution.start()).once();
 
 				onDidCloseNotebookDocument.fire(
-					instance(mock<NotebookDocument>()),
+					instance(mock<NotebookDocument>())
 				);
 
 				verify(execution.end()).never();
@@ -151,7 +151,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 			test("Dispose indicator when controller is unselected", async () => {
 				when(kernel.status).thenReturn(status);
 				when(kernelConnectionMetadata.kind).thenReturn(
-					"connectToLiveRemoteKernel",
+					"connectToLiveRemoteKernel"
 				);
 
 				indicator.initialize();
@@ -169,7 +169,7 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 			test("Do not dispose indicator when a kernel is selected again for the same notebook", async () => {
 				when(kernel.status).thenReturn(status);
 				when(kernelConnectionMetadata.kind).thenReturn(
-					"connectToLiveRemoteKernel",
+					"connectToLiveRemoteKernel"
 				);
 
 				indicator.initialize();
@@ -198,13 +198,13 @@ suite("Remote Kernel Reconnect Busy Indicator", () => {
 				test(`Dispose indicator if jupyter kernel status changes to a valid status = ${validStatus}`, async () => {
 					when(kernel.status).thenReturn(status);
 					when(kernelConnectionMetadata.kind).thenReturn(
-						"connectToLiveRemoteKernel",
+						"connectToLiveRemoteKernel"
 					);
 
 					indicator.initialize();
 
 					verify(
-						controller.createNotebookExecution(anything()),
+						controller.createNotebookExecution(anything())
 					).once();
 					verify(execution.start()).once();
 

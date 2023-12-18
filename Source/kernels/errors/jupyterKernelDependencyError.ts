@@ -21,16 +21,14 @@ import { BaseKernelError } from "./types";
 export class JupyterKernelDependencyError extends BaseKernelError {
 	constructor(
 		public reason: KernelInterpreterDependencyResponse,
-		kernelConnectionMetadata: KernelConnectionMetadata,
+		kernelConnectionMetadata: KernelConnectionMetadata
 	) {
 		super(
 			"noipykernel",
 			DataScience.kernelInvalid(
-				getDisplayNameOrNameOfKernelConnection(
-					kernelConnectionMetadata,
-				),
+				getDisplayNameOrNameOfKernelConnection(kernelConnectionMetadata)
 			),
-			kernelConnectionMetadata,
+			kernelConnectionMetadata
 		);
 	}
 }

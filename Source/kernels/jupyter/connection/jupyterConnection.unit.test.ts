@@ -75,7 +75,7 @@ suite("Jupyter Connection", async () => {
 			jupyterServer,
 		] as any);
 		when(
-			serverProvier.resolveJupyterServer(anything(), anything()),
+			serverProvier.resolveJupyterServer(anything(), anything())
 		).thenResolve(jupyterServer as any);
 		when(collection.id).thenReturn(provider.id);
 		when(collection.extensionId).thenReturn(provider.extensionId);
@@ -88,11 +88,11 @@ suite("Jupyter Connection", async () => {
 			instance(configService),
 			instance(errorHandler),
 			instance(requestAgentCreator),
-			instance(requestCreator),
+			instance(requestCreator)
 		);
 
 		when(configService.getSettings(anything())).thenReturn(
-			instance(mock<IWatchableJupyterSettings>()),
+			instance(mock<IWatchableJupyterSettings>())
 		);
 		sinon
 			.stub(JupyterLabHelper, "create")
@@ -115,8 +115,8 @@ suite("Jupyter Connection", async () => {
 		verify(
 			registrationPicker.activateThirdPartyExtensionAndFindCollection(
 				provider.extensionId,
-				provider.id,
-			),
+				provider.id
+			)
 		).never();
 	});
 	test("Validation will result in fetching kernels and kernelSpecs (Uri info fetched from provider)", async () => {
@@ -126,8 +126,8 @@ suite("Jupyter Connection", async () => {
 		when(
 			registrationPicker.activateThirdPartyExtensionAndFindCollection(
 				provider.extensionId,
-				provider.id,
-			),
+				provider.id
+			)
 		).thenResolve(collection);
 
 		await jupyterConnection.validateRemoteUri(provider);
@@ -144,8 +144,8 @@ suite("Jupyter Connection", async () => {
 		when(
 			registrationPicker.activateThirdPartyExtensionAndFindCollection(
 				provider.extensionId,
-				provider.id,
-			),
+				provider.id
+			)
 		).thenReject(new Error("Kaboom"));
 
 		await assert.isRejected(jupyterConnection.validateRemoteUri(provider));
@@ -159,12 +159,12 @@ suite("Jupyter Connection", async () => {
 		when(sessionManager.dispose()).thenResolve();
 		when(sessionManager.getKernelSpecs()).thenResolve([]);
 		when(sessionManager.getRunningKernels()).thenReject(
-			new Error("Kaboom kernels failure"),
+			new Error("Kaboom kernels failure")
 		);
 
 		await assert.isRejected(
 			jupyterConnection.validateRemoteUri(provider, server),
-			"Kaboom kernels failure",
+			"Kaboom kernels failure"
 		);
 
 		verify(sessionManager.getKernelSpecs()).once();
@@ -174,13 +174,13 @@ suite("Jupyter Connection", async () => {
 	test("Validation will fail if fetching kernelspecs fail", async () => {
 		when(sessionManager.dispose()).thenResolve();
 		when(sessionManager.getKernelSpecs()).thenReject(
-			new Error("Kaboom kernelspec failure"),
+			new Error("Kaboom kernelspec failure")
 		);
 		when(sessionManager.getRunningKernels()).thenResolve([]);
 
 		await assert.isRejected(
 			jupyterConnection.validateRemoteUri(provider, server),
-			"Kaboom kernelspec failure",
+			"Kaboom kernelspec failure"
 		);
 
 		verify(sessionManager.getKernelSpecs()).once();
@@ -198,7 +198,7 @@ suite("Jupyter Connection", async () => {
 			},
 		};
 		when(sessionManager.getKernelSpecs()).thenReject(
-			new Error("Kaboom kernelspec failure"),
+			new Error("Kaboom kernelspec failure")
 		);
 		when(sessionManager.getRunningKernels()).thenResolve([]);
 
@@ -209,12 +209,12 @@ suite("Jupyter Connection", async () => {
 		assert.strictEqual(
 			connection.baseUrl,
 			jupyterServer.connectionInformation!.baseUrl.toString(false),
-			"Base url is incorrect",
+			"Base url is incorrect"
 		);
 		assert.deepEqual(
 			connection.getAuthHeader!(),
 			jupyterServer.connectionInformation?.headers,
-			"Auth Headers are incorrect",
+			"Auth Headers are incorrect"
 		);
 	});
 	test("Ensure there is no Auth header", async () => {
@@ -224,7 +224,7 @@ suite("Jupyter Connection", async () => {
 			token: "1234",
 		};
 		when(sessionManager.getKernelSpecs()).thenReject(
-			new Error("Kaboom kernelspec failure"),
+			new Error("Kaboom kernelspec failure")
 		);
 		when(sessionManager.getRunningKernels()).thenResolve([]);
 
@@ -235,11 +235,11 @@ suite("Jupyter Connection", async () => {
 		assert.strictEqual(
 			connection.baseUrl,
 			Uri.parse("http://localhost:8888").toString(false),
-			"Base url is incorrect",
+			"Base url is incorrect"
 		);
 		assert.isUndefined(
 			connection.getAuthHeader,
-			"There should be no auth header",
+			"There should be no auth header"
 		);
 	});
 });

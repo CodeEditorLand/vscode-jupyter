@@ -42,7 +42,7 @@ export class RemoteIPyWidgetScriptManager
 	constructor(
 		kernel: IKernel,
 		private readonly context: IExtensionContext,
-		private readonly fs: IFileSystem,
+		private readonly fs: IFileSystem
 	) {
 		super(kernel);
 		if (
@@ -52,7 +52,7 @@ export class RemoteIPyWidgetScriptManager
 				"startUsingRemoteKernelSpec"
 		) {
 			throw new Error(
-				"Invalid usage, can only be used for remote kernels",
+				"Invalid usage, can only be used for remote kernels"
 			);
 		}
 		this.kernelConnection = kernel.kernelConnectionMetadata;
@@ -80,8 +80,8 @@ export class RemoteIPyWidgetScriptManager
 				Uri.joinPath(
 					this.context.extensionUri,
 					"pythonFiles",
-					"printJupyWidgetEntryPoints.py",
-				),
+					"printJupyWidgetEntryPoints.py"
+				)
 			);
 		}
 		return this.code!;
@@ -96,7 +96,7 @@ export class RemoteIPyWidgetScriptManager
 		const code = await this.getCodeToExecute();
 		if (!this.kernel.session?.kernel) {
 			traceInfoIfCI(
-				"No Kernel session to get list of widget entry points",
+				"No Kernel session to get list of widget entry points"
 			);
 			return [];
 		}
@@ -106,7 +106,7 @@ export class RemoteIPyWidgetScriptManager
 				traceErrors: true,
 				traceErrorsMessage:
 					"Failed to get widget entry points from remote kernel",
-			}),
+			})
 		);
 		// A bug was identified in our code that resulted in a deadlock.
 		// While the widgets are loading this code gets executed, however the kernel execution is blocked waiting for kernel messages to be completed on the UI side
@@ -127,14 +127,14 @@ export class RemoteIPyWidgetScriptManager
 		const outputs = await Promise.race(promises);
 		if (outputs.length === 0) {
 			traceInfoIfCI(
-				"Unable to get widget entry points, no outputs after running the code",
+				"Unable to get widget entry points, no outputs after running the code"
 			);
 			return [];
 		}
 		const output = outputs[0] as nbformat.IStream;
 		if (output.output_type !== "stream" || output.name !== "stdout") {
 			traceInfoIfCI(
-				"Unable to get widget entry points, no stream/stdout outputs after running the code",
+				"Unable to get widget entry points, no stream/stdout outputs after running the code"
 			);
 			return [];
 		}
@@ -150,20 +150,20 @@ export class RemoteIPyWidgetScriptManager
 				.map((item) =>
 					trimQuotes(item.trim())
 						.replace(/\\\\/g, "/")
-						.replace(/\\/g, "/"),
+						.replace(/\\/g, "/")
 				);
 			return items.map((item) => ({
 				uri: Uri.joinPath(
 					Uri.parse(this.kernelConnection.baseUrl),
 					"nbextensions",
-					item,
+					item
 				),
 				widgetFolderName: path.dirname(item),
 			}));
 		} catch (ex) {
 			traceError(
 				`Failed to parse output to get list of IPyWidgets, output is ${output.text}`,
-				ex,
+				ex
 			);
 			return [];
 		}
@@ -177,7 +177,7 @@ export class RemoteIPyWidgetScriptManager
 		} else {
 			traceError(`Error downloading from ${uri}: ${response.statusText}`);
 			throw new Error(
-				`Error downloading from ${uri}: ${response.statusText}`,
+				`Error downloading from ${uri}: ${response.statusText}`
 			);
 		}
 	}

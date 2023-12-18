@@ -67,15 +67,16 @@ export class KernelVariables implements IJupyterVariables {
 	private refreshEventEmitter = new EventEmitter<void>();
 
 	constructor(
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IKernelVariableRequester)
-        @named(Identifiers.PYTHON_VARIABLES_REQUESTER)
-        pythonVariableRequester: IKernelVariableRequester,
-        @inject(IDisposableRegistry) private disposables: IDisposableRegistry,
-        @inject(IKernelProvider) private kernelProvider: IKernelProvider
-    ) {
-        this.variableRequesters.set(PYTHON_LANGUAGE, pythonVariableRequester);
-    }
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IKernelVariableRequester)
+		@named(Identifiers.PYTHON_VARIABLES_REQUESTER)
+		pythonVariableRequester: IKernelVariableRequester,
+		@inject(IDisposableRegistry) private disposables: IDisposableRegistry,
+		@inject(IKernelProvider) private kernelProvider: IKernelProvider
+	) {
+		this.variableRequesters.set(PYTHON_LANGUAGE, pythonVariableRequester);
+	}
 
 	public get refreshRequired(): Event<void> {
 		return this.refreshEventEmitter.event;
@@ -84,7 +85,7 @@ export class KernelVariables implements IJupyterVariables {
 	// IJupyterVariables implementation
 	public async getVariables(
 		request: IJupyterVariablesRequest,
-		kernel: IKernel,
+		kernel: IKernel
 	): Promise<IJupyterVariablesResponse> {
 		// Run the language appropriate variable fetch
 		return this.getVariablesBasedOnKernel(kernel, request);
@@ -93,7 +94,7 @@ export class KernelVariables implements IJupyterVariables {
 	public async getMatchingVariable(
 		name: string,
 		kernel: IKernel,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<IJupyterVariable | undefined> {
 		// See if in the cache
 		const cache = this.cachedVariables.get(kernel.uri.toString());
@@ -103,7 +104,7 @@ export class KernelVariables implements IJupyterVariables {
 				match = await this.getVariableValueFromKernel(
 					match,
 					kernel,
-					token,
+					token
 				);
 			}
 			return match;
@@ -111,7 +112,7 @@ export class KernelVariables implements IJupyterVariables {
 			// No items in the cache yet, just ask for the names
 			const variables = await this.getVariableNamesAndTypesFromKernel(
 				kernel,
-				token,
+				token
 			);
 			if (variables) {
 				const matchName = variables.find((v) => v.name === name);
@@ -128,7 +129,7 @@ export class KernelVariables implements IJupyterVariables {
 							truncated: true,
 						},
 						kernel,
-						token,
+						token
 					);
 				}
 			}
@@ -139,7 +140,7 @@ export class KernelVariables implements IJupyterVariables {
 		targetVariable: IJupyterVariable,
 		kernel?: IKernel,
 		sliceExpression?: string,
-		isRefresh?: boolean,
+		isRefresh?: boolean
 	): Promise<IJupyterVariable> {
 		if (!kernel) {
 			return targetVariable;
@@ -153,7 +154,7 @@ export class KernelVariables implements IJupyterVariables {
 			if (isRefresh) {
 				targetVariable = await this.getFullVariable(
 					targetVariable,
-					kernel,
+					kernel
 				);
 			}
 
@@ -164,7 +165,7 @@ export class KernelVariables implements IJupyterVariables {
 			return variableRequester.getDataFrameInfo(
 				targetVariable,
 				kernel,
-				expression,
+				expression
 			);
 		}
 		return targetVariable;
@@ -175,7 +176,7 @@ export class KernelVariables implements IJupyterVariables {
 		start: number,
 		end: number,
 		kernel: IKernel,
-		sliceExpression?: string,
+		sliceExpression?: string
 	): Promise<{ data: Record<string, unknown>[] }> {
 		const language =
 			getKernelConnectionLanguage(kernel?.kernelConnectionMetadata) ||
@@ -190,7 +191,7 @@ export class KernelVariables implements IJupyterVariables {
 				start,
 				end,
 				kernel,
-				expression,
+				expression
 			);
 		}
 		return { data: [] };
@@ -199,7 +200,7 @@ export class KernelVariables implements IJupyterVariables {
 	public async getFullVariable(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<IJupyterVariable> {
 		const languageId =
 			getKernelConnectionLanguage(kernel?.kernelConnectionMetadata) ||
@@ -209,7 +210,7 @@ export class KernelVariables implements IJupyterVariables {
 			return variableRequester.getFullVariable(
 				targetVariable,
 				kernel,
-				token,
+				token
 			);
 		}
 		return targetVariable;
@@ -217,7 +218,7 @@ export class KernelVariables implements IJupyterVariables {
 
 	private async getVariablesBasedOnKernel(
 		kernel: IKernel,
-		request: IJupyterVariablesRequest,
+		request: IJupyterVariablesRequest
 	): Promise<IJupyterVariablesResponse> {
 		// See if we already have the name list
 		let list = this.cachedVariables.get(kernel.uri.toString());
@@ -272,7 +273,7 @@ export class KernelVariables implements IJupyterVariables {
 			const sortColumn = request.sortColumn as SortableColumn;
 			const comparer = (
 				a: IJupyterVariable,
-				b: IJupyterVariable,
+				b: IJupyterVariable
 			): number => {
 				// In case it is undefined or null
 				const aColumn = a[sortColumn] ? a[sortColumn] : "";
@@ -298,6 +299,7 @@ export class KernelVariables implements IJupyterVariables {
 			for (
 				let i = startPos;
 				i < startPos + chunkSize && i < list.variables.length;
+
 			) {
 				if (
 					exclusionList &&
@@ -313,8 +315,8 @@ export class KernelVariables implements IJupyterVariables {
 						? list.variables[i]
 						: await this.getVariableValueFromKernel(
 								list.variables[i],
-								kernel,
-						  );
+								kernel
+							);
 
 				list.variables[i] = fullVariable;
 				result.pageResponse.push(fullVariable);
@@ -334,12 +336,12 @@ export class KernelVariables implements IJupyterVariables {
 	public async getVariableProperties(
 		word: string,
 		kernel: IKernel,
-		cancelToken: CancellationToken | undefined,
+		cancelToken: CancellationToken | undefined
 	): Promise<{ [attributeName: string]: string }> {
 		const matchingVariable = await this.getMatchingVariable(
 			word,
 			kernel,
-			cancelToken,
+			cancelToken
 		);
 		const languageId =
 			getKernelConnectionLanguage(kernel.kernelConnectionMetadata) ||
@@ -350,7 +352,7 @@ export class KernelVariables implements IJupyterVariables {
 			return variableRequester.getVariableProperties(
 				word,
 				cancelToken,
-				matchingVariable,
+				matchingVariable
 			);
 		}
 
@@ -359,7 +361,7 @@ export class KernelVariables implements IJupyterVariables {
 
 	private async getVariableNamesAndTypesFromKernel(
 		kernel: IKernel,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<IJupyterVariable[]> {
 		// Get our query and parser
 		const languageId =
@@ -369,7 +371,7 @@ export class KernelVariables implements IJupyterVariables {
 		if (variableRequester) {
 			return variableRequester.getVariableNamesAndTypesFromKernel(
 				kernel,
-				token,
+				token
 			);
 		}
 
@@ -380,7 +382,7 @@ export class KernelVariables implements IJupyterVariables {
 		kernelConnection: Kernel.IKernelConnection,
 		code: string,
 		offsetInCode = 0,
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<JSONObject> {
 		// Create a deferred that will fire when the request completes
 		const deferred = createDeferred<JSONObject>();
@@ -410,8 +412,8 @@ export class KernelVariables implements IJupyterVariables {
 		if (cancelToken) {
 			this.disposables.push(
 				cancelToken.onCancellationRequested(() =>
-					deferred.reject(new CancellationError()),
-				),
+					deferred.reject(new CancellationError())
+				)
 			);
 		}
 
@@ -421,7 +423,7 @@ export class KernelVariables implements IJupyterVariables {
 	private async getVariableValueFromKernel(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<IJupyterVariable> {
 		let result = { ...targetVariable };
 		if (!kernel.disposed && kernel.session?.kernel) {
@@ -429,7 +431,7 @@ export class KernelVariables implements IJupyterVariables {
 				kernel.session.kernel,
 				targetVariable.name,
 				0,
-				token,
+				token
 			);
 
 			// Should be a text/plain inside of it (at least IPython does this)
@@ -451,7 +453,7 @@ export class KernelVariables implements IJupyterVariables {
 					DocStringRegex,
 				].reduce(
 					(value, regex) => value || regex.exec(text)?.[1] || "",
-					"",
+					""
 				);
 
 				if (count) {

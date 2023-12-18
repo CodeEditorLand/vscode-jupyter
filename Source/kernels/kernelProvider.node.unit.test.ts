@@ -67,7 +67,7 @@ suite("Jupyter Session", () => {
 			workspaceMemento = mock<Memento>();
 			when(workspaceMemento.update(anything(), anything())).thenResolve();
 			when(workspaceMemento.get(anything(), anything())).thenCall(
-				(_: unknown, defaultValue: unknown) => defaultValue,
+				(_: unknown, defaultValue: unknown) => defaultValue
 			);
 		});
 		function createKernelProvider() {
@@ -83,7 +83,7 @@ suite("Jupyter Session", () => {
 				instance(jupyterServerUriStorage),
 				[],
 				instance(registry),
-				instance(workspaceMemento),
+				instance(workspaceMemento)
 			);
 		}
 		function create3rdPartyKernelProvider() {
@@ -96,14 +96,14 @@ suite("Jupyter Session", () => {
 				instance(sessionCreator),
 				instance(configService),
 				instance(registry),
-				instance(workspaceMemento),
+				instance(workspaceMemento)
 			);
 		}
 		teardown(async () => {
 			sinon.restore();
 			disposables = dispose(disposables);
 			await Promise.all(
-				asyncDisposables.map((item) => item.dispose().catch(noop)),
+				asyncDisposables.map((item) => item.dispose().catch(noop))
 			);
 			asyncDisposables.length = 0;
 		});
@@ -114,31 +114,31 @@ suite("Jupyter Session", () => {
 			const kernelCreated = createEventHandler(
 				kernelProvider,
 				"onDidCreateKernel",
-				disposables,
+				disposables
 			);
 			const kernelStarted = createEventHandler(
 				kernelProvider,
 				"onDidStartKernel",
-				disposables,
+				disposables
 			);
 			const kernelDisposed = createEventHandler(
 				kernelProvider,
 				"onDidDisposeKernel",
-				disposables,
+				disposables
 			);
 			const kernelRestarted = createEventHandler(
 				kernelProvider,
 				"onDidRestartKernel",
-				disposables,
+				disposables
 			);
 			const kernelStatusChanged = createEventHandler(
 				kernelProvider,
 				"onKernelStatusChanged",
-				disposables,
+				disposables
 			);
 			const notebook = new TestNotebookDocument(
 				undefined,
-				"jupyter-notebook",
+				"jupyter-notebook"
 			);
 			const onStarted = new EventEmitter<void>();
 			const onStatusChanged = new EventEmitter<void>();
@@ -189,44 +189,44 @@ suite("Jupyter Session", () => {
 
 			assert.isTrue(
 				kernelCreated.fired,
-				"IKernelProvider.onDidCreateKernel not fired",
+				"IKernelProvider.onDidCreateKernel not fired"
 			);
 			assert.isFalse(
 				kernelStarted.fired,
-				"IKernelProvider.onDidStartKernel should not be fired",
+				"IKernelProvider.onDidStartKernel should not be fired"
 			);
 			assert.isFalse(
 				kernelStatusChanged.fired,
-				"IKernelProvider.onKernelStatusChanged should not be fired",
+				"IKernelProvider.onKernelStatusChanged should not be fired"
 			);
 			assert.isFalse(
 				kernelRestarted.fired,
-				"IKernelProvider.onDidRestartKernel should not have fired",
+				"IKernelProvider.onDidRestartKernel should not have fired"
 			);
 			assert.isFalse(
 				kernelDisposed.fired,
-				"IKernelProvider.onDidDisposeKernel should not have fired",
+				"IKernelProvider.onDidDisposeKernel should not have fired"
 			);
 
 			onStarted.fire();
 			assert.isTrue(
 				kernelStarted.fired,
-				"IKernelProvider.onDidStartKernel not fired",
+				"IKernelProvider.onDidStartKernel not fired"
 			);
 			onStatusChanged.fire();
 			assert.isTrue(
 				kernelStatusChanged.fired,
-				"IKernelProvider.onKernelStatusChanged not fired",
+				"IKernelProvider.onKernelStatusChanged not fired"
 			);
 			onRestartedEvent.fire();
 			assert.isTrue(
 				kernelRestarted.fired,
-				"IKernelProvider.onKernelRestarted not fired",
+				"IKernelProvider.onKernelRestarted not fired"
 			);
 			onDisposedEvent.fire();
 			assert.isTrue(
 				kernelDisposed.fired,
-				"IKernelProvider.onDisposedEvent not fired",
+				"IKernelProvider.onDisposedEvent not fired"
 			);
 		}
 		test("Kernel Events", () => testKernelProviderEvents(false));
@@ -264,7 +264,7 @@ suite("Jupyter Session", () => {
 					instance(sampleNotebook1),
 					instance(sampleNotebook2),
 					instance(sampleNotebook3),
-				],
+				]
 			);
 
 			onDidCloseNotebookDocument = new EventEmitter<NotebookDocument>();
@@ -280,31 +280,31 @@ suite("Jupyter Session", () => {
 			disposables.push(onDidChangeNotebookCellExecutionState);
 			when(
 				mockedVSCodeNamespaces.notebooks
-					.onDidChangeNotebookCellExecutionState,
+					.onDidChangeNotebookCellExecutionState
 			).thenReturn(onDidChangeNotebookCellExecutionState.event);
 			when(
-				mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
+				mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
 			).thenReturn(onDidCloseNotebookDocument.event);
 			when(
 				mockedVSCodeNamespaces.notebooks
-					.onDidChangeNotebookCellExecutionState,
+					.onDidChangeNotebookCellExecutionState
 			).thenReturn(onDidChangeNotebookCellExecutionState.event);
 			when(configService.getSettings(anything())).thenReturn(
-				instance(configSettings),
+				instance(configSettings)
 			);
 			when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn(
 				[
 					instance(sampleNotebook1),
 					instance(sampleNotebook2),
 					instance(sampleNotebook3),
-				],
+				]
 			);
 			const registry = mock<IStartupCodeProviders>();
 			when(registry.getProviders(anything())).thenReturn([]);
 			const workspaceMemento = mock<Memento>();
 			when(workspaceMemento.update(anything(), anything())).thenResolve();
 			when(workspaceMemento.get(anything(), anything())).thenCall(
-				(_: unknown, defaultValue: unknown) => defaultValue,
+				(_: unknown, defaultValue: unknown) => defaultValue
 			);
 
 			kernelProvider = new KernelProvider(
@@ -316,7 +316,7 @@ suite("Jupyter Session", () => {
 				instance(jupyterServerUriStorage),
 				[],
 				instance(registry),
-				instance(workspaceMemento),
+				instance(workspaceMemento)
 			);
 			thirdPartyKernelProvider = new ThirdPartyKernelProvider(
 				asyncDisposables,
@@ -324,12 +324,12 @@ suite("Jupyter Session", () => {
 				instance(sessionCreator),
 				instance(configService),
 				instance(registry),
-				instance(workspaceMemento),
+				instance(workspaceMemento)
 			);
 		});
 		teardown(async () => {
 			when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn(
-				[],
+				[]
 			);
 			CellOutputDisplayIdTracker.dispose();
 			disposables = dispose(disposables);
@@ -346,66 +346,66 @@ suite("Jupyter Session", () => {
 
 			assert.isUndefined(
 				kernelProvider.get(sampleUri1),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri2),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri3),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 
 			const onKernelCreated = createEventHandler(
 				kernelProvider,
 				"onDidCreateKernel",
-				disposables,
+				disposables
 			);
 			const onKernelDisposed = createEventHandler(
 				kernelProvider,
 				"onDidDisposeKernel",
-				disposables,
+				disposables
 			);
 			const kernel = kernelProvider.getOrCreate(
 				instance(sampleNotebook1),
-				options,
+				options
 			);
 			asyncDisposables.push(kernel);
 
 			assert.equal(
 				kernel.uri,
 				sampleUri1,
-				"Kernel id should match the uri",
+				"Kernel id should match the uri"
 			);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri2),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri3),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.equal(
 				onKernelCreated.count,
 				1,
-				"Should have triggered the event",
+				"Should have triggered the event"
 			);
 			assert.equal(
 				onKernelDisposed.count,
 				0,
-				"Should not have triggered the event",
+				"Should not have triggered the event"
 			);
 			assert.isOk(kernel, "Should be an object");
 			assert.equal(
 				kernel,
 				kernelProvider.get(sampleUri1),
-				"Should return the same instance",
+				"Should return the same instance"
 			);
 			assert.equal(
 				kernel,
 				kernelProvider.getOrCreate(instance(sampleNotebook1), options),
-				"Should return the same instance",
+				"Should return the same instance"
 			);
 
 			await kernel.dispose();
@@ -413,25 +413,25 @@ suite("Jupyter Session", () => {
 			assert.equal(
 				onKernelDisposed.count,
 				1,
-				"Should have triggered the disposed event",
+				"Should have triggered the disposed event"
 			);
 			assert.equal(
 				onKernelDisposed.first,
 				kernel,
-				"Incorrect disposed event arg",
+				"Incorrect disposed event arg"
 			);
 
 			assert.isUndefined(
 				kernelProvider.get(sampleUri1),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri2),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri3),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 		});
 		test("Test creation of kernels for 3rd party", async () => {
@@ -446,30 +446,30 @@ suite("Jupyter Session", () => {
 
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(uri),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri1),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri2),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri3),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 
 			const onKernelCreated = createEventHandler(
 				thirdPartyKernelProvider,
 				"onDidCreateKernel",
-				disposables,
+				disposables
 			);
 			const onKernelDisposed = createEventHandler(
 				thirdPartyKernelProvider,
 				"onDidDisposeKernel",
-				disposables,
+				disposables
 			);
 			const kernel = thirdPartyKernelProvider.getOrCreate(uri, options);
 			asyncDisposables.push(kernel);
@@ -477,32 +477,32 @@ suite("Jupyter Session", () => {
 			assert.equal(kernel.uri, uri, "Kernel id should match the uri");
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri2),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri3),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.equal(
 				onKernelCreated.count,
 				1,
-				"Should have triggered the event",
+				"Should have triggered the event"
 			);
 			assert.equal(
 				onKernelDisposed.count,
 				0,
-				"Should not have triggered the event",
+				"Should not have triggered the event"
 			);
 			assert.isOk(kernel, "Should be an object");
 			assert.equal(
 				kernel,
 				thirdPartyKernelProvider.get(uri),
-				"Should return the same instance",
+				"Should return the same instance"
 			);
 			assert.equal(
 				kernel,
 				thirdPartyKernelProvider.getOrCreate(uri, options),
-				"Should return the same instance",
+				"Should return the same instance"
 			);
 
 			await kernel.dispose();
@@ -510,25 +510,25 @@ suite("Jupyter Session", () => {
 			assert.equal(
 				onKernelDisposed.count,
 				1,
-				"Should have triggered the disposed event",
+				"Should have triggered the disposed event"
 			);
 			assert.equal(
 				onKernelDisposed.first,
 				kernel,
-				"Incorrect disposed event arg",
+				"Incorrect disposed event arg"
 			);
 
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri1),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri2),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 			assert.isUndefined(
 				thirdPartyKernelProvider.get(sampleUri3),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 		});
 		test("When kernel is disposed a new kernel should be returned when calling getOrCreate", async () => {
@@ -543,24 +543,24 @@ suite("Jupyter Session", () => {
 			// Dispose the first kernel
 			const kernel = kernelProvider.getOrCreate(
 				instance(sampleNotebook1),
-				options,
+				options
 			);
 			await kernel.dispose();
 
 			assert.isTrue(kernel.disposed, "Kernel should be disposed");
 			assert.isUndefined(
 				kernelProvider.get(sampleUri1),
-				"Should not return an instance as kernel was disposed",
+				"Should not return an instance as kernel was disposed"
 			);
 			const newKernel = kernelProvider.getOrCreate(
 				instance(sampleNotebook1),
-				options,
+				options
 			);
 			asyncDisposables.push(newKernel);
 			assert.notEqual(
 				kernel,
 				newKernel,
-				"Should return a different instance",
+				"Should return a different instance"
 			);
 		});
 		test("Dispose the kernel when the associated notebook document is closed", async () => {
@@ -574,17 +574,17 @@ suite("Jupyter Session", () => {
 
 			const kernel = kernelProvider.getOrCreate(
 				instance(sampleNotebook1),
-				options,
+				options
 			);
 			assert.isOk(kernel);
 			const onKernelDisposed = createEventHandler(
 				kernelProvider,
 				"onDidDisposeKernel",
-				disposables,
+				disposables
 			);
 			assert.isOk(
 				kernelProvider.get(sampleUri1),
-				"Should return an instance",
+				"Should return an instance"
 			);
 
 			// Close the notebook.
@@ -593,19 +593,19 @@ suite("Jupyter Session", () => {
 			await onKernelDisposed.assertFired(100);
 			assert.isUndefined(
 				kernelProvider.get(sampleUri1),
-				"Should not return an instance",
+				"Should not return an instance"
 			);
 
 			// Calling getOrCreate again will return a whole new instance.
 			const newKernel = kernelProvider.getOrCreate(
 				instance(sampleNotebook1),
-				options,
+				options
 			);
 			asyncDisposables.push(newKernel);
 			assert.notEqual(
 				kernel,
 				newKernel,
-				"Should return a different instance",
+				"Should return a different instance"
 			);
 		});
 	});

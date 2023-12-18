@@ -157,7 +157,7 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		onGridSort?: (
 			sortColumn: string,
-			sortDirection: "ASC" | "DESC" | "NONE",
+			sortDirection: "ASC" | "DESC" | "NONE"
 		) => void;
 
 		/**
@@ -285,7 +285,7 @@ declare namespace AdazzleReactDataGrid {
 
 		getCellActions?: (
 			column: Column<T>,
-			row: T,
+			row: T
 		) => (ActionButton | ActionMenu)[];
 	}
 
@@ -407,7 +407,7 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		(
 			ev: React.SyntheticEvent<any>,
-			args: { rowIdx: number; idx: number; name: string },
+			args: { rowIdx: number; idx: number; name: string }
 		): void;
 	}
 
@@ -631,7 +631,7 @@ declare namespace AdazzleReactDataGridPlugins {
 		onFocus?: () => void;
 		editorDisplayValue?: (
 			column: AdazzleReactDataGrid.ExcelColumn,
-			value: any,
+			value: any
 		) => string;
 	}
 
@@ -697,7 +697,7 @@ declare namespace AdazzleReactDataGridPlugins {
 		export function connect(Menu: any): any;
 		export function ContextMenuLayer(
 			identifier: any,
-			configure?: (props: any) => any,
+			configure?: (props: any) => any
 		): (Component: any) => any;
 	}
 }

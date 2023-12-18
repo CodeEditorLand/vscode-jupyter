@@ -49,8 +49,9 @@ export class PythonEnvironmentQuickPickItemProvider
 	}
 	constructor(
 		@inject(IPythonApiProvider) api: IPythonApiProvider,
-		@inject(IPythonExtensionChecker) extensionChecker: IPythonExtensionChecker,
-		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IPythonExtensionChecker)
+		extensionChecker: IPythonExtensionChecker,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry
 	) {
 		disposables.push(this);
 		this.promiseMonitor.onStateChange(
@@ -59,7 +60,7 @@ export class PythonEnvironmentQuickPickItemProvider
 					? "idle"
 					: "discovering"),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		const initializeApi = () => {
 			const apiPromise = api.getNewApi();
@@ -76,7 +77,7 @@ export class PythonEnvironmentQuickPickItemProvider
 					api.environments.onDidChangeEnvironments(
 						() => this._onDidChange.fire(),
 						this,
-						this.disposables,
+						this.disposables
 					);
 				})
 				.catch((ex) => traceError("Failed to get python api", ex));
@@ -91,7 +92,7 @@ export class PythonEnvironmentQuickPickItemProvider
 					}
 				},
 				this,
-				this.disposables,
+				this.disposables
 			);
 		}
 	}
@@ -116,12 +117,12 @@ export class PythonEnvironmentQuickPickItemProvider
 	 * Returns the same class with the ability to filer environments.
 	 */
 	withFilter(
-		filter: (env: Environment) => boolean,
+		filter: (env: Environment) => boolean
 	): PythonEnvironmentQuickPickItemProvider {
 		return new Proxy(this, {
 			get(
 				target: PythonEnvironmentQuickPickItemProvider,
-				propKey: keyof PythonEnvironmentQuickPickItemProvider,
+				propKey: keyof PythonEnvironmentQuickPickItemProvider
 			) {
 				switch (propKey) {
 					case "items":

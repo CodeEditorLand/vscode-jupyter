@@ -20,10 +20,12 @@ export class ClearJupyterServersCommand
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage,
-        @inject(IJupyterServerProviderRegistry) private readonly registrations: IJupyterServerProviderRegistry,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposable[]
-    ) {}
+		@inject(IJupyterServerUriStorage)
+		private readonly serverUriStorage: IJupyterServerUriStorage,
+		@inject(IJupyterServerProviderRegistry)
+		private readonly registrations: IJupyterServerProviderRegistry,
+		@inject(IDisposableRegistry) private readonly disposables: IDisposable[]
+	) {}
 	public activate() {
 		this.disposables.push(
 			commands.registerCommand(
@@ -35,7 +37,7 @@ export class ClearJupyterServersCommand
 							.filter(
 								(p) =>
 									p.id.startsWith("_builtin") ||
-									p.extensionId === JVSC_EXTENSION_ID,
+									p.extensionId === JVSC_EXTENSION_ID
 							)
 							.map(async (provider) => {
 								if (
@@ -47,27 +49,27 @@ export class ClearJupyterServersCommand
 								const token = new CancellationTokenSource();
 								const servers = await Promise.resolve(
 									provider.serverProvider.provideJupyterServers(
-										token.token,
-									),
+										token.token
+									)
 								);
 								await Promise.all(
 									(servers || []).map((server) =>
 										provider.serverProvider!
 											.removeJupyterServer!(server).catch(
-											noop,
-										),
-									),
+											noop
+										)
+									)
 								);
-							}),
+							})
 					).catch(noop);
 					await commands
 						.executeCommand(
-							"dataScience.ClearUserProviderJupyterServerCache",
+							"dataScience.ClearUserProviderJupyterServerCache"
 						)
 						.then(noop, noop);
 				},
-				this,
-			),
+				this
+			)
 		);
 	}
 }

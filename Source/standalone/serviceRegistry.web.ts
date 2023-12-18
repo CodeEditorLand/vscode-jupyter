@@ -29,56 +29,56 @@ import { ExposeUsedAzMLServerHandles } from "./api/usedAzMLServerHandles";
 export function registerTypes(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	isDevMode: boolean,
+	isDevMode: boolean
 ) {
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GlobalActivation,
+		GlobalActivation
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ActiveEditorContextService,
-	);
-
-	serviceManager.addSingleton<IExtensionSyncActivationService>(
-		IExtensionSyncActivationService,
-		ExportCommandRegistry,
+		ActiveEditorContextService
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ImportTracker,
+		ExportCommandRegistry
+	);
+
+	serviceManager.addSingleton<IExtensionSyncActivationService>(
+		IExtensionSyncActivationService,
+		ImportTracker
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		EagerlyActivateJupyterUriProviders,
+		EagerlyActivateJupyterUriProviders
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		JupyterServerSelectorCommand,
+		JupyterServerSelectorCommand
 	);
 
 	// Activation Manager
 	serviceManager.add<IExtensionActivationManager>(
 		IExtensionActivationManager,
-		ExtensionActivationManager,
+		ExtensionActivationManager
 	);
 	serviceManager.add<INotebookExporter>(INotebookExporter, JupyterExporter);
 
 	// API
 	serviceManager.addSingleton<IExportedKernelServiceFactory>(
 		IExportedKernelServiceFactory,
-		JupyterKernelServiceFactory,
+		JupyterKernelServiceFactory
 	);
 	serviceManager.addSingleton<ApiAccessService>(
 		ApiAccessService,
-		ApiAccessService,
+		ApiAccessService
 	);
 
 	// Notification
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonExtensionRestartNotification,
+		PythonExtensionRestartNotification
 	);
 
 	// Intellisense
@@ -90,15 +90,15 @@ export function registerTypes(
 	// User jupyter server url provider
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		UserJupyterServerUrlProvider,
+		UserJupyterServerUrlProvider
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodespaceCommandRegistry,
+		CodespaceCommandRegistry
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExposeUsedAzMLServerHandles,
+		ExposeUsedAzMLServerHandles
 	);
 }

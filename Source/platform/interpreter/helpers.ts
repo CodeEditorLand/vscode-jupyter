@@ -11,7 +11,7 @@ import {
 } from "@vscode/python-extension";
 
 export function getPythonEnvDisplayName(
-	interpreter: PythonEnvironment | Environment,
+	interpreter: PythonEnvironment | Environment
 ) {
 	if ("executable" in interpreter) {
 		const versionParts: string[] = [];

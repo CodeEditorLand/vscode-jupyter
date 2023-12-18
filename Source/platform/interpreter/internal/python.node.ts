@@ -33,7 +33,7 @@ export function getExecutable(): [string[], (out: string) => string] {
 }
 
 export function isModuleInstalled(
-	name: string,
+	name: string
 ): [string[], (out: string) => boolean] {
 	const args = [
 		"-c",

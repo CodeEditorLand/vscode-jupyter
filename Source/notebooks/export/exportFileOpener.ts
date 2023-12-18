@@ -23,7 +23,7 @@ export class ExportFileOpener {
 	public async openFile(
 		format: ExportFormat,
 		uri: Uri,
-		openDirectly: boolean = false,
+		openDirectly: boolean = false
 	) {
 		if (format === ExportFormat.python) {
 			await this.openPythonFile(uri, openDirectly);
@@ -44,7 +44,7 @@ export class ExportFileOpener {
 
 	private async openPythonFile(
 		uri: Uri,
-		openDirectly: boolean,
+		openDirectly: boolean
 	): Promise<void> {
 		let editor: TextEditor;
 
@@ -64,14 +64,14 @@ export class ExportFileOpener {
 		await editor.edit((editBuilder) => {
 			editBuilder.insert(
 				new Position(editor.document.lineCount, 0),
-				"\n",
+				"\n"
 			);
 		});
 	}
 
 	private async askOpenFile(
 		uri: Uri,
-		openDirectly: boolean,
+		openDirectly: boolean
 	): Promise<boolean> {
 		const yes = localize.DataScience.openExportFileYes;
 		const no = localize.DataScience.openExportFileNo;
@@ -80,7 +80,7 @@ export class ExportFileOpener {
 		const selected = await window
 			.showInformationMessage(
 				localize.DataScience.openExportedFileMessage,
-				...items,
+				...items
 			)
 			.then((item) => item);
 

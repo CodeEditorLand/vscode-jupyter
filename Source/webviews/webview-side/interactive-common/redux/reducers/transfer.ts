@@ -14,7 +14,7 @@ import {
 // These are all reducers that don't actually change state. They merely dispatch a message to the other side.
 export namespace Transfer {
 	export function showDataViewer(
-		arg: CommonReducerArg<CommonActionType, IShowDataViewerAction>,
+		arg: CommonReducerArg<CommonActionType, IShowDataViewerAction>
 	): IMainState {
 		postActionToExtension(arg, InteractiveWindowMessages.ShowDataViewer, {
 			variable: arg.payload.data.variable,
@@ -24,19 +24,19 @@ export namespace Transfer {
 	}
 
 	export function linkClick(
-		arg: CommonReducerArg<CommonActionType, ILinkClickAction>,
+		arg: CommonReducerArg<CommonActionType, ILinkClickAction>
 	): IMainState {
 		if (arg.payload.data.href.startsWith("data:image/png")) {
 			postActionToExtension(
 				arg,
 				InteractiveWindowMessages.SavePng,
-				arg.payload.data.href,
+				arg.payload.data.href
 			);
 		} else {
 			postActionToExtension(
 				arg,
 				InteractiveWindowMessages.OpenLink,
-				arg.payload.data.href,
+				arg.payload.data.href
 			);
 		}
 		return arg.prevState;

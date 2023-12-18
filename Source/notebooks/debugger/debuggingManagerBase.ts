@@ -54,7 +54,7 @@ export abstract class DebuggingManagerBase
 	public constructor(
 		protected readonly kernelProvider: IKernelProvider,
 		private readonly controllerRegistration: IControllerRegistration,
-		protected readonly serviceContainer: IServiceContainer,
+		protected readonly serviceContainer: IServiceContainer
 	) {}
 
 	public activate() {
@@ -69,12 +69,12 @@ export abstract class DebuggingManagerBase
 					await debug.stopDebugging(dbg.session);
 					this.onDidStopDebugging(document);
 				}
-			}),
+			})
 		);
 	}
 
 	abstract getDebugMode(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): KernelDebugMode | undefined;
 
 	public getDebugCell(notebook: NotebookDocument): NotebookCell | undefined {
@@ -94,7 +94,7 @@ export abstract class DebuggingManagerBase
 	}
 
 	public getDebugSession(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): DebugSession | undefined {
 		const dbg = this.notebookToDebugger.get(notebook);
 		if (dbg) {
@@ -103,7 +103,7 @@ export abstract class DebuggingManagerBase
 	}
 
 	public getDebugAdapter(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): KernelDebugAdapterBase | undefined {
 		return this.notebookToDebugAdapter.get(notebook);
 	}
@@ -114,12 +114,12 @@ export abstract class DebuggingManagerBase
 
 	protected async startDebuggingConfig(
 		config: INotebookDebugConfig,
-		options?: DebugSessionOptions,
+		options?: DebugSessionOptions
 	) {
 		traceInfoIfCI(
 			`Attempting to start debugging with config ${JSON.stringify(
-				config,
-			)}`,
+				config
+			)}`
 		);
 
 		try {
@@ -134,11 +134,11 @@ export abstract class DebuggingManagerBase
 
 	protected trackDebugAdapter(
 		notebook: NotebookDocument,
-		adapter: KernelDebugAdapterBase,
+		adapter: KernelDebugAdapterBase
 	) {
 		this.notebookToDebugAdapter.set(notebook, adapter);
 		this.disposables.push(
-			adapter.onDidEndSession(this.endSession.bind(this)),
+			adapter.onDidEndSession(this.endSession.bind(this))
 		);
 	}
 
@@ -156,7 +156,7 @@ export abstract class DebuggingManagerBase
 	}
 
 	protected getDebuggerByUri(
-		document: NotebookDocument,
+		document: NotebookDocument
 	): Debugger | undefined {
 		for (const [doc, dbg] of this.notebookToDebugger.entries()) {
 			if (document === doc) {
@@ -166,7 +166,7 @@ export abstract class DebuggingManagerBase
 	}
 
 	protected async ensureKernelIsRunning(
-		doc: NotebookDocument,
+		doc: NotebookDocument
 	): Promise<IKernel | undefined> {
 		const controller = this.controllerRegistration.getSelected(doc);
 		let kernel = this.kernelProvider.get(doc);
@@ -184,7 +184,7 @@ export abstract class DebuggingManagerBase
 				},
 				new DisplayOptions(false),
 				this.disposables,
-				"jupyterExtension",
+				"jupyterExtension"
 			);
 		}
 		return kernel;
@@ -193,13 +193,13 @@ export abstract class DebuggingManagerBase
 	private findEditorForCell(cell: NotebookCell): NotebookEditor | undefined {
 		const notebookUri = cell.notebook.uri.toString();
 		return window.visibleNotebookEditors.find(
-			(e) => e.notebook.uri.toString() === notebookUri,
+			(e) => e.notebook.uri.toString() === notebookUri
 		);
 	}
 
 	protected async checkIpykernelAndPrompt(
 		cell: NotebookCell,
-		allowSelectKernel: boolean = true,
+		allowSelectKernel: boolean = true
 	): Promise<IpykernelCheckResult> {
 		const editor = this.findEditorForCell(cell);
 		if (!editor) {
@@ -233,7 +233,7 @@ export abstract class DebuggingManagerBase
 	}
 
 	private async checkForIpykernel6(
-		doc: NotebookDocument,
+		doc: NotebookDocument
 	): Promise<IpykernelCheckResult> {
 		try {
 			let kernel = this.kernelProvider.get(doc);
@@ -267,15 +267,15 @@ export abstract class DebuggingManagerBase
 		const response = await window.showInformationMessage(
 			DataScience.needIpykernel6,
 			{ modal: true },
-			DataScience.setup,
+			DataScience.setup
 		);
 
 		if (response === DataScience.setup) {
 			sendTelemetryEvent(DebuggingTelemetry.clickedOnSetup);
 			void env.openExternal(
 				Uri.parse(
-					"https://github.com/microsoft/vscode-jupyter/wiki/Setting-Up-Run-by-Line-and-Debugging-for-Notebooks",
-				),
+					"https://github.com/microsoft/vscode-jupyter/wiki/Setting-Up-Run-by-Line-and-Debugging-for-Notebooks"
+				)
 			);
 		} else {
 			sendTelemetryEvent(DebuggingTelemetry.closedModal);

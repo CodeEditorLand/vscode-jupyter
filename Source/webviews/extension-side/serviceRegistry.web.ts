@@ -32,62 +32,62 @@ import { IPyWidgetRendererComms } from "./ipywidgets/rendererComms";
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RendererCommunication,
+		RendererCommunication
 	);
 
 	// Data viewer
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		DataViewerCommandRegistry,
+		DataViewerCommandRegistry
 	);
 	serviceManager.add<IDataViewer>(IDataViewer, DataViewer);
 	serviceManager.addSingleton<IDataViewerFactory>(
 		IDataViewerFactory,
-		DataViewerFactory,
+		DataViewerFactory
 	);
 	serviceManager.addSingleton<IDataViewerDependencyService>(
 		IDataViewerDependencyService,
-		DataViewerDependencyService,
+		DataViewerDependencyService
 	);
 
 	// Plot Viewer
 	serviceManager.add<IPlotViewer>(IPlotViewer, PlotViewer);
 	serviceManager.addSingleton<IPlotViewerProvider>(
 		IPlotViewerProvider,
-		PlotViewerProvider,
+		PlotViewerProvider
 	);
 	serviceManager.addSingleton<IPlotSaveHandler>(
 		IPlotSaveHandler,
-		PlotSaveHandler,
+		PlotSaveHandler
 	);
 	serviceManager.addSingleton<PlotViewHandler>(
 		PlotViewHandler,
-		PlotViewHandler,
+		PlotViewHandler
 	);
 
 	// Variables view
 	serviceManager.addSingleton<INotebookWatcher>(
 		INotebookWatcher,
-		NotebookWatcher,
+		NotebookWatcher
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		VariableViewActivationService,
+		VariableViewActivationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		IPyWidgetRendererComms,
+		IPyWidgetRendererComms
 	);
 	serviceManager.addSingleton<IVariableViewProvider>(
 		IVariableViewProvider,
-		VariableViewProvider,
+		VariableViewProvider
 	);
 	serviceManager.add<IJupyterVariableDataProvider>(
 		IJupyterVariableDataProvider,
-		JupyterVariableDataProvider,
+		JupyterVariableDataProvider
 	);
 	serviceManager.addSingleton<IJupyterVariableDataProviderFactory>(
 		IJupyterVariableDataProviderFactory,
-		JupyterVariableDataProviderFactory,
+		JupyterVariableDataProviderFactory
 	);
 }

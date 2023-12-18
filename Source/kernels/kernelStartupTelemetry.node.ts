@@ -10,14 +10,16 @@ import { IKernel, IKernelProvider, IKernelSession } from "./types";
 @injectable()
 export class KernelStartupTelemetry implements IExtensionSyncActivationService {
 	constructor(
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	activate(): void {
 		this.kernelProvider.onDidCreateKernel(
 			(kernel) => this.addOnStartHooks(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -29,12 +31,12 @@ export class KernelStartupTelemetry implements IExtensionSyncActivationService {
 					await sendTelemetryForPythonKernelExecutable(
 						session,
 						kernel.resourceUri,
-						kernel.kernelConnectionMetadata,
+						kernel.kernelConnectionMetadata
 					);
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 }

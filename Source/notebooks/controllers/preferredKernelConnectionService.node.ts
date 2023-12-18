@@ -10,12 +10,12 @@ import { Environment, PythonExtension } from "@vscode/python-extension";
 
 export function findPreferredPythonEnvironment(
 	notebook: NotebookDocument,
-	pythonApi: PythonExtension,
+	pythonApi: PythonExtension
 ): Environment | undefined {
 	// 1. Check if we have a .conda or .venv virtual env in the local workspace folder.
 	const localEnv = findPythonEnvironmentClosestToNotebook(
 		notebook,
-		pythonApi.environments.known,
+		pythonApi.environments.known
 	);
 	if (localEnv) {
 		return localEnv;
@@ -23,7 +23,7 @@ export function findPreferredPythonEnvironment(
 
 	const findMatchingActiveEnvironment = () => {
 		const envPath = pythonApi.environments.getActiveEnvironmentPath(
-			notebook.uri,
+			notebook.uri
 		);
 		return (
 			envPath &&
@@ -36,7 +36,7 @@ export function findPreferredPythonEnvironment(
 
 function findPythonEnvironmentClosestToNotebook(
 	notebook: NotebookDocument,
-	envs: readonly Environment[],
+	envs: readonly Environment[]
 ) {
 	const defaultFolder =
 		workspace.getWorkspaceFolder(notebook.uri)?.uri ||
@@ -45,7 +45,7 @@ function findPythonEnvironmentClosestToNotebook(
 			: undefined);
 	const localEnvNextToNbFile = findPythonEnvBelongingToFolder(
 		path.dirname(notebook.uri),
-		envs,
+		envs
 	);
 	if (localEnvNextToNbFile) {
 		return localEnvNextToNbFile;
@@ -57,7 +57,7 @@ function findPythonEnvironmentClosestToNotebook(
 
 function findPythonEnvBelongingToFolder(
 	folder: Uri,
-	pythonEnvs: readonly Environment[],
+	pythonEnvs: readonly Environment[]
 ) {
 	const localEnvs = pythonEnvs.filter((p) =>
 		// eslint-disable-next-line local-rules/dont-use-fspath
@@ -65,8 +65,8 @@ function findPythonEnvBelongingToFolder(
 			p.environment?.folderUri?.fsPath ||
 				p.executable.uri?.fsPath ||
 				p.path,
-			folder.fsPath,
-		),
+			folder.fsPath
+		)
 	);
 
 	// Find an environment that is a .venv or .conda environment.
@@ -75,12 +75,12 @@ function findPythonEnvBelongingToFolder(
 	return localEnvs.find(
 		(e) =>
 			getEnvironmentType(e) === EnvironmentType.Venv &&
-			e.environment?.name?.toLowerCase() === ".venv",
+			e.environment?.name?.toLowerCase() === ".venv"
 	) ||
 		localEnvs.find(
 			(e) =>
 				getEnvironmentType(e) === EnvironmentType.Conda &&
-				e.environment?.name?.toLowerCase() === ".conda",
+				e.environment?.name?.toLowerCase() === ".conda"
 		) ||
 		localEnvs.find(
 			(e) =>
@@ -88,12 +88,12 @@ function findPythonEnvBelongingToFolder(
 					EnvironmentType.VirtualEnv,
 					EnvironmentType.VirtualEnvWrapper,
 				].includes(getEnvironmentType(e)) &&
-				e.environment?.name?.toLowerCase() === ".venv",
+				e.environment?.name?.toLowerCase() === ".venv"
 		) ||
 		localEnvs.find(
 			(e) =>
 				e.environment?.name?.toLowerCase() === ".venv" ||
-				e.environment?.name?.toLowerCase() === ".conda",
+				e.environment?.name?.toLowerCase() === ".conda"
 		) ||
 		localEnvs.length
 		? localEnvs[0]

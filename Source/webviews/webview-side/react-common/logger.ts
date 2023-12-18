@@ -16,7 +16,7 @@ export function logErrorMessage(message: string) {
 }
 
 export function setLogger(
-	logger: (category: "error" | "verbose", message: string) => void,
+	logger: (category: "error" | "verbose", message: string) => void
 ) {
 	messageLogger = logger;
 }

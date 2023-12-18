@@ -22,7 +22,7 @@ suite("Jupyter Interpreter State", () => {
 		when(memento.update(anything(), anything())).thenResolve();
 		interpreterSelectedEventEmitter = new EventEmitter<PythonEnvironment>();
 		when(interpreterService.onDidChangeInterpreter).thenReturn(
-			interpreterSelectedEventEmitter.event,
+			interpreterSelectedEventEmitter.event
 		);
 		selected = new JupyterInterpreterStateStore(instance(memento));
 	});
@@ -35,7 +35,7 @@ suite("Jupyter Interpreter State", () => {
 	test("If memento is set (for subsequent sesssions), return true", async () => {
 		const uri = "jupyter.exe";
 		when(memento.get<string | undefined>(anything(), undefined)).thenReturn(
-			uri,
+			uri
 		);
 
 		assert.isOk(selected.interpreterSetAtleastOnce);
@@ -43,7 +43,7 @@ suite("Jupyter Interpreter State", () => {
 	test("Get python path from memento", async () => {
 		const uri = "jupyter.exe";
 		when(memento.get<string | undefined>(anything(), undefined)).thenReturn(
-			uri,
+			uri
 		);
 
 		assert.isTrue(arePathsSame(selected.selectedPythonPath!.fsPath, uri));

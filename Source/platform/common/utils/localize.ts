@@ -25,7 +25,7 @@ export namespace Common {
 	export const install = l10n.t("Install");
 	export const loadingExtension = l10n.t("Jupyter Extension loading...");
 	export const handleExtensionActivationError = l10n.t(
-		"Extension activation failed, run the 'Developer: Toggle Developer Tools' command for more information.",
+		"Extension activation failed, run the 'Developer: Toggle Developer Tools' command for more information."
 	);
 	export const doNotShowAgain = l10n.t("Do not show again");
 	export const reload = l10n.t("Reload");
@@ -53,13 +53,13 @@ export namespace Logging {
 
 export namespace InteractiveShiftEnterBanner {
 	export const bannerMessage = l10n.t(
-		"Would you like shift-enter to send code to the new Interactive Window experience?",
+		"Would you like shift-enter to send code to the new Interactive Window experience?"
 	);
 }
 
 export namespace InsidersNativeNotebooksSurveyBanner {
 	export const bannerMessage = l10n.t(
-		"Can you please take a minute to tell us about your notebooks experience in VS Code?",
+		"Can you please take a minute to tell us about your notebooks experience in VS Code?"
 	);
 }
 
@@ -69,23 +69,23 @@ export namespace DataScienceSurveyBanner {
 }
 export namespace DataScience {
 	export const warnWhenSelectingKernelWithUnSupportedPythonVersion = l10n.t(
-		"The version of Python associated with the selected kernel is no longer supported. Please consider selecting a different kernel.",
+		"The version of Python associated with the selected kernel is no longer supported. Please consider selecting a different kernel."
 	);
 	export const installingPythonExtension = l10n.t(
-		"Installing Python extension and locating kernels.",
+		"Installing Python extension and locating kernels."
 	);
 	export const pythonExtensionRequired = l10n.t(
-		"The Python Extension is required to perform that task. Click Yes to open Python Extension installation page.",
+		"The Python Extension is required to perform that task. Click Yes to open Python Extension installation page."
 	);
 	export const rendererExtensionRequired = l10n.t(
-		"The Renderer Extension is required to view IPyWidgets. Click Yes to open Jupyter Notebook Renderer Extension installation page.",
+		"The Renderer Extension is required to view IPyWidgets. Click Yes to open Jupyter Notebook Renderer Extension installation page."
 	);
 	export const rendererExtension1015Required = l10n.t(
-		"The installed version of the Renderer Extension is outdated and requires and update to view IPyWidgets. Click Yes to open Jupyter Notebook Renderer Extension installation page.",
+		"The installed version of the Renderer Extension is outdated and requires and update to view IPyWidgets. Click Yes to open Jupyter Notebook Renderer Extension installation page."
 	);
 
 	export const pythonExtensionInstalled = l10n.t(
-		"Python Extension is now installed. Some features might not be available until a notebook or interactive window session is restarted.",
+		"Python Extension is now installed. Some features might not be available until a notebook or interactive window session is restarted."
 	);
 	export const unknownPackage = l10n.t("unknown");
 	export const interactiveWindowTitleFormat = (ownerFileName: string) =>
@@ -111,20 +111,20 @@ export namespace DataScience {
 			comment: ["Only translate the text within the HTML tags"],
 		});
 	export const installingMissingDependencies = l10n.t(
-		"Installing missing dependencies",
+		"Installing missing dependencies"
 	);
 	export const validatingKernelDependencies = l10n.t(
-		"Validating kernel dependencies",
+		"Validating kernel dependencies"
 	);
 	export const performingExport = l10n.t("Performing Export");
 	export const exportNotebookToPython = l10n.t(
-		"Exporting Notebook to Python",
+		"Exporting Notebook to Python"
 	);
 	export const sessionDisposed = l10n.t(
-		"Cannot execute code, session has been disposed. Please try restarting the Kernel.",
+		"Cannot execute code, session has been disposed. Please try restarting the Kernel."
 	);
 	export const passwordFailure = l10n.t(
-		"Failed to connect to password protected server. Check that password is correct.",
+		"Failed to connect to password protected server. Check that password is correct."
 	);
 	export const incorrectPassword = l10n.t("Incorrect Password.");
 	export const exportDialogFilter = l10n.t("Jupyter Notebooks");
@@ -138,123 +138,123 @@ export namespace DataScience {
 	export const importDialogFilter = "Jupyter Notebooks";
 	export const notebookCheckForImportNo = l10n.t("Later");
 	export const libraryRequiredToLaunchJupyterNotInstalled = (
-		pythonModuleName: string,
+		pythonModuleName: string
 	) => l10n.t("Running cells requires {0} package.", pythonModuleName);
 	export const librariesRequiredToLaunchJupyterNotInstalled = (
-		pythonModuleName: string,
+		pythonModuleName: string
 	) => l10n.t("Running cells requires {0} package.", pythonModuleName);
 	export const libraryRequiredToLaunchJupyterNotInstalledInterpreter = (
 		pythonEnvName: string,
-		pythonModuleName: string,
+		pythonModuleName: string
 	) =>
 		l10n.t(
 			"Running cells with '{0}' requires the {1} package.",
 			pythonEnvName,
-			pythonModuleName,
+			pythonModuleName
 		);
 	export const libraryRequiredToLaunchJupyterKernelNotInstalledInterpreter = (
 		pythonEnvName: string,
-		pythonModuleName: string,
+		pythonModuleName: string
 	) =>
 		l10n.t(
 			"Running cells with '{0}' requires the {1} package.",
 			pythonEnvName,
-			pythonModuleName,
+			pythonModuleName
 		);
 	export const libraryRequiredToLaunchJupyterKernelNotInstalledInterpreterAndRequiresUpdate =
 		(pythonEnvName: string, pythonModuleName: string) =>
 			l10n.t(
 				"Running cells with '{0}' requires the {1} package to be installed or requires an update.",
 				pythonEnvName,
-				pythonModuleName,
+				pythonModuleName
 			);
 	export const librariesRequiredToLaunchJupyterNotInstalledInterpreter = (
 		pythonEnvName: string,
-		pythonModuleName: string,
+		pythonModuleName: string
 	) =>
 		l10n.t(
 			"Running cells with '{0}' requires the {1} package.",
 			pythonEnvName,
-			pythonModuleName,
+			pythonModuleName
 		);
 	export const installPackageInstructions = (
 		pythonModuleName: string,
-		commandId: string,
+		commandId: string
 	) =>
 		l10n.t(
 			"Run the following command to install '{0}' into the Python environment. \nCommand: '{1}'",
 			pythonModuleName,
-			commandId,
+			commandId
 		);
 	export const pythonCondaKernelsWithoutPython = l10n.t(
-		"The Python Runtime and IPyKernel will be automatically installed upon selecting this environment.",
+		"The Python Runtime and IPyKernel will be automatically installed upon selecting this environment."
 	);
 
 	export const selectJupyterInterpreter = l10n.t(
-		"Select an Interpreter to start Jupyter",
+		"Select an Interpreter to start Jupyter"
 	);
 	export const jupyterInstall = l10n.t("Install");
 	export const currentlySelectedJupyterInterpreterForPlaceholder = (
-		pythonEnvPath: string,
+		pythonEnvPath: string
 	) => l10n.t("Selected Environment {0}", pythonEnvPath);
 	export const jupyterNotSupported = (errorMessage: string) =>
 		l10n.t(
 			"Jupyter cannot be started. Error attempting to locate Jupyter: {0}",
-			errorMessage,
+			errorMessage
 		);
 	export const jupyterNotebookNotInstalledOrNotFound = (
-		interpreter: PythonEnvironment | undefined,
+		interpreter: PythonEnvironment | undefined
 	) => {
 		if (interpreter) {
 			const displayName = getInterpreterDisplayName(interpreter);
 			return l10n.t(
 				"Failed to start Jupyter Server as the packages 'jupyter' and 'notebook' could not be located in the Python environment '{0}'.",
-				displayName,
+				displayName
 			);
 		} else {
 			return l10n.t(
-				"Failed to start Jupyter Server as the packages 'jupyter' and 'notebook' could not be located in the Python environment.",
+				"Failed to start Jupyter Server as the packages 'jupyter' and 'notebook' could not be located in the Python environment."
 			);
 		}
 	};
 	export const jupyterNotSupportedBecauseOfEnvironment = (
 		pythonEnvName: string,
-		errorMessage: string,
+		errorMessage: string
 	) =>
 		l10n.t(
 			"Activating {0} to run Jupyter failed with {1}",
 			pythonEnvName,
-			errorMessage,
+			errorMessage
 		);
 	export const jupyterNbConvertNotSupported = l10n.t(
-		"Jupyter nbconvert is not installed",
+		"Jupyter nbconvert is not installed"
 	);
 	export const jupyterLaunchTimedOut = l10n.t(
-		"The Jupyter notebook server failed to launch in time",
+		"The Jupyter notebook server failed to launch in time"
 	);
 	export const jupyterLaunchNoURL = l10n.t(
-		"Failed to find the URL of the launched Jupyter notebook server",
+		"Failed to find the URL of the launched Jupyter notebook server"
 	);
 	export const jupyterSelfCertFail = (errorMessage: string) =>
 		l10n.t(
 			"The security certificate used by server {0} was not issued by a trusted certificate authority.\r\nThis may indicate an attempt to steal your information.\r\nDo you want to enable the Allow Unauthorized Remote Connection setting for this workspace to allow you to connect?",
-			errorMessage,
+			errorMessage
 		);
 	export const jupyterExpiredCertFail = (errorMessage: string) =>
 		l10n.t(
 			"The security certificate used by server {0} has expired.\r\nThis may indicate an attempt to steal your information.\r\nDo you want to enable the Allow Unauthorized Remote Connection setting for this workspace to allow you to connect?",
-			errorMessage,
+			errorMessage
 		);
 	export const jupyterSelfCertFailErrorMessageOnly = l10n.t(
-		"The security certificate used by server was not issued by a trusted certificate authority.\r\nThis may indicate an attempt to steal your information.",
+		"The security certificate used by server was not issued by a trusted certificate authority.\r\nThis may indicate an attempt to steal your information."
 	);
 	export const jupyterSelfCertExpiredErrorMessageOnly = l10n.t(
-		"The security certificate used by server has expired.\r\nThis may indicate an attempt to steal your information.",
+		"The security certificate used by server has expired.\r\nThis may indicate an attempt to steal your information."
 	);
 	export const jupyterSelfCertEnable = l10n.t("Yes, connect anyways");
 	export const jupyterSelfCertClose = l10n.t("No, close the connection");
 	export const pythonInteractiveHelpLink = l10n.t(
-		"See <https://aka.ms/pyaiinstall> for help on installing Jupyter.",
+		"See <https://aka.ms/pyaiinstall> for help on installing Jupyter."
 	);
 	export const importingFormat = (pythoModuleName: string) =>
 		l10n.t("Importing {0}", pythoModuleName);
@@ -269,17 +269,17 @@ export namespace DataScience {
 	export const runCellAndAllBelowLensCommandTitle = l10n.t("Run Below");
 
 	export const restartKernelMessage = l10n.t(
-		"Do you want to restart the Jupyter kernel? All variables will be lost.",
+		"Do you want to restart the Jupyter kernel? All variables will be lost."
 	);
 	export const restartKernelMessageYes = l10n.t("Restart");
 	export const restartKernelMessageDontAskAgain = l10n.t("Don't Ask Again");
 	export const automaticallyReconnectingToAKernelProgressMessage = (
-		kernelName: string,
+		kernelName: string
 	) => l10n.t("Reconnecting to the kernel {0}", kernelName);
 	export const restartingKernelStatus = (kernelName: string) =>
 		l10n.t("Restarting Kernel {0}", kernelName);
 	export const interruptingKernelFailed = l10n.t(
-		"Kernel interrupt failed. Jupyter Server is hung. Please reload VS Code.",
+		"Kernel interrupt failed. Jupyter Server is hung. Please reload VS Code."
 	);
 	export const sessionStartFailedWithKernel = (kernelName: string) =>
 		l10n.t({
@@ -301,7 +301,7 @@ export namespace DataScience {
 		});
 	export const failedToStartJupyterWithErrorInfo = (
 		pythonEnvName: string,
-		errorMessage: string,
+		errorMessage: string
 	) =>
 		l10n.t({
 			message:
@@ -313,7 +313,7 @@ export namespace DataScience {
 		});
 	export const failedToStartJupyterDueToOutdatedTraitlets = (
 		pythonEnvName: string,
-		errorMessage: string,
+		errorMessage: string
 	) =>
 		l10n.t({
 			message:
@@ -326,10 +326,10 @@ export namespace DataScience {
 		});
 	export const failedToStartKernel = l10n.t("Failed to start the Kernel.");
 	export const failedToRestartKernel = l10n.t(
-		"Failed to restart the Kernel.",
+		"Failed to restart the Kernel."
 	);
 	export const failedToInterruptKernel = l10n.t(
-		"Failed to interrupt the Kernel.",
+		"Failed to interrupt the Kernel."
 	);
 	export const rawKernelStartFailedDueToTimeout = (kernelName: string) =>
 		l10n.t({
@@ -341,7 +341,7 @@ export namespace DataScience {
 			],
 		});
 	export const rawKernelStartFailedDueToTimeoutWaitingForPort = (
-		kernelName: string,
+		kernelName: string
 	) =>
 		l10n.t({
 			message:
@@ -379,7 +379,7 @@ export namespace DataScience {
 		});
 	export const failedToStartAnUntrustedKernelSpec = (
 		kernelName: string,
-		specFile: string,
+		specFile: string
 	) =>
 		l10n.t({
 			message:
@@ -392,7 +392,7 @@ export namespace DataScience {
 			],
 		});
 	export const kernelDiedWithoutErrorAndAutoRestarting = (
-		kernelName: string,
+		kernelName: string
 	) =>
 		l10n.t({
 			message:
@@ -414,14 +414,14 @@ export namespace DataScience {
 	export const kernelDisconnected = (kernelName: string) =>
 		l10n.t(
 			"Unable to connect to the kernel '{0}', please verify the Jupyter Server connection. View Jupyter [log](command:jupyter.viewOutput) for further details.",
-			kernelName,
+			kernelName
 		);
 	export const cannotRunCellKernelIsDead = (kernelName: string) =>
 		l10n.t("Cannot run cells, as the kernel '{0}' is dead.", kernelName);
 	export const showJupyterLogs = l10n.t("Show Jupyter Logs.");
 	export const restartKernel = l10n.t("Restart Kernel");
 	export const reloadRequired = l10n.t(
-		"Please reload the window for new settings to take effect.",
+		"Please reload the window for new settings to take effect."
 	);
 	export const restartedKernelHeader = (kernelName: string) =>
 		l10n.t("Restarted {0}", kernelName);
@@ -435,34 +435,34 @@ export namespace DataScience {
 		l10n.t("_Connecting to {0}..._", kernelName);
 	export const noKernelConnected = l10n.t("No kernel connected");
 	export const jupyterSelectUriCommandLabel = l10n.t(
-		"Enter the URL of the running Jupyter Server...",
+		"Enter the URL of the running Jupyter Server..."
 	);
 	export const jupyterSelectUriInputTitle = l10n.t(
-		"Enter the URL of the running Jupyter Server",
+		"Enter the URL of the running Jupyter Server"
 	);
 	export const jupyterSelectUriInputPlaceholder = l10n.t(
-		"Enter the url of the running Jupyter Server",
+		"Enter the url of the running Jupyter Server"
 	);
 	export const connectToToTheJupyterServer = (url: string) =>
 		l10n.t("Connect to the Jupyter Server {0}", url);
 	export const enterOrSelectRemoteJupyterPlaceholder = l10n.t(
-		"Enter a remote url, or select a remote server",
+		"Enter a remote url, or select a remote server"
 	);
 	export const selectRemoteJupyterPlaceholder = l10n.t(
-		"Select a remote server",
+		"Select a remote server"
 	);
 	export const jupyterServerLastConnectionForQuickPickDescription = (
-		date: Date,
+		date: Date
 	) => l10n.t("Last connected {0}", fromNow(date, true, false, false));
 	export const jupyterServerNotUsedBeforeQuickPickSeparatorTitle =
 		l10n.t("Jupyter Servers");
 	export const jupyterSelectURIInvalidURI = l10n.t("Invalid URL specified");
 	export const jupyterSelectURIMustBeHttpOrHttps = l10n.t(
-		"Invalid protocol in URL specified, only HTTP or HTTPS are supported.",
+		"Invalid protocol in URL specified, only HTTP or HTTPS are supported."
 	);
 	export const jupyterSelectLiveRemoteKernelDescription = (
 		time: Date | undefined,
-		numberOfConnections: number,
+		numberOfConnections: number
 	) => {
 		if (!time) {
 			if (numberOfConnections === 0) {
@@ -476,122 +476,122 @@ export namespace DataScience {
 		if (numberOfConnections === 0) {
 			return l10n.t(
 				"Last activity {0}",
-				fromNow(time, true, false, false),
+				fromNow(time, true, false, false)
 			);
 		}
 		if (numberOfConnections === 1) {
 			return l10n.t(
 				"Last activity {0}, 1 connection",
-				fromNow(time, true, false, false),
+				fromNow(time, true, false, false)
 			);
 		}
 		return l10n.t(
 			"Last activity {0}, {1} connections",
 			fromNow(time, true, false, false),
-			numberOfConnections.toString(),
+			numberOfConnections.toString()
 		);
 	};
 	export const installJupyterHub = l10n.t(
-		"Install the JupyterHub extension to connect to JupyterHub servers.",
+		"Install the JupyterHub extension to connect to JupyterHub servers."
 	);
 	export const useJupyterHubExtension = l10n.t(
-		`Select 'Existing JupyterHub Server...' from the Kernel Picker`,
+		`Select 'Existing JupyterHub Server...' from the Kernel Picker`
 	);
 	export const useJupyterHubExtensionDetail = l10n.t(
-		`Use this option when connecting to JupyterHub servers`,
+		`Use this option when connecting to JupyterHub servers`
 	);
 	export const installJupyterHubDetail = l10n.t(
-		`Once installed, open the Kernel Picker and select 'Existing JupyterHub Server...'`,
+		`Once installed, open the Kernel Picker and select 'Existing JupyterHub Server...'`
 	);
 	export const jupyterSelectUserAndPasswordTitle = l10n.t(
-		"Enter your user name and password to connect to Jupyter Hub",
+		"Enter your user name and password to connect to Jupyter Hub"
 	);
 	export const jupyterRenameServer = l10n.t(
-		"Change Server Display Name (Leave Blank To Use URL)",
+		"Change Server Display Name (Leave Blank To Use URL)"
 	);
 	export const jupyterServerUriDisplayNameInputPlaceholder = l10n.t(
-		"Enter a display name",
+		"Enter a display name"
 	);
 	export const jupyterSelectUserPrompt = l10n.t("Enter your user name");
 	export const jupyterSelectPasswordPrompt = l10n.t("Enter your password");
 	export const jupyterSelectPasswordTitle = l10n.t(
-		"Enter your password for the Jupyter Server",
+		"Enter your password for the Jupyter Server"
 	);
 	export const pythonNotInstalled = l10n.t(
-		"Python is not installed. \nPlease download and install Python in order to execute cells in this notebook. \nOnce installed please reload VS Code.",
+		"Python is not installed. \nPlease download and install Python in order to execute cells in this notebook. \nOnce installed please reload VS Code."
 	);
 	export const pleaseReloadVSCodeOncePythonHasBeenInstalled = l10n.t(
-		"Upon installing Python please reload VS Code.",
+		"Upon installing Python please reload VS Code."
 	);
 	export const jupyterNotebookFailure = (errorMessage: string) =>
 		l10n.t("Jupyter notebook failed to launch. \r\n{0}", errorMessage);
 	export const remoteJupyterServerProvidedBy3rdPartyExtensionNoLongerValid = (
-		extensionName: string,
+		extensionName: string
 	) =>
 		l10n.t(
 			"The remote Jupyter Server contributed by the extension '{0}' is no longer available.",
-			extensionName,
+			extensionName
 		);
 	export const remoteJupyterConnectionFailedWithServerWithError = (
 		hostName: string,
-		errorMessage: string,
+		errorMessage: string
 	) =>
 		l10n.t(
 			"Failed to connect to the remote Jupyter Server '{0}'. Verify the server is running and reachable. ({1}).",
 			hostName,
-			errorMessage,
+			errorMessage
 		);
 	export const remoteJupyterConnectionFailedWithServer = (hostName: string) =>
 		l10n.t(
 			"Failed to connect to the remote Jupyter Server '{0}'. Verify the server is running and reachable.",
-			hostName,
+			hostName
 		);
 	export const remoteJupyterConnectionFailedWithoutServerWithError = (
-		errorMessage: string,
+		errorMessage: string
 	) =>
 		l10n.t(
 			"Connection failure. Verify the server is running and reachable. ({0}).",
-			errorMessage,
+			errorMessage
 		);
 	export const remoteJupyterConnectionFailedWithoutServerWithErrorWeb = (
-		errorMessage: string,
+		errorMessage: string
 	) =>
 		l10n.t(
 			"Connection failure. Verify the server is running and reachable from a browser. ({0}). \nWhen connecting from vscode.dev Jupyter servers must be started with specific options to connect. \nClick [here](https://aka.ms/vscjremoteweb) for more information.",
-			errorMessage,
+			errorMessage
 		);
 	export const removeRemoteJupyterConnectionButtonText =
 		l10n.t("Forget Connection");
 	export const jupyterNotebookRemoteConnectFailedWeb = (hostName: string) =>
 		l10n.t(
 			"Failed to connect to remote Jupyter Server.\r\nCheck that the Jupyter Server URL can be reached from a browser.\r\n{0}. Click [here](https://aka.ms/vscjremoteweb) for more information.",
-			hostName,
+			hostName
 		);
 	export const packageNotInstalledWindowsLongPathNotEnabledError = (
 		pythonPackageName: string,
-		interpreterDisplayName: string,
+		interpreterDisplayName: string
 	) =>
 		l10n.t(
 			"Support for Windows Long Path has not been enabled, hence the package {0} could not be installed into the Python Environment '{1}'.\nPlease ensure that support for Windows Long Path is enabled.\nSee [here](https://pip.pypa.io/warnings/enable-long-paths) for more information.",
 			pythonPackageName,
-			interpreterDisplayName,
+			interpreterDisplayName
 		);
 	export const changeRemoteJupyterConnectionButtonText =
 		l10n.t("Manage Connections");
 	export const rawConnectionBrokenError = l10n.t(
-		"Direct kernel connection broken",
+		"Direct kernel connection broken"
 	);
 	export const jupyterServerCrashed = (exitCode: number) =>
 		l10n.t(
 			"Jupyter Server crashed. Unable to connect. \r\nError code from Jupyter: {0}",
-			exitCode.toString(),
+			exitCode.toString()
 		);
 	export const jupyterKernelSpecModuleNotFound = (
-		pythonExecFileName: string,
+		pythonExecFileName: string
 	) =>
 		l10n.t(
 			"'Kernelspec' module not installed in the selected interpreter ({0}).\n Please re-install or update 'jupyter'.",
-			pythonExecFileName,
+			pythonExecFileName
 		);
 	export const interruptKernelStatus = (kernelDisplayName: string) =>
 		l10n.t("Interrupting Kernel {0}", kernelDisplayName);
@@ -601,40 +601,40 @@ export namespace DataScience {
 	export const restartKernelAfterInterruptMessage = (displayName: string) =>
 		l10n.t(
 			"Interrupting the kernel '{0}' timed out. Do you want to restart the kernel instead? All variables will be lost.",
-			displayName,
+			displayName
 		);
 	export const documentMismatch = (fileName: string) =>
 		l10n.t(
 			"Cannot run cells, duplicate documents for {0} found.",
-			fileName,
+			fileName
 		);
 	export const jupyterGetVariablesBadResults = l10n.t(
-		"Failed to fetch variable info from the Jupyter Server.",
+		"Failed to fetch variable info from the Jupyter Server."
 	);
 	l10n.t(
-		"Failure to create an 'Interactive' window. Try reinstalling the Python Extension.",
+		"Failure to create an 'Interactive' window. Try reinstalling the Python Extension."
 	);
 	export const jupyterGetVariablesExecutionError = (errorMessage: string) =>
 		l10n.t("Failure during variable extraction: \r\n{0}", errorMessage);
 	export const selectKernel = l10n.t("Change Kernel");
 	export const selectDifferentKernel = l10n.t("Select a different Kernel");
 	export const kernelFilterPlaceholder = l10n.t(
-		"Choose the kernels that are available in the kernel picker.",
+		"Choose the kernels that are available in the kernel picker."
 	);
 	export const recommendedItemCategoryInQuickPick = l10n.t("Recommended");
 	export const selectedKernelCategoryInQuickPick = l10n.t("Selected");
 	export const createPythonEnvironmentInQuickPick = l10n.t(
-		"Create Python Environment",
+		"Create Python Environment"
 	);
 	export const createPythonEnvironmentInQuickPickTooltip = l10n.t(
-		"Create an isolated Python Environment per workspace folder",
+		"Create an isolated Python Environment per workspace folder"
 	);
 
 	export const selectDifferentJupyterInterpreter =
 		l10n.t("Change Interpreter");
 	export const pandasTooOldForViewingFormat = (
 		currentVersion: string,
-		requiredVersion: string,
+		requiredVersion: string
 	) =>
 		l10n.t({
 			message:
@@ -654,7 +654,7 @@ export namespace DataScience {
 			],
 		});
 	export const tooManyColumnsMessage = l10n.t(
-		"Variables with over a 1000 columns may take a long time to display. Are you sure you wish to continue?",
+		"Variables with over a 1000 columns may take a long time to display. Are you sure you wish to continue?"
 	);
 	export const tooManyColumnsYes = l10n.t("Yes");
 	export const tooManyColumnsNo = l10n.t("No");
@@ -679,34 +679,34 @@ export namespace DataScience {
 	export const debugContinueCommandTitle = l10n.t("Continue");
 	export const debugStopCommandTitle = l10n.t("Stop");
 	export const runCurrentCellAndAddBelow = l10n.t(
-		"Run current cell and add empty cell below",
+		"Run current cell and add empty cell below"
 	);
 	export const jupyterDebuggerNotInstalledError = (
-		pythonModuleName: string,
+		pythonModuleName: string
 	) =>
 		l10n.t(
 			"Pip module {0} is required for debugging cells. You will need to install it to debug cells.",
-			pythonModuleName,
+			pythonModuleName
 		);
 	export const jupyterDebuggerOutputParseError = (output: string) =>
 		l10n.t(
 			"Unable to parse {0} output, please log an issue with https://github.com/microsoft/vscode-jupyter",
-			output,
+			output
 		);
 	export const cellStopOnErrorMessage = l10n.t(
-		"Cell was canceled due to an error in a previous cell.",
+		"Cell was canceled due to an error in a previous cell."
 	);
 	export const scrollToCellTitleFormatMessage = (executionCount: number) =>
 		l10n.t("Go to [{0}]", executionCount.toString());
 	export const instructionComments = (cellMarker: string) =>
 		l10n.t(
 			`# To add a new cell, type '{0}'\n# To add a new markdown cell, type '{0} [markdown]'\n`,
-			cellMarker,
+			cellMarker
 		);
 	export const exportButtonTitle = l10n.t("Export");
 	export const exportAsQuickPickPlaceholder = l10n.t("Export As...");
 	export const openExportedFileMessage = l10n.t(
-		"Would you like to open the exported file?",
+		"Would you like to open the exported file?"
 	);
 	export const openExportFileYes = l10n.t("Yes");
 	export const openExportFileNo = l10n.t("No");
@@ -717,20 +717,20 @@ export namespace DataScience {
 		],
 	});
 	export const exportToPDFDependencyMessage = l10n.t(
-		'If you have not installed xelatex (TeX), you will need to do so before you can export to PDF. For further instructions, please see https://nbconvert.readthedocs.io/en/latest/install.html#installing-tex. \r\nTo avoid installing xelatex (TeX), you might want to try exporting to HTML and using your browser\'s "Print to PDF" feature.',
+		'If you have not installed xelatex (TeX), you will need to do so before you can export to PDF. For further instructions, please see https://nbconvert.readthedocs.io/en/latest/install.html#installing-tex. \r\nTo avoid installing xelatex (TeX), you might want to try exporting to HTML and using your browser\'s "Print to PDF" feature.'
 	);
 	export const failedExportMessage = l10n.t("Export failed.");
 	export const startingJupyterLogMessage = (
 		pythonExec: string,
-		cliArgs: string,
+		cliArgs: string
 	) =>
 		l10n.t(
 			"Starting Jupyter from {0} with arguments {1}",
 			pythonExec,
-			cliArgs,
+			cliArgs
 		);
 	export const waitingForJupyterSessionToBeIdle = l10n.t(
-		"Waiting for Jupyter Session to be idle",
+		"Waiting for Jupyter Session to be idle"
 	);
 	export const gettingListOfKernelsForRemoteConnection =
 		l10n.t("Fetching Kernels");
@@ -738,7 +738,7 @@ export namespace DataScience {
 	export const startingJupyterNotebook = l10n.t("Starting Jupyter Notebook");
 	export const registeringKernel = l10n.t("Registering Kernel");
 	export const jupyterCommandLineReloadQuestion = l10n.t(
-		"Please reload the window when changing the Jupyter command line.",
+		"Please reload the window when changing the Jupyter command line."
 	);
 	export const jupyterCommandLineReloadAnswer = l10n.t("Reload");
 
@@ -747,31 +747,31 @@ export namespace DataScience {
 	export const kernelInvalid = (kernelName: string) =>
 		l10n.t(
 			"Kernel {0} is not usable. Check the Jupyter output tab for more information.",
-			kernelName,
+			kernelName
 		);
 
 	export const removeRemoteJupyterServerEntryInQuickPick = l10n.t("Remove");
 
 	export const loadClassFailedWithNoInternet = (
 		widgetName: string,
-		version: string,
+		version: string
 	) =>
 		l10n.t(
 			"Error loading {0}:{1}. Internet connection required for loading 3rd party widgets.",
 			widgetName,
-			version,
+			version
 		);
 	export const useCDNForWidgetsNoInformation = l10n.t(
-		"Widgets require us to download supporting files from a 3rd party website.",
+		"Widgets require us to download supporting files from a 3rd party website."
 	);
 	export const enableCDNForWidgetsSetting = (
 		widgetName: string,
-		version: string,
+		version: string
 	) =>
 		l10n.t(
 			"Widgets require us to download supporting files from a 3rd party website. (Error loading {0}:{1}).",
 			widgetName,
-			version,
+			version
 		);
 
 	export const enableCDNForWidgetsButton = l10n.t("Enable Downloads");
@@ -780,65 +780,65 @@ export namespace DataScience {
 		l10n.t(
 			"Unhandled kernel message from a widget: {0} : {1}",
 			messageType,
-			content,
+			content
 		);
 
 	export const cdnWidgetScriptNotAccessibleWarningMessage = (
 		widgetName: string,
-		sources: string,
+		sources: string
 	) =>
 		l10n.t(
 			"Unable to download widget '{0}' from 3rd party website {1}, due to network access. Expected behavior may be affected. Click [here](https://aka.ms/PVSCIPyWidgets) for more information.",
 			widgetName,
-			sources,
+			sources
 		);
 	export const widgetScriptNotFoundOnCDNWidgetMightNotWork = (
 		widgetName: string,
 		version: string,
-		sources: string,
+		sources: string
 	) =>
 		l10n.t(
 			"Unable to find widget '{0}' version '{1}' from configured widget sources {2}. Expected behavior may be affected. Click [here](https://aka.ms/PVSCIPyWidgets) for more information.",
 			widgetName,
 			version,
-			sources,
+			sources
 		);
 	export const insecureSessionMessage = l10n.t(
-		"Connecting over HTTP without a token may be an insecure connection. Do you want to connect to a possibly insecure server?",
+		"Connecting over HTTP without a token may be an insecure connection. Do you want to connect to a possibly insecure server?"
 	);
 	export const insecureSessionDenied = l10n.t(
-		"Denied connection to insecure server.",
+		"Denied connection to insecure server."
 	);
 	export const selectKernelForEditor = l10n.t(
-		"[Select a kernel](command:_notebook.selectKernel) to run cells.",
+		"[Select a kernel](command:_notebook.selectKernel) to run cells."
 	);
 	export const needIpykernel6 = l10n.t(
-		"Ipykernel setup required for this feature",
+		"Ipykernel setup required for this feature"
 	);
 	export const setup = l10n.t("Setup");
 	export const showDataViewerFail = l10n.t(
-		"Failed to create the Data Viewer. Check the Jupyter tab of the Output window for more info.",
+		"Failed to create the Data Viewer. Check the Jupyter tab of the Output window for more info."
 	);
 
 	export const defaultNotebookName = l10n.t("default");
 	export const recommendExtensionForNotebookLanguage = (
 		extensionLink: string,
-		language: string,
+		language: string
 	) =>
 		l10n.t(
 			"The {0} extension is recommended for notebooks targeting the language '{1}'",
 			extensionLink,
-			language,
+			language
 		);
 	export const kernelWasNotStarted = l10n.t(
-		"Kernel was not started. A kernel session is needed to start debugging.",
+		"Kernel was not started. A kernel session is needed to start debugging."
 	);
 	export const noNotebookToDebug = l10n.t(
-		"No active notebook document to debug.",
+		"No active notebook document to debug."
 	);
 	export const cantStartDebugging = l10n.t("Can't start debugging.");
 	export const restartNotSupported = l10n.t(
-		"Restarting is not supported in the interactive window.",
+		"Restarting is not supported in the interactive window."
 	);
 	export const importingIpynb = l10n.t("Importing notebook file");
 	export const exportingToFormat = (format: string) =>
@@ -850,7 +850,7 @@ export namespace DataScience {
 		l10n.t("Jupyter Kernel");
 	export const kernelCategoryForConda = l10n.t("Conda Env");
 	export const kernelCategoryForCondaWithoutPython = l10n.t(
-		"Conda Env Without Python",
+		"Conda Env Without Python"
 	);
 	export const kernelCategoryForPoetry = l10n.t("Poetry Env");
 	export const kernelCategoryForPipEnv = l10n.t("Pipenv Env");
@@ -859,30 +859,30 @@ export namespace DataScience {
 	export const kernelCategoryForVirtual = l10n.t("Virtual Env");
 
 	export const fileSeemsToBeInterferingWithKernelStartup = (
-		fileName: string,
+		fileName: string
 	) =>
 		l10n.t(
 			"The file '{0}' seems to be overriding built in modules and interfering with the startup of the kernel. Consider renaming the file and starting the kernel again.",
-			fileName,
+			fileName
 		);
 	export const moduleSeemsToBeInterferingWithKernelStartup = (
-		moduleName: string,
+		moduleName: string
 	) =>
 		l10n.t(
 			"The module '{0}' seems to be overriding built in modules and interfering with the startup of the kernel. Consider renaming the folder and starting the kernel again.",
-			moduleName,
+			moduleName
 		);
 	export const pipCondaInstallHoverWarning = (
 		pipOrCondaInstaller: "pip" | "conda",
-		link: string,
+		link: string
 	) =>
 		l10n.t(
 			"'!{0} install' could install packages into the wrong environment. [More info]({1})",
 			pipOrCondaInstaller,
-			link,
+			link
 		);
 	export const percentPipCondaInstallInsteadOfBang = (
-		condaOrPipInstaller: "conda" | "pip",
+		condaOrPipInstaller: "conda" | "pip"
 	) =>
 		l10n.t({
 			message: "Use '%{0} install' instead of '!{0} install'",
@@ -892,39 +892,39 @@ export namespace DataScience {
 			],
 		});
 	export const replacePipCondaInstallCodeAction = (
-		pipOrCondaInstaller: "pip" | "conda",
+		pipOrCondaInstaller: "pip" | "conda"
 	) => l10n.t("Replace with '%{0} install'", pipOrCondaInstaller);
 	export const failedToStartKernelDueToMissingModule = (moduleName: string) =>
 		l10n.t(
 			"The kernel failed to start due to the missing module '{0}'. Consider installing this module.",
-			moduleName,
+			moduleName
 		);
 	export const failedToStartKernelDueToImportFailure = (
-		pythonModuleName: string,
+		pythonModuleName: string
 	) =>
 		l10n.t(
 			"The kernel failed to start as the module '{0}' could not be imported.",
-			pythonModuleName,
+			pythonModuleName
 		);
 	export const failedToStartKernelDueToImportFailureFromFile = (
 		moduleName: string,
-		fileName: string,
+		fileName: string
 	) =>
 		l10n.t(
 			"The kernel failed to start as '{0}' could not be imported from '{1}'.",
 			moduleName,
-			fileName,
+			fileName
 		);
 	export const failedToStartKernelDueToUnknownDllLoadFailure = l10n.t(
-		"The kernel failed to start as a dll could not be loaded.",
+		"The kernel failed to start as a dll could not be loaded."
 	);
 	export const failedToStartKernelDueToDllLoadFailure = (dllName: string) =>
 		l10n.t(
 			"The kernel failed to start as the dll '{0}' could not be loaded.",
-			dllName,
+			dllName
 		);
 	export const failedToStartKernelDueToWin32APIFailure = l10n.t(
-		"The kernel failed to start due to an error with the Win32api module. Consider (re) installing this module.",
+		"The kernel failed to start due to an error with the Win32api module. Consider (re) installing this module."
 	);
 	export const failedToStartKernelDueToPyZmqFailure = l10n.t({
 		message:
@@ -934,37 +934,37 @@ export namespace DataScience {
 		],
 	});
 	export const failedToStartKernelDueToOldIPython = l10n.t(
-		"The kernel failed to start due to an outdated version of IPython. Consider updating this module to the latest version.",
+		"The kernel failed to start due to an outdated version of IPython. Consider updating this module to the latest version."
 	);
 	export const failedToStartKernelDueToOldIPyKernel = l10n.t(
-		"The kernel failed to start due to an outdated version of IPyKernel. Consider updating this module to the latest version.",
+		"The kernel failed to start due to an outdated version of IPyKernel. Consider updating this module to the latest version."
 	);
 	export const failedToStartKernelDueToMissingPythonEnv = (
-		pythonEnvName: string,
+		pythonEnvName: string
 	) =>
 		l10n.t(
 			`The kernel failed to start as the Python Environment '{0}' is no longer available. Consider selecting another kernel or refreshing the list of Python Environments.`,
-			pythonEnvName,
+			pythonEnvName
 		);
 	export const matplotlibWidgetInsteadOfOther = l10n.t(
-		"'%matplotlib' widget works best inside of VS Code",
+		"'%matplotlib' widget works best inside of VS Code"
 	);
 	export const matplotlibWidgetCodeActionTitle = l10n.t("More info");
 	export const allowExtensionToUseJupyterKernelApi = (
 		extensionLink: string,
-		prompt: string,
+		prompt: string
 	) =>
 		l10n.t(
 			"Do you want to give the extension '{0}' access to the Jupyter Kernels? Clicking '{1}' would allow this extension to execute code against the Jupyter Kernels.",
 			extensionLink,
-			prompt,
+			prompt
 		);
 	export const thanksForUsingJupyterKernelApiPleaseRegisterWithUs = (
-		extension: string,
+		extension: string
 	) =>
 		l10n.t(
 			"Thank you for trying the Jupyter API. Please file an issue on our repo to allow the extension {0} to use this API in production. This would prevent us from breaking your extension when updating the API (as it is still a work in progress).",
-			extension,
+			extension
 		);
 	export const activatingPythonEnvironment = (pythonEnvName: string) =>
 		l10n.t("Activating Python Environment '{0}'", pythonEnvName);
@@ -975,66 +975,66 @@ export namespace DataScience {
 		l10n.t("{0} Cell {1}", filePath, lineNumber);
 
 	export const jupyterServerConsoleOutputChannel = l10n.t(
-		`Jupyter Server Console`,
+		`Jupyter Server Console`
 	);
 
 	export const kernelConsoleOutputChannel = (kernelName: string) =>
 		l10n.t(`{0} Kernel Console Output`, kernelName);
 	export const webNotSupported = l10n.t(
-		`Operation not supported in web version of Jupyter Extension.`,
+		`Operation not supported in web version of Jupyter Extension.`
 	);
 	export const failedToInstallPythonExtension = l10n.t(
-		`Failed to install the Python Extension.`,
+		`Failed to install the Python Extension.`
 	);
 	export const filesPossiblyOverridingPythonModulesMayHavePreventedKernelFromStarting =
 		(files: string) =>
 			l10n.t(
 				"Some of the following files found in the working directory may have prevented the Kernel from starting. Consider renaming them.",
-				files,
+				files
 			);
 	export const listOfFilesWithLinksThatMightNeedToBeRenamed = (
-		files: string,
+		files: string
 	) => l10n.t("File(s): {0} might need to be renamed.", files);
 	export const failedToGetVersionOfPandas = l10n.t(
-		"Failed to get version of Pandas to use the Data Viewer.",
+		"Failed to get version of Pandas to use the Data Viewer."
 	);
 	export const failedToInstallPandas = l10n.t(
-		"Failed to install Pandas to use the Data Viewer.",
+		"Failed to install Pandas to use the Data Viewer."
 	);
 	export const localKernelSpecs = l10n.t("Jupyter Kernel...");
 
 	export const localPythonEnvironments = l10n.t("Python Environments...");
 	export const quickPickTitleForSelectionOfJupyterServer = l10n.t(
-		"Select a Jupyter Server",
+		"Select a Jupyter Server"
 	);
 	export const UserJupyterServerUrlProviderDisplayName = l10n.t(
-		"Existing Jupyter Server...",
+		"Existing Jupyter Server..."
 	);
 	export const UserJupyterServerUrlProviderDetail = l10n.t(
-		"Connect to an existing Jupyter Server",
+		"Connect to an existing Jupyter Server"
 	);
 	export const kernelPickerSelectKernelTitle = l10n.t("Select Kernel");
 	export const kernelPickerSelectLocalKernelSpecTitle = l10n.t(
-		"Select a Jupyter Kernel",
+		"Select a Jupyter Kernel"
 	);
 	export const quickPickSelectPythonEnvironmentTitle = l10n.t(
-		"Select a Python Environment",
+		"Select a Python Environment"
 	);
 	export const kernelPickerSelectKernelFromRemoteTitle = (
-		kernelProvider: string,
+		kernelProvider: string
 	) => l10n.t("Select a Kernel from {0}", kernelProvider);
 	export const kernelPickerSelectKernelFromRemoteTitleWithoutName = l10n.t(
-		"Select a Jupyter Kernel",
+		"Select a Jupyter Kernel"
 	);
 	export const installPythonExtensionViaKernelPickerTitle = l10n.t(
-		"Install Python Extension",
+		"Install Python Extension"
 	);
 	export const installPythonExtensionViaKernelPickerToolTip = l10n.t(
-		"Python Extension is required to detect and use Python environments for the execution of code cells.",
+		"Python Extension is required to detect and use Python environments for the execution of code cells."
 	);
 	export const installPythonQuickPickTitle = l10n.t("Install Python");
 	export const installPythonQuickPickToolTip = l10n.t(
-		"Python Environments not detected. Upon installation reload VS Code or refresh the list of Kernels.",
+		"Python Environments not detected. Upon installation reload VS Code or refresh the list of Kernels."
 	);
 	export const failedToFetchKernelSpecsRemoteErrorMessageForQuickPickLabel =
 		l10n.t({
@@ -1077,7 +1077,7 @@ export namespace WebViews {
 	export const collapseVariableExplorerLabel = l10n.t("Variables");
 	export const variableLoadingValue = l10n.t("Loading...");
 	export const showDataExplorerTooltip = l10n.t(
-		"Show variable snapshot in data viewer",
+		"Show variable snapshot in data viewer"
 	);
 	export const noRowsInVariableExplorer = l10n.t("No variables defined");
 	export const loadingRowsInVariableExplorer = l10n.t("Loading variables");
@@ -1129,10 +1129,10 @@ export namespace Deprecated {
 
 export namespace Installer {
 	export const noCondaOrPipInstaller = l10n.t(
-		"There is no Conda or Pip installer available in the selected environment.",
+		"There is no Conda or Pip installer available in the selected environment."
 	);
 	export const noPipInstaller = l10n.t(
-		"There is no Pip installer available in the selected environment.",
+		"There is no Pip installer available in the selected environment."
 	);
 	export const searchForHelp = l10n.t("Search for help");
 }

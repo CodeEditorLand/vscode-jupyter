@@ -55,24 +55,28 @@ export class LastCellExecutionTracker
 	private staleState?: Record<string, StorageExecutionInfo>;
 
 	constructor(
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IJupyterServerUriStorage) private readonly serverStorage: IJupyterServerUriStorage,
-        @inject(IExtensionContext) private readonly context: IExtensionContext,
-        @inject(IFileSystem) private readonly fs: IFileSystem
-    ) {
-        super();
-        context.globalStorageUri;
-        disposables.push(this);
-        this.storageFile = Uri.joinPath(this.context.globalStorageUri, 'lastExecutedRemoteCell.json');
-    }
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IJupyterServerUriStorage)
+		private readonly serverStorage: IJupyterServerUriStorage,
+		@inject(IExtensionContext) private readonly context: IExtensionContext,
+		@inject(IFileSystem) private readonly fs: IFileSystem
+	) {
+		super();
+		context.globalStorageUri;
+		disposables.push(this);
+		this.storageFile = Uri.joinPath(
+			this.context.globalStorageUri,
+			"lastExecutedRemoteCell.json"
+		);
+	}
 	public activate(): void {
 		this._register(
-			this.serverStorage.onDidRemove(this.onDidRemoveServers, this),
+			this.serverStorage.onDidRemove(this.onDidRemoveServers, this)
 		);
 	}
 	public async getLastTrackedCellExecution(
 		notebook: NotebookDocument,
-		kernel: IKernel,
+		kernel: IKernel
 	): Promise<CellExecutionInfo | undefined> {
 		if (notebook.isUntitled) {
 			return;
@@ -144,7 +148,7 @@ export class LastCellExecutionTracker
 						try {
 							// Time from the kernel is more accurate.
 							info.startTime = new Date(
-								ioPub.header.date,
+								ioPub.header.date
 							).getTime();
 						} catch {
 							// Ignore.
@@ -178,8 +182,8 @@ export class LastCellExecutionTracker
 			session.anyMessage.connect(anyMessageHandler);
 			disposables.push({
 				dispose: () =>
-					swallowExceptions(() =>
-						session.anyMessage?.disconnect(anyMessageHandler),
+					swallowExceptions(
+						() => session.anyMessage?.disconnect(anyMessageHandler)
 					),
 			});
 		};
@@ -203,7 +207,7 @@ export class LastCellExecutionTracker
 			let store: Record<string, StorageExecutionInfo> = {};
 			try {
 				const data = await this.getStorageFile().then(() =>
-					this.fs.readFile(this.storageFile),
+					this.fs.readFile(this.storageFile)
 				);
 				store = JSON.parse(data.toString()) as Record<
 					string,
@@ -219,7 +223,7 @@ export class LastCellExecutionTracker
 				this.staleState = store;
 				await this.fs.writeFile(
 					this.storageFile,
-					JSON.stringify(store),
+					JSON.stringify(store)
 				);
 			}
 		});
@@ -236,7 +240,7 @@ export class LastCellExecutionTracker
 	private trackLastExecution(
 		cell: NotebookCell,
 		kernel: IKernel,
-		info: Partial<CellExecutionInfo>,
+		info: Partial<CellExecutionInfo>
 	) {
 		if (!info.executionCount || !info.msg_id || !info.startTime) {
 			return;
@@ -253,7 +257,7 @@ export class LastCellExecutionTracker
 			kernelId: kernel.session?.kernel?.id || "",
 			msg_id: info.msg_id,
 			serverId: generateIdFromRemoteProvider(
-				kernel.kernelConnectionMetadata.serverProviderHandle,
+				kernel.kernelConnectionMetadata.serverProviderHandle
 			),
 			sessionId: kernel.session?.id,
 			startTime: info.startTime,
@@ -262,7 +266,7 @@ export class LastCellExecutionTracker
 			let store: Record<string, StorageExecutionInfo> = {};
 			try {
 				const data = await this.getStorageFile().then(() =>
-					this.fs.readFile(this.storageFile),
+					this.fs.readFile(this.storageFile)
 				);
 				store = JSON.parse(data.toString()) as Record<
 					string,
@@ -296,7 +300,7 @@ export class LastCellExecutionTracker
 			}
 			let removed = false;
 			const removedServerIds = new Set(
-				removedServers.map((s) => generateIdFromRemoteProvider(s)),
+				removedServers.map((s) => generateIdFromRemoteProvider(s))
 			);
 			Object.keys(store).forEach((key) => {
 				const data = store[key];
@@ -314,7 +318,7 @@ export class LastCellExecutionTracker
 				this.staleState = store;
 				await this.fs.writeFile(
 					this.storageFile,
-					JSON.stringify(store),
+					JSON.stringify(store)
 				);
 			}
 		});

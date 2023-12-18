@@ -20,12 +20,12 @@ export function sendFileCreationTelemetry() {
 
 export async function sendActivationTelemetry(
 	fileSystem: IFileSystem,
-	resource: Resource,
+	resource: Resource
 ) {
 	if (shouldSendTelemetry()) {
 		const systemVariables = new SystemVariables(resource, undefined);
 		const envFilePath = systemVariables.resolveAny(
-			defaultEnvFileSetting(),
+			defaultEnvFileSetting()
 		)!;
 		const envFileExists = await fileSystem.exists(Uri.file(envFilePath));
 
@@ -60,7 +60,10 @@ export namespace EnvFileTelemetryTests {
 	export function setState({
 		telemetrySent,
 		defaultSetting,
-	}: { telemetrySent?: boolean; defaultSetting?: string }) {
+	}: {
+		telemetrySent?: boolean;
+		defaultSetting?: string;
+	}) {
 		if (telemetrySent !== undefined) {
 			envFileTelemetrySent = telemetrySent;
 		}

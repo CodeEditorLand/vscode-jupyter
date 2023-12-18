@@ -29,33 +29,37 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 	private pendingUpdate = Promise.resolve();
 	private readonly disposables: IDisposable[] = [];
 	constructor(
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private cache: Memento,
-        @inject(IPlatformService) private platform: IPlatformService,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IFileSystemNode) private readonly fs: IFileSystemNode
-    ) {
-        disposables.push(this);
-        this.cachedModules = new Set(
-            this.cache.get<string[]>(PYTHON_PACKAGES_MEMENTO_KEY, BuiltInModules).map((item) => item.toLowerCase())
-        );
-        workspace.onDidChangeConfiguration(
-            (e) => {
-                if (e.affectsConfiguration(`jupyter.${ignoreListSettingName}`)) {
-                    this.initializeIgnoreList();
-                }
-            },
-            this,
-            this.disposables
-        );
-        this.initializeIgnoreList();
-    }
+		@inject(IMemento) @named(GLOBAL_MEMENTO) private cache: Memento,
+		@inject(IPlatformService) private platform: IPlatformService,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IFileSystemNode) private readonly fs: IFileSystemNode
+	) {
+		disposables.push(this);
+		this.cachedModules = new Set(
+			this.cache
+				.get<string[]>(PYTHON_PACKAGES_MEMENTO_KEY, BuiltInModules)
+				.map((item) => item.toLowerCase())
+		);
+		workspace.onDidChangeConfiguration(
+			(e) => {
+				if (
+					e.affectsConfiguration(`jupyter.${ignoreListSettingName}`)
+				) {
+					this.initializeIgnoreList();
+				}
+			},
+			this,
+			this.disposables
+		);
+		this.initializeIgnoreList();
+	}
 
 	public dispose() {
 		dispose(this.disposables);
 	}
 
 	public async getUriOverridingReservedPythonNames(
-		cwd: Uri,
+		cwd: Uri
 	): Promise<{ uri: Uri; type: "file" | "__init__" }[]> {
 		const [files, initFile] = await Promise.all([
 			this.fs.searchLocal("*.py", cwd.fsPath, true),
@@ -71,7 +75,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 					if (await this.isReserved(uri)) {
 						problematicFiles.push({ uri, type: "file" });
 					}
-				}),
+				})
 		);
 		const initFilePromises = Promise.all(
 			initFile
@@ -80,7 +84,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 					if (await this.isReserved(uri)) {
 						problematicFiles.push({ uri, type: "__init__" });
 					}
-				}),
+				})
 		);
 		await Promise.all([filePromises, initFilePromises]);
 		return problematicFiles;
@@ -133,8 +137,8 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 			jupyterConfig.update(
 				ignoreListSettingName,
 				Array.from(this.ignoredFiles),
-				ConfigurationTarget.Global,
-			),
+				ConfigurationTarget.Global
+			)
 		);
 		return this.pendingUpdate;
 	}
@@ -142,7 +146,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 		const jupyterConfig = workspace.getConfiguration("jupyter");
 		let listInSettings = jupyterConfig.get(
 			ignoreListSettingName,
-			[],
+			[]
 		) as string[];
 		// Ignore file case on windows, hence lower case the files.
 		if (this.platform.isWindows) {

@@ -27,8 +27,7 @@ export class Button extends React.Component<IButtonProps> {
 				title={this.props.tooltip}
 				aria-label={this.props.tooltip}
 				className={this.props.className}
-				onClick={this.props.onClick}
-			>
+				onClick={this.props.onClick}>
 				<span className={innerFilter}>{this.props.children}</span>
 			</button>
 		);

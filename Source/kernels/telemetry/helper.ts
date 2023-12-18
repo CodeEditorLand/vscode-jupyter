@@ -52,7 +52,7 @@ export type ContextualTelemetryProps = {
 
 export async function trackKernelResourceInformation(
 	resource: Resource,
-	information: Partial<ContextualTelemetryProps>,
+	information: Partial<ContextualTelemetryProps>
 ) {
 	if (!resource) {
 		return;
@@ -65,7 +65,7 @@ export async function trackKernelResourceInformation(
 				? await getTelemetrySafeHashedString(resource.toString())
 				: undefined,
 			kernelSessionId: await getTelemetrySafeHashedString(
-				Date.now().toString(),
+				Date.now().toString()
 			),
 			capturedEnvVars: undefined,
 			userExecutedCell: undefined,
@@ -108,7 +108,7 @@ export async function trackKernelResourceInformation(
 				newKernelConnectionId
 		) {
 			currentData.kernelSessionId = await getTelemetrySafeHashedString(
-				Date.now().toString(),
+				Date.now().toString()
 			);
 		}
 		let language: string | undefined;
@@ -130,8 +130,8 @@ export async function trackKernelResourceInformation(
 			"kernelSpec" in kernelConnection &&
 			kernelConnection.kernelSpec.specFile
 				? getTelemetrySafeHashedString(
-						kernelConnection.kernelSpec.specFile,
-				  )
+						kernelConnection.kernelSpec.specFile
+					)
 				: Promise.resolve("");
 		currentData.kernelLanguage = language;
 		[currentData.kernelId, currentData.kernelSpecHash] = await Promise.all([
@@ -147,16 +147,16 @@ export async function trackKernelResourceInformation(
 			currentData.isUsingActiveInterpreter =
 				WorkspaceInterpreterTracker.isActiveWorkspaceInterpreter(
 					resource,
-					interpreter,
+					interpreter
 				);
 			currentData.pythonEnvironmentType = interpreter.envType;
 			currentData.pythonEnvironmentPath =
 				await getTelemetrySafeHashedString(
-					getFilePath(getNormalizedInterpreterPath(interpreter.uri)),
+					getFilePath(getNormalizedInterpreterPath(interpreter.uri))
 				);
 			pythonEnvironmentsByHash.set(
 				currentData.pythonEnvironmentPath,
-				interpreter,
+				interpreter
 			);
 			if (interpreter.version) {
 				const { major, minor, patch } = interpreter.version;
@@ -182,7 +182,7 @@ export async function trackKernelResourceInformation(
  */
 export async function initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 	resourceUri: Resource,
-	kernelConnection: KernelConnectionMetadata,
+	kernelConnection: KernelConnectionMetadata
 ) {
 	await trackKernelResourceInformation(resourceUri, {
 		kernelConnection,

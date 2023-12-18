@@ -22,7 +22,7 @@ import { StopWatch } from "../platform/common/utils/stopWatch";
 export async function sendTelemetryForPythonKernelExecutable(
 	session: IKernelSession,
 	resource: Resource,
-	kernelConnection: KernelConnectionMetadata,
+	kernelConnection: KernelConnectionMetadata
 ) {
 	if (
 		!kernelConnection.interpreter ||
@@ -43,7 +43,7 @@ export async function sendTelemetryForPythonKernelExecutable(
 	try {
 		const outputs = await executeSilently(
 			session.kernel,
-			"import sys as _VSCODE_sys\nprint(_VSCODE_sys.executable); del _VSCODE_sys",
+			"import sys as _VSCODE_sys\nprint(_VSCODE_sys.executable); del _VSCODE_sys"
 		);
 		if (outputs.length === 0) {
 			return;
@@ -58,7 +58,7 @@ export async function sendTelemetryForPythonKernelExecutable(
 			.toLowerCase();
 		const match = areInterpreterPathsSame(
 			kernelConnection.interpreter.uri,
-			Uri.file(sysExecutable),
+			Uri.file(sysExecutable)
 		);
 		await trackKernelResourceInformation(resource, {
 			interpreterMatchesKernel: match,
@@ -66,11 +66,11 @@ export async function sendTelemetryForPythonKernelExecutable(
 	} catch (ex) {
 		traceError(
 			`Failed to compare interpreters after ${stopWatch.elapsedTime}ms`,
-			ex,
+			ex
 		);
 	}
 	traceVerbose(
-		`End sendTelemetryForPythonKernelExecutable after ${stopWatch.elapsedTime}ms`,
+		`End sendTelemetryForPythonKernelExecutable after ${stopWatch.elapsedTime}ms`
 	);
 }
 
@@ -79,7 +79,7 @@ export async function sendTelemetryForPythonKernelExecutable(
  * Any kernelSpec where the first argument (in argv) is `python` or `python3` will be launched via a Python executable.
  */
 function isKernelLaunchedViaLocalPythonProcess(
-	kernel: KernelConnectionMetadata | IJupyterKernelSpec,
+	kernel: KernelConnectionMetadata | IJupyterKernelSpec
 ) {
 	const connection = "kernelSpec" in kernel ? kernel : undefined;
 	// We generate these, and these kernels are always started by us using Python code.
@@ -104,7 +104,7 @@ function isKernelLaunchedViaLocalPythonProcess(
  * how the process is launched.
  */
 export function isKernelLaunchedViaLocalPythonIPyKernel(
-	kernel: KernelConnectionMetadata | IJupyterKernelSpec,
+	kernel: KernelConnectionMetadata | IJupyterKernelSpec
 ) {
 	const connection = "kernelSpec" in kernel ? kernel : undefined;
 	// We generate these, and these kernels are always started by us using Python code.

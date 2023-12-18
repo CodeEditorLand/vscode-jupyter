@@ -140,23 +140,23 @@ suite("Controller Registration", () => {
 		onDidChangeKernels = new EventEmitter<void>();
 		disposables.push(onDidChangeKernels);
 		when(
-			serviceContainer.get<IConfigurationService>(IConfigurationService),
+			serviceContainer.get<IConfigurationService>(IConfigurationService)
 		).thenReturn(instance(configService));
 		when(
 			serviceContainer.get<IConnectionDisplayDataProvider>(
-				IConnectionDisplayDataProvider,
-			),
+				IConnectionDisplayDataProvider
+			)
 		).thenReturn(instance(displayDataProvider));
 		when(
 			serviceContainer.get<NotebookCellLanguageService>(
-				NotebookCellLanguageService,
-			),
+				NotebookCellLanguageService
+			)
 		).thenReturn(instance(languageService));
 		when(
-			serviceContainer.get<IExtensionContext>(IExtensionContext),
+			serviceContainer.get<IExtensionContext>(IExtensionContext)
 		).thenReturn(instance(context));
 		when(serviceContainer.get<IKernelProvider>(IKernelProvider)).thenReturn(
-			instance(kernelProvider),
+			instance(kernelProvider)
 		);
 		addOrUpdateCalled = false;
 
@@ -191,25 +191,25 @@ suite("Controller Registration", () => {
 		disposables.push(onDidChangeKernelsInContributedPythonKernelFinder);
 
 		when(kernelFinder.onDidChangeKernels).thenReturn(
-			onDidChangeKernels.event,
+			onDidChangeKernels.event
 		);
 		when(kernelFinder.onDidChangeRegistrations).thenReturn(
-			onDidChangeRegistrations.event,
+			onDidChangeRegistrations.event
 		);
 		when(kernelFilter.onDidChange).thenReturn(onDidChangeFilter.event);
 		when(serverUriStorage.onDidChange).thenReturn(onDidChangeUri.event);
 		when(serverUriStorage.onDidRemove).thenReturn(onDidRemoveUris.event);
 		when(interpreters.onDidChangeInterpreter).thenReturn(
-			onDidChangeInterpreter.event,
+			onDidChangeInterpreter.event
 		);
 		when(interpreters.onDidChangeInterpreters).thenReturn(
-			onDidChangeInterpreters.event,
+			onDidChangeInterpreters.event
 		);
 		when(contributedLocalKernelFinder.onDidChangeKernels).thenReturn(
-			onDidChangeKernelsInContributedLocalKernelFinder.event,
+			onDidChangeKernelsInContributedLocalKernelFinder.event
 		);
 		when(contributedPythonKernelFinder.onDidChangeKernels).thenReturn(
-			onDidChangeKernelsInContributedPythonKernelFinder.event,
+			onDidChangeKernelsInContributedPythonKernelFinder.event
 		);
 		onDidChangeKernelsInContributedPythonKernelFinder;
 		when(kernelFinder.registered).thenReturn([
@@ -219,12 +219,12 @@ suite("Controller Registration", () => {
 		when(kernelFinder.kernels).thenReturn([]);
 		when(interpreters.resolvedEnvironments).thenReturn([activePythonEnv]);
 		when(kernelFilter.isPythonEnvironmentExcluded(anything())).thenReturn(
-			false,
+			false
 		);
 		when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn([]);
 		when(extensionChecker.isPythonExtensionInstalled).thenReturn(true);
 		when(interpreters.getActiveInterpreter(anything())).thenResolve(
-			activePythonEnv,
+			activePythonEnv
 		);
 
 		clock = fakeTimers.install();
@@ -244,12 +244,12 @@ suite("Controller Registration", () => {
 					instance(extensionChecker),
 					instance(serviceContainer),
 					instance(serverUriStorage),
-					instance(kernelFinder),
+					instance(kernelFinder)
 				);
 			});
 			test("No controllers created if there are no kernels", async () => {
 				when(interpreters.getActiveInterpreter(anything())).thenResolve(
-					undefined,
+					undefined
 				);
 				registration.addOrUpdate = () => {
 					addOrUpdateCalled = true;
@@ -263,11 +263,11 @@ suite("Controller Registration", () => {
 
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.isFalse(
 					stubCtor.called,
-					"VSCodeNotebookController should not be called",
+					"VSCodeNotebookController should not be called"
 				);
 			});
 			test("No controllers created if there are no kernels and even if we have an active interpreter", async function () {
@@ -275,7 +275,7 @@ suite("Controller Registration", () => {
 					return this.skip();
 				}
 				when(interpreters.getActiveInterpreter(anything())).thenResolve(
-					activePythonEnv,
+					activePythonEnv
 				);
 				registration.addOrUpdate = () => {
 					addOrUpdateCalled = true;
@@ -289,11 +289,11 @@ suite("Controller Registration", () => {
 
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.isFalse(
 					stubCtor.called,
-					"VSCodeNotebookController should not be called",
+					"VSCodeNotebookController should not be called"
 				);
 			});
 			test("Create controller for discovered kernels", async function () {
@@ -301,7 +301,7 @@ suite("Controller Registration", () => {
 					return this.skip();
 				}
 				when(interpreters.getActiveInterpreter(anything())).thenResolve(
-					undefined,
+					undefined
 				);
 				when(kernelFinder.kernels).thenReturn([
 					activePythonConnection,
@@ -311,7 +311,7 @@ suite("Controller Registration", () => {
 				const controller = mock<IVSCodeNotebookController>();
 				(instance(controller) as any).then = undefined;
 				when(controller.connection).thenReturn(
-					instance(mock<KernelConnectionMetadata>()),
+					instance(mock<KernelConnectionMetadata>())
 				);
 				registration.addOrUpdate = () => {
 					addOrUpdateCalled = true;
@@ -325,7 +325,7 @@ suite("Controller Registration", () => {
 
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.equal(stubCtor.callCount, 3);
 				assert.deepEqual(stubCtor.args[0][0], activePythonConnection);
@@ -337,7 +337,7 @@ suite("Controller Registration", () => {
 					return this.skip();
 				}
 				when(interpreters.getActiveInterpreter(anything())).thenResolve(
-					undefined,
+					undefined
 				);
 				when(kernelFinder.kernels).thenReturn([
 					activePythonConnection,
@@ -355,15 +355,15 @@ suite("Controller Registration", () => {
 				const activeInterpreterController =
 					mock<VSCodeNotebookController>();
 				when(activeInterpreterController.connection).thenReturn(
-					activePythonConnection,
+					activePythonConnection
 				);
 				const condaController = mock<VSCodeNotebookController>();
 				when(condaController.connection).thenReturn(
-					condaPythonConnection,
+					condaPythonConnection
 				);
 				const javaController = mock<VSCodeNotebookController>();
 				when(javaController.connection).thenReturn(
-					javaKernelConnection,
+					javaKernelConnection
 				);
 
 				const stubCtor = sinon.stub(VSCodeNotebookController, "create");
@@ -379,7 +379,7 @@ suite("Controller Registration", () => {
 						_arg7,
 						_arg8,
 						_arg9,
-						_arg10,
+						_arg10
 					) => {
 						if (connection === activePythonConnection) {
 							when(activeInterpreterController.id).thenReturn(id);
@@ -392,7 +392,7 @@ suite("Controller Registration", () => {
 							return instance(javaController);
 						}
 						throw new Error("Unexpected connection");
-					},
+					}
 				);
 
 				registration.activate();
@@ -401,7 +401,7 @@ suite("Controller Registration", () => {
 
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.equal(stubCtor.callCount, 6);
 
@@ -413,7 +413,7 @@ suite("Controller Registration", () => {
 				// We should see no difference in the controllers.
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.equal(stubCtor.callCount, 6);
 				verify(activeInterpreterController.dispose()).never();
@@ -438,7 +438,7 @@ suite("Controller Registration", () => {
 					return this.skip();
 				}
 				when(interpreters.getActiveInterpreter(anything())).thenResolve(
-					undefined,
+					undefined
 				);
 				when(kernelFinder.kernels).thenReturn([
 					activePythonConnection,
@@ -448,21 +448,21 @@ suite("Controller Registration", () => {
 				const controller = mock<IVSCodeNotebookController>();
 				(instance(controller) as any).then = undefined;
 				when(controller.connection).thenReturn(
-					instance(mock<KernelConnectionMetadata>()),
+					instance(mock<KernelConnectionMetadata>())
 				);
 
 				const activeInterpreterController =
 					mock<VSCodeNotebookController>();
 				when(activeInterpreterController.connection).thenReturn(
-					activePythonConnection,
+					activePythonConnection
 				);
 				const condaController = mock<VSCodeNotebookController>();
 				when(condaController.connection).thenReturn(
-					condaPythonConnection,
+					condaPythonConnection
 				);
 				const javaController = mock<VSCodeNotebookController>();
 				when(javaController.connection).thenReturn(
-					javaKernelConnection,
+					javaKernelConnection
 				);
 
 				const stubCtor = sinon.stub(VSCodeNotebookController, "create");
@@ -478,7 +478,7 @@ suite("Controller Registration", () => {
 						_arg7,
 						_arg8,
 						_arg9,
-						_arg10,
+						_arg10
 					) => {
 						if (connection === activePythonConnection) {
 							when(activeInterpreterController.id).thenReturn(id);
@@ -491,7 +491,7 @@ suite("Controller Registration", () => {
 							return instance(javaController);
 						}
 						throw new Error("Unexpected connection");
-					},
+					}
 				);
 
 				registration.activate();
@@ -500,7 +500,7 @@ suite("Controller Registration", () => {
 
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.equal(stubCtor.callCount, 6);
 
@@ -514,7 +514,7 @@ suite("Controller Registration", () => {
 				// We should see no difference in the controllers.
 				assert.isFalse(
 					addOrUpdateCalled,
-					"addOrUpdate should not be called",
+					"addOrUpdate should not be called"
 				);
 				assert.equal(stubCtor.callCount, 6);
 				verify(activeInterpreterController.dispose()).never();

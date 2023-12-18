@@ -28,13 +28,17 @@ import { trackKernelResourceInformation } from "../../telemetry/helper";
 @injectable()
 export class KernelEnvironmentVariablesService {
 	constructor(
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
-        @inject(IEnvironmentActivationService) private readonly envActivation: IEnvironmentActivationService,
-        @inject(IEnvironmentVariablesService) private readonly envVarsService: IEnvironmentVariablesService,
-        @inject(ICustomEnvironmentVariablesProvider)
-        private readonly customEnvVars: ICustomEnvironmentVariablesProvider,
-        @inject(IConfigurationService) private readonly configService: IConfigurationService
-    ) {}
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService,
+		@inject(IEnvironmentActivationService)
+		private readonly envActivation: IEnvironmentActivationService,
+		@inject(IEnvironmentVariablesService)
+		private readonly envVarsService: IEnvironmentVariablesService,
+		@inject(ICustomEnvironmentVariablesProvider)
+		private readonly customEnvVars: ICustomEnvironmentVariablesProvider,
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService
+	) {}
 	/**
 	 * Generates the environment variables for the kernel.
 	 *
@@ -52,7 +56,7 @@ export class KernelEnvironmentVariablesService {
 		resource: Resource,
 		interpreter: PythonEnvironment | undefined,
 		kernelSpec: IJupyterKernelSpec,
-		token?: CancellationToken,
+		token?: CancellationToken
 	) {
 		let kernelEnv =
 			kernelSpec.env && Object.keys(kernelSpec.env).length > 0
@@ -65,12 +69,12 @@ export class KernelEnvironmentVariablesService {
 			interpreter = await this.interpreterService
 				.getInterpreterDetails(
 					Uri.file(kernelSpec.interpreterPath),
-					token,
+					token
 				)
 				.catch((ex) => {
 					traceError(
 						"Failed to fetch interpreter information for interpreter that owns a kernel",
-						ex,
+						ex
 					);
 					return undefined;
 				});
@@ -83,7 +87,7 @@ export class KernelEnvironmentVariablesService {
 				.getCustomEnvironmentVariables(
 					resource,
 					isPythonKernel ? "RunPythonCode" : "RunNonPythonCode",
-					token,
+					token
 				)
 				.catch(noop),
 			interpreter
@@ -91,12 +95,12 @@ export class KernelEnvironmentVariablesService {
 						.getActivatedEnvironmentVariables(
 							resource,
 							interpreter,
-							token,
+							token
 						)
 						.catch<undefined>((ex) => {
 							traceError(
 								"Failed to get env variables for interpreter, hence no variables for Kernel",
-								ex,
+								ex
 							);
 							return undefined;
 						})
@@ -111,7 +115,7 @@ export class KernelEnvironmentVariablesService {
 
 		if (!interpreterEnv && Object.keys(customEnvVars || {}).length === 0) {
 			traceVerbose(
-				"No custom variables nor do we have a conda environment",
+				"No custom variables nor do we have a conda environment"
 			);
 		}
 
@@ -142,11 +146,11 @@ export class KernelEnvironmentVariablesService {
 				// Similarly for `PTYHONPATH`
 				// Additionally the 'PATH' variable may have different case in each, so account for that.
 				let otherEnvPathKey = Object.keys(interpreterEnv).find(
-					(k) => k.toLowerCase() == "path",
+					(k) => k.toLowerCase() == "path"
 				);
 				const processPathKey =
 					Object.keys(mergedVars).find(
-						(k) => k.toLowerCase() == "path",
+						(k) => k.toLowerCase() == "path"
 					) || otherEnvPathKey;
 				if (otherEnvPathKey && processPathKey) {
 					mergedVars[processPathKey] =
@@ -156,33 +160,33 @@ export class KernelEnvironmentVariablesService {
 					mergedVars["PYTHONPATH"] = interpreterEnv["PYTHONPATH"];
 				}
 				otherEnvPathKey = Object.keys(customEnvVars).find(
-					(k) => k.toLowerCase() == "path",
+					(k) => k.toLowerCase() == "path"
 				);
 				if (otherEnvPathKey && customEnvVars[otherEnvPathKey]) {
 					this.envVarsService.appendPath(
 						mergedVars,
-						customEnvVars[otherEnvPathKey]!,
+						customEnvVars[otherEnvPathKey]!
 					);
 				}
 				otherEnvPathKey = Object.keys(kernelEnv).find(
-					(k) => k.toLowerCase() == "path",
+					(k) => k.toLowerCase() == "path"
 				);
 				if (otherEnvPathKey && kernelEnv[otherEnvPathKey]) {
 					this.envVarsService.appendPath(
 						mergedVars,
-						kernelEnv[otherEnvPathKey]!,
+						kernelEnv[otherEnvPathKey]!
 					);
 				}
 				if (customEnvVars.PYTHONPATH) {
 					this.envVarsService.appendPythonPath(
 						mergedVars,
-						customEnvVars.PYTHONPATH,
+						customEnvVars.PYTHONPATH
 					);
 				}
 				if (kernelEnv.PYTHONPATH) {
 					this.envVarsService.appendPythonPath(
 						mergedVars,
-						kernelEnv.PYTHONPATH,
+						kernelEnv.PYTHONPATH
 					);
 				}
 				// Ensure the python env folder is always at the top of the PATH, this way all executables from that env are used.
@@ -191,7 +195,7 @@ export class KernelEnvironmentVariablesService {
 				if (interpreter) {
 					this.envVarsService.prependPath(
 						mergedVars,
-						path.dirname(interpreter.uri.fsPath),
+						path.dirname(interpreter.uri.fsPath)
 					);
 				}
 			} else {
@@ -207,8 +211,8 @@ export class KernelEnvironmentVariablesService {
 			) {
 				traceInfo(
 					`Adding env Variable PYTHONNOUSERSITE to ${getDisplayPath(
-						interpreter?.uri,
-					)}`,
+						interpreter?.uri
+					)}`
 				);
 				mergedVars.PYTHONNOUSERSITE = "True";
 			}
@@ -225,7 +229,7 @@ export class KernelEnvironmentVariablesService {
 		traceVerbose(
 			`Kernel Env Variables for ${
 				kernelSpec.specFile || kernelSpec.name
-			}, PATH value is ${mergedVars.PATH}`,
+			}, PATH value is ${mergedVars.PATH}`
 		);
 
 		return mergedVars;

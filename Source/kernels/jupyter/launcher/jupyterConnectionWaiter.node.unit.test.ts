@@ -109,23 +109,21 @@ suite("Jupyter Connection Waiter", async () => {
 		const settings = mock(JupyterSettings);
 		getServerInfoStub.resolves(dummyServerInfos);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(serviceContainer.get<IFileSystemNode>(IFileSystemNode)).thenReturn(
-			instance(fs),
+			instance(fs)
 		);
 		when(
-			serviceContainer.get<IConfigurationService>(IConfigurationService),
+			serviceContainer.get<IConfigurationService>(IConfigurationService)
 		).thenReturn(instance(configService));
 		when(
-			serviceContainer.get<IJupyterRequestCreator>(
-				IJupyterRequestCreator,
-			),
+			serviceContainer.get<IJupyterRequestCreator>(IJupyterRequestCreator)
 		).thenReturn(instance(mock<IJupyterRequestCreator>()));
 		when(
 			serviceContainer.get<IJupyterRequestAgentCreator>(
-				IJupyterRequestAgentCreator,
-			),
+				IJupyterRequestAgentCreator
+			)
 		).thenReturn(instance(mock<IJupyterRequestAgentCreator>()));
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -138,7 +136,7 @@ suite("Jupyter Connection Waiter", async () => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			getServerInfoStub as any,
 			instance(serviceContainer),
-			undefined,
+			undefined
 		);
 	}
 	test("Successfully gets connection info", async () => {
@@ -173,7 +171,7 @@ suite("Jupyter Connection Waiter", async () => {
 
 		await assert.isRejected(
 			promise,
-			DataScience.jupyterServerCrashed(exitCode),
+			DataScience.jupyterServerCrashed(exitCode)
 		);
 	});
 });

@@ -33,7 +33,7 @@ export abstract class Webview implements IWebview {
 		protected fs: IFileSystem,
 		protected disposableRegistry: IDisposableRegistry,
 		protected options: IWebviewOptions,
-		additionalRootPaths: Uri[] = [],
+		additionalRootPaths: Uri[] = []
 	) {
 		const webViewOptions: WebviewOptions = {
 			enableScripts: true,
@@ -69,12 +69,12 @@ export abstract class Webview implements IWebview {
 
 	// WebviewPanel and WebviewView need their own way to create a webview if not supplied one
 	protected abstract createWebview(
-		webviewOptions: WebviewOptions,
+		webviewOptions: WebviewOptions
 	): vscodeWebviewView | vscodeWebviewPanel;
 
 	// After load is finished allow derived classes to hook up class specific code
 	protected abstract postLoad(
-		webviewHost: vscodeWebviewView | vscodeWebviewPanel,
+		webviewHost: vscodeWebviewView | vscodeWebviewPanel
 	): void;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,7 +87,7 @@ export abstract class Webview implements IWebview {
 			.asWebviewUri(this.options.cwd)
 			.toString();
 		const uris = this.options.scripts.map((script) =>
-			this.webviewHost!.webview!.asWebviewUri(script),
+			this.webviewHost!.webview!.asWebviewUri(script)
 		);
 
 		const rootPath = this.webviewHost.webview
@@ -131,7 +131,7 @@ export abstract class Webview implements IWebview {
                 ${uris
 					.map(
 						(uri) =>
-							`<script type="text/javascript" src="${uri}"></script>`,
+							`<script type="text/javascript" src="${uri}"></script>`
 					)
 					.join("\n")}
             </body>
@@ -142,7 +142,7 @@ export abstract class Webview implements IWebview {
 		try {
 			if (this.webviewHost?.webview) {
 				const localFilesExist = await Promise.all(
-					this.options.scripts.map((s) => this.fs.exists(s)),
+					this.options.scripts.map((s) => this.fs.exists(s))
 				);
 				if (localFilesExist.every((exists) => exists === true)) {
 					// Call our special function that sticks this script inside of an html page
@@ -156,7 +156,7 @@ export abstract class Webview implements IWebview {
 					// Indicate that we can't load the file path
 					this.webviewHost.webview.html =
 						localize.DataScience.badWebPanelFormatString(
-							this.options.scripts.join(", "),
+							this.options.scripts.join(", ")
 						);
 				}
 			}

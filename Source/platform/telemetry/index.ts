@@ -108,8 +108,8 @@ function sanitizeProperties(eventName: string, data: Record<string, any>) {
 				typeof data[prop] === "string"
 					? data[prop]
 					: typeof data[prop] === "object"
-					  ? "object"
-					  : data[prop].toString();
+						? "object"
+						: data[prop].toString();
 		} catch (ex) {
 			traceError(`Failed to serialize ${prop} for ${eventName}`, ex);
 		}
@@ -137,7 +137,7 @@ export function sendTelemetryEvent<
 			? undefined
 			: ExcludeType<R, number>
 		: undefined | undefined,
-	ex?: Error,
+	ex?: Error
 ) {
 	if (isTestExecution() || !isTelemetrySupported()) {
 		return;
@@ -147,7 +147,7 @@ export function sendTelemetryEvent<
 		// Because of exactOptionalPropertyTypes we have to cast.
 		measures as unknown as Record<string, number> | undefined,
 		properties,
-		ex,
+		ex
 	);
 }
 
@@ -174,7 +174,7 @@ function sendTelemetryEventInternal<
 	eventName: E,
 	measures?: Record<string, number>,
 	properties?: P[E],
-	ex?: Error,
+	ex?: Error
 ) {
 	const reporter = getTelemetryReporter();
 	let customProperties: Record<string, string> = {};
@@ -191,12 +191,12 @@ function sendTelemetryEventInternal<
 			.then(() => {
 				customProperties = sanitizeProperties(
 					eventNameSent,
-					customProperties,
+					customProperties
 				);
 				reporter.sendTelemetryEvent(
 					eventNameSent,
 					customProperties,
-					measures,
+					measures
 				);
 			})
 			.catch(noop);
@@ -216,7 +216,7 @@ function sendTelemetryEventInternal<
 type TypedMethodDescriptor<T> = (
 	target: Object,
 	propertyKey: string | symbol,
-	descriptor: TypedPropertyDescriptor<T>,
+	descriptor: TypedPropertyDescriptor<T>
 ) => TypedPropertyDescriptor<T> | void;
 const timesSeenThisEventWithSameProperties = new Set<string>();
 export type PickTypeNumberProps<T, Value> = {
@@ -245,14 +245,12 @@ export function capturePerfTelemetry<
 		? ExcludeType<R, number> extends never | undefined
 			? undefined
 			: ExcludeType<R, number>
-		: undefined,
+		: undefined
 ): TypedMethodDescriptor<(this: This, ...args: any[]) => any> {
 	return function (
 		_target: Object,
 		_propertyKey: string | symbol,
-		descriptor: TypedPropertyDescriptor<
-			(this: This, ...args: any[]) => any
-		>,
+		descriptor: TypedPropertyDescriptor<(this: This, ...args: any[]) => any>
 	) {
 		const originalMethod = descriptor.value!;
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any
@@ -287,7 +285,7 @@ export function capturePerfTelemetry<
 							stopWatch
 								? ({ duration: stopWatch?.elapsedTime } as any)
 								: undefined,
-							propsToSend as typeof properties,
+							propsToSend as typeof properties
 						);
 						return data;
 					})
@@ -302,7 +300,7 @@ export function capturePerfTelemetry<
 								? { duration: stopWatch?.elapsedTime }
 								: {},
 							failedProps as any,
-							ex,
+							ex
 						);
 					});
 			} else {
@@ -311,7 +309,7 @@ export function capturePerfTelemetry<
 					stopWatch
 						? ({ duration: stopWatch?.elapsedTime } as any)
 						: undefined,
-					props as typeof properties,
+					props as typeof properties
 				);
 			}
 
@@ -337,14 +335,12 @@ export function captureUsageTelemetry<
 		? ExcludeType<R, number> extends never | undefined
 			? undefined
 			: ExcludeType<R, number>
-		: undefined,
+		: undefined
 ): TypedMethodDescriptor<(this: This, ...args: any[]) => any> {
 	return function (
 		_target: Object,
 		_propertyKey: string | symbol,
-		descriptor: TypedPropertyDescriptor<
-			(this: This, ...args: any[]) => any
-		>,
+		descriptor: TypedPropertyDescriptor<(this: This, ...args: any[]) => any>
 	) {
 		const originalMethod = descriptor.value!;
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any

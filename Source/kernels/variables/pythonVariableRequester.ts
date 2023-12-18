@@ -47,7 +47,7 @@ async function safeExecuteSilently(
 		initializeCode,
 		cleanupCode,
 	}: { code: string; initializeCode?: string; cleanupCode?: string },
-	errorOptions?: SilentExecutionErrorOptions,
+	errorOptions?: SilentExecutionErrorOptions
 ): Promise<nbformat.IOutput[]> {
 	if (
 		kernel.disposed ||
@@ -63,7 +63,7 @@ async function safeExecuteSilently(
 			await executeSilently(
 				kernel.session.kernel,
 				initializeCode,
-				errorOptions,
+				errorOptions
 			);
 		}
 		return await executeSilently(kernel.session.kernel, code, errorOptions);
@@ -77,7 +77,7 @@ async function safeExecuteSilently(
 			await executeSilently(
 				kernel.session.kernel,
 				cleanupCode,
-				errorOptions,
+				errorOptions
 			);
 		}
 	}
@@ -89,14 +89,16 @@ async function safeExecuteSilently(
 @injectable()
 export class PythonVariablesRequester implements IKernelVariableRequester {
 	constructor(
-        @inject(IVariableScriptGenerator) private readonly varScriptGenerator: IVariableScriptGenerator,
-        @inject(IDataFrameScriptGenerator) private readonly dfScriptGenerator: IDataFrameScriptGenerator
-    ) {}
+		@inject(IVariableScriptGenerator)
+		private readonly varScriptGenerator: IVariableScriptGenerator,
+		@inject(IDataFrameScriptGenerator)
+		private readonly dfScriptGenerator: IDataFrameScriptGenerator
+	) {}
 
 	public async getDataFrameInfo(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		expression: string,
+		expression: string
 	): Promise<IJupyterVariable> {
 		// Then execute a call to get the info and turn it into JSON
 		const { code, cleanupCode, initializeCode } =
@@ -112,7 +114,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				traceErrorsMessage:
 					"Failure in execute_request for getDataFrameInfo",
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-			},
+			}
 		);
 
 		const fileName =
@@ -130,7 +132,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		start: number,
 		end: number,
 		kernel: IKernel,
-		expression: string,
+		expression: string
 	): Promise<{ data: Record<string, unknown>[] }> {
 		// Then execute a call to get the rows and turn it into JSON
 		const { code, cleanupCode, initializeCode } =
@@ -148,20 +150,20 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				traceErrorsMessage:
 					"Failure in execute_request for getDataFrameRows",
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-			},
+			}
 		);
 		if (results.length === 0) {
 			return { data: [] };
 		}
 		return parseDataFrame(
-			this.deserializeJupyterResult<DataFrameSplitFormat>(results),
+			this.deserializeJupyterResult<DataFrameSplitFormat>(results)
 		);
 	}
 
 	public async getVariableProperties(
 		word: string,
 		_cancelToken: CancellationToken | undefined,
-		matchingVariable: IJupyterVariable | undefined,
+		matchingVariable: IJupyterVariable | undefined
 	): Promise<{ [attributeName: string]: string }> {
 		let result: { [attributeName: string]: string } = {};
 		if (matchingVariable && matchingVariable.value) {
@@ -172,7 +174,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 
 	public async getVariableNamesAndTypesFromKernel(
 		kernel: IKernel,
-		_token?: CancellationToken,
+		_token?: CancellationToken
 	): Promise<IJupyterVariable[]> {
 		if (kernel.session) {
 			// VariableTypesFunc takes in list of vars and the corresponding var names
@@ -188,14 +190,14 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 					traceErrorsMessage:
 						"Failure in execute_request for getVariableNamesAndTypesFromKernel",
 					telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-				},
+				}
 			);
 
 			if (kernel.disposed || kernel.disposing) {
 				return [];
 			}
 			const varNameTypeMap = this.deserializeJupyterResult(
-				results,
+				results
 			) as Map<String, String>;
 
 			const vars = [];
@@ -221,7 +223,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 	public async getFullVariable(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
-		_token?: CancellationToken,
+		_token?: CancellationToken
 	): Promise<IJupyterVariable> {
 		// Then execute a call to get the info and turn it into JSON
 		const { code, cleanupCode, initializeCode } =
@@ -237,7 +239,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				traceErrorsMessage:
 					"Failure in execute_request for getFullVariable",
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
-			},
+			}
 		);
 
 		// Combine with the original result (the call only returns the new fields)
@@ -263,7 +265,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				} else {
 					const error =
 						DataScience.jupyterGetVariablesExecutionError(
-							resultString,
+							resultString
 						);
 					traceError(error);
 					throw new Error(error);

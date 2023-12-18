@@ -53,46 +53,50 @@ export class ExperimentService implements IExperimentService {
 		);
 	}
 	constructor(
-        @inject(IConfigurationService) readonly configurationService: IConfigurationService,
-        @inject(IApplicationEnvironment) private readonly appEnvironment: IApplicationEnvironment,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalState: Memento
-    ) {
-        this.settings = configurationService.getSettings(undefined);
+		@inject(IConfigurationService)
+		readonly configurationService: IConfigurationService,
+		@inject(IApplicationEnvironment)
+		private readonly appEnvironment: IApplicationEnvironment,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly globalState: Memento
+	) {
+		this.settings = configurationService.getSettings(undefined);
 
-        // Users can only opt in or out of experiment groups, not control groups.
-        const optInto = this.settings.experiments.optInto;
-        const optOutFrom = this.settings.experiments.optOutFrom;
-        this._optInto = optInto.filter((exp) => !exp.endsWith('control'));
-        this._optOutFrom = optOutFrom.filter((exp) => !exp.endsWith('control'));
+		// Users can only opt in or out of experiment groups, not control groups.
+		const optInto = this.settings.experiments.optInto;
+		const optOutFrom = this.settings.experiments.optOutFrom;
+		this._optInto = optInto.filter((exp) => !exp.endsWith("control"));
+		this._optOutFrom = optOutFrom.filter((exp) => !exp.endsWith("control"));
 
-        // Don't initialize the experiment service if the extension's experiments setting is disabled.
-        if (!this.enabled) {
-            return;
-        }
+		// Don't initialize the experiment service if the extension's experiments setting is disabled.
+		if (!this.enabled) {
+			return;
+		}
 
-        let targetPopulation: TargetPopulation;
+		let targetPopulation: TargetPopulation;
 
-        if (getVSCodeChannel() === 'insiders') {
-            targetPopulation = TargetPopulation.Insiders;
-        } else {
-            targetPopulation = TargetPopulation.Public;
-        }
+		if (getVSCodeChannel() === "insiders") {
+			targetPopulation = TargetPopulation.Insiders;
+		} else {
+			targetPopulation = TargetPopulation.Public;
+		}
 
-        const telemetryReporter = new ExperimentationTelemetry();
+		const telemetryReporter = new ExperimentationTelemetry();
 
-        this.experimentationService = getExperimentationService(
-            JVSC_EXTENSION_ID,
-            this.appEnvironment.extensionVersion!,
-            targetPopulation,
-            telemetryReporter,
-            this.globalState
-        );
-    }
+		this.experimentationService = getExperimentationService(
+			JVSC_EXTENSION_ID,
+			this.appEnvironment.extensionVersion!,
+			targetPopulation,
+			telemetryReporter,
+			this.globalState
+		);
+	}
 
 	public async activate() {
 		if (this.experimentationService && this.enabled) {
 			traceVerbose(
-				`Experimentation service retrieved: ${this.experimentationService}`,
+				`Experimentation service retrieved: ${this.experimentationService}`
 			);
 			await this.experimentationService.initializePromise;
 			if (this.getFeatures().length === 0) {
@@ -131,7 +135,7 @@ export class ExperimentService implements IExperimentService {
 			// synced with the experiment server.
 			this.experimentationService.getTreatmentVariable(
 				EXP_CONFIG_ID,
-				experiment as unknown as string,
+				experiment as unknown as string
 			);
 			return true;
 		}
@@ -155,13 +159,13 @@ export class ExperimentService implements IExperimentService {
 		const treatmentVariable =
 			this.experimentationService.getTreatmentVariable(
 				EXP_CONFIG_ID,
-				experiment as unknown as string,
+				experiment as unknown as string
 			);
 		return treatmentVariable === true;
 	}
 
 	public async getExperimentValue<T extends boolean | number | string>(
-		experiment: ExperimentGroups,
+		experiment: ExperimentGroups
 	): Promise<T | undefined> {
 		if (
 			!this.experimentationService ||
@@ -173,7 +177,7 @@ export class ExperimentService implements IExperimentService {
 
 		return this.experimentationService.getTreatmentVariable<T>(
 			EXP_CONFIG_ID,
-			experiment as unknown as string,
+			experiment as unknown as string
 		);
 	}
 	private getFeatures() {
@@ -202,7 +206,7 @@ export class ExperimentService implements IExperimentService {
 
 		if (experimentsDisabled) {
 			traceInfo(
-				"Experiments are disabled, only manually opted experiments are active.",
+				"Experiments are disabled, only manually opted experiments are active."
 			);
 		}
 
@@ -250,14 +254,14 @@ export class ExperimentService implements IExperimentService {
 		if (
 			experimentsDisabled &&
 			!enabledExperiments.has(
-				ExperimentGroups.DoNotWaitForZmqPortsToBeUsed,
+				ExperimentGroups.DoNotWaitForZmqPortsToBeUsed
 			) &&
 			(getVSCodeChannel() === "insiders" || isPreReleaseVersion())
 		) {
 			traceInfo(
 				Experiments.inGroup(
-					ExperimentGroups.DoNotWaitForZmqPortsToBeUsed,
-				),
+					ExperimentGroups.DoNotWaitForZmqPortsToBeUsed
+				)
 			);
 		}
 

@@ -127,11 +127,11 @@ declare namespace Slick {
 
 		public subscribe(
 			event: Event<T>,
-			handler: (e: EventData, data: T) => void,
+			handler: (e: EventData, data: T) => void
 		): EventHandler;
 		public unsubscribe(
 			event: Event<T>,
-			handler: (e: EventData, data: T) => void,
+			handler: (e: EventData, data: T) => void
 		): EventHandler;
 		public unsubscribeAll(): EventHandler;
 	}
@@ -153,7 +153,7 @@ declare namespace Slick {
 			fromRow: number,
 			fromCell: number,
 			toRow?: number,
-			toCell?: number,
+			toCell?: number
 		);
 
 		/***
@@ -405,7 +405,7 @@ declare namespace Slick {
 			cellNode: any,
 			row: any,
 			dataContext: any,
-			colDef: any,
+			colDef: any
 		) => void;
 
 		/**
@@ -836,7 +836,7 @@ declare namespace Slick {
 			container: string | HTMLElement | JQuery,
 			data: T[] | DataProvider<T>,
 			columns: Column<T>[],
-			options: GridOptions<T>,
+			options: GridOptions<T>
 		);
 
 		// #region Core
@@ -968,7 +968,7 @@ declare namespace Slick {
 		 * @param cols
 		 **/
 		public setSortColumns(
-			cols: { columnId: string; sortAsc: boolean }[],
+			cols: { columnId: string; sortAsc: boolean }[]
 		): void;
 
 		/**
@@ -986,7 +986,7 @@ declare namespace Slick {
 		public updateColumnHeader(
 			columnId: string,
 			title?: string,
-			toolTip?: string,
+			toolTip?: string
 		): void;
 
 		// #endregion Columns
@@ -1302,11 +1302,11 @@ declare namespace Slick {
 		public updateRow(row: number): void;
 		public getViewport(
 			viewportTop?: number,
-			viewportLeft?: number,
+			viewportLeft?: number
 		): Viewport;
 		public getRenderedRange(
 			viewportTop?: number,
-			viewportLeft?: number,
+			viewportLeft?: number
 		): Viewport;
 		public resizeCanvas(): void;
 		public updateRowCount(): void;
@@ -1315,7 +1315,7 @@ declare namespace Slick {
 		public scrollCellIntoView(
 			row: number,
 			cell: number,
-			doPaging: boolean,
+			doPaging: boolean
 		): void;
 		public getCanvasNode(): HTMLCanvasElement;
 		public focus(): void;
@@ -1640,7 +1640,7 @@ declare namespace Slick {
 			cell: number,
 			value: any,
 			columnDef: Column<T>,
-			dataContext: SlickData,
+			dataContext: SlickData
 		): string;
 	}
 
@@ -1678,7 +1678,7 @@ declare namespace Slick {
 			public fastSort(field: Function, ascending: boolean): void; // todo: typeof(field), should be the same callback as Array.sort
 			public reSort(): void;
 			public setGrouping(
-				groupingInfos: GroupingOptions<T> | GroupingOptions<T>[],
+				groupingInfos: GroupingOptions<T> | GroupingOptions<T>[]
 			): void;
 			public getGrouping(): GroupingOptions<T>[];
 
@@ -1688,7 +1688,7 @@ declare namespace Slick {
 			public groupBy(
 				valueGetter: any,
 				valueFormatter: any,
-				sortComparer: any,
+				sortComparer: any
 			): void;
 
 			/**
@@ -1696,7 +1696,7 @@ declare namespace Slick {
 			 **/
 			public setAggregators(
 				groupAggregators: any,
-				includeCollapsed: any,
+				includeCollapsed: any
 			): void;
 
 			/**
@@ -1739,7 +1739,7 @@ declare namespace Slick {
 			public deleteItem(id: string): void;
 			public syncGridSelection(
 				grid: Grid<T>,
-				preserveHidden: boolean,
+				preserveHidden: boolean
 			): void;
 			public syncGridCellCssStyles(grid: Grid<T>, key: string): void;
 

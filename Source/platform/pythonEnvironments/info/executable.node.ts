@@ -20,7 +20,7 @@ type ExecFunc = (command: string, args: string[]) => Promise<ExecResult>;
  */
 export async function getExecutablePath(
 	python: PythonExecInfo,
-	exec: ExecFunc,
+	exec: ExecFunc
 ): Promise<Uri> {
 	const [args, parse] = getPythonExecutableCommand();
 	const info = copyPythonExecInfo(python, args);

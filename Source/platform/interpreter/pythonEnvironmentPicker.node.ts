@@ -16,20 +16,20 @@ import { EnvironmentType } from "../pythonEnvironments/info";
 
 export function pythonEnvironmentQuickPick(
 	item: Environment,
-	quickPick: BaseProviderBasedQuickPick<Environment>,
+	quickPick: BaseProviderBasedQuickPick<Environment>
 ) {
 	const label = getPythonEnvDisplayName(item);
 	const icon =
 		item.id === quickPick.recommended?.id
 			? "$(star-full) "
 			: isCondaEnvironmentWithoutPython(item)
-			  ? "$(warning) "
-			  : "";
+				? "$(warning) "
+				: "";
 	const quickPickItem: QuickPickItem = { label: `${icon}${label}` };
 	quickPickItem.description = getDisplayPath(
 		item.executable.uri || item.path,
 		workspace.workspaceFolders || [],
-		new PlatformService().homeDir,
+		new PlatformService().homeDir
 	);
 	quickPickItem.tooltip = isCondaEnvironmentWithoutPython(item)
 		? DataScience.pythonCondaKernelsWithoutPython
@@ -46,7 +46,7 @@ export function getPythonEnvironmentCategory(item: Environment): {
 				? {
 						label: DataScience.kernelCategoryForCondaWithoutPython,
 						sortKey: "Z",
-				  }
+					}
 				: { label: DataScience.kernelCategoryForConda };
 		case EnvironmentType.Pipenv:
 			return { label: DataScience.kernelCategoryForPipEnv };

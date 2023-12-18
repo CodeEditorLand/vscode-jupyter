@@ -9,9 +9,9 @@ import { IPlatformService } from "./types";
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IPlatformService>(
 		IPlatformService,
-		PlatformService,
+		PlatformService
 	);
 	initializeExternalDependencies(
-		serviceManager.get<IServiceContainer>(IServiceContainer),
+		serviceManager.get<IServiceContainer>(IServiceContainer)
 	);
 }

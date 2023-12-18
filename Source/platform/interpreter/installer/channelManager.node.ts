@@ -22,11 +22,13 @@ import { Uri, env, window } from "vscode";
  */
 @injectable()
 export class InstallationChannelManager implements IInstallationChannelManager {
-	constructor(@inject(IServiceContainer) private serviceContainer: IServiceContainer) {}
+	constructor(
+		@inject(IServiceContainer) private serviceContainer: IServiceContainer
+	) {}
 
 	public async getInstallationChannel(
 		_product: Product,
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<IModuleInstaller | undefined> {
 		const channels = await this.getInstallationChannels(interpreter);
 
@@ -42,7 +44,7 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 	}
 
 	public async getInstallationChannels(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<IModuleInstaller[]> {
 		const installers =
 			this.serviceContainer.getAll<IModuleInstaller>(IModuleInstaller);
@@ -69,14 +71,14 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 	}
 
 	public async showNoInstallersMessage(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<void> {
 		const result = await window.showErrorMessage(
 			interpreter.envType === EnvironmentType.Conda
 				? Installer.noCondaOrPipInstaller
 				: Installer.noPipInstaller,
 			{ modal: true },
-			Installer.searchForHelp,
+			Installer.searchForHelp
 		);
 		if (result === Installer.searchForHelp) {
 			const platform =
@@ -84,16 +86,16 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 			const osName = platform.isWindows
 				? "Windows"
 				: platform.isMac
-				  ? "MacOS"
-				  : "Linux";
+					? "MacOS"
+					: "Linux";
 			void env.openExternal(
 				Uri.parse(
 					`https://www.bing.com/search?q=Install Pip ${osName} ${
 						interpreter.envType === EnvironmentType.Conda
 							? "Conda"
 							: ""
-					}`,
-				),
+					}`
+				)
 			);
 		}
 	}

@@ -63,10 +63,10 @@ export interface IKernelDebugAdapter extends DebugAdapter {
 	/* These methods make requests via roundtrip to the client */
 	stepIn(threadId: number): Thenable<DebugProtocol.StepInResponse["body"]>;
 	stackTrace(
-		args: DebugProtocol.StackTraceArguments,
+		args: DebugProtocol.StackTraceArguments
 	): Thenable<DebugProtocol.StackTraceResponse["body"]>;
 	setBreakpoints(
-		args: DebugProtocol.SetBreakpointsArguments,
+		args: DebugProtocol.SetBreakpointsArguments
 	): Thenable<DebugProtocol.SetBreakpointsResponse["body"]>;
 	debugInfo(): Thenable<IDebugInfoResponse>;
 	disconnect(): Promise<void>;
@@ -88,7 +88,7 @@ export interface IDebuggingManager {
 	getDebugSession(notebook: NotebookDocument): DebugSession | undefined;
 	getDebugCell(notebook: NotebookDocument): NotebookCell | undefined;
 	getDebugAdapter(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): IKernelDebugAdapter | undefined;
 }
 
@@ -97,7 +97,7 @@ export interface INotebookDebuggingManager extends IDebuggingManager {
 	tryToStartDebugging(
 		mode: KernelDebugMode,
 		cell: NotebookCell,
-		skipIpykernelCheck?: boolean,
+		skipIpykernelCheck?: boolean
 	): Promise<void>;
 	runByLineNext(cell: NotebookCell): void;
 	runByLineStop(cell: NotebookCell): void;
@@ -113,7 +113,7 @@ export interface IDebuggingDelegate {
 	 * Called for every request sent from the client to the debug adapter. Returns true to signal that the request was handled by the delegate.
 	 */
 	willSendRequest?(
-		request: DebugProtocol.Request,
+		request: DebugProtocol.Request
 	): undefined | Promise<DebugProtocol.Response | undefined>;
 
 	/**
@@ -179,7 +179,7 @@ export interface IDebugLocation {
 	column: number;
 }
 export const IDebugLocationTrackerFactory = Symbol(
-	"IDebugLocationTrackerFactory",
+	"IDebugLocationTrackerFactory"
 );
 export interface IDebugLocationTrackerFactory {
 	createDebugAdapterTracker(session: DebugSession): DebugAdapterTracker;

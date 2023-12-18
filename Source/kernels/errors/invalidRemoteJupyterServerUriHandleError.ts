@@ -19,11 +19,11 @@ export class InvalidRemoteJupyterServerUriHandleError extends BaseError {
 			id: string;
 			handle: string;
 			extensionId: string;
-		},
+		}
 	) {
 		super(
 			"invalidremotejupyterserverurihandle",
-			"Server handle not in list of known handles",
+			"Server handle not in list of known handles"
 		);
 	}
 }

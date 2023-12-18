@@ -31,7 +31,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 	public async savePlot(
 		notebook: NotebookDocument,
 		outputId: string,
-		mimeType: string,
+		mimeType: string
 	) {
 		if (notebook.isClosed) {
 			return;
@@ -40,15 +40,15 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 		if (!output) {
 			return traceError(
 				`No plot to save ${getDisplayPath(
-					notebook.uri,
-				)}, id: ${outputId} for ${mimeType}`,
+					notebook.uri
+				)}, id: ${outputId} for ${mimeType}`
 			);
 		}
 		if (!(mimeType.toLowerCase() in imageExtensionForMimeType)) {
 			return traceError(
 				`Unsupported MimeType ${getDisplayPath(
-					notebook.uri,
-				)}, id: ${outputId} for ${mimeType}`,
+					notebook.uri
+				)}, id: ${outputId} for ${mimeType}`
 			);
 		}
 
@@ -96,17 +96,17 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 	private async saveAsImage(output: NotebookCellOutput, target: Uri) {
 		const extension = path.extname(target.path).substring(1);
 		const correspondingMimeType = Object.keys(
-			imageExtensionForMimeType,
+			imageExtensionForMimeType
 		).find((mime) => imageExtensionForMimeType[mime] === extension);
 		const data = output.items.find(
-			(item) => item.mime === correspondingMimeType,
+			(item) => item.mime === correspondingMimeType
 		);
 
 		if (!data) {
 			throw new Error(
 				`Unsupported MimeType ${target.toString()}, available mime Types: ${output.items
 					.map((item) => item.mime)
-					.join(", ")}`,
+					.join(", ")}`
 			);
 		}
 
@@ -121,7 +121,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 function getOutputItem(
 	notebook: NotebookDocument,
 	outputId: string,
-	mimeType: string,
+	mimeType: string
 ): NotebookCellOutput | undefined {
 	for (const cell of notebook.getCells()) {
 		for (const output of cell.outputs) {

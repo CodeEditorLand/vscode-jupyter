@@ -204,7 +204,7 @@ export type NotebookMetadata = nbformat.INotebookMetadata & {
 };
 
 export function getNotebookMetadata(
-	document: NotebookDocument | NotebookData,
+	document: NotebookDocument | NotebookData
 ): NotebookMetadata | undefined {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const notebookContent: undefined | Partial<nbformat.INotebookContent> =
@@ -228,12 +228,12 @@ export function getNotebookFormat(document: NotebookDocument): {
 }
 
 export function getAssociatedJupyterNotebook(
-	document: TextDocument,
+	document: TextDocument
 ): NotebookDocument | undefined {
 	return workspace.notebookDocuments.find(
 		(notebook) =>
 			isJupyterNotebook(notebook) &&
-			notebook.getCells().some((cell) => cell.document === document),
+			notebook.getCells().some((cell) => cell.document === document)
 	);
 }
 
@@ -254,7 +254,7 @@ export function concatMultilineString(str: nbformat.MultilineString): string {
 }
 
 export function splitMultilineString(
-	source: nbformat.MultilineString,
+	source: nbformat.MultilineString
 ): string[] {
 	// Make sure a multiline string is back the way Jupyter expects it
 	if (Array.isArray(source)) {
@@ -315,7 +315,7 @@ const DoubleQuoteMultiline = '"""';
 export function parseForComments(
 	lines: string[],
 	foundCommentLine: (s: string, i: number) => void,
-	foundNonCommentLine: (s: string, i: number) => void,
+	foundNonCommentLine: (s: string, i: number) => void
 ) {
 	// Check for either multiline or single line comments
 	let insideMultilineComment: string | undefined;
@@ -327,13 +327,13 @@ export function parseForComments(
 		const isMultilineComment = trim.startsWith(SingleQuoteMultiline)
 			? SingleQuoteMultiline
 			: trim.startsWith(DoubleQuoteMultiline)
-			  ? DoubleQuoteMultiline
-			  : undefined;
+				? DoubleQuoteMultiline
+				: undefined;
 		const isMultilineQuote = trim.includes(SingleQuoteMultiline)
 			? SingleQuoteMultiline
 			: trim.includes(DoubleQuoteMultiline)
-			  ? DoubleQuoteMultiline
-			  : undefined;
+				? DoubleQuoteMultiline
+				: undefined;
 
 		// Check for ending quotes of multiline string
 		if (insideMultilineQuote) {
@@ -368,7 +368,7 @@ export function parseForComments(
 			if (trim.length > 3) {
 				foundCommentLine(
 					trim.slice(3, endIndex >= 0 ? endIndex : undefined),
-					pos,
+					pos
 				);
 			}
 		} else {
@@ -391,7 +391,7 @@ export function stripComments(str: string): string {
 		(_s) => {
 			// Do nothing
 		},
-		(s) => (result = result.concat(`${s}\n`)),
+		(s) => (result = result.concat(`${s}\n`))
 	);
 	return result;
 }
@@ -399,7 +399,7 @@ export function stripComments(str: string): string {
 export function appendLineFeed(
 	arr: string[],
 	eol: string = "\n",
-	modifier?: (s: string) => string,
+	modifier?: (s: string) => string
 ) {
 	return arr.map((s: string, i: number) => {
 		const out = modifier ? modifier(s) : s;
@@ -414,7 +414,7 @@ function extractComments(lines: string[]): string[] {
 		(s) => result.push(s),
 		(_s) => {
 			// Do nothing
-		},
+		}
 	);
 	return result;
 }
@@ -422,7 +422,7 @@ function extractComments(lines: string[]): string[] {
 export function generateMarkdownFromCodeLines(lines: string[]) {
 	// Generate markdown by stripping out the comments and markdown header
 	return appendLineFeed(
-		extractComments(lines.slice(lines.length > 1 ? 1 : 0)),
+		extractComments(lines.slice(lines.length > 1 ? 1 : 0))
 	);
 }
 

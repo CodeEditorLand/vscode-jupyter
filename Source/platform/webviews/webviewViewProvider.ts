@@ -35,13 +35,13 @@ class WebviewView extends Webview implements IWebviewView {
 		fs: IFileSystem,
 		disposableRegistry: IDisposableRegistry,
 		private panelOptions: IWebviewViewOptions,
-		additionalRootPaths: Uri[] = [],
+		additionalRootPaths: Uri[] = []
 	) {
 		super(fs, disposableRegistry, panelOptions, additionalRootPaths);
 	}
 
 	protected createWebview(
-		_webviewOptions: WebviewOptions,
+		_webviewOptions: WebviewOptions
 	): vscodeWebviewView {
 		throw new Error("Webview Views must be passed in an initial view");
 	}
@@ -52,7 +52,7 @@ class WebviewView extends Webview implements IWebviewView {
 			webviewHost.onDidDispose(() => {
 				this.webviewHost = undefined;
 				this.panelOptions.listener.dispose().catch(noop);
-			}),
+			})
 		);
 
 		this.disposableRegistry.push(
@@ -60,15 +60,15 @@ class WebviewView extends Webview implements IWebviewView {
 				// Pass the message onto our listener
 				this.panelOptions.listener.onMessage(
 					message.type,
-					message.payload,
+					message.payload
 				);
-			}),
+			})
 		);
 
 		this.disposableRegistry.push(
 			webviewHost.onDidChangeVisibility(() => {
 				this._onDidChangeVisibility.fire();
-			}),
+			})
 		);
 
 		// Fire one inital visibility change once now as we have loaded
@@ -79,9 +79,10 @@ class WebviewView extends Webview implements IWebviewView {
 @injectable()
 export class WebviewViewProvider implements IWebviewViewProvider {
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IFileSystem) private readonly fs: IFileSystem
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IFileSystem) private readonly fs: IFileSystem
+	) {}
 
 	public async create(options: IWebviewViewOptions): Promise<IWebviewView> {
 		return new WebviewView(this.fs, this.disposableRegistry, options);

@@ -124,7 +124,7 @@ let activatedServiceContainer: IServiceContainer | undefined;
 // public functions
 
 export async function activate(
-	context: IExtensionContext,
+	context: IExtensionContext
 ): Promise<IExtensionApi> {
 	setDisposableTracker(context.subscriptions);
 	setIsCodeSpace(env.uiKind == UIKind.Web);
@@ -169,7 +169,7 @@ export function deactivate(): Thenable<void> {
 	if (activatedServiceContainer) {
 		const registry =
 			activatedServiceContainer.get<IAsyncDisposableRegistry>(
-				IAsyncDisposableRegistry,
+				IAsyncDisposableRegistry
 			);
 		if (registry) {
 			return registry.dispose();
@@ -186,7 +186,7 @@ export function deactivate(): Thenable<void> {
 async function activateUnsafe(
 	context: IExtensionContext,
 	startupStopWatch: StopWatch,
-	startupDurations: Record<string, number>,
+	startupDurations: Record<string, number>
 ): Promise<[IExtensionApi, Promise<void>, IServiceContainer]> {
 	const activationDeferred = createDeferred<void>();
 	try {
@@ -202,7 +202,7 @@ async function activateUnsafe(
 		const activationPromise = activateComponents(
 			context,
 			serviceManager,
-			serviceContainer,
+			serviceContainer
 		);
 
 		//===============================================
@@ -215,7 +215,7 @@ async function activateUnsafe(
 			activationPromise,
 			serviceManager,
 			serviceContainer,
-			context,
+			context
 		);
 		return [api, activationPromise, serviceContainer];
 	} finally {
@@ -257,7 +257,7 @@ function notifyUser(msg: string) {
 async function activateComponents(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	serviceContainer: IServiceContainer,
+	serviceContainer: IServiceContainer
 ) {
 	// We will be pulling code over from activateLegacy().
 	return activateLegacy(context, serviceManager, serviceContainer);
@@ -277,35 +277,35 @@ function addConsoleLogger() {
 
 function addOutputChannel(
 	context: IExtensionContext,
-	serviceManager: IServiceManager,
+	serviceManager: IServiceManager
 ) {
 	const standardOutputChannel = window.createOutputChannel(
 		OutputChannelNames.jupyter,
-		"log",
+		"log"
 	);
 	registerLogger(new OutputChannelLogger(standardOutputChannel));
 	serviceManager.addSingletonInstance<OutputChannel>(
 		IOutputChannel,
 		standardOutputChannel,
-		STANDARD_OUTPUT_CHANNEL,
+		STANDARD_OUTPUT_CHANNEL
 	);
 	serviceManager.addSingletonInstance<OutputChannel>(
 		IOutputChannel,
 		getJupyterOutputChannel(context.subscriptions),
-		JUPYTER_OUTPUT_CHANNEL,
+		JUPYTER_OUTPUT_CHANNEL
 	);
 
 	// Log env info.
 	standardOutputChannel.appendLine(
-		`${env.appName} (${version}, ${env.remoteName}, ${env.appHost})`,
+		`${env.appName} (${version}, ${env.remoteName}, ${env.appHost})`
 	);
 	standardOutputChannel.appendLine(
-		`Jupyter Extension Version: ${context.extension.packageJSON["version"]}.`,
+		`Jupyter Extension Version: ${context.extension.packageJSON["version"]}.`
 	);
 	const pythonExtension = extensions.getExtension(PythonExtension);
 	if (pythonExtension) {
 		standardOutputChannel.appendLine(
-			`Python Extension Version: ${pythonExtension.packageJSON["version"]}.`,
+			`Python Extension Version: ${pythonExtension.packageJSON["version"]}.`
 		);
 	} else {
 		standardOutputChannel.appendLine("Python Extension not installed.");
@@ -313,7 +313,7 @@ function addOutputChannel(
 	const pylanceExtension = extensions.getExtension(PylanceExtension);
 	if (pylanceExtension) {
 		standardOutputChannel.appendLine(
-			`Pylance Extension Version: ${pylanceExtension.packageJSON["version"]}.`,
+			`Pylance Extension Version: ${pylanceExtension.packageJSON["version"]}.`
 		);
 	} else {
 		standardOutputChannel.appendLine("Pylance Extension not installed.");
@@ -341,7 +341,7 @@ function addOutputChannel(
 async function activateLegacy(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	serviceContainer: IServiceContainer,
+	serviceContainer: IServiceContainer
 ) {
 	// register "services"
 	const isDevMode =
@@ -384,7 +384,7 @@ async function activateLegacy(
 	sendTelemetryEvent(Telemetry.ExperimentLoad, { duration });
 
 	const configuration = serviceManager.get<IConfigurationService>(
-		IConfigurationService,
+		IConfigurationService
 	);
 
 	// We should start logging using the log level as soon as possible, so set it as soon as we can access the level.
@@ -401,7 +401,7 @@ async function activateLegacy(
 		.executeCommand(
 			"setContext",
 			"jupyter.vscode.channel",
-			getVSCodeChannel(),
+			getVSCodeChannel()
 		)
 		.then(noop, noop);
 
@@ -416,7 +416,7 @@ async function activateLegacy(
 }
 
 function initializeGlobals(
-	context: IExtensionContext,
+	context: IExtensionContext
 ): [IServiceManager, IServiceContainer] {
 	const cont = new Container({ skipBaseClassChecks: true });
 	const serviceManager = new ServiceManager(cont);
@@ -424,30 +424,30 @@ function initializeGlobals(
 
 	serviceManager.addSingletonInstance<IServiceContainer>(
 		IServiceContainer,
-		serviceContainer,
+		serviceContainer
 	);
 	serviceManager.addSingletonInstance<IServiceManager>(
 		IServiceManager,
-		serviceManager,
+		serviceManager
 	);
 
 	serviceManager.addSingletonInstance<Disposable[]>(
 		IDisposableRegistry,
-		context.subscriptions,
+		context.subscriptions
 	);
 	serviceManager.addSingletonInstance<Memento>(
 		IMemento,
 		context.globalState,
-		GLOBAL_MEMENTO,
+		GLOBAL_MEMENTO
 	);
 	serviceManager.addSingletonInstance<Memento>(
 		IMemento,
 		context.workspaceState,
-		WORKSPACE_MEMENTO,
+		WORKSPACE_MEMENTO
 	);
 	serviceManager.addSingletonInstance<IExtensionContext>(
 		IExtensionContext,
-		context,
+		context
 	);
 
 	return [serviceManager, serviceContainer];

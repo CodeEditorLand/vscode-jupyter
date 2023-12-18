@@ -21,7 +21,7 @@ export class ExportDialog {
 	public async showDialog(
 		format: ExportFormat,
 		source: Uri | undefined,
-		defaultFileName?: string,
+		defaultFileName?: string
 	): Promise<Uri | undefined> {
 		// map each export method to a set of file extensions
 		let fileExtensions: { [name: string]: string[] } = {};
@@ -57,8 +57,8 @@ export class ExportDialog {
 				? defaultFileName || ""
 				: `${path.basename(
 						source.path,
-						path.extname(source.path),
-				  )}${extension}`;
+						path.extname(source.path)
+					)}${extension}`;
 
 		const options: SaveDialogOptions = {
 			defaultUri: await this.getDefaultUri(source, targetFileName),
@@ -71,7 +71,7 @@ export class ExportDialog {
 
 	private async getDefaultUri(
 		source: Uri | undefined,
-		targetFileName: string,
+		targetFileName: string
 	): Promise<Uri | undefined> {
 		if (source && source.scheme === "untitled" && isWebExtension()) {
 			// Force using simple file dialog
@@ -87,13 +87,13 @@ export class ExportDialog {
 			// Just combine the working directory with the file
 			const workspaceService =
 				ServiceContainer.instance.get<IWorkspaceService>(
-					IWorkspaceService,
+					IWorkspaceService
 				);
 			return Uri.file(
 				path.join(
 					await workspaceService.computeWorkingDirectory(source),
-					targetFileName,
-				),
+					targetFileName
+				)
 			);
 		}
 

@@ -19,7 +19,7 @@ export function warnAboutWidgetVersionsThatAreNotSupported(
 	errorDispatcher: (info: {
 		moduleName: typeof qgridModuleName;
 		moduleVersion: string;
-	}) => void,
+	}) => void
 ) {
 	// if widget exists on CDN or CDN is disabled, get out.
 	if (widgetSource.source === "cdn" || !cdnSupported) {

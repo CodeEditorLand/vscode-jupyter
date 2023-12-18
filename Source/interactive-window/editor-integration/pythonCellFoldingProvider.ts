@@ -29,10 +29,12 @@ export class PythonCellFoldingProvider
 	implements IExtensionSyncActivationService, FoldingRangeProvider
 {
 	constructor(
-        @inject(IDataScienceCodeLensProvider) private dataScienceCodeLensProvider: IDataScienceCodeLensProvider,
-        @inject(IExtensionContext) private extensionContext: IExtensionContext,
-        @inject(IConfigurationService) private configurationService: IConfigurationService
-    ) {}
+		@inject(IDataScienceCodeLensProvider)
+		private dataScienceCodeLensProvider: IDataScienceCodeLensProvider,
+		@inject(IExtensionContext) private extensionContext: IExtensionContext,
+		@inject(IConfigurationService)
+		private configurationService: IConfigurationService
+	) {}
 
 	public activate() {
 		const enabled =
@@ -41,8 +43,8 @@ export class PythonCellFoldingProvider
 			this.extensionContext.subscriptions.push(
 				languages.registerFoldingRangeProvider(
 					[PYTHON_FILE_ANY_SCHEME],
-					this,
-				),
+					this
+				)
 			);
 		}
 	}
@@ -50,11 +52,11 @@ export class PythonCellFoldingProvider
 	provideFoldingRanges(
 		document: TextDocument,
 		_context: FoldingContext,
-		token: CancellationToken,
+		token: CancellationToken
 	): ProviderResult<FoldingRange[]> {
 		if (
 			[NotebookCellScheme, InteractiveInputScheme].includes(
-				document.uri.scheme,
+				document.uri.scheme
 			)
 		) {
 			return undefined;
@@ -71,7 +73,7 @@ export class PythonCellFoldingProvider
 				return new FoldingRange(
 					codeLens.range.start.line,
 					codeLens.range.end.line,
-					FoldingRangeKind.Region,
+					FoldingRangeKind.Region
 				);
 			});
 		}

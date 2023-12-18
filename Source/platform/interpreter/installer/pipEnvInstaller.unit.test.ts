@@ -35,7 +35,7 @@ suite("PipEnv installer", async () => {
 			.callsFake((interpreter: Uri, folder: Uri) => {
 				return Promise.resolve(
 					interpreterPath === interpreter &&
-						folder === workspaceFolder,
+						folder === workspaceFolder
 				);
 			});
 		pipEnvInstaller = new PipEnvInstaller(serviceContainer.object);
@@ -80,13 +80,13 @@ suite("PipEnv installer", async () => {
 				Promise.resolve({
 					envType: EnvironmentType.Pipenv,
 					uri: interpreterPath,
-				} as any),
+				} as any)
 			);
 
 		when(
 			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(
-				uriEquals(resource),
-			),
+				uriEquals(resource)
+			)
 		).thenReturn({
 			uri: workspaceFolder,
 		} as any);
@@ -102,13 +102,13 @@ suite("PipEnv installer", async () => {
 				Promise.resolve({
 					envType: EnvironmentType.Conda,
 					uri: interpreterPath,
-				} as any),
+				} as any)
 			);
 
 		when(
 			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(
-				uriEquals(resource),
-			),
+				uriEquals(resource)
+			)
 		).thenReturn({
 			uri: { fsPath: workspaceFolder },
 		} as any);
@@ -124,13 +124,13 @@ suite("PipEnv installer", async () => {
 				Promise.resolve({
 					envType: EnvironmentType.Pipenv,
 					uri: "some random path",
-				} as any),
+				} as any)
 			);
 
 		when(
 			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(
-				uriEquals(resource),
-			),
+				uriEquals(resource)
+			)
 		).thenReturn({
 			uri: { fsPath: workspaceFolder },
 		} as any);

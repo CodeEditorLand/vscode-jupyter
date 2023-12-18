@@ -78,13 +78,13 @@ class NerfedExecuteCommandFeature
 	}
 
 	constructor(
-		private readonly executeCommandRequest: typeof ExecuteCommandRequest,
+		private readonly executeCommandRequest: typeof ExecuteCommandRequest
 	) {}
 
 	public fillClientCapabilities(capabilities: ClientCapabilities): void {
 		ensure(
 			ensure(capabilities, "workspace"),
-			"executeCommand",
+			"executeCommand"
 		).dynamicRegistration = true;
 	}
 
@@ -96,13 +96,13 @@ class NerfedExecuteCommandFeature
 			id: this._id,
 			registerOptions: Object.assign(
 				{},
-				capabilities.executeCommandProvider,
+				capabilities.executeCommandProvider
 			),
 		});
 	}
 
 	public register(
-		_data: RegistrationData<ExecuteCommandRegistrationOptions>,
+		_data: RegistrationData<ExecuteCommandRegistrationOptions>
 	): void {
 		// Do nothing. Otherwise we end up with double registration
 		traceInfo("Registering dummy command feature");
@@ -137,7 +137,7 @@ export class LanguageServer implements Disposable {
 		client: LanguageClient,
 		public interpreter: PythonEnvironment,
 		private readonly middleware: NotebookMiddleware,
-		private disposables: Disposable[],
+		private disposables: Disposable[]
 	) {
 		// Client should be already started. We can expose it right away.
 		this._client = client;
@@ -145,7 +145,7 @@ export class LanguageServer implements Disposable {
 		workspace.onDidChangeNotebookDocument(
 			this.onDidChangeNotebookDocument,
 			this,
-			disposables,
+			disposables
 		);
 	}
 
@@ -155,8 +155,8 @@ export class LanguageServer implements Disposable {
 		}
 		traceInfoIfCI(
 			`Disposing Language Server for ${getDisplayPath(
-				this.interpreter.id,
-			)}`,
+				this.interpreter.id
+			)}`
 		);
 		const client = this._client;
 
@@ -199,16 +199,16 @@ export class LanguageServer implements Disposable {
 		shouldAllowIntellisense: (
 			uri: Uri,
 			interpreterId: string,
-			interpreterPath: Uri,
+			interpreterPath: Uri
 		) => boolean,
-		getNotebookHeader: (uri: Uri) => string,
+		getNotebookHeader: (uri: Uri) => string
 	): Promise<LanguageServer | undefined> {
 		const serverOptions =
 			await LanguageServer.createServerOptions(interpreter);
 		if (serverOptions) {
 			let languageClient: LanguageClient | undefined;
 			const outputChannel = window.createOutputChannel(
-				`${interpreter.displayName || "notebook"}-languageserver`,
+				`${interpreter.displayName || "notebook"}-languageserver`
 			);
 			const interpreterId = getComparisonKey(interpreter.uri);
 			const { createNotebookMiddleware } = await import(
@@ -223,9 +223,9 @@ export class LanguageServer implements Disposable {
 					shouldAllowIntellisense(
 						uri,
 						interpreterId,
-						interpreter.uri,
+						interpreter.uri
 					),
-				getNotebookHeader,
+				getNotebookHeader
 			);
 
 			const {
@@ -252,7 +252,7 @@ export class LanguageServer implements Disposable {
 			const client = new LanguageClient(
 				"notebook-intellisense",
 				serverOptions,
-				clientOptions,
+				clientOptions
 			);
 
 			// Before starting do a little hack to prevent the pylance double command registration (working with Jake to have an option to skip commands)
@@ -263,10 +263,10 @@ export class LanguageServer implements Disposable {
 			const minusCommands = features.filter(
 				(f) =>
 					(f as any).registrationType?.method !=
-					"workspace/executeCommand",
+					"workspace/executeCommand"
 			);
 			minusCommands.push(
-				new NerfedExecuteCommandFeature(ExecuteCommandRequest),
+				new NerfedExecuteCommandFeature(ExecuteCommandRequest)
 			);
 			(client as any)._features = minusCommands;
 
@@ -290,14 +290,14 @@ export class LanguageServer implements Disposable {
 	}
 
 	private static async createServerOptions(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<ServerOptions | undefined> {
 		// Use jedi. Pylance will never reach here.
 		return LanguageServer.createJediLSPServerOptions(interpreter);
 	}
 
 	private static async createJediLSPServerOptions(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<ServerOptions | undefined> {
 		// Jedi ships with python. Use that to find it.
 		const python = extensions.getExtension("ms-python.python");
@@ -305,7 +305,7 @@ export class LanguageServer implements Disposable {
 			const runJediPath = path.join(
 				python.extensionPath,
 				"pythonFiles",
-				"run-jedi-language-server.py",
+				"run-jedi-language-server.py"
 			);
 			if (await fs.pathExists(runJediPath)) {
 				const interpreterPath = getFilePath(interpreter.uri);

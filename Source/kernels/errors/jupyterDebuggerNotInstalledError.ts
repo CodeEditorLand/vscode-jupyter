@@ -18,7 +18,7 @@ export class JupyterDebuggerNotInstalledError extends BaseKernelError {
 	constructor(
 		debuggerPkg: string,
 		message: string | undefined,
-		kernelConnectionMetadata: KernelConnectionMetadata,
+		kernelConnectionMetadata: KernelConnectionMetadata
 	) {
 		const errorMessage = message
 			? message

@@ -11,7 +11,7 @@ const nodeFetchIndexFile = path.join(
 	"node_modules",
 	"node-fetch",
 	"lib",
-	"index.js",
+	"index.js"
 );
 // On windows replace `\` with `\\`, else we get an error in webpack (Module parse failed: Octal literal in strict mode).
 const nodeFetchFile = constants.isWindows
@@ -31,7 +31,7 @@ exports.default = function (source) {
 	if (source.indexOf("require('node-fetch')") > 0) {
 		source = source.replace(
 			/require\('node-fetch'\)/g,
-			`require('${nodeFetchFile}')`,
+			`require('${nodeFetchFile}')`
 		);
 	}
 	return source;

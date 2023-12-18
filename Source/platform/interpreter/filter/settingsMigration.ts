@@ -21,43 +21,43 @@ export class PythonEnvFilterSettingMigration
 			: [];
 		await this.migrateWorkspaceFilters(
 			workspace.getConfiguration("jupyter", undefined),
-			ConfigurationTarget.Global,
+			ConfigurationTarget.Global
 		);
 		if (workspaceFolders.length === 0) {
 			await this.migrateWorkspaceFilters(
 				workspace.getConfiguration("jupyter", undefined),
-				ConfigurationTarget.Global,
+				ConfigurationTarget.Global
 			);
 		} else if (workspaceFolders.length === 1) {
 			await this.migrateWorkspaceFilters(
 				workspace.getConfiguration("jupyter", workspaceFolders[0].uri),
-				ConfigurationTarget.WorkspaceFolder,
+				ConfigurationTarget.WorkspaceFolder
 			);
 		} else {
 			await this.migrateWorkspaceFilters(
 				workspace.getConfiguration("jupyter", undefined),
-				ConfigurationTarget.Workspace,
+				ConfigurationTarget.Workspace
 			);
 			await Promise.all(
 				workspaceFolders.map((workspaceFolder) =>
 					this.migrateWorkspaceFilters(
 						workspace.getConfiguration(
 							"jupyter",
-							workspaceFolder.uri,
+							workspaceFolder.uri
 						),
-						ConfigurationTarget.WorkspaceFolder,
-					),
-				),
+						ConfigurationTarget.WorkspaceFolder
+					)
+				)
 			);
 		}
 	}
 	private async migrateWorkspaceFilters(
 		jupyterWorkspaceConfig: WorkspaceConfiguration,
-		configurationTarget: ConfigurationTarget,
+		configurationTarget: ConfigurationTarget
 	) {
 		const result =
 			jupyterWorkspaceConfig.inspect<OldInterpreterFilter[]>(
-				"kernels.filter",
+				"kernels.filter"
 			);
 		let filters: OldInterpreterFilter[] = [];
 		switch (configurationTarget) {
@@ -77,14 +77,14 @@ export class PythonEnvFilterSettingMigration
 			await jupyterWorkspaceConfig.update(
 				"kernels.filter",
 				undefined,
-				configurationTarget,
+				configurationTarget
 			);
 		}
 		if (interpreterPaths.length) {
 			await jupyterWorkspaceConfig.update(
 				"kernels.excludePythonEnvironments",
 				Array.from(new Set(interpreterPaths)),
-				configurationTarget,
+				configurationTarget
 			);
 		}
 	}

@@ -23,12 +23,12 @@ export type ReducerArg<
 			prevState: S;
 			queueAction: QueueAnotherFunc<AT>;
 			payload: BaseReduxActionPayload;
-	  }
+		}
 	: {
 			prevState: S;
 			queueAction: QueueAnotherFunc<AT>;
 			payload: T;
-	  };
+		};
 
 export type ReducerFunc<S, AT, T> = (args: ReducerArg<S, AT, T>) => S;
 export type ActionWithPayload<T, K> = TypedAnyAction<K> & {
@@ -47,7 +47,7 @@ export type ActionWithOutPayloadData<K> = TypedAnyAction<K> & {
  */
 export function combineReducers<S, M>(
 	defaultState: S,
-	map: M,
+	map: M
 ): Reducer<S, QueuableAction<M>> {
 	return (currentState: S = defaultState, action: QueuableAction<M>) => {
 		const func = map[action.type];

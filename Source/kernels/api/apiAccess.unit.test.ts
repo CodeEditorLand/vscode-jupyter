@@ -55,10 +55,10 @@ suite("Kernel Api Access", () => {
 			.stub(ServiceContainer, "instance")
 			.get(() => instance(serviceContainer));
 		when(
-			serviceContainer.get<IExtensionContext>(IExtensionContext),
+			serviceContainer.get<IExtensionContext>(IExtensionContext)
 		).thenReturn(instance(context));
 		when(
-			serviceContainer.get<IDisposableRegistry>(IDisposableRegistry),
+			serviceContainer.get<IDisposableRegistry>(IDisposableRegistry)
 		).thenReturn(disposables as unknown as IDisposableRegistry);
 		when(context.extensionMode).thenReturn(ExtensionMode.Production);
 		when(context.secrets).thenReturn(instance(secrets));
@@ -88,7 +88,7 @@ suite("Kernel Api Access", () => {
 	test("Disallow access if Extension does not exist (or is invalid)", async () => {
 		when(mockedVSCodeNamespaces.extensions.all).thenReturn([]);
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(anything()),
+			mockedVSCodeNamespaces.extensions.getExtension(anything())
 		).thenReturn(undefined);
 
 		const { accessAllowed } = await requestApiAccess("SomeBogus.Extension");
@@ -102,7 +102,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -110,8 +110,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(undefined);
 
 		const { accessAllowed } = await requestApiAccess(extensionId);
@@ -122,8 +122,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		assert.isFalse(accessAllowed);
 	});
@@ -134,7 +134,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -142,8 +142,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(undefined);
 
 		requestApiAccess(extensionId).catch(noop);
@@ -159,8 +159,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		assert.isFalse(accessAllowed);
 	});
@@ -171,7 +171,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -179,8 +179,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(allow as any);
 
 		const { accessAllowed } = await requestApiAccess(extensionId);
@@ -191,8 +191,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		assert.isTrue(accessAllowed);
 	});
@@ -203,7 +203,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -211,8 +211,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(allow as any);
 
 		const { accessAllowed } = await requestApiAccess(extensionId);
@@ -223,21 +223,21 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		reset(mockedVSCodeNamespaces.window);
 		assert.isTrue(accessAllowed);
 
 		assert.isTrue(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 		assert.isTrue(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 		requestApiAccess(extensionId).catch(noop);
 		requestApiAccess(extensionId).catch(noop);
@@ -245,8 +245,8 @@ suite("Kernel Api Access", () => {
 		requestApiAccess(extensionId).catch(noop);
 		assert.isTrue(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 
 		verify(
@@ -255,8 +255,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).never();
 	});
 	test("Once access has been revoked do not display prompts again", async () => {
@@ -266,7 +266,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -274,8 +274,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(deny as any);
 
 		const { accessAllowed } = await requestApiAccess(extensionId);
@@ -286,21 +286,21 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		reset(mockedVSCodeNamespaces.window);
 		assert.isFalse(accessAllowed);
 
 		assert.isFalse(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 		assert.isFalse(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 		requestApiAccess(extensionId).catch(noop);
 		requestApiAccess(extensionId).catch(noop);
@@ -308,8 +308,8 @@ suite("Kernel Api Access", () => {
 		requestApiAccess(extensionId).catch(noop);
 		assert.isFalse(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 
 		verify(
@@ -318,8 +318,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).never();
 	});
 	test("When prompt is dismissed display prompt again", async () => {
@@ -329,7 +329,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -337,8 +337,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(undefined);
 
 		const { accessAllowed } = await requestApiAccess(extensionId);
@@ -349,16 +349,16 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		assert.isFalse(accessAllowed);
 
 		reset(mockedVSCodeNamespaces.window);
 		assert.isFalse(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 		verify(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -366,15 +366,15 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 
 		reset(mockedVSCodeNamespaces.window);
 		assert.isFalse(
 			await requestApiAccess(extensionId).then(
-				({ accessAllowed }) => accessAllowed,
-			),
+				({ accessAllowed }) => accessAllowed
+			)
 		);
 		verify(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -382,8 +382,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 	});
 
@@ -394,7 +394,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -402,12 +402,12 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(undefined);
 
 		let accessAllowed = await requestApiAccess(extensionId).then(
-			({ accessAllowed }) => accessAllowed,
+			({ accessAllowed }) => accessAllowed
 		);
 
 		verify(
@@ -416,8 +416,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		assert.isFalse(accessAllowed);
 
@@ -427,7 +427,7 @@ suite("Kernel Api Access", () => {
 		await updateListOfExtensionsAllowedToAccessApi([extensionId]);
 
 		accessAllowed = await requestApiAccess(extensionId).then(
-			({ accessAllowed }) => accessAllowed,
+			({ accessAllowed }) => accessAllowed
 		);
 		verify(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -435,8 +435,8 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).never();
 		assert.isTrue(accessAllowed);
 	});
@@ -447,7 +447,7 @@ suite("Kernel Api Access", () => {
 		});
 		const extensionId = "hello.world";
 		when(
-			mockedVSCodeNamespaces.extensions.getExtension(extensionId),
+			mockedVSCodeNamespaces.extensions.getExtension(extensionId)
 		).thenReturn(instance(extension));
 		when(
 			mockedVSCodeNamespaces.window.showInformationMessage(
@@ -455,12 +455,12 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).thenResolve(allow as any);
 
 		let accessAllowed = await requestApiAccess(extensionId).then(
-			({ accessAllowed }) => accessAllowed,
+			({ accessAllowed }) => accessAllowed
 		);
 
 		verify(
@@ -469,15 +469,15 @@ suite("Kernel Api Access", () => {
 				anything(),
 				allow,
 				Common.learnMore,
-				deny,
-			),
+				deny
+			)
 		).once();
 		assert.isTrue(accessAllowed);
 
 		await updateListOfExtensionsAllowedToAccessApi([]);
 
 		accessAllowed = await requestApiAccess(extensionId).then(
-			({ accessAllowed }) => accessAllowed,
+			({ accessAllowed }) => accessAllowed
 		);
 		assert.isFalse(accessAllowed);
 	});

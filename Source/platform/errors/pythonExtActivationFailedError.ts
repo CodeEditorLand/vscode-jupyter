@@ -8,7 +8,7 @@ export class PythonExtensionActicationFailedError extends WrappedError {
 		super(
 			"Python Extension failed to activate",
 			originalException,
-			"pythonExtension",
+			"pythonExtension"
 		);
 	}
 }

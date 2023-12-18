@@ -75,7 +75,7 @@ export class IPyWidgetScriptSource {
 		disposables: IDisposableRegistry,
 		private readonly configurationSettings: IConfigurationService,
 		private readonly sourceProviderFactory: IWidgetScriptSourceProviderFactory,
-		private readonly cdnScriptProvider: CDNWidgetScriptSourceProvider,
+		private readonly cdnScriptProvider: CDNWidgetScriptSourceProvider
 	) {
 		this.uriConverter = new ScriptUriConverter(
 			isWebExtension(),
@@ -83,7 +83,7 @@ export class IPyWidgetScriptSource {
 				if (!this.uriTranslationRequests.has(resource))
 					this.uriTranslationRequests.set(
 						resource,
-						createDeferred<Uri>(),
+						createDeferred<Uri>()
 					);
 				this.postEmitter.fire({
 					message:
@@ -91,7 +91,7 @@ export class IPyWidgetScriptSource {
 					payload: resource,
 				});
 				return this.uriTranslationRequests.get(resource)!.promise;
-			},
+			}
 		);
 		// Don't leave dangling promises.
 		this.isWebViewOnline.promise.catch(noop);
@@ -103,7 +103,7 @@ export class IPyWidgetScriptSource {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -141,7 +141,7 @@ export class IPyWidgetScriptSource {
 						moduleName: string;
 						moduleVersion: string;
 						requestId: string;
-					},
+					}
 				).catch(noop);
 			}
 		}
@@ -169,7 +169,7 @@ export class IPyWidgetScriptSource {
 			this.configurationSettings,
 			this.sourceProviderFactory,
 			this.isWebViewOnline.promise,
-			this.cdnScriptProvider,
+			this.cdnScriptProvider
 		);
 		this.kernel.onDisposed(() => this.dispose());
 		this.handlePendingRequests();
@@ -219,7 +219,7 @@ export class IPyWidgetScriptSource {
 				) {
 					this.widgetSources.set(
 						widgetSource.moduleName,
-						widgetSource,
+						widgetSource
 					);
 				}
 				// Send to UI (even if there's an error) instead of hanging while waiting for a response.
@@ -244,11 +244,11 @@ export class IPyWidgetScriptSource {
 
 		traceInfo(
 			`${ConsoleForegroundColors.Green}Fetch Script for ${JSON.stringify(
-				payload,
-			)}`,
+				payload
+			)}`
 		);
 		await this.sendWidgetSource(moduleName, moduleVersion, requestId).catch(
-			(ex) => traceError("Failed to send widget sources upon ready", ex),
+			(ex) => traceError("Failed to send widget sources upon ready", ex)
 		);
 
 		// Ensure we send all of the widget script sources found in the `<python env>/share/jupyter/nbextensions` folder.
@@ -259,12 +259,12 @@ export class IPyWidgetScriptSource {
 				this.sendWidgetSource(
 					moduleName,
 					moduleVersion,
-					requestId,
+					requestId
 				).catch(
 					traceError.bind(
 						undefined,
-						"Failed to send widget sources upon ready",
-					),
+						"Failed to send widget sources upon ready"
+					)
 				);
 			}
 		}
@@ -276,7 +276,7 @@ export class IPyWidgetScriptSource {
 	private async sendWidgetSource(
 		moduleName?: string,
 		moduleVersion: string = "*",
-		requestId?: string,
+		requestId?: string
 	) {
 		// Standard widgets area already available, hence no need to look for them.
 		if (!moduleName || moduleName.startsWith("@jupyter")) {
@@ -293,11 +293,11 @@ export class IPyWidgetScriptSource {
 		let widgetSource: WidgetScriptSource = { moduleName, requestId };
 		try {
 			traceInfo(
-				`${ConsoleForegroundColors.Green}Fetch Script for ${moduleName}`,
+				`${ConsoleForegroundColors.Green}Fetch Script for ${moduleName}`
 			);
 			widgetSource = await this.scriptProvider.getWidgetScriptSource(
 				moduleName,
-				moduleVersion,
+				moduleVersion
 			);
 			// If we have a widget source from CDN, never overwrite that.
 			if (
@@ -311,7 +311,7 @@ export class IPyWidgetScriptSource {
 			sendTelemetryEvent(Telemetry.HashedIPyWidgetScriptDiscoveryError);
 		} finally {
 			traceInfo(
-				`${ConsoleForegroundColors.Green}Script for ${moduleName}, is ${widgetSource.scriptUri} from ${widgetSource.source}`,
+				`${ConsoleForegroundColors.Green}Script for ${moduleName}, is ${widgetSource.scriptUri} from ${widgetSource.source}`
 			);
 			// Send to UI (even if there's an error) continues instead of hanging while waiting for a response.
 			this.postEmitter.fire({
@@ -323,7 +323,7 @@ export class IPyWidgetScriptSource {
 	}
 	private handlePendingRequests() {
 		const pendingModuleNames = Array.from(
-			this.pendingModuleRequests.keys(),
+			this.pendingModuleRequests.keys()
 		);
 		while (pendingModuleNames.length) {
 			const moduleName = pendingModuleNames.shift();
@@ -334,11 +334,11 @@ export class IPyWidgetScriptSource {
 				this.sendWidgetSource(
 					moduleName,
 					moduleVersion,
-					requestId,
+					requestId
 				).catch(
 					traceError.bind(
-						`Failed to send WidgetScript for ${moduleName}`,
-					),
+						`Failed to send WidgetScript for ${moduleName}`
+					)
 				);
 			}
 		}

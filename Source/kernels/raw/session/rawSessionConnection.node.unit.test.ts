@@ -116,7 +116,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		when(kernelProcess.canInterrupt).thenReturn(true);
 		when(kernelProcess.interrupt()).thenResolve();
 		when(kernelProcess.kernelConnectionMetadata).thenReturn(
-			kernelConnectionMetadata,
+			kernelConnectionMetadata
 		);
 		when(kernelProcess.pid).thenReturn(9999);
 		return kernelProcess;
@@ -132,18 +132,18 @@ suite("Raw Session & Raw Kernel Connection", () => {
 			>();
 		let ioPubHandlers: ((_: unknown, msg: any) => {})[] = [];
 		when(iopubMessage.connect(anything())).thenCall((handler) =>
-			ioPubHandlers.push(handler),
+			ioPubHandlers.push(handler)
 		);
 		when(iopubMessage.disconnect(anything())).thenCall(
 			(handler) =>
-				(ioPubHandlers = ioPubHandlers.filter((h) => h !== handler)),
+				(ioPubHandlers = ioPubHandlers.filter((h) => h !== handler))
 		);
 		when(kernel.status).thenReturn("idle");
 		when(kernel.connectionStatus).thenReturn("connected");
 		when(kernel.statusChanged).thenReturn(
 			new Signal<Kernel.IKernelConnection, Kernel.Status>(
-				instance(kernel),
-			),
+				instance(kernel)
+			)
 		);
 		// when(kernel.statusChanged).thenReturn(instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>()));
 		when(kernel.iopubMessage).thenReturn(instance(iopubMessage));
@@ -158,24 +158,24 @@ suite("Raw Session & Raw Kernel Connection", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IMessage<KernelMessage.MessageType>
 					>
-				>(),
-			),
+				>()
+			)
 		);
 		when(kernel.disposed).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, void>>()),
+			instance(mock<ISignal<Kernel.IKernelConnection, void>>())
 		);
 		when(kernel.connectionStatusChanged).thenReturn(
 			instance(
 				mock<
 					ISignal<Kernel.IKernelConnection, Kernel.ConnectionStatus>
-				>(),
-			),
+				>()
+			)
 		);
 		when(kernel.info).thenResolve(kernelInfo);
 		when(kernel.shutdown()).thenResolve();
 		when(kernel.requestKernelInfo()).thenCall(async () => {
 			ioPubHandlers.forEach((handler) =>
-				handler(instance(kernel), someIOPubMessage),
+				handler(instance(kernel), someIOPubMessage)
 			);
 			return kernelInfoResponse;
 		});
@@ -222,8 +222,8 @@ suite("Raw Session & Raw Kernel Connection", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(resolvableInstance(kernelProcess));
 
 		session = new RawSessionConnection(
@@ -232,7 +232,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 			Uri.file(""),
 			kernelConnectionMetadata,
 			launchTimeout,
-			"notebook",
+			"notebook"
 		);
 	});
 
@@ -270,7 +270,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 			await assert.isRejected(
 				promise,
 				new KernelConnectionTimeoutError(kernelConnectionMetadata)
-					.message,
+					.message
 			);
 		}).timeout(2_000);
 		test("Verify startup can be cancelled", async () => {
@@ -319,8 +319,8 @@ suite("Raw Session & Raw Kernel Connection", () => {
 				1_000,
 				() =>
 					`Kernel is not dead, Kernel Disposed = ${disposed} && Kernel Status = ${statuses.join(
-						",",
-					)}`,
+						","
+					)}`
 			);
 			assert.strictEqual(session.status, "dead");
 			assert.strictEqual(session.isDisposed, false);
@@ -343,8 +343,8 @@ suite("Raw Session & Raw Kernel Connection", () => {
 				1_000,
 				() =>
 					`Session not terminated, Status = ${statuses.join(
-						",",
-					)} and current status = ${session.status}`,
+						","
+					)} and current status = ${session.status}`
 			);
 			assert.strictEqual(session.kernel?.isDisposed, true);
 			assert.strictEqual(session.kernel?.status, "dead");
@@ -372,8 +372,8 @@ suite("Raw Session & Raw Kernel Connection", () => {
 					anything(),
 					anything(),
 					anything(),
-					anything(),
-				),
+					anything()
+				)
 			).thenResolve(resolvableInstance(newKernelProcess));
 
 			const statuses: Kernel.Status[] = [];
@@ -403,8 +403,8 @@ suite("Raw Session & Raw Kernel Connection", () => {
 					anything(),
 					anything(),
 					anything(),
-					anything(),
-				),
+					anything()
+				)
 			).thenResolve(resolvableInstance(newKernelProcess));
 
 			const statuses: Kernel.Status[] = [];
@@ -448,13 +448,13 @@ suite("Raw Session & Raw Kernel Connection", () => {
 					anything(),
 					anything(),
 					anything(),
-					anything(),
-				),
+					anything()
+				)
 			).thenResolve(resolvableInstance(newKernelProcess));
 
 			const statusesOfNewKernel: Kernel.Status[] = [];
 			session.statusChanged.connect((_, s) =>
-				statusesOfNewKernel.push(s),
+				statusesOfNewKernel.push(s)
 			);
 			session.disposed.connect(() => (disposed = true));
 
@@ -498,13 +498,13 @@ suite("Raw Session & Raw Kernel Connection", () => {
 					anything(),
 					anything(),
 					anything(),
-					anything(),
-				),
+					anything()
+				)
 			).thenResolve(resolvableInstance(newKernelProcess));
 
 			const statusesOfNewKernel: Kernel.Status[] = [];
 			session.statusChanged.connect((_, s) =>
-				statusesOfNewKernel.push(s),
+				statusesOfNewKernel.push(s)
 			);
 			session.disposed.connect(() => (disposed = true));
 
@@ -544,13 +544,13 @@ suite("Raw Session & Raw Kernel Connection", () => {
 					anything(),
 					anything(),
 					anything(),
-					anything(),
-				),
+					anything()
+				)
 			).thenResolve(resolvableInstance(newKernelProcess));
 
 			const statusesOfNewKernel: Kernel.Status[] = [];
 			session.statusChanged.connect((_, s) =>
-				statusesOfNewKernel.push(s),
+				statusesOfNewKernel.push(s)
 			);
 			session.disposed.connect(() => (disposed = true));
 
@@ -584,7 +584,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 				| KernelMessage.IShellMessage<KernelMessage.ShellMessageType>
 				| undefined;
 			when(
-				kernel.sendShellMessage(anything(), anything(), anything()),
+				kernel.sendShellMessage(anything(), anything(), anything())
 			).thenCall((msg) => {
 				request = msg;
 				return { done: Promise.resolve() } as any;
@@ -594,7 +594,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 
 			verify(kernelProcess.interrupt()).never();
 			verify(
-				kernel.sendShellMessage(anything(), anything(), anything()),
+				kernel.sendShellMessage(anything(), anything(), anything())
 			).once();
 			assert.strictEqual(request?.header.msg_type, "interrupt_request");
 		});

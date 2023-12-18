@@ -45,31 +45,50 @@ export class DataViewerCommandRegistry
 {
 	private dataViewerChecker: DataViewerChecker;
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IDebugService) @optional() private debugService: IDebugService | undefined,
-        @inject(IConfigurationService) configService: IConfigurationService,
-        @inject(IJupyterVariableDataProviderFactory)
-        @optional()
-        private readonly jupyterVariableDataProviderFactory: IJupyterVariableDataProviderFactory | undefined,
-        @inject(IDataViewerFactory) @optional() private readonly dataViewerFactory: IDataViewerFactory | undefined,
-        @inject(IJupyterVariables)
-        @optional()
-        @named(Identifiers.DEBUGGER_VARIABLES)
-        private variableProvider: IJupyterVariables | undefined,
-        @inject(IDataScienceErrorHandler) private readonly errorHandler: IDataScienceErrorHandler,
-        @inject(IDataViewerDependencyService)
-        @optional()
-        private readonly dataViewerDependencyService: IDataViewerDependencyService | undefined,
-        @inject(IInterpreterService) @optional() private readonly interpreterService: IInterpreterService | undefined,
-        @inject(IPlatformService) private readonly platformService: IPlatformService,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IInteractiveWindowProvider) private interactiveWindowProvider: IInteractiveWindowProvider
-    ) {
-        this.dataViewerChecker = new DataViewerChecker(configService);
-        if (!workspace.isTrusted) {
-            workspace.onDidGrantWorkspaceTrust(this.registerCommandsIfTrusted, this, this.disposables);
-        }
-    }
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IDebugService)
+		@optional()
+		private debugService: IDebugService | undefined,
+		@inject(IConfigurationService) configService: IConfigurationService,
+		@inject(IJupyterVariableDataProviderFactory)
+		@optional()
+		private readonly jupyterVariableDataProviderFactory:
+			| IJupyterVariableDataProviderFactory
+			| undefined,
+		@inject(IDataViewerFactory)
+		@optional()
+		private readonly dataViewerFactory: IDataViewerFactory | undefined,
+		@inject(IJupyterVariables)
+		@optional()
+		@named(Identifiers.DEBUGGER_VARIABLES)
+		private variableProvider: IJupyterVariables | undefined,
+		@inject(IDataScienceErrorHandler)
+		private readonly errorHandler: IDataScienceErrorHandler,
+		@inject(IDataViewerDependencyService)
+		@optional()
+		private readonly dataViewerDependencyService:
+			| IDataViewerDependencyService
+			| undefined,
+		@inject(IInterpreterService)
+		@optional()
+		private readonly interpreterService: IInterpreterService | undefined,
+		@inject(IPlatformService)
+		private readonly platformService: IPlatformService,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IInteractiveWindowProvider)
+		private interactiveWindowProvider: IInteractiveWindowProvider
+	) {
+		this.dataViewerChecker = new DataViewerChecker(configService);
+		if (!workspace.isTrusted) {
+			workspace.onDidGrantWorkspaceTrust(
+				this.registerCommandsIfTrusted,
+				this,
+				this.disposables
+			);
+		}
+	}
 	activate() {
 		this.registerCommandsIfTrusted();
 	}
@@ -79,7 +98,7 @@ export class DataViewerCommandRegistry
 		}
 		this.registerCommand(
 			Commands.ShowDataViewer,
-			this.onVariablePanelShowDataViewerRequest,
+			this.onVariablePanelShowDataViewerRequest
 		);
 	}
 	private registerCommand<
@@ -91,10 +110,10 @@ export class DataViewerCommandRegistry
 		this.disposables.push(disposable);
 	}
 	private async onVariablePanelShowDataViewerRequest(
-		request: IShowDataViewerFromVariablePanel,
+		request: IShowDataViewerFromVariablePanel
 	) {
 		sendTelemetryEvent(
-			EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_REQUEST,
+			EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_REQUEST
 		);
 		if (
 			this.debugService?.activeDebugSession &&
@@ -111,23 +130,23 @@ export class DataViewerCommandRegistry
 				) {
 					// Check the debug adapter session to get the python env that launched it
 					const pythonEnv = await this.getDebugAdapterPython(
-						this.debugService.activeDebugSession.configuration,
+						this.debugService.activeDebugSession.configuration
 					);
 
 					pythonEnv &&
 						(await this.dataViewerDependencyService.checkAndInstallMissingDependencies(
-							pythonEnv,
+							pythonEnv
 						));
 				}
 
 				const variable = convertDebugProtocolVariableToIJupyterVariable(
-					request.variable as DebugProtocol.Variable,
+					request.variable as DebugProtocol.Variable
 				);
 				const jupyterVariable =
 					await this.variableProvider.getFullVariable(variable);
 				const jupyterVariableDataProvider =
 					await this.jupyterVariableDataProviderFactory.create(
-						jupyterVariable,
+						jupyterVariable
 					);
 				const dataFrameInfo =
 					await jupyterVariableDataProvider.getDataFrameInfo();
@@ -135,16 +154,16 @@ export class DataViewerCommandRegistry
 				if (
 					columnSize &&
 					(await this.dataViewerChecker.isRequestedColumnSizeAllowed(
-						columnSize,
+						columnSize
 					))
 				) {
 					const title: string = `${DataScience.dataExplorerTitle} - ${jupyterVariable.name}`;
 					const dv = await this.dataViewerFactory.create(
 						jupyterVariableDataProvider,
-						title,
+						title
 					);
 					sendTelemetryEvent(
-						EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS,
+						EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS
 					);
 					return dv;
 				}
@@ -153,7 +172,7 @@ export class DataViewerCommandRegistry
 					EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_ERROR,
 					undefined,
 					undefined,
-					e,
+					e
 				);
 				traceError(e);
 				this.errorHandler.handleError(e).then(noop, noop);
@@ -171,13 +190,13 @@ export class DataViewerCommandRegistry
 					const jupyterVariableDataProvider =
 						await this.jupyterVariableDataProviderFactory.create(
 							request.variable,
-							activeKernel,
+							activeKernel
 						);
 
 					const title: string = `${DataScience.dataExplorerTitle} - ${request.variable.name}`;
 					return await this.dataViewerFactory.create(
 						jupyterVariableDataProvider,
-						title,
+						title
 					);
 				}
 			} catch (e) {
@@ -211,8 +230,8 @@ export class DataViewerCommandRegistry
 		const activeDataViewer = this.dataViewerFactory?.activeViewer;
 		return activeDataViewer
 			? this.kernelProvider.kernels.find(
-					(item) => item === activeDataViewer.kernel,
-			  )
+					(item) => item === activeDataViewer.kernel
+				)
 			: undefined;
 	}
 
@@ -224,7 +243,7 @@ export class DataViewerCommandRegistry
 		}
 		return workspace.notebookDocuments.find(
 			(notebookDocument) =>
-				notebookDocument === interactiveWindow?.notebookDocument,
+				notebookDocument === interactiveWindow?.notebookDocument
 		);
 	}
 
@@ -232,12 +251,12 @@ export class DataViewerCommandRegistry
 	// Mirrors the logic from Python extension here:
 	// https://github.com/microsoft/vscode-python/blob/35b813f37d1ceec547277180e3aa07bd24d86f89/src/client/debugger/extension/adapter/factory.ts#L116
 	private async getDebugAdapterPython(
-		debugConfiguration: DebugConfiguration,
+		debugConfiguration: DebugConfiguration
 	): Promise<PythonEnvironment | undefined> {
 		if (!this.interpreterService) {
 			// Interpreter service is optional
 			traceInfo(
-				"Interpreter Service missing when trying getDebugAdapterPython",
+				"Interpreter Service missing when trying getDebugAdapterPython"
 			);
 			return;
 		}
@@ -257,12 +276,12 @@ export class DataViewerCommandRegistry
 			if (untildePath.startsWith("~") && this.platformService.homeDir) {
 				untildePath = untildify(
 					untildePath,
-					this.platformService.homeDir.path,
+					this.platformService.homeDir.path
 				);
 			}
 
 			return this.interpreterService.getInterpreterDetails(
-				Uri.file(untildePath),
+				Uri.file(untildePath)
 			);
 		} else {
 			// Failed to find the expected configuration items, use active interpreter (might be attach scenario)

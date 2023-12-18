@@ -46,17 +46,19 @@ function generateBackingIPyNbFileName(resource: Resource) {
 @injectable()
 export class ExportBase implements IExportBase {
 	constructor(
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(JupyterConnection) private readonly jupyterConnection: JupyterConnection,
-        @inject(IExportUtil) private readonly exportUtil: IExportUtil
-    ) {}
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(JupyterConnection)
+		private readonly jupyterConnection: JupyterConnection,
+		@inject(IExportUtil) private readonly exportUtil: IExportUtil
+	) {}
 
 	public async export(
 		_sourceDocument: NotebookDocument,
 		_target: Uri,
 		_interpreter: PythonEnvironment,
-		_token: CancellationToken,
+		_token: CancellationToken
 	): Promise<void> {
 		return undefined;
 	}
@@ -67,7 +69,7 @@ export class ExportBase implements IExportBase {
 		target: Uri,
 		format: ExportFormat,
 		_interpreter: PythonEnvironment,
-		_token: CancellationToken,
+		_token: CancellationToken
 	): Promise<void> {
 		const kernel = this.kernelProvider.get(sourceDocument);
 		if (!kernel) {
@@ -91,7 +93,7 @@ export class ExportBase implements IExportBase {
 		}
 		const kernelConnection = kernel.session.kernel;
 		const connection = await this.jupyterConnection.createConnectionInfo(
-			kernelConnectionMetadata.serverProviderHandle,
+			kernelConnectionMetadata.serverProviderHandle
 		);
 		const serverSettings = connection.settings;
 		const jupyter =
@@ -116,7 +118,7 @@ export class ExportBase implements IExportBase {
 
 		const backingFile = await this.createBackingFile(
 			resource,
-			contentsManager,
+			contentsManager
 		);
 
 		if (!backingFile) {
@@ -142,8 +144,8 @@ export class ExportBase implements IExportBase {
 			const outputs = await executeSilently(
 				kernelConnection,
 				`!jupyter nbconvert ${filePath} --to ${format} --output ${path.basename(
-					tempTarget,
-				)}`,
+					tempTarget
+				)}`
 			);
 
 			const text = this.parseStreamOutput(outputs);
@@ -162,7 +164,7 @@ export class ExportBase implements IExportBase {
 				});
 				const bytes = this.b64toBlob(
 					content.content,
-					"application/pdf",
+					"application/pdf"
 				);
 				const buffer = await bytes.arrayBuffer();
 				await this.fs.writeFile(target!, Buffer.from(buffer));
@@ -185,7 +187,7 @@ export class ExportBase implements IExportBase {
 	}
 	public async createBackingFile(
 		resource: Resource,
-		contentsManager: ContentsManager,
+		contentsManager: ContentsManager
 	): Promise<
 		{ dispose: () => Promise<unknown>; filePath: string } | undefined
 	> {
@@ -207,7 +209,7 @@ export class ExportBase implements IExportBase {
 				backingFile.path,
 				backingFileDir.length && backingFileDir !== "."
 					? `${backingFileDir}/${newName}`
-					: newName, // Note, the docs say the path uses UNIX delimiters.
+					: newName // Note, the docs say the path uses UNIX delimiters.
 			);
 		} catch (exc) {
 			traceError(`Backing file not supported: ${exc}`);
@@ -224,7 +226,7 @@ export class ExportBase implements IExportBase {
 	async getContents(
 		file: string,
 		format: Contents.FileFormat,
-		contentsManager: ContentsManager,
+		contentsManager: ContentsManager
 	): Promise<Contents.IModel> {
 		const data = await contentsManager.get(file, {
 			type: "file",
@@ -291,7 +293,7 @@ export class ExportBase implements IExportBase {
 		}
 		const outputs = await executeSilently(
 			kernel.session.kernel,
-			`import os;os.getcwd();`,
+			`import os;os.getcwd();`
 		);
 		if (outputs.length === 0) {
 			return;

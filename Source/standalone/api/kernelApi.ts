@@ -39,19 +39,24 @@ export class JupyterKernelServiceFactory
 	private readonly chainedApiAccess = new PromiseChain();
 	private readonly extensionApi = new Map<string, IExportedKernelService>();
 	constructor(
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
-        @inject(IThirdPartyKernelProvider) private readonly thirdPartyKernelProvider: IThirdPartyKernelProvider,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IControllerRegistration) private readonly controllerRegistration: IControllerRegistration,
-        @inject(ApiAccessService) private readonly apiAccess: ApiAccessService,
-        @inject(IExtensions) private readonly extensions: IExtensions,
-        @inject(IServiceContainer) private readonly serviceContainer: IServiceContainer
-    ) {}
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
+		@inject(IThirdPartyKernelProvider)
+		private readonly thirdPartyKernelProvider: IThirdPartyKernelProvider,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IControllerRegistration)
+		private readonly controllerRegistration: IControllerRegistration,
+		@inject(ApiAccessService) private readonly apiAccess: ApiAccessService,
+		@inject(IExtensions) private readonly extensions: IExtensions,
+		@inject(IServiceContainer)
+		private readonly serviceContainer: IServiceContainer
+	) {}
 	public async getService() {
 		const info = this.extensions.determineExtensionFromCallStack();
 		const accessInfo = await this.chainedApiAccess.chainFinally(() =>
-			this.apiAccess.getAccessInformation(info),
+			this.apiAccess.getAccessInformation(info)
 		);
 		if (!accessInfo.accessAllowed) {
 			return;
@@ -67,7 +72,7 @@ export class JupyterKernelServiceFactory
 			this.thirdPartyKernelProvider,
 			this.disposables,
 			this.controllerRegistration,
-			this.serviceContainer,
+			this.serviceContainer
 		);
 		this.extensionApi.set(accessInfo.extensionId, service);
 		return service;
@@ -110,80 +115,88 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 
 	constructor(
-        private readonly callingExtensionId: string,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
-        @inject(IThirdPartyKernelProvider) private readonly thirdPartyKernelProvider: IThirdPartyKernelProvider,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IControllerRegistration) private readonly controllerRegistration: IControllerRegistration,
-        @inject(IServiceContainer) private serviceContainer: IServiceContainer
-    ) {
-        this._status = this.kernelFinder.status;
-        this.kernelFinder.onDidChangeStatus(
-            () => {
-                this._status = this.kernelFinder.status;
-                this._onDidChangeStatus.fire();
-            },
-            this,
-            disposables
-        );
-        this.kernelProvider.onDidDisposeKernel(
-            (e) => {
-                traceInfoIfCI(
-                    `Kernel ${
-                        e.kernelConnectionMetadata.id
-                    }, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} disposed`
-                );
-                this._onDidChangeKernels.fire();
-            },
-            this,
-            disposables
-        );
-        this.kernelProvider.onDidStartKernel(
-            (e) => {
-                traceInfoIfCI(
-                    `Kernel ${
-                        e.kernelConnectionMetadata.id
-                    }, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} started`
-                );
-                this._onDidChangeKernels.fire();
-            },
-            this,
-            disposables
-        );
-        this.thirdPartyKernelProvider.onDidDisposeKernel(
-            (e) => {
-                traceInfoIfCI(
-                    `Third party Kernel ${
-                        e.kernelConnectionMetadata.id
-                    }, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} disposed`
-                );
-                this._onDidChangeKernels.fire();
-            },
-            this,
-            disposables
-        );
-        this.thirdPartyKernelProvider.onDidStartKernel(
-            (e) => {
-                traceInfoIfCI(
-                    `Third party Kernel ${
-                        e.kernelConnectionMetadata.id
-                    }, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} started`
-                );
-                this._onDidChangeKernels.fire();
-            },
-            this,
-            disposables
-        );
-        this.controllerRegistration.onDidChange(() => this._onDidChangeKernelSpecifications.fire(), this, disposables);
-    }
+		private readonly callingExtensionId: string,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
+		@inject(IThirdPartyKernelProvider)
+		private readonly thirdPartyKernelProvider: IThirdPartyKernelProvider,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IControllerRegistration)
+		private readonly controllerRegistration: IControllerRegistration,
+		@inject(IServiceContainer) private serviceContainer: IServiceContainer
+	) {
+		this._status = this.kernelFinder.status;
+		this.kernelFinder.onDidChangeStatus(
+			() => {
+				this._status = this.kernelFinder.status;
+				this._onDidChangeStatus.fire();
+			},
+			this,
+			disposables
+		);
+		this.kernelProvider.onDidDisposeKernel(
+			(e) => {
+				traceInfoIfCI(
+					`Kernel ${
+						e.kernelConnectionMetadata.id
+					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} disposed`
+				);
+				this._onDidChangeKernels.fire();
+			},
+			this,
+			disposables
+		);
+		this.kernelProvider.onDidStartKernel(
+			(e) => {
+				traceInfoIfCI(
+					`Kernel ${
+						e.kernelConnectionMetadata.id
+					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} started`
+				);
+				this._onDidChangeKernels.fire();
+			},
+			this,
+			disposables
+		);
+		this.thirdPartyKernelProvider.onDidDisposeKernel(
+			(e) => {
+				traceInfoIfCI(
+					`Third party Kernel ${
+						e.kernelConnectionMetadata.id
+					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} disposed`
+				);
+				this._onDidChangeKernels.fire();
+			},
+			this,
+			disposables
+		);
+		this.thirdPartyKernelProvider.onDidStartKernel(
+			(e) => {
+				traceInfoIfCI(
+					`Third party Kernel ${
+						e.kernelConnectionMetadata.id
+					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} started`
+				);
+				this._onDidChangeKernels.fire();
+			},
+			this,
+			disposables
+		);
+		this.controllerRegistration.onDidChange(
+			() => this._onDidChangeKernelSpecifications.fire(),
+			this,
+			disposables
+		);
+	}
 	async getKernelSpecifications(): Promise<KernelConnectionMetadata[]> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
 			pemUsed: "getKernelSpecifications",
 		});
 		return this.kernelFinder.kernels.map((item) =>
-			this.translateKernelConnectionMetadataToExportedType(item),
+			this.translateKernelConnectionMetadataToExportedType(item)
 		);
 	}
 	getActiveKernels(): {
@@ -205,7 +218,7 @@ class JupyterKernelService implements IExportedKernelService {
 				(item) =>
 					item.startedAtLeastOnce ||
 					item.kernelConnectionMetadata.kind ===
-						"connectToLiveRemoteKernel",
+						"connectToLiveRemoteKernel"
 			)
 			.forEach((item) => {
 				const kernel = this.kernelProvider.get(item.notebook);
@@ -219,7 +232,7 @@ class JupyterKernelService implements IExportedKernelService {
 				kernels.push({
 					metadata:
 						this.translateKernelConnectionMetadataToExportedType(
-							item.kernelConnectionMetadata,
+							item.kernelConnectionMetadata
 						),
 					uri: item.uri,
 					id: item.id,
@@ -230,7 +243,7 @@ class JupyterKernelService implements IExportedKernelService {
 				(item) =>
 					item.startedAtLeastOnce ||
 					item.kernelConnectionMetadata.kind ===
-						"connectToLiveRemoteKernel",
+						"connectToLiveRemoteKernel"
 			)
 			.forEach((item) => {
 				const kernel = this.thirdPartyKernelProvider.get(item.uri);
@@ -244,7 +257,7 @@ class JupyterKernelService implements IExportedKernelService {
 				kernels.push({
 					metadata:
 						this.translateKernelConnectionMetadataToExportedType(
-							item.kernelConnectionMetadata,
+							item.kernelConnectionMetadata
 						),
 					uri: item.uri,
 					id: item.id,
@@ -271,9 +284,7 @@ class JupyterKernelService implements IExportedKernelService {
 		});
 		return kernels;
 	}
-	getKernel(
-		uri: Uri,
-	):
+	getKernel(uri: Uri):
 		| {
 				metadata: KernelConnectionMetadata;
 				connection: Session.ISessionConnection;
@@ -289,7 +300,7 @@ class JupyterKernelService implements IExportedKernelService {
 		if (kernel?.session) {
 			return {
 				metadata: this.translateKernelConnectionMetadataToExportedType(
-					kernel.kernelConnectionMetadata,
+					kernel.kernelConnectionMetadata
 				),
 				connection: wrapKernelSession(kernel.session),
 			};
@@ -297,7 +308,7 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 	async startKernel(
 		spec: KernelConnectionMetadata,
-		uri: Uri,
+		uri: Uri
 	): Promise<Session.ISessionConnection> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
@@ -307,7 +318,7 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 	async connect(
 		spec: ActiveKernel,
-		uri: Uri,
+		uri: Uri
 	): Promise<Session.ISessionConnection> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
@@ -317,10 +328,10 @@ class JupyterKernelService implements IExportedKernelService {
 	}
 	private async startOrConnect(
 		spec: KernelConnectionMetadata | ActiveKernel,
-		uri: Uri,
+		uri: Uri
 	): Promise<Session.ISessionConnection> {
 		const connection = this.kernelFinder.kernels.find(
-			(item) => item.id === spec.id,
+			(item) => item.id === spec.id
 		);
 		if (!connection) {
 			throw new Error("Not found");
@@ -331,7 +342,7 @@ class JupyterKernelService implements IExportedKernelService {
 			{ resource: uri },
 			new DisplayOptions(false),
 			this.disposables,
-			"3rdPartyExtension",
+			"3rdPartyExtension"
 		);
 		if (!kernel?.session) {
 			throw new Error("Not found");
@@ -339,7 +350,7 @@ class JupyterKernelService implements IExportedKernelService {
 		return wrapKernelSession(kernel.session);
 	}
 	private translateKernelConnectionMetadataToExportedType(
-		connection: Readonly<IKernelKernelConnectionMetadata>,
+		connection: Readonly<IKernelKernelConnectionMetadata>
 	): KernelConnectionMetadata {
 		if (!this.translatedConnections.has(connection)) {
 			// By not forcing the cast, we ensure the types are compatible.
@@ -349,7 +360,7 @@ class JupyterKernelService implements IExportedKernelService {
 			// We recast to KernelConnectionMetadata as this has already define its properties as readonly.
 
 			const translatedConnection = Object.freeze(
-				BaseKernelConnectionMetadata.fromJSON(connection.toJSON()),
+				BaseKernelConnectionMetadata.fromJSON(connection.toJSON())
 			) as KernelConnectionMetadata;
 			this.translatedConnections.set(connection, translatedConnection);
 		}

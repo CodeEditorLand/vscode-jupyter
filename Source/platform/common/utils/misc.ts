@@ -49,9 +49,7 @@ type NonFunctionPropertyNames<T> = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type UnionToIntersection<U> = (
-	U extends any
-		? (k: U) => void
-		: never
+	U extends any ? (k: U) => void : never
 ) extends (k: infer I) => void
 	? I
 	: never;
@@ -77,7 +75,7 @@ export type TraceInfo =
 export function tracing<T>(
 	log: (t: TraceInfo) => void,
 	run: () => T,
-	logBeforeCall?: boolean,
+	logBeforeCall?: boolean
 ): T {
 	const timer = new StopWatch();
 	try {
@@ -121,7 +119,7 @@ export function tracing<T>(
  * @returns {resource is Resource}
  */
 export function isResource(
-	resource?: InterpreterUri | Environment,
+	resource?: InterpreterUri | Environment
 ): resource is Resource {
 	if (!resource) {
 		return true;

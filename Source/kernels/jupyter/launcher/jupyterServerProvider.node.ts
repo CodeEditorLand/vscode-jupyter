@@ -19,13 +19,14 @@ import {
 export class JupyterServerProvider implements IJupyterServerProvider {
 	private serverPromise?: Promise<IJupyterConnection>;
 	constructor(
-        @inject(IJupyterServerHelper)
-        @optional()
-        private readonly jupyterServerHelper: IJupyterServerHelper | undefined,
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService
-    ) {}
+		@inject(IJupyterServerHelper)
+		@optional()
+		private readonly jupyterServerHelper: IJupyterServerHelper | undefined,
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService
+	) {}
 	public async getOrStartServer(
-		options: GetServerOptions,
+		options: GetServerOptions
 	): Promise<IJupyterConnection> {
 		if (!this.serverPromise) {
 			const promise = (this.serverPromise =
@@ -40,7 +41,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 	}
 
 	private async startServerImpl(
-		options: GetServerOptions,
+		options: GetServerOptions
 	): Promise<IJupyterConnection> {
 		const jupyterServerHelper = this.jupyterServerHelper;
 		if (!jupyterServerHelper) {
@@ -57,15 +58,15 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				// Indicate failing.
 				throw new JupyterInstallError(
 					DataScience.jupyterNotSupported(
-						await jupyterServerHelper.getJupyterServerError(),
-					),
+						await jupyterServerHelper.getJupyterServerError()
+					)
 				);
 			}
 			// Then actually start the server
 			traceVerbose(`Starting notebook server.`);
 			const result = await jupyterServerHelper.startServer(
 				options.resource,
-				options.token,
+				options.token
 			);
 			Cancellation.throwIfCanceled(options.token);
 			return result;
@@ -106,16 +107,16 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				throw new Error(
 					DataScience.jupyterNotSupportedBecauseOfEnvironment(
 						displayName,
-						e.toString(),
-					),
+						e.toString()
+					)
 				);
 			} else {
 				throw new JupyterInstallError(
 					DataScience.jupyterNotSupported(
 						this.jupyterServerHelper
 							? await this.jupyterServerHelper.getJupyterServerError()
-							: "Error",
-					),
+							: "Error"
+					)
 				);
 			}
 		}

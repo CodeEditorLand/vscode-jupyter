@@ -23,11 +23,11 @@ suite("CellMatcher", () => {
 		test("CellMatcher for valid code cell", () => {
 			assert.ok(
 				defaultMatcher.isCell(cellMarker),
-				`"${cellMarker}" should match as a cell marker`,
+				`"${cellMarker}" should match as a cell marker`
 			);
 			assert.ok(
 				defaultMatcher.isCode(cellMarker),
-				`"${cellMarker}" should match as a code cell marker`,
+				`"${cellMarker}" should match as a code cell marker`
 			);
 		});
 	});
@@ -47,11 +47,11 @@ suite("CellMatcher", () => {
 		test("CellMatcher for valid markdown cell", () => {
 			assert.ok(
 				defaultMatcher.isCell(cellMarker),
-				`"${cellMarker}" should match as a cell marker`,
+				`"${cellMarker}" should match as a cell marker`
 			);
 			assert.ok(
 				defaultMatcher.isMarkdown(cellMarker),
-				`"${cellMarker}" should match as a markdown cell marker`,
+				`"${cellMarker}" should match as a markdown cell marker`
 			);
 		});
 	});
@@ -61,7 +61,7 @@ suite("CellMatcher", () => {
 		test("CellMatcher for valid markdown cell", () => {
 			assert.isFalse(
 				defaultMatcher.isCell(cellMarker),
-				`"${cellMarker}" should not match as a cell marker`,
+				`"${cellMarker}" should not match as a cell marker`
 			);
 		});
 	});
@@ -75,11 +75,11 @@ suite("CellMatcher", () => {
 		test("Custom Default cell setting for valid code cell", () => {
 			assert.ok(
 				cusomMatcher.isCell(cellMarker),
-				`"${cellMarker}" should match as a cell marker`,
+				`"${cellMarker}" should match as a cell marker`
 			);
 			assert.ok(
 				cusomMatcher.isCode(cellMarker),
-				`"${cellMarker}" should match as a code cell marker`,
+				`"${cellMarker}" should match as a code cell marker`
 			);
 		});
 	});

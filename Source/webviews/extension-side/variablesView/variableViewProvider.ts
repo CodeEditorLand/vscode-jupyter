@@ -48,19 +48,26 @@ export class VariableViewProvider implements IVariableViewProvider {
 	private variableView?: VariableView;
 
 	constructor(
-        @inject(IConfigurationService) private readonly configuration: IConfigurationService,
-        @inject(IWebviewViewProvider) private readonly webviewViewProvider: IWebviewViewProvider,
-        @inject(IExtensionContext) private readonly context: IExtensionContext,
-        @inject(IJupyterVariables) @named(Identifiers.ALL_VARIABLES) private variables: IJupyterVariables,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(INotebookWatcher) private readonly notebookWatcher: INotebookWatcher,
-        @inject(IExperimentService) private readonly experiments: IExperimentService
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configuration: IConfigurationService,
+		@inject(IWebviewViewProvider)
+		private readonly webviewViewProvider: IWebviewViewProvider,
+		@inject(IExtensionContext) private readonly context: IExtensionContext,
+		@inject(IJupyterVariables)
+		@named(Identifiers.ALL_VARIABLES)
+		private variables: IJupyterVariables,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(INotebookWatcher)
+		private readonly notebookWatcher: INotebookWatcher,
+		@inject(IExperimentService)
+		private readonly experiments: IExperimentService
+	) {}
 
 	public async resolveWebviewView(
 		webviewView: WebviewView,
 		_context: WebviewViewResolveContext,
-		_token: CancellationToken,
+		_token: CancellationToken
 	): Promise<void> {
 		webviewView.webview.options = { enableScripts: true };
 
@@ -72,7 +79,7 @@ export class VariableViewProvider implements IVariableViewProvider {
 			this.variables,
 			this.disposables,
 			this.notebookWatcher,
-			this.experiments,
+			this.experiments
 		);
 
 		// If someone is waiting for the variable view resolve that here

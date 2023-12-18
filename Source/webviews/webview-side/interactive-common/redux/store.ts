@@ -27,7 +27,7 @@ function generateDefaultState(
 	skipDefault: boolean,
 	testMode: boolean,
 	baseTheme: string,
-	editable: boolean,
+	editable: boolean
 ): IMainState {
 	if (!skipDefault) {
 		return generateTestState("", editable);
@@ -61,14 +61,14 @@ function generateMainReducer<M>(
 	testMode: boolean,
 	baseTheme: string,
 	editable: boolean,
-	reducerMap: M,
+	reducerMap: M
 ): Redux.Reducer<IMainState, QueuableAction<M>> {
 	// First create our default state.
 	const defaultState = generateDefaultState(
 		skipDefault,
 		testMode,
 		baseTheme,
-		editable,
+		editable
 	);
 
 	// Then combine that with our map of state change message to reducer
@@ -98,7 +98,7 @@ function createTestLogger() {
 */
 
 function createTestMiddleware(
-	transformLoad: () => Promise<void>,
+	transformLoad: () => Promise<void>
 ): Redux.Middleware<{}, IStore> {
 	// Make sure all dynamic imports are loaded.
 	const transformPromise = transformLoad();
@@ -116,8 +116,8 @@ function createTestMiddleware(
 						postActionToExtension(
 							{ queueAction: store.dispatch },
 							message,
-							payload,
-						),
+							payload
+						)
 					)
 					.catch(noop);
 			});
@@ -133,7 +133,7 @@ function createTestMiddleware(
 		if (
 			(!fastDeepEqual(
 				prevState.variables.variables,
-				afterState.variables.variables,
+				afterState.variables.variables
 			) ||
 				prevState.variables.currentExecutionCount !==
 					afterState.variables.currentExecutionCount ||
@@ -154,7 +154,7 @@ function createTestMiddleware(
 function createMiddleWare(
 	testMode: boolean,
 	postOffice: PostOffice,
-	transformLoad: () => Promise<void>,
+	transformLoad: () => Promise<void>
 ): Redux.Middleware<{}, IStore>[] {
 	// Create the middleware that modifies actions to queue new actions
 	const queueableActions = createQueueableActionMiddleware();
@@ -239,7 +239,7 @@ export function createStore<M>(
 	variablesStartOpen: boolean,
 	reducerMap: M,
 	postOffice: PostOffice,
-	transformLoad: () => Promise<void>,
+	transformLoad: () => Promise<void>
 ) {
 	// Create reducer for the main react UI
 	const mainReducer = generateMainReducer(
@@ -247,7 +247,7 @@ export function createStore<M>(
 		testMode,
 		baseTheme,
 		editable,
-		reducerMap,
+		reducerMap
 	);
 
 	// Create reducer to pass window messages to the other side
@@ -256,7 +256,7 @@ export function createStore<M>(
 	// Create another reducer for handling variable state
 	const variableReducer = generateVariableReducer(
 		showVariablesOnDebug,
-		variablesStartOpen,
+		variablesStartOpen
 	);
 
 	// Combine these together
@@ -272,7 +272,7 @@ export function createStore<M>(
 	// Use this reducer and middle ware to create a store
 	const store = Redux.createStore(
 		rootReducer,
-		Redux.applyMiddleware(...middleware),
+		Redux.applyMiddleware(...middleware)
 	);
 
 	// Make all messages from the post office dispatch to the store, changing the type to

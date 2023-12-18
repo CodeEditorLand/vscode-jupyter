@@ -13,7 +13,7 @@ const settingsFile = path.join(
 	"test",
 	"datascience",
 	".vscode",
-	"settings.json",
+	"settings.json"
 );
 async function go() {
 	let url = process.env.EXISTING_JUPYTER_URI;
@@ -22,11 +22,11 @@ async function go() {
 		url = info.url;
 		fs.writeFileSync(
 			path.join(__dirname, "..", "temp", "jupyter.pid"),
-			info.server.pid.toString(),
+			info.server.pid.toString()
 		);
 	} else {
 		console.log(
-			"Jupyter server URL provided in env args, no need to start one",
+			"Jupyter server URL provided in env args, no need to start one"
 		);
 	}
 	const settingsJson = fs.readFileSync(settingsFile).toString();
@@ -34,7 +34,7 @@ async function go() {
 		settingsJson,
 		["jupyter.DEBUG_JUPYTER_SERVER_URI"],
 		url,
-		{},
+		{}
 	);
 	const updatedSettingsJson = jsonc.applyEdits(settingsJson, edits);
 	fs.writeFileSync(settingsFile, updatedSettingsJson);

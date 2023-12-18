@@ -21,7 +21,7 @@ export interface IVariablePanelProps {
 	containerHeight: number;
 	showDataExplorer(
 		targetVariable: IJupyterVariable,
-		numberOfColumns: number,
+		numberOfColumns: number
 	): void;
 	closeVariableExplorer(): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

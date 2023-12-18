@@ -26,12 +26,14 @@ export class IPyWidgetScriptManagerFactory
 {
 	private readonly managers = new WeakMap<IKernel, IIPyWidgetScriptManager>();
 	constructor(
-        @inject(INbExtensionsPathProvider) private readonly nbExtensionsPathProvider: INbExtensionsPathProvider,
-        @inject(IFileSystemNode) private readonly fs: IFileSystemNode,
-        @inject(IExtensionContext) private readonly context: IExtensionContext,
-        @inject(JupyterPaths) private readonly jupyterPaths: JupyterPaths,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(INbExtensionsPathProvider)
+		private readonly nbExtensionsPathProvider: INbExtensionsPathProvider,
+		@inject(IFileSystemNode) private readonly fs: IFileSystemNode,
+		@inject(IExtensionContext) private readonly context: IExtensionContext,
+		@inject(JupyterPaths) private readonly jupyterPaths: JupyterPaths,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	getOrCreate(kernel: IKernel): IIPyWidgetScriptManager {
 		if (!this.managers.has(kernel)) {
 			if (
@@ -43,13 +45,13 @@ export class IPyWidgetScriptManagerFactory
 				const scriptManager = new RemoteIPyWidgetScriptManager(
 					kernel,
 					this.context,
-					this.fs,
+					this.fs
 				);
 				this.managers.set(kernel, scriptManager);
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
-					this.disposables,
+					this.disposables
 				);
 			} else {
 				const scriptManager = new LocalIPyWidgetScriptManager(
@@ -57,13 +59,13 @@ export class IPyWidgetScriptManagerFactory
 					this.fs,
 					this.nbExtensionsPathProvider,
 					this.context,
-					this.jupyterPaths,
+					this.jupyterPaths
 				);
 				this.managers.set(kernel, scriptManager);
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
-					this.disposables,
+					this.disposables
 				);
 			}
 		}

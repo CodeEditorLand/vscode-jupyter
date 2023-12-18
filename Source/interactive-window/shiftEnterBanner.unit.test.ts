@@ -106,7 +106,7 @@ function loadBanner(
 	config: typemoq.IMock<IConfigurationService>,
 	stateEnabled: boolean,
 	configCalled: boolean,
-	questionResponse: string,
+	questionResponse: string
 ): InteractiveShiftEnterBanner {
 	// Config persist state
 	const persistService: typemoq.IMock<IPersistentStateFactory> =
@@ -118,8 +118,8 @@ function loadBanner(
 		.setup((a) =>
 			a.createGlobalPersistentState(
 				typemoq.It.isValue(InteractiveShiftEnterStateKeys.ShowBanner),
-				typemoq.It.isValue(true),
-			),
+				typemoq.It.isValue(true)
+			)
 		)
 		.returns(() => {
 			return enabledState.object;
@@ -128,8 +128,8 @@ function loadBanner(
 		.setup((a) =>
 			a.createGlobalPersistentState(
 				typemoq.It.isValue(InteractiveShiftEnterStateKeys.ShowBanner),
-				typemoq.It.isValue(false),
-			),
+				typemoq.It.isValue(false)
+			)
 		)
 		.returns(() => {
 			return enabledState.object;
@@ -153,8 +153,8 @@ function loadBanner(
 		mockedVSCodeNamespaces.window.showInformationMessage(
 			anything(),
 			yes,
-			no,
-		),
+			no
+		)
 	).thenReturn(Promise.resolve(questionResponse) as any);
 
 	// Config settings
@@ -162,20 +162,20 @@ function loadBanner(
 		.setup((c) =>
 			c.updateSetting(
 				typemoq.It.isValue(
-					"interactiveWindow.textEditor.executeSelection",
+					"interactiveWindow.textEditor.executeSelection"
 				),
 				typemoq.It.isAny(),
 				typemoq.It.isAny(),
-				typemoq.It.isAny(),
-			),
+				typemoq.It.isAny()
+			)
 		)
 		.returns(() => Promise.resolve())
 		.verifiable(
-			configCalled ? typemoq.Times.once() : typemoq.Times.never(),
+			configCalled ? typemoq.Times.once() : typemoq.Times.never()
 		);
 
 	return new InteractiveShiftEnterBanner(
 		persistService.object,
-		config.object,
+		config.object
 	);
 }

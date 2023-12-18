@@ -13,16 +13,17 @@ export class CodeLensProviderActivator
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IDataScienceCodeLensProvider) private dataScienceCodeLensProvider: IDataScienceCodeLensProvider,
-        @inject(IExtensionContext) private extensionContext: IExtensionContext
-    ) {}
+		@inject(IDataScienceCodeLensProvider)
+		private dataScienceCodeLensProvider: IDataScienceCodeLensProvider,
+		@inject(IExtensionContext) private extensionContext: IExtensionContext
+	) {}
 
 	public activate() {
 		this.extensionContext.subscriptions.push(
 			languages.registerCodeLensProvider(
 				[PYTHON_FILE_ANY_SCHEME],
-				this.dataScienceCodeLensProvider,
-			),
+				this.dataScienceCodeLensProvider
+			)
 		);
 	}
 }

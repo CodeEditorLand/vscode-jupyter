@@ -44,7 +44,7 @@ export const GlobalStateKeyToNeverWarnAboutNoNetworkAccess =
 function moduleNameToCDNUrl(
 	cdn: string,
 	moduleName: string,
-	moduleVersion: string,
+	moduleVersion: string
 ) {
 	let packageName = moduleName;
 	let fileName = "index"; // default filename
@@ -102,9 +102,12 @@ export class CDNWidgetScriptSourceProvider
 	}
 	private configurationPromise?: Deferred<void>;
 	constructor(
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento,
-        @inject(IConfigurationService) private readonly configurationSettings: IConfigurationService
-    ) {}
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly globalMemento: Memento,
+		@inject(IConfigurationService)
+		private readonly configurationSettings: IConfigurationService
+	) {}
 	public dispose() {
 		this.cache.clear();
 	}
@@ -122,10 +125,10 @@ export class CDNWidgetScriptSourceProvider
 		const promise = (async () => {
 			const httpClient = new HttpClient();
 			const unpkgPromise = createDeferredFromPromise(
-				httpClient.exists(`${unpgkUrl}${moduleName}`),
+				httpClient.exists(`${unpgkUrl}${moduleName}`)
 			);
 			const jsDeliverPromise = createDeferredFromPromise(
-				httpClient.exists(`${jsdelivrUrl}${moduleName}`),
+				httpClient.exists(`${jsdelivrUrl}${moduleName}`)
 			);
 			await Promise.race([
 				unpkgPromise.promise,
@@ -151,7 +154,7 @@ export class CDNWidgetScriptSourceProvider
 	public async getWidgetScriptSource(
 		moduleName: string,
 		moduleVersion: string,
-		isWebViewOnline?: boolean,
+		isWebViewOnline?: boolean
 	): Promise<WidgetScriptSource> {
 		// If the webview is not online, then we cannot use the CDN.
 		if (isWebViewOnline === false) {
@@ -164,7 +167,7 @@ export class CDNWidgetScriptSourceProvider
 			this.cdnProviders.length === 0 &&
 			this.globalMemento.get<boolean>(
 				GlobalStateKeyToTrackIfUserConfiguredCDNAtLeastOnce,
-				false,
+				false
 			)
 		) {
 			return {
@@ -178,8 +181,8 @@ export class CDNWidgetScriptSourceProvider
 				key,
 				this.getWidgetScriptSourceImplementation(
 					moduleName,
-					moduleVersion,
-				),
+					moduleVersion
+				)
 			);
 		}
 		return this.cache.get(key)!;
@@ -187,7 +190,7 @@ export class CDNWidgetScriptSourceProvider
 	protected async generateDownloadUri(
 		moduleName: string,
 		moduleVersion: string,
-		cdn: WidgetCDNs,
+		cdn: WidgetCDNs
 	): Promise<string | undefined> {
 		const cdnBaseUrl = getCDNPrefix(cdn);
 		if (cdnBaseUrl) {
@@ -201,14 +204,14 @@ export class CDNWidgetScriptSourceProvider
 	}
 	protected async getWidgetScriptSourceImplementation(
 		moduleName: string,
-		moduleVersion: string,
+		moduleVersion: string
 	): Promise<WidgetScriptSource> {
 		traceInfo(
 			`${
 				ConsoleForegroundColors.Green
 			}Searching for Widget Script ${moduleName}#${moduleVersion} using cdns ${this.cdnProviders.join(
-				" ",
-			)}`,
+				" "
+			)}`
 		);
 		await this.configureWidgets();
 		if (this.cdnProviders.length === 0) {
@@ -217,19 +220,19 @@ export class CDNWidgetScriptSourceProvider
 		// Try all cdns
 		const uris = await Promise.all(
 			this.cdnProviders.map((cdn) =>
-				this.getValidUri(moduleName, moduleVersion, cdn),
-			),
+				this.getValidUri(moduleName, moduleVersion, cdn)
+			)
 		);
 		const scriptUri = uris.find((u) => u);
 		if (scriptUri) {
 			traceInfo(
-				`${ConsoleForegroundColors.Green}Widget Script ${moduleName}#${moduleVersion} found at URI: ${scriptUri}`,
+				`${ConsoleForegroundColors.Green}Widget Script ${moduleName}#${moduleVersion} found at URI: ${scriptUri}`
 			);
 			return { moduleName, scriptUri, source: "cdn" };
 		}
 
 		traceError(
-			`Widget Script ${moduleName}#${moduleVersion} was not found on on any cdn`,
+			`Widget Script ${moduleName}#${moduleVersion} was not found on on any cdn`
 		);
 		this.handleWidgetSourceNotFound(moduleName, moduleVersion).catch(noop);
 		return { moduleName };
@@ -238,14 +241,14 @@ export class CDNWidgetScriptSourceProvider
 	private async getValidUri(
 		moduleName: string,
 		moduleVersion: string,
-		cdn: WidgetCDNs,
+		cdn: WidgetCDNs
 	): Promise<string | undefined> {
 		// Make sure CDN has the item before returning it.
 		try {
 			const downloadUrl = await this.generateDownloadUri(
 				moduleName,
 				moduleVersion,
-				cdn,
+				cdn
 			);
 			const httpClient = new HttpClient();
 			if (downloadUrl && (await httpClient.exists(downloadUrl))) {
@@ -253,7 +256,7 @@ export class CDNWidgetScriptSourceProvider
 			}
 		} catch (ex) {
 			traceVerbose(
-				`Failed downloading ${moduleName}:${moduleVersion} from ${cdn}`,
+				`Failed downloading ${moduleName}:${moduleVersion} from ${cdn}`
 			);
 			return undefined;
 		}
@@ -263,7 +266,7 @@ export class CDNWidgetScriptSourceProvider
 		if (
 			this.globalMemento.get<boolean>(
 				GlobalStateKeyToNeverWarnAboutNoNetworkAccess,
-				false,
+				false
 			)
 		) {
 			return;
@@ -278,21 +281,21 @@ export class CDNWidgetScriptSourceProvider
 		const selection = await window.showWarningMessage(
 			DataScience.cdnWidgetScriptNotAccessibleWarningMessage(
 				moduleName,
-				JSON.stringify(this.cdnProviders),
+				JSON.stringify(this.cdnProviders)
 			),
 			Common.ok,
 			Common.doNotShowAgain,
-			Common.moreInfo,
+			Common.moreInfo
 		);
 		switch (selection) {
 			case Common.doNotShowAgain:
 				return this.globalMemento.update(
 					GlobalStateKeyToNeverWarnAboutNoNetworkAccess,
-					true,
+					true
 				);
 			case Common.moreInfo:
 				return env.openExternal(
-					Uri.parse("https://aka.ms/PVSCIPyWidgets"),
+					Uri.parse("https://aka.ms/PVSCIPyWidgets")
 				);
 			default:
 				noop();
@@ -307,7 +310,7 @@ export class CDNWidgetScriptSourceProvider
 		if (
 			this.globalMemento.get<boolean>(
 				GlobalStateKeyToTrackIfUserConfiguredCDNAtLeastOnce,
-				false,
+				false
 			)
 		) {
 			return;
@@ -323,7 +326,7 @@ export class CDNWidgetScriptSourceProvider
 			{ modal: true },
 			Common.ok,
 			Common.doNotShowAgain,
-			Common.moreInfo,
+			Common.moreInfo
 		);
 
 		let selectionForTelemetry:
@@ -339,7 +342,7 @@ export class CDNWidgetScriptSourceProvider
 					this.updateScriptSources(["jsdelivr.com", "unpkg.com"]),
 					this.globalMemento.update(
 						GlobalStateKeyToTrackIfUserConfiguredCDNAtLeastOnce,
-						true,
+						true
 					),
 				]);
 				break;
@@ -351,14 +354,14 @@ export class CDNWidgetScriptSourceProvider
 					this.updateScriptSources([]),
 					this.globalMemento.update(
 						GlobalStateKeyToTrackIfUserConfiguredCDNAtLeastOnce,
-						true,
+						true
 					),
 				]);
 				break;
 			}
 			case Common.moreInfo: {
 				void env.openExternal(
-					Uri.parse("https://aka.ms/PVSCIPyWidgets"),
+					Uri.parse("https://aka.ms/PVSCIPyWidgets")
 				);
 				break;
 			}
@@ -371,7 +374,7 @@ export class CDNWidgetScriptSourceProvider
 		sendTelemetryEvent(
 			Telemetry.IPyWidgetPromptToUseCDNSelection,
 			undefined,
-			{ selection: selectionForTelemetry },
+			{ selection: selectionForTelemetry }
 		);
 		this.configurationPromise.resolve();
 	}
@@ -381,18 +384,18 @@ export class CDNWidgetScriptSourceProvider
 			targetSetting,
 			scriptSources,
 			undefined,
-			ConfigurationTarget.Global,
+			ConfigurationTarget.Global
 		);
 	}
 	private async handleWidgetSourceNotFound(
 		moduleName: string,
-		version: string,
+		version: string
 	) {
 		// if widget exists nothing to do.
 		if (
 			this.globalMemento.get<boolean>(
 				GlobalStateKeyToNeverWarnAboutScriptsNotFoundOnCDN,
-				false,
+				false
 			)
 		) {
 			return;
@@ -408,21 +411,21 @@ export class CDNWidgetScriptSourceProvider
 			DataScience.widgetScriptNotFoundOnCDNWidgetMightNotWork(
 				moduleName,
 				version,
-				JSON.stringify(this.cdnProviders),
+				JSON.stringify(this.cdnProviders)
 			),
 			Common.ok,
 			Common.doNotShowAgain,
-			Common.reportThisIssue,
+			Common.reportThisIssue
 		);
 		switch (selection) {
 			case Common.doNotShowAgain:
 				return this.globalMemento.update(
 					GlobalStateKeyToNeverWarnAboutScriptsNotFoundOnCDN,
-					true,
+					true
 				);
 			case Common.reportThisIssue:
 				return env.openExternal(
-					Uri.parse("https://aka.ms/CreatePVSCDataScienceIssue"),
+					Uri.parse("https://aka.ms/CreatePVSCDataScienceIssue")
 				);
 			default:
 				noop();

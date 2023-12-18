@@ -18,13 +18,13 @@ export class ReloadVSCodeCommandHandler
 		commands.registerCommand(
 			"jupyter.reloadVSCode",
 			this.onReloadVSCode,
-			this,
+			this
 		);
 	}
 	private async onReloadVSCode(message: string) {
 		const item = await window.showInformationMessage(
 			message,
-			Common.reload,
+			Common.reload
 		);
 		if (item === Common.reload) {
 			commands

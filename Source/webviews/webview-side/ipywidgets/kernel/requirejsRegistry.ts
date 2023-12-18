@@ -26,20 +26,20 @@ function getScriptsToBeRegistered(scripts: WidgetScriptSource[]) {
 }
 
 function getScriptsWithAValidScriptUriToBeRegistered(
-	scripts: WidgetScriptSource[],
+	scripts: WidgetScriptSource[]
 ) {
 	return scripts
 		.filter((source) => {
 			if (source.scriptUri) {
 				// eslint-disable-next-line no-console
 				logMessage(
-					`Source for IPyWidget ${source.moduleName} found in ${source.source} @ ${source.scriptUri}.`,
+					`Source for IPyWidget ${source.moduleName} found in ${source.source} @ ${source.scriptUri}.`
 				);
 				return true;
 			} else {
 				// eslint-disable-next-line no-console
 				console.error(
-					`Source for IPyWidget ${source.moduleName} not found.`,
+					`Source for IPyWidget ${source.moduleName} not found.`
 				);
 				return false;
 			}
@@ -62,7 +62,7 @@ function getRequireJs() {
 }
 function registerScriptsInRequireJs(
 	baseUrl: string | undefined,
-	scripts: NonPartial<WidgetScriptSource>[],
+	scripts: NonPartial<WidgetScriptSource>[]
 ) {
 	const requireJsFunc = getRequireJs();
 	const config: { baseUrl?: string; paths: Record<string, string> } = {
@@ -75,11 +75,11 @@ function registerScriptsInRequireJs(
 
 	scripts.forEach((script) => {
 		logMessage(
-			`Registering IPyWidget ${script.moduleName} found in ${script.scriptUri}.`,
+			`Registering IPyWidget ${script.moduleName} found in ${script.scriptUri}.`
 		);
 		scriptsAlreadyRegisteredInRequireJs.set(
 			script.moduleName,
-			script.scriptUri,
+			script.scriptUri
 		);
 		// Drop the `.js` from the scriptUri.
 		const scriptUri = script.scriptUri.toLowerCase().endsWith(".js")
@@ -98,7 +98,7 @@ export function undefineModule(moduleName: string) {
 }
 export function registerScripts(
 	baseUrl: string | undefined,
-	scripts: WidgetScriptSource[],
+	scripts: WidgetScriptSource[]
 ) {
 	const scriptsToRegister = getScriptsToBeRegistered(scripts);
 	const validScriptsToRegister =

@@ -66,10 +66,10 @@ suite("JupyterServer Password Connect", () => {
 		});
 
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReturn(
-			Promise.resolve("Python"),
+			Promise.resolve("Python")
 		);
 		when(mockedVSCodeNamespaces.window.createInputBox()).thenReturn(
-			inputBox,
+			inputBox
 		);
 		configService = mock(ConfigurationService);
 		requestCreator = mock(JupyterRequestCreator);
@@ -80,7 +80,7 @@ suite("JupyterServer Password Connect", () => {
 			undefined,
 			instance(requestCreator),
 			instance(serverUriStorage),
-			disposables,
+			disposables
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -88,14 +88,14 @@ suite("JupyterServer Password Connect", () => {
 	function createMockSetup(
 		secure: boolean,
 		ok: boolean,
-		xsrfReponseStatusCode: 200 | 302 | 401 = 302,
+		xsrfReponseStatusCode: 200 | 302 | 401 = 302
 	) {
 		const dsSettings = {
 			allowUnauthorizedRemoteConnection: secure,
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} as any;
 		when(configService.getSettings(anything())).thenReturn(
-			dsSettings as any,
+			dsSettings as any
 		);
 
 		// Set up our fake node fetch
@@ -132,8 +132,8 @@ suite("JupyterServer Password Connect", () => {
 					typemoq.It.isObjectWith({
 						method: "get",
 						headers: { Connection: "keep-alive" },
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockXsrfResponse.object));
 		fetchMock
@@ -143,8 +143,8 @@ suite("JupyterServer Password Connect", () => {
 					typemoq.It.isObjectWith({
 						method: "get",
 						headers: { Connection: "keep-alive" },
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockXsrfResponse.object));
 		fetchMock
@@ -154,8 +154,8 @@ suite("JupyterServer Password Connect", () => {
 					typemoq.It.isObjectWith({
 						method: "get",
 						headers: { Connection: "keep-alive" },
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockHubResponse.object));
 
@@ -165,7 +165,7 @@ suite("JupyterServer Password Connect", () => {
 	test("With Password", async () => {
 		inputBox.value = "Python";
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReturn(
-			Promise.resolve("Python"),
+			Promise.resolve("Python")
 		);
 		const { fetchMock, mockXsrfHeaders, mockXsrfResponse } =
 			createMockSetup(false, true);
@@ -203,12 +203,12 @@ suite("JupyterServer Password Connect", () => {
 								"application/x-www-form-urlencoded;charset=UTF-8",
 						},
 						body: postParams.toString(),
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockSessionResponse.object));
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		const result = await jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -231,7 +231,7 @@ suite("JupyterServer Password Connect", () => {
 	});
 	test("Empty Password and empty token", async () => {
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReject(
-			new Error("Should not be called"),
+			new Error("Should not be called")
 		);
 		const { fetchMock, mockXsrfHeaders, mockXsrfResponse } =
 			createMockSetup(false, true, 200);
@@ -269,12 +269,12 @@ suite("JupyterServer Password Connect", () => {
 								"application/x-www-form-urlencoded;charset=UTF-8",
 						},
 						body: postParams.toString(),
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockSessionResponse.object));
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		const result = await jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -297,7 +297,7 @@ suite("JupyterServer Password Connect", () => {
 	});
 	test("Password required and non-empty token", async () => {
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReject(
-			new Error("Should not be called"),
+			new Error("Should not be called")
 		);
 		const { fetchMock, mockXsrfHeaders, mockXsrfResponse } =
 			createMockSetup(false, true, 401);
@@ -335,12 +335,12 @@ suite("JupyterServer Password Connect", () => {
 								"application/x-www-form-urlencoded;charset=UTF-8",
 						},
 						body: postParams.toString(),
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockSessionResponse.object));
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		const result = await jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -397,12 +397,12 @@ suite("JupyterServer Password Connect", () => {
 							"content-type":
 								"application/x-www-form-urlencoded;charset=UTF-8",
 						},
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockSessionResponse.object));
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		const result = await jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -428,7 +428,7 @@ suite("JupyterServer Password Connect", () => {
 		const { fetchMock, mockXsrfHeaders, mockXsrfResponse } =
 			createMockSetup(false, false);
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		const result = await jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -450,7 +450,7 @@ suite("JupyterServer Password Connect", () => {
 		// Reconfigure our app shell to first give a bad password
 		inputBox.value = "JUNK";
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReturn(
-			Promise.resolve("JUNK"),
+			Promise.resolve("JUNK")
 		);
 
 		const { fetchMock, mockXsrfHeaders, mockXsrfResponse } =
@@ -488,12 +488,12 @@ suite("JupyterServer Password Connect", () => {
 								"application/x-www-form-urlencoded;charset=UTF-8",
 						},
 						body: postParams.toString(),
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockSessionResponseBad.object));
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		let result = await jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -503,20 +503,20 @@ suite("JupyterServer Password Connect", () => {
 		});
 		assert(
 			!result.remappedBaseUrl,
-			"First call to get password should have failed",
+			"First call to get password should have failed"
 		);
 		assert(
 			!result.remappedToken,
-			"First call to get password should have failed",
+			"First call to get password should have failed"
 		);
 		assert(
 			!result.requestHeaders,
-			"First call to get password should have failed",
+			"First call to get password should have failed"
 		);
 
 		// Now set our input for the correct password
 		when(mockedVSCodeNamespaces.window.showInputBox(anything())).thenReturn(
-			Promise.resolve("Python"),
+			Promise.resolve("Python")
 		);
 
 		// Mock our second call to get session cookie with the correct password 'Python'
@@ -552,12 +552,12 @@ suite("JupyterServer Password Connect", () => {
 								"application/x-www-form-urlencoded;charset=UTF-8",
 						},
 						body: postParams.toString(),
-					}),
-				),
+					})
+				)
 			)
 			.returns(() => Promise.resolve(mockSessionResponse.object));
 		when(requestCreator.getFetchMethod()).thenReturn(
-			fetchMock.object as any,
+			fetchMock.object as any
 		);
 
 		// Retry the password

@@ -42,9 +42,9 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		} & ProgressReporter
 	>();
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        disposables.push(this);
-        KernelProgressReporter.instance = this;
-    }
+		disposables.push(this);
+		KernelProgressReporter.instance = this;
+	}
 	activate(): void {
 		//
 	}
@@ -67,7 +67,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 	public static createProgressReporter(
 		resource: Resource,
 		title: string,
-		initiallyHidden?: boolean,
+		initiallyHidden?: boolean
 	): ProgressReporter {
 		if (!KernelProgressReporter.instance) {
 			return new Disposable(noop);
@@ -77,7 +77,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		const key = resource ? getComparisonKey(resource) : "";
 		if (
 			KernelProgressReporter.instance.kernelResourceProgressReporter.has(
-				key,
+				key
 			)
 		) {
 			return KernelProgressReporter.reportProgress(resource, title);
@@ -85,7 +85,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			return KernelProgressReporter.createProgressReporterInternal(
 				key,
 				title,
-				initiallyHidden,
+				initiallyHidden
 			);
 		}
 	}
@@ -98,7 +98,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 	public static wrapAndReportProgress<T>(
 		resource: Resource,
 		title: string,
-		cb: () => Promise<T>,
+		cb: () => Promise<T>
 	): Promise<T> {
 		const key = resource ? getComparisonKey(resource) : "";
 		if (!KernelProgressReporter.instance) {
@@ -106,7 +106,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		}
 		const progress = KernelProgressReporter.reportProgressInternal(
 			key,
-			title,
+			title
 		);
 		return cb().finally(() => progress?.dispose());
 	}
@@ -118,15 +118,15 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 	 */
 	public static reportProgress(
 		resource: Resource,
-		action: ReportableAction,
+		action: ReportableAction
 	): IDisposable;
 	public static reportProgress(
 		resource: Resource,
-		title: string,
+		title: string
 	): IDisposable;
 	public static reportProgress(
 		resource: Resource,
-		option: string | ReportableAction,
+		option: string | ReportableAction
 	): IDisposable {
 		const progressMessage =
 			getUserMessageForAction(option as unknown as ReportableAction) ||
@@ -138,19 +138,19 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 
 		return KernelProgressReporter.reportProgressInternal(
 			key,
-			progressMessage || "",
+			progressMessage || ""
 		);
 	}
 	private static reportProgressInternal(
 		key: string,
-		title: string,
+		title: string
 	): IDisposable {
 		if (!KernelProgressReporter.instance) {
 			return new Disposable(noop);
 		}
 		let progressInfo =
 			KernelProgressReporter.instance.kernelResourceProgressReporter.get(
-				key,
+				key
 			);
 		if (!progressInfo) {
 			progressInfo = {
@@ -161,7 +161,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			};
 			KernelProgressReporter.instance!.kernelResourceProgressReporter.set(
 				key,
-				progressInfo,
+				progressInfo
 			);
 		}
 
@@ -190,7 +190,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 					}
 					// Find the list of progress messages just before this one.
 					const index = progressInfo.progressList.findIndex(
-						(value) => value === title,
+						(value) => value === title
 					);
 					if (index >= 0) {
 						progressInfo.progressList.splice(index);
@@ -213,14 +213,14 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 					} else {
 						// If we have no more messages, then remove the reporter.
 						KernelProgressReporter.instance!.kernelResourceProgressReporter.delete(
-							key,
+							key
 						);
 						progressInfo.dispose();
 					}
 				} catch (ex) {
 					traceError(
 						`Failed to dispose Progress reporter for ${key}`,
-						ex,
+						ex
 					);
 				}
 			},
@@ -230,13 +230,13 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 	private static createProgressReporterInternal(
 		key: string,
 		title: string,
-		initiallyHidden?: boolean,
+		initiallyHidden?: boolean
 	) {
 		const deferred = createDeferred();
 		const disposable = new Disposable(() => deferred.resolve());
 		const existingInfo =
 			KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
-				key,
+				key
 			) || {
 				title,
 				pendingProgress: [] as string[],
@@ -260,7 +260,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 					async (progress, token: CancellationToken) => {
 						const info =
 							KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
-								key,
+								key
 							);
 						if (!info) {
 							return;
@@ -279,15 +279,15 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 						await raceCancellation(token, deferred.promise);
 						if (
 							KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
-								key,
+								key
 							) === info
 						) {
 							KernelProgressReporter.instance!.kernelResourceProgressReporter.delete(
-								key,
+								key
 							);
 						}
 						KernelProgressReporter.disposables.delete(disposable);
-					},
+					}
 				)
 				.then(noop, noop);
 		};
@@ -298,7 +298,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 				...existingInfo,
 				dispose: () => disposable.dispose(),
 				show,
-			},
+			}
 		);
 		KernelProgressReporter.disposables.add(disposable);
 		existingInfo.pendingProgress.push(title);

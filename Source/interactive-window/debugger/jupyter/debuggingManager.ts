@@ -59,17 +59,19 @@ export class InteractiveWindowDebuggingManager
 		IInteractiveWindowDebuggingManager
 {
 	public constructor(
-        @inject(IKernelProvider) kernelProvider: IKernelProvider,
-        @inject(IControllerRegistration) controllerRegistration: IControllerRegistration,
-        @inject(IPlatformService) private readonly platform: IPlatformService,
-        @inject(IDebugLocationTrackerFactory)
-        private readonly debugLocationTrackerFactory: IDebugLocationTrackerFactory,
-        @inject(IConfigurationService) private readonly configService: IConfigurationService,
-        @inject(IDebugService) private readonly debugService: IDebugService,
-        @inject(IServiceContainer) serviceContainer: IServiceContainer
-    ) {
-        super(kernelProvider, controllerRegistration, serviceContainer);
-    }
+		@inject(IKernelProvider) kernelProvider: IKernelProvider,
+		@inject(IControllerRegistration)
+		controllerRegistration: IControllerRegistration,
+		@inject(IPlatformService) private readonly platform: IPlatformService,
+		@inject(IDebugLocationTrackerFactory)
+		private readonly debugLocationTrackerFactory: IDebugLocationTrackerFactory,
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService,
+		@inject(IDebugService) private readonly debugService: IDebugService,
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super(kernelProvider, controllerRegistration, serviceContainer);
+	}
 
 	public override activate() {
 		super.activate();
@@ -80,13 +82,13 @@ export class InteractiveWindowDebuggingManager
 				{
 					createDebugAdapterDescriptor: async (session) =>
 						this.createDebugAdapterDescriptor(session),
-				},
-			),
+				}
+			)
 		);
 	}
 
 	public getDebugMode(
-		_notebook: NotebookDocument,
+		_notebook: NotebookDocument
 	): KernelDebugMode | undefined {
 		return KernelDebugMode.InteractiveWindow;
 	}
@@ -102,7 +104,7 @@ export class InteractiveWindowDebuggingManager
 
 	private async startDebuggingCell(
 		doc: NotebookDocument,
-		cell: NotebookCell,
+		cell: NotebookCell
 	) {
 		const settings = this.configService.getSettings(doc.uri);
 		const config: IInteractiveWindowDebugConfig = {
@@ -126,31 +128,31 @@ export class InteractiveWindowDebuggingManager
 	}
 
 	protected async createDebugAdapterDescriptor(
-		session: DebugSession,
+		session: DebugSession
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const config = session.configuration as IInteractiveWindowDebugConfig;
 		assertIsInteractiveWindowDebugConfig(config);
 
 		const notebook = workspace.notebookDocuments.find(
-			(doc) => doc.uri.toString() === config.__notebookUri,
+			(doc) => doc.uri.toString() === config.__notebookUri
 		);
 		if (!notebook || typeof config.__cellIndex !== "number") {
 			traceError(
-				"Invalid debug session for debugging of IW using Jupyter Protocol",
+				"Invalid debug session for debugging of IW using Jupyter Protocol"
 			);
 			return;
 		}
 
 		if (this.notebookInProgress.has(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook`,
+				`Cannot start debugging. Already debugging this notebook`
 			);
 			return;
 		}
 
 		if (this.isDebugging(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook document. Toolbar should update`,
+				`Cannot start debugging. Already debugging this notebook document. Toolbar should update`
 			);
 			return;
 		}
@@ -163,7 +165,7 @@ export class InteractiveWindowDebuggingManager
 				config,
 				session,
 				notebook,
-				dbgr,
+				dbgr
 			);
 		} finally {
 			this.notebookInProgress.delete(notebook);
@@ -174,7 +176,7 @@ export class InteractiveWindowDebuggingManager
 		config: IInteractiveWindowDebugConfig,
 		session: DebugSession,
 		notebook: NotebookDocument,
-		dbgr: IWDebugger,
+		dbgr: IWDebugger
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const kernel = await this.ensureKernelIsRunning(notebook);
 		if (!kernel?.session) {
@@ -190,18 +192,18 @@ export class InteractiveWindowDebuggingManager
 			kernel,
 			this.platform,
 			this.debugService,
-			this.debugLocationTrackerFactory,
+			this.debugLocationTrackerFactory
 		);
 
 		this.disposables.push(
-			adapter.onDidEndSession(this.endSession.bind(this)),
+			adapter.onDidEndSession(this.endSession.bind(this))
 		);
 
 		const cell = notebook.cellAt(config.__cellIndex);
 		const controller = new DebugCellController(
 			adapter,
 			cell,
-			this.kernelProvider.getKernelExecution(kernel!),
+			this.kernelProvider.getKernelExecution(kernel!)
 		);
 		adapter.addDebuggingDelegates([
 			controller,
@@ -210,7 +212,7 @@ export class InteractiveWindowDebuggingManager
 		controller.ready
 			.then(() => dbgr.resolve())
 			.catch((ex) =>
-				console.error("Failed waiting for controller to be ready", ex),
+				console.error("Failed waiting for controller to be ready", ex)
 			);
 
 		this.trackDebugAdapter(notebook, adapter);
@@ -220,7 +222,7 @@ export class InteractiveWindowDebuggingManager
 	// TODO: This will likely be needed for mapping breakpoints and such
 	public async updateSourceMaps(
 		notebookEditor: NotebookEditor,
-		hashes: IFileGeneratedCodes[],
+		hashes: IFileGeneratedCodes[]
 	): Promise<void> {
 		// Make sure that we have an active debugging session at this point
 		let debugSession = this.getDebugSession(notebookEditor.notebook);
@@ -231,10 +233,10 @@ export class InteractiveWindowDebuggingManager
 					if (debugSession) {
 						return debugSession.customRequest(
 							"setPydevdSourceMap",
-							buildSourceMap(fileHash),
+							buildSourceMap(fileHash)
 						);
 					}
-				}),
+				})
 			);
 		}
 	}

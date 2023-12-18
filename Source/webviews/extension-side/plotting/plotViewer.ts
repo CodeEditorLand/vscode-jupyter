@@ -37,31 +37,39 @@ export class PlotViewer
 	private removedEvent: EventEmitter<number> = new EventEmitter<number>();
 
 	constructor(
-        @inject(IWebviewPanelProvider) provider: IWebviewPanelProvider,
-        @inject(IConfigurationService) configuration: IConfigurationService,
-        @inject(IFileSystem) protected fs: IFileSystem,
-        @inject(IExtensionContext) readonly context: IExtensionContext
-    ) {
-        const startupTimer = new StopWatch();
-        const plotDir = joinPath(context.extensionUri, 'dist', 'webviews', 'webview-side', 'viewers');
-        super(
-            configuration,
-            provider,
-            (c, v, d) => new PlotViewerMessageListener(c, v, d),
-            plotDir,
-            [joinPath(plotDir, 'plotViewer.js')],
-            localize.DataScience.plotViewerTitle,
-            ViewColumn.One
-        );
-        // Load the web panel using our current directory as we don't expect to load any other files
-        super
-            .loadWebview(Uri.file(process.cwd()))
-            .catch(traceError)
-            .finally(() => {
-                // Send our telemetry for the webview loading when the load is done.
-                sendTelemetryEvent(Telemetry.PlotViewerWebviewLoaded, { duration: startupTimer.elapsedTime });
-            });
-    }
+		@inject(IWebviewPanelProvider) provider: IWebviewPanelProvider,
+		@inject(IConfigurationService) configuration: IConfigurationService,
+		@inject(IFileSystem) protected fs: IFileSystem,
+		@inject(IExtensionContext) readonly context: IExtensionContext
+	) {
+		const startupTimer = new StopWatch();
+		const plotDir = joinPath(
+			context.extensionUri,
+			"dist",
+			"webviews",
+			"webview-side",
+			"viewers"
+		);
+		super(
+			configuration,
+			provider,
+			(c, v, d) => new PlotViewerMessageListener(c, v, d),
+			plotDir,
+			[joinPath(plotDir, "plotViewer.js")],
+			localize.DataScience.plotViewerTitle,
+			ViewColumn.One
+		);
+		// Load the web panel using our current directory as we don't expect to load any other files
+		super
+			.loadWebview(Uri.file(process.cwd()))
+			.catch(traceError)
+			.finally(() => {
+				// Send our telemetry for the webview loading when the load is done.
+				sendTelemetryEvent(Telemetry.PlotViewerWebviewLoaded, {
+					duration: startupTimer.elapsedTime,
+				});
+			});
+	}
 
 	public get closed(): Event<IPlotViewer> {
 		return this.closedEvent.event;
@@ -85,7 +93,7 @@ export class PlotViewer
 
 			// Send a message with our data
 			this.postMessage(PlotViewerMessages.SendPlot, imageHtml).catch(
-				noop,
+				noop
 			);
 		}
 	};
@@ -152,7 +160,7 @@ export class PlotViewer
 					case ".png":
 						const buffer = Buffer.from(
 							payload.png.replace("data:image/png;base64", ""),
-							"base64",
+							"base64"
 						);
 						await this.fs.writeFile(file, buffer);
 						break;
@@ -168,7 +176,7 @@ export class PlotViewer
 			traceError(e);
 			window
 				.showErrorMessage(
-					localize.DataScience.exportImageFailed(e.toString()),
+					localize.DataScience.exportImageFailed(e.toString())
 				)
 				.then(noop, noop);
 		}

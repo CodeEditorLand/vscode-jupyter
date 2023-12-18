@@ -41,7 +41,10 @@ interface SelectorQuickPickItem<T extends { id: string }>
 	item: T;
 }
 class CategoryQuickPickItem extends BaseQuickPickItem {
-	constructor(label: string, public readonly sortKey: string) {
+	constructor(
+		label: string,
+		public readonly sortKey: string
+	) {
 		super(label);
 		this.kind = QuickPickItemKind.Separator;
 	}
@@ -79,20 +82,20 @@ export class BaseProviderBasedQuickPick<
 		private readonly provider: Promise<IQuickPickItemProvider<T>>,
 		private readonly createQuickPickItem: (
 			item: T,
-			provider: BaseProviderBasedQuickPick<T>,
+			provider: BaseProviderBasedQuickPick<T>
 		) => QuickPickItem,
 		private readonly getCategory: (
 			item: T,
-			provider: BaseProviderBasedQuickPick<T>,
+			provider: BaseProviderBasedQuickPick<T>
 		) => { label: string; sortKey?: string },
 		private readonly options: {
 			supportsBack: boolean;
 		},
 		private readonly createErrorQuickPickItem?: (
 			error: Error,
-			provider: BaseProviderBasedQuickPick<T>,
+			provider: BaseProviderBasedQuickPick<T>
 		) => QuickPickItem,
-		private _title?: string,
+		private _title?: string
 	) {
 		super();
 	}
@@ -150,7 +153,7 @@ export class BaseProviderBasedQuickPick<
 		quickPick.onDidChangeValue(
 			(e) => (this.previouslyEnteredValue = e),
 			this,
-			disposables,
+			disposables
 		);
 		quickPick.onDidHide(() => dispose(disposables), this, disposables);
 		quickPick.title =
@@ -162,14 +165,14 @@ export class BaseProviderBasedQuickPick<
 				if (!this._title) {
 					quickPick.title =
 						DataScience.kernelPickerSelectKernelFromRemoteTitle(
-							provider.title,
+							provider.title
 						);
 				}
 				quickPick.busy = provider.status === "discovering";
 				provider.onDidChange(
 					() => this.updateQuickPickItems(quickPick, provider),
 					this,
-					disposables,
+					disposables
 				);
 				quickPick.onDidTriggerButton(
 					async (e) => {
@@ -183,7 +186,7 @@ export class BaseProviderBasedQuickPick<
 						}
 					},
 					this,
-					disposables,
+					disposables
 				);
 				let timeout: NodeJS.Timer | undefined;
 				provider.onDidChangeStatus(
@@ -196,18 +199,18 @@ export class BaseProviderBasedQuickPick<
 							case "idle":
 								timeout = setTimeout(
 									() => (quickPick.busy = false),
-									500,
+									500
 								);
 								disposables.push(
 									new Disposable(
-										() => timeout && clearTimeout(timeout),
-									),
+										() => timeout && clearTimeout(timeout)
+									)
 								);
 								break;
 						}
 					},
 					this,
-					disposables,
+					disposables
 				);
 
 				groupBy(
@@ -215,8 +218,8 @@ export class BaseProviderBasedQuickPick<
 					(a, b) =>
 						compareIgnoreCase(
 							this.getCategory(a.item, this),
-							this.getCategory(b.item, this),
-						),
+							this.getCategory(b.item, this)
+						)
 				).forEach((items) => {
 					const item = this.connectionToCategory(items[0].item);
 					this.quickPickItems.push(item);
@@ -233,13 +236,13 @@ export class BaseProviderBasedQuickPick<
 		return { quickPick, disposables };
 	}
 	private isCommandQuickPickItem(
-		item: QuickPickItem,
+		item: QuickPickItem
 	): item is CommandQuickPickItem<T> {
 		return this.commands.has(item as CommandQuickPickItem<T>);
 	}
 	public addCommand(
 		item: QuickPickItem,
-		execute: () => Promise<T | undefined | typeof InputFlowAction.back>,
+		execute: () => Promise<T | undefined | typeof InputFlowAction.back>
 	) {
 		const quickPickItem = item as CommandQuickPickItem<T>;
 		quickPickItem.execute = execute;
@@ -254,7 +257,7 @@ export class BaseProviderBasedQuickPick<
 		};
 	}
 	public async selectItem(
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<
 		| T
 		| typeof InputFlowAction.back
@@ -290,12 +293,12 @@ export class BaseProviderBasedQuickPick<
 								? resolve(InputFlowAction.back)
 								: undefined,
 						this,
-						disposables,
+						disposables
 					);
 					quickPick.onDidHide(
 						() => resolve(undefined),
 						this,
-						disposables,
+						disposables
 					);
 				});
 
@@ -342,17 +345,17 @@ export class BaseProviderBasedQuickPick<
 
 	private updateQuickPickItems(
 		quickPick: QuickPick<QuickPickItem>,
-		provider: IQuickPickItemProvider<T>,
+		provider: IQuickPickItemProvider<T>
 	) {
 		const currentItems = new Map(
 			quickPick.items
 				.filter((item) => this.isSelectorQuickPickItem(item))
 				.map((item) => item as SelectorQuickPickItem<T>)
-				.map((item) => [item.item.id, item.item]),
+				.map((item) => [item.item.id, item.item])
 		);
 
 		const latestItems = new Map(
-			provider.items.map((item) => [item.id, item]),
+			provider.items.map((item) => [item.id, item])
 		);
 		// Possible some information has changed, update the quick pick items.
 		this.quickPickItems = this.quickPickItems.map((item) => {
@@ -390,8 +393,8 @@ export class BaseProviderBasedQuickPick<
 		groupBy(newQuickPickItems, (a, b) =>
 			compareIgnoreCase(
 				this.getCategory(a.item, this),
-				this.getCategory(b.item, this),
-			),
+				this.getCategory(b.item, this)
+			)
 		).forEach((items) => {
 			items.sort((a, b) => a.label.localeCompare(b.label));
 			const newCategory = this.connectionToCategory(items[0].item);
@@ -399,7 +402,7 @@ export class BaseProviderBasedQuickPick<
 			const existingCategory = this.quickPickItems.find(
 				(item) =>
 					item.kind === QuickPickItemKind.Separator &&
-					item.label === newCategory.label,
+					item.label === newCategory.label
 			);
 			if (existingCategory) {
 				const indexOfExistingCategory =
@@ -410,12 +413,12 @@ export class BaseProviderBasedQuickPick<
 					Array.from(currentItemsInCategory).map((item) => [
 						item.item.id,
 						item,
-					]),
+					])
 				);
 				const oldItemCount = currentItemsInCategory.size;
 				items.forEach((item) => {
 					const existingItem = currentItemIdsInCategory.get(
-						item.item.id,
+						item.item.id
 					);
 					if (existingItem) {
 						currentItemsInCategory.delete(existingItem);
@@ -427,7 +430,7 @@ export class BaseProviderBasedQuickPick<
 				this.quickPickItems.splice(
 					indexOfExistingCategory + 1,
 					oldItemCount,
-					...newItems,
+					...newItems
 				);
 			} else {
 				// Since we sort items by Env type, ensure this new item is inserted in the right place.
@@ -441,12 +444,12 @@ export class BaseProviderBasedQuickPick<
 
 				currentCategories.push([newCategory, -1]);
 				currentCategories.sort((a, b) =>
-					a[0].sortKey.localeCompare(b[0].sortKey),
+					a[0].sortKey.localeCompare(b[0].sortKey)
 				);
 
 				// Find where we need to insert this new category.
 				const indexOfNewCategoryInList = currentCategories.findIndex(
-					(item) => item[1] === -1,
+					(item) => item[1] === -1
 				);
 				let newIndex = 0;
 				if (indexOfNewCategoryInList > 0) {
@@ -456,7 +459,7 @@ export class BaseProviderBasedQuickPick<
 							? this.quickPickItems.length
 							: (currentCategories[
 									indexOfNewCategoryInList + 1
-							  ][1] as number);
+								][1] as number);
 				}
 
 				items.sort((a, b) => a.label.localeCompare(b.label));
@@ -477,7 +480,7 @@ export class BaseProviderBasedQuickPick<
 					label: DataScience.recommendedItemCategoryInQuickPick,
 					kind: QuickPickItemKind.Separator,
 				},
-				recommendedItemQuickPick,
+				recommendedItemQuickPick
 			);
 		}
 
@@ -493,7 +496,7 @@ export class BaseProviderBasedQuickPick<
 		const connections = this.quickPickItems.filter(
 			(item) =>
 				!this.isSelectorQuickPickItem(item) ||
-				item.item.id !== recommendedItemQuickPick?.item?.id,
+				item.item.id !== recommendedItemQuickPick?.item?.id
 		);
 		const currentActiveItem = quickPick.activeItems.length
 			? quickPick.activeItems[0]
@@ -523,8 +526,8 @@ export class BaseProviderBasedQuickPick<
 		const activeItems = selectedQuickPickItem
 			? [selectedQuickPickItem]
 			: quickPick.activeItems.length
-			  ? [quickPick.activeItems[0]]
-			  : [];
+				? [quickPick.activeItems[0]]
+				: [];
 		if (activeItems.length && !items.includes(activeItems[0])) {
 			const oldActiveItem = activeItems[0];
 			const newActiveQuickPickItem =
@@ -532,7 +535,7 @@ export class BaseProviderBasedQuickPick<
 				items.find(
 					(item) =>
 						this.isSelectorQuickPickItem(item) &&
-						item.item.id === oldActiveItem.item.id,
+						item.item.id === oldActiveItem.item.id
 				);
 			// Find this same quick pick item.
 			if (newActiveQuickPickItem) {
@@ -564,16 +567,16 @@ export class BaseProviderBasedQuickPick<
 		return quickPickItem;
 	}
 	private isSelectorQuickPickItem(
-		item: QuickPickItem,
+		item: QuickPickItem
 	): item is SelectorQuickPickItem<T> {
 		return this.quickPickItemMap.has(
-			item as unknown as SelectorQuickPickItem<T>,
+			item as unknown as SelectorQuickPickItem<T>
 		);
 	}
 	private toQuickPickItem(item: T): SelectorQuickPickItem<T> {
 		const quickPickItem = this.createQuickPickItem(
 			item,
-			this,
+			this
 		) as SelectorQuickPickItem<T>;
 		quickPickItem.item = item;
 		this.quickPickItemMap.add(quickPickItem);
@@ -581,14 +584,14 @@ export class BaseProviderBasedQuickPick<
 	}
 	private removeOutdatedQuickPickItems(
 		quickPick: QuickPick<QuickPickItem>,
-		provider: IQuickPickItemProvider<T>,
+		provider: IQuickPickItemProvider<T>
 	) {
 		const currentConnections = quickPick.items
 			.filter((item) => this.isSelectorQuickPickItem(item))
 			.map((item) => item as SelectorQuickPickItem<T>)
 			.map((item) => item.item.id);
 		const items = new Map<string, T>(
-			provider.items.map((item) => [item.id, item]),
+			provider.items.map((item) => [item.id, item])
 		);
 		const removedIds = currentConnections.filter((id) => !items.has(id));
 		if (removedIds.length) {
@@ -606,7 +609,7 @@ export class BaseProviderBasedQuickPick<
 				}
 			});
 			this.quickPickItems = this.quickPickItems.filter(
-				(item) => !itemsRemoved.includes(item),
+				(item) => !itemsRemoved.includes(item)
 			);
 			this.rebuildQuickPickItems(quickPick);
 		}
@@ -616,14 +619,14 @@ export class BaseProviderBasedQuickPick<
 		const category = this.getCategory(item, this);
 		return new CategoryQuickPickItem(
 			category.label,
-			category.sortKey || category.label,
+			category.sortKey || category.label
 		);
 	}
 }
 
 function groupBy<T>(
 	data: ReadonlyArray<T>,
-	compare: (a: T, b: T) => number,
+	compare: (a: T, b: T) => number
 ): T[][] {
 	const result: T[][] = [];
 	let currentGroup: T[] | undefined = undefined;
@@ -640,11 +643,11 @@ function groupBy<T>(
 
 function compareIgnoreCase(
 	a: { label: string; sortKey?: string },
-	b: { label: string; sortKey?: string },
+	b: { label: string; sortKey?: string }
 ) {
 	return (a.sortKey || a.label).localeCompare(
 		b.sortKey || b.label,
 		undefined,
-		{ sensitivity: "accent" },
+		{ sensitivity: "accent" }
 	);
 }

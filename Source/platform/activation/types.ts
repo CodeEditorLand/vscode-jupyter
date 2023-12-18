@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export const IExtensionActivationManager = Symbol(
-	"IExtensionActivationManager",
+	"IExtensionActivationManager"
 );
 /**
  * Responsible for activation of extension.
@@ -15,7 +15,7 @@ export interface IExtensionActivationManager {
 }
 
 export const IExtensionSyncActivationService = Symbol(
-	"IExtensionSyncActivationService",
+	"IExtensionSyncActivationService"
 );
 /**
  * Classes implementing this interface will have their `activate` methods

@@ -29,7 +29,7 @@ const progressMessages = {
  * @returns {(string | undefined)}
  */
 export function getUserMessageForAction(
-	action: ReportableAction,
+	action: ReportableAction
 ): string | undefined {
 	return progressMessages[action];
 }

@@ -23,10 +23,10 @@ export type ExecutionFactoryCreateWithEnvironmentOptions = {
 export const IPythonExecutionFactory = Symbol("IPythonExecutionFactory");
 export interface IPythonExecutionFactory {
 	create(
-		options: ExecutionFactoryCreationOptions,
+		options: ExecutionFactoryCreationOptions
 	): Promise<IPythonExecutionService>;
 	createActivatedEnvironment(
-		options: ExecutionFactoryCreateWithEnvironmentOptions,
+		options: ExecutionFactoryCreateWithEnvironmentOptions
 	): Promise<IPythonExecutionService>;
 }
 export const IPythonExecutionService = Symbol("IPythonExecutionService");
@@ -35,21 +35,21 @@ export interface IPythonExecutionService {
 	isModuleInstalled(moduleName: string): Promise<boolean>;
 	execObservable(
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): ObservableExecutionResult<string>;
 	execModuleObservable(
 		moduleName: string,
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): ObservableExecutionResult<string>;
 
 	exec(
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ExecutionResult<string>>;
 	execModule(
 		moduleName: string,
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ExecutionResult<string>>;
 }

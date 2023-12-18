@@ -70,11 +70,14 @@ export class KernelDependencyService implements IKernelDependencyService {
 		Promise<KernelInterpreterDependencyResponse>
 	>();
 	constructor(
-        @inject(IInstaller) private readonly installer: IInstaller,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly memento: Memento,
-        @inject(IRawNotebookSupportedService) private readonly rawSupport: IRawNotebookSupportedService,
-        @inject(IServiceContainer) protected serviceContainer: IServiceContainer // @inject(IInteractiveWindowProvider) private readonly interactiveWindowProvider: IInteractiveWindowProvider
-    ) {}
+		@inject(IInstaller) private readonly installer: IInstaller,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly memento: Memento,
+		@inject(IRawNotebookSupportedService)
+		private readonly rawSupport: IRawNotebookSupportedService,
+		@inject(IServiceContainer) protected serviceContainer: IServiceContainer // @inject(IInteractiveWindowProvider) private readonly interactiveWindowProvider: IInteractiveWindowProvider
+	) {}
 	/**
 	 * Configures the python interpreter to ensure it can run a Jupyter Kernel by installing any missing dependencies.
 	 * If user opts not to install they can opt to select another interpreter.
@@ -107,10 +110,10 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 		traceInfo(
 			`Check & install missing Kernel dependencies for ${getDisplayPath(
-				kernelConnection.interpreter?.uri,
+				kernelConnection.interpreter?.uri
 			)}, ui.disabled=${ui.disableUI} for resource '${getDisplayPath(
-				resource,
-			)}'`,
+				resource
+			)}'`
 		);
 		const checkForPackages = async () => {
 			const alreadyInstalled =
@@ -121,8 +124,8 @@ export class KernelDependencyService implements IKernelDependencyService {
 						this.areDependenciesInstalled(
 							kernelConnection,
 							token,
-							ignoreCache,
-						),
+							ignoreCache
+						)
 				);
 			if (alreadyInstalled) {
 				return KernelInterpreterDependencyResponse.ok;
@@ -172,9 +175,9 @@ export class KernelDependencyService implements IKernelDependencyService {
 						ui,
 						cancelTokenSource,
 						cannotChangeKernels,
-						installWithoutPrompting,
+						installWithoutPrompting
 					);
-				},
+				}
 			);
 			promise
 				.finally(() => {
@@ -209,9 +212,10 @@ export class KernelDependencyService implements IKernelDependencyService {
 	}
 	@traceDecoratorVerbose("Are Dependencies Installed")
 	public async areDependenciesInstalled(
-		@logValue<KernelConnectionMetadata>('id') kernelConnection: KernelConnectionMetadata,
+		@logValue<KernelConnectionMetadata>("id")
+		kernelConnection: KernelConnectionMetadata,
 		token?: CancellationToken,
-		ignoreCache?: boolean,
+		ignoreCache?: boolean
 	): Promise<boolean> {
 		if (
 			kernelConnection.kind === "connectToLiveRemoteKernel" ||
@@ -231,13 +235,13 @@ export class KernelDependencyService implements IKernelDependencyService {
 			(await isModulePresentInEnvironmentCache(
 				this.memento,
 				Product.ipykernel,
-				kernelConnection.interpreter,
+				kernelConnection.interpreter
 			))
 		) {
 			traceInfo(
 				`IPyKernel found previously in this environment ${getDisplayPath(
-					kernelConnection.interpreter.uri,
-				)}`,
+					kernelConnection.interpreter.uri
+				)}`
 			);
 			return true;
 		}
@@ -249,7 +253,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				trackPackageInstalledIntoInterpreter(
 					this.memento,
 					Product.ipykernel,
-					kernelConnection.interpreter,
+					kernelConnection.interpreter
 				).catch(noop);
 			}
 		}, noop);
@@ -262,14 +266,14 @@ export class KernelDependencyService implements IKernelDependencyService {
 		ui: IDisplayOptions,
 		cancelTokenSource: CancellationTokenSource,
 		cannotChangeKernels?: boolean,
-		installWithoutPrompting?: boolean,
+		installWithoutPrompting?: boolean
 	): Promise<KernelInterpreterDependencyResponse> {
 		traceInfoIfCI(
 			`Run Installer for ${getDisplayPath(resource)} ui.disableUI=${
 				ui.disableUI
 			}, cancelTokenSource.token.isCancellationRequested=${
 				cancelTokenSource.token.isCancellationRequested
-			}`,
+			}`
 		);
 		// If there's no UI, then cancel installation.
 		if (ui.disableUI) {
@@ -279,7 +283,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			isModulePresentInEnvironment(
 				this.memento,
 				Product.ipykernel,
-				interpreter,
+				interpreter
 			),
 			interpreter.envType === EnvironmentType.Conda
 				? undefined
@@ -299,7 +303,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			interpreter.displayName || interpreter.uri.fsPath,
 			products
 				.map((product) => ProductNames.get(product)!)
-				.join(` ${Common.and} `),
+				.join(` ${Common.and} `)
 		);
 		const productNameForTelemetry = products
 			.map((product) => ProductNames.get(product)!)
@@ -318,7 +322,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				resourceType,
 				resourceHash,
 				pythonEnvType: interpreter.envType,
-			},
+			}
 		);
 
 		// Build our set of prompt actions
@@ -345,7 +349,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						resourceType,
 						resourceHash,
 						pythonEnvType: interpreter.envType,
-					},
+					}
 				);
 			}
 			let selection;
@@ -358,9 +362,9 @@ export class KernelDependencyService implements IKernelDependencyService {
 								window.showInformationMessage(
 									message,
 									{ modal: true },
-									...options,
-								),
-						  );
+									...options
+								)
+							);
 
 				if (selection === moreInfoOption) {
 					sendKernelTelemetryEvent(
@@ -373,7 +377,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							resourceType,
 							resourceHash,
 							pythonEnvType: interpreter.envType,
-						},
+						}
 					);
 
 					// Link to our wiki page on jupyter kernels + ipykernel
@@ -393,7 +397,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						resourceType,
 						resourceHash,
 						pythonEnvType: interpreter.envType,
-					},
+					}
 				);
 				return KernelInterpreterDependencyResponse.cancel;
 			}
@@ -408,7 +412,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						resourceType,
 						resourceHash,
 						pythonEnvType: interpreter.envType,
-					},
+					}
 				);
 				return KernelInterpreterDependencyResponse.selectDifferentKernel;
 			} else if (selection === installOption) {
@@ -422,7 +426,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						resourceType,
 						resourceHash,
 						pythonEnvType: interpreter.envType,
-					},
+					}
 				);
 				// Always pass a cancellation token to `install`, to ensure it waits until the module is installed.
 				const response = await raceCancellation(
@@ -433,8 +437,8 @@ export class KernelDependencyService implements IKernelDependencyService {
 						interpreter,
 						cancelTokenSource,
 						isModulePresent === true,
-						isPipAvailableForNonConda === false,
-					),
+						isPipAvailableForNonConda === false
+					)
 				);
 				if (response === InstallerResponse.Installed) {
 					sendKernelTelemetryEvent(
@@ -447,7 +451,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							resourceType,
 							resourceHash,
 							pythonEnvType: interpreter.envType,
-						},
+						}
 					);
 					return KernelInterpreterDependencyResponse.ok;
 				} else if (response === InstallerResponse.Ignore) {
@@ -461,7 +465,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							resourceType,
 							resourceHash,
 							pythonEnvType: interpreter.envType,
-						},
+						}
 					);
 					return KernelInterpreterDependencyResponse.failed; // Happens when errors in pip or conda.
 				}
@@ -476,7 +480,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 					resourceType,
 					resourceHash,
 					pythonEnvType: interpreter.envType,
-				},
+				}
 			);
 			return KernelInterpreterDependencyResponse.cancel;
 		} catch (ex) {
@@ -491,7 +495,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 					resourceType,
 					resourceHash,
 					pythonEnvType: interpreter.envType,
-				},
+				}
 			);
 			throw ex;
 		}

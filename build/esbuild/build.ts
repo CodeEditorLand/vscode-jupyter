@@ -62,7 +62,7 @@ const commonExternals = [
 ];
 const webExternals = commonExternals.concat("os").concat(commonExternals);
 const desktopExternals = commonExternals.concat(
-	deskTopNodeModulesToExternalize,
+	deskTopNodeModulesToExternalize
 );
 const bundleConfig = getBundleConfiguration();
 const isDevbuild = !process.argv.includes("--production");
@@ -128,7 +128,7 @@ function style({
 					path: args.path,
 					namespace: "style-helper",
 					sideEffects: false,
-				}),
+				})
 			);
 
 			onLoad({ filter: /.*/, namespace: "style-helper" }, async () => ({
@@ -171,7 +171,7 @@ function style({
 						contents: outputFiles![0].text,
 						loader: "text",
 					};
-				},
+				}
 			);
 		},
 	};
@@ -181,15 +181,15 @@ function createConfig(
 	source: string,
 	outfile: string,
 	target: "desktop" | "web",
-	watch: boolean,
+	watch: boolean
 ): SameShape<BuildOptions, BuildOptions> {
 	const inject: string[] = [];
 	if (target === "web") {
 		inject.push(
 			path.join(
 				__dirname,
-				isDevbuild ? "process.development.js" : "process.production.js",
-			),
+				isDevbuild ? "process.development.js" : "process.production.js"
+			)
 		);
 	}
 	if (source.endsWith(path.join("data-explorer", "index.tsx"))) {
@@ -209,7 +209,7 @@ function createConfig(
 		moment: path.join(extensionFolder, "build", "webpack", "moment.js"),
 		"vscode-jupyter-release-version": path.join(
 			__dirname,
-			releaseVersionScriptFile,
+			releaseVersionScriptFile
 		),
 	};
 	return {
@@ -229,7 +229,7 @@ function createConfig(
 				: {
 						BROWSER: "true", // From webacpk scripts we had.
 						global: "this",
-				  },
+					},
 		target: target === "desktop" ? "node18" : "es2018",
 		platform: target === "desktop" ? "node" : "browser",
 		minify: !isDevbuild,
@@ -243,29 +243,29 @@ function createConfig(
 async function build(
 	source: string,
 	outfile: string,
-	options: { watch: boolean; target: "desktop" | "web" },
+	options: { watch: boolean; target: "desktop" | "web" }
 ) {
 	if (options.watch) {
 		const context = await esbuild.context(
-			createConfig(source, outfile, options.target, options.watch),
+			createConfig(source, outfile, options.target, options.watch)
 		);
 		await context.watch();
 	} else {
 		const result = await esbuild.build(
-			createConfig(source, outfile, options.target, options.watch),
+			createConfig(source, outfile, options.target, options.watch)
 		);
 		const size = fs.statSync(outfile).size;
 		const relativePath = `./${path.relative(extensionFolder, outfile)}`;
 		console.log(
-			`asset ${green(relativePath)} size: ${(size / 1024).toFixed()} KiB`,
+			`asset ${green(relativePath)} size: ${(size / 1024).toFixed()} KiB`
 		);
 		if (isDevbuild && result.metafile) {
 			const metafile = `${outfile}.esbuild.meta.json`;
 			await fs.writeFile(metafile, JSON.stringify(result.metafile));
 			console.log(
 				`metafile ${green(
-					`./${path.relative(extensionFolder, metafile)}`,
-				)}`,
+					`./${path.relative(extensionFolder, metafile)}`
+				)}`
 			);
 		}
 	}
@@ -283,7 +283,7 @@ async function buildAll() {
 					"webviews",
 					"webview-side",
 					"interactive-common",
-					"variableExplorerGrid.less",
+					"variableExplorerGrid.less"
 				),
 				path.join(
 					extensionFolder,
@@ -291,9 +291,9 @@ async function buildAll() {
 					"webviews",
 					"webview-side",
 					"interactive-common",
-					"variableExplorerGrid.css",
+					"variableExplorerGrid.css"
 				),
-				{ watch, target: "web" },
+				{ watch, target: "web" }
 			),
 			build(
 				path.join(
@@ -303,7 +303,7 @@ async function buildAll() {
 					"webview-side",
 					"react-common",
 					"seti",
-					"seti.less",
+					"seti.less"
 				),
 				path.join(
 					extensionFolder,
@@ -312,9 +312,9 @@ async function buildAll() {
 					"webview-side",
 					"react-common",
 					"seti",
-					"seti.css",
+					"seti.css"
 				),
-				{ watch, target: "web" },
+				{ watch, target: "web" }
 			),
 		];
 	};
@@ -336,7 +336,7 @@ async function buildAll() {
 				"webview-side",
 				"ipywidgets",
 				"kernel",
-				"index.ts",
+				"index.ts"
 			),
 			path.join(
 				extensionFolder,
@@ -344,9 +344,9 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"ipywidgetsKernel",
-				"ipywidgetsKernel.js",
+				"ipywidgetsKernel.js"
 			),
-			{ target: "web", watch: watchAll },
+			{ target: "web", watch: watchAll }
 		),
 		build(
 			path.join(
@@ -356,7 +356,7 @@ async function buildAll() {
 				"webview-side",
 				"ipywidgets",
 				"renderer",
-				"index.ts",
+				"index.ts"
 			),
 			path.join(
 				extensionFolder,
@@ -364,9 +364,9 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"ipywidgetsRenderer",
-				"ipywidgetsRenderer.js",
+				"ipywidgetsRenderer.js"
 			),
-			{ target: "web", watch: watchAll },
+			{ target: "web", watch: watchAll }
 		),
 		build(
 			path.join(
@@ -375,7 +375,7 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"variable-view",
-				"index.tsx",
+				"index.tsx"
 			),
 			path.join(
 				extensionFolder,
@@ -383,9 +383,9 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"viewers",
-				"variableView.js",
+				"variableView.js"
 			),
-			{ target: "web", watch: watchAll },
+			{ target: "web", watch: watchAll }
 		),
 		build(
 			path.join(
@@ -394,7 +394,7 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"plot",
-				"index.tsx",
+				"index.tsx"
 			),
 			path.join(
 				extensionFolder,
@@ -402,9 +402,9 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"viewers",
-				"plotViewer.js",
+				"plotViewer.js"
 			),
-			{ target: "web", watch: watchAll },
+			{ target: "web", watch: watchAll }
 		),
 		build(
 			path.join(
@@ -413,7 +413,7 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"data-explorer",
-				"index.tsx",
+				"index.tsx"
 			),
 			path.join(
 				extensionFolder,
@@ -421,10 +421,10 @@ async function buildAll() {
 				"webviews",
 				"webview-side",
 				"viewers",
-				"dataExplorer.js",
+				"dataExplorer.js"
 			),
-			{ target: "web", watch: watchAll },
-		),
+			{ target: "web", watch: watchAll }
+		)
 	);
 
 	if (isDevbuild) {
@@ -436,7 +436,7 @@ async function buildAll() {
 					"test",
 					"datascience",
 					"widgets",
-					"rendererUtils.ts",
+					"rendererUtils.ts"
 				),
 				path.join(
 					extensionFolder,
@@ -444,10 +444,10 @@ async function buildAll() {
 					"webviews",
 					"webview-side",
 					"widgetTester",
-					"widgetTester.js",
+					"widgetTester.js"
 				),
-				{ target: "web", watch: watchAll },
-			),
+				{ target: "web", watch: watchAll }
+			)
 		);
 	}
 	if (bundleConfig !== "desktop") {
@@ -455,8 +455,8 @@ async function buildAll() {
 			build(
 				path.join(extensionFolder, "src", "extension.web.ts"),
 				path.join(extensionFolder, "dist", "extension.web.bundle.js"),
-				{ target: "web", watch: watchAll },
-			),
+				{ target: "web", watch: watchAll }
+			)
 		);
 	}
 	if (bundleConfig !== "web") {
@@ -464,16 +464,16 @@ async function buildAll() {
 			build(
 				path.join(extensionFolder, "src", "extension.node.ts"),
 				path.join(extensionFolder, "dist", "extension.node.js"),
-				{ target: "desktop", watch: isWatchMode },
-			),
+				{ target: "desktop", watch: isWatchMode }
+			)
 		);
 		builders.push(
 			build(
 				path.join(extensionFolder, "src", "extension.node.proxy.ts"),
 				path.join(extensionFolder, "dist", "extension.node.proxy.js"),
 				// This file almost never ever changes, hence no need to watch this.
-				{ target: "desktop", watch: false },
-			),
+				{ target: "desktop", watch: false }
+			)
 		);
 		builders.push(
 			...deskTopNodeModulesToExternalize
@@ -481,8 +481,8 @@ async function buildAll() {
 				.filter(
 					(module) =>
 						!["zeromq", "zeromqold", "vscode-jsonrpc"].includes(
-							module,
-						),
+							module
+						)
 				)
 
 				.map(async (module) => {
@@ -493,22 +493,22 @@ async function buildAll() {
 							extensionFolder,
 							"dist",
 							"node_modules",
-							`${module}.js`,
+							`${module}.js`
 						),
 						{
 							target: "desktop",
 							// These almost never change, easier to re-run copmilation if packges change.
 							watch: false,
-						},
+						}
 					);
-				}),
+				})
 		);
 		builders.push(
 			copyJQuery(),
 			copyAminya(),
 			copyZeroMQ(),
 			copyZeroMQOld(),
-			buildVSCodeJsonRPC(),
+			buildVSCodeJsonRPC()
 		);
 	}
 
@@ -530,7 +530,7 @@ async function copyJQuery() {
 		"node_modules",
 		"jquery",
 		"out",
-		"jquery.min.js",
+		"jquery.min.js"
 	);
 	const license = require
 		.resolve("jquery")
@@ -545,8 +545,8 @@ async function copyJQuery() {
 				"dist",
 				"node_modules",
 				"jquery",
-				"LICENSE.txt",
-			),
+				"LICENSE.txt"
+			)
 		),
 	]);
 }
@@ -555,13 +555,13 @@ async function copyAminya() {
 	const source = path.join(
 		extensionFolder,
 		"node_modules",
-		"@aminya/node-gyp-build",
+		"@aminya/node-gyp-build"
 	);
 	const target = path.join(
 		extensionFolder,
 		"dist",
 		"node_modules",
-		"@aminya/node-gyp-build",
+		"@aminya/node-gyp-build"
 	);
 	await fs.ensureDir(path.dirname(target));
 	await fs.ensureDir(target);
@@ -582,7 +582,7 @@ async function copyZeroMQOld() {
 		extensionFolder,
 		"dist",
 		"node_modules",
-		"zeromqold",
+		"zeromqold"
 	);
 	await fs.ensureDir(path.dirname(target));
 	await fs.ensureDir(target);
@@ -598,7 +598,7 @@ async function buildVSCodeJsonRPC() {
 		"dist",
 		"node_modules",
 		"vscode-jsonrpc",
-		"index.js",
+		"index.js"
 	);
 	await fs.ensureDir(path.dirname(target));
 	const fullPath = require.resolve(source);
@@ -645,8 +645,8 @@ function shouldCopyFileFromZmqFolder(resourcePath) {
 					path
 						.join(parentFolder, folder)
 						.replace(/\\/g, "/")
-						.toLowerCase(),
-				),
+						.toLowerCase()
+				)
 		)
 	) {
 		return false;
@@ -678,7 +678,7 @@ function shouldCopyFileFromZmqFolder(resourcePath) {
 	// Use path.sep as the delimiter, as we do not want linux-arm64 to get compiled with search criteria is linux-arm.
 	if (
 		preBuildsFoldersToCopy.some((folder) =>
-			resourcePath.includes(`${folder.toLowerCase()}/`),
+			resourcePath.includes(`${folder.toLowerCase()}/`)
 		)
 	) {
 		return true;

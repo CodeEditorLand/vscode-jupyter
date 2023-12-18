@@ -66,7 +66,7 @@ export class CellExecutionQueue implements Disposable {
 		private readonly session: Promise<IKernelSession>,
 		private readonly executionFactory: CellExecutionFactory,
 		readonly metadata: Readonly<KernelConnectionMetadata>,
-		readonly resourceUri: Resource,
+		readonly resourceUri: Resource
 	) {}
 
 	public dispose() {
@@ -94,7 +94,7 @@ export class CellExecutionQueue implements Disposable {
 	public queueCode(
 		code: string,
 		extensionId: string,
-		token: CancellationToken,
+		token: CancellationToken
 	): ICodeExecution {
 		const item = this.enqueue({ code, extensionId, token });
 		return item as ICodeExecution;
@@ -102,13 +102,13 @@ export class CellExecutionQueue implements Disposable {
 	private enqueue(
 		options:
 			| { cell: NotebookCell; codeOverride?: string }
-			| { code: string; extensionId: string; token: CancellationToken },
+			| { code: string; extensionId: string; token: CancellationToken }
 	) {
 		let executionItem: ICellExecution | ICodeExecution;
 		if ("cell" in options) {
 			const { cell, codeOverride } = options;
 			const existingCellExecution = this.queueOfCellsToExecute.find(
-				(item) => item.cell === cell,
+				(item) => item.cell === cell
 			);
 			if (existingCellExecution) {
 				traceCellMessage(cell, "Use existing cell execution");
@@ -117,14 +117,14 @@ export class CellExecutionQueue implements Disposable {
 			const cellExecution = this.executionFactory.create(
 				cell,
 				codeOverride,
-				this.metadata,
+				this.metadata
 			);
 			executionItem = cellExecution;
 			this.disposables.push(cellExecution);
 			cellExecution.preExecute(
 				(c) => this._onPreExecute.fire(c),
 				this,
-				this.disposables,
+				this.disposables
 			);
 			this.queueOfItemsToExecute.push(cellExecution);
 
@@ -137,8 +137,8 @@ export class CellExecutionQueue implements Disposable {
 			this.queueOfItemsToExecute.push(codeExecution);
 			this.disposables.push(
 				once(token.onCancellationRequested)(() =>
-					codeExecution.cancel(),
-				),
+					codeExecution.cancel()
+				)
 			);
 		}
 		// Start executing the cells.
@@ -151,10 +151,10 @@ export class CellExecutionQueue implements Disposable {
 	 */
 	public resumeCell(
 		cell: NotebookCell,
-		info: ResumeCellExecutionInformation,
+		info: ResumeCellExecutionInformation
 	): void {
 		const existingCellExecution = this.queueOfCellsToExecute.find(
-			(item) => item.cell === cell,
+			(item) => item.cell === cell
 		);
 		if (existingCellExecution) {
 			traceCellMessage(cell, "Use existing cell execution");
@@ -164,7 +164,7 @@ export class CellExecutionQueue implements Disposable {
 			cell,
 			"",
 			this.metadata,
-			info,
+			info
 		);
 		this.disposables.push(cellExecution);
 		this.queueOfItemsToExecute.push(cellExecution);
@@ -186,7 +186,7 @@ export class CellExecutionQueue implements Disposable {
 		this.cancelledOrCompletedWithErrors = true;
 		traceVerbose("Cancel pending cells");
 		await Promise.all(
-			this.queueOfItemsToExecute.map((item) => item.cancel(forced)),
+			this.queueOfItemsToExecute.map((item) => item.cancel(forced))
 		);
 		this.lastCellExecution?.dispose();
 		this.queueOfItemsToExecute.splice(0, this.queueOfItemsToExecute.length);
@@ -198,15 +198,13 @@ export class CellExecutionQueue implements Disposable {
 		this.cancelledOrCompletedWithErrors = true;
 		traceVerbose("Cancel pending cells");
 		await Promise.all(
-			this.queueOfCellsToExecute.map((item) => item.cancel()),
+			this.queueOfCellsToExecute.map((item) => item.cancel())
 		);
 		if (this.lastCellExecution?.type === "cell") {
 			this.lastCellExecution?.dispose();
 		}
 		this.queueOfItemsToExecute.push(
-			...this.queueOfItemsToExecute.filter(
-				(item) => item.type === "code",
-			),
+			...this.queueOfItemsToExecute.filter((item) => item.type === "code")
 		);
 	}
 	/**
@@ -215,13 +213,13 @@ export class CellExecutionQueue implements Disposable {
 	 * If no cells are provided, then wait on all cells in the current queue.
 	 */
 	public async waitForCompletion(
-		cells?: NotebookCell[],
+		cells?: NotebookCell[]
 	): Promise<NotebookCellRunState[]> {
 		const cellsToCheck =
 			Array.isArray(cells) && cells.length > 0
 				? this.queueOfCellsToExecute.filter((item) =>
-						cells.includes(item.cell),
-				  )
+						cells.includes(item.cell)
+					)
 				: this.queueOfItemsToExecute;
 
 		return Promise.all(cellsToCheck.map((cell) => cell.result));
@@ -253,7 +251,7 @@ export class CellExecutionQueue implements Disposable {
 		this.queueOfItemsToExecute.forEach(
 			(exec) =>
 				exec.type === "cell" &&
-				traceCellMessage(exec.cell, "Ready to execute"),
+				traceCellMessage(exec.cell, "Ready to execute")
 		);
 		while (this.queueOfItemsToExecute.length) {
 			// Dispose the previous cell execution.
@@ -271,7 +269,7 @@ export class CellExecutionQueue implements Disposable {
 			if (itemToExecute.type === "cell") {
 				traceCellMessage(
 					itemToExecute.cell,
-					"Before Execute individual cell",
+					"Before Execute individual cell"
 				);
 			}
 
@@ -296,7 +294,7 @@ export class CellExecutionQueue implements Disposable {
 					// Once the cell has completed execution, remove it from the queue.
 					traceCellMessage(
 						itemToExecute.cell,
-						`After Execute individual cell ${executionResult}`,
+						`After Execute individual cell ${executionResult}`
 					);
 				}
 				const index = this.queueOfItemsToExecute.indexOf(itemToExecute);
@@ -315,7 +313,7 @@ export class CellExecutionQueue implements Disposable {
 			if (
 				itemToExecute.type === "cell" &&
 				createJupyterCellFromVSCNotebookCell(
-					itemToExecute.cell,
+					itemToExecute.cell
 				).metadata?.tags?.includes("raises-exception")
 			) {
 				cellErrorsAllowed = true;
@@ -354,8 +352,8 @@ export class CellExecutionQueue implements Disposable {
 					// Cancel evertyting and stop execution.
 					traceWarning(
 						`Cancel all remaining cells due to ${reasons.join(
-							" or ",
-						)}`,
+							" or "
+						)}`
 					);
 					await this.cancel();
 					break;
@@ -369,8 +367,8 @@ export class CellExecutionQueue implements Disposable {
 					// Continue with the execution of code.
 					traceWarning(
 						`Cancel all remaining cells due to ${reasons.join(
-							" or ",
-						)}`,
+							" or "
+						)}`
 					);
 					await this.cancelQueuedCells();
 				} else if (notebookClosed) {
@@ -379,8 +377,8 @@ export class CellExecutionQueue implements Disposable {
 					// Unless the notebook was closed.
 					traceWarning(
 						`Cancel all remaining cells due to ${reasons.join(
-							" or ",
-						)}`,
+							" or "
+						)}`
 					);
 					await this.cancel();
 					break;

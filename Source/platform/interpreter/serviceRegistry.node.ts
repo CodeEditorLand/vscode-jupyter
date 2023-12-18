@@ -47,89 +47,89 @@ import { DesktopWorkspaceInterpreterTracker } from "./workspaceInterpreterTracke
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IPythonExecutionFactory>(
 		IPythonExecutionFactory,
-		PythonExecutionFactory,
+		PythonExecutionFactory
 	);
 	serviceManager.addSingleton<CondaService>(CondaService, CondaService);
 	serviceManager.addSingleton<GlobalPythonExecutablePathService>(
 		GlobalPythonExecutablePathService,
-		GlobalPythonExecutablePathService,
+		GlobalPythonExecutablePathService
 	);
 	serviceManager.addSingleton<IInterpreterPackages>(
 		IInterpreterPackages,
-		InterpreterPackages,
+		InterpreterPackages
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		WorkspaceInterpreterTracker,
+		WorkspaceInterpreterTracker
 	);
 	serviceManager.addSingleton<IWorkspaceInterpreterTracker>(
 		IWorkspaceInterpreterTracker,
-		DesktopWorkspaceInterpreterTracker,
+		DesktopWorkspaceInterpreterTracker
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonEnvFilterSettingMigration,
+		PythonEnvFilterSettingMigration
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonFilterUICommandDeprecation,
+		PythonFilterUICommandDeprecation
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonEnvFilterCompletionProvider,
+		PythonEnvFilterCompletionProvider
 	);
 	serviceManager.addSingleton<PythonEnvironmentFilter>(
 		PythonEnvironmentFilter,
-		PythonEnvironmentFilter,
+		PythonEnvironmentFilter
 	);
 	serviceManager.addSingleton<IReservedPythonNamedProvider>(
 		IReservedPythonNamedProvider,
-		ReservedNamedProvider,
+		ReservedNamedProvider
 	);
 	serviceManager.addSingleton<IVariableScriptGenerator>(
 		IVariableScriptGenerator,
-		VariableScriptGenerator,
+		VariableScriptGenerator
 	);
 	serviceManager.addSingleton<IDataFrameScriptGenerator>(
 		IDataFrameScriptGenerator,
-		DataFrameScriptGenerator,
+		DataFrameScriptGenerator
 	);
 	serviceManager.addSingleton<IModuleInstaller>(
 		IModuleInstaller,
-		CondaInstaller,
+		CondaInstaller
 	);
 	serviceManager.addSingleton<IModuleInstaller>(
 		IModuleInstaller,
-		PipInstaller,
+		PipInstaller
 	);
 	serviceManager.addSingleton<IModuleInstaller>(
 		IModuleInstaller,
-		PipEnvInstaller,
+		PipEnvInstaller
 	);
 	serviceManager.addSingleton<IModuleInstaller>(
 		IModuleInstaller,
-		PoetryInstaller,
+		PoetryInstaller
 	);
 	serviceManager.addSingleton<IInstallationChannelManager>(
 		IInstallationChannelManager,
-		InstallationChannelManager,
+		InstallationChannelManager
 	);
 	serviceManager.addSingleton<IProductService>(
 		IProductService,
-		ProductService,
+		ProductService
 	);
 	serviceManager.addSingleton<IInstaller>(IInstaller, ProductInstaller);
 	serviceManager.addSingleton<IProductPathService>(
 		IProductPathService,
 		DataScienceProductPathService,
-		ProductType.DataScience,
+		ProductType.DataScience
 	);
 	serviceManager.addSingleton<PythonEnvironmentQuickPickItemProvider>(
 		PythonEnvironmentQuickPickItemProvider,
-		PythonEnvironmentQuickPickItemProvider,
+		PythonEnvironmentQuickPickItemProvider
 	);
 	serviceManager.addBinding(
 		PythonEnvironmentQuickPickItemProvider,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 }

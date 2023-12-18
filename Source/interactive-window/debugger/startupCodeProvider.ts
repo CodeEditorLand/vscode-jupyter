@@ -31,11 +31,13 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 	private addRunCellHookContents?: Promise<string>;
 
 	constructor(
-        @inject(IConfigurationService) private readonly configService: IConfigurationService,
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IExtensionContext) private readonly context: IExtensionContext,
-        @inject(IStartupCodeProviders) private readonly registry: IStartupCodeProviders
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService,
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IExtensionContext) private readonly context: IExtensionContext,
+		@inject(IStartupCodeProviders)
+		private readonly registry: IStartupCodeProviders
+	) {}
 
 	activate(): void {
 		this.registry.register(this, InteractiveWindowView);
@@ -72,8 +74,8 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 						"pythonFiles",
 						"vscode_datascience_helpers",
 						"kernel",
-						"addRunCellHook.py",
-					),
+						"addRunCellHook.py"
+					)
 				);
 			}
 			const addRunCellHook = await this.addRunCellHookContents;

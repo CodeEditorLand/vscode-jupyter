@@ -5,12 +5,12 @@ import { CancellationToken } from "vscode";
 import { Resource } from "../../common/types";
 
 export const IEnvironmentActivationService = Symbol(
-	"IEnvironmentActivationService",
+	"IEnvironmentActivationService"
 );
 export interface IEnvironmentActivationService {
 	getActivatedEnvironmentVariables(
 		resource: Resource,
 		interpreter: { id: string },
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<NodeJS.ProcessEnv | undefined>;
 }

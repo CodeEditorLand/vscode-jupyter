@@ -9,6 +9,6 @@ export interface IPlotSaveHandler {
 	savePlot(
 		notebook: NotebookDocument,
 		outputId: string,
-		mimeType: string,
+		mimeType: string
 	): Promise<void>;
 }

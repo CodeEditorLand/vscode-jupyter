@@ -30,14 +30,21 @@ export class DataViewerFactory implements IDataViewerFactory, IAsyncDisposable {
 	private viewContext: ContextKey;
 
 	constructor(
-        @inject(IServiceContainer) private serviceContainer: IServiceContainer,
-        @inject(IAsyncDisposableRegistry) asyncRegistry: IAsyncDisposableRegistry,
-        @inject(IDisposableRegistry) private disposables: IDisposableRegistry
-    ) {
-        asyncRegistry.push(this);
-        this.viewContext = new ContextKey(EditorContexts.IsDataViewerActive);
-        this.disposables.push(commands.registerCommand(Commands.RefreshDataViewer, this.refreshDataViewer, this));
-    }
+		@inject(IServiceContainer) private serviceContainer: IServiceContainer,
+		@inject(IAsyncDisposableRegistry)
+		asyncRegistry: IAsyncDisposableRegistry,
+		@inject(IDisposableRegistry) private disposables: IDisposableRegistry
+	) {
+		asyncRegistry.push(this);
+		this.viewContext = new ContextKey(EditorContexts.IsDataViewerActive);
+		this.disposables.push(
+			commands.registerCommand(
+				Commands.RefreshDataViewer,
+				this.refreshDataViewer,
+				this
+			)
+		);
+	}
 
 	public async dispose() {
 		for (const viewer of this.knownViewers) {
@@ -48,7 +55,7 @@ export class DataViewerFactory implements IDataViewerFactory, IAsyncDisposable {
 	@capturePerfTelemetry(Telemetry.StartShowDataViewer)
 	public async create(
 		dataProvider: IDataViewerDataProvider,
-		title: string,
+		title: string
 	): Promise<IDataViewer> {
 		let result: IDataViewer | undefined;
 
@@ -61,12 +68,12 @@ export class DataViewerFactory implements IDataViewerFactory, IAsyncDisposable {
 			dataExplorer.onDidDisposeDataViewer(
 				this.updateOpenDataViewers,
 				this,
-				this.disposables,
+				this.disposables
 			);
 			dataExplorer.onDidChangeDataViewerViewState(
 				this.updateViewStateContext,
 				this,
-				this.disposables,
+				this.disposables
 			);
 			// Show the window and the data
 			await dataExplorer.showData(dataProvider, title);

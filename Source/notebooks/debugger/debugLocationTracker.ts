@@ -42,14 +42,14 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 			const topMostFrame = message.body?.stackFrames[0];
 			this.topMostFrameId = topMostFrame?.id;
 			this.sequenceNumbersOfRequestsPendingResponses.delete(
-				message.request_seq,
+				message.request_seq
 			);
 			// If we are waiting for a stack trace, check our messages for one
 			if (this.waitingForStackTrace) {
 				this.DebugLocation = {
 					lineNumber: topMostFrame?.line,
 					fileName: this.normalizeFilePath(
-						topMostFrame?.source?.path,
+						topMostFrame?.source?.path
 					),
 					column: topMostFrame.column,
 				};
@@ -130,14 +130,14 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 	}
 
 	private isResponseForRequestToFetchAllFrames(
-		message: DebugProtocol.Response,
+		message: DebugProtocol.Response
 	) {
 		return (
 			message.type === "response" &&
 			message.command === "stackTrace" &&
 			message.body?.stackFrames[0] &&
 			this.sequenceNumbersOfRequestsPendingResponses.has(
-				message.request_seq,
+				message.request_seq
 			)
 		);
 	}

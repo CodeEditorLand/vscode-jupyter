@@ -39,12 +39,12 @@ export abstract class WebviewPanelHost<IMapping>
 		messageListenerCtor: (
 			callback: (message: string, payload: {}) => void,
 			viewChanged: (panel: IWebviewPanel) => void,
-			disposed: () => void,
+			disposed: () => void
 		) => IWebviewPanelMessageListener,
 		rootPath: Uri,
 		scripts: Uri[],
 		private _title: string,
-		private viewColumn: ViewColumn,
+		private viewColumn: ViewColumn
 	) {
 		super(configService, rootPath, scripts);
 
@@ -52,7 +52,7 @@ export abstract class WebviewPanelHost<IMapping>
 		this.messageListener = messageListenerCtor(
 			this.onMessage.bind(this),
 			this.webPanelViewStateChanged.bind(this),
-			this.dispose.bind(this),
+			this.dispose.bind(this)
 		);
 	}
 
@@ -93,7 +93,7 @@ export abstract class WebviewPanelHost<IMapping>
 		cwd: Uri,
 		settings: IJupyterExtraSettings,
 		workspaceFolder: Resource,
-		vscodeWebview?: vscodeWebviewPanel,
+		vscodeWebview?: vscodeWebviewPanel
 	): Promise<IWebview> {
 		// Use this script to create our web view panel. It should contain all of the necessary
 		// script to communicate with this class.

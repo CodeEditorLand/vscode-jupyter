@@ -55,10 +55,10 @@ export interface IJupyterServerHelper extends IAsyncDisposable {
 	isJupyterServerSupported(cancelToken?: CancellationToken): Promise<boolean>;
 	startServer(
 		resource: Resource,
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<IJupyterConnection>;
 	getUsableJupyterPython(
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<PythonEnvironment | undefined>;
 	getJupyterServerError(): Promise<string>;
 	refreshCommands(): Promise<void>;
@@ -81,7 +81,7 @@ export const INotebookImporter = Symbol("INotebookImporter");
 export interface INotebookImporter extends Disposable {
 	importFromFile(
 		contentsFile: Uri,
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<string>;
 }
 
@@ -89,17 +89,17 @@ export const INotebookExporter = Symbol("INotebookExporter");
 export interface INotebookExporter extends Disposable {
 	translateToNotebook(
 		cells: ICell[],
-		kernelSpec?: nbformat.IKernelspecMetadata,
+		kernelSpec?: nbformat.IKernelspecMetadata
 	): Promise<nbformat.INotebookContent | undefined>;
 	exportToFile(
 		cells: ICell[],
 		file: string,
-		showOpenPrompt?: boolean,
+		showOpenPrompt?: boolean
 	): Promise<void>;
 }
 
 export const IJupyterInterpreterDependencyManager = Symbol(
-	"IJupyterInterpreterDependencyManager",
+	"IJupyterInterpreterDependencyManager"
 );
 export interface IJupyterInterpreterDependencyManager {
 	/**
@@ -110,33 +110,33 @@ export interface IJupyterInterpreterDependencyManager {
 	 * @memberof IJupyterInterpreterDependencyManager
 	 */
 	installMissingDependencies(
-		err?: JupyterInstallError,
+		err?: JupyterInstallError
 	): Promise<JupyterInterpreterDependencyResponse>;
 }
 
 export const INbConvertInterpreterDependencyChecker = Symbol(
-	"INbConvertInterpreterDependencyChecker",
+	"INbConvertInterpreterDependencyChecker"
 );
 export interface INbConvertInterpreterDependencyChecker {
 	isNbConvertInstalled(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken,
+		_token?: CancellationToken
 	): Promise<boolean>;
 	getNbConvertVersion(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken,
+		_token?: CancellationToken
 	): Promise<SemVer | undefined>;
 }
 
 export const INbConvertExportToPythonService = Symbol(
-	"INbConvertExportToPythonService",
+	"INbConvertExportToPythonService"
 );
 export interface INbConvertExportToPythonService {
 	exportNotebookToPython(
 		file: Uri,
 		interpreter: PythonEnvironment,
 		template?: string,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<string>;
 }
 
@@ -202,7 +202,7 @@ export interface IJupyterServerUriStorage {
 	clear(): Promise<void>;
 	add(
 		serverProviderHandle: JupyterServerProviderHandle,
-		options?: { time: number },
+		options?: { time: number }
 	): Promise<void>;
 }
 
@@ -218,12 +218,12 @@ export interface IJupyterKernelService {
 		kernel: KernelConnectionMetadata,
 		ui: IDisplayOptions,
 		cancelToken: CancellationToken,
-		cannotChangeKernels?: boolean,
+		cannotChangeKernels?: boolean
 	): Promise<void>;
 }
 
 export const IJupyterRequestAgentCreator = Symbol(
-	"IJupyterRequestAgentCreator",
+	"IJupyterRequestAgentCreator"
 );
 export interface IJupyterRequestAgentCreator {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -236,21 +236,21 @@ export interface IJupyterRequestCreator {
 	getRequestCtor(
 		cookieString?: string,
 		allowUnauthorized?: boolean,
-		getAuthHeader?: () => any,
+		getAuthHeader?: () => any
 	): ClassType<Request>;
 	getFetchMethod(): (
 		input: RequestInfo,
-		init?: RequestInit,
+		init?: RequestInit
 	) => Promise<Response>;
 	getHeadersCtor(): ClassType<Headers>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	getWebsocketCtor(
 		cookieString?: string,
 		allowUnauthorized?: boolean,
-		getAuthHeaders?: () => Record<string, string>,
+		getAuthHeaders?: () => Record<string, string>
 	): ClassType<WebSocket>;
 	wrapWebSocketCtor(
-		websocketCtor: ClassType<WebSocketIsomorphic>,
+		websocketCtor: ClassType<WebSocketIsomorphic>
 	): ClassType<WebSocketIsomorphic>;
 	getRequestInit(): RequestInit;
 }
@@ -262,12 +262,12 @@ export interface INotebookStarter extends IDisposable {
 		useDefaultConfig: boolean,
 		customCommandLine: string[],
 		workingDirectory: Uri,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	): Promise<IJupyterConnection>;
 }
 
 export const ILiveRemoteKernelConnectionUsageTracker = Symbol(
-	"ILiveRemoteKernelConnectionUsageTracker",
+	"ILiveRemoteKernelConnectionUsageTracker"
 );
 export interface ILiveRemoteKernelConnectionUsageTracker {
 	/**
@@ -280,7 +280,7 @@ export interface ILiveRemoteKernelConnectionUsageTracker {
 	trackKernelIdAsUsed(
 		resource: Uri,
 		serverId: JupyterServerProviderHandle,
-		kernelId: string,
+		kernelId: string
 	): void;
 	/**
 	 * Tracks the fact that the provided remote kernel for a given server is no longer used by a notebook defined by the uri.
@@ -288,12 +288,12 @@ export interface ILiveRemoteKernelConnectionUsageTracker {
 	trackKernelIdAsNotUsed(
 		resource: Uri,
 		serverId: JupyterServerProviderHandle,
-		kernelId: string,
+		kernelId: string
 	): void;
 }
 
 export const IJupyterRemoteCachedKernelValidator = Symbol(
-	"IJupyterRemoteCachedKernelValidator",
+	"IJupyterRemoteCachedKernelValidator"
 );
 export interface IJupyterRemoteCachedKernelValidator {
 	isValid(kernel: LiveRemoteKernelConnectionMetadata): Promise<boolean>;
@@ -307,7 +307,7 @@ export interface IRemoteKernelFinder
 }
 
 export const IJupyterServerProviderRegistry = Symbol(
-	"IJupyterServerProviderRegistry",
+	"IJupyterServerProviderRegistry"
 );
 export interface IJupyterServerProviderRegistry {
 	onDidChangeCollections: Event<{
@@ -316,13 +316,13 @@ export interface IJupyterServerProviderRegistry {
 	}>;
 	activateThirdPartyExtensionAndFindCollection(
 		extensionId: string,
-		id: string,
+		id: string
 	): Promise<JupyterServerCollection | undefined>;
 	readonly jupyterCollections: readonly JupyterServerCollection[];
 	createJupyterServerCollection(
 		extensionId: string,
 		id: string,
 		label: string,
-		serverProvider: JupyterServerProvider,
+		serverProvider: JupyterServerProvider
 	): JupyterServerCollection;
 }

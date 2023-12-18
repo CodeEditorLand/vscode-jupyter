@@ -14,10 +14,10 @@ import { traceError } from "../../platform/logging";
 @injectable()
 export class ExtensionActivationManager implements IExtensionActivationManager {
 	constructor(
-        @optional()
-        @multiInject(IExtensionSyncActivationService)
-        private readonly syncActivationServices: IExtensionSyncActivationService[]
-    ) {}
+		@optional()
+		@multiInject(IExtensionSyncActivationService)
+		private readonly syncActivationServices: IExtensionSyncActivationService[]
+	) {}
 
 	public activate(): void {
 		this.syncActivationServices.map((item) => {
@@ -28,7 +28,7 @@ export class ExtensionActivationManager implements IExtensionActivationManager {
 					`Error in activating extension, failed in ${
 						(item as Object).constructor.name
 					}`,
-					ex,
+					ex
 				);
 			}
 		});

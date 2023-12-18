@@ -52,7 +52,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 			api.serviceContainer.get<IKernelProvider>(IKernelProvider);
 		controllerRegistration =
 			api.serviceContainer.get<IControllerRegistration>(
-				IControllerRegistration,
+				IControllerRegistration
 			);
 		traceInfo("Suite Setup, Step 2");
 		await startJupyterServer();
@@ -60,7 +60,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 		await prewarmNotebooks();
 		traceInfo("Suite Setup, Step 4");
 		kernels = await Promise.resolve(
-			getKernelsApi(JVSC_EXTENSION_ID_FOR_TESTS),
+			getKernelsApi(JVSC_EXTENSION_ID_FOR_TESTS)
 		);
 		traceInfo("Suite Setup (completed)");
 	});
@@ -93,7 +93,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 
 		assert.isUndefined(
 			kernel,
-			"Kernel should not be returned as no code was executed",
+			"Kernel should not be returned as no code was executed"
 		);
 	});
 	testMandatory("Get Kernel and execute code", async function () {
@@ -125,7 +125,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 		await waitForOutput(
 			kernel.executeCode("print(1234)", token.token),
 			"1234",
-			expectedMime,
+			expectedMime
 		);
 		traceInfo(`Execute code silently completed`);
 		// // Wait for kernel to be idle.
@@ -143,17 +143,17 @@ suiteMandatory("Kernel API Tests @python", function () {
 			waitForOutput(
 				kernel.executeCode("print(1)", token.token),
 				"1",
-				expectedMime,
+				expectedMime
 			),
 			waitForOutput(
 				kernel.executeCode("print(2)", token.token),
 				"2",
-				expectedMime,
+				expectedMime
 			),
 			waitForOutput(
 				kernel.executeCode("print(3)", token.token),
 				"3",
-				expectedMime,
+				expectedMime
 			),
 		]);
 
@@ -168,7 +168,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 	async function waitForOutput(
 		executionResult: AsyncIterable<OutputItem[]>,
 		expectedOutput: string,
-		expectedMimetype: string,
+		expectedMimetype: string
 	) {
 		const disposables: IDisposable[] = [];
 		const outputsReceived: string[] = [];
@@ -188,7 +188,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 						outputsReceived.push(
 							`${item.mime} ${new TextDecoder()
 								.decode(item.data)
-								.trim()}`,
+								.trim()}`
 						);
 					}
 				});
@@ -198,7 +198,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 		await raceTimeoutError(
 			30_000,
 			new Error(`Timed out waiting for output, got ${outputsReceived}`),
-			outputPromise,
+			outputPromise
 		).finally(() => dispose(disposables));
 	}
 });

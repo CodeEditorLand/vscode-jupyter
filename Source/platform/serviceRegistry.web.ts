@@ -33,23 +33,23 @@ export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IFileSystem>(IFileSystem, FileSystem);
 	serviceManager.addSingleton<IWorkspaceService>(
 		IWorkspaceService,
-		WorkspaceService,
+		WorkspaceService
 	);
 	serviceManager.addSingleton<IApplicationEnvironment>(
 		IApplicationEnvironment,
-		ApplicationEnvironment,
+		ApplicationEnvironment
 	);
 	serviceManager.addSingleton<IConfigurationService>(
 		IConfigurationService,
-		ConfigurationService,
+		ConfigurationService
 	);
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
-		OutputCommandListener,
+		OutputCommandListener
 	);
 	serviceManager.addSingleton<ProgressReporter>(
 		ProgressReporter,
-		ProgressReporter,
+		ProgressReporter
 	);
 
 	registerCommonTypes(serviceManager);
@@ -58,20 +58,20 @@ export function registerTypes(serviceManager: IServiceManager) {
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelProgressReporter,
+		KernelProgressReporter
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		WorkspaceInterpreterTracker,
+		WorkspaceInterpreterTracker
 	);
 	// Webview Provider
 	serviceManager.add<IWebviewViewProvider>(
 		IWebviewViewProvider,
-		WebviewViewProvider,
+		WebviewViewProvider
 	);
 	serviceManager.add<IWebviewPanelProvider>(
 		IWebviewPanelProvider,
-		WebviewPanelProvider,
+		WebviewPanelProvider
 	);
 }

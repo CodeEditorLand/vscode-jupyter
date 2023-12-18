@@ -34,7 +34,7 @@ const interestedPackages = new Set(
 		"pyzmq32",
 		"tornado",
 		"traitlets",
-	].map((item) => item.toLowerCase()),
+	].map((item) => item.toLowerCase())
 );
 
 const notInstalled = "NOT INSTALLED";
@@ -56,24 +56,32 @@ export class InterpreterPackages implements IInterpreterPackages {
 		Promise<Set<string>>
 	>();
 	constructor(
-        @inject(IPythonExtensionChecker) private readonly pythonExtensionChecker: IPythonExtensionChecker,
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
-        @inject(IPythonExecutionFactory) private readonly executionFactory: IPythonExecutionFactory,
-        @inject(IPythonApiProvider) private readonly apiProvider: IPythonApiProvider,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {
-        InterpreterPackages._instance = this;
-        this.apiProvider.onDidActivatePythonExtension(
-            () => this.pendingInterpreterBeforeActivation.forEach((item) => this.trackPackages(item)),
-            this,
-            this.disposables
-        );
-    }
+		@inject(IPythonExtensionChecker)
+		private readonly pythonExtensionChecker: IPythonExtensionChecker,
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService,
+		@inject(IPythonExecutionFactory)
+		private readonly executionFactory: IPythonExecutionFactory,
+		@inject(IPythonApiProvider)
+		private readonly apiProvider: IPythonApiProvider,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {
+		InterpreterPackages._instance = this;
+		this.apiProvider.onDidActivatePythonExtension(
+			() =>
+				this.pendingInterpreterBeforeActivation.forEach((item) =>
+					this.trackPackages(item)
+				),
+			this,
+			this.disposables
+		);
+	}
 	public static get instance() {
 		return InterpreterPackages._instance;
 	}
 	public getPackageVersions(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<Map<string, string>> {
 		if (!this.pythonExtensionChecker.isPythonExtensionInstalled) {
 			return Promise.resolve(new Map<string, string>());
@@ -89,14 +97,14 @@ export class InterpreterPackages implements IInterpreterPackages {
 	}
 	public async getPackageVersion(
 		interpreter: PythonEnvironment,
-		packageName: string,
+		packageName: string
 	): Promise<string | undefined> {
 		if (!this.pythonExtensionChecker.isPythonExtensionInstalled) {
 			return Promise.resolve(undefined);
 		}
 		const packages = await this.getPackageVersions(interpreter);
 		const telemetrySafeString = await getTelemetrySafeHashedString(
-			packageName.toLocaleLowerCase(),
+			packageName.toLocaleLowerCase()
 		);
 		if (!packages.has(telemetrySafeString)) {
 			return;
@@ -109,7 +117,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 	}
 	public trackPackages(
 		interpreterUri: InterpreterUri,
-		ignoreCache?: boolean,
+		ignoreCache?: boolean
 	) {
 		this.trackPackagesInternal(interpreterUri, ignoreCache).catch(noop);
 	}
@@ -131,7 +139,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 				}
 				traceWarning(
 					`Failed to get list of installed packages for ${workspaceKey}`,
-					ex,
+					ex
 				);
 			});
 		}
@@ -156,17 +164,17 @@ export class InterpreterPackages implements IInterpreterPackages {
 		});
 		if (modulesOutput.stdout) {
 			const modules = JSON.parse(
-				modulesOutput.stdout.split(separator)[1].trim(),
+				modulesOutput.stdout.split(separator)[1].trim()
 			) as string[];
 			return new Set(
-				modules.concat(modules.map((item) => item.toLowerCase())),
+				modules.concat(modules.map((item) => item.toLowerCase()))
 			);
 		} else {
 			traceError(
 				`Failed to get list of installed packages for ${getDisplayPath(
-					interpreter.uri,
+					interpreter.uri
 				)}`,
-				modulesOutput.stderr,
+				modulesOutput.stderr
 			);
 			return new Set<string>();
 		}
@@ -174,7 +182,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 
 	private async trackPackagesInternal(
 		interpreterUri: InterpreterUri,
-		ignoreCache?: boolean,
+		ignoreCache?: boolean
 	) {
 		if (!this.pythonExtensionChecker.isPythonExtensionActive) {
 			this.pendingInterpreterBeforeActivation.add(interpreterUri);
@@ -185,7 +193,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 			// Get details of active interpreter for the Uri provided.
 			const activeInterpreter =
 				await this.interpreterService.getActiveInterpreter(
-					interpreterUri,
+					interpreterUri
 				);
 			if (!activeInterpreter) {
 				return;
@@ -198,7 +206,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 	}
 	private async trackInterpreterPackages(
 		interpreter: PythonEnvironment,
-		ignoreCache?: boolean,
+		ignoreCache?: boolean
 	) {
 		const key = getComparisonKey(interpreter.uri);
 		if (this.pendingInterpreterInformation.has(key) && !ignoreCache) {
@@ -226,7 +234,9 @@ export class InterpreterPackages implements IInterpreterPackages {
 
 	private async getPackageInformation({
 		interpreter,
-	}: { interpreter: PythonEnvironment }) {
+	}: {
+		interpreter: PythonEnvironment;
+	}) {
 		if (interpreter.isCondaEnvWithoutPython) {
 			return;
 		}
@@ -245,9 +255,9 @@ export class InterpreterPackages implements IInterpreterPackages {
 			Array.from(interestedPackages).map(async (item) => {
 				packageAndVersions.set(
 					await getTelemetrySafeHashedString(item),
-					notInstalled,
+					notInstalled
 				);
-			}),
+			})
 		);
 		await Promise.all(
 			output.stdout
@@ -264,7 +274,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 					const [packageName, rawVersion] = parts;
 					if (
 						!interestedPackages.has(
-							packageName.toLowerCase().trim(),
+							packageName.toLowerCase().trim()
 						)
 					) {
 						return;
@@ -272,9 +282,9 @@ export class InterpreterPackages implements IInterpreterPackages {
 					const version = getTelemetrySafeVersion(rawVersion);
 					packageAndVersions.set(
 						await getTelemetrySafeHashedString(packageName),
-						version || "",
+						version || ""
 					);
-				}),
+				})
 		);
 		const key = getComparisonKey(interpreter.uri);
 		let deferred = this.interpreterInformation.get(key);

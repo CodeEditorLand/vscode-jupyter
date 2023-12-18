@@ -34,12 +34,12 @@ suite("PreWarm Env Vars", () => {
 		envActivationService = mock<IEnvironmentActivationService>();
 		jupyterInterpreter = mock(JupyterInterpreterService);
 		when(jupyterInterpreter.onDidChangeInterpreter).thenReturn(
-			onDidChangeInterpreter.event,
+			onDidChangeInterpreter.event
 		);
 		extensionChecker = mock(PythonExtensionChecker);
 		const apiProvider = mock<IPythonApiProvider>();
 		when(apiProvider.onDidActivatePythonExtension).thenReturn(
-			new EventEmitter<void>().event,
+			new EventEmitter<void>().event
 		);
 		when(extensionChecker.isPythonExtensionInstalled).thenReturn(false);
 		when(extensionChecker.isPythonExtensionActive).thenReturn(true);
@@ -52,24 +52,22 @@ suite("PreWarm Env Vars", () => {
 			instance(extensionChecker),
 			instance(apiProvider),
 			instance(zmqSupported),
-			instance(mock(CondaService)),
+			instance(mock(CondaService))
 		);
 	});
 	test("Should not pre-warm env variables if there is no jupyter interpreter", async () => {
 		const envActivated = createDeferred<string>();
 		when(jupyterInterpreter.getSelectedInterpreter()).thenResolve(
-			undefined,
+			undefined
 		);
 		when(
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -77,13 +75,11 @@ suite("PreWarm Env Vars", () => {
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -98,13 +94,11 @@ suite("PreWarm Env Vars", () => {
 		when(
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -112,13 +106,11 @@ suite("PreWarm Env Vars", () => {
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -133,13 +125,11 @@ suite("PreWarm Env Vars", () => {
 		when(
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -147,13 +137,11 @@ suite("PreWarm Env Vars", () => {
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -165,13 +153,13 @@ suite("PreWarm Env Vars", () => {
 	test("Should pre-warm env variables", async () => {
 		const envActivated = createDeferred<string>();
 		when(jupyterInterpreter.getSelectedInterpreter()).thenResolve(
-			interpreter,
+			interpreter
 		);
 		when(
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.resolve();
 			return Promise.resolve();
@@ -180,8 +168,8 @@ suite("PreWarm Env Vars", () => {
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.resolve();
 			return Promise.resolve();
@@ -193,25 +181,23 @@ suite("PreWarm Env Vars", () => {
 		verify(
 			envActivationService.getActivatedEnvironmentVariables(
 				undefined,
-				interpreter,
-			),
+				interpreter
+			)
 		).once();
 	});
 	test("Should pre-warm env variables when jupyter interpreter changes", async () => {
 		const envActivated = createDeferred<string>();
 		when(jupyterInterpreter.getSelectedInterpreter()).thenResolve(
-			undefined,
+			undefined
 		);
 		when(
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -219,13 +205,11 @@ suite("PreWarm Env Vars", () => {
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.reject(
-				new Error(
-					"Environment Activated when it should not have been!",
-				),
+				new Error("Environment Activated when it should not have been!")
 			);
 			return Promise.resolve();
 		});
@@ -236,13 +220,13 @@ suite("PreWarm Env Vars", () => {
 
 		// Change interpreter
 		when(jupyterInterpreter.getSelectedInterpreter()).thenResolve(
-			interpreter,
+			interpreter
 		);
 		when(
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.resolve();
 			return Promise.resolve();
@@ -251,8 +235,8 @@ suite("PreWarm Env Vars", () => {
 			envActivationService.getActivatedEnvironmentVariables(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			envActivated.resolve();
 			return Promise.resolve();
@@ -263,8 +247,8 @@ suite("PreWarm Env Vars", () => {
 		verify(
 			envActivationService.getActivatedEnvironmentVariables(
 				undefined,
-				interpreter,
-			),
+				interpreter
+			)
 		).once();
 	});
 });

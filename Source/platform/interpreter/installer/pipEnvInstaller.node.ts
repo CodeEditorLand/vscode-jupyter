@@ -26,9 +26,11 @@ export const pipenvName = "pipenv";
  */
 @injectable()
 export class PipEnvInstaller extends ModuleInstaller {
-	constructor(@inject(IServiceContainer) serviceContainer: IServiceContainer) {
-        super(serviceContainer);
-    }
+	constructor(
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super(serviceContainer);
+	}
 	public get name(): string {
 		return "pipenv";
 	}
@@ -45,7 +47,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 	}
 
 	public async isSupported(
-		resource?: InterpreterUri | Environment,
+		resource?: InterpreterUri | Environment
 	): Promise<boolean> {
 		if (isResource(resource)) {
 			const interpreter = await this.serviceContainer
@@ -64,7 +66,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 			// Install using `pipenv install` only if the active environment is related to the current folder.
 			return isPipenvEnvironmentRelatedToFolder(
 				interpreter.uri,
-				workspaceFolder.uri,
+				workspaceFolder.uri
 			);
 		} else {
 			return (
@@ -77,7 +79,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
-		flags: ModuleInstallFlags = 0,
+		flags: ModuleInstallFlags = 0
 	): Promise<ExecutionInstallArgs> {
 		// In pipenv the only way to update/upgrade or re-install is update (apart from a complete uninstall and re-install).
 		const update =

@@ -9,14 +9,14 @@ suite("Incompatible Widgets", () => {
 	suite("Using qgrid widget with CDN turned on", () => {
 		async function testLoadingQgrid(
 			versionToLoad: string,
-			warningExpectedToBeDisplayed: boolean,
+			warningExpectedToBeDisplayed: boolean
 		) {
 			let warningDisplayed = false;
 			warnAboutWidgetVersionsThatAreNotSupported(
 				{ moduleName: "qgrid" },
 				versionToLoad,
 				true,
-				() => (warningDisplayed = true),
+				() => (warningDisplayed = true)
 			);
 
 			assert.equal(warningDisplayed, warningExpectedToBeDisplayed);

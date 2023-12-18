@@ -7,6 +7,6 @@ import * as localize from "../platform/common/utils/localize";
 
 export function getInteractiveWindowTitle(owner: Uri): string {
 	return localize.DataScience.interactiveWindowTitleFormat(
-		path.basename(owner.path),
+		path.basename(owner.path)
 	);
 }

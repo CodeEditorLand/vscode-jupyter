@@ -21,9 +21,9 @@ const cleanupCode = dedent`
 @injectable()
 export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 	constructor(
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IExtensionContext) private readonly context: IExtensionContext
-    ) {}
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IExtensionContext) private readonly context: IExtensionContext
+	) {}
 	public async generateCodeToGetDataFrameInfo(options: {
 		isDebugging: boolean;
 		variableName: string;
@@ -78,7 +78,7 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 			"pythonFiles",
 			"vscode_datascience_helpers",
 			"dataframes",
-			"vscodeDataFrame.py",
+			"vscodeDataFrame.py"
 		);
 		const contents = await this.fs.readFile(scriptPath);
 		DataFrameScriptGenerator.contentsOfDataFrameScript = contents;

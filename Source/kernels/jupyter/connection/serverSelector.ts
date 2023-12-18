@@ -31,13 +31,16 @@ export type SelectJupyterUriCommandSource =
 @injectable()
 export class JupyterServerSelector {
 	constructor(
-        @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage,
-        @inject(JupyterConnection) private readonly jupyterConnection: JupyterConnection,
-        @inject(IJupyterServerProviderRegistry) readonly serverProviderRegistry: IJupyterServerProviderRegistry
-    ) {}
+		@inject(IJupyterServerUriStorage)
+		private readonly serverUriStorage: IJupyterServerUriStorage,
+		@inject(JupyterConnection)
+		private readonly jupyterConnection: JupyterConnection,
+		@inject(IJupyterServerProviderRegistry)
+		readonly serverProviderRegistry: IJupyterServerProviderRegistry
+	) {}
 
 	public async addJupyterServer(
-		provider: JupyterServerProviderHandle,
+		provider: JupyterServerProviderHandle
 	): Promise<void> {
 		// Double check this server can be connected to. Might need a password, might need a allowUnauthorized
 		try {
@@ -45,7 +48,7 @@ export class JupyterServerSelector {
 		} catch (err) {
 			traceError(
 				`Error in validating the Remote Uri ${provider.id}.${provider.handle}`,
-				err,
+				err
 			);
 			return;
 		}
@@ -64,7 +67,7 @@ export class JupyterServerSelector {
 		if (
 			![JVSC_EXTENSION_ID].includes(provider.extensionId) &&
 			!this.serverProviderRegistry.jupyterCollections.some(
-				(c) => c.extensionId === provider.extensionId,
+				(c) => c.extensionId === provider.extensionId
 			)
 		) {
 			await this.serverUriStorage.add(provider);

@@ -11,7 +11,7 @@ import { commands } from "vscode";
  */
 export async function selectKernel(
 	resource: Resource,
-	notebookEditorProvider: INotebookEditorProvider | undefined,
+	notebookEditorProvider: INotebookEditorProvider | undefined
 ): Promise<boolean> {
 	const notebookEditor = notebookEditorProvider?.findNotebookEditor(resource);
 	if (notebookEditor) {
@@ -20,7 +20,7 @@ export async function selectKernel(
 		}) as Promise<boolean>;
 	}
 	traceError(
-		`Unable to select kernel as the Notebook document could not be identified`,
+		`Unable to select kernel as the Notebook document could not be identified`
 	);
 	return false;
 }

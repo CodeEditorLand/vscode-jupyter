@@ -15,7 +15,7 @@ declare module "./api" {
 		 */
 		readonly fetch?: (
 			input: RequestInfo,
-			init?: RequestInit,
+			init?: RequestInit
 		) => Promise<Response>;
 		/**
 		 * The `WebSocket` object constructor.

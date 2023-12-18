@@ -80,7 +80,7 @@ export abstract class KernelDebugAdapterBase
 		protected readonly jupyterSession: IKernelSession,
 		private readonly kernel: IKernel | undefined,
 		private readonly platformService: IPlatformService,
-		private readonly debugService: IDebugService,
+		private readonly debugService: IDebugService
 	) {
 		traceInfoIfCI(`Creating kernel debug adapter for debugging notebooks`);
 		const configuration = this.session.configuration;
@@ -92,15 +92,16 @@ export abstract class KernelDebugAdapterBase
 
 		this.jupyterSession.kernel?.iopubMessage.connect(
 			this.onIOPubMessage,
-			this,
+			this
 		);
 		this.disposables.push(
-			new Disposable(() =>
-				this.jupyterSession.kernel?.iopubMessage.disconnect(
-					this.onIOPubMessage,
-					this,
-				),
-			),
+			new Disposable(
+				() =>
+					this.jupyterSession.kernel?.iopubMessage.disconnect(
+						this.onIOPubMessage,
+						this
+					)
+			)
 		);
 
 		if (this.kernel) {
@@ -108,13 +109,13 @@ export abstract class KernelDebugAdapterBase
 				"willRestart",
 				() => this.disconnect(),
 				this,
-				this.disposables,
+				this.disposables
 			);
 			this.kernel.addHook(
 				"interruptCompleted",
 				() => this.disconnect(),
 				this,
-				this.disposables,
+				this.disposables
 			);
 			this.disposables.push(
 				this.kernel.onDisposed(() => {
@@ -124,10 +125,10 @@ export abstract class KernelDebugAdapterBase
 						sendTelemetryEvent(
 							DebuggingTelemetry.endedSession,
 							undefined,
-							{ reason: "onKernelDisposed" },
+							{ reason: "onKernelDisposed" }
 						);
 					}
-				}),
+				})
 			);
 		}
 
@@ -145,14 +146,14 @@ export abstract class KernelDebugAdapterBase
 						sendTelemetryEvent(
 							DebuggingTelemetry.endedSession,
 							undefined,
-							{ reason: "normally" },
+							{ reason: "normally" }
 						);
 						this.disconnect().catch(noop);
 					}
 				},
 				this,
-				this.disposables,
-			),
+				this.disposables
+			)
 		);
 
 		this.disposables.push(
@@ -167,15 +168,15 @@ export abstract class KernelDebugAdapterBase
 					});
 				},
 				this,
-				this.disposables,
-			),
+				this.disposables
+			)
 		);
 		this.disposables.push(
 			this.debugService.onDidTerminateDebugSession((e) => {
 				if (e === this.session) {
 					this.disconnect().catch(noop);
 				}
-			}),
+			})
 		);
 	}
 
@@ -209,15 +210,15 @@ export abstract class KernelDebugAdapterBase
 	}
 
 	protected async handleClientMessageAsync(
-		message: DebugProtocol.ProtocolMessage,
+		message: DebugProtocol.ProtocolMessage
 	): Promise<void> {
 		try {
 			traceInfoIfCI(
 				`KernelDebugAdapter::handleMessage ${JSON.stringify(
 					message,
 					undefined,
-					" ",
-				)}`,
+					" "
+				)}`
 			);
 
 			// Necessary, since dumpCell usually runs before debugging starts?
@@ -235,7 +236,7 @@ export abstract class KernelDebugAdapterBase
 						.getCells()
 						.find(
 							(c) =>
-								c.document.uri.toString() === args.source.path,
+								c.document.uri.toString() === args.source.path
 						);
 					if (cell) {
 						await this.dumpCell(cell.index);
@@ -246,7 +247,7 @@ export abstract class KernelDebugAdapterBase
 			if (message.type === "request") {
 				for (const d of this.delegates ?? []) {
 					const response = await d?.willSendRequest?.(
-						message as DebugProtocol.Request,
+						message as DebugProtocol.Request
 					);
 					if (response) {
 						this.trace("response", JSON.stringify(response));
@@ -267,7 +268,7 @@ export abstract class KernelDebugAdapterBase
 	}
 
 	public stepIn(
-		threadId: number,
+		threadId: number
 	): Thenable<DebugProtocol.StepInResponse["body"]> {
 		return this.session.customRequest("stepIn", { threadId });
 	}
@@ -299,8 +300,8 @@ export abstract class KernelDebugAdapterBase
 						this.deleteDumpedFiles().catch((ex) =>
 							traceWarning(
 								"Error deleting temporary debug files.",
-								ex,
-							),
+								ex
+							)
 						),
 						this.session.customRequest("disconnect", {
 							restart: false,
@@ -319,13 +320,13 @@ export abstract class KernelDebugAdapterBase
 	}
 
 	public stackTrace(
-		args: DebugProtocol.StackTraceArguments,
+		args: DebugProtocol.StackTraceArguments
 	): Thenable<DebugProtocol.StackTraceResponse["body"]> {
 		return this.session.customRequest("stackTrace", args);
 	}
 
 	public setBreakpoints(
-		args: DebugProtocol.SetBreakpointsArguments,
+		args: DebugProtocol.SetBreakpointsArguments
 	): Thenable<DebugProtocol.SetBreakpointsResponse["body"]> {
 		return this.session.customRequest("setBreakpoints", args);
 	}
@@ -336,7 +337,7 @@ export abstract class KernelDebugAdapterBase
 				if (cell.kind === NotebookCellKind.Code) {
 					await this.dumpCell(cell.index);
 				}
-			}),
+			})
 		);
 	}
 	protected abstract dumpCell(index: number): Promise<void>;
@@ -360,7 +361,7 @@ export abstract class KernelDebugAdapterBase
 	}
 
 	protected async sendMessageToJupyterSession(
-		message: DebugProtocol.ProtocolMessage,
+		message: DebugProtocol.ProtocolMessage
 	) {
 		if (
 			this.jupyterSession.isDisposed ||
@@ -368,7 +369,7 @@ export abstract class KernelDebugAdapterBase
 			!this.jupyterSession.kernel
 		) {
 			traceInfo(
-				`Skipping sending message ${message.type} because session is disposed`,
+				`Skipping sending message ${message.type} because session is disposed`
 			);
 			return;
 		}
@@ -382,7 +383,7 @@ export abstract class KernelDebugAdapterBase
 		} else if (message.type === "response") {
 			getMessageSourceAndHookIt(
 				message,
-				this.translateRealLocationToDebuggerLocation.bind(this),
+				this.translateRealLocationToDebuggerLocation.bind(this)
 			);
 			// responses of reverse requests
 			const response = message as DebugProtocol.Response;
@@ -392,7 +393,7 @@ export abstract class KernelDebugAdapterBase
 					type: "request",
 					command: response.command,
 				},
-				true,
+				true
 			);
 			return control.done;
 		} else {
@@ -402,11 +403,11 @@ export abstract class KernelDebugAdapterBase
 	}
 
 	protected async sendRequestToJupyterSession(
-		message: DebugProtocol.ProtocolMessage,
+		message: DebugProtocol.ProtocolMessage
 	): Promise<DebugProtocol.Response> {
 		getMessageSourceAndHookIt(
 			message,
-			this.translateRealLocationToDebuggerLocation.bind(this),
+			this.translateRealLocationToDebuggerLocation.bind(this)
 		);
 		if (!this.jupyterSession.kernel) {
 			throw new SessionDisposedError();
@@ -421,13 +422,13 @@ export abstract class KernelDebugAdapterBase
 				command: request.command,
 				arguments: request.arguments,
 			},
-			true,
+			true
 		);
 		const msg = await control.done;
 		const response = msg.content as DebugProtocol.Response;
 		getMessageSourceAndHookIt(
 			response,
-			this.translateDebuggerLocationToRealLocation.bind(this),
+			this.translateDebuggerLocationToRealLocation.bind(this)
 		);
 
 		for (const d of this.delegates ?? []) {
@@ -444,7 +445,7 @@ export abstract class KernelDebugAdapterBase
 			line?: number;
 			endLine?: number;
 		},
-		source?: DebugProtocol.Source,
+		source?: DebugProtocol.Source
 	) {
 		source = location?.source ?? source;
 		if (source && source.path) {
@@ -464,7 +465,7 @@ export abstract class KernelDebugAdapterBase
 			line?: number;
 			endLine?: number;
 		},
-		source?: DebugProtocol.Source,
+		source?: DebugProtocol.Source
 	): void;
 
 	protected abstract getDumpFilesForDeletion(): string[];

@@ -157,13 +157,13 @@ export class ReactSVGPanZoom extends React.Component<Props> {
 		selectionSVGPointX: number,
 		selectionSVGPointY: number,
 		selectionWidth: number,
-		selectionHeight: number,
+		selectionHeight: number
 	): void;
 	fitToViewer(): void;
 	setPointOnViewerCenter(
 		SVGPointX: number,
 		SVGPointY: number,
-		zoomLevel: number,
+		zoomLevel: number
 	): void;
 	reset(): void;
 	zoomOnViewerCenter(scaleFactor: number): void;
@@ -180,13 +180,13 @@ export class UncontrolledReactSVGPanZoom extends React.Component<Props> {
 		selectionSVGPointX: number,
 		selectionSVGPointY: number,
 		selectionWidth: number,
-		selectionHeight: number,
+		selectionHeight: number
 	): void;
 	fitToViewer(): void;
 	setPointOnViewerCenter(
 		SVGPointX: number,
 		SVGPointY: number,
-		zoomLevel: number,
+		zoomLevel: number
 	): void;
 	reset(): void;
 	zoomOnViewerCenter(scaleFactor: number): void;
@@ -229,14 +229,14 @@ export function pan(
 	value: Value,
 	SVGDeltaX: number,
 	SVGDeltaY: number,
-	panLimit?: number,
+	panLimit?: number
 ): Value;
 
 export function zoom(
 	value: Value,
 	SVGPointX: number,
 	SVGPointY: number,
-	scaleFactor: number,
+	scaleFactor: number
 ): Value;
 
 export function fitSelection(
@@ -244,7 +244,7 @@ export function fitSelection(
 	selectionSVGPointX: number,
 	selectionSVGPointY: number,
 	selectionWidth: number,
-	selectionHeight: number,
+	selectionHeight: number
 ): Value;
 
 export function fitToViewer(value: Value): Value;
@@ -255,7 +255,7 @@ export function setPointOnViewerCenter(
 	value: Value,
 	SVGPointX: number,
 	SVGPointY: number,
-	zoomLevel: number,
+	zoomLevel: number
 ): Value;
 
 export function reset(value: Value): Value;

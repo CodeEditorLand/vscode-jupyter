@@ -78,29 +78,35 @@ export class ImportTracker
 		return isTelemetryDisabled();
 	}
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        disposables.push(this);
-        workspace.onDidOpenNotebookDocument(
-            (t) => this.onOpenedOrClosedNotebookDocument(t, 'onOpenCloseOrSave'),
-            this.disposables
-        );
-        workspace.onDidCloseNotebookDocument(
-            (t) => this.onOpenedOrClosedNotebookDocument(t, 'onOpenCloseOrSave'),
-            this.disposables
-        );
-        workspace.onDidSaveNotebookDocument(
-            (t) => this.onOpenedOrClosedNotebookDocument(t, 'onOpenCloseOrSave'),
-            this.disposables
-        );
-        notebooks.onDidChangeNotebookCellExecutionState(
-            (e) => {
-                if (e.state == NotebookCellExecutionState.Pending && !this.isTelemetryDisabled) {
-                    this.checkNotebookCell(e.cell, 'onExecution').catch(noop);
-                }
-            },
-            this,
-            disposables
-        );
-    }
+		disposables.push(this);
+		workspace.onDidOpenNotebookDocument(
+			(t) =>
+				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
+			this.disposables
+		);
+		workspace.onDidCloseNotebookDocument(
+			(t) =>
+				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
+			this.disposables
+		);
+		workspace.onDidSaveNotebookDocument(
+			(t) =>
+				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
+			this.disposables
+		);
+		notebooks.onDidChangeNotebookCellExecutionState(
+			(e) => {
+				if (
+					e.state == NotebookCellExecutionState.Pending &&
+					!this.isTelemetryDisabled
+				) {
+					this.checkNotebookCell(e.cell, "onExecution").catch(noop);
+				}
+			},
+			this,
+			disposables
+		);
+	}
 
 	public dispose() {
 		dispose(this.disposables);
@@ -109,7 +115,7 @@ export class ImportTracker
 
 	public activate() {
 		workspace.notebookDocuments.forEach((e) =>
-			this.checkNotebookDocument(e, "onOpenCloseOrSave"),
+			this.checkNotebookDocument(e, "onOpenCloseOrSave")
 		);
 	}
 
@@ -130,14 +136,14 @@ export class ImportTracker
 
 	private onOpenedOrClosedNotebookDocument(
 		e: NotebookDocument,
-		when: "onExecution" | "onOpenCloseOrSave",
+		when: "onExecution" | "onOpenCloseOrSave"
 	) {
 		if (!isJupyterNotebook(e) || this.isTelemetryDisabled) {
 			return;
 		}
 		this.scheduleCheck(
 			e.uri,
-			this.checkNotebookDocument.bind(this, e, when),
+			this.checkNotebookDocument.bind(this, e, when)
 		);
 	}
 
@@ -162,21 +168,19 @@ export class ImportTracker
 
 	private async checkNotebookDocument(
 		e: NotebookDocument,
-		when: "onExecution" | "onOpenCloseOrSave",
+		when: "onExecution" | "onOpenCloseOrSave"
 	) {
 		if (!isJupyterNotebook(e) || this.isTelemetryDisabled) {
 			return;
 		}
 		await Promise.all(
-			e
-				.getCells()
-				.map(async (cell) => this.checkNotebookCell(cell, when)),
+			e.getCells().map(async (cell) => this.checkNotebookCell(cell, when))
 		);
 	}
 
 	private async checkNotebookCell(
 		cell: NotebookCell,
-		when: "onExecution" | "onOpenCloseOrSave",
+		when: "onExecution" | "onOpenCloseOrSave"
 	) {
 		if (
 			!isJupyterNotebook(cell.notebook) ||
@@ -193,7 +197,7 @@ export class ImportTracker
 			await this.sendTelemetryForImports(
 				this.getDocumentLines(cell.document),
 				resourceType,
-				when,
+				when
 			);
 		} catch (ex) {
 			// Can fail on CI, if the notebook has been closed or the like
@@ -221,7 +225,7 @@ export class ImportTracker
 						packageNames.push(
 							...match.groups.importImport
 								.split(",")
-								.map((rawPackageName) => rawPackageName.trim()),
+								.map((rawPackageName) => rawPackageName.trim())
 						);
 					}
 				}
@@ -236,7 +240,7 @@ export class ImportTracker
 	private async sendTelemetryForImports(
 		lines: string[],
 		resourceType: ResourceTypeTelemetryProperty["resourceType"],
-		when: "onExecution" | "onOpenCloseOrSave",
+		when: "onExecution" | "onOpenCloseOrSave"
 	) {
 		await Promise.all(
 			this.lookForImports(lines).map(async (packageName) => {
@@ -254,7 +258,7 @@ export class ImportTracker
 					resourceType,
 					when,
 				});
-			}),
+			})
 		);
 	}
 }

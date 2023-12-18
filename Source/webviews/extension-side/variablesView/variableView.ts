@@ -70,48 +70,48 @@ export class VariableView
 		private readonly variables: IJupyterVariables,
 		private readonly disposables: IDisposableRegistry,
 		private readonly notebookWatcher: INotebookWatcher,
-		private readonly experiments: IExperimentService,
+		private readonly experiments: IExperimentService
 	) {
 		const variableViewDir = joinPath(
 			context.extensionUri,
 			"dist",
 			"webviews",
 			"webview-side",
-			"viewers",
+			"viewers"
 		);
 		super(
 			configuration,
 			(c, d) => new VariableViewMessageListener(c, d),
 			provider,
 			variableViewDir,
-			[joinPath(variableViewDir, "variableView.js")],
+			[joinPath(variableViewDir, "variableView.js")]
 		);
 
 		// Sign up if the active variable view notebook is changed, restarted or updated
 		this.notebookWatcher.onDidFinishExecutingActiveNotebook(
 			this.activeNotebookExecuted,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.notebookWatcher.onDidChangeActiveNotebook(
 			this.activeNotebookChanged,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.notebookWatcher.onDidRestartActiveNotebook(
 			this.activeNotebookRestarted,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.variables.refreshRequired(
 			this.sendRefreshMessage,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		window.onDidChangeActiveTextEditor(
 			this.activeTextEditorChanged,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -126,7 +126,7 @@ export class VariableView
 			this.disposables.push(
 				this.webviewView.onDidChangeVisibility(() => {
 					this.handleVisibilityChanged();
-				}),
+				})
 			);
 		}
 		this.handleVisibilityChanged();
@@ -162,7 +162,7 @@ export class VariableView
 		_message: T,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		payload: any,
-		handler: (args: M[T]) => void,
+		handler: (args: M[T]) => void
 	) {
 		const args = payload as M[T];
 		handler.bind(this)(args);
@@ -190,12 +190,12 @@ export class VariableView
 					{
 						executionCount:
 							this.notebookWatcher.activeNotebookExecutionCount,
-					},
+					}
 				).catch(noop);
 			} else {
 				// No active view, so just trigger refresh to clear
 				this.postMessage(
-					InteractiveWindowMessages.ForceVariableRefresh,
+					InteractiveWindowMessages.ForceVariableRefresh
 				).catch(noop);
 			}
 		}
@@ -207,18 +207,18 @@ export class VariableView
 		try {
 			if (
 				this.experiments.inExperiment(
-					Experiments.DataViewerContribution,
+					Experiments.DataViewerContribution
 				)
 			) {
 				// jupyterVariableViewers
 				const variableViewers = this.getMatchingVariableViewers(
-					request.variable,
+					request.variable
 				);
 				if (variableViewers.length === 0) {
 					// No data frame viewer extensions, show notifications
 					await commands.executeCommand(
 						"workbench.extensions.search",
-						"@tag:jupyterVariableViewers",
+						"@tag:jupyterVariableViewers"
 					);
 					return;
 				} else if (variableViewers.length === 1) {
@@ -275,7 +275,7 @@ export class VariableView
 	}
 
 	private getMatchingVariableViewers(
-		variable: IJupyterVariable,
+		variable: IJupyterVariable
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	): {
 		extension: Extension<any>;
@@ -283,7 +283,7 @@ export class VariableView
 	}[] {
 		const variableViewers = this.getVariableViewers();
 		return variableViewers.filter((d) =>
-			d.jupyterVariableViewers.dataTypes.includes(variable.type),
+			d.jupyterVariableViewers.dataTypes.includes(variable.type)
 		);
 	}
 
@@ -296,7 +296,7 @@ export class VariableView
 			.filter(
 				(e) =>
 					e.packageJSON?.contributes?.jupyterVariableViewers &&
-					e.packageJSON?.contributes?.jupyterVariableViewers.length,
+					e.packageJSON?.contributes?.jupyterVariableViewers.length
 			)
 			.filter((e) => e.id !== JVSC_EXTENSION_ID)
 			.map((e) => {
@@ -306,7 +306,7 @@ export class VariableView
 						(jupyterVariableViewers: IVariableViewer) => ({
 							extension: e,
 							jupyterVariableViewers,
-						}),
+						})
 					);
 				}
 				return [];
@@ -317,17 +317,17 @@ export class VariableView
 	}
 
 	private postProcessSupportsDataExplorer(
-		response: IJupyterVariablesResponse,
+		response: IJupyterVariablesResponse
 	) {
 		const variableViewers = this.getVariableViewers();
 		response.pageResponse.forEach((variable) => {
 			if (
 				this.experiments.inExperiment(
-					Experiments.DataViewerContribution,
+					Experiments.DataViewerContribution
 				)
 			) {
 				variable.supportsDataExplorer = variableViewers.some((d) =>
-					d.jupyterVariableViewers.dataTypes.includes(variable.type),
+					d.jupyterVariableViewers.dataTypes.includes(variable.type)
 				);
 			}
 		});
@@ -339,18 +339,18 @@ export class VariableView
 	// and use the variables interface to fetch them and pass them to the variable view UI
 	@swallowExceptions()
 	private async requestVariables(
-		args: IJupyterVariablesRequest,
+		args: IJupyterVariablesRequest
 	): Promise<void> {
 		const activeNotebook = this.notebookWatcher.activeKernel;
 		if (activeNotebook) {
 			const response = await this.variables.getVariables(
 				args,
-				activeNotebook,
+				activeNotebook
 			);
 
 			this.postMessage(
 				InteractiveWindowMessages.GetVariablesResponse,
-				this.postProcessSupportsDataExplorer(response),
+				this.postProcessSupportsDataExplorer(response)
 			).catch(noop);
 			sendTelemetryEvent(Telemetry.VariableExplorerVariableCount, {
 				variableCount: response.totalCount,
@@ -367,7 +367,7 @@ export class VariableView
 
 			this.postMessage(
 				InteractiveWindowMessages.GetVariablesResponse,
-				response,
+				response
 			).catch(noop);
 		}
 	}
@@ -378,7 +378,7 @@ export class VariableView
 			InteractiveWindowMessages.UpdateVariableViewExecutionCount,
 			{
 				executionCount: args.executionCount,
-			},
+			}
 		).catch(noop);
 	}
 
@@ -389,26 +389,26 @@ export class VariableView
 				InteractiveWindowMessages.UpdateVariableViewExecutionCount,
 				{
 					executionCount: arg.executionCount,
-				},
+				}
 			).catch(noop);
 		} else {
 			this.postMessage(
 				InteractiveWindowMessages.UpdateVariableViewExecutionCount,
 				{
 					executionCount: 0,
-				},
+				}
 			).catch(noop);
 		}
 
 		this.postMessage(InteractiveWindowMessages.ForceVariableRefresh).catch(
-			noop,
+			noop
 		);
 	}
 
 	// Active text editor changed. Editor may not be associated with a notebook
 	private activeTextEditorChanged() {
 		this.postMessage(InteractiveWindowMessages.ForceVariableRefresh).catch(
-			noop,
+			noop
 		);
 	}
 
@@ -418,7 +418,7 @@ export class VariableView
 
 	private async sendRefreshMessage() {
 		this.postMessage(InteractiveWindowMessages.ForceVariableRefresh).catch(
-			noop,
+			noop
 		);
 	}
 }

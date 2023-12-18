@@ -32,8 +32,7 @@ export class CollapseButton extends React.Component<ICollapseButtonProps> {
 				className={collapseInputClassNames}
 				title={tooltip}
 				onClick={this.props.onClick}
-				aria-expanded={ariaExpanded}
-			>
+				aria-expanded={ariaExpanded}>
 				<svg version="1.1" baseProfile="full" width="8px" height="11px">
 					<polygon
 						points="0,0 0,10 5,5"

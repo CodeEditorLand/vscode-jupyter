@@ -69,7 +69,7 @@ suite("User Uri Provider", () => {
 	let asyncDisposableRegistry: IAsyncDisposableRegistry = {
 		dispose: async function () {
 			await Promise.all(
-				asyncDisposables.map((d) => d.dispose().catch(noop)),
+				asyncDisposables.map((d) => d.dispose().catch(noop))
 			);
 			asyncDisposables = [];
 		},
@@ -135,49 +135,46 @@ suite("User Uri Provider", () => {
 		disposables.push(tokenSource);
 		when(mockedVSCodeNamespaces.env.machineId).thenReturn("1");
 		when(mockedVSCodeNamespaces.env.openExternal(anything())).thenReturn(
-			Promise.resolve(true),
+			Promise.resolve(true)
 		);
 		when(serverUriStorage.all).thenReturn([]);
 		when(mockedVSCodeNamespaces.window.createInputBox()).thenReturn(
-			inputBox,
+			inputBox
 		);
 		when(jupyterConnection.validateRemoteUri(anything())).thenResolve();
 		when(globalMemento.get(UserJupyterServerUriListKey)).thenReturn([]);
 		when(
-			globalMemento.update(UserJupyterServerUriListKey, anything()),
+			globalMemento.update(UserJupyterServerUriListKey, anything())
 		).thenCall((_, v) => {
 			when(globalMemento.get(UserJupyterServerUriListKey)).thenReturn(v);
 			return Promise.resolve();
 		});
 		when(
-			globalMemento.update(
-				UserJupyterServerUriListMementoKey,
-				anything(),
-			),
+			globalMemento.update(UserJupyterServerUriListMementoKey, anything())
 		).thenCall((_, v) => {
 			when(
-				globalMemento.get(UserJupyterServerUriListMementoKey),
+				globalMemento.get(UserJupyterServerUriListMementoKey)
 			).thenReturn(v);
 			return Promise.resolve();
 		});
 		when(
 			encryptedStorage.retrieve(
 				Settings.JupyterServerRemoteLaunchService,
-				UserJupyterServerUriListKey,
-			),
+				UserJupyterServerUriListKey
+			)
 		).thenResolve();
 		when(
 			encryptedStorage.store(
 				Settings.JupyterServerRemoteLaunchService,
 				UserJupyterServerUriListKey,
-				anything(),
-			),
+				anything()
+			)
 		).thenCall((_, __, v) => {
 			when(
 				encryptedStorage.retrieve(
 					Settings.JupyterServerRemoteLaunchService,
-					UserJupyterServerUriListKey,
-				),
+					UserJupyterServerUriListKey
+				)
 			).thenReturn(v);
 			return Promise.resolve();
 		});
@@ -186,27 +183,27 @@ suite("User Uri Provider", () => {
 			encryptedStorage.store(
 				Settings.JupyterServerRemoteLaunchService,
 				"user-jupyter-server-uri-list-v2",
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve();
 		when(
 			encryptedStorage.retrieve(
 				Settings.JupyterServerRemoteLaunchService,
-				UserJupyterServerUriListKeyV2,
-			),
+				UserJupyterServerUriListKeyV2
+			)
 		).thenResolve();
 		when(
 			encryptedStorage.store(
 				Settings.JupyterServerRemoteLaunchService,
 				UserJupyterServerUriListKeyV2,
-				anything(),
-			),
+				anything()
+			)
 		).thenCall((_, __, v) => {
 			when(
 				encryptedStorage.retrieve(
 					Settings.JupyterServerRemoteLaunchService,
-					UserJupyterServerUriListKeyV2,
-				),
+					UserJupyterServerUriListKeyV2
+				)
 			).thenReturn(v);
 			return Promise.resolve();
 		});
@@ -215,7 +212,7 @@ suite("User Uri Provider", () => {
 			.resolves(false);
 		getPasswordConnectionInfoStub = sinon.stub(
 			JupyterPasswordConnect.prototype,
-			"getPasswordConnectionInfo",
+			"getPasswordConnectionInfo"
 		);
 		getPasswordConnectionInfoStub.resolves({ requiresPassword: false });
 
@@ -230,8 +227,8 @@ suite("User Uri Provider", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(instance(collection));
 		provider = new UserJupyterServerUrlProvider(
 			instance(configService),
@@ -246,7 +243,7 @@ suite("User Uri Provider", () => {
 			instance(requestCreator),
 			instance(mock<IExtensionContext>()),
 			instance(mock<IFileSystem>()),
-			instance(jupyterServerProviderRegistry),
+			instance(jupyterServerProviderRegistry)
 		);
 	});
 	teardown(async () => {
@@ -259,18 +256,18 @@ suite("User Uri Provider", () => {
 	test("Add the provided Url and verify it is in the storage", async () => {
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.resolves("Foo Bar");
 		const getUriFromUserStub = sinon.stub(
 			UserJupyterServerUriInput.prototype,
-			"getUrlFromUser",
+			"getUrlFromUser"
 		);
 		getUriFromUserStub.resolves(undefined);
 
 		const [cmd] = await provider.provideCommands(
 			"https://localhost:3333?token=ABCD",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token);
 
@@ -282,23 +279,23 @@ suite("User Uri Provider", () => {
 		assert.strictEqual(server.label, "Foo Bar");
 		assert.ok(
 			displayNameStub.called,
-			"We should have prompted the user for a display name",
+			"We should have prompted the user for a display name"
 		);
 		assert.isFalse(
 			getUriFromUserStub.called,
-			"Should not prompt for a Url, as one was provided",
+			"Should not prompt for a Url, as one was provided"
 		);
 		const authInfo = await provider.resolveJupyterServer(server, token);
 		assert.strictEqual(
 			authInfo.connectionInformation.baseUrl.toString(),
-			"https://localhost:3333/",
+			"https://localhost:3333/"
 		);
 
 		const servers = await provider.provideJupyterServers(token);
 		assert.isAtLeast(servers.length, 1);
 		assert.include(
 			servers.map((s) => s.id),
-			server.id,
+			server.id
 		);
 
 		const [serversInNewStorage, serversInNewStorage2] = await Promise.all([
@@ -311,7 +308,7 @@ suite("User Uri Provider", () => {
 	test("Prompt user for a Url and use what is in clipboard, then verify it is in the storage", async () => {
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.resolves("Foo Bar");
 		void env.clipboard.writeText("https://localhost:3333?token=ABCD");
@@ -327,14 +324,14 @@ suite("User Uri Provider", () => {
 		assert.strictEqual(server.label, "Foo Bar");
 		assert.ok(
 			displayNameStub.called,
-			"We should have prompted the user for a display name",
+			"We should have prompted the user for a display name"
 		);
 
 		const servers = await provider.provideJupyterServers(token);
 		assert.isAtLeast(servers.length, 1);
 		assert.include(
 			servers.map((s) => s.id),
-			server.id,
+			server.id
 		);
 
 		const [serversInNewStorage, serversInNewStorage2] = await Promise.all([
@@ -348,12 +345,12 @@ suite("User Uri Provider", () => {
 		void env.clipboard.writeText("https://localhost:3333");
 		const secureConnectionStub = sinon.stub(
 			SecureConnectionValidator.prototype,
-			"promptToUseInsecureConnections",
+			"promptToUseInsecureConnections"
 		);
 		secureConnectionStub.resolves(true);
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.resolves("Foo Bar");
 
@@ -371,7 +368,7 @@ suite("User Uri Provider", () => {
 		assert.isAtLeast(servers.length, 1);
 		assert.include(
 			servers.map((s) => s.id),
-			server.id,
+			server.id
 		);
 
 		const [serversInNewStorage, serversInNewStorage2] = await Promise.all([
@@ -384,23 +381,23 @@ suite("User Uri Provider", () => {
 	test("When adding a HTTP url (without pwd, and without a token) prompt user to use insecure sites (in new pwd manager)", async function () {
 		const secureConnectionStub = sinon.stub(
 			SecureConnectionValidator.prototype,
-			"promptToUseInsecureConnections",
+			"promptToUseInsecureConnections"
 		);
 		secureConnectionStub.resolves(true);
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.resolves("Foo Bar");
 		const getUriFromUserStub = sinon.stub(
 			UserJupyterServerUriInput.prototype,
-			"getUrlFromUser",
+			"getUrlFromUser"
 		);
 		getUriFromUserStub.resolves(undefined);
 
 		const [cmd] = await provider.provideCommands(
 			"http://localhost:3333",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token);
 
@@ -414,7 +411,7 @@ suite("User Uri Provider", () => {
 		assert.isAtLeast(servers.length, 1);
 		assert.include(
 			servers.map((s) => s.id),
-			server.id,
+			server.id
 		);
 
 		const [serversInNewStorage, serversInNewStorage2] = await Promise.all([
@@ -427,23 +424,23 @@ suite("User Uri Provider", () => {
 	test("When prompted to use insecure sites and ignored/cancelled, then do not add the url", async function () {
 		const secureConnectionStub = sinon.stub(
 			SecureConnectionValidator.prototype,
-			"promptToUseInsecureConnections",
+			"promptToUseInsecureConnections"
 		);
 		secureConnectionStub.resolves(false);
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.resolves("Foo Bar");
 		const getUriFromUserStub = sinon.stub(
 			UserJupyterServerUriInput.prototype,
-			"getUrlFromUser",
+			"getUrlFromUser"
 		);
 		getUriFromUserStub.resolves(undefined);
 
 		const [cmd] = await provider.provideCommands(
 			"http://localhost:3333",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token).catch((ex) => {
 			if (ex instanceof CancellationError) {
@@ -472,18 +469,18 @@ suite("User Uri Provider", () => {
 			.resolves({ requiresPassword: true });
 		const secureConnectionStub = sinon.stub(
 			SecureConnectionValidator.prototype,
-			"promptToUseInsecureConnections",
+			"promptToUseInsecureConnections"
 		);
 		secureConnectionStub.resolves(false);
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.resolves("Foo Bar");
 
 		const [cmd] = await provider.provideCommands(
 			"http://localhost:3333",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token);
 
@@ -495,7 +492,7 @@ suite("User Uri Provider", () => {
 		assert.isAtLeast(servers.length, 1);
 		assert.include(
 			servers.map((s) => s.id),
-			server.id,
+			server.id
 		);
 
 		const [serversInNewStorage, serversInNewStorage2] = await Promise.all([
@@ -510,7 +507,7 @@ suite("User Uri Provider", () => {
 		getPasswordConnectionInfoStub.reset();
 		const urlInputStub = sinon.stub(
 			UserJupyterServerUriInput.prototype,
-			"getUrlFromUser",
+			"getUrlFromUser"
 		);
 		urlInputStub.resolves();
 		sinon
@@ -518,18 +515,18 @@ suite("User Uri Provider", () => {
 			.resolves({ requiresPassword: false });
 		const secureConnectionStub = sinon.stub(
 			SecureConnectionValidator.prototype,
-			"promptToUseInsecureConnections",
+			"promptToUseInsecureConnections"
 		);
 		secureConnectionStub.resolves(false);
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.rejects(InputFlowAction.back);
 
 		const [cmd] = await provider.provideCommands(
 			"https://localhost:3333",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token);
 
@@ -542,7 +539,7 @@ suite("User Uri Provider", () => {
 		getPasswordConnectionInfoStub.reset();
 		const urlInputStub = sinon.stub(
 			UserJupyterServerUriInput.prototype,
-			"getUrlFromUser",
+			"getUrlFromUser"
 		);
 		urlInputStub.resolves();
 		sinon
@@ -550,18 +547,18 @@ suite("User Uri Provider", () => {
 			.resolves({ requiresPassword: false });
 		const secureConnectionStub = sinon.stub(
 			SecureConnectionValidator.prototype,
-			"promptToUseInsecureConnections",
+			"promptToUseInsecureConnections"
 		);
 		secureConnectionStub.resolves(false);
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.rejects(InputFlowAction.cancel);
 
 		const [cmd] = await provider.provideCommands(
 			"https://localhost:3333",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token).catch((ex) => {
 			if (ex instanceof CancellationError) {
@@ -579,7 +576,7 @@ suite("User Uri Provider", () => {
 		getPasswordConnectionInfoStub.reset();
 		const urlInputStub = sinon.stub(
 			UserJupyterServerUriInput.prototype,
-			"getUrlFromUser",
+			"getUrlFromUser"
 		);
 		let getUrlFromUserCallCount = 0;
 		urlInputStub.callsFake(async (_initialValue, errorMessage, _) => {
@@ -588,7 +585,7 @@ suite("User Uri Provider", () => {
 					// Originally we should be called with an error message.
 					assert.isOk(
 						errorMessage,
-						"Error Message should not be empty",
+						"Error Message should not be empty"
 					);
 					return {
 						jupyterServerUri: {
@@ -604,7 +601,7 @@ suite("User Uri Provider", () => {
 					// We should have come here from the back button of the display name.
 					assert.isEmpty(
 						errorMessage,
-						"Error Message should be empty",
+						"Error Message should be empty"
 					);
 					// Lets get out of here.
 					throw InputFlowAction.back;
@@ -618,11 +615,11 @@ suite("User Uri Provider", () => {
 			.resolves({ requiresPassword: false });
 		const displayNameStub = sinon.stub(
 			UserJupyterServerDisplayName.prototype,
-			"getDisplayName",
+			"getDisplayName"
 		);
 		displayNameStub.rejects(InputFlowAction.back);
 		when(
-			jupyterConnection.validateRemoteUri(anything(), anything(), true),
+			jupyterConnection.validateRemoteUri(anything(), anything(), true)
 		).thenCall((_, uri: IJupyterServerUri) => {
 			if (!uri) {
 				return;
@@ -642,7 +639,7 @@ suite("User Uri Provider", () => {
 
 		const [cmd] = await provider.provideCommands(
 			"https://localhost:3333",
-			token,
+			token
 		);
 		const server = await provider.handleCommand(cmd, token);
 

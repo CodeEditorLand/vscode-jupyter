@@ -26,12 +26,14 @@ type KernelIdListEntry = {
 @injectable()
 export class PreferredRemoteKernelIdProvider {
 	constructor(
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento,
-        @inject(ICryptoUtils) private crypto: ICryptoUtils
-    ) {}
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly globalMemento: Memento,
+		@inject(ICryptoUtils) private crypto: ICryptoUtils
+	) {}
 
 	public async getPreferredRemoteKernelId(
-		uri: Uri,
+		uri: Uri
 	): Promise<string | undefined> {
 		// Stored as a list so we don't take up too much space
 		const list: KernelIdListEntry[] = this.globalMemento.get<
@@ -42,9 +44,9 @@ export class PreferredRemoteKernelIdProvider {
 			const fileHash = await this.crypto.createHash(uri.toString());
 			const entry = list.find((l) => l.fileHash === fileHash);
 			traceVerbose(
-				`Preferred Remote kernel for ${getDisplayPath(uri)} is ${
-					entry?.kernelId
-				}`,
+				`Preferred Remote kernel for ${getDisplayPath(
+					uri
+				)} is ${entry?.kernelId}`
 			);
 			return entry?.kernelId;
 		}
@@ -55,13 +57,13 @@ export class PreferredRemoteKernelIdProvider {
 	}
 	public async storePreferredRemoteKernelId(
 		uri: Uri,
-		id: string,
+		id: string
 	): Promise<void> {
 		await this.updatePreferredRemoteKernelIdInternal(uri, id);
 	}
 	private async updatePreferredRemoteKernelIdInternal(
 		uri: Uri,
-		id?: string,
+		id?: string
 	): Promise<void> {
 		let requiresUpdate = false;
 
@@ -70,9 +72,9 @@ export class PreferredRemoteKernelIdProvider {
 			JSON.stringify(
 				this.globalMemento.get<KernelIdListEntry[]>(
 					ActiveKernelIdList,
-					[],
-				),
-			),
+					[]
+				)
+			)
 		);
 		const fileHash = await this.crypto.createHash(uri.toString());
 		const index = list.findIndex((l) => l.fileHash === fileHash);
@@ -88,8 +90,8 @@ export class PreferredRemoteKernelIdProvider {
 			list.push({ fileHash, kernelId: id });
 			traceVerbose(
 				`Storing Preferred remote kernel for ${getDisplayPath(
-					uri,
-				)} is ${id}`,
+					uri
+				)} is ${id}`
 			);
 		}
 

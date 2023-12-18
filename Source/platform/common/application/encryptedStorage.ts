@@ -14,14 +14,17 @@ import { IEncryptedStorage } from "./types";
  */
 @injectable()
 export class EncryptedStorage implements IEncryptedStorage {
-	constructor(@inject(IExtensionContext) private readonly extensionContext: IExtensionContext) {}
+	constructor(
+		@inject(IExtensionContext)
+		private readonly extensionContext: IExtensionContext
+	) {}
 
 	private readonly testingState = new Map<string, string>();
 
 	public async store(
 		service: string,
 		key: string,
-		value: string | undefined,
+		value: string | undefined
 	): Promise<void> {
 		// On CI we don't need to use keytar for testing (else it hangs).
 		if (
@@ -41,13 +44,13 @@ export class EncryptedStorage implements IEncryptedStorage {
 		} else {
 			await this.extensionContext.secrets.store(
 				`${service}.${key}`,
-				value,
+				value
 			);
 		}
 	}
 	public async retrieve(
 		service: string,
-		key: string,
+		key: string
 	): Promise<string | undefined> {
 		// On CI we don't need to use keytar for testing (else it hangs).
 		if (
@@ -59,7 +62,7 @@ export class EncryptedStorage implements IEncryptedStorage {
 		try {
 			// eslint-disable-next-line
 			const val = await this.extensionContext.secrets.get(
-				`${service}.${key}`,
+				`${service}.${key}`
 			);
 			return val;
 		} catch (e) {

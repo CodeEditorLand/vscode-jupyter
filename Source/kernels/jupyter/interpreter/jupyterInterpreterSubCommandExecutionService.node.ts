@@ -53,15 +53,21 @@ export class JupyterInterpreterSubCommandExecutionService
 		IJupyterInterpreterDependencyManager
 {
 	constructor(
-        @inject(JupyterInterpreterService) private readonly jupyterInterpreter: JupyterInterpreterService,
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
-        @inject(JupyterInterpreterDependencyService)
-        private readonly jupyterDependencyService: JupyterInterpreterDependencyService,
-        @inject(IPythonExecutionFactory) private readonly pythonExecutionFactory: IPythonExecutionFactory,
-        @inject(IOutputChannel) @named(JUPYTER_OUTPUT_CHANNEL) private readonly jupyterOutputChannel: IOutputChannel,
-        @inject(JupyterPaths) private readonly jupyterPaths: JupyterPaths,
-        @inject(IEnvironmentActivationService) private readonly activationHelper: IEnvironmentActivationService
-    ) {}
+		@inject(JupyterInterpreterService)
+		private readonly jupyterInterpreter: JupyterInterpreterService,
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService,
+		@inject(JupyterInterpreterDependencyService)
+		private readonly jupyterDependencyService: JupyterInterpreterDependencyService,
+		@inject(IPythonExecutionFactory)
+		private readonly pythonExecutionFactory: IPythonExecutionFactory,
+		@inject(IOutputChannel)
+		@named(JUPYTER_OUTPUT_CHANNEL)
+		private readonly jupyterOutputChannel: IOutputChannel,
+		@inject(JupyterPaths) private readonly jupyterPaths: JupyterPaths,
+		@inject(IEnvironmentActivationService)
+		private readonly activationHelper: IEnvironmentActivationService
+	) {}
 
 	/**
 	 * This is a noop, implemented for backwards compatibility.
@@ -73,7 +79,7 @@ export class JupyterInterpreterSubCommandExecutionService
 		noop();
 	}
 	public async isNotebookSupported(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<boolean> {
 		const interpreter =
 			await this.jupyterInterpreter.getSelectedInterpreter(token);
@@ -82,11 +88,11 @@ export class JupyterInterpreterSubCommandExecutionService
 		}
 		return this.jupyterDependencyService.areDependenciesInstalled(
 			interpreter,
-			token,
+			token
 		);
 	}
 	public async getReasonForJupyterNotebookNotBeingSupported(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<string> {
 		let interpreter =
 			await this.jupyterInterpreter.getSelectedInterpreter(token);
@@ -103,7 +109,7 @@ export class JupyterInterpreterSubCommandExecutionService
 		const productsNotInstalled =
 			await this.jupyterDependencyService.getDependenciesNotInstalled(
 				interpreter,
-				token,
+				token
 			);
 		if (productsNotInstalled.length === 0) {
 			return "";
@@ -114,33 +120,33 @@ export class JupyterInterpreterSubCommandExecutionService
 			productsNotInstalled[0] === Product.kernelspec
 		) {
 			return DataScience.jupyterKernelSpecModuleNotFound(
-				interpreter.uri.fsPath,
+				interpreter.uri.fsPath
 			);
 		}
 
 		return getMessageForLibrariesNotInstalled(
 			productsNotInstalled,
-			interpreter,
+			interpreter
 		);
 	}
 	public async getSelectedInterpreter(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment | undefined> {
 		return this.jupyterInterpreter.getSelectedInterpreter(token);
 	}
 	public async startNotebook(
 		notebookArgs: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ObservableExecutionResult<string>> {
 		const interpreter =
 			await this.getSelectedInterpreterAndThrowIfNotAvailable(
-				options.token,
+				options.token
 			);
 		this.jupyterOutputChannel.appendLine(
 			DataScience.startingJupyterLogMessage(
 				getDisplayPath(interpreter.uri),
-				notebookArgs.join(" "),
-			),
+				notebookArgs.join(" ")
+			)
 		);
 		const executionService =
 			await this.pythonExecutionFactory.createActivatedEnvironment({
@@ -153,7 +159,7 @@ export class JupyterInterpreterSubCommandExecutionService
 		const envVars =
 			(await this.activationHelper.getActivatedEnvironmentVariables(
 				undefined,
-				interpreter,
+				interpreter
 			)) || process.env;
 		const jupyterDataPaths = (
 			process.env["JUPYTER_PATH"] ||
@@ -164,8 +170,8 @@ export class JupyterInterpreterSubCommandExecutionService
 			.filter((item) => item.trim().length);
 		jupyterDataPaths.push(
 			uriPath.dirname(
-				await this.jupyterPaths.getKernelSpecTempRegistrationFolder(),
-			).fsPath,
+				await this.jupyterPaths.getKernelSpecTempRegistrationFolder()
+			).fsPath
 		);
 		spawnOptions.env = {
 			...envVars,
@@ -173,26 +179,25 @@ export class JupyterInterpreterSubCommandExecutionService
 		};
 		traceVerbose(
 			`Start Jupyter Notebook with JUPYTER_PATH=${jupyterDataPaths.join(
-				path.delimiter,
-			)}`,
+				path.delimiter
+			)}`
 		);
 		traceVerbose(
 			`Start Jupyter Notebook with PYTHONPATH=${
 				envVars["PYTHONPATH"] || ""
-			}`,
+			}`
 		);
 		const pathVariables = Object.keys(envVars).filter(
-			(key) => key.toLowerCase() === "path",
+			(key) => key.toLowerCase() === "path"
 		);
 		if (pathVariables.length) {
 			const pathValues = pathVariables
 				.map(
-					(pathVariable) =>
-						`${pathVariable}=${envVars[pathVariable]}`,
+					(pathVariable) => `${pathVariable}=${envVars[pathVariable]}`
 				)
 				.join(",");
 			traceVerbose(
-				`Start Jupyter Notebook with PATH variable. ${pathValues}`,
+				`Start Jupyter Notebook with PATH variable. ${pathValues}`
 			);
 		} else {
 			traceError(`Start Jupyter Notebook without a PATH variable`);
@@ -200,12 +205,12 @@ export class JupyterInterpreterSubCommandExecutionService
 		return executionService.execModuleObservable(
 			"jupyter",
 			["notebook"].concat(notebookArgs),
-			spawnOptions,
+			spawnOptions
 		);
 	}
 
 	public async getRunningJupyterServers(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<JupyterServerInfo[] | undefined> {
 		const interpreter =
 			await this.getSelectedInterpreterAndThrowIfNotAvailable(token);
@@ -220,7 +225,7 @@ export class JupyterInterpreterSubCommandExecutionService
 			EXTENSION_ROOT_DIR,
 			"pythonFiles",
 			"vscode_datascience_helpers",
-			"getServerInfo.py",
+			"getServerInfo.py"
 		);
 		const serverInfoString = await daemon.exec([file], newOptions);
 
@@ -228,12 +233,12 @@ export class JupyterInterpreterSubCommandExecutionService
 		try {
 			// Parse out our results, return undefined if we can't suss it out
 			serverInfos = JSON.parse(
-				serverInfoString.stdout.trim(),
+				serverInfoString.stdout.trim()
 			) as JupyterServerInfo[];
 		} catch (err) {
 			traceWarning(
 				"Failed to parse JSON when getting server info out from getServerInfo.py",
-				err,
+				err
 			);
 			return;
 		}
@@ -241,13 +246,13 @@ export class JupyterInterpreterSubCommandExecutionService
 	}
 
 	public async installMissingDependencies(
-		err?: JupyterInstallError,
+		err?: JupyterInstallError
 	): Promise<JupyterInterpreterDependencyResponse> {
 		return this.jupyterInterpreter.installMissingDependencies(err);
 	}
 
 	private async getSelectedInterpreterAndThrowIfNotAvailable(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment> {
 		const interpreter =
 			await this.jupyterInterpreter.getSelectedInterpreter(token);

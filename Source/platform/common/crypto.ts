@@ -8,7 +8,7 @@ import type { ICryptoUtils } from "./types";
 export class CryptoUtils implements ICryptoUtils {
 	public async createHash(
 		data: string,
-		algorithm: "SHA-512" | "SHA-256" = "SHA-256",
+		algorithm: "SHA-512" | "SHA-256" = "SHA-256"
 	): Promise<string> {
 		return computeHash(data, algorithm);
 	}
@@ -43,7 +43,7 @@ else {
  */
 export async function computeHash(
 	data: string,
-	algorithm: "SHA-512" | "SHA-256" | "SHA-1",
+	algorithm: "SHA-512" | "SHA-256" | "SHA-1"
 ): Promise<string> {
 	// Save some CPU as this is called in a number of places.
 	// This will not get too large, will only grow by number of files per workspace, even if user has
@@ -75,12 +75,12 @@ export async function computeHash(
 
 async function computeHashInternal(
 	data: string,
-	algorithm: "SHA-512" | "SHA-256" | "SHA-1",
+	algorithm: "SHA-512" | "SHA-256" | "SHA-1"
 ): Promise<string> {
 	const inputBuffer = new TextEncoder().encode(data);
 	const hashBuffer = await cryptoProvider.subtle.digest(
 		{ name: algorithm },
-		inputBuffer,
+		inputBuffer
 	);
 
 	// Turn into hash string (got this logic from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest)

@@ -117,7 +117,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 	constructor(
 		workspaceFolder: Resource,
 		private _systemVariablesCtor: ISystemVariablesConstructor, // Note: All properties not set with '_' are destroyed on update.
-		private _type: "node" | "web",
+		private _type: "node" | "web"
 	) {
 		this._workspaceRoot = workspaceFolder;
 		this.initialize();
@@ -130,7 +130,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 	public static getInstance(
 		resource: Uri | undefined,
 		systemVariablesCtor: ISystemVariablesConstructor,
-		type: "node" | "web",
+		type: "node" | "web"
 	): JupyterSettings {
 		const workspaceFolderUri =
 			JupyterSettings.getSettingsUriAndTarget(resource).uri;
@@ -143,7 +143,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 			settings = new JupyterSettings(
 				workspaceFolderUri,
 				systemVariablesCtor,
-				type,
+				type
 			);
 			JupyterSettings.jupyterSettings.set(workspaceFolderKey, settings);
 		} else if (settings._type === "web" && type === "node") {
@@ -185,13 +185,13 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 			throw new Error("Dispose can only be called from unit tests");
 		}
 		JupyterSettings.jupyterSettings.forEach(
-			(item) => item && item.dispose(),
+			(item) => item && item.dispose()
 		);
 		JupyterSettings.jupyterSettings.clear();
 	}
 	public dispose() {
 		this._disposables.forEach(
-			(disposable) => disposable && disposable.dispose(),
+			(disposable) => disposable && disposable.dispose()
 		);
 		this._disposables = [];
 	}
@@ -213,22 +213,22 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 
 	private update(
 		jupyterConfig: WorkspaceConfiguration,
-		pythonConfig: WorkspaceConfiguration | undefined,
+		pythonConfig: WorkspaceConfiguration | undefined
 	) {
 		const systemVariables = this.createSystemVariables(undefined);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const loggingSettings = systemVariables.resolveAny(
-			jupyterConfig.get<any>("logging"),
+			jupyterConfig.get<any>("logging")
 		)!;
 		if (loggingSettings) {
 			loggingSettings.level = convertSettingTypeToLogLevel(
-				loggingSettings.level,
+				loggingSettings.level
 			);
 			if (this.logging) {
 				Object.assign<ILoggingSettings, ILoggingSettings>(
 					this.logging,
-					loggingSettings,
+					loggingSettings
 				);
 			} else {
 				this.logging = loggingSettings;
@@ -236,12 +236,12 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		}
 
 		const experiments = systemVariables.resolveAny(
-			jupyterConfig.get<IExperiments>("experiments"),
+			jupyterConfig.get<IExperiments>("experiments")
 		)!;
 		if (this.experiments) {
 			Object.assign<IExperiments, IExperiments>(
 				this.experiments,
-				experiments,
+				experiments
 			);
 		} else {
 			this.experiments = experiments;
@@ -252,7 +252,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 					enabled: true,
 					optInto: [],
 					optOutFrom: [],
-			  };
+				};
 
 		// The rest are all the same.
 		const replacer = (k: string, config: WorkspaceConfiguration) => {
@@ -272,7 +272,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 			(f) =>
 				f !== "experiments" &&
 				f !== "logging" &&
-				f !== "kernelPickerType",
+				f !== "kernelPickerType"
 		);
 		keys.forEach((k) => replacer(k, jupyterConfig));
 
@@ -285,13 +285,13 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 	private onWorkspaceFoldersChanged() {
 		//If an activated workspace folder was removed, delete its key
 		const workspaceKeys = (workspace.workspaceFolders || []).map(
-			(workspaceFolder) => workspaceFolder.uri.path,
+			(workspaceFolder) => workspaceFolder.uri.path
 		);
 		const activatedWkspcKeys = Array.from(
-			JupyterSettings.jupyterSettings.keys(),
+			JupyterSettings.jupyterSettings.keys()
 		);
 		const activatedWkspcFoldersRemoved = activatedWkspcKeys.filter(
-			(item) => workspaceKeys.indexOf(item) < 0,
+			(item) => workspaceKeys.indexOf(item) < 0
 		);
 		if (activatedWkspcFoldersRemoved.length > 0) {
 			for (const folder of activatedWkspcFoldersRemoved) {
@@ -304,11 +304,11 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		const onDidChange = () => {
 			const currentConfig = workspace.getConfiguration(
 				"jupyter",
-				this._workspaceRoot,
+				this._workspaceRoot
 			);
 			const pythonConfig = workspace.getConfiguration(
 				"python",
-				this._workspaceRoot,
+				this._workspaceRoot
 			);
 			this.update(currentConfig, pythonConfig);
 
@@ -319,8 +319,8 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		this._disposables.push(
 			workspace.onDidChangeWorkspaceFolders(
 				this.onWorkspaceFoldersChanged,
-				this,
-			),
+				this
+			)
 		);
 		this._disposables.push(
 			workspace.onDidChangeConfiguration(
@@ -331,17 +331,17 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 					if (event.affectsConfiguration("python.poetryPath")) {
 						onDidChange();
 					}
-				},
-			),
+				}
+			)
 		);
 
 		const initialConfig = workspace.getConfiguration(
 			"jupyter",
-			this._workspaceRoot,
+			this._workspaceRoot
 		);
 		const pythonConfig = workspace.getConfiguration(
 			"python",
-			this._workspaceRoot,
+			this._workspaceRoot
 		);
 		if (initialConfig) {
 			this.update(initialConfig, pythonConfig);
@@ -366,13 +366,13 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 	private getSerializableKeys() {
 		// Get the keys that are allowed.
 		return Object.getOwnPropertyNames(this).filter(
-			(f) => !f.startsWith("_"),
+			(f) => !f.startsWith("_")
 		);
 	}
 }
 
 function convertSettingTypeToLogLevel(
-	setting: LoggingLevelSettingType | undefined,
+	setting: LoggingLevelSettingType | undefined
 ): LogLevel | "off" {
 	switch (setting) {
 		case "info": {

@@ -77,7 +77,7 @@ export class ProtocolParser implements IProtocolParser {
 				if (typeof request.command === "string") {
 					this.events.emit(
 						`${message.type}_${request.command}`,
-						request,
+						request
 					);
 				}
 				break;
@@ -87,7 +87,7 @@ export class ProtocolParser implements IProtocolParser {
 				if (typeof reponse.command === "string") {
 					this.events.emit(
 						`${message.type}_${reponse.command}`,
-						reponse,
+						reponse
 					);
 				}
 				break;
@@ -111,7 +111,7 @@ export class ProtocolParser implements IProtocolParser {
 					const message = this.rawData.toString(
 						"utf8",
 						0,
-						this.contentLength,
+						this.contentLength
 					);
 					this.rawData = this.rawData.slice(this.contentLength);
 					this.contentLength = -1;
@@ -133,7 +133,7 @@ export class ProtocolParser implements IProtocolParser {
 						}
 					}
 					this.rawData = this.rawData.slice(
-						idx + PROTOCOL_START_INDENTIFIER.length,
+						idx + PROTOCOL_START_INDENTIFIER.length
 					);
 					continue;
 				}

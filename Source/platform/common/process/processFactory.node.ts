@@ -17,16 +17,16 @@ import { trackDisposable } from "../utils/lifecycle";
 @injectable()
 export class ProcessServiceFactory implements IProcessServiceFactory {
 	constructor(
-        @inject(ICustomEnvironmentVariablesProvider)
-        private readonly envVarsService: ICustomEnvironmentVariablesProvider
-    ) {}
+		@inject(ICustomEnvironmentVariablesProvider)
+		private readonly envVarsService: ICustomEnvironmentVariablesProvider
+	) {}
 	@traceDecoratorVerbose(
 		"Create ProcessService",
-		TraceOptions.BeforeCall | TraceOptions.Arguments,
+		TraceOptions.BeforeCall | TraceOptions.Arguments
 	)
 	public async create(
 		resource: Resource,
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<IProcessService> {
 		// This should never happen, but if it does ensure we never run code accidentally in untrusted workspaces.
 		if (!workspace.isTrusted) {
@@ -35,7 +35,7 @@ export class ProcessServiceFactory implements IProcessServiceFactory {
 		const customEnvVars = await this.envVarsService.getEnvironmentVariables(
 			resource,
 			"RunNonPythonCode",
-			cancelToken,
+			cancelToken
 		);
 		return trackDisposable(new ProcessService(customEnvVars));
 	}

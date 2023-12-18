@@ -20,39 +20,39 @@ import {
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	isDevMode: boolean,
+	isDevMode: boolean
 ) {
 	serviceManager.addSingleton<IControllerRegistration>(
 		IControllerRegistration,
-		ControllerRegistration,
+		ControllerRegistration
 	);
 	serviceManager.addBinding(
 		IControllerRegistration,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IConnectionDisplayDataProvider>(
 		IConnectionDisplayDataProvider,
-		ConnectionDisplayDataProvider,
+		ConnectionDisplayDataProvider
 	);
 	serviceManager.addSingleton<IRemoteNotebookKernelSourceSelector>(
 		IRemoteNotebookKernelSourceSelector,
-		RemoteNotebookKernelSourceSelector,
+		RemoteNotebookKernelSourceSelector
 	);
 	serviceManager.addSingleton<ILocalNotebookKernelSourceSelector>(
 		ILocalNotebookKernelSourceSelector,
-		LocalNotebookKernelSourceSelector,
+		LocalNotebookKernelSourceSelector
 	);
 	serviceManager.addSingleton<ILocalPythonNotebookKernelSourceSelector>(
 		ILocalPythonNotebookKernelSourceSelector,
-		LocalPythonEnvNotebookKernelSourceSelector,
+		LocalPythonEnvNotebookKernelSourceSelector
 	);
 	serviceManager.addBinding(
 		ILocalPythonNotebookKernelSourceSelector,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelSourceCommandHandler,
+		KernelSourceCommandHandler
 	);
 	registerWidgetTypes(serviceManager, isDevMode);
 }

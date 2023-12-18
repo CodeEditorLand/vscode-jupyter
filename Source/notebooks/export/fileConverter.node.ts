@@ -15,17 +15,17 @@ import { noop } from "../../platform/common/utils/misc";
 @injectable()
 export class FileConverter extends FileConverterBase implements IFileConverter {
 	constructor(
-        @inject(IExportUtil) override readonly exportUtil: IExportUtil,
-        @inject(IFileSystemNode) readonly fs: IFileSystemNode,
-        @inject(ProgressReporter) progressReporter: ProgressReporter,
-        @inject(IConfigurationService) configuration: IConfigurationService
-    ) {
-        super(exportUtil, progressReporter, configuration);
-    }
+		@inject(IExportUtil) override readonly exportUtil: IExportUtil,
+		@inject(IFileSystemNode) readonly fs: IFileSystemNode,
+		@inject(ProgressReporter) progressReporter: ProgressReporter,
+		@inject(IConfigurationService) configuration: IConfigurationService
+	) {
+		super(exportUtil, progressReporter, configuration);
+	}
 
 	protected override async openExportedFile(
 		format: ExportFormat,
-		target: Uri,
+		target: Uri
 	) {
 		await new ExportFileOpener().openFile(format, target).catch(noop);
 	}

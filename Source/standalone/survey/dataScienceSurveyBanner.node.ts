@@ -110,26 +110,33 @@ export class DataScienceSurveyBanner
 	private readonly NotebookExecutionThreshold = 250; // Cell executions before showing survey
 
 	constructor(
-        @inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory,
-        @inject(IDisposableRegistry) private disposables: IDisposableRegistry
-    ) {
-        this.setPersistentState(BannerType.InsidersNotebookSurvey, InsidersNotebookSurveyStateKeys.ShowBanner);
-        this.setPersistentState(BannerType.ExperimentNotebookSurvey, ExperimentNotebookSurveyStateKeys.ShowBanner);
+		@inject(IPersistentStateFactory)
+		private persistentState: IPersistentStateFactory,
+		@inject(IDisposableRegistry) private disposables: IDisposableRegistry
+	) {
+		this.setPersistentState(
+			BannerType.InsidersNotebookSurvey,
+			InsidersNotebookSurveyStateKeys.ShowBanner
+		);
+		this.setPersistentState(
+			BannerType.ExperimentNotebookSurvey,
+			ExperimentNotebookSurveyStateKeys.ShowBanner
+		);
 
-        // Change the surveyDelay flag after 10 minutes
-        setTimeout(
-            () => {
-                DataScienceSurveyBanner.surveyDelay = true;
-            },
-            10 * 60 * 1000
-        );
-    }
+		// Change the surveyDelay flag after 10 minutes
+		setTimeout(
+			() => {
+				DataScienceSurveyBanner.surveyDelay = true;
+			},
+			10 * 60 * 1000
+		);
+	}
 
 	public activate() {
 		notebooks.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -143,7 +150,7 @@ export class DataScienceSurveyBanner
 
 		const response = await window.showInformationMessage(
 			this.getBannerMessage(type),
-			...this.bannerLabels,
+			...this.bannerLabels
 		);
 		switch (response) {
 			case this.bannerLabels[DSSurveyLabelIndex.Yes]: {
@@ -181,8 +188,8 @@ export class DataScienceSurveyBanner
 				val,
 				{
 					data: true,
-				},
-			),
+				}
+			)
 		);
 	}
 
@@ -205,11 +212,11 @@ export class DataScienceSurveyBanner
 		switch (type) {
 			case BannerType.InsidersNotebookSurvey:
 				return this.getPersistentState(
-					InsidersNotebookSurveyStateKeys.ExecutionCount,
+					InsidersNotebookSurveyStateKeys.ExecutionCount
 				);
 			case BannerType.ExperimentNotebookSurvey:
 				return this.getPersistentState(
-					ExperimentNotebookSurveyStateKeys.ExecutionCount,
+					ExperimentNotebookSurveyStateKeys.ExecutionCount
 				);
 			default:
 				traceError("Invalid Banner type");
@@ -220,14 +227,14 @@ export class DataScienceSurveyBanner
 	private getPersistentState(val: string): number {
 		const state = this.persistentState.createGlobalPersistentState<number>(
 			val,
-			0,
+			0
 		);
 		return state.value;
 	}
 
 	// Handle when a cell finishes execution
 	private async onDidChangeNotebookCellExecutionState(
-		cellStateChange: NotebookCellExecutionStateChangeEvent,
+		cellStateChange: NotebookCellExecutionStateChangeEvent
 	): Promise<void> {
 		if (!isJupyterNotebook(cellStateChange.cell.notebook)) {
 			return;
@@ -237,11 +244,11 @@ export class DataScienceSurveyBanner
 		if (cellStateChange.state === NotebookCellExecutionState.Executing) {
 			this.updateStateAndShowBanner(
 				InsidersNotebookSurveyStateKeys.ExecutionCount,
-				BannerType.InsidersNotebookSurvey,
+				BannerType.InsidersNotebookSurvey
 			).catch(noop);
 			this.updateStateAndShowBanner(
 				ExperimentNotebookSurveyStateKeys.ExecutionCount,
-				BannerType.ExperimentNotebookSurvey,
+				BannerType.ExperimentNotebookSurvey
 			).catch(noop);
 		}
 	}
@@ -249,7 +256,7 @@ export class DataScienceSurveyBanner
 	private async updateStateAndShowBanner(val: string, banner: BannerType) {
 		const state = this.persistentState.createGlobalPersistentState<number>(
 			val,
-			0,
+			0
 		);
 		await state.updateValue(state.value + 1);
 		this.showBanner(banner).catch(noop);

@@ -39,7 +39,7 @@ suite("Custom Environment Variables Provider", () => {
 		"src",
 		"test",
 		"datascience",
-		".env",
+		".env"
 	);
 	let contentsOfOldEnvFile: string;
 	let customPythonEnvFile = Uri.joinPath(
@@ -47,7 +47,7 @@ suite("Custom Environment Variables Provider", () => {
 		"src",
 		"test",
 		"datascience",
-		".env.python",
+		".env.python"
 	);
 	let onFSEvent: EventEmitter<Uri>;
 	let fsWatcher: FileSystemWatcher;
@@ -55,7 +55,7 @@ suite("Custom Environment Variables Provider", () => {
 		Uri.file(EXTENSION_ROOT_DIR_FOR_TESTS),
 		"src",
 		"test",
-		"datascience",
+		"datascience"
 	);
 	const workspaceFolder = { index: 0, name: "workspace", uri: workspaceUri };
 	setup(async function () {
@@ -80,17 +80,17 @@ suite("Custom Environment Variables Provider", () => {
 			workspaceFolder,
 		]);
 		when(
-			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything()),
+			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything())
 		).thenCall(() => workspaceFolder);
 		when(
 			mockedVSCodeNamespaces.workspace.getConfiguration(
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(() => {
 			const workspaceConfig = mock<WorkspaceConfiguration>();
 			when(workspaceConfig.get<string>("envFile")).thenReturn(
-				"${workspaceFolder}/.env.python",
+				"${workspaceFolder}/.env.python"
 			);
 			return instance(workspaceConfig);
 		});
@@ -100,8 +100,8 @@ suite("Custom Environment Variables Provider", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(instance(fsWatcher));
 	});
 	teardown(async function () {
@@ -121,7 +121,7 @@ suite("Custom Environment Variables Provider", () => {
 			disposables,
 			pythonExtChecker,
 			instance(pythonApiProvider),
-			cacheDuration,
+			cacheDuration
 		);
 	}
 	test("Loads .env file", async () => {
@@ -135,7 +135,7 @@ suite("Custom Environment Variables Provider", () => {
 		createProvider();
 		const vars = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 
 		assert.deepEqual(vars, {
@@ -147,7 +147,7 @@ suite("Custom Environment Variables Provider", () => {
 		const originalCalLCount = fsSpy.callCount;
 		const vars2 = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 
 		assert.strictEqual(fsSpy.callCount, originalCalLCount);
@@ -166,7 +166,7 @@ suite("Custom Environment Variables Provider", () => {
 		createProvider();
 		let vars = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 
 		assert.deepEqual(vars, {
@@ -178,7 +178,7 @@ suite("Custom Environment Variables Provider", () => {
 		const changeDetected = createEventHandler(
 			customEnvVarsProvider,
 			"onDidEnvironmentVariablesChange",
-			disposables,
+			disposables
 		);
 		envVars = dedent`
                     VSCODE_JUPYTER_ENV_TEST_VAR1=FOO2
@@ -194,7 +194,7 @@ suite("Custom Environment Variables Provider", () => {
 		// Ensure the new vars are different.
 		vars = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 		assert.deepEqual(vars, {
 			VSCODE_JUPYTER_ENV_TEST_VAR1: "FOO2",
@@ -207,7 +207,7 @@ suite("Custom Environment Variables Provider", () => {
 		createProvider();
 		let vars = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 		assert.isEmpty(vars || {});
 
@@ -215,7 +215,7 @@ suite("Custom Environment Variables Provider", () => {
 		const changeDetected = createEventHandler(
 			customEnvVarsProvider,
 			"onDidEnvironmentVariablesChange",
-			disposables,
+			disposables
 		);
 		const envVars = dedent`
                     VSCODE_JUPYTER_ENV_TEST_VAR1=FOO2
@@ -231,7 +231,7 @@ suite("Custom Environment Variables Provider", () => {
 		// Ensure the new vars are different.
 		vars = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 		assert.deepEqual(vars, {
 			VSCODE_JUPYTER_ENV_TEST_VAR1: "FOO2",
@@ -260,12 +260,12 @@ suite("Custom Environment Variables Provider", () => {
 		createProvider();
 		const vars = await customEnvVarsProvider.getCustomEnvironmentVariables(
 			undefined,
-			"RunNonPythonCode",
+			"RunNonPythonCode"
 		);
 		const pythonVars =
 			await customEnvVarsProvider.getCustomEnvironmentVariables(
 				undefined,
-				"RunPythonCode",
+				"RunPythonCode"
 			);
 
 		assert.deepEqual(vars, {

@@ -30,16 +30,19 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 	private readonly disposables: IDisposableRegistry;
 	private readonly fileSystem: IFileSystem;
 	constructor(
-        @inject(IServiceContainer) private serviceContainer: IServiceContainer,
-        @inject(IEnvironmentActivationService) private readonly activationHelper: IEnvironmentActivationService,
-        @inject(IProcessServiceFactory) private readonly processServiceFactory: IProcessServiceFactory
-    ) {
-        // Acquire other objects here so that if we are called during dispose they are available.
-        this.disposables = this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry);
-        this.fileSystem = this.serviceContainer.get<IFileSystem>(IFileSystem);
-    }
+		@inject(IServiceContainer) private serviceContainer: IServiceContainer,
+		@inject(IEnvironmentActivationService)
+		private readonly activationHelper: IEnvironmentActivationService,
+		@inject(IProcessServiceFactory)
+		private readonly processServiceFactory: IProcessServiceFactory
+	) {
+		// Acquire other objects here so that if we are called during dispose they are available.
+		this.disposables =
+			this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry);
+		this.fileSystem = this.serviceContainer.get<IFileSystem>(IFileSystem);
+	}
 	public async create(
-		options: ExecutionFactoryCreationOptions,
+		options: ExecutionFactoryCreationOptions
 	): Promise<IPythonExecutionService> {
 		const processService: IProcessService =
 			await this.processServiceFactory.create(options.resource);
@@ -48,17 +51,17 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 			options.interpreter,
 			processService,
 			this.fileSystem,
-			undefined,
+			undefined
 		);
 	}
 	public async createActivatedEnvironment(
-		options: ExecutionFactoryCreateWithEnvironmentOptions,
+		options: ExecutionFactoryCreateWithEnvironmentOptions
 	): Promise<IPythonExecutionService> {
 		options.resource = options.resource
 			? options.resource
 			: workspace.workspaceFolders?.length
-			  ? workspace.workspaceFolders[0].uri
-			  : undefined;
+				? workspace.workspaceFolders[0].uri
+				: undefined;
 
 		// This should never happen, but if it does ensure we never run code accidentally in untrusted workspaces.
 		if (!workspace.isTrusted) {
@@ -67,7 +70,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		const envVars =
 			await this.activationHelper.getActivatedEnvironmentVariables(
 				options.resource,
-				options.interpreter,
+				options.interpreter
 			);
 		const hasEnvVars = envVars && Object.keys(envVars).length > 0;
 		if (!hasEnvVars) {
@@ -84,7 +87,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		return createPythonService(
 			options.interpreter,
 			processService,
-			this.fileSystem,
+			this.fileSystem
 		);
 	}
 }
@@ -99,7 +102,7 @@ function createPythonService(
 			name: string;
 			path: string;
 		},
-	],
+	]
 ): IPythonExecutionService {
 	let env = createPythonEnv(interpreter, procService, fs);
 	if (conda) {
@@ -109,7 +112,7 @@ function createPythonService(
 			condaInfo,
 			interpreter,
 			procService,
-			fs,
+			fs
 		);
 	}
 	const procs = createPythonProcessService(procService, env);

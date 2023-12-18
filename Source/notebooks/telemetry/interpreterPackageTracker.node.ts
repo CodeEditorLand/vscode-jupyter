@@ -36,42 +36,50 @@ export class InterpreterPackageTracker
 {
 	private activeInterpreterTrackedUponActivation?: boolean;
 	constructor(
-        @inject(IInterpreterPackages) private readonly packages: IInterpreterPackages,
-        @inject(IInstaller) @optional() private readonly installer: IInstaller | undefined,
-        @inject(IPythonExtensionChecker) private readonly pythonExtensionChecker: IPythonExtensionChecker,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
-        @inject(IPythonApiProvider) private readonly apiProvider: IPythonApiProvider,
-        @inject(IControllerRegistration) private readonly notebookControllerManager: IControllerRegistration
-    ) {}
+		@inject(IInterpreterPackages)
+		private readonly packages: IInterpreterPackages,
+		@inject(IInstaller)
+		@optional()
+		private readonly installer: IInstaller | undefined,
+		@inject(IPythonExtensionChecker)
+		private readonly pythonExtensionChecker: IPythonExtensionChecker,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService,
+		@inject(IPythonApiProvider)
+		private readonly apiProvider: IPythonApiProvider,
+		@inject(IControllerRegistration)
+		private readonly notebookControllerManager: IControllerRegistration
+	) {}
 	public activate() {
 		this.notebookControllerManager.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		if (!isWebExtension()) {
 			this.interpreterService.onDidChangeInterpreter(
 				this.trackPackagesOfActiveInterpreter,
 				this,
-				this.disposables,
+				this.disposables
 			);
 		}
 		this.installer?.onInstalled(
 			this.onDidInstallPackage,
 			this,
-			this.disposables,
+			this.disposables
 		); // Not supported in Web
 		extensions.onDidChange(
 			this.trackUponActivation,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.trackUponActivation().catch(noop);
 		this.apiProvider.onDidActivatePythonExtension(
 			this.trackUponActivation,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private async onNotebookControllerSelected(event: {
@@ -85,7 +93,7 @@ export class InterpreterPackageTracker
 			kernelConnection: event.controller.connection,
 		});
 		await this.packages.trackPackages(
-			event.controller.connection.interpreter,
+			event.controller.connection.interpreter
 		);
 	}
 	private async trackUponActivation() {
@@ -121,7 +129,7 @@ export class InterpreterPackageTracker
 			// Get details of active interpreter for the Uri provided.
 			const activeInterpreter =
 				await this.interpreterService.getActiveInterpreter(
-					args.resource,
+					args.resource
 				);
 			await this.packages.trackPackages(activeInterpreter, true);
 		} else {

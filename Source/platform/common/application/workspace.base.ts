@@ -12,25 +12,25 @@ import { IWorkspaceService } from "./types";
  */
 export abstract class BaseWorkspaceService implements IWorkspaceService {
 	public abstract computeWorkingDirectory(
-		resource: Resource,
+		resource: Resource
 	): Promise<string>;
 }
 
 export function getWorkspaceFolderIdentifier(
 	resource: Resource,
-	defaultValue: string = "",
+	defaultValue: string = ""
 ): string {
 	const workspaceFolder = resource
 		? workspace.getWorkspaceFolder(resource)
 		: workspace.workspaceFolders
-		  ? workspace.workspaceFolders[0] // Default to first folder if resource not passed in.
-		  : undefined;
+			? workspace.workspaceFolders[0] // Default to first folder if resource not passed in.
+			: undefined;
 	return workspaceFolder
 		? path.normalize(
 				getOSType() === OSType.Windows
 					? workspaceFolder.uri.path.toUpperCase()
-					: workspaceFolder.uri.path,
-		  )
+					: workspaceFolder.uri.path
+			)
 		: defaultValue;
 }
 

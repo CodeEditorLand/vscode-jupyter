@@ -61,16 +61,16 @@ suite("Progress Reporter Decorator", () => {
 				deepEqual({
 					action: ReportableAction.NotebookStart,
 					phase: "started",
-				}),
-			),
+				})
+			)
 		).once();
 		verify(
 			reporter.report(
 				deepEqual({
 					action: ReportableAction.JupyterSessionWaitForIdleSession,
 					phase: "started",
-				}),
-			),
+				})
+			)
 		).once();
 
 		// Report progress of actions completed (even if promises get rejected).
@@ -87,16 +87,16 @@ suite("Progress Reporter Decorator", () => {
 				deepEqual({
 					action: ReportableAction.NotebookStart,
 					phase: "completed",
-				}),
-			),
+				})
+			)
 		).once();
 		verify(
 			reporter.report(
 				deepEqual({
 					action: ReportableAction.JupyterSessionWaitForIdleSession,
 					phase: "completed",
-				}),
-			),
+				})
+			)
 		).once();
 
 		// Report progress of actions started again.
@@ -109,16 +109,16 @@ suite("Progress Reporter Decorator", () => {
 				deepEqual({
 					action: ReportableAction.NotebookConnect,
 					phase: "started",
-				}),
-			),
+				})
+			)
 		).once();
 		verify(
 			reporter.report(
 				deepEqual({
 					action: ReportableAction.KernelsGetKernelForRemoteConnection,
 					phase: "started",
-				}),
-			),
+				})
+			)
 		).once();
 
 		// Report progress of actions completed (even if promises get rejected).
@@ -135,16 +135,16 @@ suite("Progress Reporter Decorator", () => {
 				deepEqual({
 					action: ReportableAction.NotebookConnect,
 					phase: "completed",
-				}),
-			),
+				})
+			)
 		).once();
 		verify(
 			reporter.report(
 				deepEqual({
 					action: ReportableAction.KernelsGetKernelForRemoteConnection,
 					phase: "completed",
-				}),
-			),
+				})
+			)
 		).once();
 	});
 });

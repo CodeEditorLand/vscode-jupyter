@@ -36,28 +36,28 @@ export class CellOutputMimeTypeTracker
 	}
 
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        disposables.push(this);
-    }
+		disposables.push(this);
+	}
 	public activate() {
 		workspace.onDidOpenNotebookDocument(
 			this.onDidOpenCloseDocument,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.onDidCloseNotebookDocument(
 			this.onDidOpenCloseDocument,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.onDidSaveNotebookDocument(
 			this.onDidOpenCloseDocument,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		notebooks.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -65,7 +65,7 @@ export class CellOutputMimeTypeTracker
 		dispose(this.disposables);
 	}
 	public async onDidChangeNotebookCellExecutionState(
-		e: NotebookCellExecutionStateChangeEvent,
+		e: NotebookCellExecutionStateChangeEvent
 	): Promise<void> {
 		if (!isJupyterNotebook(e.cell.notebook) || this.isTelemetryDisabled) {
 			return;
@@ -77,12 +77,12 @@ export class CellOutputMimeTypeTracker
 			return;
 		}
 		doc.getCells().forEach((cell) =>
-			this.checkCell(cell, "onOpenCloseOrSave"),
+			this.checkCell(cell, "onOpenCloseOrSave")
 		);
 	}
 	private checkCell(
 		cell: NotebookCell,
-		when: "onExecution" | "onOpenCloseOrSave",
+		when: "onExecution" | "onOpenCloseOrSave"
 	) {
 		if (cell.kind === NotebookCellKind.Markup) {
 			return;
@@ -103,7 +103,7 @@ export class CellOutputMimeTypeTracker
 	private sendTelemetry(
 		mimeType: string,
 		when: "onExecution" | "onOpenCloseOrSave",
-		resourceType: ResourceTypeTelemetryProperty["resourceType"],
+		resourceType: ResourceTypeTelemetryProperty["resourceType"]
 	) {
 		// No need to send duplicate telemetry or waste CPU cycles on an unneeded hash.
 		const key = `${mimeType}-${when}`;

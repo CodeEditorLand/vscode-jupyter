@@ -55,7 +55,7 @@ suite("RemoteKernelControllerWatcher", () => {
 		}>();
 		disposables.push(onDidChangeJupyterServerCollections);
 		when(jupyterServerProviderRegistry.onDidChangeCollections).thenReturn(
-			onDidChangeJupyterServerCollections.event,
+			onDidChangeJupyterServerCollections.event
 		);
 		when(jupyterServerProviderRegistry.jupyterCollections).thenReturn([]);
 		when(uriStorage.remove(anything())).thenResolve();
@@ -63,7 +63,7 @@ suite("RemoteKernelControllerWatcher", () => {
 			disposables,
 			instance(uriStorage),
 			instance(controllers),
-			instance(jupyterServerProviderRegistry),
+			instance(jupyterServerProviderRegistry)
 		);
 		clock = fakeTimers.install();
 		disposables.push(new Disposable(() => clock.uninstall()));
@@ -94,7 +94,7 @@ suite("RemoteKernelControllerWatcher", () => {
 			instance(server1),
 		] as any);
 		when(serverProvider1.onDidChangeServers).thenReturn(
-			serverProvider1DidChange1.event,
+			serverProvider1DidChange1.event
 		);
 		when(collection1.serverProvider).thenReturn(instance(serverProvider1));
 
@@ -102,13 +102,13 @@ suite("RemoteKernelControllerWatcher", () => {
 		when(collection2.id).thenReturn("provider2");
 		const serverProvider2 = mock<JupyterServerProvider>();
 		when(serverProvider2.provideJupyterServers(anything())).thenResolve(
-			[] as any,
+			[] as any
 		);
 		when(collection2.serverProvider).thenReturn(instance(serverProvider2));
 		const serverProvider1DidChange2 = new EventEmitter<void>();
 		disposables.push(serverProvider1DidChange2);
 		when(serverProvider2.onDidChangeServers).thenReturn(
-			serverProvider1DidChange2.event,
+			serverProvider1DidChange2.event
 		);
 
 		const collection3 = mock<JupyterServerCollection>();
@@ -123,7 +123,7 @@ suite("RemoteKernelControllerWatcher", () => {
 		const serverProvider1DidChange3 = new EventEmitter<void>();
 		disposables.push(serverProvider1DidChange3);
 		when(serverProvider2.onDidChangeServers).thenReturn(
-			serverProvider1DidChange3.event,
+			serverProvider1DidChange3.event
 		);
 		when(jupyterServerProviderRegistry.jupyterCollections).thenReturn([
 			instance(collection1),
@@ -135,12 +135,12 @@ suite("RemoteKernelControllerWatcher", () => {
 		const remoteKernelSpec = createControllerForRemoteKernelSpec(
 			"remote1",
 			remoteUriForProvider1,
-			serverProviderHandle,
+			serverProviderHandle
 		);
 		const remoteLiveKernel = createControllerForRemoteLiveKernel(
 			"live1",
 			remoteUriForProvider1,
-			serverProviderHandle,
+			serverProviderHandle
 		);
 		when(controllers.registered).thenReturn([
 			instance(localKernel),
@@ -217,14 +217,14 @@ suite("RemoteKernelControllerWatcher", () => {
 			LocalKernelSpecConnectionMetadata.create({
 				id,
 				kernelSpec: mock<IJupyterKernelSpec>(),
-			}),
+			})
 		);
 		return localKernel;
 	}
 	function createControllerForRemoteKernelSpec(
 		id: string,
 		baseUrl: string,
-		serverProviderHandle: JupyterServerProviderHandle,
+		serverProviderHandle: JupyterServerProviderHandle
 	) {
 		const remoteKernelSpec = mock<IVSCodeNotebookController>();
 		when(remoteKernelSpec.id).thenReturn(id);
@@ -235,14 +235,14 @@ suite("RemoteKernelControllerWatcher", () => {
 				baseUrl,
 				kernelSpec: mock<IJupyterKernelSpec>(),
 				serverProviderHandle,
-			}),
+			})
 		);
 		return remoteKernelSpec;
 	}
 	function createControllerForRemoteLiveKernel(
 		id: string,
 		baseUrl: string,
-		serverProviderHandle: JupyterServerProviderHandle,
+		serverProviderHandle: JupyterServerProviderHandle
 	) {
 		const remoteLiveKernel = mock<IVSCodeNotebookController>();
 		when(remoteLiveKernel.dispose()).thenReturn();
@@ -252,7 +252,7 @@ suite("RemoteKernelControllerWatcher", () => {
 				baseUrl,
 				kernelModel: mock<LiveKernelModel>(),
 				serverProviderHandle,
-			}),
+			})
 		);
 		return remoteLiveKernel;
 	}
@@ -266,7 +266,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "1",
 					id: "1",
 					handle: "1",
-				},
+				}
 			);
 		const remoteKernelSpecExt1Coll1Server2 =
 			createControllerForRemoteKernelSpec(
@@ -276,7 +276,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "1",
 					id: "1",
 					handle: "2",
-				},
+				}
 			);
 		const remoteLiveKernelExt1Coll1Server1 =
 			createControllerForRemoteLiveKernel(
@@ -286,7 +286,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "1",
 					id: "1",
 					handle: "2",
-				},
+				}
 			);
 		const remoteKernelSpecExt1Col2Server1 =
 			createControllerForRemoteKernelSpec(
@@ -296,7 +296,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "1",
 					id: "2",
 					handle: "1",
-				},
+				}
 			);
 		const remoteLiveKernelExt1Col2Server1 =
 			createControllerForRemoteLiveKernel(
@@ -306,7 +306,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "1",
 					id: "2",
 					handle: "1",
-				},
+				}
 			);
 		const remoteKernelSpecExt2Col1Server1 =
 			createControllerForRemoteKernelSpec(
@@ -316,7 +316,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "2",
 					id: "1",
 					handle: "1",
-				},
+				}
 			);
 		const remoteKernelSpecExt2Col2Server1 =
 			createControllerForRemoteLiveKernel(
@@ -326,7 +326,7 @@ suite("RemoteKernelControllerWatcher", () => {
 					extensionId: "2",
 					id: "2",
 					handle: "1",
-				},
+				}
 			);
 		const remoteControllers: IVSCodeNotebookController[] = [
 			instance(remoteKernelSpecExt1Coll1Server1),
@@ -349,7 +349,7 @@ suite("RemoteKernelControllerWatcher", () => {
 				time: 1,
 				displayName: `Server ${s.handle} Collection ${s.id} for Ext ${s.extensionId}`,
 				provider: s,
-			})),
+			}))
 		);
 		when(uriStorage.add(anything())).thenResolve();
 		when(uriStorage.add(anything(), anything())).thenResolve();
@@ -358,8 +358,8 @@ suite("RemoteKernelControllerWatcher", () => {
 			new Set(
 				remoteProviderHandles
 					.filter((s) => s.extensionId === "1" && s.id === "1")
-					.map((s) => s.handle),
-			),
+					.map((s) => s.handle)
+			)
 		).map((s) => ({ id: s, label: s }));
 		const onDidChangeServers = new EventEmitter<void>();
 		const onDidChangeProviders = new EventEmitter<void>();
@@ -407,13 +407,13 @@ suite("RemoteKernelControllerWatcher", () => {
 		verify(remoteKernelSpecExt1Coll1Server2.dispose()).never();
 		verify(
 			uriStorage.remove(
-				deepEqual({ extensionId: "1", id: "1", handle: "1" }),
-			),
+				deepEqual({ extensionId: "1", id: "1", handle: "1" })
+			)
 		).once();
 		verify(
 			uriStorage.remove(
-				deepEqual({ extensionId: "1", id: "1", handle: "2" }),
-			),
+				deepEqual({ extensionId: "1", id: "1", handle: "2" })
+			)
 		).never();
 
 		// 2. Dispose the collection 1 and verify the remaining servers were disposed.
@@ -429,14 +429,14 @@ suite("RemoteKernelControllerWatcher", () => {
 		verify(remoteKernelSpecExt2Col2Server1.dispose()).never();
 		verify(
 			uriStorage.remove(
-				deepEqual({ extensionId: "1", id: "1", handle: "1" }),
-			),
+				deepEqual({ extensionId: "1", id: "1", handle: "1" })
+			)
 		).once();
 		// Just because the collection was removed, do not remove the MRU, possible the server is still valid.
 		verify(
 			uriStorage.remove(
-				deepEqual({ extensionId: "1", id: "1", handle: "2" }),
-			),
+				deepEqual({ extensionId: "1", id: "1", handle: "2" })
+			)
 		).never();
 	});
 });

@@ -17,16 +17,17 @@ import { PythonEnvironment } from "../../platform/pythonEnvironments/info";
 @injectable()
 export class ExportInterpreterFinder {
 	constructor(
-        @inject(IJupyterInterpreterDependencyManager)
-        private readonly dependencyManager: IJupyterInterpreterDependencyManager,
-        @inject(INbConvertInterpreterDependencyChecker)
-        private readonly nbConvertDependencyChecker: INbConvertInterpreterDependencyChecker,
-        @inject(JupyterInterpreterService) private readonly jupyterInterpreterService: JupyterInterpreterService
-    ) {}
+		@inject(IJupyterInterpreterDependencyManager)
+		private readonly dependencyManager: IJupyterInterpreterDependencyManager,
+		@inject(INbConvertInterpreterDependencyChecker)
+		private readonly nbConvertDependencyChecker: INbConvertInterpreterDependencyChecker,
+		@inject(JupyterInterpreterService)
+		private readonly jupyterInterpreterService: JupyterInterpreterService
+	) {}
 
 	// For the given ExportFormat and a possible candidateInterpreter return an interpreter capable of running nbconvert or throw
 	public async getExportInterpreter(
-		candidateInterpreter?: PythonEnvironment,
+		candidateInterpreter?: PythonEnvironment
 	): Promise<PythonEnvironment> {
 		// If an interpreter was passed in, first see if that interpreter supports NB Convert
 		// if it does, we are good to go, but don't install nbconvert into it
@@ -57,7 +58,7 @@ export class ExportInterpreterFinder {
 				await this.dependencyManager.installMissingDependencies();
 				if (
 					await this.checkNotebookInterpreter(
-						selectedJupyterInterpreter,
+						selectedJupyterInterpreter
 					)
 				) {
 					return selectedJupyterInterpreter;
@@ -72,7 +73,7 @@ export class ExportInterpreterFinder {
 	// and export with nbconvert
 	private async checkNotebookInterpreter(interpreter: PythonEnvironment) {
 		return this.nbConvertDependencyChecker.isNbConvertInstalled(
-			interpreter,
+			interpreter
 		);
 	}
 }

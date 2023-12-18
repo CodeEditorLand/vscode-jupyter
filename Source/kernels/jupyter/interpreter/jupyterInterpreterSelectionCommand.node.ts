@@ -16,14 +16,16 @@ export class JupyterInterpreterSelectionCommand
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(JupyterInterpreterService) private readonly service: JupyterInterpreterService,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(JupyterInterpreterService)
+		private readonly service: JupyterInterpreterService,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	public activate() {
 		this.disposables.push(
 			commands.registerCommand("jupyter.selectJupyterInterpreter", () => {
 				this.service.selectInterpreter().catch(noop);
-			}),
+			})
 		);
 	}
 }

@@ -13,9 +13,10 @@ export class VariableViewActivationService
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IExtensionContext) private extensionContext: IExtensionContext,
-        @inject(IVariableViewProvider) private variableViewProvider: IVariableViewProvider
-    ) {}
+		@inject(IExtensionContext) private extensionContext: IExtensionContext,
+		@inject(IVariableViewProvider)
+		private variableViewProvider: IVariableViewProvider
+	) {}
 
 	public activate() {
 		this.extensionContext.subscriptions.push(
@@ -26,8 +27,8 @@ export class VariableViewActivationService
 				this.variableViewProvider,
 				{
 					webviewOptions: { retainContextWhenHidden: false },
-				},
-			),
+				}
+			)
 		);
 	}
 }

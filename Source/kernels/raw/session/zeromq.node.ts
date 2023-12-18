@@ -27,12 +27,12 @@ export function getZeroMQ(): typeof import("zeromq") {
 					EXTENSION_ROOT_DIR,
 					"dist",
 					"node_modules",
-					"zeromqold",
-				),
+					"zeromqold"
+				)
 			);
 			traceInfo("ZMQ loaded via fallback mechanism.");
 			sendZMQTelemetry(false, true, e.message || e.toString()).catch(
-				noop,
+				noop
 			);
 			return zmq;
 		} catch (e2) {
@@ -40,12 +40,12 @@ export function getZeroMQ(): typeof import("zeromq") {
 				true,
 				true,
 				e.message || e.toString(),
-				e2.message || e2.toString(),
+				e2.message || e2.toString()
 			).catch(noop);
 			traceWarning(`Exception while attempting zmq :`, e.message || e); // No need to display the full stack (when this fails we know why if fails, hence a stack is not useful)
 			traceWarning(
 				`Exception while attempting zmq (fallback) :`,
-				e2.message || e2,
+				e2.message || e2
 			); // No need to display the full stack (when this fails we know why if fails, hence a stack is not useful)
 			throw e2;
 		}
@@ -63,11 +63,11 @@ async function getLocalZmqBinaries() {
 			"dist",
 			"node_modules",
 			"zeromq",
-			"prebuilds",
+			"prebuilds"
 		);
 		if (
 			!(await fs.pathExists(
-				path.join(EXTENSION_ROOT_DIR, "dist", "node_modules"),
+				path.join(EXTENSION_ROOT_DIR, "dist", "node_modules")
 			))
 		) {
 			// We're in dev mode.
@@ -81,20 +81,20 @@ async function getLocalZmqBinaries() {
 					return fs
 						.readdir(folderPath)
 						.then((files) =>
-							files.map((file) => path.join(folderPath, file)),
+							files.map((file) => path.join(folderPath, file))
 						);
 				}
 				return [];
-			}),
+			})
 		);
 		const files = (await Promise.all(filesPromises.flat())).flat();
 		return files.map((file) =>
 			file
 				.substring(
-					file.lastIndexOf("prebuilds") + "prebuilds".length + 1,
+					file.lastIndexOf("prebuilds") + "prebuilds".length + 1
 				)
 				.replace(/\\/g, "<sep>")
-				.replace(/\//g, "<sep>"),
+				.replace(/\//g, "<sep>")
 		);
 	} catch (ex) {
 		traceWarning(`Failed to determine local zmq binaries.`, ex);
@@ -106,7 +106,7 @@ async function sendZMQTelemetry(
 	failed: boolean,
 	fallbackTried: boolean = false,
 	errorMessage = "",
-	fallbackErrorMessage = "",
+	fallbackErrorMessage = ""
 ) {
 	if (telemetrySentOnce) {
 		return;
@@ -176,7 +176,7 @@ function getPlatformInfo() {
 	} catch (ex) {
 		traceWarning(
 			`Failed to determine platform information used to load zeromq binary.`,
-			ex,
+			ex
 		);
 		return {};
 	}

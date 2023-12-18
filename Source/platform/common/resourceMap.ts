@@ -8,7 +8,10 @@ interface ResourceMapKeyFn {
 }
 
 class ResourceMapEntry<T> {
-	constructor(readonly Uri: Uri, readonly value: T) {}
+	constructor(
+		readonly Uri: Uri,
+		readonly value: T
+	) {}
 }
 
 /**
@@ -38,7 +41,7 @@ export class ResourceMap<T> implements Map<Uri, T> {
 
 	constructor(
 		mapOrKeyFn?: ResourceMap<T> | ResourceMapKeyFn,
-		toKey?: ResourceMapKeyFn,
+		toKey?: ResourceMapKeyFn
 	) {
 		if (mapOrKeyFn instanceof ResourceMap) {
 			this.map = new Map(mapOrKeyFn.map);
@@ -52,7 +55,7 @@ export class ResourceMap<T> implements Map<Uri, T> {
 	set(resource: Uri, value: T): this {
 		this.map.set(
 			this.toKey(resource),
-			new ResourceMapEntry(resource, value),
+			new ResourceMapEntry(resource, value)
 		);
 		return this;
 	}
@@ -80,7 +83,7 @@ export class ResourceMap<T> implements Map<Uri, T> {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	forEach(
 		clb: (value: T, key: Uri, map: Map<Uri, T>) => void,
-		thisArg?: any,
+		thisArg?: any
 	): void {
 		if (typeof thisArg !== "undefined") {
 			clb = clb.bind(thisArg);

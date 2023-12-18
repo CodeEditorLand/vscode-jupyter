@@ -20,11 +20,11 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	private refreshedOnceBefore?: boolean;
 	constructor(
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IKernelFinder) private readonly kernelFinder: IKernelFinder
-    ) {
-        disposables.push(this);
-    }
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder
+	) {
+		disposables.push(this);
+	}
 	public dispose() {
 		dispose(this.disposables);
 	}
@@ -52,7 +52,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private displayProgressIndicator() {
@@ -60,10 +60,10 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 		traceInfo(`Start refreshing Kernel Picker (${id})`);
 		const taskNb =
 			notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
+				JupyterNotebookView
 			);
 		const taskIW = notebooks.createNotebookControllerDetectionTask(
-			InteractiveWindowView,
+			InteractiveWindowView
 		);
 		this.disposables.push(taskNb);
 		this.disposables.push(taskIW);
@@ -77,7 +77,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 }

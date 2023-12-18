@@ -40,14 +40,14 @@ suite("Uri Provider Registration", () => {
 		when(
 			globalMemento.get(
 				REGISTRATION_ID_EXTENSION_OWNER_MEMENTO_KEY,
-				anything(),
-			),
+				anything()
+			)
 		).thenCall((_, defaultValue) => defaultValue);
 		when(uriStorage.onDidRemove).thenReturn(onDidRemoveServer.event);
 		when(
 			serviceContainer.get<IJupyterServerUriStorage>(
-				IJupyterServerUriStorage,
-			),
+				IJupyterServerUriStorage
+			)
 		).thenReturn(instance(uriStorage));
 		when(extensions.all).thenReturn([]);
 		clock = fakeTimers.install();
@@ -56,7 +56,7 @@ suite("Uri Provider Registration", () => {
 		registration = new JupyterUriProviderRegistration(
 			instance(extensions),
 			disposables,
-			instance(globalMemento),
+			instance(globalMemento)
 		);
 		registration.activate();
 		await clock.runAllAsync();
@@ -66,14 +66,14 @@ suite("Uri Provider Registration", () => {
 		assert.deepEqual(
 			registration.providers,
 			[],
-			"Providers should be empty",
+			"Providers should be empty"
 		);
 
 		await clock.runAllAsync();
 		assert.deepEqual(
 			registration.providers,
 			[],
-			"Providers should be empty",
+			"Providers should be empty"
 		);
 	});
 	test("No Providers registered even after activating extension that seems to have a Jupyter Provider", async () => {
@@ -104,7 +104,7 @@ suite("Uri Provider Registration", () => {
 		assert.deepEqual(
 			registration.providers,
 			[],
-			"Providers should be empty",
+			"Providers should be empty"
 		);
 
 		await clock.runAllAsync();
@@ -112,30 +112,30 @@ suite("Uri Provider Registration", () => {
 		assert.deepEqual(
 			registration.providers,
 			[],
-			"Providers should be empty",
+			"Providers should be empty"
 		);
 		assert.strictEqual(
 			activatedRightExtension,
 			true,
-			"Extension should have been activated",
+			"Extension should have been activated"
 		);
 		assert.strictEqual(
 			activatedWrongExtension,
 			false,
-			"Extension should not have been activated",
+			"Extension should not have been activated"
 		);
 	});
 	test("Once a provider is registered trigger a change event", async () => {
 		const eventHandler = createEventHandler(
 			registration,
 			"onDidChangeProviders",
-			disposables,
+			disposables
 		);
 
 		assert.deepEqual(
 			registration.providers,
 			[],
-			"Providers should be empty",
+			"Providers should be empty"
 		);
 
 		const provider1 = createAndRegisterJupyterUriProvider("ext", "1");
@@ -166,13 +166,13 @@ suite("Uri Provider Registration", () => {
 		const eventHandler = createEventHandler(
 			registration,
 			"onDidChangeProviders",
-			disposables,
+			disposables
 		);
 
 		assert.deepEqual(
 			registration.providers,
 			[],
-			"Providers should be empty",
+			"Providers should be empty"
 		);
 
 		createAndRegisterJupyterUriProvider("ext", "1");
@@ -188,22 +188,22 @@ suite("Uri Provider Registration", () => {
 
 		assert.strictEqual(
 			(await registration.getProvider("a", "1"))?.extensionId,
-			"a",
+			"a"
 		);
 		assert.strictEqual(
 			(await registration.getProvider("b", "2"))?.extensionId,
-			"b",
+			"b"
 		);
 		assert.isUndefined(await registration.getProvider("x", "3"));
 	});
 	test("Throws an error when getting a server for an invalid item", async () => {
 		const { provider: provider1 } = createAndRegisterJupyterUriProvider(
 			"ext",
-			"a",
+			"a"
 		);
 		const { provider: provider2 } = createAndRegisterJupyterUriProvider(
 			"ext",
-			"b",
+			"b"
 		);
 		when(provider1.getHandles!()).thenResolve(["handle1", "handle2"]);
 		when(provider2.getHandles!()).thenResolve(["handlea", "handleb"]);
@@ -213,31 +213,31 @@ suite("Uri Provider Registration", () => {
 				id: "unknownId",
 				handle: "unknownHandle",
 				extensionId: "",
-			}),
+			})
 		);
 		await assert.isRejected(
 			registration.getJupyterServerUri({
 				id: "a",
 				handle: "unknownHandle",
 				extensionId: "",
-			}),
+			})
 		);
 		await assert.isRejected(
 			registration.getJupyterServerUri({
 				id: "b",
 				handle: "unknownHandle",
 				extensionId: "",
-			}),
+			})
 		);
 	});
 	test("Get a Jupyter Server by handle", async () => {
 		const { provider: provider1 } = createAndRegisterJupyterUriProvider(
 			"ext",
-			"a",
+			"a"
 		);
 		const { provider: provider2 } = createAndRegisterJupyterUriProvider(
 			"ext",
-			"b",
+			"b"
 		);
 		when(provider1.getHandles!()).thenResolve(["handle1", "handle2"]);
 		when(provider2.getHandles!()).thenResolve(["handlea", "handleb"]);
@@ -248,10 +248,10 @@ suite("Uri Provider Registration", () => {
 		when(serverForHandleB.baseUrl).thenReturn("http://serverB/");
 		when(serverForHandleB.displayName).thenReturn("Server B");
 		when(provider1.getServerUri("handle1")).thenResolve(
-			resolvableInstance(serverForHandle1),
+			resolvableInstance(serverForHandle1)
 		);
 		when(provider2.getServerUri("handleb")).thenResolve(
-			resolvableInstance(serverForHandleB),
+			resolvableInstance(serverForHandleB)
 		);
 
 		const server = await registration.getJupyterServerUri({
@@ -273,7 +273,7 @@ suite("Uri Provider Registration", () => {
 	test("Verify the handles", async () => {
 		const { provider: mockProvider } = createAndRegisterJupyterUriProvider(
 			"a",
-			"1",
+			"1"
 		);
 		when(mockProvider.getHandles!()).thenResolve(["handle1", "handle2"]);
 
@@ -290,7 +290,7 @@ suite("Uri Provider Registration", () => {
 		const eventHandler = createEventHandler(
 			provider!,
 			"onDidChangeHandles",
-			disposables,
+			disposables
 		);
 
 		onDidChangeHandles.fire();
@@ -311,11 +311,11 @@ suite("Uri Provider Registration", () => {
 	test("Returns a list of the quick pick items", async () => {
 		const { provider: mockProvider1 } = createAndRegisterJupyterUriProvider(
 			"a",
-			"1",
+			"1"
 		);
 		const { provider: mockProvider2 } = createAndRegisterJupyterUriProvider(
 			"ext2",
-			"b",
+			"b"
 		);
 		const quickPickItemsForHandle1: QuickPickItem[] = [
 			{
@@ -330,10 +330,10 @@ suite("Uri Provider Registration", () => {
 			{ label: "Item Y" },
 		];
 		when(mockProvider1.getQuickPickEntryItems!(anything())).thenResolve(
-			quickPickItemsForHandle1 as any,
+			quickPickItemsForHandle1 as any
 		);
 		when(mockProvider2.getQuickPickEntryItems!(anything())).thenResolve(
-			quickPickItemsForHandle2 as any,
+			quickPickItemsForHandle2 as any
 		);
 
 		const provider1 = await registration.getProvider("a", "1");
@@ -347,7 +347,7 @@ suite("Uri Provider Registration", () => {
 					detail: undefined,
 					original: item,
 				};
-			}),
+			})
 		);
 		assert.deepEqual(
 			await provider2!.getQuickPickEntryItems!(),
@@ -357,23 +357,23 @@ suite("Uri Provider Registration", () => {
 					detail: undefined,
 					original: item,
 				};
-			}),
+			})
 		);
 	});
 	test("Handles the selection of a quick pick item", async () => {
 		const { provider: mockProvider1 } = createAndRegisterJupyterUriProvider(
 			"a",
-			"1",
+			"1"
 		);
 		const { provider: mockProvider2 } = createAndRegisterJupyterUriProvider(
 			"ext2",
-			"b",
+			"b"
 		);
 		when(
-			mockProvider1.handleQuickPick!(anything(), anything()),
+			mockProvider1.handleQuickPick!(anything(), anything())
 		).thenResolve();
 		when(
-			mockProvider2.handleQuickPick!(anything(), anything()),
+			mockProvider2.handleQuickPick!(anything(), anything())
 		).thenResolve();
 		const quickPickItemsForHandle1: QuickPickItem[] = [
 			{
@@ -388,10 +388,10 @@ suite("Uri Provider Registration", () => {
 			{ label: "Item Y" },
 		];
 		when(mockProvider1.getQuickPickEntryItems!()).thenResolve(
-			quickPickItemsForHandle1 as any,
+			quickPickItemsForHandle1 as any
 		);
 		when(mockProvider2.getQuickPickEntryItems!()).thenResolve(
-			quickPickItemsForHandle2 as any,
+			quickPickItemsForHandle2 as any
 		);
 
 		const provider1 = await registration.getProvider("a", "1");
@@ -402,11 +402,11 @@ suite("Uri Provider Registration", () => {
 				...quickPickItemsForHandle1[0],
 				original: quickPickItemsForHandle1[0],
 			} as any,
-			false,
+			false
 		);
 
 		verify(
-			mockProvider1.handleQuickPick!(quickPickItemsForHandle1[0], false),
+			mockProvider1.handleQuickPick!(quickPickItemsForHandle1[0], false)
 		).once();
 		verify(mockProvider2.handleQuickPick!(anything(), anything())).never();
 		reset(mockProvider1);
@@ -416,19 +416,19 @@ suite("Uri Provider Registration", () => {
 				...quickPickItemsForHandle2[1],
 				original: quickPickItemsForHandle2[1],
 			} as any,
-			true,
+			true
 		);
 
 		verify(mockProvider1.handleQuickPick!(anything(), anything())).never();
 		verify(
-			mockProvider2.handleQuickPick!(quickPickItemsForHandle2[1], true),
+			mockProvider2.handleQuickPick!(quickPickItemsForHandle2[1], true)
 		).once();
 	});
 
 	function createAndRegisterJupyterUriProvider(
 		extensionId: string,
 		id: string,
-		disposables: IDisposable[] = [],
+		disposables: IDisposable[] = []
 	) {
 		const provider = mock<IJupyterUriProvider>();
 		const onDidChangeHandles = new EventEmitter<void>();
@@ -449,7 +449,7 @@ suite("Uri Provider Registration", () => {
 
 		const disposable = registration.registerProvider(
 			instance(provider),
-			extensionId,
+			extensionId
 		);
 		return { provider, disposable, onDidChangeHandles };
 	}

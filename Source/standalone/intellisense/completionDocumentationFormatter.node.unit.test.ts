@@ -46,7 +46,7 @@ suite("Jupyter Completion Documentation Formatter", () => {
 			"src",
 			"standalone",
 			"intellisense",
-			"completionDocumentationFormatter",
+			"completionDocumentationFormatter"
 		);
 		const expectedOutputFile = path.join(root, `${inputFile}.md`);
 		inputFile = path.join(root, `${inputFile}.txt`);
@@ -56,7 +56,7 @@ suite("Jupyter Completion Documentation Formatter", () => {
 		]);
 		const converted = convertDocumentationToMarkdown(
 			documentation,
-			language,
+			language
 		);
 		// fs.writeFileSync(expectedOutputFile, typeof converted === 'string' ? converted : converted.value);
 		if (typeof converted === "string") {

@@ -96,16 +96,16 @@ export class ConfigKeysIterator implements IKeyIterator<string> {
 					0,
 					a.length,
 					this._from,
-					this._to,
-			  )
+					this._to
+				)
 			: compareSubstringIgnoreCase(
 					a,
 					this._value,
 					0,
 					a.length,
 					this._from,
-					this._to,
-			  );
+					this._to
+				);
 	}
 
 	value(): string {
@@ -121,7 +121,7 @@ export class PathIterator implements IKeyIterator<string> {
 
 	constructor(
 		private readonly _splitOnBackslash: boolean = true,
-		private readonly _caseSensitive: boolean = true,
+		private readonly _caseSensitive: boolean = true
 	) {}
 
 	reset(key: string): this {
@@ -178,16 +178,16 @@ export class PathIterator implements IKeyIterator<string> {
 					0,
 					a.length,
 					this._from,
-					this._to,
-			  )
+					this._to
+				)
 			: compareSubstringIgnoreCase(
 					a,
 					this._value,
 					0,
 					a.length,
 					this._from,
-					this._to,
-			  );
+					this._to
+				);
 	}
 
 	value(): string {
@@ -211,7 +211,7 @@ export class UriIterator implements IKeyIterator<URI> {
 
 	constructor(
 		private readonly _ignorePathCasing: (uri: URI) => boolean,
-		private readonly _ignoreQueryAndFragment: (uri: URI) => boolean,
+		private readonly _ignoreQueryAndFragment: (uri: URI) => boolean
 	) {}
 
 	reset(key: URI): this {
@@ -226,7 +226,7 @@ export class UriIterator implements IKeyIterator<URI> {
 		if (this._value.path) {
 			this._pathIterator = new PathIterator(
 				false,
-				!this._ignorePathCasing(key),
+				!this._ignorePathCasing(key)
 			);
 			this._pathIterator.reset(key.path);
 			if (this._pathIterator.value()) {
@@ -305,7 +305,10 @@ interface ResourceMapKeyFn {
 }
 
 class ResourceMapEntry<T> {
-	constructor(readonly uri: URI, readonly value: T) {}
+	constructor(
+		readonly uri: URI,
+		readonly value: T
+	) {}
 }
 
 export class ResourceMap<T> implements Map<URI, T> {
@@ -332,7 +335,7 @@ export class ResourceMap<T> implements Map<URI, T> {
 
 	constructor(
 		mapOrKeyFn?: ResourceMap<T> | ResourceMapKeyFn,
-		toKey?: ResourceMapKeyFn,
+		toKey?: ResourceMapKeyFn
 	) {
 		if (mapOrKeyFn instanceof ResourceMap) {
 			this.map = new Map(mapOrKeyFn.map);
@@ -346,7 +349,7 @@ export class ResourceMap<T> implements Map<URI, T> {
 	set(resource: URI, value: T): this {
 		this.map.set(
 			this.toKey(resource),
-			new ResourceMapEntry(resource, value),
+			new ResourceMapEntry(resource, value)
 		);
 		return this;
 	}
@@ -373,7 +376,7 @@ export class ResourceMap<T> implements Map<URI, T> {
 
 	forEach(
 		clb: (value: T, key: URI, map: Map<URI, T>) => void,
-		thisArg?: any,
+		thisArg?: any
 	): void {
 		if (typeof thisArg !== "undefined") {
 			clb = clb.bind(thisArg);
@@ -418,7 +421,7 @@ export class ResourceSet implements Set<URI> {
 	constructor(entries: readonly URI[], toKey?: ResourceMapKeyFn);
 	constructor(
 		entriesOrKey?: readonly URI[] | ResourceMapKeyFn,
-		toKey?: ResourceMapKeyFn,
+		toKey?: ResourceMapKeyFn
 	) {
 		if (!entriesOrKey || typeof entriesOrKey === "function") {
 			this._map = new ResourceMap(entriesOrKey);
@@ -447,10 +450,10 @@ export class ResourceSet implements Set<URI> {
 
 	forEach(
 		callbackfn: (value: URI, value2: URI, set: Set<URI>) => void,
-		thisArg?: any,
+		thisArg?: any
 	): void {
 		this._map.forEach((_value, key) =>
-			callbackfn.call(thisArg, key, key, this),
+			callbackfn.call(thisArg, key, key, this)
 		);
 	}
 

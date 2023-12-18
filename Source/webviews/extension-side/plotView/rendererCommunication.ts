@@ -28,9 +28,11 @@ export class RendererCommunication
 {
 	private readonly disposables: IDisposable[] = [];
 	constructor(
-        @inject(IPlotSaveHandler) private readonly plotSaveHandler: IPlotSaveHandler,
-        @inject(PlotViewHandler) private readonly plotViewHandler: PlotViewHandler
-    ) {}
+		@inject(IPlotSaveHandler)
+		private readonly plotSaveHandler: IPlotSaveHandler,
+		@inject(PlotViewHandler)
+		private readonly plotViewHandler: PlotViewHandler
+	) {}
 
 	public dispose() {
 		dispose(this.disposables);
@@ -70,7 +72,7 @@ export class RendererCommunication
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 }

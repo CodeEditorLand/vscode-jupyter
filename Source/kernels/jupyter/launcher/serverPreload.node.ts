@@ -33,15 +33,26 @@ const LastNotebookCreatedKey = "last-notebook-created";
 @injectable()
 export class ServerPreload implements IExtensionSyncActivationService {
 	constructor(
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IJupyterServerConnector) private serverConnector: IJupyterServerConnector,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IRawNotebookSupportedService) private readonly rawKernelSupport: IRawNotebookSupportedService,
-        @inject(IMemento) @named(WORKSPACE_MEMENTO) private mementoStorage: Memento,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider
-    ) {
-        workspace.onDidOpenNotebookDocument(this.onDidOpenNotebook.bind(this), this, disposables);
-    }
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IJupyterServerConnector)
+		private serverConnector: IJupyterServerConnector,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IRawNotebookSupportedService)
+		private readonly rawKernelSupport: IRawNotebookSupportedService,
+		@inject(IMemento)
+		@named(WORKSPACE_MEMENTO)
+		private mementoStorage: Memento,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider
+	) {
+		workspace.onDidOpenNotebookDocument(
+			this.onDidOpenNotebook.bind(this),
+			this,
+			disposables
+		);
+	}
 	public activate() {
 		// This is the list of things that should cause us to start a local server
 		// 1) Notebook is opened
@@ -52,13 +63,13 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		this.checkDateForServerStart();
 
 		this.disposables.push(
-			this.kernelProvider.onDidStartKernel(this.kernelStarted, this),
+			this.kernelProvider.onDidStartKernel(this.kernelStarted, this)
 		);
 	}
 
 	private get lastNotebookCreated() {
 		const time = this.mementoStorage.get<number | undefined>(
-			LastNotebookCreatedKey,
+			LastNotebookCreatedKey
 		);
 		return time ? new Date(time) : undefined;
 	}
@@ -86,7 +97,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		const ui = new DisplayOptions(true);
 		try {
 			traceInfo(
-				`Attempting to start a server because of preload conditions ...`,
+				`Attempting to start a server because of preload conditions ...`
 			);
 
 			// If it didn't start, attempt for local and if allowed.
@@ -121,7 +132,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 	// Note the time as well as an extra time for python specific notebooks
 	private kernelStarted(kernel: IKernel) {
 		const language = getKernelConnectionLanguage(
-			kernel.kernelConnectionMetadata,
+			kernel.kernelConnectionMetadata
 		);
 
 		this.mementoStorage

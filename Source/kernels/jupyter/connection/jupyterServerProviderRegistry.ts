@@ -9,12 +9,12 @@ import {
 export function getJupyterDisplayName(
 	serverHandle: JupyterServerProviderHandle,
 	jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
-	defaultValue?: string,
+	defaultValue?: string
 ) {
 	const collection = jupyterUriProviderRegistration.jupyterCollections.find(
 		(c) =>
 			c.extensionId === serverHandle.extensionId &&
-			c.id === serverHandle.id,
+			c.id === serverHandle.id
 	);
 	return (
 		collection?.label ||

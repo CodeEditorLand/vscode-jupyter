@@ -34,8 +34,8 @@ export class SystemVariables extends AbstractSystemVariables {
 			this._selectedText = window.activeTextEditor.document.getText(
 				new Range(
 					window.activeTextEditor.selection.start,
-					window.activeTextEditor.selection.end,
-				),
+					window.activeTextEditor.selection.end
+				)
 			);
 		}
 		this._execPath = process.execPath;

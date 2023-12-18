@@ -75,7 +75,7 @@ export interface IModuleInstaller {
 		product: string,
 		interpreter: PythonEnvironment | Environment,
 		cancelTokenSource: CancellationTokenSource,
-		flags?: ModuleInstallFlags,
+		flags?: ModuleInstallFlags
 	): Promise<void>;
 	/**
 	 * Installs a Product
@@ -92,7 +92,7 @@ export interface IModuleInstaller {
 		product: Product,
 		interpreter: PythonEnvironment | Environment,
 		cancelTokenSource: CancellationTokenSource,
-		flags?: ModuleInstallFlags,
+		flags?: ModuleInstallFlags
 	): Promise<void>;
 	isSupported(resource?: InterpreterUri | Environment): Promise<boolean>;
 }
@@ -103,15 +103,15 @@ export interface IPythonInstallation {
 }
 
 export const IInstallationChannelManager = Symbol(
-	"IInstallationChannelManager",
+	"IInstallationChannelManager"
 );
 export interface IInstallationChannelManager {
 	getInstallationChannel(
 		product: Product,
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<IModuleInstaller | undefined>;
 	getInstallationChannels(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<IModuleInstaller[]>;
 	showNoInstallersMessage(interpreter: PythonEnvironment): void;
 }
@@ -145,14 +145,14 @@ export interface IInstaller {
 		resource: InterpreterUri,
 		cancelTokenSource: CancellationTokenSource,
 		reInstallAndUpdate?: boolean,
-		installPipIfRequired?: boolean,
+		installPipIfRequired?: boolean
 	): Promise<InstallerResponse>;
 	isInstalled(
 		product: Product,
-		resource: InterpreterUri | Environment,
+		resource: InterpreterUri | Environment
 	): Promise<boolean | undefined>;
 	translateProductToModuleName(
 		product: Product,
-		purpose: ModuleNamePurpose,
+		purpose: ModuleNamePurpose
 	): string;
 }

@@ -30,16 +30,16 @@ export function createCodeCell(): nbformat.ICodeCell;
 export function createCodeCell(code: string): nbformat.ICodeCell;
 export function createCodeCell(
 	code: string[],
-	outputs: nbformat.IOutput[],
+	outputs: nbformat.IOutput[]
 ): nbformat.ICodeCell;
 // eslint-disable-next-line @typescript-eslint/unified-signatures
 export function createCodeCell(
 	code: string[],
-	magicCommandsAsComments: boolean,
+	magicCommandsAsComments: boolean
 ): nbformat.ICodeCell;
 export function createCodeCell(
 	code?: string | string[],
-	options?: boolean | nbformat.IOutput[],
+	options?: boolean | nbformat.IOutput[]
 ): nbformat.ICodeCell {
 	const magicCommandsAsComments =
 		typeof options === "boolean" ? options : false;
@@ -51,8 +51,8 @@ export function createCodeCell(
 		? appendLineFeed(
 				code,
 				"\n",
-				magicCommandsAsComments ? uncommentMagicCommands : undefined,
-		  )
+				magicCommandsAsComments ? uncommentMagicCommands : undefined
+			)
 		: code;
 	return {
 		cell_type: "code",
@@ -65,7 +65,7 @@ export function createCodeCell(
 
 export function createMarkdownCell(
 	code: string | string[],
-	useSourceAsIs: boolean = false,
+	useSourceAsIs: boolean = false
 ): nbformat.IMarkdownCell {
 	code = Array.isArray(code) ? code : [code];
 	return {
@@ -96,7 +96,7 @@ export function uncommentMagicCommands(line: string): string {
 function generateCodeCell(
 	code: string[],
 	uri: Uri | undefined,
-	magicCommandsAsComments: boolean,
+	magicCommandsAsComments: boolean
 ): ICell {
 	// Code cells start out with just source and no outputs.
 	return {
@@ -108,7 +108,7 @@ function generateCodeCell(
 function generateMarkdownCell(
 	code: string[],
 	uri: Uri | undefined,
-	useSourceAsIs = false,
+	useSourceAsIs = false
 ): ICell {
 	return {
 		uri,
@@ -120,7 +120,7 @@ export function generateCells(
 	settings: IJupyterSettings | undefined,
 	code: string,
 	uri: Uri | undefined,
-	splitMarkdown: boolean,
+	splitMarkdown: boolean
 ): ICell[] {
 	// Determine if we have a markdown cell/ markdown and code cell combined/ or just a code cell
 	const split = splitLines(code, { trim: false });
@@ -139,7 +139,7 @@ export function generateCells(
 				if (s && s.length > 0 && firstNonMarkdown === -1) {
 					firstNonMarkdown = splitMarkdown ? i : -1;
 				}
-			},
+			}
 		);
 		if (firstNonMarkdown >= 0) {
 			// Make sure if we split, the second cell has a new id. It's a new submission.
@@ -148,7 +148,7 @@ export function generateCells(
 				generateCodeCell(
 					split.slice(firstNonMarkdown),
 					uri,
-					magicCommandsAsComments,
+					magicCommandsAsComments
 				),
 			];
 		} else {
@@ -163,7 +163,7 @@ export function generateCells(
 
 export function hasCells(
 	document: TextDocument,
-	settings?: IJupyterSettings,
+	settings?: IJupyterSettings
 ): boolean {
 	const matcher = new CellMatcher(settings);
 	for (let index = 0; index < document.lineCount; index += 1) {
@@ -178,7 +178,7 @@ export function hasCells(
 
 export function generateCellRangesFromDocument(
 	document: TextDocument,
-	settings?: IJupyterSettings,
+	settings?: IJupyterSettings
 ): ICellRange[] {
 	// Implmentation of getCells here based on Don's Jupyter extension work
 	const matcher = new CellMatcher(settings);
@@ -190,7 +190,7 @@ export function generateCellRangesFromDocument(
 				const previousCell = cells[cells.length - 1];
 				previousCell.range = new Range(
 					previousCell.range.start,
-					document.lineAt(index - 1).range.end,
+					document.lineAt(index - 1).range.end
 				);
 			}
 
@@ -206,7 +206,7 @@ export function generateCellRangesFromDocument(
 		const previousCell = cells[cells.length - 1];
 		previousCell.range = new Range(
 			previousCell.range.start,
-			line.range.end,
+			line.range.end
 		);
 	}
 
@@ -215,7 +215,7 @@ export function generateCellRangesFromDocument(
 
 export function generateCellsFromDocument(
 	document: TextDocument,
-	settings?: IJupyterSettings,
+	settings?: IJupyterSettings
 ): ICell[] {
 	const ranges = generateCellRangesFromDocument(document, settings);
 
@@ -224,13 +224,13 @@ export function generateCellsFromDocument(
 		...ranges.map((cr) => {
 			const code = document.getText(cr.range);
 			return generateCells(settings, code, document.uri, false);
-		}),
+		})
 	);
 }
 
 export function generateCellsFromNotebookDocument(
 	notebookDocument: NotebookDocument,
-	magicCommandsAsComments: boolean,
+	magicCommandsAsComments: boolean
 ): ICell[] {
 	return notebookDocument
 		.getCells()
@@ -252,8 +252,8 @@ export function generateCellsFromNotebookDocument(
 							"\n",
 							magicCommandsAsComments
 								? uncommentMagicCommands
-								: undefined,
-					  )
+								: undefined
+						)
 					: appendLineFeed(code);
 			return {
 				data,

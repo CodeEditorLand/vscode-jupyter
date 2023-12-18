@@ -22,13 +22,13 @@ suite("Trusted Kernel paths", () => {
 		function createTrustedPathService() {
 			jupyterConfig = mock<WorkspaceConfiguration>();
 			when(jupyterConfig.get("kernels.trusted", anything())).thenCall(
-				(_, defaultValue) => defaultValue,
+				(_, defaultValue) => defaultValue
 			);
 			when(
 				mockedVSCodeNamespaces.workspace.getConfiguration(
 					"jupyter",
-					anything(),
-				),
+					anything()
+				)
 			).thenReturn(instance(jupyterConfig));
 			platform = mock<IPlatformService>();
 			trustedKernelPaths = new TrustedKernelPaths(instance(platform));
@@ -60,31 +60,31 @@ suite("Trusted Kernel paths", () => {
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
 					Uri.file(
-						"C:/Something/venv/shared/jupyter/kernels/foo.json",
-					),
-				),
+						"C:/Something/venv/shared/jupyter/kernels/foo.json"
+					)
+				)
 			);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/Windows/venv/shared/jupyter/kernels/foo.json"),
-				),
+					Uri.file("C:/Windows/venv/shared/jupyter/kernels/foo.json")
+				)
 			);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/Program Files/jupyter/kernels/foo.json"),
-				),
+					Uri.file("C:/Program Files/jupyter/kernels/foo.json")
+				)
 			);
 
 			// Untrusted paths
 			assert.isFalse(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/ProgramData/jupyter/kernels/a/foo.json"),
-				),
+					Uri.file("C:/ProgramData/jupyter/kernels/a/foo.json")
+				)
 			);
 			assert.isFalse(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/ProgramData/jupyter/kernels/b/foo.json"),
-				),
+					Uri.file("C:/ProgramData/jupyter/kernels/b/foo.json")
+				)
 			);
 
 			// Trust and check again
@@ -93,13 +93,13 @@ suite("Trusted Kernel paths", () => {
 			]);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/ProgramData/jupyter/kernels/a/foo.json"),
-				),
+					Uri.file("C:/ProgramData/jupyter/kernels/a/foo.json")
+				)
 			);
 			assert.isFalse(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/ProgramData/jupyter/kernels/b/foo.json"),
-				),
+					Uri.file("C:/ProgramData/jupyter/kernels/b/foo.json")
+				)
 			);
 
 			// Trust and check again
@@ -109,13 +109,13 @@ suite("Trusted Kernel paths", () => {
 			]);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/ProgramData/jupyter/kernels/a/foo.json"),
-				),
+					Uri.file("C:/ProgramData/jupyter/kernels/a/foo.json")
+				)
 			);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/ProgramData/jupyter/kernels/b/foo.json"),
-				),
+					Uri.file("C:/ProgramData/jupyter/kernels/b/foo.json")
+				)
 			);
 		});
 	});
@@ -127,19 +127,19 @@ suite("Trusted Kernel paths", () => {
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
 					Uri.file(
-						"C:/Something/venv/shared/jupyter/kernels/foo.json",
-					),
-				),
+						"C:/Something/venv/shared/jupyter/kernels/foo.json"
+					)
+				)
 			);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/Windows/venv/shared/jupyter/kernels/foo.json"),
-				),
+					Uri.file("C:/Windows/venv/shared/jupyter/kernels/foo.json")
+				)
 			);
 			assert.isTrue(
 				trustedKernelPaths.isTrusted(
-					Uri.file("C:/Program Files/jupyter/kernels/foo.json"),
-				),
+					Uri.file("C:/Program Files/jupyter/kernels/foo.json")
+				)
 			);
 		});
 	});

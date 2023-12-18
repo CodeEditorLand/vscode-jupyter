@@ -41,7 +41,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		kernel: IKernel | undefined,
 		platformService: IPlatformService,
 		debugService: IDebugService,
-		debugLocationTrackerFactory?: IDebugLocationTrackerFactory,
+		debugLocationTrackerFactory?: IDebugLocationTrackerFactory
 	) {
 		super(
 			session,
@@ -49,12 +49,12 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			jupyterSession,
 			kernel,
 			platformService,
-			debugService,
+			debugService
 		);
 		if (debugLocationTrackerFactory) {
 			this.debugLocationTracker =
 				debugLocationTrackerFactory.createDebugAdapterTracker(
-					session,
+					session
 				) as DebugAdapterTracker;
 			if (this.debugLocationTracker.onWillStartSession) {
 				this.debugLocationTracker.onWillStartSession();
@@ -66,7 +66,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					}
 				},
 				this,
-				this.disposables,
+				this.disposables
 			);
 			this.onDidEndSession(
 				() => {
@@ -75,20 +75,20 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					}
 				},
 				this,
-				this.disposables,
+				this.disposables
 			);
 		}
 	}
 
 	override handleClientMessageAsync(
-		message: DebugProtocol.ProtocolMessage,
+		message: DebugProtocol.ProtocolMessage
 	): Promise<void> {
 		traceInfoIfCI(
 			`KernelDebugAdapter::handleMessage ${JSON.stringify(
 				message,
 				undefined,
-				" ",
-			)}`,
+				" "
+			)}`
 		);
 		if (
 			message.type === "request" &&
@@ -122,11 +122,11 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 
 			// We know jupyter will strip out leading white spaces, hence take that into account.
 			const norm = path.normalize(
-				(response as IDumpCellResponse).sourcePath,
+				(response as IDumpCellResponse).sourcePath
 			);
 			this.fileToCell.set(
 				norm,
-				Uri.parse(metadata.interactive.uristring),
+				Uri.parse(metadata.interactive.uristring)
 			);
 
 			// If this cell doesn't have a cell marker, then
@@ -154,12 +154,12 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			this.cellToDebugFileSortedInReverseOrderByLineNumber.sort(
 				(a, b) =>
 					b.metadata.interactive.lineIndex -
-					a.metadata.interactive.lineIndex,
+					a.metadata.interactive.lineIndex
 			);
 		} catch (err) {
 			traceError(
 				`Failed to dump cell for ${cell.index} with code ${metadata.interactive.originalSource}`,
-				err,
+				err
 			);
 		}
 	}
@@ -170,7 +170,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			line?: number;
 			endLine?: number;
 		},
-		source?: DebugProtocol.Source,
+		source?: DebugProtocol.Source
 	) {
 		source = location?.source ?? source;
 		if (!source || !source.path) {
@@ -179,7 +179,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 
 		// Find the cell that matches this line in the IW file by mapping the debugFilePath to the IW file.
 		const cell = this.cellToDebugFileSortedInReverseOrderByLineNumber.find(
-			(item) => item.debugFilePath === source!.path,
+			(item) => item.debugFilePath === source!.path
 		);
 		if (!cell) {
 			return;
@@ -201,7 +201,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			line?: number;
 			endLine?: number;
 		},
-		source?: DebugProtocol.Source,
+		source?: DebugProtocol.Source
 	) {
 		const startLine = location.line;
 		source = location?.source ?? source;
@@ -211,7 +211,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 
 		// Find the cell that matches this line in the IW file by mapping the debugFilePath to the IW file.
 		const cell = this.cellToDebugFileSortedInReverseOrderByLineNumber.find(
-			(item) => startLine >= item.metadata.interactive.lineIndex + 1,
+			(item) => startLine >= item.metadata.interactive.lineIndex + 1
 		);
 		if (!cell || cell.interactiveWindow.path !== source.path) {
 			return;
@@ -228,7 +228,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	}
 
 	protected override async sendRequestToJupyterSession(
-		request: DebugProtocol.Request,
+		request: DebugProtocol.Request
 	): Promise<DebugProtocol.Response> {
 		if (request.command === "setBreakpoints") {
 			const args =
@@ -253,8 +253,8 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					clonedRequest.arguments.breakpoints = currentCellBps;
 					setBreakpointsResponses.push(
 						super.sendRequestToJupyterSession(
-							clonedRequest,
-						) as Promise<DebugProtocol.SetBreakpointsResponse>,
+							clonedRequest
+						) as Promise<DebugProtocol.SetBreakpointsResponse>
 					);
 				}
 			};
@@ -267,7 +267,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 								bp.line >= cell.metadata.generatedCode!.line &&
 								bp.line <= cell.metadata.generatedCode!.endLine
 							);
-						},
+						}
 					);
 
 				if (
@@ -284,7 +284,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					setBreakpointsResponses.push(
 						Promise.resolve({
 							body: { breakpoints: [fakeBreakpoint] },
-						} as DebugProtocol.SetBreakpointsResponse),
+						} as DebugProtocol.SetBreakpointsResponse)
 					);
 				}
 			}
@@ -296,7 +296,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			responses.slice(1).forEach((response) => {
 				newResponse.body.breakpoints =
 					newResponse.body.breakpoints.concat(
-						response.body.breakpoints ?? [],
+						response.body.breakpoints ?? []
 					);
 			});
 
@@ -312,7 +312,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 
 	protected getDumpFilesForDeletion() {
 		return this.cellToDebugFileSortedInReverseOrderByLineNumber.map(
-			(item) => item.debugFilePath,
+			(item) => item.debugFilePath
 		);
 	}
 }

@@ -12,7 +12,10 @@ const pngMimeType = "image/png";
 
 @injectable()
 export class PlotViewHandler {
-	constructor(@inject(IPlotViewerProvider) private readonly plotViewProvider: IPlotViewerProvider) {}
+	constructor(
+		@inject(IPlotViewerProvider)
+		private readonly plotViewProvider: IPlotViewerProvider
+	) {}
 
 	public async openPlot(notebook: NotebookDocument, outputId: string) {
 		if (notebook.isClosed) {
@@ -27,8 +30,8 @@ export class PlotViewHandler {
 			if (!pngOutput) {
 				return traceError(
 					`No SVG or PNG Plot to open ${getDisplayPath(
-						notebook.uri,
-					)}, id: ${outputId}`,
+						notebook.uri
+					)}, id: ${outputId}`
 				);
 			}
 
@@ -46,7 +49,7 @@ export class PlotViewHandler {
 function getOutputItem(
 	notebook: NotebookDocument,
 	outputId: string,
-	mimeType: string,
+	mimeType: string
 ): NotebookCellOutputItem | undefined {
 	for (const cell of notebook.getCells()) {
 		for (const output of cell.outputs) {

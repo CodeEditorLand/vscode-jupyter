@@ -15,7 +15,7 @@ function getListOfFiles(filename) {
 	return files.map((file) => {
 		return path.join(
 			exports.ExtensionRootDir,
-			file.replace(/\//g, path.sep),
+			file.replace(/\//g, path.sep)
 		);
 	});
 }

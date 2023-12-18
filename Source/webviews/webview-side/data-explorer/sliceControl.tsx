@@ -55,7 +55,7 @@ export class SliceControl extends React.Component<
 	constructor(props: ISliceControlProps) {
 		super(props);
 		const initialSlice = preselectedSliceExpression(
-			this.props.originalVariableShape,
+			this.props.originalVariableShape
 		);
 		this.state = {
 			isEnabled: this.props.originalVariableShape.length > 2,
@@ -75,12 +75,10 @@ export class SliceControl extends React.Component<
 					className="slicing-control"
 					{...(this.props.originalVariableShape.length > 2
 						? { open: true }
-						: {})}
-				>
+						: {})}>
 					<summary
 						className="slice-summary"
-						onClick={() => this.props.onPanelToggled()}
-					>
+						onClick={() => this.props.onPanelToggled()}>
 						<span className="slice-summary-detail">
 							{getLocString("sliceSummaryTitle", "SLICING")}
 						</span>
@@ -98,16 +96,14 @@ export class SliceControl extends React.Component<
 								/>
 								<span
 									className="checkbox-label"
-									onClick={this.toggleEnablement}
-								>
+									onClick={this.toggleEnablement}>
 									{getLocString("sliceData", "Slice Data")}
 								</span>
 							</div>
 						</div>
 						<div
 							className="slice-control-row slice-form-container"
-							style={{ marginTop: "10px" }}
-						>
+							style={{ marginTop: "10px" }}>
 							<div className="slice-control-column">
 								<input
 									value={this.state.inputValue}
@@ -119,7 +115,7 @@ export class SliceControl extends React.Component<
 									}
 									autoComplete="on"
 									placeholder={preselectedSliceExpression(
-										this.props.originalVariableShape,
+										this.props.originalVariableShape
 									)}
 									disabled={isDisabled}
 								/>
@@ -127,8 +123,7 @@ export class SliceControl extends React.Component<
 									<div
 										className={`error-message${
 											isDisabled ? " disabled" : ""
-										}`}
-									>
+										}`}>
 										{this.state.errorMessage}
 									</div>
 								) : null}
@@ -139,7 +134,7 @@ export class SliceControl extends React.Component<
 								disabled={isDisabled}
 								value={getLocString(
 									"sliceSubmitButton",
-									"Apply",
+									"Apply"
 								)}
 							/>
 						</div>
@@ -153,7 +148,7 @@ export class SliceControl extends React.Component<
 	private generateIndexHandler = (index: number) => {
 		return (
 			_data: React.FormEvent,
-			option: IDropdownOption | undefined,
+			option: IDropdownOption | undefined
 		) => {
 			const state: { [key: string]: number } = {};
 			state[`selectedIndex${index}`] = option?.key as number;
@@ -165,7 +160,7 @@ export class SliceControl extends React.Component<
 	private generateAxisHandler = (index: number) => {
 		return (
 			_data: React.FormEvent,
-			option: IDropdownOption | undefined,
+			option: IDropdownOption | undefined
 		) => {
 			const state: { [key: string]: number } = {};
 			state[`selectedAxis${index}`] = option?.key as number;
@@ -184,9 +179,9 @@ export class SliceControl extends React.Component<
 				width:
 					measureText(
 						Math.max(
-							...this.props.originalVariableShape,
+							...this.props.originalVariableShape
 						).toString(),
-						null,
+						null
 					) + 40,
 			},
 		};
@@ -231,7 +226,7 @@ export class SliceControl extends React.Component<
 						className="dropdownTitleOverrides"
 						onChange={updateIndexHandler}
 					/>
-				</div>,
+				</div>
 			);
 		}
 		return dropdowns;
@@ -281,7 +276,7 @@ export class SliceControl extends React.Component<
 		const newValue = event.currentTarget.value ?? "";
 		const errorMessage = getErrorMessage(
 			newValue,
-			this.props.originalVariableShape,
+			this.props.originalVariableShape
 		);
 		this.setState({ inputValue: newValue ?? "", errorMessage });
 	};
@@ -292,7 +287,7 @@ export class SliceControl extends React.Component<
 			this.state.inputValue !== this.props.sliceExpression &&
 			isValidSliceExpression(
 				this.state.inputValue,
-				this.props.originalVariableShape,
+				this.props.originalVariableShape
 			)
 		) {
 			// Update axis and index dropdown selections
@@ -385,7 +380,7 @@ export class SliceControl extends React.Component<
 
 			const newSliceExpression = "[" + shape.join(", ") + "]";
 			const fullSlice = fullSliceExpression(
-				this.props.originalVariableShape,
+				this.props.originalVariableShape
 			);
 			if (
 				numSpecifiedIndices === numDropdowns &&

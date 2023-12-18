@@ -19,7 +19,7 @@ import { KernelConnectionMetadata } from "../kernels/types";
 
 export function getStartConnectMessage(
 	kernelMetadata: KernelConnectionMetadata,
-	reason: SysInfoReason,
+	reason: SysInfoReason
 ) {
 	const displayName = getDisplayNameOrNameOfKernelConnection(kernelMetadata);
 	if (displayName) {
@@ -35,7 +35,7 @@ export function getStartConnectMessage(
 
 export function getFinishConnectMessage(
 	kernelMetadata: KernelConnectionMetadata,
-	reason: SysInfoReason,
+	reason: SysInfoReason
 ) {
 	const displayName = getDisplayNameOrNameOfKernelConnection(kernelMetadata);
 	return reason == SysInfoReason.Restart
@@ -57,11 +57,11 @@ export class SystemInfoCell {
 
 	constructor(
 		private readonly notebookDocument: NotebookDocument,
-		message: string,
+		message: string
 	) {
 		if (notebookDocument.cellCount) {
 			const lastCell = notebookDocument.cellAt(
-				notebookDocument.cellCount,
+				notebookDocument.cellCount
 			);
 			if (isSysInfoCell(lastCell)) {
 				this.sysInfoCellPromise = Promise.resolve(lastCell);
@@ -80,7 +80,7 @@ export class SystemInfoCell {
 			const markdownCell = new NotebookCellData(
 				NotebookCellKind.Markup,
 				message,
-				MARKDOWN_LANGUAGE,
+				MARKDOWN_LANGUAGE
 			);
 			markdownCell.metadata = {
 				custom: { metadata: { isInteractiveWindowMessageCell: true } },
@@ -103,7 +103,7 @@ export class SystemInfoCell {
 					edit.replace(
 						cell.document.uri,
 						new Range(0, 0, cell.document.lineCount, 0),
-						newMessage,
+						newMessage
 					);
 
 					edit.set(this.notebookDocument!.uri, [
@@ -129,7 +129,7 @@ export class SystemInfoCell {
 			if (cell.index >= 0) {
 				if (isSysInfoCell(cell)) {
 					const nbEdit = NotebookEdit.deleteCells(
-						new NotebookRange(cell.index, cell.index + 1),
+						new NotebookRange(cell.index, cell.index + 1)
 					);
 					edit.set(this.notebookDocument.uri, [nbEdit]);
 					return;

@@ -27,15 +27,18 @@ export class ScriptSourceProviderFactory
 	implements IWidgetScriptSourceProviderFactory
 {
 	constructor(
-        @inject(IConfigurationService) private readonly configurationSettings: IConfigurationService,
-        @inject(IIPyWidgetScriptManagerFactory)
-        private readonly widgetScriptManagerFactory: IIPyWidgetScriptManagerFactory,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configurationSettings: IConfigurationService,
+		@inject(IIPyWidgetScriptManagerFactory)
+		private readonly widgetScriptManagerFactory: IIPyWidgetScriptManagerFactory,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly globalMemento: Memento
+	) {}
 
 	public getProviders(
 		kernel: IKernel,
-		uriConverter: ILocalResourceUriConverter,
+		uriConverter: ILocalResourceUriConverter
 	) {
 		const scriptProviders: IWidgetScriptSourceProvider[] = [];
 
@@ -43,8 +46,8 @@ export class ScriptSourceProviderFactory
 		scriptProviders.push(
 			new CDNWidgetScriptSourceProvider(
 				this.globalMemento,
-				this.configurationSettings,
-			),
+				this.configurationSettings
+			)
 		);
 		switch (kernel.kernelConnectionMetadata.kind) {
 			case "connectToLiveRemoteKernel":
@@ -52,8 +55,8 @@ export class ScriptSourceProviderFactory
 				scriptProviders.push(
 					new RemoteWidgetScriptSourceProvider(
 						kernel,
-						this.widgetScriptManagerFactory,
-					),
+						this.widgetScriptManagerFactory
+					)
 				);
 				break;
 
@@ -62,8 +65,8 @@ export class ScriptSourceProviderFactory
 					new LocalWidgetScriptSourceProvider(
 						kernel,
 						uriConverter,
-						this.widgetScriptManagerFactory,
-					),
+						this.widgetScriptManagerFactory
+					)
 				);
 		}
 

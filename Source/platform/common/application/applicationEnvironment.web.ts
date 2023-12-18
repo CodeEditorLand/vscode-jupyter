@@ -17,7 +17,9 @@ export class ApplicationEnvironment extends BaseApplicationEnvironment {
 	public get userCustomKeybindingsFile(): Uri | undefined {
 		return undefined;
 	}
-	constructor(@inject(IExtensionContext) extensionContext: IExtensionContext) {
-        super(extensionContext);
-    }
+	constructor(
+		@inject(IExtensionContext) extensionContext: IExtensionContext
+	) {
+		super(extensionContext);
+	}
 }

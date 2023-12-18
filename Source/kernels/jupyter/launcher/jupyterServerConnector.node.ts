@@ -16,13 +16,14 @@ import { PythonExtensionNotInstalledError } from "../../../platform/errors/pytho
 export class JupyterServerConnector implements IJupyterServerConnector {
 	private readonly startupUi = new DisplayOptions(true);
 	constructor(
-        @inject(IJupyterServerProvider)
-        private readonly jupyterServerProvider: IJupyterServerProvider,
-        @inject(IPythonExtensionChecker) private readonly extensionChecker: IPythonExtensionChecker
-    ) {}
+		@inject(IJupyterServerProvider)
+		private readonly jupyterServerProvider: IJupyterServerProvider,
+		@inject(IPythonExtensionChecker)
+		private readonly extensionChecker: IPythonExtensionChecker
+	) {}
 
 	public async connect(
-		options: ConnectNotebookProviderOptions,
+		options: ConnectNotebookProviderOptions
 	): Promise<IJupyterConnection> {
 		if (!options.ui.disableUI) {
 			this.startupUi.disableUI = false;

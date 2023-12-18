@@ -88,13 +88,13 @@ export interface IDataViewerDataProvider {
 	dispose(): void;
 	getDataFrameInfo(
 		sliceExpression?: string,
-		isRefresh?: boolean,
+		isRefresh?: boolean
 	): Promise<IDataFrameInfo>;
 	getAllRows(sliceExpression?: string): Promise<IRowsResponse>;
 	getRows(
 		start: number,
 		end: number,
-		sliceExpression?: string,
+		sliceExpression?: string
 	): Promise<IRowsResponse>;
 }
 
@@ -110,7 +110,7 @@ export const IDataViewerFactory = Symbol("IDataViewerFactory");
 export interface IDataViewerFactory {
 	create(
 		dataProvider: IDataViewerDataProvider,
-		title: string,
+		title: string
 	): Promise<IDataViewer>;
 	readonly activeViewer: IDataViewer | undefined;
 }
@@ -124,13 +124,13 @@ export interface IDataViewer extends IDisposable {
 	readonly onDidChangeDataViewerViewState: Event<void>;
 	showData(
 		dataProvider: IDataViewerDataProvider,
-		title: string,
+		title: string
 	): Promise<void>;
 	refreshData(): Promise<void>;
 }
 
 export const IJupyterVariableDataProvider = Symbol(
-	"IJupyterVariableDataProvider",
+	"IJupyterVariableDataProvider"
 );
 export interface IJupyterVariableDataProvider extends IDataViewerDataProvider {
 	readonly kernel: IKernel | undefined;
@@ -138,21 +138,21 @@ export interface IJupyterVariableDataProvider extends IDataViewerDataProvider {
 }
 
 export const IJupyterVariableDataProviderFactory = Symbol(
-	"IJupyterVariableDataProviderFactory",
+	"IJupyterVariableDataProviderFactory"
 );
 export interface IJupyterVariableDataProviderFactory {
 	create(
 		variable: IJupyterVariable,
-		kernel?: IKernel,
+		kernel?: IKernel
 	): Promise<IJupyterVariableDataProvider>;
 }
 
 export const IDataViewerDependencyService = Symbol(
-	"IDataViewerDependencyService",
+	"IDataViewerDependencyService"
 );
 
 export interface IDataViewerDependencyService {
 	checkAndInstallMissingDependencies(
-		executionEnvironment: IKernel | PythonEnvironment,
+		executionEnvironment: IKernel | PythonEnvironment
 	): Promise<void>;
 }

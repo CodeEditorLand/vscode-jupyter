@@ -22,9 +22,9 @@ const cleanupCode = dedent`
 export class VariableScriptGenerator implements IVariableScriptGenerator {
 	static contentsOfScript: string | undefined;
 	constructor(
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IExtensionContext) private readonly context: IExtensionContext
-    ) {}
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IExtensionContext) private readonly context: IExtensionContext
+	) {}
 	async generateCodeToGetVariableInfo(options: {
 		isDebugging: boolean;
 		variableName: string;
@@ -103,7 +103,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 			"pythonFiles",
 			"vscode_datascience_helpers",
 			"getVariableInfo",
-			"vscodeGetVariableInfo.py",
+			"vscodeGetVariableInfo.py"
 		);
 		const contents = await this.fs.readFile(scriptPath);
 		VariableScriptGenerator.contentsOfScript = contents;

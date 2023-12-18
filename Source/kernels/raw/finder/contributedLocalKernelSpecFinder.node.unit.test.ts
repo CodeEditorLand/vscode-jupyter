@@ -76,21 +76,21 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		disposables.push(onDidChangeInterpreterStatus);
 		when(interpreterService.status).thenReturn("idle");
 		when(interpreterService.onDidChangeInterpreter).thenReturn(
-			onDidChangeInterpreter.event,
+			onDidChangeInterpreter.event
 		);
 		when(interpreterService.onDidChangeStatus).thenReturn(
-			onDidChangeInterpreterStatus.event,
+			onDidChangeInterpreterStatus.event
 		);
 		when(mockedVSCodeNamespaces.extensions.onDidChange).thenReturn(
-			onDidChangeExtensions.event,
+			onDidChangeExtensions.event
 		);
 		when(nonPythonKernelFinder.status).thenReturn("idle");
 		when(nonPythonKernelFinder.onDidChangeKernels).thenReturn(
-			onDidChangeNonPythonKernels.event,
+			onDidChangeNonPythonKernels.event
 		);
 		when(pythonKernelFinder.status).thenReturn("idle");
 		when(pythonKernelFinder.onDidChangeKernels).thenReturn(
-			onDidChangePythonKernels.event,
+			onDidChangePythonKernels.event
 		);
 		when(extensionChecker.isPythonExtensionInstalled).thenReturn(true);
 		finder = new ContributedLocalKernelSpecFinder(
@@ -99,7 +99,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 			instance(kernelFinder),
 			disposables,
 			instance(extensionChecker),
-			instance(interpreterService),
+			instance(interpreterService)
 		);
 
 		clock = fakeTimers.install();
@@ -114,12 +114,12 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables,
+			disposables
 		);
 		const onDidChangeStatus = createEventHandler(
 			finder,
 			"onDidChangeStatus",
-			disposables,
+			disposables
 		);
 
 		finder.activate();
@@ -128,12 +128,12 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			0,
-			"onDidChangeKernels should not fire",
+			"onDidChangeKernels should not fire"
 		);
 		assert.isAtLeast(
 			onDidChangeStatus.count,
 			0,
-			"onDidChangeStatus should ont fire",
+			"onDidChangeStatus should ont fire"
 		);
 	});
 	test("Status is discovering until Python extension finishes refreshing interpreters", async () => {
@@ -145,12 +145,12 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables,
+			disposables
 		);
 		const onDidChangeStatus = createEventHandler(
 			finder,
 			"onDidChangeStatus",
-			disposables,
+			disposables
 		);
 
 		finder.activate();
@@ -159,12 +159,12 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			0,
-			"onDidChangeKernels not fired",
+			"onDidChangeKernels not fired"
 		);
 		assert.isAtLeast(
 			onDidChangeStatus.count,
 			1,
-			"onDidChangeStatus not fired 2 times",
+			"onDidChangeStatus not fired 2 times"
 		);
 		assert.deepEqual(statuses, ["discovering"]);
 
@@ -176,7 +176,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeStatus.count,
 			2,
-			"onDidChangeStatus not fired 2 times",
+			"onDidChangeStatus not fired 2 times"
 		);
 		assert.deepEqual(statuses, ["discovering", "idle"]);
 	});
@@ -188,7 +188,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		const onDidChangeStatus = createEventHandler(
 			finder,
 			"onDidChangeStatus",
-			disposables,
+			disposables
 		);
 
 		finder.activate();
@@ -207,7 +207,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeStatus.count,
 			2,
-			"onDidChangeStatus not fired 2 times",
+			"onDidChangeStatus not fired 2 times"
 		);
 		assert.deepEqual(statuses, ["discovering", "idle"]);
 	});
@@ -219,7 +219,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables,
+			disposables
 		);
 
 		finder.activate();
@@ -228,7 +228,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			1,
-			"onDidChangeKernels not fired",
+			"onDidChangeKernels not fired"
 		);
 	});
 	test("Re-discover if there are changes to python interpreters and we have a new kernel spec", async () => {
@@ -239,7 +239,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables,
+			disposables
 		);
 
 		finder.activate();
@@ -248,7 +248,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			1,
-			"onDidChangeKernels not fired",
+			"onDidChangeKernels not fired"
 		);
 
 		when(pythonKernelFinder.kernels).thenReturn([rustKernelSpec]);
@@ -258,7 +258,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			2,
-			"onDidChangeKernels not fired",
+			"onDidChangeKernels not fired"
 		);
 	});
 	test("Re-discover if there are changes to python interpreters without any new kernels", async () => {
@@ -269,7 +269,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		const onDidChangeKernels = createEventHandler(
 			finder,
 			"onDidChangeKernels",
-			disposables,
+			disposables
 		);
 
 		finder.activate();
@@ -278,7 +278,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			1,
-			"onDidChangeKernels not fired",
+			"onDidChangeKernels not fired"
 		);
 
 		onDidChangePythonKernels.fire();
@@ -287,7 +287,7 @@ suite(`Contributed Local Kernel Spec Finder`, () => {
 		assert.isAtLeast(
 			onDidChangeKernels.count,
 			1,
-			"onDidChangeKernels should not have been fired again fired",
+			"onDidChangeKernels should not have been fired again fired"
 		);
 	});
 });

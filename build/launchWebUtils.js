@@ -35,7 +35,7 @@ exports.launch = async function launch(launchTests) {
 		const bundlePath = path.join(
 			extensionDevelopmentPath,
 			launchTests ? "out" : "dist",
-			"extension.web.bundle",
+			"extension.web.bundle"
 		);
 
 		// Changing the logging level to be read from workspace settings file.
@@ -55,8 +55,8 @@ exports.launch = async function launch(launchTests) {
 					"scope",
 				],
 				"resource",
-				{},
-			),
+				{}
+			)
 		);
 		// Tests scripts are in the 'out' folder.
 		if (launchTests) {
@@ -66,8 +66,8 @@ exports.launch = async function launch(launchTests) {
 					settingsJson,
 					["main"],
 					"./out/extension.node.js",
-					{},
-				),
+					{}
+				)
 			);
 			settingsJson = jsonc.applyEdits(
 				settingsJson,
@@ -75,8 +75,8 @@ exports.launch = async function launch(launchTests) {
 					settingsJson,
 					["browser"],
 					"./out/extension.web.bundle.js",
-					{},
-				),
+					{}
+				)
 			);
 		}
 		fs.writeFileSync(packageJsonFile, settingsJson);
@@ -91,7 +91,7 @@ exports.launch = async function launch(launchTests) {
 				"..",
 				"src",
 				"test",
-				"datascience",
+				"datascience"
 			),
 		};
 		if (launchTests) {
@@ -101,7 +101,7 @@ exports.launch = async function launch(launchTests) {
 	} catch (err) {
 		console.error(
 			launchTests ? "Failed to run tests" : "Failed to launch VS Code",
-			err,
+			err
 		);
 		exitCode = 1;
 	} finally {

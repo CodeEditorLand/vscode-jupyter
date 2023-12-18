@@ -31,21 +31,23 @@ export class ConnectionDisplayDataProvider
 {
 	private readonly details = new Map<string, ConnectionDisplayData>();
 	constructor(
-        @inject(IPlatformService) private readonly platform: IPlatformService,
-        @inject(IJupyterServerProviderRegistry)
-        private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IInterpreterService) private readonly interpreters: IInterpreterService
-    ) {}
+		@inject(IPlatformService) private readonly platform: IPlatformService,
+		@inject(IJupyterServerProviderRegistry)
+		private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IInterpreterService)
+		private readonly interpreters: IInterpreterService
+	) {}
 
 	public getDisplayData(
-		connection: KernelConnectionMetadata,
+		connection: KernelConnectionMetadata
 	): IConnectionDisplayData {
 		if (!this.details.get(connection.id)) {
 			const label = getDisplayNameOrNameOfKernelConnection(connection);
 			let description = getKernelConnectionDisplayPath(
 				connection,
-				this.platform,
+				this.platform
 			);
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
@@ -61,7 +63,7 @@ export class ConnectionDisplayDataProvider
 				"",
 				category,
 				undefined,
-				descriptionProvider,
+				descriptionProvider
 			);
 			this.disposables.push(newDetails);
 			this.details.set(connection.id, newDetails);
@@ -73,11 +75,11 @@ export class ConnectionDisplayDataProvider
 			) {
 				const updateInterpreterInfo = (e: PythonEnvironment[]) => {
 					const changedEnv = e.find(
-						(env) => env.id === connection.interpreter?.id,
+						(env) => env.id === connection.interpreter?.id
 					);
 					const interpreter =
 						this.interpreters.resolvedEnvironments.find(
-							(env) => env.id === changedEnv?.id,
+							(env) => env.id === changedEnv?.id
 						);
 					if (
 						connection.kind === "startUsingPythonInterpreter" &&
@@ -88,7 +90,7 @@ export class ConnectionDisplayDataProvider
 							getDisplayNameOrNameOfKernelConnection(connection);
 						const newDescription = getKernelConnectionDisplayPath(
 							connection,
-							this.platform,
+							this.platform
 						);
 						const newCategory =
 							getKernelConnectionCategorySync(connection);
@@ -113,7 +115,7 @@ export class ConnectionDisplayDataProvider
 				this.interpreters.onDidChangeInterpreter(
 					(e) => (e ? updateInterpreterInfo([e]) : undefined),
 					this,
-					this.disposables,
+					this.disposables
 				);
 			}
 		}
@@ -127,7 +129,7 @@ export class ConnectionDisplayDataProvider
 			const displayName = getJupyterDisplayName(
 				connection.serverProviderHandle,
 				this.jupyterUriProviderRegistration,
-				DataScience.kernelDefaultRemoteDisplayName,
+				DataScience.kernelDefaultRemoteDisplayName
 			);
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;

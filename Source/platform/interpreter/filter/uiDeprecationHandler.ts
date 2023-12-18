@@ -11,7 +11,10 @@ import { commands } from "vscode";
 export class PythonFilterUICommandDeprecation
 	implements IExtensionSyncActivationService
 {
-	constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry) {}
+	constructor(
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	public activate() {
 		this.disposables.push(
 			commands.registerCommand(
@@ -20,11 +23,11 @@ export class PythonFilterUICommandDeprecation
 					commands
 						.executeCommand(
 							"workbench.action.openSettings",
-							"jupyter.kernels.excludePythonEnvironments",
+							"jupyter.kernels.excludePythonEnvironments"
 						)
 						.then(noop, noop),
-				this,
-			),
+				this
+			)
 		);
 	}
 }

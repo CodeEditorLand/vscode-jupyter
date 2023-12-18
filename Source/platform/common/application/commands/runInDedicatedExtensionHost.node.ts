@@ -19,7 +19,7 @@ export class RunInDedicatedExtensionHostCommandHandler
 		commands.registerCommand(
 			"jupyter.runInDedicatedExtensionHost",
 			this.updateAffinity,
-			this,
+			this
 		);
 	}
 	private async updateAffinity() {
@@ -56,7 +56,7 @@ export class RunInDedicatedExtensionHostCommandHandler
 				...(affinity ?? {}),
 				...update,
 			},
-			ConfigurationTarget.Global,
+			ConfigurationTarget.Global
 		);
 
 		commands

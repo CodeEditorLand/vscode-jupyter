@@ -28,16 +28,16 @@ suite("ipywidget - Local Widget Script Source", () => {
 		scriptManagerFactory = mock<IIPyWidgetScriptManagerFactory>();
 		scriptManager = mock<IIPyWidgetScriptManager>();
 		when(scriptManagerFactory.getOrCreate(anything())).thenReturn(
-			instance(scriptManager),
+			instance(scriptManager)
 		);
 		kernel = mock<IKernel>();
 		when(resourceConverter.asWebviewUri(anything())).thenCall((uri) =>
-			Promise.resolve(asVSCodeUri(uri)),
+			Promise.resolve(asVSCodeUri(uri))
 		);
 		scriptSourceProvider = new LocalWidgetScriptSourceProvider(
 			instance(kernel),
 			instance(resourceConverter),
-			instance(scriptManagerFactory),
+			instance(scriptManagerFactory)
 		);
 	});
 	test("No baseurl if Script Manager does not support it", async () => {
@@ -62,7 +62,7 @@ suite("ipywidget - Local Widget Script Source", () => {
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
 			"ModuleName",
-			"1",
+			"1"
 		);
 
 		assert.deepEqual(value, { moduleName: "ModuleName" });
@@ -75,7 +75,7 @@ suite("ipywidget - Local Widget Script Source", () => {
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
 			"widgetNotFound",
-			"1",
+			"1"
 		);
 		assert.deepEqual(value, {
 			moduleName: "widgetNotFound",
@@ -89,7 +89,7 @@ suite("ipywidget - Local Widget Script Source", () => {
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
 			"widget1",
-			"1",
+			"1"
 		);
 		assert.deepEqual(value, {
 			moduleName: "widget1",
@@ -109,14 +109,14 @@ suite("ipywidget - Local Widget Script Source", () => {
 				moduleName: "widget1",
 				source: "local",
 				scriptUri: asVSCodeUri(
-					Uri.file("nbextensions/widget1/inex.js"),
+					Uri.file("nbextensions/widget1/inex.js")
 				),
 			},
 			{
 				moduleName: "widget2",
 				source: "local",
 				scriptUri: asVSCodeUri(
-					Uri.file("nbextensions/widget2/inex.js"),
+					Uri.file("nbextensions/widget2/inex.js")
 				),
 			},
 		]);

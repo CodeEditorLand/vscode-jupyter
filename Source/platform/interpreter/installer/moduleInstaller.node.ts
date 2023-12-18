@@ -57,7 +57,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 		productOrModuleName: Product | string,
 		interpreter: PythonEnvironment | Environment,
 		cancelTokenSource: CancellationTokenSource,
-		flags?: ModuleInstallFlags,
+		flags?: ModuleInstallFlags
 	): Promise<void> {
 		const name =
 			typeof productOrModuleName == "string"
@@ -66,18 +66,18 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 		const args = await this.getExecutionArgs(name, interpreter, flags);
 		const pythonFactory =
 			this.serviceContainer.get<IPythonExecutionFactory>(
-				IPythonExecutionFactory,
+				IPythonExecutionFactory
 			);
 		const procFactory = this.serviceContainer.get<IProcessServiceFactory>(
-			IProcessServiceFactory,
+			IProcessServiceFactory
 		);
 		const activationHelper =
 			this.serviceContainer.get<IEnvironmentActivationService>(
-				IEnvironmentActivationService,
+				IEnvironmentActivationService
 			);
 		const environmentService =
 			this.serviceContainer.get<IEnvironmentVariablesService>(
-				IEnvironmentVariablesService,
+				IEnvironmentVariablesService
 			);
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return;
@@ -87,7 +87,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				message?: string | undefined;
 				increment?: number | undefined;
 			}>,
-			token: CancellationToken,
+			token: CancellationToken
 		) => {
 			const deferred = createDeferred();
 			const disposables: IDisposable[] = [];
@@ -98,7 +98,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 					deferred.resolve();
 				},
 				this,
-				disposables,
+				disposables
 			);
 
 			let observable: ObservableExecutionResult<string> | undefined;
@@ -125,7 +125,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				const envVars =
 					await activationHelper.getActivatedEnvironmentVariables(
 						undefined,
-						interpreter,
+						interpreter
 					);
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
@@ -181,13 +181,13 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 							} else if (
 								!couldNotInstallErr &&
 								output.out.includes(
-									"ERROR: Could not install packages",
+									"ERROR: Could not install packages"
 								)
 							) {
 								couldNotInstallErr = output.out.substring(
 									output.out.indexOf(
-										"ERROR: Could not install packages",
-									),
+										"ERROR: Could not install packages"
+									)
 								);
 							}
 
@@ -195,7 +195,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 						}
 					},
 					this,
-					disposables,
+					disposables
 				);
 				observable.out.done
 					.then(
@@ -208,7 +208,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 								if (
 									couldNotInstallErr &&
 									couldNotInstallErr.includes(
-										"https://pip.pypa.io/warnings/enable-long-paths",
+										"https://pip.pypa.io/warnings/enable-long-paths"
 									)
 								) {
 									couldNotInstallErr = splitLines(
@@ -216,24 +216,23 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 										{
 											trim: true,
 											removeEmptyEntries: true,
-										},
+										}
 									)
 										.filter(
 											(line) =>
-												!line.startsWith("[notice]"),
+												!line.startsWith("[notice]")
 										)
 										.join(EOL);
 									deferred.reject(
 										new PackageNotInstalledWindowsLongPathNotEnabledError(
 											productOrModuleName,
 											interpreter,
-											couldNotInstallErr,
-										),
+											couldNotInstallErr
+										)
 									);
 								} else {
 									deferred.reject(
-										lastStdErr ||
-											observable?.proc?.exitCode,
+										lastStdErr || observable?.proc?.exitCode
 									);
 								}
 							} else {
@@ -242,7 +241,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 						},
 						(err: unknown) => {
 							deferred.reject(err);
-						},
+						}
 					)
 					.finally(() => dispose(disposables));
 			}
@@ -260,15 +259,15 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 		await window.withProgress(
 			options,
 			async (progress, token: CancellationToken) =>
-				install(progress, token),
+				install(progress, token)
 		);
 	}
 	public abstract isSupported(
-		interpreter: PythonEnvironment | Environment,
+		interpreter: PythonEnvironment | Environment
 	): Promise<boolean>;
 	protected abstract getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
-		flags?: ModuleInstallFlags,
+		flags?: ModuleInstallFlags
 	): Promise<ExecutionInstallArgs>;
 }

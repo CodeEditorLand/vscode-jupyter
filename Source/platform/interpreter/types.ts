@@ -10,11 +10,11 @@ import {
 import { PythonEnvironment } from "../pythonEnvironments/info";
 
 export const IReservedPythonNamedProvider = Symbol(
-	"IReservedPythonNamedProvider",
+	"IReservedPythonNamedProvider"
 );
 export interface IReservedPythonNamedProvider extends IDisposable {
 	getUriOverridingReservedPythonNames(
-		cwd: Uri,
+		cwd: Uri
 	): Promise<{ uri: Uri; type: "file" | "__init__" }[]>;
 	isReserved(uri: Uri): Promise<boolean>;
 	/**
@@ -27,22 +27,22 @@ export const IInterpreterPackages = Symbol("IInterpreterPackages");
 export interface IInterpreterPackages {
 	listPackages(resource?: Resource): Promise<string[]>;
 	getPackageVersions(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<Map<string, string>>;
 	getPackageVersion(
 		interpreter: PythonEnvironment,
-		packageName: string,
+		packageName: string
 	): Promise<string | undefined>;
 	trackPackages(interpreterUri: InterpreterUri, ignoreCache?: boolean): void;
 }
 
 export const IWorkspaceInterpreterTracker = Symbol(
-	"IWorkspaceInterpreterTracker",
+	"IWorkspaceInterpreterTracker"
 );
 export interface IWorkspaceInterpreterTracker {
 	activate(): void;
 	isActiveWorkspaceInterpreter(
 		resource: Resource,
-		interpreter?: PythonEnvironment,
+		interpreter?: PythonEnvironment
 	): boolean;
 }

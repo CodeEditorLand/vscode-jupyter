@@ -12,9 +12,10 @@ import { IBaseKernelSession, IKernelSocket } from "../types";
 import { KernelSocketMap } from "../kernelSocket";
 
 export abstract class BaseJupyterSessionConnection<
-	S extends Session.ISessionConnection,
-	T extends "remoteJupyter" | "localJupyter" | "localRaw",
-> implements Session.ISessionConnection, IBaseKernelSession<T>
+		S extends Session.ISessionConnection,
+		T extends "remoteJupyter" | "localJupyter" | "localRaw",
+	>
+	implements Session.ISessionConnection, IBaseKernelSession<T>
 {
 	public get id() {
 		return this.session.id;
@@ -66,13 +67,16 @@ export abstract class BaseJupyterSessionConnection<
 	anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
 	protected readonly disposables: IDisposable[] = [];
 
-	constructor(public readonly kind: T, protected readonly session: S) {
+	constructor(
+		public readonly kind: T,
+		protected readonly session: S
+	) {
 		session.propertyChanged.connect(this.onPropertyChanged, this);
 		session.kernelChanged.connect(this.onKernelChanged, this);
 		session.statusChanged.connect(this.onStatusChanged, this);
 		session.connectionStatusChanged.connect(
 			this.onConnectionStatusChanged,
-			this,
+			this
 		);
 		session.iopubMessage.connect(this.onIOPubMessage, this);
 		session.unhandledMessage.connect(this.onUnhandledMessage, this);
@@ -85,24 +89,24 @@ export abstract class BaseJupyterSessionConnection<
 
 				this.session.propertyChanged.disconnect(
 					this.onPropertyChanged,
-					this,
+					this
 				);
 				this.session.kernelChanged.disconnect(
 					this.onKernelChanged,
-					this,
+					this
 				);
 				this.session.statusChanged.disconnect(
 					this.onStatusChanged,
-					this,
+					this
 				);
 				this.session.connectionStatusChanged.disconnect(
 					this.onConnectionStatusChanged,
-					this,
+					this
 				);
 				this.session.iopubMessage.disconnect(this.onIOPubMessage, this);
 				this.session.unhandledMessage.disconnect(
 					this.onUnhandledMessage,
-					this,
+					this
 				);
 				this.session.anyMessage.disconnect(this.onAnyMessage, this);
 			},
@@ -157,7 +161,7 @@ export abstract class BaseJupyterSessionConnection<
 	abstract shutdown(): Promise<void>;
 	abstract waitForIdle(
 		timeout: number,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<void>;
 	public async restart(): Promise<void> {
 		await this.session.kernel?.restart();
@@ -185,7 +189,7 @@ export abstract class BaseJupyterSessionConnection<
 		// If we have a new session, then emit the new kernel connection information.
 		if (
 			JSON.stringify(
-				this.previousKernelSocketInformation?.kernel.model,
+				this.previousKernelSocketInformation?.kernel.model
 			) === JSON.stringify(newKernelSocketInformation.kernel.model) &&
 			this.previousKernelSocketInformation?.kernel ===
 				newKernelSocketInformation.kernel &&
@@ -203,13 +207,13 @@ export abstract class BaseJupyterSessionConnection<
 		this.previousAnyMessageHandler?.dispose();
 		this.session.kernel?.connectionStatusChanged.disconnect(
 			this.onKernelConnectionStatusHandler,
-			this,
+			this
 		);
 
 		// Listen for session status changes
 		this.session.kernel?.connectionStatusChanged.connect(
 			this.onKernelConnectionStatusHandler,
-			this,
+			this
 		);
 		this._onDidKernelSocketChange.fire();
 	}
@@ -223,7 +227,7 @@ export abstract class BaseJupyterSessionConnection<
 			Kernel.IKernelConnection | null,
 			Kernel.IKernelConnection | null,
 			"kernel"
-		>,
+		>
 	) {
 		this.kernelChanged.emit(value);
 	}
@@ -234,7 +238,7 @@ export abstract class BaseJupyterSessionConnection<
 	}
 	private onConnectionStatusChanged(
 		_: unknown,
-		value: Kernel.ConnectionStatus,
+		value: Kernel.ConnectionStatus
 	) {
 		this.connectionStatusChanged.emit(value);
 	}
@@ -262,7 +266,7 @@ export abstract class BaseJupyterSessionConnection<
 	}
 	private onKernelConnectionStatusHandler(
 		_: unknown,
-		kernelConnection: Kernel.ConnectionStatus,
+		kernelConnection: Kernel.ConnectionStatus
 	) {
 		traceInfoIfCI(`Server Kernel Status = ${kernelConnection}`);
 	}

@@ -15,11 +15,11 @@ export class JupyterCannotBeLaunchedWithRootError extends BaseError {
 	constructor(
 		message: string,
 		stderr: string | string,
-		public readonly interpreter?: PythonEnvironment,
+		public readonly interpreter?: PythonEnvironment
 	) {
 		super(
 			"jupytercannotbelaunchedwitheroot",
-			message + (stderr ? `\n${stderr}` : ""),
+			message + (stderr ? `\n${stderr}` : "")
 		);
 	}
 }

@@ -31,18 +31,18 @@ suite("Export File Opener", () => {
 		(instance(editor) as any).then = undefined;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		when(reporter.createProgressIndicator(anything())).thenReturn(
-			instance(mock<IDisposable>()) as any,
+			instance(mock<IDisposable>()) as any
 		);
 		when(
-			mockedVSCodeNamespaces.workspace.openTextDocument(anything()),
+			mockedVSCodeNamespaces.workspace.openTextDocument(anything())
 		).thenResolve();
 		when(
-			mockedVSCodeNamespaces.window.showTextDocument(anything()),
+			mockedVSCodeNamespaces.window.showTextDocument(anything())
 		).thenReturn(Promise.resolve(instance(editor)));
 		when(fileSystem.readFile(anything())).thenResolve();
 		// reset(mockedVSCodeNamespaces.env);
 		when(mockedVSCodeNamespaces.env.openExternal(anything())).thenReturn(
-			Promise.resolve(true),
+			Promise.resolve(true)
 		);
 		sinon.stub(ServiceContainer, "instance").get(() => ({
 			get: (id: unknown) =>
@@ -58,7 +58,7 @@ suite("Export File Opener", () => {
 		await fileOpener.openFile(ExportFormat.python, uri);
 
 		verify(
-			mockedVSCodeNamespaces.window.showTextDocument(anything()),
+			mockedVSCodeNamespaces.window.showTextDocument(anything())
 		).once();
 	});
 	test("HTML File opened if yes button pressed", async () => {
@@ -67,8 +67,8 @@ suite("Export File Opener", () => {
 			mockedVSCodeNamespaces.window.showInformationMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(Promise.resolve("Yes"));
 
 		await fileOpener.openFile(ExportFormat.html, uri);
@@ -81,8 +81,8 @@ suite("Export File Opener", () => {
 			mockedVSCodeNamespaces.window.showInformationMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(Promise.resolve("No"));
 
 		await fileOpener.openFile(ExportFormat.html, uri);
@@ -95,8 +95,8 @@ suite("Export File Opener", () => {
 			mockedVSCodeNamespaces.window.showInformationMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(Promise.resolve("Yes"));
 
 		await fileOpener.openFile(ExportFormat.pdf, uri);
@@ -109,8 +109,8 @@ suite("Export File Opener", () => {
 			mockedVSCodeNamespaces.window.showInformationMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(Promise.resolve("No"));
 
 		await fileOpener.openFile(ExportFormat.pdf, uri);

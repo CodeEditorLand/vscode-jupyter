@@ -13,7 +13,7 @@ export async function sleep(timeout: number): Promise<number> {
 export async function waitForCondition(
 	condition: () => Promise<boolean>,
 	timeout: number,
-	interval: number,
+	interval: number
 ): Promise<boolean> {
 	// Set a timer that will resolve with null
 	return new Promise<boolean>((resolve) => {
@@ -59,7 +59,7 @@ export function raceTimeout<T>(
 
 	const timer = setTimeout(
 		() => promiseResolve?.(resolveValue as unknown as T),
-		timeout,
+		timeout
 	);
 
 	return Promise.race([
@@ -197,7 +197,7 @@ export class PromiseChain {
 		this.currentPromise = this.currentPromise.finally(() =>
 			promise()
 				.then((result) => deferred.resolve(result))
-				.catch((ex) => deferred.reject(ex)),
+				.catch((ex) => deferred.reject(ex))
 		);
 		return deferred.promise;
 	}

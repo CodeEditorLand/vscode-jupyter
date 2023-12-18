@@ -40,7 +40,7 @@ suite("Installation - installation channels", () => {
 		assert.strictEqual(
 			channels[0],
 			instance(installer),
-			"Incorrect installer",
+			"Incorrect installer"
 		);
 	});
 
@@ -56,12 +56,12 @@ suite("Installation - installation channels", () => {
 		assert.strictEqual(
 			channels[0],
 			instance(installer1),
-			"Incorrect installer 1",
+			"Incorrect installer 1"
 		);
 		assert.strictEqual(
 			channels[1],
 			instance(installer2),
-			"Incorrect installer 2",
+			"Incorrect installer 2"
 		);
 	});
 
@@ -82,7 +82,7 @@ suite("Installation - installation channels", () => {
 		assert.strictEqual(
 			channels[0],
 			instance(pipenvInstaller),
-			"Installer must be pipenv",
+			"Installer must be pipenv"
 		);
 	});
 
@@ -100,7 +100,7 @@ suite("Installation - installation channels", () => {
 
 		const result = await cm.getInstallationChannel(
 			Product.ensurepip,
-			interpreter,
+			interpreter
 		);
 
 		assert.strictEqual(result, instance(installer1));
@@ -108,7 +108,7 @@ suite("Installation - installation channels", () => {
 
 	function mockInstaller(
 		supported: boolean,
-		priority?: number,
+		priority?: number
 	): IModuleInstaller {
 		const installer = mock<IModuleInstaller>();
 		(installer as any).then = undefined;

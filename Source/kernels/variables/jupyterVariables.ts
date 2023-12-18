@@ -24,15 +24,21 @@ import {
 export class JupyterVariables implements IJupyterVariables {
 	private refreshEventEmitter = new EventEmitter<void>();
 	constructor(
-        @inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
-        @inject(IJupyterVariables) @named(Identifiers.KERNEL_VARIABLES) private kernelVariables: IJupyterVariables,
-        @inject(IJupyterVariables)
-        @named(Identifiers.DEBUGGER_VARIABLES)
-        private debuggerVariables: IConditionalJupyterVariables
-    ) {
-        disposableRegistry.push(debuggerVariables.refreshRequired(this.fireRefresh.bind(this)));
-        disposableRegistry.push(kernelVariables.refreshRequired(this.fireRefresh.bind(this)));
-    }
+		@inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
+		@inject(IJupyterVariables)
+		@named(Identifiers.KERNEL_VARIABLES)
+		private kernelVariables: IJupyterVariables,
+		@inject(IJupyterVariables)
+		@named(Identifiers.DEBUGGER_VARIABLES)
+		private debuggerVariables: IConditionalJupyterVariables
+	) {
+		disposableRegistry.push(
+			debuggerVariables.refreshRequired(this.fireRefresh.bind(this))
+		);
+		disposableRegistry.push(
+			kernelVariables.refreshRequired(this.fireRefresh.bind(this))
+		);
+	}
 
 	public get refreshRequired(): Event<void> {
 		return this.refreshEventEmitter.event;
@@ -42,14 +48,14 @@ export class JupyterVariables implements IJupyterVariables {
 	@capturePerfTelemetry(Telemetry.VariableExplorerFetchTime)
 	public async getVariables(
 		request: IJupyterVariablesRequest,
-		kernel?: IKernel,
+		kernel?: IKernel
 	): Promise<IJupyterVariablesResponse> {
 		return this.variableHandler.getVariables(request, kernel);
 	}
 
 	public async getFullVariable(
 		variable: IJupyterVariable,
-		kernel?: IKernel,
+		kernel?: IKernel
 	): Promise<IJupyterVariable> {
 		return this.variableHandler.getFullVariable(variable, kernel);
 	}
@@ -57,12 +63,12 @@ export class JupyterVariables implements IJupyterVariables {
 	public async getMatchingVariable(
 		name: string,
 		kernel?: IKernel,
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<IJupyterVariable | undefined> {
 		return this.variableHandler.getMatchingVariable(
 			name,
 			kernel,
-			cancelToken,
+			cancelToken
 		);
 	}
 
@@ -70,13 +76,13 @@ export class JupyterVariables implements IJupyterVariables {
 		targetVariable: IJupyterVariable,
 		kernel?: IKernel,
 		sliceExpression?: string,
-		isRefresh?: boolean,
+		isRefresh?: boolean
 	): Promise<IJupyterVariable> {
 		return this.variableHandler.getDataFrameInfo(
 			targetVariable,
 			kernel,
 			sliceExpression,
-			isRefresh,
+			isRefresh
 		);
 	}
 
@@ -85,14 +91,14 @@ export class JupyterVariables implements IJupyterVariables {
 		start: number,
 		end: number,
 		kernel?: IKernel,
-		sliceExpression?: string,
+		sliceExpression?: string
 	): Promise<{ data: Record<string, unknown>[] }> {
 		return this.variableHandler.getDataFrameRows(
 			targetVariable,
 			start,
 			end,
 			kernel,
-			sliceExpression,
+			sliceExpression
 		);
 	}
 

@@ -8,10 +8,10 @@ import { IPythonApiProvider, IPythonExtensionChecker } from "./types";
 export function registerTypes(serviceManager: IServiceManager): void {
 	serviceManager.addSingleton<IPythonApiProvider>(
 		IPythonApiProvider,
-		OldPythonApiProvider,
+		OldPythonApiProvider
 	);
 	serviceManager.addSingleton<IPythonExtensionChecker>(
 		IPythonExtensionChecker,
-		PythonExtensionChecker,
+		PythonExtensionChecker
 	);
 }

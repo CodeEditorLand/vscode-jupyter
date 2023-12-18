@@ -64,16 +64,26 @@ export class DebuggerVariables
 	private currentSeqNumsForVariables = new Set<Number>();
 
 	constructor(
-        @inject(IJupyterDebugService) @named(Identifiers.MULTIPLEXING_DEBUGSERVICE) private debugService: IDebugService,
-        @inject(INotebookDebuggingManager) private readonly debuggingManager: INotebookDebuggingManager,
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IVariableScriptGenerator) private readonly varScriptGenerator: IVariableScriptGenerator,
-        @inject(IDataFrameScriptGenerator) private readonly dfScriptGenerator: IDataFrameScriptGenerator,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider
-    ) {
-        super(undefined);
-        this.debuggingManager.onDoneDebugging(() => this.refreshEventEmitter.fire(), this);
-    }
+		@inject(IJupyterDebugService)
+		@named(Identifiers.MULTIPLEXING_DEBUGSERVICE)
+		private debugService: IDebugService,
+		@inject(INotebookDebuggingManager)
+		private readonly debuggingManager: INotebookDebuggingManager,
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IVariableScriptGenerator)
+		private readonly varScriptGenerator: IVariableScriptGenerator,
+		@inject(IDataFrameScriptGenerator)
+		private readonly dfScriptGenerator: IDataFrameScriptGenerator,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider
+	) {
+		super(undefined);
+		this.debuggingManager.onDoneDebugging(
+			() => this.refreshEventEmitter.fire(),
+			this
+		);
+	}
 
 	public get refreshRequired(): Event<void> {
 		return this.refreshEventEmitter.event;
@@ -90,7 +100,7 @@ export class DebuggerVariables
 	// IJupyterVariables implementation
 	public async getVariables(
 		request: IJupyterVariablesRequest,
-		kernel?: IKernel,
+		kernel?: IKernel
 	): Promise<IJupyterVariablesResponse> {
 		// Listen to notebook events if we haven't already
 		if (kernel) {
@@ -113,7 +123,7 @@ export class DebuggerVariables
 			const sortColumn = request.sortColumn as SortableColumn;
 			const comparer = (
 				a: IJupyterVariable,
-				b: IJupyterVariable,
+				b: IJupyterVariable
 			): number => {
 				// In case it is undefined or null
 				const aColumn = a[sortColumn] ? a[sortColumn] : "";
@@ -157,7 +167,7 @@ export class DebuggerVariables
 
 	public async getMatchingVariable(
 		name: string,
-		kernel?: IKernel,
+		kernel?: IKernel
 	): Promise<IJupyterVariable | undefined> {
 		if (this.active) {
 			// Note, full variable results isn't necessary for this call. It only really needs the variable value.
@@ -177,7 +187,7 @@ export class DebuggerVariables
 		targetVariable: IJupyterVariable,
 		kernel?: IKernel,
 		sliceExpression?: string,
-		isRefresh?: boolean,
+		isRefresh?: boolean
 	): Promise<IJupyterVariable> {
 		if (!this.active) {
 			// No active server just return the unchanged target variable
@@ -222,7 +232,7 @@ export class DebuggerVariables
 					...JSON.parse(results.result),
 					maximumRowChunkSize: MaximumRowChunkSizeForDebugger,
 					fileName,
-			  }
+				}
 			: targetVariable;
 	}
 
@@ -231,12 +241,12 @@ export class DebuggerVariables
 		start: number,
 		end: number,
 		kernel?: IKernel,
-		sliceExpression?: string,
+		sliceExpression?: string
 	): Promise<{ data: Record<string, unknown>[] }> {
 		// Developer error. The debugger cannot eval more than 100 rows at once.
 		if (end - start > MaximumRowChunkSizeForDebugger) {
 			throw new Error(
-				`Debugger cannot provide more than ${MaximumRowChunkSizeForDebugger} rows at once`,
+				`Debugger cannot provide more than ${MaximumRowChunkSizeForDebugger} rows at once`
 			);
 		}
 
@@ -302,7 +312,7 @@ export class DebuggerVariables
 			this.activeNotebookIsDebugging()
 		) {
 			this.handleNotebookVariables(
-				message as DebugProtocol.StoppedEvent,
+				message as DebugProtocol.StoppedEvent
 			).catch(noop);
 		} else if (
 			message.type === "response" &&
@@ -336,7 +346,7 @@ export class DebuggerVariables
 				// came with the most recent 'scopes' variablesReference
 				this.updateVariables(
 					undefined,
-					message as DebugProtocol.VariablesResponse,
+					message as DebugProtocol.VariablesResponse
 				);
 			}
 
@@ -360,14 +370,14 @@ export class DebuggerVariables
 		if (key && !this.watchedNotebooks.has(key)) {
 			const disposables: Disposable[] = [];
 			disposables.push(
-				kernel.onRestarted(this.resetImport.bind(this, key)),
+				kernel.onRestarted(this.resetImport.bind(this, key))
 			);
 			disposables.push(
 				kernel.onDisposed(() => {
 					this.resetImport(key);
 					disposables.forEach((d) => d.dispose());
 					this.watchedNotebooks.delete(key);
-				}),
+				})
 			);
 			this.watchedNotebooks.set(key, disposables);
 		}
@@ -397,7 +407,7 @@ export class DebuggerVariables
 				format: { rawString: true },
 			};
 			traceVerbose(
-				`Evaluating in debugger : ${this.debugService.activeDebugSession.id}: ${code}`,
+				`Evaluating in debugger : ${this.debugService.activeDebugSession.id}: ${code}`
 			);
 			try {
 				if (initializeCode) {
@@ -406,7 +416,7 @@ export class DebuggerVariables
 						{
 							...defaultEvalOptions,
 							expression: initializeCode,
-						},
+						}
 					);
 				}
 				const results =
@@ -415,7 +425,7 @@ export class DebuggerVariables
 						{
 							...defaultEvalOptions,
 							expression: code,
-						},
+						}
 					);
 				if (results && results.result !== "None") {
 					return results;
@@ -430,7 +440,7 @@ export class DebuggerVariables
 						{
 							...defaultEvalOptions,
 							expression: cleanupCode,
-						},
+						}
 					);
 				}
 			}
@@ -438,7 +448,7 @@ export class DebuggerVariables
 		throw Error("Debugger is not active, cannot evaluate.");
 	}
 	public async getFullVariable(
-		variable: IJupyterVariable,
+		variable: IJupyterVariable
 	): Promise<IJupyterVariable> {
 		// Then eval calling the variable info function with our target variable
 		const { initializeCode, code, cleanupCode } =
@@ -467,7 +477,7 @@ export class DebuggerVariables
 	}
 
 	private monkeyPatchDataViewableVariables(
-		variablesResponse: DebugProtocol.VariablesResponse,
+		variablesResponse: DebugProtocol.VariablesResponse
 	) {
 		variablesResponse.body.variables.forEach((v) => {
 			if (v.type && DataViewableTypes.has(v.type)) {
@@ -479,7 +489,7 @@ export class DebuggerVariables
 
 	private updateVariables(
 		resource: Resource,
-		variablesResponse: DebugProtocol.VariablesResponse,
+		variablesResponse: DebugProtocol.VariablesResponse
 	) {
 		const exclusionList = this.configService.getSettings(resource)
 			.variableExplorerExclude
@@ -506,7 +516,7 @@ export class DebuggerVariables
 					return false;
 				}
 				return true;
-			},
+			}
 		);
 
 		this.lastKnownVariables = allowedVariables.map((v) => {
@@ -526,7 +536,7 @@ export class DebuggerVariables
 
 	// This handles all the debug session calls, variable handling, and refresh calls needed for notebook debugging
 	private async handleNotebookVariables(
-		stoppedMessage: DebugProtocol.StoppedEvent,
+		stoppedMessage: DebugProtocol.StoppedEvent
 	): Promise<void> {
 		const doc = window.activeNotebookEditor?.notebook;
 		const threadId = stoppedMessage.body.threadId;
@@ -560,7 +570,7 @@ export class DebuggerVariables
 						) {
 							scopesResponse = await session.customRequest(
 								"scopes",
-								{ frameId: sf.id },
+								{ frameId: sf.id }
 							);
 						}
 					} else {
@@ -573,7 +583,7 @@ export class DebuggerVariables
 						) {
 							scopesResponse = await session.customRequest(
 								"scopes",
-								{ frameId: sf.id },
+								{ frameId: sf.id }
 							);
 						}
 					}
@@ -588,7 +598,7 @@ export class DebuggerVariables
 											scope.variablesReference,
 									})
 									.then(noop, noop);
-							},
+							}
 						);
 
 						this.refreshEventEmitter.fire();

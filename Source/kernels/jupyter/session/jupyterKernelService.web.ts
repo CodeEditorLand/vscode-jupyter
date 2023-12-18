@@ -28,10 +28,11 @@ export class JupyterKernelService implements IJupyterKernelService {
 	 */
 	public async ensureKernelIsUsable(
 		_resource: Resource,
-		@logValue<KernelConnectionMetadata>('id') _kernel: KernelConnectionMetadata,
-		@logValue<IDisplayOptions>('disableUI') _ui: IDisplayOptions,
+		@logValue<KernelConnectionMetadata>("id")
+		_kernel: KernelConnectionMetadata,
+		@logValue<IDisplayOptions>("disableUI") _ui: IDisplayOptions,
 		@ignoreLogging() _cancelToken: CancellationToken,
-		_cannotChangeKernels?: boolean,
+		_cannotChangeKernels?: boolean
 	): Promise<void> {
 		traceVerbose("Check if a kernel is usable");
 		// For now web kernels are always usable.

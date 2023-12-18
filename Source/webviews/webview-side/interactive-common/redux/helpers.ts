@@ -53,7 +53,7 @@ export function postActionToExtension<
 export function postActionToExtension(
 	originalReducerArg: ReducerArg,
 	message: any,
-	payload?: any,
+	payload?: any
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const newPayload: BaseReduxActionPayload<any> = {

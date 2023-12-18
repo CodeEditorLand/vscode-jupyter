@@ -66,20 +66,20 @@ suite("Import Tracker", async () => {
 				await waitForCondition(
 					async () => {
 						expect(Reporter.eventNames).to.contain(
-							EventName.HASHED_PACKAGE_NAME,
+							EventName.HASHED_PACKAGE_NAME
 						);
 						return true;
 					},
 					1_000,
-					"Hashed package name event not sent",
+					"Hashed package name event not sent"
 				);
 				expect(Reporter.eventNames).to.contain(
-					EventName.HASHED_PACKAGE_NAME,
+					EventName.HASHED_PACKAGE_NAME
 				);
 				await waitForCondition(
 					async () => {
 						Reporter.properties.filter(
-							(item) => Object.keys(item).length,
+							(item) => Object.keys(item).length
 						).length === hashes.length;
 						return true;
 					},
@@ -89,42 +89,42 @@ suite("Import Tracker", async () => {
 							hashes.length
 						}, got ${
 							Reporter.properties.filter(
-								(item) => Object.keys(item).length,
+								(item) => Object.keys(item).length
 							).length
 						}, with values ${JSON.stringify(
 							Reporter.properties.filter(
-								(item) => Object.keys(item).length,
-							),
-						)}`,
+								(item) => Object.keys(item).length
+							)
+						)}`
 				);
 			}
 			const properties = Reporter.properties.filter(
-				(item) => Object.keys(item).length,
+				(item) => Object.keys(item).length
 			);
 			const expected = resourceType
 				? hashes.map((hash) => ({
 						hashedNamev2: hash,
 						when,
 						resourceType,
-				  }))
+					}))
 				: hashes.map((hash) => ({ hashedNamev2: hash, when }));
 			assert.deepEqual(
 				properties.sort((a, b) =>
-					a.hashedNamev2.localeCompare(b.hashedNamev2),
+					a.hashedNamev2.localeCompare(b.hashedNamev2)
 				),
 				expected.sort((a, b) =>
-					a.hashedNamev2.localeCompare(b.hashedNamev2),
+					a.hashedNamev2.localeCompare(b.hashedNamev2)
 				),
 				`Hashes not sent correctly, expected ${JSON.stringify(
-					expected,
-				)} but got ${JSON.stringify(properties)}`,
+					expected
+				)} but got ${JSON.stringify(properties)}`
 			);
 		}
 
 		public sendTelemetryEvent(
 			eventName: string,
 			properties?: {},
-			measures?: {},
+			measures?: {}
 		) {
 			Reporter.eventNames.push(eventName);
 			Reporter.properties.push(properties!);
@@ -163,21 +163,21 @@ suite("Import Tracker", async () => {
 		disposables.push(onDidCloseNbEvent);
 		disposables.push(onDidSaveNbEvent);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidOpenNotebookDocument,
+			mockedVSCodeNamespaces.workspace.onDidOpenNotebookDocument
 		).thenReturn(onDidOpenNbEvent.event);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
 		).thenReturn(onDidCloseNbEvent.event);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidSaveNotebookDocument,
+			mockedVSCodeNamespaces.workspace.onDidSaveNotebookDocument
 		).thenReturn(onDidSaveNbEvent.event);
 		when(
 			mockedVSCodeNamespaces.notebooks
-				.onDidChangeNotebookCellExecutionState,
+				.onDidChangeNotebookCellExecutionState
 		).thenReturn(onDidChangeNotebookCellExecutionState.event);
 		when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn([]);
 		when(
-			mockedVSCodeNamespaces.workspace.getConfiguration("telemetry"),
+			mockedVSCodeNamespaces.workspace.getConfiguration("telemetry")
 		).thenReturn({
 			inspect: () => {
 				return {
@@ -208,7 +208,7 @@ suite("Import Tracker", async () => {
 		await Reporter.expectHashes(
 			"onOpenCloseOrSave",
 			"notebook",
-			pandasHash,
+			pandasHash
 		);
 	});
 	test("Close document", async () => {
@@ -221,7 +221,7 @@ suite("Import Tracker", async () => {
 		await Reporter.expectHashes(
 			"onOpenCloseOrSave",
 			"notebook",
-			pandasHash,
+			pandasHash
 		);
 	});
 	test("Save document", async () => {
@@ -234,7 +234,7 @@ suite("Import Tracker", async () => {
 		await Reporter.expectHashes(
 			"onOpenCloseOrSave",
 			"notebook",
-			pandasHash,
+			pandasHash
 		);
 	});
 
@@ -252,7 +252,7 @@ suite("Import Tracker", async () => {
 		await Reporter.expectHashes(
 			"onOpenCloseOrSave",
 			"notebook",
-			pandasHash,
+			pandasHash
 		);
 	});
 	async function testImports(
@@ -270,7 +270,7 @@ suite("Import Tracker", async () => {
 			],
 			undefined,
 			undefined,
-			notebookType,
+			notebookType
 		);
 		when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn([
 			nb,
@@ -281,7 +281,7 @@ suite("Import Tracker", async () => {
 		await Reporter.expectHashes(
 			"onOpenCloseOrSave",
 			notebookType === "jupyter-notebook" ? "notebook" : "interactive",
-			...expectedPackageHashes,
+			...expectedPackageHashes
 		);
 	}
 	test("from <pkg>._ import _, _", async () => {
@@ -346,7 +346,7 @@ suite("Import Tracker", async () => {
 			"interactive",
 			pandasHash,
 			numpyHash,
-			randomHash,
+			randomHash
 		);
 	});
 

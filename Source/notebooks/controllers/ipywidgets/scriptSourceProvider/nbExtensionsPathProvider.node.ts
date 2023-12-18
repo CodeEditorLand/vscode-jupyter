@@ -20,10 +20,10 @@ export class NbExtensionsPathProvider implements INbExtensionsPathProvider {
 			case "startUsingPythonInterpreter": {
 				return Uri.joinPath(
 					Uri.file(
-						kernel.kernelConnectionMetadata.interpreter.sysPrefix,
+						kernel.kernelConnectionMetadata.interpreter.sysPrefix
 					),
 					"share",
-					"jupyter",
+					"jupyter"
 				);
 			}
 			default: {

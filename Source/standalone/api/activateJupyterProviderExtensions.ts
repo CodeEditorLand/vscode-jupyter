@@ -41,13 +41,13 @@ export class EagerlyActivateJupyterUriProviders
 			extensions.all
 				.filter(
 					(e) =>
-						e.packageJSON?.contributes?.pythonRemoteServerProvider,
+						e.packageJSON?.contributes?.pythonRemoteServerProvider
 				)
 				.map((e) =>
 					e.isActive
 						? Promise.resolve()
-						: e.activate().then(noop, noop),
-				),
+						: e.activate().then(noop, noop)
+				)
 		);
 	}
 }

@@ -25,7 +25,7 @@ export function once<T>(event: Event<T>): Event<T> {
 				return listener.call(thisArgs, e);
 			},
 			null,
-			disposables,
+			disposables
 		);
 
 		if (didFire) {
@@ -43,9 +43,9 @@ export function once<T>(event: Event<T>): Event<T> {
 export function toPromise<T>(
 	event: Event<T>,
 	thisArgs: any = null,
-	disposables?: IDisposable[],
+	disposables?: IDisposable[]
 ): Promise<T> {
 	return new Promise((resolve) =>
-		once(event)(resolve, thisArgs, disposables),
+		once(event)(resolve, thisArgs, disposables)
 	);
 }

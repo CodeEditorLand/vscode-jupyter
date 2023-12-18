@@ -50,7 +50,7 @@ suite("Process - Process Service", function () {
 
 		expect(ProcessService.isAlive(proc.proc.pid)).to.equal(
 			true,
-			"process is not alive",
+			"process is not alive"
 		);
 	});
 });

@@ -36,7 +36,7 @@ export function fullSliceExpression(shape: number[]) {
 
 export function validateSliceExpression(
 	sliceExpression: string,
-	shape: number[],
+	shape: number[]
 ) {
 	if (sliceExpression.startsWith("[") && sliceExpression.endsWith("]")) {
 		let hasOutOfRangeIndex:
@@ -66,13 +66,13 @@ export function validateSliceExpression(
 			const { shapeIndex, value } = hasOutOfRangeIndex;
 			const localized = getLocString(
 				"sliceIndexError",
-				"Index {0} out of range for axis {1} with {2} elements",
+				"Index {0} out of range for axis {1} with {2} elements"
 			);
 			return format(
 				localized,
 				value.toString(),
 				shapeIndex.toString(),
-				shape[shapeIndex].toString(),
+				shape[shapeIndex].toString()
 			);
 		} else if (
 			parsedExpression &&
@@ -80,12 +80,12 @@ export function validateSliceExpression(
 		) {
 			const localized = getLocString(
 				"sliceMismatchedAxesError",
-				"Expected {0} axes, got {1} in slice expression",
+				"Expected {0} axes, got {1} in slice expression"
 			);
 			return format(
 				localized,
 				shape.length.toString(),
-				parsedExpression.length.toString(),
+				parsedExpression.length.toString()
 			);
 		}
 	}
@@ -94,7 +94,7 @@ export function validateSliceExpression(
 
 export function isValidSliceExpression(
 	sliceExpression: string,
-	shape: number[],
+	shape: number[]
 ) {
 	return validateSliceExpression(sliceExpression, shape) === "";
 }

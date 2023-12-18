@@ -18,7 +18,7 @@ export class KernelDiedError extends WrappedKernelError {
 		message: string,
 		public override readonly stdErr: string,
 		originalException: Error | undefined,
-		kernelConnectionMetadata: KernelConnectionMetadata,
+		kernelConnectionMetadata: KernelConnectionMetadata
 	) {
 		super(message, originalException, kernelConnectionMetadata);
 	}

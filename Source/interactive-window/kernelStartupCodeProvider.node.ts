@@ -36,10 +36,12 @@ export class KernelStartupCodeProvider
 	public priority = StartupCodePriority.Base;
 
 	constructor(
-        @inject(IConfigurationService) private readonly configService: IConfigurationService,
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IStartupCodeProviders) private readonly registry: IStartupCodeProviders
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService,
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IStartupCodeProviders)
+		private readonly registry: IStartupCodeProviders
+	) {}
 
 	activate(): void {
 		this.registry.register(this, InteractiveWindowView);
@@ -50,9 +52,9 @@ export class KernelStartupCodeProvider
 			return splitLines(
 				format(
 					CodeSnippets.UpdateCWDAndPath,
-					getFilePath(suggestedDir),
+					getFilePath(suggestedDir)
 				),
-				{ trim: false },
+				{ trim: false }
 			);
 		}
 		return [];
@@ -77,7 +79,7 @@ export class KernelStartupCodeProvider
 				: kernel.resourceUri;
 
 		let suggestedDir = await this.calculateWorkingDirectory(
-			kernel.resourceUri,
+			kernel.resourceUri
 		);
 		if (suggestedDir && (await this.fs.exists(suggestedDir))) {
 			return suggestedDir;
@@ -91,8 +93,8 @@ export class KernelStartupCodeProvider
 				expandWorkingDir(
 					getFilePath(suggestedDir),
 					launchingFile,
-					this.configService.getSettings(launchingFile),
-				),
+					this.configService.getSettings(launchingFile)
+				)
 			);
 			if (suggestedDir && (await this.fs.exists(suggestedDir))) {
 				return suggestedDir;
@@ -101,7 +103,7 @@ export class KernelStartupCodeProvider
 	}
 
 	private async calculateWorkingDirectory(
-		resource: Resource,
+		resource: Resource
 	): Promise<Uri | undefined> {
 		let workingDir: Uri | undefined;
 		// For a local launch calculate the working directory that we should switch into
@@ -125,7 +127,7 @@ export class KernelStartupCodeProvider
 				// fileRoot is a relative path, combine it with the workspace folder
 				const combinedPath = Uri.joinPath(
 					workspaceFolderPath,
-					fileRootStr,
+					fileRootStr
 				);
 				if (await this.fs.exists(combinedPath)) {
 					// combined path exists, use it

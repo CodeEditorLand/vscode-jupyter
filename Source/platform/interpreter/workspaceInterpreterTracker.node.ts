@@ -22,21 +22,24 @@ export class DesktopWorkspaceInterpreterTracker
 	private readonly workspaceInterpreters = new Map<string, undefined | Uri>();
 	private trackingInterpreters?: boolean;
 	constructor(
-        @inject(IPythonExtensionChecker) private readonly pythonExtensionChecker: IPythonExtensionChecker,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService
-    ) {}
+		@inject(IPythonExtensionChecker)
+		private readonly pythonExtensionChecker: IPythonExtensionChecker,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService
+	) {}
 	public activate() {
 		this.trackActiveInterpreters();
 		extensions.onDidChange(
 			this.trackActiveInterpreters,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public isActiveWorkspaceInterpreter(
 		resource: Resource,
-		interpreter?: PythonEnvironment,
+		interpreter?: PythonEnvironment
 	) {
 		if (!interpreter) {
 			return false;
@@ -62,7 +65,7 @@ export class DesktopWorkspaceInterpreterTracker
 		this.interpreterService.onDidChangeInterpreter(
 			async () => {
 				const workspaces: Uri[] = Array.isArray(
-					workspace.workspaceFolders,
+					workspace.workspaceFolders
 				)
 					? workspace.workspaceFolders.map((item) => item.uri)
 					: [];
@@ -73,20 +76,20 @@ export class DesktopWorkspaceInterpreterTracker
 								getWorkspaceFolderIdentifier(item);
 							const interpreter =
 								await this.interpreterService.getActiveInterpreter(
-									item,
+									item
 								);
 							this.workspaceInterpreters.set(
 								workspaceId,
-								interpreter?.uri,
+								interpreter?.uri
 							);
 						} catch (ex) {
 							// Don't care.
 						}
-					}),
+					})
 				);
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 }

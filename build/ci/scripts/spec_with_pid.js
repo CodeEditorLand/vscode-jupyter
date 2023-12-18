@@ -92,7 +92,7 @@ function Spec(runner, options) {
 		Base.consoleLog(
 			indent() + color("fail", `${prefix}%d) %s`),
 			++n,
-			test.title,
+			test.title
 		);
 	});
 

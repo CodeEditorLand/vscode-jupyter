@@ -26,11 +26,15 @@ import { IDataScienceErrorHandler } from "../../kernels/errors/types";
 @injectable()
 export class JupyterExporter implements INotebookExporter {
 	constructor(
-        @inject(IJupyterServerHelper) @optional() private jupyterServerHelper: IJupyterServerHelper | undefined,
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IFileSystem) private fileSystem: IFileSystem,
-        @inject(IDataScienceErrorHandler) protected errorHandler: IDataScienceErrorHandler
-    ) {}
+		@inject(IJupyterServerHelper)
+		@optional()
+		private jupyterServerHelper: IJupyterServerHelper | undefined,
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IFileSystem) private fileSystem: IFileSystem,
+		@inject(IDataScienceErrorHandler)
+		protected errorHandler: IDataScienceErrorHandler
+	) {}
 
 	public dispose() {
 		// Do nothing
@@ -39,7 +43,7 @@ export class JupyterExporter implements INotebookExporter {
 	public async exportToFile(
 		cells: ICell[],
 		file: string,
-		showOpenPrompt: boolean = true,
+		showOpenPrompt: boolean = true
 	): Promise<void> {
 		const notebook = await this.translateToNotebook(cells);
 
@@ -54,7 +58,7 @@ export class JupyterExporter implements INotebookExporter {
 			window
 				.showInformationMessage(
 					DataScience.exportDialogComplete(file),
-					openQuestion1,
+					openQuestion1
 				)
 				.then(async (str: string | undefined) => {
 					try {
@@ -71,14 +75,14 @@ export class JupyterExporter implements INotebookExporter {
 			window
 				.showInformationMessage(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					DataScience.exportDialogFailed(exc as any),
+					DataScience.exportDialogFailed(exc as any)
 				)
 				.then(noop, noop);
 		}
 	}
 	public async translateToNotebook(
 		cells: ICell[],
-		kernelSpec?: nbformat.IKernelspecMetadata,
+		kernelSpec?: nbformat.IKernelspecMetadata
 	): Promise<nbformat.INotebookContent | undefined> {
 		const pythonNumber = await this.extractPythonMainVersion();
 
@@ -114,7 +118,7 @@ export class JupyterExporter implements INotebookExporter {
 
 	private pruneCells = (
 		cells: ICell[],
-		cellMatcher: CellMatcher,
+		cellMatcher: CellMatcher
 	): nbformat.IBaseCell[] => {
 		// First filter out sys info cells. Jupyter doesn't understand these
 		const filtered = cells;
@@ -125,7 +129,7 @@ export class JupyterExporter implements INotebookExporter {
 
 	private pruneCell = (
 		cell: ICell,
-		cellMatcher: CellMatcher,
+		cellMatcher: CellMatcher
 	): nbformat.IBaseCell => {
 		// Prune with the common pruning function first.
 		const copy = pruneCell({ ...cell.data });
@@ -138,7 +142,7 @@ export class JupyterExporter implements INotebookExporter {
 
 	private pruneSource = (
 		source: nbformat.MultilineString,
-		cellMatcher: CellMatcher,
+		cellMatcher: CellMatcher
 	): nbformat.MultilineString => {
 		// Remove the comments on the top if there.
 		if (Array.isArray(source) && source.length > 0) {

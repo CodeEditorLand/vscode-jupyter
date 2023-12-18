@@ -24,7 +24,7 @@ export abstract class BaseConfigurationService
 		setting: string,
 		value?: {},
 		resource?: Uri,
-		configTarget?: ConfigurationTarget,
+		configTarget?: ConfigurationTarget
 	): Promise<void> {
 		const defaultSetting = {
 			uri: resource,
@@ -39,7 +39,7 @@ export abstract class BaseConfigurationService
 		}
 		const configSection = workspace.getConfiguration(
 			section,
-			settingsInfo.uri,
+			settingsInfo.uri
 		);
 		const currentValue = configSection.inspect(setting);
 
@@ -60,7 +60,7 @@ export abstract class BaseConfigurationService
 				configSection,
 				configTarget,
 				setting,
-				value,
+				value
 			);
 		}
 	}
@@ -69,14 +69,14 @@ export abstract class BaseConfigurationService
 		setting: string,
 		value?: {},
 		resource?: Uri,
-		configTarget?: ConfigurationTarget,
+		configTarget?: ConfigurationTarget
 	): Promise<void> {
 		return this.updateSectionSetting(
 			"jupyter",
 			setting,
 			value,
 			resource,
-			configTarget,
+			configTarget
 		);
 	}
 
@@ -84,7 +84,7 @@ export abstract class BaseConfigurationService
 		configSection: WorkspaceConfiguration,
 		target: ConfigurationTarget,
 		settingName: string,
-		value?: {},
+		value?: {}
 	): Promise<void> {
 		if (isTestExecution() && !isUnitTestExecution()) {
 			let retries = 0;
@@ -99,8 +99,8 @@ export abstract class BaseConfigurationService
 						target === ConfigurationTarget.Global
 							? setting.globalValue
 							: target === ConfigurationTarget.Workspace
-							  ? setting.workspaceValue
-							  : setting.workspaceFolderValue;
+								? setting.workspaceValue
+								: setting.workspaceFolderValue;
 					if (actual === value) {
 						break;
 					}

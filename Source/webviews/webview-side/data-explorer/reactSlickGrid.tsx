@@ -100,7 +100,10 @@ class ColumnFilter {
 		/^\s*(?:=|==)\s*((?<Number>-?\d+.*)|(?<NaN>nan)|(?<Inf>inf)|(?<NegInf>-inf)).*/i;
 	private textRegex: RegExp | undefined;
 
-	constructor(public text: string, column: Slick.Column<Slick.SlickData>) {
+	constructor(
+		public text: string,
+		column: Slick.Column<Slick.SlickData>
+	) {
 		if (text && text.length > 0) {
 			const columnType = (column as any).type;
 			switch (columnType) {
@@ -218,9 +221,9 @@ export class ReactSlickGrid extends React.Component<
 			// Compute font size. Default to 15 if not found.
 			let fontSize = parseInt(
 				getComputedStyle(this.containerRef.current).getPropertyValue(
-					"--vscode-font-size",
+					"--vscode-font-size"
 				),
-				10,
+				10
 			);
 			if (isNaN(fontSize)) {
 				fontSize = 15;
@@ -247,13 +250,13 @@ export class ReactSlickGrid extends React.Component<
 				this.containerRef.current,
 				this.dataView,
 				columns,
-				options,
+				options
 			);
 			grid.registerPlugin(
 				new Slick.AutoTooltips({
 					enableForCells: true,
 					enableForHeaderCells: true,
-				}),
+				})
 			);
 			grid.registerPlugin(new Slick.Plugins.HeaderButtons());
 			// Setup our dataview
@@ -306,7 +309,7 @@ export class ReactSlickGrid extends React.Component<
 					.on("focusin", this.slickgridFocus);
 				slickgridJQ(".grid-canvas").on(
 					"keydown",
-					this.slickgridHandleKeyDown,
+					this.slickgridHandleKeyDown
 				);
 			}
 
@@ -318,7 +321,7 @@ export class ReactSlickGrid extends React.Component<
 
 			// Set the initial sort column to our index column
 			const indexColumn = columns.find(
-				(c) => c.field === this.props.idProperty,
+				(c) => c.field === this.props.idProperty
 			);
 			if (indexColumn && indexColumn.id) {
 				grid.setSortColumn(indexColumn.id, true);
@@ -360,7 +363,7 @@ export class ReactSlickGrid extends React.Component<
 			? {
 					height: `${this.props.forceHeight}px`,
 					width: `${this.props.forceHeight}px`,
-			  }
+				}
 			: {};
 
 		return (
@@ -368,8 +371,7 @@ export class ReactSlickGrid extends React.Component<
 				<div
 					className="react-grid-container"
 					style={style}
-					ref={this.containerRef}
-				></div>
+					ref={this.containerRef}></div>
 				<div className="react-grid-measure" ref={this.measureRef} />
 			</div>
 		);
@@ -378,12 +380,12 @@ export class ReactSlickGrid extends React.Component<
 	// public for testing
 	public sort = (
 		_e: Slick.EventData,
-		args: Slick.OnSortEventArgs<Slick.SlickData>,
+		args: Slick.OnSortEventArgs<Slick.SlickData>
 	) => {
 		// Note: dataView.fastSort is an IE workaround. Not necessary.
 		this.dataView.sort(
 			(l: any, r: any) => this.compareElements(l, r, args.sortCol),
-			args.sortAsc,
+			args.sortAsc
 		);
 		args.grid.invalidateAllRows();
 		args.grid.render();
@@ -392,12 +394,12 @@ export class ReactSlickGrid extends React.Component<
 	// Public for testing
 	public filterChanged = (
 		text: string,
-		column: Slick.Column<Slick.SlickData>,
+		column: Slick.Column<Slick.SlickData>
 	) => {
 		if (column && column.field) {
 			this.columnFilters.set(
 				column.field,
-				new ColumnFilter(text, column),
+				new ColumnFilter(text, column)
 			);
 			this.dataView.refresh();
 		}
@@ -516,7 +518,7 @@ export class ReactSlickGrid extends React.Component<
 			if (document) {
 				const cssOverrideNode = document.createElement("style");
 				const rule = `.${gridName} .slick-cell {height: ${this.getAppropiateRowHeight(
-					this.state.fontSize,
+					this.state.fontSize
 				)}px;}`;
 				cssOverrideNode.setAttribute("type", "text/css");
 				cssOverrideNode.setAttribute("rel", "stylesheet");
@@ -572,12 +574,12 @@ export class ReactSlickGrid extends React.Component<
 								tooltip: this.state.showingFilters
 									? getLocString(
 											"dataViewerHideFilters",
-											"Hide filters",
-									  )
+											"Hide filters"
+										)
 									: getLocString(
 											"dataViewerShowFilters",
-											"Show filters",
-									  ),
+											"Show filters"
+										),
 							},
 							{
 								cssClass:
@@ -585,7 +587,7 @@ export class ReactSlickGrid extends React.Component<
 								handler: this.props.handleRefreshRequest,
 								tooltip: getLocString(
 									"refreshDataViewer",
-									"Refresh data viewer",
+									"Refresh data viewer"
 								),
 							},
 						],
@@ -625,7 +627,7 @@ export class ReactSlickGrid extends React.Component<
 
 	private updateColumns = (
 		_e: Slick.EventData,
-		newColumns: Slick.Column<Slick.SlickData>[],
+		newColumns: Slick.Column<Slick.SlickData>[]
 	) => {
 		this.setColumns(newColumns);
 		this.state.grid?.render(); // We might be able to skip this rerender?
@@ -678,12 +680,12 @@ export class ReactSlickGrid extends React.Component<
 
 	private renderFilterCell = (
 		_e: Slick.EventData,
-		args: Slick.OnHeaderRowCellRenderedEventArgs<Slick.SlickData>,
+		args: Slick.OnHeaderRowCellRenderedEventArgs<Slick.SlickData>
 	) => {
 		if (args.column.field === this.props.idProperty) {
 			const tooltipText = getLocString(
 				"clearFilters",
-				"Clear all filters",
+				"Clear all filters"
 			);
 			ReactDOM.render(
 				<div
@@ -691,7 +693,7 @@ export class ReactSlickGrid extends React.Component<
 					onClick={this.clearAllFilters}
 					title={tooltipText}
 				/>,
-				args.node,
+				args.node
 			);
 		} else {
 			const filter = args.column.field
@@ -704,7 +706,7 @@ export class ReactSlickGrid extends React.Component<
 					onChange={this.filterChanged}
 					fontSize={this.state.fontSize}
 				/>,
-				args.node,
+				args.node
 			);
 		}
 	};
@@ -712,7 +714,7 @@ export class ReactSlickGrid extends React.Component<
 	private compareElements(
 		a: any,
 		b: any,
-		col?: Slick.Column<Slick.SlickData>,
+		col?: Slick.Column<Slick.SlickData>
 	): number {
 		if (col) {
 			const sortColumn = col.field;
@@ -734,14 +736,14 @@ export class ReactSlickGrid extends React.Component<
 					const aStr = aVal
 						? aVal.substring(
 								0,
-								Math.min(aVal.length, MaxStringCompare),
-						  )
+								Math.min(aVal.length, MaxStringCompare)
+							)
 						: aVal;
 					const bStr = bVal
 						? bVal.substring(
 								0,
-								Math.min(bVal.length, MaxStringCompare),
-						  )
+								Math.min(bVal.length, MaxStringCompare)
+							)
 						: bVal;
 					return aStr.localeCompare(bStr);
 				} else {

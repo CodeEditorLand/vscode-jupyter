@@ -46,16 +46,16 @@ suite("Pip installer", async () => {
 		pythonExecutionFactory = mock<IPythonExecutionFactory>();
 		when(
 			serviceContainer.get<IPythonExecutionFactory>(
-				IPythonExecutionFactory,
-			),
+				IPythonExecutionFactory
+			)
 		).thenReturn(instance(pythonExecutionFactory));
 		pythonExecutionService = mock<IPythonExecutionService>();
 		(instance(pythonExecutionService) as any).then = undefined;
 		when(pythonExecutionFactory.create(anything())).thenResolve(
-			instance(pythonExecutionService),
+			instance(pythonExecutionService)
 		);
 		when(
-			pythonExecutionFactory.createActivatedEnvironment(anything()),
+			pythonExecutionFactory.createActivatedEnvironment(anything())
 		).thenResolve(instance(pythonExecutionService));
 
 		const workspaceConfig = mock<WorkspaceConfiguration>();
@@ -63,10 +63,10 @@ suite("Pip installer", async () => {
 		disposables.push(cancellation);
 		const progress = mock<any>();
 		when(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).thenCall((_, cb) => cb(instance(progress), cancellation.token));
 		when(
-			mockedVSCodeNamespaces.workspace.getConfiguration("http"),
+			mockedVSCodeNamespaces.workspace.getConfiguration("http")
 		).thenReturn(instance(workspaceConfig));
 		when(workspaceConfig.get("proxy", "")).thenReturn("");
 
@@ -74,7 +74,7 @@ suite("Pip installer", async () => {
 		subject = createObservable<Output<string>>();
 		disposables.push(subject);
 		when(
-			pythonExecutionService.execObservable(anything(), anything()),
+			pythonExecutionService.execObservable(anything(), anything())
 		).thenReturn({
 			dispose: noop,
 			out: subject,
@@ -101,8 +101,8 @@ suite("Pip installer", async () => {
 
 		verify(
 			pythonExecutionFactory.create(
-				deepEqual({ resource: undefined, interpreter }),
-			),
+				deepEqual({ resource: undefined, interpreter })
+			)
 		).once();
 	});
 
@@ -129,7 +129,7 @@ suite("Pip installer", async () => {
 		};
 
 		when(pythonExecutionService.isModuleInstalled("pip")).thenResolve(
-			false,
+			false
 		);
 
 		const expected = await pipInstaller.isSupported(interpreter);
@@ -145,7 +145,7 @@ suite("Pip installer", async () => {
 			sysPrefix: "0",
 		};
 		when(pythonExecutionService.isModuleInstalled("pip")).thenReject(
-			new Error("Unable to check if module is installed"),
+			new Error("Unable to check if module is installed")
 		);
 
 		const expected = await pipInstaller.isSupported(interpreter);
@@ -163,9 +163,9 @@ suite("Pip installer", async () => {
 					sysPrefix: "0",
 				};
 				when(
-					pythonExecutionService.isModuleInstalled("pip"),
+					pythonExecutionService.isModuleInstalled("pip")
 				).thenReject(
-					new Error("Unable to check if module is installed"),
+					new Error("Unable to check if module is installed")
 				);
 				when(proc.exitCode).thenReturn(0);
 				subject.fire({ out: "", source: "stdout" });
@@ -177,7 +177,7 @@ suite("Pip installer", async () => {
 				await pipInstaller.installModule(
 					Product.ipykernel,
 					interpreter,
-					cancellationToken,
+					cancellationToken
 				);
 
 				let args = ["-m", "pip", "install", "-U", "ipykernel"];
@@ -193,13 +193,13 @@ suite("Pip installer", async () => {
 				}
 				assert.deepEqual(
 					capture(pythonExecutionService.execObservable).first()[0],
-					args,
+					args
 				);
 				verify(
 					pythonExecutionService.execObservable(
 						anything(),
-						anything(),
-					),
+						anything()
+					)
 				).once();
 			});
 		});

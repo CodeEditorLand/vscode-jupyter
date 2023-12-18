@@ -22,15 +22,14 @@ export class LocalWidgetScriptSourceProvider
 	constructor(
 		private readonly kernel: IKernel,
 		private readonly localResourceUriConverter: ILocalResourceUriConverter,
-		private readonly scriptManagerFactory: IIPyWidgetScriptManagerFactory,
+		private readonly scriptManagerFactory: IIPyWidgetScriptManagerFactory
 	) {}
 	public async getWidgetScriptSource(
-		moduleName: string,
+		moduleName: string
 	): Promise<Readonly<WidgetScriptSource>> {
 		const sources = await this.getWidgetScriptSources();
 		const found = sources.find(
-			(item) =>
-				item.moduleName.toLowerCase() === moduleName.toLowerCase(),
+			(item) => item.moduleName.toLowerCase() === moduleName.toLowerCase()
 		);
 		return found || { moduleName };
 	}
@@ -41,7 +40,7 @@ export class LocalWidgetScriptSourceProvider
 		Readonly<WidgetScriptSource[]>
 	> {
 		const scriptManager = this.scriptManagerFactory.getOrCreate(
-			this.kernel,
+			this.kernel
 		);
 		const widgetModuleMappings =
 			await scriptManager.getWidgetModuleMappings();
@@ -50,7 +49,7 @@ export class LocalWidgetScriptSourceProvider
 				Object.keys(widgetModuleMappings).map(async (moduleName) => {
 					const scriptUri = (
 						await this.localResourceUriConverter.asWebviewUri(
-							widgetModuleMappings[moduleName],
+							widgetModuleMappings[moduleName]
 						)
 					).toString();
 					return <WidgetScriptSource>{
@@ -58,7 +57,7 @@ export class LocalWidgetScriptSourceProvider
 						scriptUri,
 						source: "local",
 					};
-				}),
+				})
 			);
 			return sources;
 		}
@@ -66,7 +65,7 @@ export class LocalWidgetScriptSourceProvider
 	}
 	public async getBaseUrl() {
 		const scriptManager = this.scriptManagerFactory.getOrCreate(
-			this.kernel,
+			this.kernel
 		);
 		if (!scriptManager.getBaseUrl) {
 			return;

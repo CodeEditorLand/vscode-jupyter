@@ -35,30 +35,42 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	private disposed: boolean = false;
 	private _disposed = false;
 	constructor(
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IAsyncDisposableRegistry) asyncRegistry: IAsyncDisposableRegistry,
-        @inject(IConfigurationService) private readonly configuration: IConfigurationService,
-        @inject(INotebookStarter) @optional() private readonly notebookStarter: INotebookStarter | undefined,
-        @inject(IJupyterSubCommandExecutionService)
-        @optional()
-        private readonly jupyterInterpreterService: IJupyterSubCommandExecutionService | undefined
-    ) {
-        this.disposableRegistry.push(this.interpreterService.onDidChangeInterpreter(() => this.onSettingsChanged()));
-        this.disposableRegistry.push(this);
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService,
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IAsyncDisposableRegistry)
+		asyncRegistry: IAsyncDisposableRegistry,
+		@inject(IConfigurationService)
+		private readonly configuration: IConfigurationService,
+		@inject(INotebookStarter)
+		@optional()
+		private readonly notebookStarter: INotebookStarter | undefined,
+		@inject(IJupyterSubCommandExecutionService)
+		@optional()
+		private readonly jupyterInterpreterService:
+			| IJupyterSubCommandExecutionService
+			| undefined
+	) {
+		this.disposableRegistry.push(
+			this.interpreterService.onDidChangeInterpreter(() =>
+				this.onSettingsChanged()
+			)
+		);
+		this.disposableRegistry.push(this);
 
-        workspace.onDidChangeConfiguration(
-            (e) => {
-                if (e.affectsConfiguration('python.dataScience', undefined)) {
-                    // When config changes happen, recreate our commands.
-                    this.onSettingsChanged();
-                }
-            },
-            this,
-            this.disposableRegistry
-        );
-        asyncRegistry.push(this);
-    }
+		workspace.onDidChangeConfiguration(
+			(e) => {
+				if (e.affectsConfiguration("python.dataScience", undefined)) {
+					// When config changes happen, recreate our commands.
+					this.onSettingsChanged();
+				}
+			},
+			this,
+			this.disposableRegistry
+		);
+		asyncRegistry.push(this);
+	}
 
 	public async dispose(): Promise<void> {
 		traceInfo(`Disposing HostJupyterExecution`);
@@ -76,7 +88,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 
 	public async startServer(
 		resource: Resource,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	): Promise<IJupyterConnection> {
 		if (this._disposed) {
 			throw new Error("Notebook server is disposed");
@@ -84,7 +96,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 		if (!this.cache) {
 			const promise = (this.cache = this.startJupyterWithRetry(
 				resource,
-				cancelToken,
+				cancelToken
 			));
 			promise.catch((ex) => {
 				traceError(`Failed to start the Jupyter Server`, ex);
@@ -101,7 +113,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	}
 
 	public async isJupyterServerSupported(
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<boolean> {
 		// See if we can find the command notebook
 		return this.jupyterInterpreterService
@@ -116,7 +128,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	}
 
 	public async getUsableJupyterPython(
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<PythonEnvironment | undefined> {
 		// Only try to compute this once.
 		if (
@@ -127,8 +139,8 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			this.usablePythonInterpreter = await raceCancellationError(
 				cancelToken,
 				this.jupyterInterpreterService!.getSelectedInterpreter(
-					cancelToken,
-				),
+					cancelToken
+				)
 			);
 		}
 		return this.usablePythonInterpreter;
@@ -137,7 +149,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	/* eslint-disable complexity,  */
 	private startJupyterWithRetry(
 		resource: Resource,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	): Promise<IJupyterConnection> {
 		const work = async () => {
 			let connection: IJupyterConnection | undefined;
@@ -146,7 +158,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			let tryCount = 1;
 			const maxTries = Math.max(
 				1,
-				this.configuration.getSettings(undefined).jupyterLaunchRetries,
+				this.configuration.getSettings(undefined).jupyterLaunchRetries
 			);
 			let lastTryError: Error;
 			while (tryCount <= maxTries && !this.disposed) {
@@ -188,7 +200,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 
 	private async startImpl(
 		resource: Resource,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	): Promise<IJupyterConnection> {
 		// If our uri is undefined or if it's set to local launch we need to launch a server locally
 		// If that works, then attempt to start the server
@@ -203,7 +215,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			rootFolder
 				? urlPath.joinPath(rootFolder, `${uuid()}.txt`)
 				: undefined,
-			settings,
+			settings
 		);
 
 		if (!this.notebookStarter) {
@@ -216,7 +228,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 			this.configuration.getSettings(undefined)
 				.jupyterCommandLineArguments,
 			Uri.file(workingDirectory),
-			cancelToken,
+			cancelToken
 		);
 	}
 

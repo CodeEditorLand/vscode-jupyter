@@ -87,24 +87,39 @@ export class CodeLensFactory implements ICodeLensFactory {
 	private maxCellCount: number = 0;
 
 	constructor(
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IGeneratedCodeStorageFactory)
-        private readonly generatedCodeStorageFactory: IGeneratedCodeStorageFactory,
-        @inject(IKernelProvider) kernelProvider: IKernelProvider
-    ) {
-        workspace.onDidCloseTextDocument(this.onClosedDocument, this, disposables);
-        workspace.onDidGrantWorkspaceTrust(() => this.codeLensCache.clear(), this, disposables);
-        this.configService.getSettings(undefined).onDidChange(this.onChangedSettings, this, disposables);
-        notebooks.onDidChangeNotebookCellExecutionState(this.onDidChangeNotebookCellExecutionState, this, disposables);
-        kernelProvider.onDidDisposeKernel(
-            (kernel) => {
-                this.notebookData.delete(kernel.notebook.uri.toString());
-            },
-            this,
-            disposables
-        );
-    }
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IGeneratedCodeStorageFactory)
+		private readonly generatedCodeStorageFactory: IGeneratedCodeStorageFactory,
+		@inject(IKernelProvider) kernelProvider: IKernelProvider
+	) {
+		workspace.onDidCloseTextDocument(
+			this.onClosedDocument,
+			this,
+			disposables
+		);
+		workspace.onDidGrantWorkspaceTrust(
+			() => this.codeLensCache.clear(),
+			this,
+			disposables
+		);
+		this.configService
+			.getSettings(undefined)
+			.onDidChange(this.onChangedSettings, this, disposables);
+		notebooks.onDidChangeNotebookCellExecutionState(
+			this.onDidChangeNotebookCellExecutionState,
+			this,
+			disposables
+		);
+		kernelProvider.onDidDisposeKernel(
+			(kernel) => {
+				this.notebookData.delete(kernel.notebook.uri.toString());
+			},
+			this,
+			disposables
+		);
+	}
 
 	public getPerfMeasures(): CodeLensPerfMeasures {
 		return {
@@ -154,7 +169,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 		if (cache.cachedDocumentVersion !== document.version) {
 			cache.cellRanges = generateCellRangesFromDocument(
 				document,
-				this.configService.getSettings(document.uri),
+				this.configService.getSettings(document.uri)
 			);
 
 			// Because we have all new ranges, we need to recompute ALL of our code lenses.
@@ -188,8 +203,8 @@ export class CodeLensFactory implements ICodeLensFactory {
 				`CodeLensFactory: Generating new code lenses for version ${
 					document.version
 				} of document ${document.uri} for commands ${commands.join(
-					", ",
-				)}`,
+					", "
+				)}`
 			);
 
 			// Then iterate over all of the cell ranges and generate code lenses for each enabled command
@@ -200,7 +215,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						document,
 						r,
 						c,
-						firstCell,
+						firstCell
 					);
 					if (codeLens) {
 						cache!.documentLenses.push(codeLens);
@@ -210,7 +225,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 			});
 		} else {
 			traceInfoIfCI(
-				`NOT Generating new code lenses for version ${document.version} of document ${document.uri} - needUpdate: ${needUpdate}, cellRanges.length: ${cache.cellRanges.length}`,
+				`NOT Generating new code lenses for version ${document.version} of document ${document.uri} - needUpdate: ${needUpdate}, cellRanges.length: ${cache.cellRanges.length}`
 			);
 		}
 
@@ -227,15 +242,15 @@ export class CodeLensFactory implements ICodeLensFactory {
 			const generatedCodes = storage
 				? storage.all.find(
 						(item) =>
-							item.uri.toString() === document.uri.toString(),
-				  )?.generatedCodes
+							item.uri.toString() === document.uri.toString()
+					)?.generatedCodes
 				: undefined;
 			if (generatedCodes && generatedCodes.length) {
 				cache.cellRanges.forEach((r) => {
 					const codeLens = this.createExecutionLens(
 						document,
 						r.range,
-						generatedCodes,
+						generatedCodes
 					);
 					if (codeLens) {
 						cache?.gotoCellLens.push(codeLens); // NOSONAR
@@ -249,7 +264,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 			this.codeLensUpdateCount += 1;
 			this.maxCellCount = Math.max(
 				this.maxCellCount,
-				cache.cellRanges.length,
+				cache.cellRanges.length
 			);
 		}
 
@@ -261,7 +276,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 			.filter((n) => n !== undefined) as number[];
 	}
 	private onDidChangeNotebookCellExecutionState(
-		e: NotebookCellExecutionStateChangeEvent,
+		e: NotebookCellExecutionStateChangeEvent
 	) {
 		if (e.cell.notebook.notebookType !== InteractiveWindowView) {
 			return;
@@ -284,11 +299,11 @@ export class CodeLensFactory implements ICodeLensFactory {
 		if (data !== undefined && metadata !== undefined) {
 			data.cellExecutionCounts.set(
 				metadata.id,
-				e.cell.executionSummary.executionOrder,
+				e.cell.executionSummary.executionOrder
 			);
 			data.documentExecutionCounts.set(
 				metadata.interactive.uristring,
-				e.cell.executionSummary.executionOrder,
+				e.cell.executionSummary.executionOrder
 			);
 			this.updateEvent.fire();
 		}
@@ -323,11 +338,11 @@ export class CodeLensFactory implements ICodeLensFactory {
 			this.configService.getSettings(resource).debugCodeLenses;
 		if (debugCommands) {
 			fullCommandList = fullCommandList.concat(
-				debugCommands.split(",").map((s) => s.trim()),
+				debugCommands.split(",").map((s) => s.trim())
 			);
 		} else {
 			fullCommandList = fullCommandList.concat(
-				CodeLensCommands.DefaultDebuggingLenses,
+				CodeLensCommands.DefaultDebuggingLenses
 			);
 		}
 
@@ -357,7 +372,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 		}
 		if (commandsToBeDisabled) {
 			fullCommandList = fullCommandList.filter(
-				(item) => !commandsToBeDisabled.includes(item),
+				(item) => !commandsToBeDisabled.includes(item)
 			);
 		}
 		return fullCommandList;
@@ -368,7 +383,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 		document: TextDocument,
 		cellRange: { range: Range; cell_type: string },
 		commandName: string,
-		isFirst: boolean,
+		isFirst: boolean
 	): CodeLens | undefined {
 		// We only support specific commands
 		// Be careful here. These arguments will be serialized during liveshare sessions
@@ -379,20 +394,20 @@ export class CodeLensFactory implements ICodeLensFactory {
 				return this.generateCodeLens(
 					range,
 					Commands.RunCurrentCellAndAddBelow,
-					runCurrentandAllBelowTitle,
+					runCurrentandAllBelowTitle
 				);
 			case Commands.AddCellBelow:
 				return this.generateCodeLens(
 					range,
 					Commands.AddCellBelow,
 					addCellBelowTitle,
-					[document.uri, range.start.line],
+					[document.uri, range.start.line]
 				);
 			case Commands.DebugCurrentCellPalette:
 				return this.generateCodeLens(
 					range,
 					Commands.DebugCurrentCellPalette,
-					debugCurrentCellTitle,
+					debugCurrentCellTitle
 				);
 
 			case Commands.DebugCell:
@@ -410,7 +425,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						range.start.character,
 						range.end.line,
 						range.end.character,
-					],
+					]
 				);
 
 			case Commands.DebugStepOver:
@@ -422,7 +437,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					range,
 					Commands.DebugStepOver,
 					debugStepOverTitle,
-					[document.uri],
+					[document.uri]
 				);
 
 			case Commands.DebugContinue:
@@ -434,7 +449,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					range,
 					Commands.DebugContinue,
 					DebugContinueTitle,
-					[document.uri],
+					[document.uri]
 				);
 
 			case Commands.DebugStop:
@@ -446,7 +461,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					range,
 					Commands.DebugStop,
 					debugStopTitle,
-					[document.uri],
+					[document.uri]
 				);
 
 			case Commands.RunCurrentCell:
@@ -461,7 +476,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						range.start.character,
 						range.end.line,
 						range.end.character,
-					],
+					]
 				);
 
 			case Commands.RunAllCells:
@@ -469,7 +484,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					range,
 					Commands.RunAllCells,
 					runAllCellsTitle,
-					[document.uri, range.start.line, range.start.character],
+					[document.uri, range.start.line, range.start.character]
 				);
 
 			case Commands.RunAllCellsAbovePalette:
@@ -479,14 +494,14 @@ export class CodeLensFactory implements ICodeLensFactory {
 						range,
 						Commands.RunAllCellsAbove,
 						runAllAboveTitle,
-						[document.uri, range.start.line, range.start.character],
+						[document.uri, range.start.line, range.start.character]
 					);
 				} else {
 					return this.generateCodeLens(
 						range,
 						Commands.RunCellAndAllBelow,
 						runAllBelowTitle,
-						[document.uri, range.start.line, range.start.character],
+						[document.uri, range.start.line, range.start.character]
 					);
 				}
 				break;
@@ -496,7 +511,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					range,
 					Commands.RunCellAndAllBelow,
 					runAllBelowTitle,
-					[document.uri, range.start.line, range.start.character],
+					[document.uri, range.start.line, range.start.character]
 				);
 
 			default:
@@ -510,7 +525,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 	private findMatchingCellExecutionCount(cellId: string) {
 		// Cell ids on interactive window are generated on the fly so there shouldn't be dupes
 		const data = [...this.notebookData.values()].find((d) =>
-			d.cellExecutionCounts.get(cellId),
+			d.cellExecutionCounts.get(cellId)
 		);
 		return data?.cellExecutionCounts.get(cellId);
 	}
@@ -518,7 +533,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 	private createExecutionLens(
 		document: TextDocument,
 		range: Range,
-		generatedCodes: IGeneratedCode[],
+		generatedCodes: IGeneratedCode[]
 	) {
 		if (generatedCodes) {
 			// Match just the start of the range. Should be - 2 (1 for 1 based numbers and 1 for skipping the comment at the top)
@@ -534,7 +549,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						range,
 						Commands.ScrollToCell,
 						scrollToCellFormat(matchingExecutionCount),
-						[document.uri, rangeMatch.id],
+						[document.uri, rangeMatch.id]
 					);
 				}
 			}
@@ -546,7 +561,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 		range: Range,
 		commandName: string,
 		title: string,
-		args?: any[],
+		args?: any[]
 	): CodeLens {
 		return new CodeLens(range, generateCommand(commandName, title, args));
 	}
@@ -556,7 +571,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 export function generateCommand(
 	commandName: string,
 	title: string,
-	args?: any[],
+	args?: any[]
 ): Command {
 	return {
 		arguments: args,

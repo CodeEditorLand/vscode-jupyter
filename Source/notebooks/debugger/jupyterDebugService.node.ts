@@ -47,8 +47,8 @@ class JupyterDebugSession implements DebugSession {
 		private _configuration: DebugConfiguration,
 		private customRequestHandler: (
 			command: string,
-			args?: any,
-		) => Thenable<any>,
+			args?: any
+		) => Thenable<any>
 	) {
 		noop();
 	}
@@ -71,7 +71,7 @@ class JupyterDebugSession implements DebugSession {
 		return this.customRequestHandler(command, args);
 	}
 	public getDebugProtocolBreakpoint(
-		_breakpoint: Breakpoint,
+		_breakpoint: Breakpoint
 	): Thenable<DebugProtocolBreakpoint | undefined> {
 		return Promise.resolve(undefined);
 	}
@@ -105,10 +105,12 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	private _stoppedThreadId: number | undefined;
 	private _topFrameId: number | undefined;
 	private protocolParser: ProtocolParser;
-	constructor(@inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry) {
-        disposableRegistry.push(this);
-        this.protocolParser = new ProtocolParser();
-    }
+	constructor(
+		@inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry
+	) {
+		disposableRegistry.push(this);
+		this.protocolParser = new ProtocolParser();
+	}
 
 	public dispose(): void {
 		if (this.socket) {
@@ -152,7 +154,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	}
 	public registerDebugConfigurationProvider(
 		_debugType: string,
-		_provider: DebugConfigurationProvider,
+		_provider: DebugConfigurationProvider
 	): Disposable {
 		return {
 			dispose: () => {
@@ -163,14 +165,14 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 
 	public registerDebugAdapterTrackerFactory(
 		_debugType: string,
-		provider: DebugAdapterTrackerFactory,
+		provider: DebugAdapterTrackerFactory
 	): Disposable {
 		this.debugAdapterTrackerFactories.push(provider);
 		return {
 			dispose: () => {
 				this.debugAdapterTrackerFactories =
 					this.debugAdapterTrackerFactories.filter(
-						(f) => f !== provider,
+						(f) => f !== provider
 					);
 			},
 		};
@@ -185,7 +187,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	public startDebugging(
 		_folder: WorkspaceFolder | undefined,
 		nameOrConfiguration: string | DebugConfiguration,
-		_parentSession?: DebugSession | undefined,
+		_parentSession?: DebugSession | undefined
 	): Thenable<boolean> {
 		// Should have a port number. We'll assume it's local
 		const config = nameOrConfiguration as DebugConfiguration; // NOSONAR
@@ -193,7 +195,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			this.session = new JupyterDebugSession(
 				uuid(),
 				config,
-				this.sendCustomRequest.bind(this),
+				this.sendCustomRequest.bind(this)
 			);
 			this.sessionChangedEvent.fire(this.session);
 
@@ -201,25 +203,25 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			this.debugAdapterTrackers = this.debugAdapterTrackerFactories.map(
 				(f) =>
 					f.createDebugAdapterTracker(
-						this.session!,
-					) as DebugAdapterTracker, // NOSONAR
+						this.session!
+					) as DebugAdapterTracker // NOSONAR
 			);
 
 			this.socket = net.createConnection(config.port);
 			this.protocolParser.connect(this.socket);
 			this.protocolParser.on(
 				"event_stopped",
-				this.onBreakpoint.bind(this),
+				this.onBreakpoint.bind(this)
 			);
 			this.protocolParser.on("event_output", this.onOutput.bind(this));
 			this.protocolParser.on(
 				"event_terminated",
-				this.sendToTrackers.bind(this),
+				this.sendToTrackers.bind(this)
 			);
 			this.socket.on("error", this.onError.bind(this));
 			this.socket.on("close", this.onClose.bind(this));
 			return this.sendStartSequence(config, this.session.id).then(
-				() => true,
+				() => true
 			);
 		}
 		return Promise.resolve(true);
@@ -307,7 +309,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 				break;
 			default:
 				this.debugAdapterTrackers.forEach((d) =>
-					d.onDidSendMessage!(args),
+					d.onDidSendMessage!(args)
 				);
 				break;
 		}
@@ -319,7 +321,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 
 	private async sendStartSequence(
 		config: DebugConfiguration,
-		sessionId: string,
+		sessionId: string
 	): Promise<void> {
 		traceInfo("Sending debugger initialize...");
 		await this.sendInitialize();
@@ -356,7 +358,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 
 	private sendAttach(
 		config: DebugConfiguration,
-		sessionId: string,
+		sessionId: string
 	): Promise<void> {
 		// Send our attach request
 		return this.sendMessage("attach", {
@@ -406,7 +408,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			if (resp.request_seq === sequenceNumber) {
 				this.sendToTrackers(resp);
 				traceInfo(
-					`Received response from debugger: ${JSON.stringify(args)}`,
+					`Received response from debugger: ${JSON.stringify(args)}`
 				);
 				disposable.dispose();
 				response.resolve(resp.body);
@@ -416,7 +418,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		this.emitMessage(command, args).catch((exc) => {
 			traceError(
 				`Exception attempting to emit ${command} to debugger: `,
-				exc,
+				exc
 			);
 		});
 		return response.promise;
@@ -472,7 +474,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			this.session = undefined;
 			this.sessionChangedEvent.fire(undefined);
 			this.debugAdapterTrackers.forEach((d) =>
-				d.onExit ? d.onExit(0, undefined) : noop(),
+				d.onExit ? d.onExit(0, undefined) : noop()
 			);
 			this.debugAdapterTrackers = [];
 			this.sendDisconnect().catch(noop);

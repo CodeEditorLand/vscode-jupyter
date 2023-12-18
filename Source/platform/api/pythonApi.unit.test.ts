@@ -56,23 +56,23 @@ suite(`Interpreter Service`, () => {
 		environments = mock<PythonExtension["environments"]>();
 		when(newPythonApi.environments).thenReturn(instance(environments));
 		when(environments.onDidChangeActiveEnvironmentPath).thenReturn(
-			onDidChangeActiveEnvironmentPath.event,
+			onDidChangeActiveEnvironmentPath.event
 		);
 		when(environments.onDidChangeEnvironments).thenReturn(
-			onDidChangeEnvironments.event,
+			onDidChangeEnvironments.event
 		);
 		when(environments.onDidEnvironmentVariablesChange).thenReturn(
-			onDidEnvironmentVariablesChange.event,
+			onDidEnvironmentVariablesChange.event
 		);
 		when(environments.known).thenReturn([]);
 		when(environments.getActiveEnvironmentPath(anything())).thenReturn();
 		(instance(newPythonApi) as any).then = undefined;
 		when(apiProvider.getNewApi()).thenResolve(instance(newPythonApi));
 		when(apiProvider.onDidActivatePythonExtension).thenReturn(
-			onDidActivatePythonExtension.event,
+			onDidActivatePythonExtension.event
 		);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidChangeWorkspaceFolders,
+			mockedVSCodeNamespaces.workspace.onDidChangeWorkspaceFolders
 		).thenReturn(onDidChangeWorkspaceFolders.event);
 		when(extensionChecker.isPythonExtensionInstalled).thenReturn(true);
 		clock = fakeTimers.install();
@@ -84,7 +84,7 @@ suite(`Interpreter Service`, () => {
 			instance(apiProvider),
 			instance(extensionChecker),
 			disposables,
-			instance(context),
+			instance(context)
 		);
 	}
 	test("Progress status triggered upon refresh", async () => {
@@ -92,16 +92,16 @@ suite(`Interpreter Service`, () => {
 
 		const statuses: (typeof interpreterService.status)[] = [];
 		interpreterService.onDidChangeStatus(() =>
-			statuses.push(interpreterService.status),
+			statuses.push(interpreterService.status)
 		);
 		const progressEvent = createEventHandler(
 			interpreterService,
 			"onDidChangeStatus",
-			disposables,
+			disposables
 		);
 		// const deferred = createDeferred<void>();
 		when(environments.refreshEnvironments(anything())).thenReturn(
-			Promise.resolve(),
+			Promise.resolve()
 		);
 		await interpreterService.refreshInterpreters();
 		await clock.runAllAsync();
@@ -110,7 +110,7 @@ suite(`Interpreter Service`, () => {
 		assert.isAtLeast(
 			progressEvent.count,
 			2,
-			"Progress event not triggered at least 2 times",
+			"Progress event not triggered at least 2 times"
 		);
 		assert.deepEqual(statuses, ["refreshing", "idle"]);
 	});

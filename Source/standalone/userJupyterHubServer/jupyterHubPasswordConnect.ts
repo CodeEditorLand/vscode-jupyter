@@ -46,13 +46,13 @@ export class JupyterHubPasswordConnect {
 		private readonly agentCreator: IJupyterRequestAgentCreator | undefined,
 		private readonly requestCreator: IJupyterRequestCreator,
 		private readonly serverUriStorage: IJupyterServerUriStorage,
-		private readonly disposables: IDisposableRegistry,
+		private readonly disposables: IDisposableRegistry
 	) {
 		// Sign up to see if servers are removed from our uri storage list
 		this.serverUriStorage.onDidRemove(
 			this.onDidRemoveServers,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public async getPasswordConnectionInfo(options: {
@@ -79,7 +79,7 @@ export class JupyterHubPasswordConnect {
 		if (!result) {
 			result = this.getJupyterHubConnectionInfo(
 				newUrl,
-				options.validationErrorMessage,
+				options.validationErrorMessage
 			).then((value) => {
 				if (
 					!value ||
@@ -131,7 +131,7 @@ export class JupyterHubPasswordConnect {
 				new URL("hub/api", addTrailingSlash(url)).toString(),
 				{
 					method: "get",
-				},
+				}
 			);
 			// Assume we are at the login page for jupyterlab, which means we're not a jupyter hub
 			// Sending this request with the /hub/api appended, still ends up going to the same loging page.
@@ -145,7 +145,7 @@ export class JupyterHubPasswordConnect {
 				traceVerbose(
 					`JupyterHub version is ${
 						json && json.version
-					} for url ${url}`,
+					} for url ${url}`
 				);
 				return json && json.version;
 			} catch {
@@ -154,7 +154,7 @@ export class JupyterHubPasswordConnect {
 			return false;
 		} catch (ex) {
 			traceVerbose(
-				`Error in detecting whether url is isJupyterHub: ${ex}`,
+				`Error in detecting whether url is isJupyterHub: ${ex}`
 			);
 			return false;
 		}
@@ -162,19 +162,19 @@ export class JupyterHubPasswordConnect {
 
 	private async getJupyterHubConnectionInfo(
 		uri: string,
-		validationErrorMessage?: string,
+		validationErrorMessage?: string
 	): Promise<IJupyterPasswordConnectInfo> {
 		try {
 			// First ask for the user name and password
 			const userNameAndPassword = await this.getUserNameAndPassword(
-				validationErrorMessage,
+				validationErrorMessage
 			);
 			if (userNameAndPassword.username || userNameAndPassword.password) {
 				// Try the login method. It should work and doesn't require a token to be generated.
 				let result = await this.getJupyterHubConnectionInfoFromLogin(
 					uri,
 					userNameAndPassword.username,
-					userNameAndPassword.password,
+					userNameAndPassword.password
 				);
 
 				// If login method fails, try generating a token
@@ -189,7 +189,7 @@ export class JupyterHubPasswordConnect {
 						{
 							failed,
 							info,
-						},
+						}
 					);
 				} else {
 					sendTelemetryEvent(
@@ -198,12 +198,12 @@ export class JupyterHubPasswordConnect {
 						{
 							failed: true,
 							info: "emptyResponseFromLogin",
-						},
+						}
 					);
 					result = await this.getJupyterHubConnectionInfoFromApi(
 						uri,
 						userNameAndPassword.username,
-						userNameAndPassword.password,
+						userNameAndPassword.password
 					);
 					const failed = Object.keys(result || {}).length === 0;
 					const info = failed
@@ -215,7 +215,7 @@ export class JupyterHubPasswordConnect {
 						{
 							failed,
 							info,
-						},
+						}
 					);
 				}
 
@@ -240,7 +240,7 @@ export class JupyterHubPasswordConnect {
 	private async getJupyterHubConnectionInfoFromLogin(
 		uri: string,
 		username: string,
-		password: string,
+		password: string
 	): Promise<IJupyterPasswordConnectInfo | undefined> {
 		// We're using jupyter hub. Get the base url
 		const url = new URL(uri);
@@ -267,7 +267,7 @@ export class JupyterHubPasswordConnect {
 			const cookies = this.getCookies(response);
 			const cookieString = [...cookies.entries()].reduce(
 				(p, c) => `${p};${c[0]}=${c[1]}`,
-				"",
+				""
 			);
 			// See this API for creating a token
 			// https://jupyterhub.readthedocs.io/en/stable/_static/rest-api/index.html#operation--users--name--tokens-post
@@ -280,7 +280,7 @@ export class JupyterHubPasswordConnect {
 						Cookie: cookieString,
 						Referer: `${baseUrl}/hub/login`,
 					},
-				},
+				}
 			);
 
 			// That should give us a new token. For now server name is hard coded. Not sure
@@ -302,7 +302,7 @@ export class JupyterHubPasswordConnect {
 								Cookie: cookieString,
 								Referer: `${baseUrl}/hub/login`,
 							},
-						},
+						}
 					);
 
 					// This token was generated for this request. We should clean it up when
@@ -318,7 +318,7 @@ export class JupyterHubPasswordConnect {
 										Cookie: cookieString,
 										Referer: `${baseUrl}/hub/login`,
 									},
-								},
+								}
 							).catch(noop); // Don't wait for this during shutdown. Just make the request
 						},
 					});
@@ -337,7 +337,7 @@ export class JupyterHubPasswordConnect {
 	private async getJupyterHubConnectionInfoFromApi(
 		uri: string,
 		username: string,
-		password: string,
+		password: string
 	): Promise<IJupyterPasswordConnectInfo> {
 		// We're using jupyter hub. Get the base url
 		const url = new URL(uri);
@@ -355,7 +355,7 @@ export class JupyterHubPasswordConnect {
 					password || ""
 				}"  }`,
 				redirect: "manual",
-			},
+			}
 		);
 
 		if (response.ok && response.status === 200) {
@@ -381,7 +381,7 @@ export class JupyterHubPasswordConnect {
 	private addAllowUnauthorized(
 		url: string,
 		allowUnauthorized: boolean,
-		options: RequestInit,
+		options: RequestInit
 	): RequestInit {
 		if (url.startsWith("https") && allowUnauthorized && this.agentCreator) {
 			const requestAgent = this.agentCreator.createHttpRequestAgent();
@@ -393,7 +393,7 @@ export class JupyterHubPasswordConnect {
 	}
 
 	private async getUserNameAndPassword(
-		validationMessage?: string,
+		validationMessage?: string
 	): Promise<{ username: string; password: string }> {
 		const multistep = this.multiStepFactory.create<{
 			username: string;
@@ -415,7 +415,7 @@ export class JupyterHubPasswordConnect {
 			username: string;
 			password: string;
 			validationMessage?: string;
-		},
+		}
 	) {
 		state.username = await input.showInputBox({
 			title: DataScience.jupyterSelectUserAndPasswordTitle,
@@ -430,14 +430,14 @@ export class JupyterHubPasswordConnect {
 	}
 
 	private async validateUserNameOrPassword(
-		_value: string,
+		_value: string
 	): Promise<string | undefined> {
 		return undefined;
 	}
 
 	private async getPasswordMultiStep(
 		input: IMultiStepInput<{ username: string; password: string }>,
-		state: { username: string; password: string },
+		state: { username: string; password: string }
 	) {
 		state.password = await input.showInputBox({
 			title: DataScience.jupyterSelectUserAndPasswordTitle,
@@ -450,11 +450,11 @@ export class JupyterHubPasswordConnect {
 
 	private async makeRequest(
 		url: string,
-		options: RequestInit,
+		options: RequestInit
 	): Promise<Response> {
 		const allowUnauthorized =
 			this.configService.getSettings(
-				undefined,
+				undefined
 			).allowUnauthorizedRemoteConnection;
 
 		// Try once and see if it fails with unauthorized.
@@ -464,8 +464,8 @@ export class JupyterHubPasswordConnect {
 				this.addAllowUnauthorized(
 					url,
 					allowUnauthorized ? true : false,
-					options,
-				),
+					options
+				)
 			);
 		} catch (e) {
 			if (e.message.indexOf("reason: self signed certificate") >= 0) {
@@ -476,7 +476,7 @@ export class JupyterHubPasswordConnect {
 					DataScience.jupyterSelfCertFail(e.message),
 					{ modal: true },
 					enableOption,
-					closeOption,
+					closeOption
 				);
 				if (value === enableOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
@@ -484,11 +484,11 @@ export class JupyterHubPasswordConnect {
 						"allowUnauthorizedRemoteConnection",
 						true,
 						undefined,
-						ConfigurationTarget.Workspace,
+						ConfigurationTarget.Workspace
 					);
 					return this.requestCreator.getFetchMethod()(
 						url,
-						this.addAllowUnauthorized(url, true, options),
+						this.addAllowUnauthorized(url, true, options)
 					);
 				} else if (value === closeOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageClose);

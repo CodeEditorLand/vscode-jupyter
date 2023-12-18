@@ -45,10 +45,10 @@ suite("DataScienceCodeLensProvider Unit Tests", () => {
 		pythonSettings = TypeMoq.Mock.ofType<IWatchableJupyterSettings>();
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(true);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust,
+			mockedVSCodeNamespaces.workspace.onDidGrantWorkspaceTrust
 		).thenReturn(new EventEmitter<void>().event);
 		when(mockedVSCodeNamespaces.window.activeNotebookEditor).thenReturn(
-			undefined,
+			undefined
 		);
 		configurationService
 			.setup((c) => c.getSettings(TypeMoq.It.isAny()))
@@ -57,8 +57,8 @@ suite("DataScienceCodeLensProvider Unit Tests", () => {
 			mockedVSCodeNamespaces.commands.executeCommand(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve();
 		debugService
 			.setup((d) => d.activeDebugSession)
@@ -68,7 +68,7 @@ suite("DataScienceCodeLensProvider Unit Tests", () => {
 			debugLocationTracker.object,
 			configurationService.object,
 			disposables,
-			debugService.object,
+			debugService.object
 		);
 	});
 
@@ -95,7 +95,7 @@ suite("DataScienceCodeLensProvider Unit Tests", () => {
 
 		await codeLensProvider.provideCodeLenses(
 			document.object,
-			tokenSource.token,
+			tokenSource.token
 		);
 
 		targetCodeWatcher.verifyAll();
@@ -129,11 +129,11 @@ suite("DataScienceCodeLensProvider Unit Tests", () => {
 
 		await codeLensProvider.provideCodeLenses(
 			document.object,
-			tokenSource.token,
+			tokenSource.token
 		);
 		await codeLensProvider.provideCodeLenses(
 			document.object,
-			tokenSource.token,
+			tokenSource.token
 		);
 
 		// getCodeLenses should be called twice, but getting the code watcher only once due to same doc
@@ -182,15 +182,15 @@ suite("DataScienceCodeLensProvider Unit Tests", () => {
 
 		await codeLensProvider.provideCodeLenses(
 			document1.object,
-			tokenSource.token,
+			tokenSource.token
 		);
 		await codeLensProvider.provideCodeLenses(
 			document1.object,
-			tokenSource.token,
+			tokenSource.token
 		);
 		await codeLensProvider.provideCodeLenses(
 			document2.object,
-			tokenSource.token,
+			tokenSource.token
 		);
 
 		// service container get should be called three times as the names and versions don't match

@@ -36,7 +36,7 @@ export class Extensions implements IExtensions {
 					.filter(
 						(item) =>
 							item &&
-							!item.toLowerCase().startsWith(jupyterExtRoot),
+							!item.toLowerCase().startsWith(jupyterExtRoot)
 					) as string[];
 				parseStack(new Error("Ex")).forEach((item) => {
 					const fileName = item.getFileName();
@@ -54,13 +54,13 @@ export class Extensions implements IExtensions {
 							(frame
 								.toLowerCase()
 								.startsWith(
-									ext.extensionUri.fsPath.toLowerCase(),
+									ext.extensionUri.fsPath.toLowerCase()
 								) ||
 								frame
 									.toLowerCase()
 									.startsWith(
-										ext.extensionUri.path.toLowerCase(),
-									)),
+										ext.extensionUri.path.toLowerCase()
+									))
 					);
 					if (matchingExt) {
 						return {
@@ -77,7 +77,7 @@ export class Extensions implements IExtensions {
 		} catch (ex) {
 			traceError(
 				`Unable to determine the caller of the extension API for trace stack.`,
-				stack,
+				stack
 			);
 			traceError(`Failure error`, ex);
 			return {

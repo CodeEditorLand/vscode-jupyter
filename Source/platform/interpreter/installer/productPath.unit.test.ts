@@ -31,7 +31,7 @@ suite("Product Path", () => {
 		class TestBaseProductPathsService extends BaseProductPathsService {
 			public getExecutableNameFromSettings(
 				_: Product,
-				_resource?: Uri,
+				_resource?: Uri
 			): string {
 				return "";
 			}
@@ -59,27 +59,27 @@ suite("Product Path", () => {
 				serviceContainer.object,
 				interpreterPackages.object,
 				memento.object,
-				outputChannel.object,
+				outputChannel.object
 			);
 			serviceContainer
 				.setup((s) =>
 					s.get(
 						TypeMoq.It.isValue(IConfigurationService),
-						TypeMoq.It.isAny(),
-					),
+						TypeMoq.It.isAny()
+					)
 				)
 				.returns(() => configService.object);
 			serviceContainer
 				.setup((s) =>
-					s.get(TypeMoq.It.isValue(IInstaller), TypeMoq.It.isAny()),
+					s.get(TypeMoq.It.isValue(IInstaller), TypeMoq.It.isAny())
 				)
 				.returns(() => productInstaller);
 			serviceContainer
 				.setup((c) =>
 					c.get(
 						TypeMoq.It.isValue(IProductService),
-						TypeMoq.It.isAny(),
-					),
+						TypeMoq.It.isAny()
+					)
 				)
 				.returns(() => new ProductService());
 		});
@@ -89,24 +89,24 @@ suite("Product Path", () => {
 				productInstaller.translateProductToModuleName = () =>
 					"moduleName";
 				const productPathService = new TestBaseProductPathsService(
-					serviceContainer.object,
+					serviceContainer.object
 				);
 				productPathService.getExecutableNameFromSettings = () =>
 					"executableName";
 				expect(
-					productPathService.isExecutableAModule(product.value),
+					productPathService.isExecutableAModule(product.value)
 				).to.equal(true, "Should be true");
 			});
 			test("Returns false if User has customized the full path to executable", () => {
 				productInstaller.translateProductToModuleName = () =>
 					"moduleName";
 				const productPathService = new TestBaseProductPathsService(
-					serviceContainer.object,
+					serviceContainer.object
 				);
 				productPathService.getExecutableNameFromSettings = () =>
 					"path/to/executable";
 				expect(
-					productPathService.isExecutableAModule(product.value),
+					productPathService.isExecutableAModule(product.value)
 				).to.equal(false, "Should be false");
 			});
 			test("Returns false if translating product to module name fails with error", () => {
@@ -114,12 +114,12 @@ suite("Product Path", () => {
 					return new Error("Kaboom") as any;
 				};
 				const productPathService = new TestBaseProductPathsService(
-					serviceContainer.object,
+					serviceContainer.object
 				);
 				productPathService.getExecutableNameFromSettings = () =>
 					"executableName";
 				expect(
-					productPathService.isExecutableAModule(product.value),
+					productPathService.isExecutableAModule(product.value)
 				).to.equal(false, "Should be false");
 			});
 		});

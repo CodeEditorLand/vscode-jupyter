@@ -13,7 +13,7 @@ declare namespace Slick {
 			constructor(
 				columns: Slick.Column<T>[],
 				grid: Slick.Grid<T>,
-				options: SlickColumnPickerOptions,
+				options: SlickColumnPickerOptions
 			);
 			getAllColumns(): Slick.Column<T>[];
 			destroy(): void;

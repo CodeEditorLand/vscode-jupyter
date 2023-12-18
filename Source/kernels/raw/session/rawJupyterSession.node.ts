@@ -39,7 +39,7 @@ export class RawJupyterSessionWrapper
 			return this.session.kernel.status;
 		}
 		traceInfoIfCI(
-			`Real kernel is ${this.session.kernel ? "defined" : "undefined"}`,
+			`Real kernel is ${this.session.kernel ? "defined" : "undefined"}`
 		);
 		return "unknown";
 	}
@@ -47,7 +47,7 @@ export class RawJupyterSessionWrapper
 	constructor(
 		session: RawSessionConnection,
 		private readonly resource: Resource,
-		private readonly kernelConnectionMetadata: LocalKernelConnectionMetadata,
+		private readonly kernelConnectionMetadata: LocalKernelConnectionMetadata
 	) {
 		super("localRaw", session);
 		this.initializeKernelSocket();
@@ -64,7 +64,7 @@ export class RawJupyterSessionWrapper
 
 	public async waitForIdle(
 		timeout: number,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<void> {
 		try {
 			await waitForIdleOnSession(
@@ -72,7 +72,7 @@ export class RawJupyterSessionWrapper
 				this.resource,
 				this.session,
 				timeout,
-				token,
+				token
 			);
 		} catch (ex) {
 			traceInfoIfCI(`Error waiting for idle`, ex);
@@ -92,14 +92,14 @@ export class RawJupyterSessionWrapper
 		traceVerbose(
 			`Shutdown session ${kernelIdForLogging} - start called from ${
 				new Error("").stack
-			}`,
+			}`
 		);
 		suppressShutdownErrors(this.session.kernel);
 		await raceTimeout(1000, this.session.shutdown().catch(noop));
 		this.didShutdown.fire();
 		super.dispose();
 		traceVerbose(
-			`Shutdown session ${kernelIdForLogging} - shutdown complete`,
+			`Shutdown session ${kernelIdForLogging} - shutdown complete`
 		);
 	}
 }

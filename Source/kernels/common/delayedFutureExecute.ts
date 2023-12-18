@@ -28,16 +28,16 @@ export class DelayedFutureExecute
 		| undefined;
 	private pendingOnIOPub:
 		| ((
-				msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
+				msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 		  ) => void | PromiseLike<void>)
 		| undefined;
 	private pendingOnStdin:
 		| ((
-				msg: KernelMessage.IStdinMessage<KernelMessage.StdinMessageType>,
+				msg: KernelMessage.IStdinMessage<KernelMessage.StdinMessageType>
 		  ) => void | PromiseLike<void>)
 		| undefined;
 	private pendingHooks: ((
-		msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
+		msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 	) => boolean | PromiseLike<boolean>)[] = [];
 	private pendingInputReplies: (
 		| KernelMessage.IReplyErrorContent
@@ -47,7 +47,7 @@ export class DelayedFutureExecute
 	private disposed = false;
 	private statusChangedHandler: (
 		_session: Kernel.IKernelConnection,
-		status: KernelMessage.Status,
+		status: KernelMessage.Status
 	) => void;
 	constructor(
 		private kernelConnection: Kernel.IKernelConnection,
@@ -57,7 +57,7 @@ export class DelayedFutureExecute
 		>,
 		private content: KernelMessage.IExecuteRequestMsg["content"],
 		private disposeOnDone?: boolean,
-		private metadata?: JSONObject,
+		private metadata?: JSONObject
 	) {
 		// Ensure we don't have any unhandled promises.
 		this.doneDeferred.promise.catch(noop);
@@ -69,7 +69,7 @@ export class DelayedFutureExecute
 		// If the kernel dies, finish our future
 		this.statusChangedHandler = (
 			_session: Kernel.IKernelConnection,
-			status: KernelMessage.Status,
+			status: KernelMessage.Status
 		) => {
 			if (
 				status === "unknown" ||
@@ -107,27 +107,31 @@ export class DelayedFutureExecute
 	public get done(): Promise<KernelMessage.IExecuteReplyMsg> {
 		return this.doneDeferred.promise;
 	}
-	public set onReply(value: (
-		msg: KernelMessage.IExecuteReplyMsg,
-	) => void | PromiseLike<void>) {
+	public set onReply(
+		value: (msg: KernelMessage.IExecuteReplyMsg) => void | PromiseLike<void>
+	) {
 		if (this.requestFuture) {
 			this.requestFuture.onReply = value;
 		} else {
 			this.pendingOnReply = value;
 		}
 	}
-	public set onIOPub(value: (
-		msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
-	) => void | PromiseLike<void>) {
+	public set onIOPub(
+		value: (
+			msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
+		) => void | PromiseLike<void>
+	) {
 		if (this.requestFuture) {
 			this.requestFuture.onIOPub = value;
 		} else {
 			this.pendingOnIOPub = value;
 		}
 	}
-	public set onStdin(value: (
-		msg: KernelMessage.IStdinMessage<KernelMessage.StdinMessageType>,
-	) => void | PromiseLike<void>) {
+	public set onStdin(
+		value: (
+			msg: KernelMessage.IStdinMessage<KernelMessage.StdinMessageType>
+		) => void | PromiseLike<void>
+	) {
 		if (this.requestFuture) {
 			this.requestFuture.onStdin = value;
 		} else {
@@ -136,8 +140,8 @@ export class DelayedFutureExecute
 	}
 	public registerMessageHook(
 		hook: (
-			msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
-		) => boolean | PromiseLike<boolean>,
+			msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
+		) => boolean | PromiseLike<boolean>
 	): void {
 		if (this.requestFuture) {
 			this.requestFuture.registerMessageHook(hook);
@@ -147,8 +151,8 @@ export class DelayedFutureExecute
 	}
 	public removeMessageHook(
 		hook: (
-			msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
-		) => boolean | PromiseLike<boolean>,
+			msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
+		) => boolean | PromiseLike<boolean>
 	): void {
 		this.pendingHooks = this.pendingHooks.filter((h) => h != hook);
 		if (this.requestFuture) {
@@ -159,7 +163,7 @@ export class DelayedFutureExecute
 		content:
 			| KernelMessage.IReplyErrorContent
 			| KernelMessage.IReplyAbortContent
-			| KernelMessage.IInputReply,
+			| KernelMessage.IInputReply
 	): void {
 		if (this.requestFuture) {
 			this.requestFuture.sendInputReply(content);
@@ -173,7 +177,7 @@ export class DelayedFutureExecute
 	dispose(): void {
 		this.disposed = true;
 		this.kernelConnection.statusChanged.disconnect(
-			this.statusChangedHandler,
+			this.statusChangedHandler
 		);
 		if (this.requestFuture) {
 			this.requestFuture.dispose();
@@ -193,16 +197,16 @@ export class DelayedFutureExecute
 	private requestExecute() {
 		if (this.requestFuture) {
 			throw new Error(
-				`ChainedFuture already executed. Can't execute more than once.`,
+				`ChainedFuture already executed. Can't execute more than once.`
 			);
 		}
 		traceInfoIfCI(
-			`DelayedFuture is starting request now for ${this.content}.`,
+			`DelayedFuture is starting request now for ${this.content}.`
 		);
 		this.requestFuture = this.kernelConnection.requestExecute(
 			this.content,
 			this.disposeOnDone,
-			this.metadata,
+			this.metadata
 		);
 		if (this.requestFuture) {
 			if (this.pendingOnReply) {
@@ -215,13 +219,13 @@ export class DelayedFutureExecute
 				this.requestFuture.onStdin = this.pendingOnStdin;
 			}
 			if (this.pendingHooks.length) {
-				this.pendingHooks.forEach((h) =>
-					this.requestFuture?.registerMessageHook(h),
+				this.pendingHooks.forEach(
+					(h) => this.requestFuture?.registerMessageHook(h)
 				);
 			}
 			if (this.pendingInputReplies) {
-				this.pendingInputReplies.forEach((r) =>
-					this.requestFuture?.sendInputReply(r),
+				this.pendingInputReplies.forEach(
+					(r) => this.requestFuture?.sendInputReply(r)
 				);
 			}
 			this.requestFuture.done

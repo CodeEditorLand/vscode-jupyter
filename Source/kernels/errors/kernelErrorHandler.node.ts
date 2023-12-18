@@ -25,38 +25,41 @@ import { IInterpreterService } from "../../platform/interpreter/contracts";
 @injectable()
 export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 	constructor(
-        @inject(IJupyterInterpreterDependencyManager)
-        @optional()
-        dependencyManager: IJupyterInterpreterDependencyManager | undefined,
-        @inject(IConfigurationService) configuration: IConfigurationService,
-        @inject(IKernelDependencyService)
-        @optional()
-        kernelDependency: IKernelDependencyService | undefined,
-        @inject(IJupyterServerUriStorage) serverUriStorage: IJupyterServerUriStorage,
-        @inject(IJupyterServerProviderRegistry) jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
-        @inject(IReservedPythonNamedProvider) private readonly reservedPythonNames: IReservedPythonNamedProvider,
-        @inject(IFileSystem) fs: IFileSystem,
-        @inject(IInterpreterService) interpreterService: IInterpreterService
-    ) {
-        super(
-            dependencyManager,
-            configuration,
-            kernelDependency,
-            serverUriStorage,
-            jupyterUriProviderRegistration,
-            fs,
-            interpreterService
-        );
-    }
+		@inject(IJupyterInterpreterDependencyManager)
+		@optional()
+		dependencyManager: IJupyterInterpreterDependencyManager | undefined,
+		@inject(IConfigurationService) configuration: IConfigurationService,
+		@inject(IKernelDependencyService)
+		@optional()
+		kernelDependency: IKernelDependencyService | undefined,
+		@inject(IJupyterServerUriStorage)
+		serverUriStorage: IJupyterServerUriStorage,
+		@inject(IJupyterServerProviderRegistry)
+		jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
+		@inject(IReservedPythonNamedProvider)
+		private readonly reservedPythonNames: IReservedPythonNamedProvider,
+		@inject(IFileSystem) fs: IFileSystem,
+		@inject(IInterpreterService) interpreterService: IInterpreterService
+	) {
+		super(
+			dependencyManager,
+			configuration,
+			kernelDependency,
+			serverUriStorage,
+			jupyterUriProviderRegistration,
+			fs,
+			interpreterService
+		);
+	}
 	protected override async addErrorMessageIfPythonArePossiblyOverridingPythonModules(
 		messages: string[],
-		resource: Resource,
+		resource: Resource
 	) {
 		// Looks like some other module is missing.
 		// Sometimes when you create files like xml.py, then kernel startup fails due to xml.dom module not being found.
 		const problematicFiles =
 			await this.getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
-				resource,
+				resource
 			);
 		if (problematicFiles.length > 0) {
 			const cwd = resource ? path.dirname(resource) : undefined;
@@ -70,8 +73,8 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 					const displayPath = resource
 						? getDisplayPath(item.uri, [], cwd)
 						: `${path.basename(
-								path.dirname(item.uri),
-						  )}/__init__.py`;
+								path.dirname(item.uri)
+							)}/__init__.py`;
 					return `<a href='${item.uri.toString()}?line=1'>${displayPath}</a>`;
 				}
 			});
@@ -85,26 +88,26 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 			}
 			messages.push(
 				DataScience.filesPossiblyOverridingPythonModulesMayHavePreventedKernelFromStarting(
-					files,
-				),
+					files
+				)
 			);
 			messages.push(
-				DataScience.listOfFilesWithLinksThatMightNeedToBeRenamed(files),
+				DataScience.listOfFilesWithLinksThatMightNeedToBeRenamed(files)
 			);
 			messages.push(
 				Common.clickHereForMoreInfoWithHtml(
-					JupyterKernelStartFailureOverrideReservedName,
-				),
+					JupyterKernelStartFailureOverrideReservedName
+				)
 			);
 		}
 	}
 	protected override async getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
-		resource: Resource,
+		resource: Resource
 	): Promise<{ uri: Uri; type: "file" | "__init__" }[]> {
 		return resource
 			? this.reservedPythonNames.getUriOverridingReservedPythonNames(
-					path.dirname(resource),
-			  )
+					path.dirname(resource)
+				)
 			: [];
 	}
 }

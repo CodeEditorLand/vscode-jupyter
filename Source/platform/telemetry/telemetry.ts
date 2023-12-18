@@ -21,11 +21,11 @@ export const trackedInfo = new Map<
 >();
 export const pythonEnvironmentsByHash = new Map<string, PythonEnvironment>();
 type InterpreterPackageProvider = (
-	interpreter: PythonEnvironment,
+	interpreter: PythonEnvironment
 ) => Promise<Map<string, string>>;
 let _interpreterPackageProvider: InterpreterPackageProvider | undefined;
 export function initializeGlobals(
-	interpreterPackageProvider: InterpreterPackageProvider,
+	interpreterPackageProvider: InterpreterPackageProvider
 ) {
 	_interpreterPackageProvider = interpreterPackageProvider;
 }
@@ -37,7 +37,7 @@ export function initializeGlobals(
  */
 export function updatePythonPackages(
 	currentData: ResourceSpecificTelemetryProperties,
-	clonedCurrentData?: ResourceSpecificTelemetryProperties,
+	clonedCurrentData?: ResourceSpecificTelemetryProperties
 ) {
 	if (!currentData.pythonEnvironmentPath) {
 		return;
@@ -64,7 +64,7 @@ export function updatePythonPackages(
  * Gets a JSON with hashed keys of some python packages along with their versions.
  */
 async function getPythonEnvironmentPackages(
-	options: { interpreter: PythonEnvironment } | { interpreterHash: string },
+	options: { interpreter: PythonEnvironment } | { interpreterHash: string }
 ) {
 	if (!_interpreterPackageProvider) {
 		traceError(`Python package provider is not initialized.`);
@@ -94,7 +94,7 @@ export function deleteTrackedInformation(resource: Uri) {
  * We will be using a reference of this object elsewhere & adding properties to the object.
  */
 export async function getContextualPropsForTelemetry(
-	resource: Resource,
+	resource: Resource
 ): Promise<ResourceSpecificTelemetryProperties> {
 	if (!resource) {
 		return {};

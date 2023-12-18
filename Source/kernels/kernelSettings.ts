@@ -6,7 +6,7 @@ import { IKernelSettings } from "./types";
 
 export function createKernelSettings(
 	configService: IConfigurationService,
-	resource: Resource,
+	resource: Resource
 ): IKernelSettings {
 	return {
 		get enableExtendedKernelCompletions() {

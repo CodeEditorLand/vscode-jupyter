@@ -33,9 +33,11 @@ export class CondaInstaller extends ModuleInstaller {
 	// Unfortunately inversify requires the number of args in constructor to be explictly
 	// specified as more than its base class. So we need the constructor.
 	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
-	constructor(@inject(IServiceContainer) serviceContainer: IServiceContainer) {
-        super(serviceContainer);
-    }
+	constructor(
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super(serviceContainer);
+	}
 
 	public get name(): string {
 		return "Conda";
@@ -62,7 +64,7 @@ export class CondaInstaller extends ModuleInstaller {
 	 * @returns {Promise<boolean>} Whether conda is supported as a module installer or not.
 	 */
 	public async isSupported(
-		interpreter: PythonEnvironment | Environment,
+		interpreter: PythonEnvironment | Environment
 	): Promise<boolean> {
 		if (this._isCondaAvailable === false) {
 			return false;
@@ -85,13 +87,13 @@ export class CondaInstaller extends ModuleInstaller {
 		productOrModuleName: Product | string,
 		interpreter: PythonEnvironment | Environment,
 		cancelTokenSource: CancellationTokenSource,
-		flags?: ModuleInstallFlags,
+		flags?: ModuleInstallFlags
 	): Promise<void> {
 		await super.installModule(
 			productOrModuleName,
 			interpreter,
 			cancelTokenSource,
-			flags,
+			flags
 		);
 
 		// If we just installed a package into a conda env without python init, then Python may have gotten installed
@@ -106,14 +108,14 @@ export class CondaInstaller extends ModuleInstaller {
 		) {
 			const pythonExt =
 				this.serviceContainer.get<IPythonExtensionChecker>(
-					IPythonExtensionChecker,
+					IPythonExtensionChecker
 				);
 			if (!pythonExt.isPythonExtensionActive) {
 				return;
 			}
 			const interpreterService =
 				this.serviceContainer.get<IInterpreterService>(
-					IInterpreterService,
+					IInterpreterService
 				);
 			const updatedCondaEnv =
 				await interpreterService.getInterpreterDetails(interpreter.id);
@@ -129,7 +131,7 @@ export class CondaInstaller extends ModuleInstaller {
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
-		flags: ModuleInstallFlags = ModuleInstallFlags.None,
+		flags: ModuleInstallFlags = ModuleInstallFlags.None
 	): Promise<ExecutionInstallArgs> {
 		const condaService =
 			this.serviceContainer.get<CondaService>(CondaService);

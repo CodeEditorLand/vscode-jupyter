@@ -28,7 +28,7 @@ suite("Local Kernel Spec Finder", () => {
 		finder = new LocalKernelSpecFinder(
 			instance(fs),
 			instance(globalState),
-			instance(jupyterPaths),
+			instance(jupyterPaths)
 		);
 		disposables.push(finder);
 	});
@@ -52,13 +52,13 @@ suite("Local Kernel Spec Finder", () => {
 		};
 		const uri = Uri.file("path/to/kernel.json");
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec),
+			JSON.stringify(kernelSpec)
 		);
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec),
+			JSON.stringify(kernelSpec)
 		);
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec),
+			JSON.stringify(kernelSpec)
 		);
 
 		const loadedSpec = await finder.loadKernelSpec(uri, cancellation.token);
@@ -89,7 +89,7 @@ suite("Local Kernel Spec Finder", () => {
 		};
 		const uri = Uri.file("path/to/kernel.json");
 		when(fs.readFile(uriEquals(uri))).thenResolve(
-			JSON.stringify(kernelSpec),
+			JSON.stringify(kernelSpec)
 		);
 
 		await finder.loadKernelSpec(uri, cancellation.token);

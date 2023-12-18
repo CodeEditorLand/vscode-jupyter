@@ -46,7 +46,7 @@ export class ProgressReporter implements IProgressReporter {
 	 */
 	public createProgressIndicator(
 		message: string,
-		cancellable = false,
+		cancellable = false
 	): IDisposable & { token: CancellationToken } {
 		const cancellation = new CancellationTokenSource();
 		const deferred = createDeferred();

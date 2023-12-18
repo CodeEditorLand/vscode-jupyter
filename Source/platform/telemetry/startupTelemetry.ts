@@ -21,7 +21,7 @@ export async function sendStartupTelemetry(
 		startActivateTime: number;
 		endActivateTime: number;
 	},
-	stopWatch: IStopWatch,
+	stopWatch: IStopWatch
 ) {
 	if (isTestExecution()) {
 		return;
@@ -43,7 +43,7 @@ export async function sendErrorTelemetry(
 		workspaceFolderCount: number;
 		totalActivateTime: number;
 		codeLoadingTime: number;
-	},
+	}
 ) {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any

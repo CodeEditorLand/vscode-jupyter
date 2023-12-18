@@ -22,7 +22,9 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	private docOpenedHandler?: IDisposable;
 
-	constructor(@inject(IFileSystem) private readonly fileSystem: IFileSystem) {}
+	constructor(
+		@inject(IFileSystem) private readonly fileSystem: IFileSystem
+	) {}
 
 	public activate() {
 		this.addHandlers();
@@ -72,8 +74,8 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 		this.disposables.push(
 			workspace.onDidChangeWorkspaceFolders(
 				this.onWorkspaceFoldersChanged,
-				this,
-			),
+				this
+			)
 		);
 	}
 	protected addRemoveDocOpenedHandlers() {
@@ -81,7 +83,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 			if (!this.docOpenedHandler) {
 				this.docOpenedHandler = workspace.onDidOpenTextDocument(
 					this.onDocOpened,
-					this,
+					this
 				);
 			}
 			return;
@@ -94,11 +96,11 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 	protected onWorkspaceFoldersChanged() {
 		//If an activated workspace folder was removed, delete its key
 		const workspaceKeys = (workspace.workspaceFolders || [])!.map(
-			(workspaceFolder) => this.getWorkspaceKey(workspaceFolder.uri),
+			(workspaceFolder) => this.getWorkspaceKey(workspaceFolder.uri)
 		);
 		const activatedWkspcKeys = Array.from(this.activatedWorkspaces.keys());
 		const activatedWkspcFoldersRemoved = activatedWkspcKeys.filter(
-			(item) => workspaceKeys.indexOf(item) < 0,
+			(item) => workspaceKeys.indexOf(item) < 0
 		);
 		if (activatedWkspcFoldersRemoved.length > 0) {
 			for (const folder of activatedWkspcFoldersRemoved) {

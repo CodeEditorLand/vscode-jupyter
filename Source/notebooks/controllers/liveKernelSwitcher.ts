@@ -24,17 +24,19 @@ import { getDisplayPath } from "../../platform/common/platform/fs-paths";
 @injectable()
 export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IControllerRegistration) private readonly controllerRegistration: IControllerRegistration,
-        @inject(PreferredRemoteKernelIdProvider)
-        private readonly preferredRemoteKernelIdProvider: PreferredRemoteKernelIdProvider
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IControllerRegistration)
+		private readonly controllerRegistration: IControllerRegistration,
+		@inject(PreferredRemoteKernelIdProvider)
+		private readonly preferredRemoteKernelIdProvider: PreferredRemoteKernelIdProvider
+	) {}
 	public activate() {
 		// Listen to notebook open events. If we open a notebook that had a remote kernel started on it, reset it
 		workspace.onDidOpenNotebookDocument(
 			this.onDidOpenNotebook,
 			this,
-			this.disposables,
+			this.disposables
 		);
 
 		// For all currently open notebooks, need to run the same code
@@ -48,7 +50,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		}
 		const preferredRemote =
 			await this.preferredRemoteKernelIdProvider.getPreferredRemoteKernelId(
-				notebook.uri,
+				notebook.uri
 			);
 		if (!preferredRemote) {
 			return;
@@ -56,7 +58,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		const findAndSelectRemoteController = () => {
 			const active = this.controllerRegistration.getSelected(notebook);
 			const matching = this.controllerRegistration.registered.find(
-				(l) => l.id === preferredRemote,
+				(l) => l.id === preferredRemote
 			);
 			if (matching && active?.id !== matching.id) {
 				// This controller is the one we want, but it's not currently set.
@@ -80,7 +82,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.controllerRegistration.onControllerSelected(
 			(e) => {
@@ -90,18 +92,18 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
 	private async switchKernel(
 		n: NotebookDocument,
-		kernel: Readonly<KernelConnectionMetadata>,
+		kernel: Readonly<KernelConnectionMetadata>
 	) {
 		traceVerbose(
 			`Using notebook.selectKernel to force remote kernel for ${getDisplayPath(
-				n.uri,
-			)} to ${kernel.id}`,
+				n.uri
+			)} to ${kernel.id}`
 		);
 		// Do this in a loop as it may fail
 		await commands.executeCommand("notebook.selectKernel", {
@@ -120,19 +122,19 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 				return false;
 			},
 			2000,
-			100,
+			100
 		);
 		if (success) {
 			traceVerbose(
 				`Successfully switched remote kernel for ${getDisplayPath(
-					n.uri,
-				)} to ${kernel.id}`,
+					n.uri
+				)} to ${kernel.id}`
 			);
 		} else {
 			traceWarning(
 				`Failed to switch remote kernel for ${getDisplayPath(
-					n.uri,
-				)} to ${kernel.id}`,
+					n.uri
+				)} to ${kernel.id}`
 			);
 		}
 	}

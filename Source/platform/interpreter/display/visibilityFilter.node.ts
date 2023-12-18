@@ -26,18 +26,20 @@ export class InterpreterStatusBarVisibility
 	private _registered = false;
 
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IPythonExtensionChecker) private extensionChecker: IPythonExtensionChecker,
-        @inject(IPythonApiProvider) private pythonApi: IPythonApiProvider
-    ) {
-        window.onDidChangeActiveNotebookEditor(
-            () => {
-                this._changed.fire();
-            },
-            this,
-            disposables
-        );
-    }
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IPythonExtensionChecker)
+		private extensionChecker: IPythonExtensionChecker,
+		@inject(IPythonApiProvider) private pythonApi: IPythonApiProvider
+	) {
+		window.onDidChangeActiveNotebookEditor(
+			() => {
+				this._changed.fire();
+			},
+			this,
+			disposables
+		);
+	}
 	public activate() {
 		// Tell the python extension about our filter
 		if (this.extensionChecker.isPythonExtensionActive) {
@@ -46,7 +48,7 @@ export class InterpreterStatusBarVisibility
 			this.pythonApi.onDidActivatePythonExtension(
 				this.registerStatusFilter,
 				this,
-				this.disposables,
+				this.disposables
 			);
 		}
 	}

@@ -36,10 +36,13 @@ export class PythonEnvFilterCompletionProvider
 	};
 
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IInterpreterService) private readonly interpreters: IInterpreterService,
-        @inject(IPythonExtensionChecker) private readonly pythonExtChecker: IPythonExtensionChecker
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IInterpreterService)
+		private readonly interpreters: IInterpreterService,
+		@inject(IPythonExtensionChecker)
+		private readonly pythonExtChecker: IPythonExtensionChecker
+	) {}
 
 	public async activate(): Promise<void> {
 		this.disposableRegistry.push(
@@ -47,23 +50,23 @@ export class PythonEnvFilterCompletionProvider
 				{ language: "json" },
 				this,
 				",",
-				"[",
-			),
+				"["
+			)
 		);
 		this.disposableRegistry.push(
 			languages.registerCompletionItemProvider(
 				{ language: "jsonc" },
 				this,
 				",",
-				"[",
-			),
+				"["
+			)
 		);
 	}
 
 	public async provideCompletionItems(
 		document: TextDocument,
 		position: Position,
-		_token: CancellationToken,
+		_token: CancellationToken
 	): Promise<CompletionItem[]> {
 		if (
 			!this.pythonExtChecker.isPythonExtensionInstalled ||
@@ -71,7 +74,7 @@ export class PythonEnvFilterCompletionProvider
 			this.interpreters.resolvedEnvironments.length === 0 ||
 			!PythonEnvFilterCompletionProvider.canProvideCompletions(
 				document,
-				position,
+				position
 			)
 		) {
 			return [];
@@ -99,14 +102,14 @@ export class PythonEnvFilterCompletionProvider
 
 	public static canProvideCompletions(
 		document: TextDocument,
-		position: Position,
+		position: Position
 	): boolean {
 		if (path.basename(document.uri.fsPath) !== "settings.json") {
 			return false;
 		}
 		const location = getLocation(
 			document.getText(),
-			document.offsetAt(position),
+			document.offsetAt(position)
 		);
 		// Cursor must be inside the configurations array and not in any nested items.
 		// Hence path[0] = array, path[1] = array element index.
@@ -117,7 +120,7 @@ export class PythonEnvFilterCompletionProvider
 	}
 	private getCurrentItemsInList(
 		document: TextDocument,
-		position: Position,
+		position: Position
 	): string[] {
 		try {
 			const settings = document.getText();
@@ -132,7 +135,7 @@ export class PythonEnvFilterCompletionProvider
 		} catch (ex) {
 			traceWarning(
 				`Failed to provide completions for python env filter`,
-				ex,
+				ex
 			);
 			return [];
 		}

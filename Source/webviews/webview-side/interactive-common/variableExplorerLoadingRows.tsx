@@ -9,7 +9,7 @@ import { getLocString } from "../react-common/locReactSide";
 export const VariableExplorerLoadingRowsView = () => {
 	const message = getLocString(
 		"loadingRowsInVariableExplorer",
-		"Loading variables",
+		"Loading variables"
 	);
 
 	return <div id="variable-explorer-empty-rows">{message}</div>;

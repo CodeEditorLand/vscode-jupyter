@@ -52,15 +52,15 @@ function createKernelWrapper(kernel: Kernel.IKernelConnection) {
 	return new Proxy(kernel, {
 		get(
 			target: Kernel.IKernelConnection,
-			p: keyof Kernel.IKernelConnection | symbol,
+			p: keyof Kernel.IKernelConnection | symbol
 		) {
 			if (p === "registerCommTarget") {
 				return (
 					targetName: string,
 					callback: (
 						comm: Kernel.IComm,
-						msg: ICommOpenMsg<"iopub" | "shell">,
-					) => void | PromiseLike<void>,
+						msg: ICommOpenMsg<"iopub" | "shell">
+					) => void | PromiseLike<void>
 				): void => {
 					registerCommTargetFor3rdPartyExtensions(kernel, targetName);
 					return Reflect.get(target, p).apply(target, [
@@ -74,8 +74,8 @@ function createKernelWrapper(kernel: Kernel.IKernelConnection) {
 					targetName: string,
 					callback: (
 						comm: Kernel.IComm,
-						msg: ICommOpenMsg<"iopub" | "shell">,
-					) => void | PromiseLike<void>,
+						msg: ICommOpenMsg<"iopub" | "shell">
+					) => void | PromiseLike<void>
 				): void => {
 					remoteCommTargetFor3rdPartyExtensions(kernel, targetName);
 					return Reflect.get(target, p).apply(target, [

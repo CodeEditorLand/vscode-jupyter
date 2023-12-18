@@ -45,13 +45,13 @@ export class JupyterPasswordConnect {
 		private readonly agentCreator: IJupyterRequestAgentCreator | undefined,
 		private readonly requestCreator: IJupyterRequestCreator,
 		private readonly serverUriStorage: IJupyterServerUriStorage,
-		private readonly disposables: IDisposableRegistry,
+		private readonly disposables: IDisposableRegistry
 	) {
 		// Sign up to see if servers are removed from our uri storage list
 		this.serverUriStorage.onDidRemove(
 			this.onDidRemoveServers,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public getPasswordConnectionInfo(options: {
@@ -149,22 +149,22 @@ export class JupyterPasswordConnect {
 							}
 						},
 						this,
-						options.disposables,
+						options.disposables
 					);
 					input.onDidChangeValue(
 						() => (input.validationMessage = ""),
 						this,
-						options.disposables,
+						options.disposables
 					);
 					input.onDidAccept(
 						() => resolve(input.value),
 						this,
-						options.disposables,
+						options.disposables
 					);
 					input.onDidHide(
 						() => reject(InputFlowAction.cancel),
 						this,
-						options.disposables,
+						options.disposables
 					);
 				});
 			}
@@ -187,7 +187,7 @@ export class JupyterPasswordConnect {
 					const sessionResult = await this.getSessionCookie(
 						options.url,
 						xsrfCookie,
-						userPassword || "",
+						userPassword || ""
 					);
 					sessionCookieName = sessionResult.sessionCookieName;
 					sessionCookieValue = sessionResult.sessionCookieValue;
@@ -199,7 +199,7 @@ export class JupyterPasswordConnect {
 
 					xsrfCookie = await this.getXSRFToken(
 						options.url,
-						`${sessionCookieName}=${sessionCookieValue}`,
+						`${sessionCookieName}=${sessionCookieValue}`
 					);
 				}
 			} else {
@@ -240,7 +240,7 @@ export class JupyterPasswordConnect {
 	private addAllowUnauthorized(
 		url: string,
 		allowUnauthorized: boolean,
-		options: RequestInit,
+		options: RequestInit
 	): RequestInit {
 		if (url.startsWith("https") && allowUnauthorized && this.agentCreator) {
 			const requestAgent = this.agentCreator.createHttpRequestAgent();
@@ -253,7 +253,7 @@ export class JupyterPasswordConnect {
 
 	private async getXSRFToken(
 		url: string,
-		sessionCookie: string,
+		sessionCookie: string
 	): Promise<string | undefined> {
 		let xsrfCookie: string | undefined;
 		let headers;
@@ -295,7 +295,7 @@ export class JupyterPasswordConnect {
 				method: "get",
 				redirect: "manual",
 				headers: { Connection: "keep-alive" },
-			},
+			}
 		);
 
 		return response.status !== 200;
@@ -303,11 +303,11 @@ export class JupyterPasswordConnect {
 
 	private async makeRequest(
 		url: string,
-		options: RequestInit,
+		options: RequestInit
 	): Promise<Response> {
 		const allowUnauthorized =
 			this.configService.getSettings(
-				undefined,
+				undefined
 			).allowUnauthorizedRemoteConnection;
 
 		// Try once and see if it fails with unauthorized.
@@ -317,8 +317,8 @@ export class JupyterPasswordConnect {
 				this.addAllowUnauthorized(
 					url,
 					allowUnauthorized ? true : false,
-					options,
-				),
+					options
+				)
 			);
 		} catch (e) {
 			if (e.message.indexOf("reason: self signed certificate") >= 0) {
@@ -329,7 +329,7 @@ export class JupyterPasswordConnect {
 					DataScience.jupyterSelfCertFail(e.message),
 					{ modal: true },
 					enableOption,
-					closeOption,
+					closeOption
 				);
 				if (value === enableOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
@@ -337,11 +337,11 @@ export class JupyterPasswordConnect {
 						"allowUnauthorizedRemoteConnection",
 						true,
 						undefined,
-						ConfigurationTarget.Workspace,
+						ConfigurationTarget.Workspace
 					);
 					return this.requestCreator.getFetchMethod()(
 						url,
-						this.addAllowUnauthorized(url, true, options),
+						this.addAllowUnauthorized(url, true, options)
 					);
 				} else if (value === closeOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
@@ -360,7 +360,7 @@ export class JupyterPasswordConnect {
 	private async getSessionCookie(
 		url: string,
 		xsrfCookie: string,
-		password: string,
+		password: string
 	): Promise<{
 		sessionCookieName: string | undefined;
 		sessionCookieValue: string | undefined;
@@ -384,7 +384,7 @@ export class JupyterPasswordConnect {
 				},
 				body: postParams.toString(),
 				redirect: "manual",
-			},
+			}
 		);
 
 		// Now from this result we need to extract the session cookie

@@ -120,34 +120,34 @@ export class ApplicationShell implements IApplicationShell {
 	public showQuickPick(
 		items: string[] | Thenable<string[]>,
 		options?: QuickPickOptions,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Thenable<string>;
 	public showQuickPick<T extends QuickPickItem>(
 		items: T[] | Thenable<T[]>,
 		options?: QuickPickOptions,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Thenable<T>;
 	public showQuickPick(
 		items: any,
 		options?: any,
-		token?: any,
+		token?: any
 	): Thenable<any> {
 		return window.showQuickPick(items, options, token);
 	}
 
 	public showOpenDialog(
-		options: OpenDialogOptions,
+		options: OpenDialogOptions
 	): Thenable<Uri[] | undefined> {
 		return window.showOpenDialog(options);
 	}
 	public showSaveDialog(
-		options: SaveDialogOptions,
+		options: SaveDialogOptions
 	): Thenable<Uri | undefined> {
 		return window.showSaveDialog(options);
 	}
 	public showInputBox(
 		options?: InputBoxOptions,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Thenable<string | undefined> {
 		return window.showInputBox(options, token);
 	}
@@ -157,11 +157,11 @@ export class ApplicationShell implements IApplicationShell {
 
 	public setStatusBarMessage(
 		text: string,
-		hideAfterTimeout: number,
+		hideAfterTimeout: number
 	): Disposable;
 	public setStatusBarMessage(
 		text: string,
-		hideWhenDone: Thenable<any>,
+		hideWhenDone: Thenable<any>
 	): Disposable;
 	public setStatusBarMessage(text: string): Disposable;
 	public setStatusBarMessage(text: string, arg?: any): Disposable {
@@ -170,12 +170,12 @@ export class ApplicationShell implements IApplicationShell {
 
 	public createStatusBarItem(
 		alignment?: StatusBarAlignment,
-		priority?: number,
+		priority?: number
 	): StatusBarItem {
 		return window.createStatusBarItem(alignment, priority);
 	}
 	public showWorkspaceFolderPick(
-		options?: WorkspaceFolderPickOptions,
+		options?: WorkspaceFolderPickOptions
 	): Thenable<WorkspaceFolder | undefined> {
 		return window.showWorkspaceFolderPick(options);
 	}
@@ -183,8 +183,8 @@ export class ApplicationShell implements IApplicationShell {
 		options: ProgressOptions,
 		task: (
 			progress: Progress<{ message?: string; increment?: number }>,
-			token: CancellationToken,
-		) => Thenable<R>,
+			token: CancellationToken
+		) => Thenable<R>
 	): Thenable<R> {
 		return window.withProgress<R>(options, task);
 	}
@@ -192,12 +192,12 @@ export class ApplicationShell implements IApplicationShell {
 		icon: string,
 		task: (
 			progress: Progress<{ message?: string; increment?: number }>,
-			token: CancellationToken,
-		) => Thenable<R>,
+			token: CancellationToken
+		) => Thenable<R>
 	): Thenable<R> {
 		const token = new CancellationTokenSource().token;
 		const statusBarProgress = this.createStatusBarItem(
-			StatusBarAlignment.Left,
+			StatusBarAlignment.Left
 		);
 		const progress = {
 			report: (value: { message?: string; increment?: number }) => {
@@ -218,7 +218,7 @@ export class ApplicationShell implements IApplicationShell {
 	}
 	public createTreeView<T>(
 		viewId: string,
-		options: TreeViewOptions<T>,
+		options: TreeViewOptions<T>
 	): TreeView<T> {
 		return window.createTreeView<T>(viewId, options);
 	}

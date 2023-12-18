@@ -94,7 +94,7 @@ suite(`Notebook Controller`, function () {
 		interpreterService = mock<IInterpreterService>();
 		const onDidChangeInterpreters = new EventEmitter<PythonEnvironment[]>();
 		when(interpreterService.onDidChangeInterpreters).thenReturn(
-			onDidChangeInterpreters.event,
+			onDidChangeInterpreters.event
 		);
 		onDidCloseNotebookDocument = new EventEmitter<NotebookDocument>();
 		disposables.push(onDidChangeSelectedNotebooks);
@@ -104,11 +104,11 @@ suite(`Notebook Controller`, function () {
 		disposables.push(new Disposable(() => clock.uninstall()));
 		when(context.extensionUri).thenReturn(Uri.file("extension"));
 		when(controller.onDidChangeSelectedNotebooks).thenReturn(
-			onDidChangeSelectedNotebooks.event,
+			onDidChangeSelectedNotebooks.event
 		);
 		when(mockedVSCodeNamespaces.workspace.notebookDocuments).thenReturn([]);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
 		).thenReturn(onDidCloseNotebookDocument.event);
 		when(
 			mockedVSCodeNamespaces.notebooks.createNotebookController(
@@ -116,8 +116,8 @@ suite(`Notebook Controller`, function () {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall((_id, _view, _label, _handler) => {
 			// executionHandler = handler;
 			return instance(controller);
@@ -127,22 +127,22 @@ suite(`Notebook Controller`, function () {
 		]);
 		when(mockedVSCodeNamespaces.workspace.isTrusted).thenReturn(true);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument,
+			mockedVSCodeNamespaces.workspace.onDidCloseNotebookDocument
 		).thenReturn(onDidCloseNotebookDocument.event);
 		when(mockedVSCodeNamespaces.window.visibleNotebookEditors).thenReturn(
-			[],
+			[]
 		);
 		when(
-			mockedVSCodeNamespaces.workspace.applyEdit(anything()),
+			mockedVSCodeNamespaces.workspace.applyEdit(anything())
 		).thenResolve();
 		when(kernelProvider.getOrCreate(anything(), anything())).thenReturn(
-			instance(kernel),
+			instance(kernel)
 		);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(jupyterSettings),
+			instance(jupyterSettings)
 		);
 		when(
-			(kernelConnection as LocalKernelConnectionMetadata).kernelSpec,
+			(kernelConnection as LocalKernelConnectionMetadata).kernelSpec
 		).thenReturn({
 			argv: [],
 			executable: "",
@@ -152,11 +152,11 @@ suite(`Notebook Controller`, function () {
 		});
 		when(extensionChecker.isPythonExtensionInstalled).thenReturn(true);
 		when(kernel.kernelConnectionMetadata).thenReturn(
-			instance(kernelConnection),
+			instance(kernelConnection)
 		);
 		when(kernelConnection.id).thenReturn("1");
 		when(
-			serviceContainer.get<ITrustedKernelPaths>(ITrustedKernelPaths),
+			serviceContainer.get<ITrustedKernelPaths>(ITrustedKernelPaths)
 		).thenReturn(instance(trustedPaths));
 		when(trustedPaths.isTrusted(anything())).thenReturn(true);
 		when(jupyterSettings.disableJupyterAutoStart).thenReturn(false);
@@ -164,7 +164,7 @@ suite(`Notebook Controller`, function () {
 			instance(platform),
 			instance(providerRegistry),
 			disposables,
-			instance(interpreterService),
+			instance(interpreterService)
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -180,7 +180,7 @@ suite(`Notebook Controller`, function () {
 			instance(configService),
 			instance(extensionChecker),
 			instance(serviceContainer),
-			displayDataProvider,
+			displayDataProvider
 		);
 		notebook = new TestNotebookDocument(undefined, viewType);
 	}
@@ -218,8 +218,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook),
-			),
+						oldConnectToNotebook)
+			)
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -243,8 +243,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook),
-			),
+						oldConnectToNotebook)
+			)
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -268,8 +268,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook),
-			),
+						oldConnectToNotebook)
+			)
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -292,8 +292,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook),
-			),
+						oldConnectToNotebook)
+			)
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();
@@ -316,8 +316,8 @@ suite(`Notebook Controller`, function () {
 			new Disposable(
 				() =>
 					(KernelConnector.connectToNotebookKernel =
-						oldConnectToNotebook),
-			),
+						oldConnectToNotebook)
+			)
 		);
 		onDidChangeSelectedNotebooks.fire({ notebook, selected: true });
 		await clock.runAllAsync();

@@ -61,7 +61,7 @@ export class ReactSlickGridFilterBox extends React.Component<IFilterProps> {
 
 	private updateInputValue = (
 		_event?: React.ChangeEvent<HTMLInputElement> | undefined,
-		newValue?: string | undefined,
+		newValue?: string | undefined
 	) => {
 		this.props.onChange(newValue ?? "", this.props.column);
 	};

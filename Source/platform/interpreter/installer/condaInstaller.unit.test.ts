@@ -28,7 +28,7 @@ suite("Common - Conda Installer", () => {
 		public override async getExecutionArgs(
 			moduleName: string,
 			interpreter: PythonEnvironment,
-			flags?: ModuleInstallFlags,
+			flags?: ModuleInstallFlags
 		): Promise<ExecutionInstallArgs> {
 			return super.getExecutionArgs(moduleName, interpreter, flags);
 		}
@@ -38,10 +38,10 @@ suite("Common - Conda Installer", () => {
 		condaService = mock(CondaService);
 		configService = mock(ConfigurationService);
 		when(serviceContainer.get<CondaService>(CondaService)).thenReturn(
-			instance(condaService),
+			instance(condaService)
 		);
 		when(
-			serviceContainer.get<IConfigurationService>(IConfigurationService),
+			serviceContainer.get<IConfigurationService>(IConfigurationService)
 		).thenReturn(instance(configService));
 		installer = new CondaInstallerTest(instance(serviceContainer));
 	});
@@ -88,7 +88,7 @@ suite("Common - Conda Installer", () => {
 
 		when(condaService.isCondaAvailable()).thenResolve(true);
 		when(configService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 
 		const supported = await installer.isSupported(interpreter);
@@ -106,7 +106,7 @@ suite("Common - Conda Installer", () => {
 
 		when(condaService.isCondaAvailable()).thenResolve(true);
 		when(configService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 
 		const supported = await installer.isSupported(interpreter);
@@ -125,7 +125,7 @@ suite("Common - Conda Installer", () => {
 		const condaPath = Uri.file("some Conda Path");
 
 		when(configService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(condaService.getCondaFile()).thenResolve(condaPath.fsPath);
 
@@ -147,7 +147,7 @@ suite("Common - Conda Installer", () => {
 		const settings = mock(JupyterSettings);
 
 		when(configService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(condaService.getCondaFile()).thenResolve("conda");
 
@@ -169,7 +169,7 @@ suite("Common - Conda Installer", () => {
 		const condaPath = Uri.file("some Conda Path");
 
 		when(configService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(condaService.getCondaFile()).thenResolve(condaPath.fsPath);
 
@@ -197,7 +197,7 @@ suite("Common - Conda Installer", () => {
 		const condaPath = Uri.file("some Conda Path");
 
 		when(configService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(condaService.getCondaFile()).thenResolve(condaPath.fsPath);
 

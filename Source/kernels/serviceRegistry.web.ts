@@ -45,11 +45,11 @@ class RawNotebookSupportedService implements IRawNotebookSupportedService {
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	isDevMode: boolean,
+	isDevMode: boolean
 ) {
 	serviceManager.addSingleton<IRawNotebookSupportedService>(
 		IRawNotebookSupportedService,
-		RawNotebookSupportedService,
+		RawNotebookSupportedService
 	);
 	setSharedProperty("isInsiderExtension", isPreReleaseVersion());
 
@@ -57,95 +57,93 @@ export function registerTypes(
 		serviceManager.get<IPythonExtensionChecker>(IPythonExtensionChecker);
 	setSharedProperty(
 		"isPythonExtensionInstalled",
-		isPythonExtensionInstalled.isPythonExtensionInstalled
-			? "true"
-			: "false",
+		isPythonExtensionInstalled.isPythonExtensionInstalled ? "true" : "false"
 	);
 	const rawService = serviceManager.get<IRawNotebookSupportedService>(
-		IRawNotebookSupportedService,
+		IRawNotebookSupportedService
 	);
 	setSharedProperty(
 		"rawKernelSupported",
-		rawService.isSupported ? "true" : "false",
+		rawService.isSupported ? "true" : "false"
 	);
 	serviceManager.addSingleton<IStartupCodeProviders>(
 		IStartupCodeProviders,
-		KernelStartupCodeProviders,
+		KernelStartupCodeProviders
 	);
 	serviceManager.addSingleton<IKernelVariableRequester>(
 		IKernelVariableRequester,
 		PythonVariablesRequester,
-		Identifiers.PYTHON_VARIABLES_REQUESTER,
+		Identifiers.PYTHON_VARIABLES_REQUESTER
 	);
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		JupyterVariables,
-		Identifiers.ALL_VARIABLES,
+		Identifiers.ALL_VARIABLES
 	);
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		KernelVariables,
-		Identifiers.KERNEL_VARIABLES,
+		Identifiers.KERNEL_VARIABLES
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelCrashMonitor,
+		KernelCrashMonitor
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelRefreshIndicator,
+		KernelRefreshIndicator
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelStatusProvider,
+		KernelStatusProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelAutoReconnectMonitor,
+		KernelAutoReconnectMonitor
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RemoteJupyterServerMruUpdate,
+		RemoteJupyterServerMruUpdate
 	);
 
 	serviceManager.addSingleton<IKernelProvider>(
 		IKernelProvider,
-		KernelProvider,
+		KernelProvider
 	);
 	serviceManager.addSingleton<ITrustedKernelPaths>(
 		ITrustedKernelPaths,
-		TrustedKernelPaths,
+		TrustedKernelPaths
 	);
 	serviceManager.addSingleton<IThirdPartyKernelProvider>(
 		IThirdPartyKernelProvider,
-		ThirdPartyKernelProvider,
+		ThirdPartyKernelProvider
 	);
 	serviceManager.addSingleton<PreferredRemoteKernelIdProvider>(
 		PreferredRemoteKernelIdProvider,
-		PreferredRemoteKernelIdProvider,
+		PreferredRemoteKernelIdProvider
 	);
 	serviceManager.addSingleton<IKernelFinder>(IKernelFinder, KernelFinder);
 	serviceManager.addSingleton<IKernelDependencyService>(
 		IKernelDependencyService,
-		KernelDependencyService,
+		KernelDependencyService
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ClearJupyterServersCommand,
+		ClearJupyterServersCommand
 	);
 	serviceManager.addSingleton<LastCellExecutionTracker>(
 		LastCellExecutionTracker,
-		LastCellExecutionTracker,
+		LastCellExecutionTracker
 	);
 	serviceManager.addBinding(
 		LastCellExecutionTracker,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelApi,
+		KernelApi
 	);
 
 	// Subdirectories
@@ -153,6 +151,6 @@ export function registerTypes(
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CellOutputDisplayIdTracker,
+		CellOutputDisplayIdTracker
 	);
 }

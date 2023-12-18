@@ -27,12 +27,12 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	private readonly disposables: IDisposable[] = [];
 	constructor(
 		private readonly baseMulticaster: IPyWidgetMessageDispatcher,
-		private oldMessages: ReadonlyArray<IPyWidgetMessage>,
+		private oldMessages: ReadonlyArray<IPyWidgetMessage>
 	) {
 		baseMulticaster.postMessage(
 			this.raisePostMessage,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
@@ -94,13 +94,18 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 	private disposed = false;
 	private disposables: IDisposable[] = [];
 	constructor(
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider
-    ) {
-        disposables.push(this);
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider
+	) {
+		disposables.push(this);
 
-        kernelProvider.onDidDisposeKernel(this.trackDisposingOfKernels, this, disposables);
-    }
+		kernelProvider.onDidDisposeKernel(
+			this.trackDisposingOfKernels,
+			this,
+			disposables
+		);
+	}
 
 	public dispose() {
 		this.disposed = true;
@@ -113,7 +118,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		if (!baseDispatcher) {
 			baseDispatcher = new IPyWidgetMessageDispatcher(
 				this.kernelProvider,
-				document,
+				document
 			);
 			this.messageDispatchers.set(document, baseDispatcher);
 
@@ -121,8 +126,8 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			this.disposables.push(
 				baseDispatcher.postMessage(
 					(msg) => this.onMessage(msg, document),
-					this,
-				),
+					this
+				)
 			);
 		}
 
@@ -136,7 +141,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		}
 		const dispatcher = new IPyWidgetMessageDispatcherWithOldMessages(
 			baseDispatcher,
-			messages,
+			messages
 		);
 		this.disposables.push(dispatcher);
 		return dispatcher;
@@ -163,7 +168,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		}
 		this.messagesPerNotebook.set(
 			document,
-			this.messagesPerNotebook.get(document) || [],
+			this.messagesPerNotebook.get(document) || []
 		);
 		if (
 			message.message === IPyWidgetMessages.IPyWidgets_kernelOptions ||

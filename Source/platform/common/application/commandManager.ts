@@ -46,7 +46,7 @@ export class CommandManager implements ICommandManager {
 					return callback(...args);
 				}
 			},
-			thisArg,
+			thisArg
 		);
 	}
 
@@ -71,7 +71,7 @@ export class CommandManager implements ICommandManager {
 			edit: TextEditorEdit,
 			...args: any[]
 		) => void,
-		thisArg?: any,
+		thisArg?: any
 	): Disposable {
 		commandsToIgnore.add(command);
 		return commands.registerTextEditorCommand(
@@ -86,7 +86,7 @@ export class CommandManager implements ICommandManager {
 					return callback(textEditor, edit, ...args);
 				}
 			},
-			thisArg,
+			thisArg
 		);
 	}
 

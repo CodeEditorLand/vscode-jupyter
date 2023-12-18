@@ -62,7 +62,7 @@ suite("kernel Launcher", () => {
 
 		(instance(pythonExecService) as any).then = undefined;
 		when(
-			pythonExecutionFactory.createActivatedEnvironment(anything()),
+			pythonExecutionFactory.createActivatedEnvironment(anything())
 		).thenResolve(instance(pythonExecService));
 		when(pythonExecService.exec(anything(), anything())).thenResolve({
 			stdout: "",
@@ -80,7 +80,7 @@ suite("kernel Launcher", () => {
 			instance(configService),
 			instance(jupyterPaths),
 			instance(pythonKernelInterruptDaemon),
-			instance(platform),
+			instance(platform)
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -121,7 +121,7 @@ suite("kernel Launcher", () => {
 			10_000,
 			undefined,
 			__dirname,
-			cancellation.token,
+			cancellation.token
 		);
 	}
 	test("Verify used ports are listed", async () => {
@@ -132,7 +132,7 @@ suite("kernel Launcher", () => {
 		assert.notDeepEqual(
 			Array.from(UsedPorts),
 			oldPorts,
-			"Ports not updated",
+			"Ports not updated"
 		);
 	});
 	test("Verify Kernel ports are not forwarded", async () => {
@@ -145,10 +145,10 @@ suite("kernel Launcher", () => {
 			assert.equal(
 				portAttributeProvider.providePortAttributes(
 					{ port },
-					cancellation.token,
+					cancellation.token
 				)?.autoForwardAction,
 				PortAutoForwardAction.Ignore,
-				"Kernel Port should not be forwarded",
+				"Kernel Port should not be forwarded"
 			);
 		}
 	});

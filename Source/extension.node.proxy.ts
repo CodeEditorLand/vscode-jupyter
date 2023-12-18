@@ -10,7 +10,7 @@ let realEntryPoint: {
 	deactivate: typeof deactivate;
 };
 export async function activate(
-	context: IExtensionContext,
+	context: IExtensionContext
 ): Promise<IExtensionApi> {
 	const entryPoint =
 		context.extensionMode === ExtensionMode.Test
@@ -22,7 +22,7 @@ export async function activate(
 	} catch (ex) {
 		console.error(
 			"Failed to activate extension, falling back to `./extension.node`",
-			ex,
+			ex
 		);
 		// In smoke tests, we do not want to load the out/extension.node.
 		realEntryPoint = eval("require")("./extension.node"); // CodeQL [SM04509] Usage of eval in this context is safe (we do not want bundlers to import code when it sees `require`)

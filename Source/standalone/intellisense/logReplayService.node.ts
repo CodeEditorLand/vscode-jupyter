@@ -48,24 +48,26 @@ export class LogReplayService implements IExtensionSyncActivationService {
 	private activeNotebook: vscode.NotebookDocument | undefined;
 	private isLogActive: ContextKey | undefined;
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IConfigurationService) private readonly configService: IConfigurationService
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService
+	) {}
 	public activate() {
 		this.disposableRegistry.push(
 			vscode.commands.registerCommand(
 				Commands.ReplayPylanceLog,
 				this.replayPylanceLog,
-				this,
-			),
+				this
+			)
 		);
 		this.disposableRegistry.push(
 			vscode.commands.registerCommand(
 				Commands.ReplayPylanceLogStep,
 				this.step,
-				this,
-			),
+				this
+			)
 		);
 		this.isLogActive = new ContextKey(EditorContexts.ReplayLogLoaded);
 		this.isLogActive.set(false).then(noop, noop);
@@ -86,7 +88,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 		} else {
 			vscode.window
 				.showErrorMessage(
-					`Command should be run with a jupyter notebook open`,
+					`Command should be run with a jupyter notebook open`
 				)
 				.then(noop, noop);
 		}
@@ -102,7 +104,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 		) {
 			window
 				.showInformationMessage(
-					`Replaying step ${this.index + 2} of ${this.steps.length}`,
+					`Replaying step ${this.index + 2} of ${this.steps.length}`
 				)
 				.then(noop, noop);
 
@@ -124,7 +126,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				const converter = await this.getConverter();
 				step.textDocument.uri = converter!
 					.getConcatDocument(
-						this.activeNotebook.cellAt(0).document.uri.toString(),
+						this.activeNotebook.cellAt(0).document.uri.toString()
 					)
 					.concatUri?.toString();
 
@@ -136,7 +138,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 								version: step.textDocument.version,
 								uri: converter.toNotebookUri(
 									step.textDocument.uri,
-									change.range,
+									change.range
 								),
 							},
 							contentChanges: [
@@ -144,7 +146,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 									text: change.text,
 									range: converter.toNotebookRange(
 										step.textDocument.uri,
-										change.range,
+										change.range
 									),
 									rangeLength: change.rangeLength,
 								},
@@ -155,14 +157,13 @@ export class LogReplayService implements IExtensionSyncActivationService {
 					// a line with a magic in it
 					if (
 						change.text.startsWith(
-							`import IPython\nIPython.get_ipython()\n`,
+							`import IPython\nIPython.get_ipython()\n`
 						)
 					) {
 						// Just replace the entire cell contents.
 						const newContents = change.text
 							.slice(
-								`import IPython\nIPython.get_ipython()\n`
-									.length,
+								`import IPython\nIPython.get_ipython()\n`.length
 							)
 							.replace(` # type: ignore`, "");
 						const entireCell = this.activeNotebook
@@ -170,7 +171,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 							.find(
 								(c) =>
 									originalChange.textDocument.uri ===
-									c.document.uri.toString(),
+									c.document.uri.toString()
 							);
 						if (entireCell) {
 							originalChange.contentChanges = [
@@ -180,8 +181,8 @@ export class LogReplayService implements IExtensionSyncActivationService {
 										new vscode.Position(0, 0),
 										new vscode.Position(
 											entireCell.document.lineCount,
-											0,
-										),
+											0
+										)
 									),
 									rangeLength:
 										entireCell.document.getText().length,
@@ -213,14 +214,14 @@ export class LogReplayService implements IExtensionSyncActivationService {
 			}
 
 			traceInfo(
-				`*** Replaying step: ${JSON.stringify(step, undefined, "  ")}`,
+				`*** Replaying step: ${JSON.stringify(step, undefined, "  ")}`
 			);
 
 			// Find the associated cell in the real notebook
 			let cell = this.activeNotebook
 				?.getCells()
 				.find(
-					(c) => c.document.uri.toString() === step.textDocument.uri,
+					(c) => c.document.uri.toString() === step.textDocument.uri
 				);
 			if (!cell) {
 				// Cell doesn't exist yet, create it
@@ -229,7 +230,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				const cellData = new vscode.NotebookCellData(
 					vscode.NotebookCellKind.Code,
 					"",
-					PYTHON_LANGUAGE,
+					PYTHON_LANGUAGE
 				);
 				cellData.outputs = [];
 				cellData.metadata = {};
@@ -239,18 +240,18 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				edit.set(this.activeNotebook.uri, [nbEdit]);
 				await vscode.workspace.applyEdit(edit);
 				cell = this.activeNotebook.cellAt(
-					this.activeNotebook.cellCount - 1,
+					this.activeNotebook.cellCount - 1
 				);
 			}
 
 			// Reveal the cell (this should force the editor to become visible)
 			const notebookRange = new vscode.NotebookRange(
 				cell.index,
-				cell.index + 1,
+				cell.index + 1
 			);
 			vscode.window.activeNotebookEditor?.revealRange(
 				notebookRange,
-				vscode.NotebookEditorRevealType.InCenterIfOutsideViewport,
+				vscode.NotebookEditorRevealType.InCenterIfOutsideViewport
 			);
 
 			// Wait for editor to show up
@@ -258,37 +259,37 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				async () => {
 					return (
 						vscode.window.visibleTextEditors.find(
-							(e) => e.document === cell!.document,
+							(e) => e.document === cell!.document
 						) !== undefined
 					);
 				},
 				3000,
-				10,
+				10
 			);
 			// Find the associated document and apply the edit
 			const editor = vscode.window.visibleTextEditors.find(
-				(e) => e.document === cell!.document,
+				(e) => e.document === cell!.document
 			);
 			if (editor) {
 				const vscodeRange = new vscode.Range(
 					new vscode.Position(
 						change.range.start.line,
-						change.range.start.character,
+						change.range.start.character
 					),
 					new vscode.Position(
 						change.range.end.line,
-						change.range.end.character,
-					),
+						change.range.end.character
+					)
 				);
 
 				// Jump to this range so we can see the edit happen
 				editor.revealRange(
 					vscodeRange,
-					vscode.TextEditorRevealType.InCenterIfOutsideViewport,
+					vscode.TextEditorRevealType.InCenterIfOutsideViewport
 				);
 				editor.selection = new vscode.Selection(
 					vscodeRange.start,
-					vscodeRange.start,
+					vscodeRange.start
 				);
 
 				await sleep(100);
@@ -318,7 +319,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 		) {
 			window
 				.showErrorMessage(
-					`You changed the notebook editor in the middle of stepping through the log`,
+					`You changed the notebook editor in the middle of stepping through the log`
 				)
 				.then(noop, noop);
 		}
@@ -372,14 +373,14 @@ export class LogReplayService implements IExtensionSyncActivationService {
 			);
 			const converter = createConverter(
 				(_u) => this.getNotebookHeader(this.activeNotebook!.uri),
-				() => os.platform(),
+				() => os.platform()
 			);
 			this.activeNotebook
 				.getCells()
 				.filter(
 					(c) =>
 						vscode.languages.match(NOTEBOOK_SELECTOR, c.document) >
-						0,
+						0
 				)
 				.forEach((c) => {
 					converter.handleOpen({

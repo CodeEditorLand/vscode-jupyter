@@ -21,7 +21,7 @@ import { getFilePath } from "./fs-paths";
 export class FileSystem extends FileSystemBase implements IFileSystemNode {
 	private globFiles: (
 		pat: string,
-		options?: { cwd: string; dot?: boolean },
+		options?: { cwd: string; dot?: boolean }
 	) => Promise<string[]>;
 	constructor() {
 		super();
@@ -33,7 +33,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 	}
 
 	public async createTemporaryLocalFile(
-		options: string | { fileExtension: string; prefix: string },
+		options: string | { fileExtension: string; prefix: string }
 	): Promise<TemporaryFile> {
 		const suffix =
 			typeof options === "string" ? options : options.fileExtension;
@@ -59,7 +59,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 	public async searchLocal(
 		globPattern: string,
 		cwd?: string,
-		dot?: boolean,
+		dot?: boolean
 	): Promise<string[]> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let options: any;
@@ -76,7 +76,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 
 	async writeLocalFile(
 		filename: string,
-		text: string | Buffer,
+		text: string | Buffer
 	): Promise<void> {
 		await fs.ensureDir(path.dirname(filename));
 		return fs.writeFile(filename, text);
@@ -101,8 +101,8 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 						fs.rm(
 							getFilePath(uri),
 							{ force: true, recursive: true },
-							resolve,
-						),
+							resolve
+						)
 					);
 				} else {
 					await fs.unlink(getFilePath(uri));
@@ -115,7 +115,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 
 	override async exists(
 		filename: Uri,
-		fileType?: FileType | undefined,
+		fileType?: FileType | undefined
 	): Promise<boolean> {
 		if (isLocalFile(filename)) {
 			return fs.pathExists(getFilePath(filename));
@@ -138,14 +138,14 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		} else {
 			await this.vscfs.writeFile(
 				uri,
-				typeof text === "string" ? Buffer.from(text) : text,
+				typeof text === "string" ? Buffer.from(text) : text
 			);
 		}
 	}
 	override async copy(
 		source: Uri,
 		destination: Uri,
-		options?: { overwrite: boolean },
+		options?: { overwrite: boolean }
 	): Promise<void> {
 		if (isLocalFile(source) && isLocalFile(destination)) {
 			const overwrite =

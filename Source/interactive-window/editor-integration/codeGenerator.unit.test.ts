@@ -39,7 +39,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		pythonSettings = mock<IWatchableJupyterSettings>();
 		storage = new GeneratedCodeStorage();
 		when(configurationService.getSettings(anything())).thenReturn(
-			instance(pythonSettings),
+			instance(pythonSettings)
 		);
 		documentManager = new MockDocumentManager();
 		notebook = mock<NotebookDocument>();
@@ -48,14 +48,14 @@ suite.skip("Code Generator Unit Tests", () => {
 		disposables.push(onDidChangeNotebookCellExecutionState);
 		when(
 			mockedVSCodeNamespaces.notebooks
-				.onDidChangeNotebookCellExecutionState,
+				.onDidChangeNotebookCellExecutionState
 		).thenReturn(onDidChangeNotebookCellExecutionState.event);
 		when(notebook.uri).thenReturn();
 		codeGenerator = new CodeGenerator(
 			instance(configurationService),
 			storage,
 			instance(notebook),
-			[],
+			[]
 		);
 		disposables.push(codeGenerator);
 	});
@@ -95,29 +95,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodes[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Edit the first cell, removing it
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(2, 0)),
-			"",
+			""
 		);
 
 		// Get our hashes again. The line number should change
@@ -127,22 +127,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodes[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].line,
 			2,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].endLine,
 			2,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -160,7 +160,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(generatedCodes.length, 1, "No hashes found");
 		assert.strictEqual(
 			generatedCodes[0].generatedCodes[0].code.trim(),
-			"%%latex\n$e^2$",
+			"%%latex\n$e^2$"
 		);
 	});
 
@@ -178,7 +178,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(generatedCodes.length, 1, "No hashes found");
 		assert.strictEqual(
 			generatedCodes[0].generatedCodes[0].code.trim(),
-			"%%latex\n$e^2$",
+			"%%latex\n$e^2$"
 		);
 	});
 
@@ -196,7 +196,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(generatedCodes.length, 1, "No hashes found");
 		assert.strictEqual(
 			generatedCodes[0].generatedCodes[0].code.trim(),
-			"%%html\n<button>Hello</button>",
+			"%%html\n<button>Hello</button>"
 		);
 	});
 
@@ -215,29 +215,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodes[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Change the second cell
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(3, 0), new Position(3, 0)),
-			'print ("bob")\r\n',
+			'print ("bob")\r\n'
 		);
 
 		// Should be no hashes now
@@ -248,7 +248,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(3, 0), new Position(4, 0)),
-			"",
+			""
 		);
 
 		// Hash should reappear
@@ -257,22 +257,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodes[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodes[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -292,29 +292,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Change the third cell
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(5, 0), new Position(5, 0)),
-			'print ("bob")\r\n',
+			'print ("bob")\r\n'
 		);
 
 		// Should be the same hashes
@@ -323,29 +323,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Delete the first cell
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(2, 0)),
-			"",
+			""
 		);
 
 		// Hash should move
@@ -354,22 +354,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].line,
 			2,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].endLine,
 			3,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFile[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -390,29 +390,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Change the third cell
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(5, 0), new Position(5, 0)),
-			'print ("bob")\r\n',
+			'print ("bob")\r\n'
 		);
 
 		// Send the third cell
@@ -424,44 +424,44 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			2,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].line,
 			6,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].endLine,
 			7,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].executionCount,
 			2,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Delete the first cell
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(2, 0)),
-			"",
+			""
 		);
 
 		// Hashes should move
@@ -470,37 +470,37 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			2,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			2,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			3,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].executionCount,
 			2,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -528,37 +528,37 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			2,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			3,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].line,
 			6,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].endLine,
 			6,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[1].executionCount,
 			2,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -587,43 +587,43 @@ suite.skip("Code Generator Unit Tests", () => {
 		const generatedCodes = storage.all;
 		assert.equal(generatedCodes.length, 2, "Wrong number of hashes");
 		const fooHash = generatedCodes.find(
-			(h) => h.uri.fsPath === Uri.file("foo.py").fsPath,
+			(h) => h.uri.fsPath === Uri.file("foo.py").fsPath
 		);
 		const barHash = generatedCodes.find(
-			(h) => h.uri.fsPath === Uri.file("bar.py").fsPath,
+			(h) => h.uri.fsPath === Uri.file("bar.py").fsPath
 		);
 		assert.ok(fooHash, "No hash for foo.py");
 		assert.ok(barHash, "No hash for bar.py");
 		assert.equal(
 			fooHash!.generatedCodes.length,
 			2,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(fooHash!.generatedCodes[0].line, 4, "Wrong start line");
 		assert.equal(fooHash!.generatedCodes[0].endLine, 5, "Wrong end line");
 		assert.equal(
 			fooHash!.generatedCodes[0].executionCount,
 			4,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 		assert.equal(fooHash!.generatedCodes[1].line, 6, "Wrong start line");
 		assert.equal(fooHash!.generatedCodes[1].endLine, 6, "Wrong end line");
 		assert.equal(
 			fooHash!.generatedCodes[1].executionCount,
 			3,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 		assert.equal(
 			barHash!.generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(barHash!.generatedCodes[0].line, 4, "Wrong start line");
 		assert.equal(barHash!.generatedCodes[0].endLine, 5, "Wrong end line");
 		assert.equal(
 			barHash!.generatedCodes[0].executionCount,
 			2,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -644,29 +644,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Modify the code
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(3, 0), new Position(3, 1)),
-			"",
+			""
 		);
 
 		// Should have zero hashes
@@ -677,36 +677,36 @@ suite.skip("Code Generator Unit Tests", () => {
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(3, 0), new Position(3, 0)),
-			"p",
+			"p"
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 1, "No hashes found");
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			5,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Modify the code
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(3, 0), new Position(3, 1)),
-			"",
+			""
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 0, "Too many hashes found");
@@ -715,7 +715,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(2, 0)),
-			"",
+			""
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 0, "Too many hashes found");
@@ -724,29 +724,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(1, 0), new Position(1, 0)),
-			"p",
+			"p"
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 1, "No hashes found");
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			2,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			3,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -765,95 +765,95 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Edit the cell we added
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 0), new Position(2, 0)),
-			"#",
+			"#"
 		);
 		assert.equal(storage.all.length, 0, "Cell should be destroyed");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 0), new Position(2, 1)),
-			"",
+			""
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 0), new Position(2, 1)),
-			"",
+			""
 		);
 		assert.equal(storage.all.length, 0, "Cell should be destroyed");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 0), new Position(2, 0)),
-			"#",
+			"#"
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 1), new Position(2, 2)),
-			"",
+			""
 		);
 		assert.equal(storage.all.length, 0, "Cell should be destroyed");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 1), new Position(2, 1)),
-			"%",
+			"%"
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 2), new Position(2, 3)),
-			"",
+			""
 		);
 		assert.equal(storage.all.length, 0, "Cell should be destroyed");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 2), new Position(2, 2)),
-			"%",
+			"%"
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 3), new Position(2, 4)),
-			"",
+			""
 		);
 		assert.equal(storage.all.length, 0, "Cell should be destroyed");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 3), new Position(2, 3)),
-			"\r",
+			"\r"
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 4), new Position(2, 5)),
-			"",
+			""
 		);
 		assert.equal(storage.all.length, 0, "Cell should be destroyed");
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(2, 4), new Position(2, 4)),
-			"\n",
+			"\n"
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 	});
@@ -873,51 +873,51 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Replace with the same cell
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(4, 0)),
-			file,
+			file
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 1, "No hashes found");
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 		assert.equal(storage.all.length, 1, "Cell should be back");
 	});
@@ -938,29 +938,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Replace with the new code
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(4, 0)),
-			file2,
+			file2
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 0, "Hashes should be gone");
@@ -969,29 +969,29 @@ suite.skip("Code Generator Unit Tests", () => {
 		addSingleChange(
 			"foo.py",
 			new Range(new Position(0, 0), new Position(4, 0)),
-			file,
+			file
 		);
 		generatedCodesByFiles = storage.all;
 		assert.equal(generatedCodesByFiles.length, 1, "No hashes found");
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -1010,22 +1010,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Apply a couple of edits at once
@@ -1044,22 +1044,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			8,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			8,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		documentManager.changeDocument("foo.py", [
@@ -1077,22 +1077,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			8,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			8,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 
@@ -1111,22 +1111,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			4,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 
 		// Restart the kernel
@@ -1136,7 +1136,7 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles.length,
 			0,
-			"Restart should have cleared",
+			"Restart should have cleared"
 		);
 	});
 
@@ -1154,22 +1154,22 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes.length,
 			1,
-			"Not enough hashes found",
+			"Not enough hashes found"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].line,
 			2,
-			"Wrong start line",
+			"Wrong start line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].endLine,
 			4,
-			"Wrong end line",
+			"Wrong end line"
 		);
 		assert.equal(
 			generatedCodesByFiles[0].generatedCodes[0].executionCount,
 			1,
-			"Wrong execution count",
+			"Wrong execution count"
 		);
 	});
 });

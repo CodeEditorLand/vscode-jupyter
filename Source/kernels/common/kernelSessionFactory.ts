@@ -20,18 +20,20 @@ import { JupyterKernelSessionFactory } from "../jupyter/session/jupyterKernelSes
 @injectable()
 export class KernelSessionFactory implements IKernelSessionFactory {
 	constructor(
-        @inject(IRawNotebookSupportedService)
-        private readonly rawKernelSupported: IRawNotebookSupportedService,
+		@inject(IRawNotebookSupportedService)
+		private readonly rawKernelSupported: IRawNotebookSupportedService,
 
-        @inject(IRawKernelSessionFactory)
-        @optional()
-        private readonly newRawKernelSessionFactory: IRawKernelSessionFactory | undefined,
-        @inject(JupyterKernelSessionFactory)
-        private readonly newJupyterSessionFactory: IKernelSessionFactory
-    ) {}
+		@inject(IRawKernelSessionFactory)
+		@optional()
+		private readonly newRawKernelSessionFactory:
+			| IRawKernelSessionFactory
+			| undefined,
+		@inject(JupyterKernelSessionFactory)
+		private readonly newJupyterSessionFactory: IKernelSessionFactory
+	) {}
 
 	public async create(
-		options: KernelSessionCreationOptions,
+		options: KernelSessionCreationOptions
 	): Promise<IKernelSession> {
 		const kernelConnection = options.kernelConnection;
 		if (

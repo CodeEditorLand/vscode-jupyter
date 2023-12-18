@@ -30,7 +30,7 @@ export class HttpClient implements IHttpClient {
 			return response.status === 200;
 		} catch (ex) {
 			traceVerbose(
-				`HttpClient - Failure checking for file ${uri}: ${ex}`,
+				`HttpClient - Failure checking for file ${uri}: ${ex}`
 			);
 			return false;
 		}

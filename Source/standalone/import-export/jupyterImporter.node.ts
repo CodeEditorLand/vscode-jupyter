@@ -45,21 +45,24 @@ export class JupyterImporter implements INotebookImporter {
 	private template6Promise?: Promise<string | undefined>;
 
 	constructor(
-        @inject(IFileSystemNode) private fs: IFileSystemNode,
-        @inject(IDisposableRegistry) private disposableRegistry: IDisposableRegistry,
-        @inject(IConfigurationService) private configuration: IConfigurationService,
-        @inject(INbConvertInterpreterDependencyChecker)
-        private readonly nbConvertDependencyChecker: INbConvertInterpreterDependencyChecker,
-        @inject(INbConvertExportToPythonService) private readonly exportToPythonService: INbConvertExportToPythonService
-    ) {}
+		@inject(IFileSystemNode) private fs: IFileSystemNode,
+		@inject(IDisposableRegistry)
+		private disposableRegistry: IDisposableRegistry,
+		@inject(IConfigurationService)
+		private configuration: IConfigurationService,
+		@inject(INbConvertInterpreterDependencyChecker)
+		private readonly nbConvertDependencyChecker: INbConvertInterpreterDependencyChecker,
+		@inject(INbConvertExportToPythonService)
+		private readonly exportToPythonService: INbConvertExportToPythonService
+	) {}
 
 	public async importFromFile(
 		sourceFile: Uri,
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<string> {
 		const nbConvertVersion =
 			await this.nbConvertDependencyChecker.getNbConvertVersion(
-				interpreter,
+				interpreter
 			);
 		// Use the jupyter nbconvert functionality to turn the notebook into a python file
 		if (nbConvertVersion) {
@@ -84,7 +87,7 @@ export class JupyterImporter implements INotebookImporter {
 				await this.exportToPythonService.exportNotebookToPython(
 					sourceFile,
 					interpreter,
-					template,
+					template
 				);
 			if (fileOutput.includes("get_ipython()")) {
 				fileOutput = this.addIPythonImport(fileOutput);
@@ -101,7 +104,7 @@ export class JupyterImporter implements INotebookImporter {
 
 	private addInstructionComments = (pythonOutput: string): string => {
 		const comments = DataScience.instructionComments(
-			this.defaultCellMarker,
+			this.defaultCellMarker
 		);
 		return comments.concat(pythonOutput);
 	};
@@ -117,12 +120,12 @@ export class JupyterImporter implements INotebookImporter {
 		return format(
 			CodeSnippets.ImportIPython,
 			this.defaultCellMarker,
-			pythonOutput,
+			pythonOutput
 		);
 	};
 
 	public async createTemplateFile(
-		nbconvert6: boolean,
+		nbconvert6: boolean
 	): Promise<string | undefined> {
 		// Create a temp file on disk
 		const file = await this.fs.createTemporaryLocalFile(".tpl");
@@ -137,8 +140,8 @@ export class JupyterImporter implements INotebookImporter {
 					format(
 						this.nbconvertBaseTemplateFormat,
 						nbconvert6 ? this.nbconvert6Null : this.nbconvert5Null,
-						this.defaultCellMarker,
-					),
+						this.defaultCellMarker
+					)
 				);
 
 				// Now we should have a template that will convert

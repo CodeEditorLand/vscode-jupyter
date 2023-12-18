@@ -8,6 +8,6 @@ import { IPlatformService } from "./types";
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IPlatformService>(
 		IPlatformService,
-		PlatformService,
+		PlatformService
 	);
 }

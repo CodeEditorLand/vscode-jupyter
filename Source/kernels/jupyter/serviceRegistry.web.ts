@@ -33,66 +33,66 @@ import { CodespacesJupyterServerSelector } from "../../codespaces/codeSpacesServ
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	_isDevMode: boolean,
+	_isDevMode: boolean
 ) {
 	serviceManager.addSingleton<CodespacesJupyterServerSelector>(
 		CodespacesJupyterServerSelector,
-		CodespacesJupyterServerSelector,
+		CodespacesJupyterServerSelector
 	);
 	serviceManager.addSingleton<IJupyterKernelService>(
 		IJupyterKernelService,
-		JupyterKernelService,
+		JupyterKernelService
 	);
 	serviceManager.addSingleton<IJupyterServerUriStorage>(
 		IJupyterServerUriStorage,
-		JupyterServerUriStorage,
+		JupyterServerUriStorage
 	);
 	serviceManager.addSingleton<IKernelSessionFactory>(
 		IKernelSessionFactory,
-		KernelSessionFactory,
+		KernelSessionFactory
 	);
 	serviceManager.addSingleton<JupyterKernelSessionFactory>(
 		JupyterKernelSessionFactory,
-		JupyterKernelSessionFactory,
+		JupyterKernelSessionFactory
 	);
 	serviceManager.addSingleton<IJupyterServerProvider>(
 		IJupyterServerProvider,
-		JupyterServerProvider,
+		JupyterServerProvider
 	);
 	serviceManager.addSingleton<IJupyterRequestCreator>(
 		IJupyterRequestCreator,
-		JupyterRequestCreator,
+		JupyterRequestCreator
 	);
 	serviceManager.addSingleton<JupyterConnection>(
 		JupyterConnection,
-		JupyterConnection,
+		JupyterConnection
 	);
 	serviceManager.addSingleton<ILiveRemoteKernelConnectionUsageTracker>(
 		ILiveRemoteKernelConnectionUsageTracker,
-		LiveRemoteKernelConnectionUsageTracker,
+		LiveRemoteKernelConnectionUsageTracker
 	);
 	serviceManager.addBinding(
 		ILiveRemoteKernelConnectionUsageTracker,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IJupyterRemoteCachedKernelValidator>(
 		IJupyterRemoteCachedKernelValidator,
-		JupyterRemoteCachedKernelValidator,
+		JupyterRemoteCachedKernelValidator
 	);
 	serviceManager.addSingleton<IDataScienceErrorHandler>(
 		IDataScienceErrorHandler,
-		DataScienceErrorHandlerWeb,
+		DataScienceErrorHandlerWeb
 	);
 	serviceManager.addSingleton<IRemoteKernelFinderController>(
 		IRemoteKernelFinderController,
-		RemoteKernelFinderController,
+		RemoteKernelFinderController
 	);
 	serviceManager.addBinding(
 		IRemoteKernelFinderController,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IJupyterServerProviderRegistry>(
 		IJupyterServerProviderRegistry,
-		JupyterServerProviderRegistry,
+		JupyterServerProviderRegistry
 	);
 }

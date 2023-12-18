@@ -34,21 +34,22 @@ export class JupyterServerSelectorCommand
 	public readonly id = TestingKernelPickerProviderId;
 	public readonly displayName = "Jupyter Server for Testing";
 	constructor(
-        @inject(IJupyterServerProviderRegistry)
-        private readonly uriProviderRegistration: IJupyterServerProviderRegistry,
-        @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage
-    ) {
-        super();
-    }
+		@inject(IJupyterServerProviderRegistry)
+		private readonly uriProviderRegistration: IJupyterServerProviderRegistry,
+		@inject(IJupyterServerUriStorage)
+		private readonly serverUriStorage: IJupyterServerUriStorage
+	) {
+		super();
+	}
 	public readonly onDidChangeServers = this._onDidChangeHandles.event;
 	async provideJupyterServers(
-		_token: CancellationToken,
+		_token: CancellationToken
 	): Promise<JupyterServer[]> {
 		return Array.from(this.handleMappings.values()).map((s) => s.server);
 	}
 	async resolveJupyterServer(
 		server: JupyterServer,
-		_token: CancellationToken,
+		_token: CancellationToken
 	): Promise<JupyterServer> {
 		return server;
 	}
@@ -58,15 +59,15 @@ export class JupyterServerSelectorCommand
 				JVSC_EXTENSION_ID,
 				this.id,
 				this.displayName,
-				this,
-			),
+				this
+			)
 		);
 		this._register(
 			commands.registerCommand(
 				"jupyter.selectjupyteruri",
 				this.selectJupyterUri,
-				this,
-			),
+				this
+			)
 		);
 	}
 	private async selectJupyterUri(source: Uri): Promise<void> {
@@ -76,7 +77,7 @@ export class JupyterServerSelectorCommand
 		const baseUrl = Uri.parse(
 			`${url.protocol}//${url.host}${
 				url.pathname === "/lab" ? "" : url.pathname
-			}`,
+			}`
 		);
 		const token = url.searchParams.get("token") ?? "";
 		const handle = await computeHash(source.toString(true), "SHA-1");

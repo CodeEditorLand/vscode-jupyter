@@ -44,18 +44,18 @@ suite("Reserved Names Provider", () => {
 		workspaceConfig = mock<WorkspaceConfiguration>();
 		when(memento.update(anything(), anything())).thenResolve();
 		when(
-			mockedVSCodeNamespaces.workspace.getConfiguration("jupyter"),
+			mockedVSCodeNamespaces.workspace.getConfiguration("jupyter")
 		).thenReturn(instance(workspaceConfig));
 		when(workspaceConfig.get(ignoreListSettingName, anything())).thenReturn(
-			defaultIgnoreList,
+			defaultIgnoreList
 		);
 		when(memento.get(anything(), anything())).thenCall(
-			(_, defaultValue) => defaultValue as any,
+			(_, defaultValue) => defaultValue as any
 		);
 		settingsChanged = new EventEmitter<ConfigurationChangeEvent>();
 		disposables.push(settingsChanged);
 		when(
-			mockedVSCodeNamespaces.workspace.onDidChangeConfiguration,
+			mockedVSCodeNamespaces.workspace.onDidChangeConfiguration
 		).thenReturn(settingsChanged.event);
 		createProvider();
 	});
@@ -67,7 +67,7 @@ suite("Reserved Names Provider", () => {
 			instance(memento),
 			instance(platform),
 			disposables,
-			instance(fs),
+			instance(fs)
 		);
 	}
 	test("Returns valid Uris of files and folders that can override builtins", async () => {
@@ -75,7 +75,7 @@ suite("Reserved Names Provider", () => {
 			Uri.file("users"),
 			"username",
 			"folder",
-			"projectDir",
+			"projectDir"
 		);
 		const cwdFiles = [
 			"one.py",
@@ -92,7 +92,7 @@ suite("Reserved Names Provider", () => {
 		];
 		when(fs.searchLocal("*.py", cwd.fsPath, true)).thenResolve(cwdFiles);
 		when(fs.searchLocal("*/__init__.py", cwd.fsPath, true)).thenResolve(
-			initFiles,
+			initFiles
 		);
 
 		// Assume that a module named `overrideThirdPartyModule` has been installed into python, then
@@ -101,14 +101,14 @@ suite("Reserved Names Provider", () => {
 
 		const uris =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.deepEqual(
 			uris.map((uri) => uri.uri.fsPath).sort(),
 			["xml.py", "urllib.py", "random.py", `xml${path.sep}__init__.py`]
 				.map((file) => Uri.joinPath(cwd, file).fsPath)
-				.sort(),
+				.sort()
 		);
 
 		// Also verify we don't call into Python API for the same Python files that we know are overriding builtins.
@@ -124,29 +124,29 @@ suite("Reserved Names Provider", () => {
 
 		const urisAgain =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.deepEqual(
 			urisAgain.map((uri) => uri.uri.fsPath).sort(),
 			["xml.py", "urllib.py", "random.py", `xml${path.sep}__init__.py`]
 				.map((file) => Uri.joinPath(cwd, file).fsPath)
-				.sort(),
+				.sort()
 		);
 		// Verify there are no additional calls into this API.
 		assert.strictEqual(
 			listPackagesCallCount,
-			initialCallCountIntoPythonApi,
+			initialCallCountIntoPythonApi
 		);
 	});
 
 	async function testGlobPattern(
 		cwd: Uri,
 		cwdFiles: string[],
-		globPattern: string,
+		globPattern: string
 	) {
 		when(workspaceConfig.get(ignoreListSettingName, anything())).thenReturn(
-			[globPattern],
+			[globPattern]
 		);
 		when(fs.searchLocal("*.py", cwd.fsPath, true)).thenResolve(cwdFiles);
 		when(fs.searchLocal("*/__init__.py", cwd.fsPath, true)).thenResolve([]);
@@ -154,7 +154,7 @@ suite("Reserved Names Provider", () => {
 
 		const uris =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.strictEqual(uris.length, 0);
@@ -167,7 +167,7 @@ suite("Reserved Names Provider", () => {
 			"projectDir",
 			".venv",
 			"site-packages",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = [
 			"one.py",
@@ -188,7 +188,7 @@ suite("Reserved Names Provider", () => {
 			".venv",
 			"lib",
 			"python",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = [
 			"one.py",
@@ -209,7 +209,7 @@ suite("Reserved Names Provider", () => {
 			".venv",
 			"lib64",
 			"python",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = [
 			"one.py",
@@ -228,7 +228,7 @@ suite("Reserved Names Provider", () => {
 			"username",
 			"folder",
 			"projectDir",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = [
 			"one.py",
@@ -249,7 +249,7 @@ suite("Reserved Names Provider", () => {
 			"username",
 			"folder",
 			"projectDir",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = [
 			"one.py",
@@ -270,7 +270,7 @@ suite("Reserved Names Provider", () => {
 			"username",
 			"folder",
 			"projectDir",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = ["__ignore_this_prefix_one.py"];
 		when(platform.isWindows).thenReturn(false);
@@ -285,21 +285,21 @@ suite("Reserved Names Provider", () => {
 			"username",
 			"folder",
 			"projectDir",
-			"thirdPartyPackage",
+			"thirdPartyPackage"
 		);
 		const cwdFiles = ["xml.py", "random.py"];
 		when(platform.isWindows).thenReturn(false);
 		when(platform.isLinux).thenReturn(true);
 
 		when(workspaceConfig.get(ignoreListSettingName, anything())).thenCall(
-			() => ignoreListInSettings,
+			() => ignoreListInSettings
 		);
 		when(
 			workspaceConfig.update(
 				ignoreListSettingName,
 				anything(),
-				ConfigurationTarget.Global,
-			),
+				ConfigurationTarget.Global
+			)
 		).thenCall(async (_, value) => {
 			ignoreListInSettings = value;
 		});
@@ -309,13 +309,13 @@ suite("Reserved Names Provider", () => {
 
 		let uris =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.strictEqual(uris.length, 1);
 		assert.strictEqual(
 			uris.map((uri) => uri.uri.toString()).join(),
-			Uri.joinPath(cwd, "random.py").toString(),
+			Uri.joinPath(cwd, "random.py").toString()
 		);
 
 		// Now, lets change the setting to un-ignore the above file.
@@ -327,7 +327,7 @@ suite("Reserved Names Provider", () => {
 
 		uris =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.strictEqual(
@@ -338,30 +338,30 @@ suite("Reserved Names Provider", () => {
 			cwdFiles
 				.map((file) => Uri.joinPath(cwd, file).toString())
 				.sort()
-				.join(),
+				.join()
 		);
 
 		// If we were to add random.py to the list, then we should ignore it.
 		await reservedNamedProvider.addToIgnoreList(
-			Uri.joinPath(cwd, "random.py"),
+			Uri.joinPath(cwd, "random.py")
 		);
 		uris =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.strictEqual(
 			uris.map((uri) => uri.uri.toString()).join(),
-			Uri.joinPath(cwd, "xml.py").toString(),
+			Uri.joinPath(cwd, "xml.py").toString()
 		);
 
 		// If we were to add xml.py to the list, then we should ignore it.
 		await reservedNamedProvider.addToIgnoreList(
-			Uri.joinPath(cwd, "xml.py"),
+			Uri.joinPath(cwd, "xml.py")
 		);
 		uris =
 			await reservedNamedProvider.getUriOverridingReservedPythonNames(
-				cwd,
+				cwd
 			);
 
 		assert.strictEqual(uris.length, 0);

@@ -79,12 +79,12 @@ gulp.task("validateTranslationFiles", (done) => {
 				throw new Error(
 					result.errors
 						.map((err) => `${err.property} ${err.message}`)
-						.join("\n"),
+						.join("\n")
 				);
 			}
 		} catch (ex) {
 			throw new Error(
-				`Error parsing Translation File ${file}, ${ex.message}`,
+				`Error parsing Translation File ${file}, ${ex.message}`
 			);
 		}
 	});
@@ -99,7 +99,7 @@ gulp.task("printTestResults", async (done) => {
 gulp.task("output:clean", () => del(["coverage"]));
 
 gulp.task("clean:cleanExceptTests", () =>
-	del(["clean:vsix", "out", "dist", "!out/test"]),
+	del(["clean:vsix", "out", "dist", "!out/test"])
 );
 gulp.task("clean:vsix", () => del(["*.vsix"]));
 gulp.task("clean:out", () =>
@@ -109,7 +109,7 @@ gulp.task("clean:out", () =>
 		"!out",
 		"!out/client_renderer/**",
 		"!**/*nls.*.json",
-	]),
+	])
 );
 
 gulp.task("clean", gulp.parallel("output:clean", "clean:vsix", "clean:out"));
@@ -152,7 +152,7 @@ gulp.task("checkNpmDependencies", (done) => {
 						expectedVersion.version
 					}, current ${version}, ${
 						parent ? `(parent package ${parent})` : ""
-					}`,
+					}`
 				);
 			}
 		});
@@ -182,13 +182,13 @@ gulp.task("checkNpmDependencies", (done) => {
 
 async function buildWebPackForDevOrProduction(
 	configFile,
-	configNameForProductionBuilds,
+	configNameForProductionBuilds
 ) {
 	if (configNameForProductionBuilds) {
 		await buildWebPack(
 			configNameForProductionBuilds,
 			["--config", configFile],
-			webpackEnv,
+			webpackEnv
 		);
 	} else {
 		await spawnAsync(
@@ -202,7 +202,7 @@ async function buildWebPackForDevOrProduction(
 				"--mode",
 				"development",
 			],
-			webpackEnv,
+			webpackEnv
 		);
 	}
 }
@@ -213,7 +213,7 @@ gulp.task("webpack-dependencies", async () => {
 	}
 	await buildWebPackForDevOrProduction(
 		"./build/webpack/webpack.extension.dependencies.config.js",
-		"production",
+		"production"
 	);
 });
 
@@ -278,7 +278,7 @@ gulp.task("updatePackageJsonForBundle", async () => {
 async function buildWebPack(webpackConfigName, args, env) {
 	// Remember to perform a case insensitive search.
 	const allowedWarnings = getAllowedWarningsForWebPack(webpackConfigName).map(
-		(item) => item.toLowerCase(),
+		(item) => item.toLowerCase()
 	);
 	const stdOut = await spawnAsync(
 		"npm",
@@ -289,7 +289,7 @@ async function buildWebPack(webpackConfigName, args, env) {
 			...args,
 			...["--mode", "production", "--devtool", "source-map"],
 		],
-		env,
+		env
 	);
 	const stdOutLines = stdOut
 		.split("\n")
@@ -301,20 +301,20 @@ async function buildWebPack(webpackConfigName, args, env) {
 		.filter(
 			(item) =>
 				allowedWarnings.findIndex((allowedWarning) =>
-					item.toLowerCase().startsWith(allowedWarning.toLowerCase()),
-				) == -1,
+					item.toLowerCase().startsWith(allowedWarning.toLowerCase())
+				) == -1
 		);
 	const errors = stdOutLines.some((item) => item.startsWith("ERROR in"));
 	if (errors) {
 		throw new Error(
 			`Errors in ${webpackConfigName}, \n${warnings.join(
-				", ",
-			)}\n\n${stdOut}`,
+				", "
+			)}\n\n${stdOut}`
 		);
 	}
 	if (warnings.length > 0) {
 		throw new Error(
-			`Warnings in ${webpackConfigName}, Check gulpfile.js to see if the warning should be allowed., \n\n${stdOut}`,
+			`Warnings in ${webpackConfigName}, Check gulpfile.js to see if the warning should be allowed., \n\n${stdOut}`
 		);
 	}
 }
@@ -377,7 +377,7 @@ gulp.task("prePublishBundle", async () => {
 
 gulp.task(
 	"checkDependencies",
-	gulp.series("checkNativeDependencies", "checkNpmDependencies"),
+	gulp.series("checkNativeDependencies", "checkNpmDependencies")
 );
 
 gulp.task("prePublishNonBundle", async () => {
@@ -411,38 +411,36 @@ function spawnAsync(command, args, env, rejectOnStdErr = false) {
 
 function hasNativeDependencies() {
 	let nativeDependencies = nativeDependencyChecker.check(
-		path.join(__dirname, "node_modules"),
+		path.join(__dirname, "node_modules")
 	);
 	if (!Array.isArray(nativeDependencies) || nativeDependencies.length === 0) {
 		return false;
 	}
 	const dependencies = JSON.parse(
-		spawn.sync("npm", ["ls", "--json", "--prod"]).stdout.toString(),
+		spawn.sync("npm", ["ls", "--json", "--prod"]).stdout.toString()
 	);
 	const jsonProperties = Object.keys(flat.flatten(dependencies));
 	nativeDependencies = _.flatMap(nativeDependencies, (item) =>
 		path
 			.dirname(
 				item.substring(
-					item.indexOf("node_modules") + "node_modules".length,
-				),
+					item.indexOf("node_modules") + "node_modules".length
+				)
 			)
-			.split(path.sep),
+			.split(path.sep)
 	)
 		.filter((item) => item.length > 0)
 		.filter(
 			(item) =>
 				!item.includes("zeromq") &&
 				!item.includes("canvas") &&
-				!item.includes("keytar"),
+				!item.includes("keytar")
 		) // Known native modules
 		.filter(
 			(item) =>
 				jsonProperties.findIndex((flattenedDependency) =>
-					flattenedDependency.endsWith(
-						`dependencies.${item}.version`,
-					),
-				) >= 0,
+					flattenedDependency.endsWith(`dependencies.${item}.version`)
+				) >= 0
 		);
 	if (nativeDependencies.length > 0) {
 		console.error("Native dependencies detected", nativeDependencies);
@@ -462,19 +460,19 @@ gulp.task("generateTelemetry", async () => {
 gulp.task("validateTelemetry", async () => {
 	const gdprTS = fs.readFileSync(
 		path.join(__dirname, "src", "gdpr.ts"),
-		"utf-8",
+		"utf-8"
 	);
 	await generateTelemetry();
 	const gdprTS2 = fs.readFileSync(
 		path.join(__dirname, "src", "gdpr.ts"),
-		"utf-8",
+		"utf-8"
 	);
 	if (gdprTS2.trim() !== gdprTS.trim()) {
 		console.error(
-			"src/gdpr.ts is not valid, please re-run `npm run generateTelemetry`",
+			"src/gdpr.ts is not valid, please re-run `npm run generateTelemetry`"
 		);
 		throw new Error(
-			"src/gdpr.ts is not valid, please re-run `npm run generateTelemetry`",
+			"src/gdpr.ts is not valid, please re-run `npm run generateTelemetry`"
 		);
 	}
 });
@@ -486,7 +484,7 @@ gulp.task("validatePackageLockJson", async () => {
 	const newContents = fs.readFileSync(fileName).toString();
 	if (oldContents.trim() !== newContents.trim()) {
 		throw new Error(
-			"package-lock.json has changed after running `npm install`",
+			"package-lock.json has changed after running `npm install`"
 		);
 	}
 });
@@ -500,7 +498,7 @@ gulp.task("verifyUnhandledErrors", async () => {
 		console.error(contents);
 		throw new Error(
 			"Unhandled errors detected. Please fix them before merging this PR.",
-			contents,
+			contents
 		);
 	}
 });

@@ -31,23 +31,23 @@ suite("Kernel Refresh Indicator (web)", () => {
 		onDidChangeStatus = new EventEmitter<void>();
 		when(kernelFinder.status).thenReturn("idle");
 		when(kernelFinder.onDidChangeStatus).thenReturn(
-			onDidChangeStatus.event,
+			onDidChangeStatus.event
 		);
 		taskNb = mock<NotebookControllerDetectionTask>();
 		taskIW = mock<NotebookControllerDetectionTask>();
 		when(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
-			),
+				JupyterNotebookView
+			)
 		).thenReturn(instance(taskNb));
 		when(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView,
-			),
+				InteractiveWindowView
+			)
 		).thenReturn(instance(taskIW));
 		indicator = new KernelRefreshIndicator(
 			disposables,
-			instance(kernelFinder),
+			instance(kernelFinder)
 		);
 		disposables.push(indicator);
 		disposables.push(onDidChangeStatus);
@@ -63,13 +63,13 @@ suite("Kernel Refresh Indicator (web)", () => {
 
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
-			),
+				JupyterNotebookView
+			)
 		).never();
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView,
-			),
+				InteractiveWindowView
+			)
 		).never();
 	});
 	test("Progress when finder is initially discovering", async () => {
@@ -79,13 +79,13 @@ suite("Kernel Refresh Indicator (web)", () => {
 
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
-			),
+				JupyterNotebookView
+			)
 		).once();
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView,
-			),
+				InteractiveWindowView
+			)
 		).once();
 		verify(taskNb.dispose()).never();
 		verify(taskIW.dispose()).never();
@@ -106,13 +106,13 @@ suite("Kernel Refresh Indicator (web)", () => {
 
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
-			),
+				JupyterNotebookView
+			)
 		).never();
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView,
-			),
+				InteractiveWindowView
+			)
 		).never();
 		verify(taskNb.dispose()).never();
 		verify(taskIW.dispose()).never();
@@ -123,13 +123,13 @@ suite("Kernel Refresh Indicator (web)", () => {
 
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
-			),
+				JupyterNotebookView
+			)
 		).once();
 		verify(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView,
-			),
+				InteractiveWindowView
+			)
 		).once();
 		verify(taskNb.dispose()).never();
 		verify(taskIW.dispose()).never();

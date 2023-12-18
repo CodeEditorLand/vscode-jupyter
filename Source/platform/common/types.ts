@@ -46,12 +46,12 @@ export interface IPersistentStateFactory {
 	createGlobalPersistentState<T>(
 		key: string,
 		defaultValue?: T,
-		expiryDurationMs?: number,
+		expiryDurationMs?: number
 	): IPersistentState<T>;
 	createWorkspacePersistentState<T>(
 		key: string,
 		defaultValue?: T,
-		expiryDurationMs?: number,
+		expiryDurationMs?: number
 	): IPersistentState<T>;
 }
 
@@ -181,14 +181,14 @@ export interface IConfigurationService {
 		setting: string,
 		value?: {},
 		resource?: Uri,
-		configTarget?: ConfigurationTarget,
+		configTarget?: ConfigurationTarget
 	): Promise<void>;
 	updateSectionSetting(
 		section: string,
 		setting: string,
 		value?: {},
 		resource?: Uri,
-		configTarget?: ConfigurationTarget,
+		configTarget?: ConfigurationTarget
 	): Promise<void>;
 }
 
@@ -282,7 +282,7 @@ export interface ICryptoUtils {
 	 */
 	createHash(
 		data: string,
-		algorithm?: "SHA-512" | "SHA-256",
+		algorithm?: "SHA-512" | "SHA-256"
 	): Promise<string>;
 }
 
@@ -305,14 +305,14 @@ export interface IExperimentService {
 	activate(): Promise<void>;
 	inExperiment(experimentName: Experiments): boolean;
 	getExperimentValue<T extends boolean | number | string>(
-		experimentName: Experiments,
+		experimentName: Experiments
 	): Promise<T | undefined>;
 }
 
 export type InterpreterUri = Resource | PythonEnvironment;
 
 export const IDataScienceCommandListener = Symbol(
-	"IDataScienceCommandListener",
+	"IDataScienceCommandListener"
 );
 export interface IDataScienceCommandListener {
 	register(): void;

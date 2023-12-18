@@ -32,9 +32,9 @@ import { Environment } from "@vscode/python-extension";
 @injectable()
 export class JupyterInterpreterSelector {
 	constructor(
-        @inject(IServiceContainer)
-        private readonly serviceContainer: IServiceContainer
-    ) {}
+		@inject(IServiceContainer)
+		private readonly serviceContainer: IServiceContainer
+	) {}
 	/**
 	 * Displays interpreter selector and returns the selection.
 	 */
@@ -57,27 +57,27 @@ export class JupyterInterpreterSelector {
 		const platformService = new PlatformService();
 		const selectedInterpreter =
 			this.serviceContainer.get<JupyterInterpreterStateStore>(
-				JupyterInterpreterStateStore,
+				JupyterInterpreterStateStore
 			).selectedPythonPath;
 		const filter = ServiceContainer.instance.get<PythonEnvironmentFilter>(
-			PythonEnvironmentFilter,
+			PythonEnvironmentFilter
 		);
 		const provider = ServiceContainer.instance
 			.get<PythonEnvironmentQuickPickItemProvider>(
-				PythonEnvironmentQuickPickItemProvider,
+				PythonEnvironmentQuickPickItemProvider
 			)
 			.withFilter(
 				(item) =>
 					!isCondaEnvironmentWithoutPython(item) &&
-					!filter.isPythonEnvironmentExcluded(item),
+					!filter.isPythonEnvironmentExcluded(item)
 			);
 		const findSelectedEnvironment = () =>
 			provider.items.find((item) =>
 				areInterpreterPathsSame(
 					item.executable.uri,
 					selectedInterpreter,
-					platformService.osType,
-				),
+					platformService.osType
+				)
 			);
 
 		const placeholder = selectedInterpreter
@@ -85,9 +85,9 @@ export class JupyterInterpreterSelector {
 					getDisplayPath(
 						selectedInterpreter,
 						workspace.workspaceFolders || [],
-						platformService.homeDir,
-					),
-			  )
+						platformService.homeDir
+					)
+				)
 			: "";
 
 		const disposables: IDisposable[] = [];
@@ -98,7 +98,7 @@ export class JupyterInterpreterSelector {
 			getPythonEnvironmentCategory,
 			{ supportsBack: false },
 			undefined,
-			DataScience.quickPickSelectPythonEnvironmentTitle,
+			DataScience.quickPickSelectPythonEnvironmentTitle
 		);
 		selector.placeholder = placeholder;
 		selector.selected = findSelectedEnvironment();
@@ -123,7 +123,7 @@ export class JupyterInterpreterSelector {
 		} catch (ex) {
 			traceError(
 				`Failed to select a Python Environment to start Jupyter`,
-				ex,
+				ex
 			);
 		} finally {
 			dispose(disposables);

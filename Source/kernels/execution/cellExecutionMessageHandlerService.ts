@@ -26,7 +26,7 @@ export class CellExecutionMessageHandlerService {
 		private readonly controller: IKernelController,
 		private readonly context: IExtensionContext,
 		private readonly formatters: ITracebackFormatter[],
-		private readonly notebook: NotebookDocument,
+		private readonly notebook: NotebookDocument
 	) {
 		workspace.onDidChangeNotebookDocument(
 			(e) => {
@@ -35,13 +35,13 @@ export class CellExecutionMessageHandlerService {
 				}
 				e.contentChanges.forEach((change) =>
 					// If the cell is deleted, then dispose the corresponding handler.
-					change.removedCells.forEach((cell) =>
-						this.messageHandlers.get(cell)?.dispose(),
-					),
+					change.removedCells.forEach(
+						(cell) => this.messageHandlers.get(cell)?.dispose()
+					)
 				);
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public dispose() {
@@ -61,7 +61,7 @@ export class CellExecutionMessageHandlerService {
 				KernelMessage.IExecuteReplyMsg
 			>;
 			cellExecution: NotebookCellExecution;
-		},
+		}
 	): CellExecutionMessageHandler {
 		// Always dispose any previous handlers & create new ones.
 		this.messageHandlers.get(cell)?.dispose();
@@ -73,7 +73,7 @@ export class CellExecutionMessageHandlerService {
 			options.kernel,
 			options.request,
 			options.cellExecution,
-			options.request.msg.header.msg_id,
+			options.request.msg.header.msg_id
 		);
 		// This object must be kept in memory has it monitors the kernel messages.
 		this.messageHandlers.set(cell, handler);
@@ -85,7 +85,7 @@ export class CellExecutionMessageHandlerService {
 			kernel: Kernel.IKernelConnection;
 			msg_id: string;
 			cellExecution: NotebookCellExecution;
-		},
+		}
 	): CellExecutionMessageHandler {
 		// Always dispose any previous handlers & create new ones.
 		this.messageHandlers.get(cell)?.dispose();
@@ -97,7 +97,7 @@ export class CellExecutionMessageHandlerService {
 			options.kernel,
 			undefined,
 			options.cellExecution,
-			options.msg_id,
+			options.msg_id
 		);
 		// This object must be kept in memory has it monitors the kernel messages.
 		this.messageHandlers.set(cell, handler);

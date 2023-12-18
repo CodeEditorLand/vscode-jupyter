@@ -22,23 +22,25 @@ export class PythonEnvironmentFilter implements IDisposable {
 		return this._onDidChange.event;
 	}
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        disposables.push(this);
-        if (!isWebExtension()) {
-            workspace.onDidChangeConfiguration(
-                (e) => {
-                    e.affectsConfiguration('jupyter.kernels.excludePythonEnvironments') && this._onDidChange.fire();
-                },
-                this,
-                this.disposables
-            );
-        }
-    }
+		disposables.push(this);
+		if (!isWebExtension()) {
+			workspace.onDidChangeConfiguration(
+				(e) => {
+					e.affectsConfiguration(
+						"jupyter.kernels.excludePythonEnvironments"
+					) && this._onDidChange.fire();
+				},
+				this,
+				this.disposables
+			);
+		}
+	}
 	public dispose() {
 		this._onDidChange.dispose();
 		dispose(this.disposables);
 	}
 	public isPythonEnvironmentExcluded(
-		interpreter: { uri: Uri; envPath?: Uri } | Environment,
+		interpreter: { uri: Uri; envPath?: Uri } | Environment
 	): boolean {
 		if (isWebExtension()) {
 			return false;
@@ -51,8 +53,8 @@ export class PythonEnvironmentFilter implements IDisposable {
 			sendTelemetryEvent(Telemetry.JupyterKernelHiddenViaFilter);
 			traceVerbose(
 				`Python Env hidden via filter: ${getDisplayPath(
-					interpreterUri,
-				)}`,
+					interpreterUri
+				)}`
 			);
 		}
 		return hidden;
@@ -73,7 +75,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 			filters.push(
 				...workspace
 					.getConfiguration("jupyter", item.uri)
-					.get<string[]>("kernels.excludePythonEnvironments", []),
+					.get<string[]>("kernels.excludePythonEnvironments", [])
 			);
 		});
 		return filters;
@@ -82,7 +84,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 
 export function isPythonEnvInListOfHiddenEnvs(
 	interpreter: { uri: Uri; envPath?: Uri } | Environment,
-	hiddenList: string[],
+	hiddenList: string[]
 ): boolean {
 	const envFolderUri =
 		"uri" in interpreter

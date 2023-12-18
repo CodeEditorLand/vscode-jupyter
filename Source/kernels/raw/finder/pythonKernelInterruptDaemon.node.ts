@@ -27,7 +27,7 @@ import { swallowExceptions } from "../../../platform/common/utils/misc";
 import { splitLines } from "../../../platform/common/helpers";
 import { IPythonExecutionFactory } from "../../../platform/interpreter/types.node";
 function isBestPythonInterpreterForAnInterruptDaemon(
-	interpreter: PythonEnvironment,
+	interpreter: PythonEnvironment
 ) {
 	// Give preference to globally installed python environments.
 	// The assumption is that users are more likely to uninstall/delete local python environments
@@ -82,19 +82,22 @@ export class PythonKernelInterruptDaemon {
 	>();
 	private requestCounter: number = 0;
 	constructor(
-        @inject(IPythonExecutionFactory) private readonly pythonExecutionFactory: IPythonExecutionFactory,
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IInterpreterService) private readonly interpreters: IInterpreterService,
-        @inject(IExtensionContext) private readonly context: IExtensionContext
-    ) {}
+		@inject(IPythonExecutionFactory)
+		private readonly pythonExecutionFactory: IPythonExecutionFactory,
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IInterpreterService)
+		private readonly interpreters: IInterpreterService,
+		@inject(IExtensionContext) private readonly context: IExtensionContext
+	) {}
 	public async createInterrupter(
 		pythonEnvironment: PythonEnvironment,
-		resource: Resource,
+		resource: Resource
 	): Promise<Interrupter> {
 		try {
 			return await this.createInterrupterImpl(
 				pythonEnvironment,
-				resource,
+				resource
 			);
 		} catch (ex) {
 			traceError(`Failed to create interrupter, trying again`, ex);
@@ -103,12 +106,12 @@ export class PythonKernelInterruptDaemon {
 	}
 	private async createInterrupterImpl(
 		pythonEnvironment: PythonEnvironment,
-		resource: Resource,
+		resource: Resource
 	): Promise<Interrupter> {
 		const interruptHandle = (await this.sendCommand(
 			{ command: "INITIALIZE_INTERRUPT" },
 			pythonEnvironment,
-			resource,
+			resource
 		)) as number;
 		if (!interruptHandle) {
 			traceError(`Unable to initialize interrupt handle`);
@@ -121,7 +124,7 @@ export class PythonKernelInterruptDaemon {
 				await this.sendCommand(
 					{ command: "INTERRUPT", handle: interruptHandle },
 					pythonEnvironment,
-					resource,
+					resource
 				);
 			},
 			dispose: async () => {
@@ -131,12 +134,12 @@ export class PythonKernelInterruptDaemon {
 						handle: interruptHandle,
 					},
 					pythonEnvironment,
-					resource,
+					resource
 				).catch((ex) =>
 					traceError(
 						`Failed to dispose interrupt handle for ${pythonEnvironment.id}`,
-						ex,
-					),
+						ex
+					)
 				);
 			},
 		};
@@ -162,7 +165,7 @@ export class PythonKernelInterruptDaemon {
 	}
 	private async initializeInterrupter(
 		pythonEnvironment: PythonEnvironment,
-		resource: Resource,
+		resource: Resource
 	) {
 		if (this.startupPromise) {
 			return this.startupPromise;
@@ -177,21 +180,21 @@ export class PythonKernelInterruptDaemon {
 			const dsFolder = Uri.joinPath(
 				this.context.extensionUri,
 				"pythonFiles",
-				"vscode_datascience_helpers",
+				"vscode_datascience_helpers"
 			);
 			const file = Uri.joinPath(dsFolder, "kernel_interrupt_daemon.py");
 			const proc = executionService.execObservable(
 				[file.fsPath, "--ppid", process.pid.toString()],
 				{
 					cwd: dsFolder.fsPath,
-				},
+				}
 			);
 
 			await new Promise<void>((resolve, reject) => {
 				let started = false;
 				const subscription = proc.out.onDidChange((out) => {
 					traceInfoIfCI(
-						`Output from interrupt daemon started = ${started}, output (${out.source}) = ${out.out} ('END)`,
+						`Output from interrupt daemon started = ${started}, output (${out.source}) = ${out.out} ('END)`
 					);
 					if (
 						out.source === "stdout" &&
@@ -204,7 +207,7 @@ export class PythonKernelInterruptDaemon {
 						out.source === "stderr" &&
 						out.out.includes("INTERRUPT:") &&
 						out.out.includes(
-							"ERROR: handling command :INITIALIZE_INTERRUPT:",
+							"ERROR: handling command :INITIALIZE_INTERRUPT:"
 						) &&
 						started
 					) {
@@ -219,27 +222,27 @@ export class PythonKernelInterruptDaemon {
 									const id = parseInt(
 										parts[
 											parts.indexOf(
-												"INITIALIZE_INTERRUPT",
+												"INITIALIZE_INTERRUPT"
 											) + 1
 										],
-										10,
+										10
 									);
 									const deferred = this.messages.get(id);
 									if (deferred) {
 										traceError(
-											`Failed to initialize interrupt daemon for ${id}, ${out.out}`,
+											`Failed to initialize interrupt daemon for ${id}, ${out.out}`
 										);
 										deferred.deferred.reject(
 											new Error(
-												`Failed to start interrupt daemon ${out.out}`,
-											),
+												`Failed to start interrupt daemon ${out.out}`
+											)
 										);
 										this.messages.delete(id);
 									}
 								} catch (ex) {
 									traceError(
 										`Failed to parse interrupt daemon response, ${out.out}`,
-										ex,
+										ex
 									);
 								}
 							});
@@ -258,41 +261,41 @@ export class PythonKernelInterruptDaemon {
 									const [command, id, response] =
 										output.split(":");
 									const deferred = this.messages.get(
-										parseInt(id, 10),
+										parseInt(id, 10)
 									);
 									if (deferred) {
 										traceVerbose(
-											`Got a response of ${response} for ${command}:${id}`,
+											`Got a response of ${response} for ${command}:${id}`
 										);
 										deferred.deferred.resolve(response);
 										this.messages.delete(parseInt(id, 10));
 									} else {
 										traceError(
-											`Got a response of ${response} for ${command}:${id} but no command entry found in ${out.out}`,
+											`Got a response of ${response} for ${command}:${id} but no command entry found in ${out.out}`
 										);
 									}
 								} catch (ex) {
 									traceError(
 										`Failed to parse interrupt daemon response, ${out.out}`,
-										ex,
+										ex
 									);
 								}
 							});
 					} else if (out.out.includes("ERROR: handling command")) {
 						traceWarning(
-							`Error output in interrupt daemon response ${out.out} ('END')`,
+							`Error output in interrupt daemon response ${out.out} ('END')`
 						);
 						if (!started) {
 							return reject(
 								new Error(
-									`Interrupt daemon failed to start, ${out.out}`,
-								),
+									`Interrupt daemon failed to start, ${out.out}`
+								)
 							);
 						}
 						try {
 							const id = out.out.split(":")[2];
 							const deferred = this.messages.get(
-								parseInt(id, 10),
+								parseInt(id, 10)
 							);
 							if (deferred) {
 								deferred.deferred.reject(new Error(out.out));
@@ -302,7 +305,7 @@ export class PythonKernelInterruptDaemon {
 						} catch (ex) {
 							traceError(
 								`Failed to parse interrupt daemon response, ${out.out}`,
-								ex,
+								ex
 							);
 						}
 					}
@@ -310,9 +313,7 @@ export class PythonKernelInterruptDaemon {
 				this.disposableRegistry.push(subscription);
 			});
 			this.disposableRegistry.push(
-				new Disposable(() =>
-					swallowExceptions(() => proc.proc?.kill()),
-				),
+				new Disposable(() => swallowExceptions(() => proc.proc?.kill()))
 			);
 			// Added for logging to see if this process dies.
 			// We can remove this later if there are no more flaky test failures.
@@ -331,8 +332,8 @@ export class PythonKernelInterruptDaemon {
 		promise.catch((ex) =>
 			traceError(
 				`Failed to start interrupt daemon for (${pythonEnvironment.id})`,
-				ex,
-			),
+				ex
+			)
 		);
 		this.startupPromise = promise;
 		return promise;
@@ -340,7 +341,7 @@ export class PythonKernelInterruptDaemon {
 	private async sendCommand(
 		command: Command,
 		pythonEnvironment: PythonEnvironment,
-		resource: Resource,
+		resource: Resource
 	): Promise<unknown> {
 		const deferred = createDeferred<unknown>();
 		const id = this.requestCounter++;
@@ -351,7 +352,7 @@ export class PythonKernelInterruptDaemon {
 				: `${command.command}:${id}:${command.handle}`;
 		const { proc } = await this.initializeInterrupter(
 			pythonEnvironment,
-			resource,
+			resource
 		);
 		if (!proc || !proc.stdin) {
 			// An impossible scenario, but types in node.js requires this, and we need to check to keep the compiler happy
@@ -360,11 +361,11 @@ export class PythonKernelInterruptDaemon {
 		}
 		proc.stdin.write(`${messageToSend}${EOL}`);
 		traceInfoIfCI(
-			`Sending Interrupt Request id=${id}, Command ${command.command} for ${pythonEnvironment.id}`,
+			`Sending Interrupt Request id=${id}, Command ${command.command} for ${pythonEnvironment.id}`
 		);
 		const response = await deferred.promise;
 		traceInfoIfCI(
-			`Got Interrupt Response id=${id}, Command ${command.command} for ${pythonEnvironment.id}`,
+			`Got Interrupt Response id=${id}, Command ${command.command} for ${pythonEnvironment.id}`
 		);
 		if (command.command === "INITIALIZE_INTERRUPT") {
 			return parseInt(response as string, 10);

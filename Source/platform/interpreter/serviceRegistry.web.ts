@@ -10,14 +10,14 @@ import { PythonFilterUICommandDeprecation } from "./filter/uiDeprecationHandler"
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonEnvFilterSettingMigration,
+		PythonEnvFilterSettingMigration
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonFilterUICommandDeprecation,
+		PythonFilterUICommandDeprecation
 	);
 	serviceManager.addSingleton<PythonEnvironmentFilter>(
 		PythonEnvironmentFilter,
-		PythonEnvironmentFilter,
+		PythonEnvironmentFilter
 	);
 }

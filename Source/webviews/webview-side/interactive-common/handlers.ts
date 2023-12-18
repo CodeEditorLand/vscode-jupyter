@@ -3,7 +3,7 @@
 
 export function handleLinkClick(
 	ev: MouseEvent,
-	linkClick: (href: string) => void,
+	linkClick: (href: string) => void
 ) {
 	// If this is an anchor element, forward the click as Jupyter does.
 	let anchor = ev.target as HTMLAnchorElement;

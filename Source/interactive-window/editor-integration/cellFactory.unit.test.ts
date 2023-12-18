@@ -22,76 +22,76 @@ suite("CellFactory", () => {
 			undefined,
 			"#%% [markdown]\n# #a=1\n#a",
 			uri,
-			true,
+			true
 		);
 		assert.equal(cells.length, 1, "Markdown split wrong");
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"Markdown cell not generated",
+			"Markdown cell not generated"
 		);
 		cells = generateCells(
 			undefined,
 			"#%% [markdown]\n'''\n# a\nb\n'''",
 			uri,
-			true,
+			true
 		);
 		assert.equal(cells.length, 1, "Markdown cell multline failed");
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"Markdown cell not generated",
+			"Markdown cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			2,
-			"Lines for markdown not emitted",
+			"Lines for markdown not emitted"
 		);
 		cells = generateCells(
 			undefined,
 			'#%% [markdown]\n"""\n# a\nb\n"""',
 			uri,
-			true,
+			true
 		);
 		assert.equal(cells.length, 1, "Markdown cell multline failed");
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"Markdown cell not generated",
+			"Markdown cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			2,
-			"Lines for markdown not emitted",
+			"Lines for markdown not emitted"
 		);
 		cells = generateCells(undefined, '#%% \n"""\n# a\nb\n"""', uri, true);
 		assert.equal(cells.length, 1, "Code cell multline failed");
 		assert.equal(
 			cells[0].data.cell_type,
 			"code",
-			"Code cell not generated",
+			"Code cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			5,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		cells = generateCells(
 			undefined,
 			'#%% [markdown] \n"""# a\nb\n"""',
 			uri,
-			true,
+			true
 		);
 		assert.equal(cells.length, 1, "Markdown cell multline failed");
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"Markdown cell not generated",
+			"Markdown cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			2,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 
 		// eslint-disable-next-line no-multi-str
@@ -122,30 +122,30 @@ Morbi molestie lacinia sapien nec porttitor. Nam at vestibulum nisi.
 		assert.equal(
 			cells[0].data.cell_type,
 			"code",
-			"Code cell not generated",
+			"Code cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			10,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		cells = generateCells(undefined, multilineTwo, uri, true);
 		assert.equal(cells.length, 1, "code cell multline failed");
 		assert.equal(
 			cells[0].data.cell_type,
 			"code",
-			"Code cell not generated",
+			"Code cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			10,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		// eslint-disable-next-line no-multi-str
 		assert.equal(
 			cells[0].data.source[9],
 			`""" print('bob')`,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		// eslint-disable-next-line no-multi-str
 		const multilineMarkdown = `#%% [markdown]
@@ -174,17 +174,17 @@ Morbi molestie lacinia sapien nec porttitor. Nam at vestibulum nisi.
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"markdown cell not generated",
+			"markdown cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			20,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		assert.equal(
 			cells[0].data.source[17],
 			"          - Item 1-a-3-c\n",
-			"Lines for markdown not emitted",
+			"Lines for markdown not emitted"
 		);
 
 		// eslint-disable-next-line no-multi-str
@@ -199,23 +199,23 @@ Morbi molestie lacinia sapien nec porttitor. Nam at vestibulum nisi.
 			undefined,
 			multilineQuoteWithOtherDelimiter,
 			uri,
-			true,
+			true
 		);
 		assert.equal(cells.length, 1, "markdown cell multline failed");
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"markdown cell not generated",
+			"markdown cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			3,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		assert.equal(
 			cells[0].data.source[2],
 			'""" Not a comment delimiter',
-			"Lines for markdown not emitted",
+			"Lines for markdown not emitted"
 		);
 
 		// eslint-disable-next-line no-multi-str
@@ -233,17 +233,17 @@ def download(url, filename):
 		assert.equal(
 			cells[0].data.cell_type,
 			"code",
-			"code cell not generated",
+			"code cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			9,
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 		assert.equal(
 			cells[0].data.source[3],
 			'    """ utility function to download a file """\n',
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 
 		// eslint-disable-next-line no-multi-str
@@ -262,34 +262,34 @@ class Pizza(object):
 		assert.equal(
 			cells[0].data.cell_type,
 			"markdown",
-			"markdown cell not generated",
+			"markdown cell not generated"
 		);
 		assert.equal(
 			cells[0].data.source.length,
 			1,
-			"Lines for markdown not emitted",
+			"Lines for markdown not emitted"
 		);
 		assert.equal(
 			cells[1].data.cell_type,
 			"code",
-			"code cell not generated",
+			"code cell not generated"
 		);
 		assert.equal(
 			cells[1].data.source.length,
 			7,
-			"Lines for code not emitted",
+			"Lines for code not emitted"
 		);
 		assert.equal(
 			cells[1].data.source[3],
 			"        self.toppings = toppings\n",
-			"Lines for cell not emitted",
+			"Lines for cell not emitted"
 		);
 
 		// Non comments tests
 		let nonComments = stripComments(multilineCode);
 		assert.ok(
 			nonComments.startsWith('myvar = """ # Lorem Ipsum'),
-			"Variable set to multiline string not working",
+			"Variable set to multiline string not working"
 		);
 		nonComments = stripComments(multilineTwo);
 		assert.equal(nonComments, "", "Multline comment is not being stripped");
@@ -297,7 +297,7 @@ class Pizza(object):
 		assert.equal(
 			splitLines(nonComments).length,
 			6,
-			"Splitting quote in func wrong number of lines",
+			"Splitting quote in func wrong number of lines"
 		);
 	});
 

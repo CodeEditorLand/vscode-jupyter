@@ -21,11 +21,14 @@ import { UsedPorts } from "./common/usedPorts";
 export class PortAttributesProviders
 	implements PortAttributesProvider, IExtensionSyncActivationService
 {
-	constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry) {}
+	constructor(
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	activate(): void {
 		try {
 			this.disposables.push(
-				workspace.registerPortAttributesProvider({}, this),
+				workspace.registerPortAttributesProvider({}, this)
 			);
 		} catch (ex) {
 			// In case proposed API changes.
@@ -34,7 +37,7 @@ export class PortAttributesProviders
 	}
 	providePortAttributes(
 		attributes: { port: number; pid?: number; commandLine?: string },
-		_token: CancellationToken,
+		_token: CancellationToken
 	): PortAttributes | undefined {
 		try {
 			if (UsedPorts.has(attributes.port)) {

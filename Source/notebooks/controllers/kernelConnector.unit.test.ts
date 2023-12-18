@@ -90,18 +90,18 @@ suite("Kernel Connector", () => {
 		when(kernel.kernelConnectionMetadata).thenReturn(pythonKernelSpec);
 		when(trustedKernels.isTrusted(anything())).thenReturn(true);
 		when(serviceContainer.get<IKernelProvider>(IKernelProvider)).thenReturn(
-			instance(kernelProvider),
+			instance(kernelProvider)
 		);
 		when(
-			serviceContainer.get<ITrustedKernelPaths>(ITrustedKernelPaths),
+			serviceContainer.get<ITrustedKernelPaths>(ITrustedKernelPaths)
 		).thenReturn(instance(trustedKernels));
 		when(
 			serviceContainer.get<IDataScienceErrorHandler>(
-				IDataScienceErrorHandler,
-			),
+				IDataScienceErrorHandler
+			)
 		).thenReturn(instance(errorHandler));
 		when(kernelProvider.getOrCreate(anything(), anything())).thenReturn(
-			instance(kernel),
+			instance(kernel)
 		);
 		controller = createKernelController(pythonConnection.id);
 	});
@@ -119,13 +119,13 @@ suite("Kernel Connector", () => {
 			},
 			new DisplayOptions(false),
 			disposables,
-			"jupyterExtension",
+			"jupyterExtension"
 		);
 	});
 	test("Throws an error if we fail to start the kernel", async () => {
 		when(kernel.status).thenReturn("idle");
 		when(kernel.start(anything())).thenThrow(
-			new Error("Failed to Start Kernel"),
+			new Error("Failed to Start Kernel")
 		);
 		when(
 			errorHandler.handleKernelError(
@@ -133,8 +133,8 @@ suite("Kernel Connector", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(KernelInterpreterDependencyResponse.failed);
 		const result = KernelConnector.connectToNotebookKernel(
 			pythonConnection,
@@ -146,7 +146,7 @@ suite("Kernel Connector", () => {
 			},
 			new DisplayOptions(false),
 			disposables,
-			"jupyterExtension",
+			"jupyterExtension"
 		);
 
 		await assert.isRejected(result, "Failed to Start Kernel");
@@ -160,16 +160,16 @@ suite("Kernel Connector", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(KernelInterpreterDependencyResponse.failed);
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenReturn(Promise.resolve(DataScience.restartKernel));
 		await KernelConnector.connectToNotebookKernel(
 			pythonConnection,
@@ -181,19 +181,19 @@ suite("Kernel Connector", () => {
 			},
 			new DisplayOptions(false),
 			disposables,
-			"jupyterExtension",
+			"jupyterExtension"
 		);
 
 		verify(kernel.restart()).once();
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				DataScience.cannotRunCellKernelIsDead(
-					getDisplayNameOrNameOfKernelConnection(pythonKernelSpec),
+					getDisplayNameOrNameOfKernelConnection(pythonKernelSpec)
 				),
 				deepEqual({ modal: true }),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).once();
 	});
 	test("Display modal dialog for dead kernel and verify kernel is not restarted when the kernel is dead (user does not restart)", async () => {
@@ -205,16 +205,16 @@ suite("Kernel Connector", () => {
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(KernelInterpreterDependencyResponse.failed);
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve();
 		const result = KernelConnector.connectToNotebookKernel(
 			pythonConnection,
@@ -226,23 +226,23 @@ suite("Kernel Connector", () => {
 			},
 			new DisplayOptions(false),
 			disposables,
-			"jupyterExtension",
+			"jupyterExtension"
 		);
 
 		await assert.isRejected(
 			result,
-			new KernelDeadError(pythonKernelSpec).message,
+			new KernelDeadError(pythonKernelSpec).message
 		);
 		verify(kernel.restart()).never();
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				DataScience.cannotRunCellKernelIsDead(
-					getDisplayNameOrNameOfKernelConnection(pythonKernelSpec),
+					getDisplayNameOrNameOfKernelConnection(pythonKernelSpec)
 				),
 				deepEqual({ modal: true }),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).once();
 	});
 });

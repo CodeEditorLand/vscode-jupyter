@@ -64,24 +64,24 @@ suite("Kernel ReConnect Progress Message", () => {
 		onDidRestartKernel = new EventEmitter<IKernel>();
 
 		disposables.push(
-			...[onDidStartKernel, onDidDisposeKernel, onDidRestartKernel],
+			...[onDidStartKernel, onDidDisposeKernel, onDidRestartKernel]
 		);
 		when(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).thenResolve();
 		kernelProvider = mock<IKernelProvider>();
 		kernelExecution = mock<INotebookKernelExecution>();
 		when(kernelProvider.onDidStartKernel).thenReturn(
-			onDidStartKernel.event,
+			onDidStartKernel.event
 		);
 		when(kernelProvider.onDidDisposeKernel).thenReturn(
-			onDidDisposeKernel.event,
+			onDidDisposeKernel.event
 		);
 		when(kernelProvider.onDidRestartKernel).thenReturn(
-			onDidRestartKernel.event,
+			onDidRestartKernel.event
 		);
 		when(kernelProvider.getKernelExecution(anything())).thenReturn(
-			instance(kernelExecution),
+			instance(kernelExecution)
 		);
 		clock = fakeTimers.install();
 		jupyterServerUriStorage = mock<IJupyterServerUriStorage>();
@@ -93,7 +93,7 @@ suite("Kernel ReConnect Progress Message", () => {
 			disposables,
 			instance(kernelProvider),
 			instance(jupyterServerUriStorage),
-			instance(jupyterUriProviderRegistration),
+			instance(jupyterUriProviderRegistration)
 		);
 		monitor.activate();
 	});
@@ -122,7 +122,7 @@ suite("Kernel ReConnect Progress Message", () => {
 			serverProviderHandle: { handle: "1", id: "1", extensionId: "" },
 		});
 		when(kernelConnection.connectionStatusChanged).thenReturn(
-			kernelConnectionStatusSignal,
+			kernelConnectionStatusSignal
 		);
 		when(kernel.session).thenReturn(instance(session));
 		when(kernel.resourceUri).thenReturn(Uri.file("test.ipynb"));
@@ -159,7 +159,7 @@ suite("Kernel ReConnect Progress Message", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).once();
 	});
 	test("Do not display a message if kernel is restarting", async () => {
@@ -176,7 +176,7 @@ suite("Kernel ReConnect Progress Message", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).never();
 	});
 });
@@ -202,24 +202,24 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		onDidRestartKernel = new EventEmitter<IKernel>();
 
 		disposables.push(
-			...[onDidStartKernel, onDidDisposeKernel, onDidRestartKernel],
+			...[onDidStartKernel, onDidDisposeKernel, onDidRestartKernel]
 		);
 		when(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).thenResolve();
 		kernelProvider = mock<IKernelProvider>();
 		kernelExecution = mock<INotebookKernelExecution>();
 		when(kernelProvider.onDidStartKernel).thenReturn(
-			onDidStartKernel.event,
+			onDidStartKernel.event
 		);
 		when(kernelProvider.onDidDisposeKernel).thenReturn(
-			onDidDisposeKernel.event,
+			onDidDisposeKernel.event
 		);
 		when(kernelProvider.onDidRestartKernel).thenReturn(
-			onDidRestartKernel.event,
+			onDidRestartKernel.event
 		);
 		when(kernelProvider.getKernelExecution(anything())).thenReturn(
-			instance(kernelExecution),
+			instance(kernelExecution)
 		);
 		jupyterServerUriStorage = mock<IJupyterServerUriStorage>();
 		when(jupyterServerUriStorage.all).thenReturn([]);
@@ -229,7 +229,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 			disposables,
 			instance(kernelProvider),
 			instance(jupyterServerUriStorage),
-			instance(jupyterUriProviderRegistration),
+			instance(jupyterUriProviderRegistration)
 		);
 		clock = fakeTimers.install();
 
@@ -246,13 +246,13 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		disposables.push(onDidChangeNotebookCellExecutionState);
 		when(
 			mockedVSCodeNamespaces.notebooks
-				.onDidChangeNotebookCellExecutionState,
+				.onDidChangeNotebookCellExecutionState
 		).thenReturn(onDidChangeNotebookCellExecutionState.event);
 		monitor.activate();
 	});
 	teardown(() => (disposables = dispose(disposables)));
 	function createKernel(
-		serverProviderHandle = { handle: "1234", id: "1234", extensionId: "" },
+		serverProviderHandle = { handle: "1234", id: "1234", extensionId: "" }
 	) {
 		const kernel = mock<IKernel>();
 		const onPreExecute = new EventEmitter<NotebookCell>();
@@ -277,7 +277,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 			serverProviderHandle,
 		});
 		when(kernelConnection.connectionStatusChanged).thenReturn(
-			kernelConnectionStatusSignal,
+			kernelConnectionStatusSignal
 		);
 		when(kernel.disposed).thenReturn(false);
 		when(kernel.disposing).thenReturn(false);
@@ -322,7 +322,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).once();
 		verify(cellExecution.appendOutput(anything())).never();
 	});
@@ -338,7 +338,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).never();
 		verify(cellExecution.appendOutput(anything())).never();
 	});
@@ -354,7 +354,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).never();
 		verify(cellExecution.appendOutput(anything())).never();
 	});
@@ -364,7 +364,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		const nb = createNotebook();
 		const cell = createCell(instance(nb));
 		when(kernelProvider.get(instance(nb))).thenReturn(
-			instance(kernel.kernel),
+			instance(kernel.kernel)
 		);
 		onDidStartKernel.fire(instance(kernel.kernel));
 		kernel.onPreExecute.fire(instance(cell));
@@ -375,7 +375,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).once();
 		verify(cellExecution.appendOutput(anything())).once();
 	});
@@ -385,7 +385,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		const nb = createNotebook();
 		const cell = createCell(instance(nb));
 		when(kernelProvider.get(instance(nb))).thenReturn(
-			instance(kernel.kernel),
+			instance(kernel.kernel)
 		);
 		onDidStartKernel.fire(instance(kernel.kernel));
 		kernel.onPreExecute.fire(instance(cell));
@@ -402,7 +402,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 		await clock.runAllAsync();
 
 		verify(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).once();
 		verify(cellExecution.appendOutput(anything())).never();
 	});
@@ -448,7 +448,7 @@ suite("Kernel ReConnect Failed Monitor", () => {
 
 		// the server is gone, the kernel is disposed so we don't show the error message
 		verify(
-			mockedVSCodeNamespaces.window.showErrorMessage(anything()),
+			mockedVSCodeNamespaces.window.showErrorMessage(anything())
 		).never();
 		verify(cellExecution.appendOutput(anything())).never();
 	});

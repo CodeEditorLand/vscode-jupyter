@@ -20,17 +20,18 @@ export class GlobalPythonExecutablePathService {
 		Promise<Uri | undefined>
 	>();
 	constructor(
-        @inject(IProcessServiceFactory) private readonly processFactory: IProcessServiceFactory,
-        @inject(IPlatformService) private readonly platform: IPlatformService,
-        @inject(IFileSystem) private readonly fs: IFileSystem
-    ) {}
+		@inject(IProcessServiceFactory)
+		private readonly processFactory: IProcessServiceFactory,
+		@inject(IPlatformService) private readonly platform: IPlatformService,
+		@inject(IFileSystem) private readonly fs: IFileSystem
+	) {}
 
 	/**
 	 * Gets the path where executables are installed for the given Global Python interpreter.
 	 */
 	@swallowExceptions()
 	public async getExecutablesPath(
-		environment: Environment,
+		environment: Environment
 	): Promise<Uri | undefined> {
 		const executable = environment.executable.uri;
 		if (
@@ -76,7 +77,7 @@ export class GlobalPythonExecutablePathService {
 	 *
 	 */
 	private async getUserSitePathImpl(
-		executable: Uri,
+		executable: Uri
 	): Promise<Uri | undefined> {
 		const processService = await this.processFactory.create(undefined);
 		const delimiter = "USER_BASE_VALUE";
@@ -90,7 +91,7 @@ export class GlobalPythonExecutablePathService {
 			const output = stdout
 				.substring(
 					stdout.indexOf(delimiter) + delimiter.length,
-					stdout.lastIndexOf(delimiter),
+					stdout.lastIndexOf(delimiter)
 				)
 				.trim();
 			const outputPath = Uri.file(output);
@@ -105,21 +106,21 @@ export class GlobalPythonExecutablePathService {
 					`USER_SITE ${
 						sitePath.fsPath
 					} dir does not exist for the interpreter ${getDisplayPath(
-						executable,
-					)}`,
+						executable
+					)}`
 				);
 			}
 			traceVerbose(
 				`USER_SITE for ${getDisplayPath(executable)} is ${
 					sitePath.fsPath
-				}`,
+				}`
 			);
 			return sitePath;
 		} else {
 			throw new Error(
 				`USER_SITE not found for the interpreter ${getDisplayPath(
-					executable,
-				)}. Stdout: ${stdout}`,
+					executable
+				)}. Stdout: ${stdout}`
 			);
 		}
 	}

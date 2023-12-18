@@ -11,7 +11,7 @@ export class JupyterConnectError extends BaseError {
 	constructor(
 		message: string,
 		stderr: string | string,
-		public readonly interpreter?: PythonEnvironment,
+		public readonly interpreter?: PythonEnvironment
 	) {
 		super("jupyterconnection", message + (stderr ? `\n${stderr}` : ""));
 	}

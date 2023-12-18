@@ -44,70 +44,70 @@ import { INotebookCompletionProvider, INotebookEditorProvider } from "./types";
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	isDevMode: boolean,
+	isDevMode: boolean
 ) {
 	registerControllerTypes(serviceManager, isDevMode);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		LiveKernelSwitcher,
+		LiveKernelSwitcher
 	);
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
-		NotebookCommandListener,
+		NotebookCommandListener
 	);
 	serviceManager.addSingleton<INotebookEditorProvider>(
 		INotebookEditorProvider,
-		NotebookEditorProvider,
+		NotebookEditorProvider
 	);
 	serviceManager.addBinding(
 		INotebookCompletionProvider,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RemoteKernelControllerWatcher,
+		RemoteKernelControllerWatcher
 	);
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
-		NotebookTracebackFormatter,
+		NotebookTracebackFormatter
 	);
 	serviceManager.addSingleton<IJupyterDebugService>(
 		IJupyterDebugService,
 		JupyterDebugService,
-		Identifiers.RUN_BY_LINE_DEBUGSERVICE,
+		Identifiers.RUN_BY_LINE_DEBUGSERVICE
 	);
 	serviceManager.addSingleton<NotebookIPyWidgetCoordinator>(
 		NotebookIPyWidgetCoordinator,
-		NotebookIPyWidgetCoordinator,
+		NotebookIPyWidgetCoordinator
 	);
 	serviceManager.addBinding(
 		NotebookIPyWidgetCoordinator,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RemoteKernelConnectionHandler,
+		RemoteKernelConnectionHandler
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InterpreterPackageTracker,
+		InterpreterPackageTracker
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InstallPythonControllerCommands,
+		InstallPythonControllerCommands
 	);
 
 	serviceManager.addSingleton<NotebookCellLanguageService>(
 		NotebookCellLanguageService,
-		NotebookCellLanguageService,
+		NotebookCellLanguageService
 	);
 	serviceManager.addBinding(
 		NotebookCellLanguageService,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		EmptyNotebookCellLanguageService,
+		EmptyNotebookCellLanguageService
 	);
 
 	// Debugging
@@ -115,46 +115,46 @@ export function registerTypes(
 		INotebookDebuggingManager,
 		DebuggingManager,
 		undefined,
-		[IExtensionSyncActivationService],
+		[IExtensionSyncActivationService]
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		DebuggerVariableRegistration,
+		DebuggerVariableRegistration
 	);
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		DebuggerVariables,
-		Identifiers.DEBUGGER_VARIABLES,
+		Identifiers.DEBUGGER_VARIABLES
 	);
 	serviceManager.addSingleton<IJupyterDebugService>(
 		IJupyterDebugService,
 		MultiplexingDebugService,
-		Identifiers.MULTIPLEXING_DEBUGSERVICE,
+		Identifiers.MULTIPLEXING_DEBUGSERVICE
 	);
 	serviceManager.addSingleton<IDebugLocationTracker>(
 		IDebugLocationTracker,
 		DebugLocationTrackerFactory,
 		undefined,
-		[IDebugLocationTrackerFactory],
+		[IDebugLocationTrackerFactory]
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CommandRegistry,
+		CommandRegistry
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CellOutputMimeTypeTracker,
+		CellOutputMimeTypeTracker
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelStartupCodeProvider,
+		KernelStartupCodeProvider
 	);
 
 	// File export/import
 	serviceManager.addSingleton<IFileConverter>(IFileConverter, FileConverter);
 	serviceManager.addSingleton<ExportInterpreterFinder>(
 		ExportInterpreterFinder,
-		ExportInterpreterFinder,
+		ExportInterpreterFinder
 	);
 
 	serviceManager.addSingleton<IExportBase>(IExportBase, ExportBase);

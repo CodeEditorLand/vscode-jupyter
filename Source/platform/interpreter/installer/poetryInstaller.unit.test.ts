@@ -39,7 +39,7 @@ suite("Module Installer - Poetry", () => {
 		public override async getExecutionArgs(
 			moduleName: string,
 			interpreter: PythonEnvironment,
-			_flags?: ModuleInstallFlags,
+			_flags?: ModuleInstallFlags
 		): Promise<ExecutionInstallArgs> {
 			return super.getExecutionArgs(moduleName, interpreter);
 		}
@@ -58,7 +58,7 @@ suite("Module Installer - Poetry", () => {
 		configurationService = mock(ConfigurationService);
 		reset(mockedVSCodeNamespaces.workspace);
 		when(configurationService.getSettings(anything())).thenReturn(
-			{} as any,
+			{} as any
 		);
 
 		shellExecute = sinon.stub(fileUtils, "shellExecute");
@@ -84,7 +84,7 @@ suite("Module Installer - Poetry", () => {
 
 		poetryInstaller = new TestInstaller(
 			instance(serviceContainer),
-			instance(configurationService),
+			instance(configurationService)
 		);
 	});
 
@@ -114,7 +114,7 @@ suite("Module Installer - Poetry", () => {
 		};
 
 		when(
-			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything()),
+			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything())
 		).thenReturn();
 
 		const supported = await poetryInstaller.isSupported(interpreter);
@@ -131,13 +131,13 @@ suite("Module Installer - Poetry", () => {
 		const settings = mock(JupyterSettings);
 
 		when(configurationService.getSettings(undefined)).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(settings.poetryPath).thenReturn("poetry path");
 
 		const info = await poetryInstaller.getExecutionArgs(
 			"something",
-			interpreter,
+			interpreter
 		);
 
 		assert.deepEqual(info, {
@@ -152,7 +152,7 @@ suite("Module Installer - Poetry", () => {
 		const interpreter: PythonEnvironment = {
 			envType: EnvironmentType.Poetry,
 			uri: Uri.file(
-				path.join(project1, ".venv", "scripts", "python.exe"),
+				path.join(project1, ".venv", "scripts", "python.exe")
 			),
 			id: Uri.file(path.join(project1, ".venv", "scripts", "python.exe"))
 				.fsPath,
@@ -160,11 +160,11 @@ suite("Module Installer - Poetry", () => {
 		};
 
 		when(configurationService.getSettings(anything())).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(settings.poetryPath).thenReturn("poetry");
 		when(
-			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything()),
+			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything())
 		).thenReturn({ uri, name: "", index: 0 });
 
 		const supported = await poetryInstaller.isSupported(interpreter);
@@ -183,11 +183,11 @@ suite("Module Installer - Poetry", () => {
 		};
 
 		when(configurationService.getSettings(anything())).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(settings.poetryPath).thenReturn("poetry");
 		when(
-			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything()),
+			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything())
 		).thenReturn({ uri, name: "", index: 0 });
 
 		const supported = await poetryInstaller.isSupported(interpreter);
@@ -206,11 +206,11 @@ suite("Module Installer - Poetry", () => {
 		};
 
 		when(configurationService.getSettings(anything())).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(settings.poetryPath).thenReturn("poetry");
 		when(
-			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything()),
+			mockedVSCodeNamespaces.workspace.getWorkspaceFolder(anything())
 		).thenReturn({ uri, name: "", index: 0 });
 
 		const supported = await poetryInstaller.isSupported(interpreter);

@@ -57,7 +57,7 @@ export class ScriptManager extends EventEmitter {
 	// List of widgets that must always be loaded using requirejs instead of using a CDN or the like.
 	constructor(
 		private readonly postOffice: PostOffice,
-		cdnIsReachable = isCDNReachable(),
+		cdnIsReachable = isCDNReachable()
 	) {
 		super();
 		this.isOnline.promise.catch(noop);
@@ -68,11 +68,11 @@ export class ScriptManager extends EventEmitter {
 					IPyWidgetMessages.IPyWidgets_IsOnline,
 					{
 						isOnline,
-					},
+					}
 				);
 			})
 			.catch((ex) =>
-				logErrorMessage(`Failed to check if online ${ex.toString()}`),
+				logErrorMessage(`Failed to check if online ${ex.toString()}`)
 			);
 
 		postOffice.addHandler({
@@ -80,7 +80,7 @@ export class ScriptManager extends EventEmitter {
 			handleMessage: (type: string, payload?: any) => {
 				if (type === SharedMessages.UpdateSettings) {
 					const settings = JSON.parse(
-						payload,
+						payload
 					) as IJupyterExtraSettings;
 					this.widgetsCanLoadFromCDN =
 						settings.widgetScriptSources.length > 0;
@@ -89,7 +89,7 @@ export class ScriptManager extends EventEmitter {
 					IPyWidgetMessages.IPyWidgets_WidgetScriptSourceResponse
 				) {
 					this.registerScriptSourceInRequirejs(
-						payload as WidgetScriptSource,
+						payload as WidgetScriptSource
 					);
 				} else if (
 					type ===
@@ -102,7 +102,7 @@ export class ScriptManager extends EventEmitter {
 						(moduleName) => {
 							// If we don't have a source, then we can re-try fetching the source (next time its requested).
 							this.clearWidgetModuleScriptSource(moduleName);
-						},
+						}
 					);
 					this.widgetModulesFailedToLoad.clear();
 				} else if (
@@ -122,14 +122,14 @@ export class ScriptManager extends EventEmitter {
 					type === IPyWidgetMessages.IPyWidgets_kernelOptions
 				) {
 					logMessage(
-						`Received IPyWidgets_kernelOptions in ScriptManager`,
+						`Received IPyWidgets_kernelOptions in ScriptManager`
 					);
 					if (
 						this.previousKernelOptions &&
 						!fastDeepEqual(this.previousKernelOptions, payload)
 					) {
 						logMessage(
-							`Received IPyWidgets_kernelOptions in ScriptManager with new kernel options`,
+							`Received IPyWidgets_kernelOptions in ScriptManager with new kernel options`
 						);
 						this.previousKernelOptions = payload;
 						this.clear();
@@ -138,7 +138,7 @@ export class ScriptManager extends EventEmitter {
 					type === IPyWidgetMessages.IPyWidgets_onKernelChanged
 				) {
 					logMessage(
-						`Received IPyWidgets_onKernelChanged in ScriptManager`,
+						`Received IPyWidgets_onKernelChanged in ScriptManager`
 					);
 					this.clear();
 				}
@@ -157,13 +157,13 @@ export class ScriptManager extends EventEmitter {
 				className: string,
 				moduleName: string,
 				moduleVersion: string,
-				error: any,
+				error: any
 			) =>
 				this.handleLoadError(
 					className,
 					moduleName,
 					moduleVersion,
-					error,
+					error
 				).catch(() => {
 					/* do nothing (this is so we don't pull in noop in misc.ts which will pull stuff that uses process.env) */
 				}),
@@ -172,7 +172,7 @@ export class ScriptManager extends EventEmitter {
 			successHandler: (
 				className: string,
 				moduleName: string,
-				moduleVersion: string,
+				moduleVersion: string
 			) => this.handleLoadSuccess(className, moduleName, moduleVersion),
 		};
 	}
@@ -181,7 +181,7 @@ export class ScriptManager extends EventEmitter {
 			className: string;
 			moduleName: string;
 			moduleVersion: string;
-		}) => void,
+		}) => void
 	): this {
 		return this.on("onWidgetLoadSuccess", listener);
 	}
@@ -194,15 +194,12 @@ export class ScriptManager extends EventEmitter {
 			error: any;
 			timedout?: boolean;
 			isOnline: boolean;
-		}) => void,
+		}) => void
 	): this {
 		return this.on("onWidgetLoadError", listener);
 	}
 	public onWidgetVersionNotSupported(
-		listener: (data: {
-			moduleName: "qgrid";
-			moduleVersion: string;
-		}) => void,
+		listener: (data: { moduleName: "qgrid"; moduleVersion: string }) => void
 	): this {
 		return this.on("onWidgetVersionNotSupported", listener);
 	}
@@ -215,7 +212,7 @@ export class ScriptManager extends EventEmitter {
 	 */
 	public async loadWidgetScript(
 		moduleName: string,
-		moduleVersion: string,
+		moduleVersion: string
 	): Promise<void> {
 		// eslint-disable-next-line no-console
 		logMessage(`Fetch IPyWidget source for ${moduleName}`);
@@ -258,16 +255,16 @@ export class ScriptManager extends EventEmitter {
 				if (request && !request.deferred.resolved) {
 					// eslint-disable-next-line no-console
 					console.error(
-						`Timeout waiting to get widget source for ${moduleName}, ${moduleVersion}`,
+						`Timeout waiting to get widget source for ${moduleName}, ${moduleVersion}`
 					);
 					this.handleLoadError(
 						"<class>",
 						moduleName,
 						moduleVersion,
 						new Error(
-							`Timeout getting source for ${moduleName}:${moduleVersion}`,
+							`Timeout getting source for ${moduleName}:${moduleVersion}`
 						),
-						true,
+						true
 					).catch(() => {
 						// Do nothing with errors
 					});
@@ -297,7 +294,7 @@ export class ScriptManager extends EventEmitter {
 				moduleName,
 				moduleVersion,
 				requestId,
-			},
+			}
 		);
 
 		try {
@@ -312,14 +309,14 @@ export class ScriptManager extends EventEmitter {
 						this.emit("onWidgetVersionNotSupported", {
 							moduleName: info.moduleName,
 							moduleVersion: info.moduleVersion,
-						}),
+						})
 				);
 			}
 		} catch (ex) {
 			// eslint-disable-next-line no-console
 			console.error(
 				`Failed to load Widget Script from Extension for ${moduleName}, ${moduleVersion}`,
-				ex,
+				ex
 			);
 			// TODO: https://github.com/microsoft/vscode-jupyter/issues/12786
 			// throw ex;
@@ -329,7 +326,7 @@ export class ScriptManager extends EventEmitter {
 	public handleLoadSuccess(
 		className: string,
 		moduleName: string,
-		moduleVersion: string,
+		moduleVersion: string
 	) {
 		this.emit("onWidgetLoadSuccess", {
 			className,
@@ -364,7 +361,7 @@ export class ScriptManager extends EventEmitter {
 	 */
 	private registerScriptSourcesInRequirejs(sources: WidgetScriptSource[]) {
 		logMessage(
-			`Received IPyWidget scripts ${JSON.stringify(sources || [])}`,
+			`Received IPyWidget scripts ${JSON.stringify(sources || [])}`
 		);
 		if (!Array.isArray(sources) || sources.length === 0) {
 			return;
@@ -375,7 +372,7 @@ export class ScriptManager extends EventEmitter {
 			// If we have a script from CDN, then don't overwrite that.
 			// We want to always give preference to the widgets from CDN.
 			const currentRegistration = this.registeredWidgetSources.get(
-				source.moduleName,
+				source.moduleName
 			);
 			if (
 				!currentRegistration ||
@@ -426,7 +423,7 @@ export class ScriptManager extends EventEmitter {
 		moduleVersion: string,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		error: any,
-		timedout: boolean = false,
+		timedout: boolean = false
 	) {
 		this.widgetModulesFailedToLoad.add(moduleName);
 		const isOnline = await isCDNReachable();

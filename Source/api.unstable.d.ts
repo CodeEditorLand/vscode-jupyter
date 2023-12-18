@@ -23,7 +23,7 @@ declare module "./api" {
 		 * @param serverProvider object called back when picking jupyter server URI
 		 */
 		registerRemoteServerProvider(
-			serverProvider: IJupyterUriProvider,
+			serverProvider: IJupyterUriProvider
 		): Disposable;
 		/**
 		 * Adds a remote Jupyter Server to the list of Remote Jupyter servers.
@@ -31,7 +31,7 @@ declare module "./api" {
 		 */
 		addRemoteJupyterServer(
 			providerId: string,
-			handle: string,
+			handle: string
 		): Promise<void>;
 		/**
 		 * Gets the service that provides access to kernels.
@@ -265,9 +265,7 @@ declare module "./api" {
 		 * Gets the Kernel connection & the metadata that's associated with a given resource.
 		 * (only successfully started/active connections are returned).
 		 */
-		getKernel(
-			uri: Uri,
-		):
+		getKernel(uri: Uri):
 			| {
 					metadata: KernelConnectionMetadata;
 					connection: Session.ISessionConnection;
@@ -281,7 +279,7 @@ declare module "./api" {
 		startKernel(
 			metadata: KernelConnectionMetadata,
 			uri: Uri,
-			token?: CancellationToken,
+			token?: CancellationToken
 		): Promise<Session.ISessionConnection>;
 		/**
 		 * Connects an existing kernel to a resource.
@@ -290,7 +288,7 @@ declare module "./api" {
 		 */
 		connect(
 			metadata: LiveRemoteKernelConnectionMetadata,
-			uri: Uri,
+			uri: Uri
 		): Promise<Session.ISessionConnection>;
 	}
 }

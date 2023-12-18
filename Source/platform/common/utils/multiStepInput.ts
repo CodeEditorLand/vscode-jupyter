@@ -30,7 +30,7 @@ export class InputFlowAction extends Error {
 
 export type InputStep<T extends any> = (
 	input: MultiStepInput<T>,
-	state: T,
+	state: T
 ) => Promise<InputStep<T> | void>;
 
 export interface IQuickPickParameters<T extends QuickPickItem> {
@@ -187,7 +187,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 					}
 				},
 				this,
-				disposables,
+				disposables
 			);
 		}
 		if (onDidChangeItems) {
@@ -197,14 +197,14 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 					input.items = newItems;
 				},
 				this,
-				disposables,
+				disposables
 			);
 		}
 		if (onDidTriggerItemButton) {
 			input.onDidTriggerItemButton(
 				(e) => onDidTriggerItemButton(e),
 				undefined,
-				disposables,
+				disposables
 			);
 		}
 		input.matchOnDescription = matchOnDescription || false;
@@ -256,10 +256,10 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 					deferred.reject(
 						shouldResume && (await shouldResume())
 							? InputFlowAction.resume
-							: InputFlowAction.cancel,
+							: InputFlowAction.cancel
 					);
 				})().catch(deferred.reject);
-			}),
+			})
 		);
 		if (acceptFilterBoxTextAsSelection) {
 			disposables.push(
@@ -279,7 +279,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 							input.busy = false;
 						}
 					}
-				}),
+				})
 			);
 		}
 		if (this.current) {
@@ -361,18 +361,18 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 									reject(
 										shouldResume && (await shouldResume())
 											? InputFlowAction.resume
-											: InputFlowAction.cancel,
+											: InputFlowAction.cancel
 									);
 								}
 							})().catch(reject);
-						}),
+						})
 					);
 					if (this.current) {
 						this.current.dispose();
 					}
 					this.current = input;
 					this.current.show();
-				},
+				}
 			);
 		} finally {
 			disposables.forEach((d) => d.dispose());
@@ -381,7 +381,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 
 	private async stepThrough(
 		start: InputStep<S>,
-		state: S,
+		state: S
 	): Promise<InputFlowAction | undefined> {
 		let step: InputStep<S> | void = start;
 		while (step) {

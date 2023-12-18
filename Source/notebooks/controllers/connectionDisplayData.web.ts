@@ -29,20 +29,21 @@ export class ConnectionDisplayDataProvider
 {
 	private readonly details = new Map<string, ConnectionDisplayData>();
 	constructor(
-        @inject(IPlatformService) private readonly platform: IPlatformService,
-        @inject(IJupyterServerProviderRegistry)
-        private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(IPlatformService) private readonly platform: IPlatformService,
+		@inject(IJupyterServerProviderRegistry)
+		private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 
 	public getDisplayData(
-		connection: KernelConnectionMetadata,
+		connection: KernelConnectionMetadata
 	): IConnectionDisplayData {
 		if (!this.details.get(connection.id)) {
 			const label = getDisplayNameOrNameOfKernelConnection(connection);
 			let description = getKernelConnectionDisplayPath(
 				connection,
-				this.platform,
+				this.platform
 			);
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
@@ -58,7 +59,7 @@ export class ConnectionDisplayDataProvider
 				"",
 				category,
 				undefined,
-				descriptionProvider,
+				descriptionProvider
 			);
 			this.disposables.push(newDetails);
 			this.details.set(connection.id, newDetails);
@@ -73,7 +74,7 @@ export class ConnectionDisplayDataProvider
 			const displayName = getJupyterDisplayName(
 				connection.serverProviderHandle,
 				this.jupyterUriProviderRegistration,
-				DataScience.kernelDefaultRemoteDisplayName,
+				DataScience.kernelDefaultRemoteDisplayName
 			);
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;

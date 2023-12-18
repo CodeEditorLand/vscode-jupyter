@@ -38,9 +38,11 @@ type RendererLoadedCommand = { command: "ipywidget-renderer-loaded" };
 export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	constructor(
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IControllerRegistration) private readonly controllers: IControllerRegistration
-    ) {}
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IControllerRegistration)
+		private readonly controllers: IControllerRegistration
+	) {}
 	private readonly widgetOutputsPerNotebook = new WeakMap<
 		NotebookDocument,
 		Set<string>
@@ -50,17 +52,17 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 	}
 	activate() {
 		const comms = notebooks.createRendererMessaging(
-			"jupyter-ipywidget-renderer",
+			"jupyter-ipywidget-renderer"
 		);
 		comms.onDidReceiveMessage(
 			this.onDidReceiveMessage.bind(this, comms),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private onDidStartKernel(e: IKernel) {
@@ -81,7 +83,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 			require("@jupyterlab/services") as typeof import("@jupyterlab/services");
 		const handler = (
 			kernelConnection: IKernelConnection,
-			msg: IIOPubMessage<IOPubMessageType>,
+			msg: IIOPubMessage<IOPubMessageType>
 		) => {
 			if (kernelConnection !== previousKernelConnection) {
 				// Must be some old message from a previous kernel (before a restart or the like.)
@@ -99,7 +101,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		};
 		iopubMessage.connect(handler);
 		this.disposables.push(
-			new Disposable(() => iopubMessage.disconnect(handler)),
+			new Disposable(() => iopubMessage.disconnect(handler))
 		);
 	}
 	private trackModelId(
@@ -108,7 +110,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 			content: {
 				data: nbformat.IMimeBundle;
 			};
-		},
+		}
 	) {
 		const output = msg.content;
 		if (
@@ -134,7 +136,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		}: {
 			editor: NotebookEditor;
 			message: QueryWidgetStateCommand | RendererLoadedCommand;
-		},
+		}
 	) {
 		if (
 			message &&
@@ -154,10 +156,10 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 	private queryWidgetState(
 		comms: NotebookRendererMessaging,
 		editor: NotebookEditor,
-		message: QueryWidgetStateCommand,
+		message: QueryWidgetStateCommand
 	) {
 		const availableModels = this.widgetOutputsPerNotebook.get(
-			editor.notebook,
+			editor.notebook
 		);
 		const kernelSelected = !!this.controllers.getSelected(editor.notebook);
 		const hasWidgetState = !!availableModels?.has(message.model_id);
@@ -169,13 +171,13 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 					hasWidgetState,
 					kernelSelected,
 				},
-				editor,
+				editor
 			)
 			.then(noop, noop);
 	}
 	private sendWidgetVersionAndState(
 		comms: NotebookRendererMessaging,
-		editor: NotebookEditor,
+		editor: NotebookEditor
 	) {
 		// Support for loading Widget state from ipynb files.
 		// Temporarily disabled. See https://github.com/microsoft/vscode-jupyter/issues/11117
@@ -202,7 +204,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		const version = kernel?.ipywidgetsVersion; // || versionInWidgetState;
 		if (kernel?.ipywidgetsVersion) {
 			traceVerbose(
-				`IPyWidget version in Kernel is ${kernel?.ipywidgetsVersion}.`,
+				`IPyWidget version in Kernel is ${kernel?.ipywidgetsVersion}.`
 			);
 		}
 		// if (versionInWidgetState) {
@@ -222,7 +224,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 					widgetState: undefined,
 					kernelSelected,
 				},
-				editor,
+				editor
 			)
 			.then(noop, noop);
 	}

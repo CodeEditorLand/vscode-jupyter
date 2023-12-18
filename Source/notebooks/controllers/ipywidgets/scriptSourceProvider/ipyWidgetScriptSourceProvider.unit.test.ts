@@ -59,7 +59,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 		onDidChangeWorkspaceSettings =
 			new EventEmitter<ConfigurationChangeEvent>();
 		when(
-			mockedVSCodeNamespaces.workspace.onDidChangeConfiguration,
+			mockedVSCodeNamespaces.workspace.onDidChangeConfiguration
 		).thenReturn(onDidChangeWorkspaceSettings.event);
 		const stateFactory = mock(PersistentStateFactory);
 		userSelectedOkOrDoNotShowAgainInPrompt =
@@ -75,13 +75,13 @@ suite("ipywidget - Widget Script Source Provider", () => {
 		when(kernel.onRestarted).thenReturn(onReStarted.event);
 		when(kernel.onDidKernelSocketChange).thenReturn(kernelSocket.event);
 		when(
-			stateFactory.createGlobalPersistentState(anything(), anything()),
+			stateFactory.createGlobalPersistentState(anything(), anything())
 		).thenReturn(instance(userSelectedOkOrDoNotShowAgainInPrompt));
 		settings = { widgetScriptSources: [] } as any;
 		when(configService.getSettings(anything())).thenReturn(settings as any);
 		when(userSelectedOkOrDoNotShowAgainInPrompt.value).thenReturn(false);
 		when(
-			userSelectedOkOrDoNotShowAgainInPrompt.updateValue(anything()),
+			userSelectedOkOrDoNotShowAgainInPrompt.updateValue(anything())
 		).thenResolve();
 	});
 	teardown(() => {
@@ -97,12 +97,12 @@ suite("ipywidget - Widget Script Source Provider", () => {
 			instance(fs),
 			instance(context),
 			instance(jupyterPaths),
-			disposables,
+			disposables
 		);
 		scriptSourceFactory = new ScriptSourceProviderFactory(
 			instance(configService),
 			scriptManagerFactory,
-			instance(memento),
+			instance(memento)
 		);
 		const cdnScriptProvider = mock<CDNWidgetScriptSourceProvider>();
 		when(cdnScriptProvider.isOnCDN(anything())).thenResolve(false);
@@ -112,7 +112,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 			instance(configService),
 			scriptSourceFactory,
 			Promise.resolve(true),
-			instance(cdnScriptProvider),
+			instance(cdnScriptProvider)
 		);
 	}
 	[true, false].forEach((localLaunch) => {
@@ -125,7 +125,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 							LocalKernelSpecConnectionMetadata.create({
 								id: "",
 								kernelSpec: {} as any,
-							}),
+							})
 						);
 					} else {
 						when(kernel.kernelConnectionMetadata).thenReturn(
@@ -138,7 +138,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 									id: "",
 									extensionId: "",
 								},
-							}),
+							})
 						);
 					}
 					createScripSourceProvider();
@@ -151,15 +151,15 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const localOrRemoteSource = localLaunch
 						? sinon.stub(
 								LocalWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  )
+								"getWidgetScriptSource"
+							)
 						: sinon.stub(
 								RemoteWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  );
+								"getWidgetScriptSource"
+							);
 					const cdnSource = sinon.stub(
 						CDNWidgetScriptSourceProvider.prototype,
-						"getWidgetScriptSource",
+						"getWidgetScriptSource"
 					);
 
 					localOrRemoteSource.resolves({ moduleName: "HelloWorld" });
@@ -168,7 +168,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const value =
 						await scriptSourceProvider.getWidgetScriptSource(
 							"HelloWorld",
-							"1",
+							"1"
 						);
 
 					assert.deepEqual(value, { moduleName: "HelloWorld" });
@@ -186,15 +186,15 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const localOrRemoteSource = localLaunch
 						? sinon.stub(
 								LocalWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  )
+								"getWidgetScriptSource"
+							)
 						: sinon.stub(
 								RemoteWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  );
+								"getWidgetScriptSource"
+							);
 					const cdnSource = sinon.stub(
 						CDNWidgetScriptSourceProvider.prototype,
-						"getWidgetScriptSource",
+						"getWidgetScriptSource"
 					);
 					cdnSource.resolves({
 						moduleName: "moduleCDN",
@@ -205,7 +205,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					let values =
 						await scriptSourceProvider.getWidgetScriptSource(
 							"ModuleName",
-							"`",
+							"`"
 						);
 
 					assert.deepEqual(values, {
@@ -229,7 +229,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 
 					values = await scriptSourceProvider.getWidgetScriptSource(
 						"ModuleName",
-						"`",
+						"`"
 					);
 					assert.deepEqual(values, {
 						moduleName: "moduleLocal",
@@ -248,15 +248,15 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const localOrRemoteSource = localLaunch
 						? sinon.stub(
 								LocalWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  )
+								"getWidgetScriptSource"
+							)
 						: sinon.stub(
 								RemoteWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  );
+								"getWidgetScriptSource"
+							);
 					const cdnSource = sinon.stub(
 						CDNWidgetScriptSourceProvider.prototype,
-						"getWidgetScriptSource",
+						"getWidgetScriptSource"
 					);
 					localOrRemoteSource.resolves({
 						moduleName: "moduleLocal",
@@ -268,7 +268,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const value =
 						await scriptSourceProvider.getWidgetScriptSource(
 							"",
-							"",
+							""
 						);
 
 					// 1. Confirm CDN was first searched, then local/remote
@@ -290,15 +290,15 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const localOrRemoteSource = localLaunch
 						? sinon.stub(
 								LocalWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  )
+								"getWidgetScriptSource"
+							)
 						: sinon.stub(
 								RemoteWidgetScriptSourceProvider.prototype,
-								"getWidgetScriptSource",
-						  );
+								"getWidgetScriptSource"
+							);
 					const cdnSource = sinon.stub(
 						CDNWidgetScriptSourceProvider.prototype,
-						"getWidgetScriptSource",
+						"getWidgetScriptSource"
 					);
 
 					localOrRemoteSource.resolves({ moduleName: "module1" });
@@ -311,7 +311,7 @@ suite("ipywidget - Widget Script Source Provider", () => {
 					const values =
 						await scriptSourceProvider.getWidgetScriptSource(
 							"ModuleName",
-							"1",
+							"1"
 						);
 
 					assert.deepEqual(values, {
@@ -326,11 +326,11 @@ suite("ipywidget - Widget Script Source Provider", () => {
 							anything(),
 							anything(),
 							anything(),
-							anything(),
-						),
+							anything()
+						)
 					).never();
 				});
-			},
+			}
 		);
 	});
 });

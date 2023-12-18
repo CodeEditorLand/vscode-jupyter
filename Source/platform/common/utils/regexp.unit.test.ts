@@ -25,7 +25,7 @@ suite("Utils for regular expressions - verboseRegExp()", () => {
 
 		expect(regex.source).to.equal(
 			"^(?:spam\\b.*)|(?:eggs\\b.*)$",
-			"mismatch",
+			"mismatch"
 		);
 	});
 

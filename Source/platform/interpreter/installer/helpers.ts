@@ -10,7 +10,7 @@ import { getRootFolder } from "../../common/application/workspace.base";
  * Returns the workspace folder this interpreter is based in or the root if not a virtual env
  */
 export function getInterpreterWorkspaceFolder(
-	interpreter: PythonEnvironment | Environment,
+	interpreter: PythonEnvironment | Environment
 ): Uri | undefined {
 	const uri =
 		"executable" in interpreter

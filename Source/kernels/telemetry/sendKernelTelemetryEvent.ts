@@ -31,7 +31,7 @@ export function sendKernelTelemetryEvent<
 			? undefined
 			: Partial<ExcludeType<R, number>>
 		: undefined | undefined,
-	ex?: Error | undefined,
+	ex?: Error | undefined
 ) {
 	getContextualPropsForTelemetry(resource)
 		.then((props) => {
@@ -41,7 +41,7 @@ export function sendKernelTelemetryEvent<
 				eventName as any,
 				measures as any,
 				props as any,
-				ex,
+				ex
 			);
 		})
 		.catch(noop);

@@ -21,7 +21,7 @@ export class JupyterWaitForIdleError extends BaseKernelError {
 		super(
 			"timeout",
 			DataScience.jupyterLaunchTimedOut,
-			kernelConnectionMetadata,
+			kernelConnectionMetadata
 		);
 	}
 }

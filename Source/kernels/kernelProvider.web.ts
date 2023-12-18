@@ -39,23 +39,35 @@ import { NotebookKernelExecution } from "./kernelExecution";
 @injectable()
 export class KernelProvider extends BaseCoreKernelProvider {
 	constructor(
-        @inject(IAsyncDisposableRegistry) asyncDisposables: IAsyncDisposableRegistry,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IKernelSessionFactory) private sessionCreator: IKernelSessionFactory,
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IExtensionContext) private readonly context: IExtensionContext,
-        @inject(IJupyterServerUriStorage) jupyterServerUriStorage: IJupyterServerUriStorage,
-        @multiInject(ITracebackFormatter) private readonly formatters: ITracebackFormatter[],
-        @inject(IStartupCodeProviders) private readonly startupCodeProviders: IStartupCodeProviders,
-        @inject(IMemento) @named(WORKSPACE_MEMENTO) private readonly workspaceStorage: Memento
-    ) {
-        super(asyncDisposables, disposables);
-        disposables.push(jupyterServerUriStorage.onDidRemove(this.handleServerRemoval.bind(this)));
-    }
+		@inject(IAsyncDisposableRegistry)
+		asyncDisposables: IAsyncDisposableRegistry,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IKernelSessionFactory)
+		private sessionCreator: IKernelSessionFactory,
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IExtensionContext) private readonly context: IExtensionContext,
+		@inject(IJupyterServerUriStorage)
+		jupyterServerUriStorage: IJupyterServerUriStorage,
+		@multiInject(ITracebackFormatter)
+		private readonly formatters: ITracebackFormatter[],
+		@inject(IStartupCodeProviders)
+		private readonly startupCodeProviders: IStartupCodeProviders,
+		@inject(IMemento)
+		@named(WORKSPACE_MEMENTO)
+		private readonly workspaceStorage: Memento
+	) {
+		super(asyncDisposables, disposables);
+		disposables.push(
+			jupyterServerUriStorage.onDidRemove(
+				this.handleServerRemoval.bind(this)
+			)
+		);
+	}
 
 	public getOrCreate(
 		notebook: NotebookDocument,
-		options: KernelOptions,
+		options: KernelOptions
 	): IKernel {
 		const existingKernelInfo = this.getInternal(notebook);
 		if (
@@ -84,27 +96,27 @@ export class KernelProvider extends BaseCoreKernelProvider {
 			settings,
 			options.controller,
 			this.startupCodeProviders.getProviders(notebookType),
-			this.workspaceStorage,
+			this.workspaceStorage
 		) as IKernel;
 		kernel.onRestarted(
 			() => this._onDidRestartKernel.fire(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.onDisposed(
 			() => this._onDidDisposeKernel.fire(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.onStarted(
 			() => this._onDidStartKernel.fire(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.onStatusChanged(
 			(status) => this._onKernelStatusChanged.fire({ kernel, status }),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.executions.set(
 			kernel,
@@ -112,8 +124,8 @@ export class KernelProvider extends BaseCoreKernelProvider {
 				kernel,
 				this.context,
 				this.formatters,
-				notebook,
-			),
+				notebook
+			)
 		);
 		this.asyncDisposables.push(kernel);
 		this.storeKernel(notebook, options, kernel);
@@ -126,19 +138,25 @@ export class KernelProvider extends BaseCoreKernelProvider {
 @injectable()
 export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 	constructor(
-        @inject(IAsyncDisposableRegistry) asyncDisposables: IAsyncDisposableRegistry,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IKernelSessionFactory) private sessionCreator: IKernelSessionFactory,
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IStartupCodeProviders) private readonly startupCodeProviders: IStartupCodeProviders,
-        @inject(IMemento) @named(WORKSPACE_MEMENTO) private readonly workspaceStorage: Memento
-    ) {
-        super(asyncDisposables, disposables);
-    }
+		@inject(IAsyncDisposableRegistry)
+		asyncDisposables: IAsyncDisposableRegistry,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IKernelSessionFactory)
+		private sessionCreator: IKernelSessionFactory,
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IStartupCodeProviders)
+		private readonly startupCodeProviders: IStartupCodeProviders,
+		@inject(IMemento)
+		@named(WORKSPACE_MEMENTO)
+		private readonly workspaceStorage: Memento
+	) {
+		super(asyncDisposables, disposables);
+	}
 
 	public getOrCreate(
 		uri: Uri,
-		options: ThirdPartyKernelOptions,
+		options: ThirdPartyKernelOptions
 	): IThirdPartyKernel {
 		const existingKernelInfo = this.getInternal(uri);
 		if (
@@ -163,27 +181,27 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 			this.sessionCreator,
 			settings,
 			this.startupCodeProviders.getProviders(notebookType),
-			this.workspaceStorage,
+			this.workspaceStorage
 		);
 		kernel.onRestarted(
 			() => this._onDidRestartKernel.fire(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.onDisposed(
 			() => this._onDidDisposeKernel.fire(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.onStarted(
 			() => this._onDidStartKernel.fire(kernel),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.onStatusChanged(
 			(status) => this._onKernelStatusChanged.fire({ kernel, status }),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.asyncDisposables.push(kernel);
 

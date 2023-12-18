@@ -14,42 +14,42 @@ import { PythonKernelCompletionProviderRegistration } from "./pythonKernelComple
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	isDevMode: boolean,
+	isDevMode: boolean
 ) {
 	if (isDevMode) {
 		serviceManager.addSingleton<IExtensionSyncActivationService>(
 			IExtensionSyncActivationService,
-			LogReplayService,
+			LogReplayService
 		);
 	}
 
 	serviceManager.addSingleton<PythonKernelCompletionProvider>(
 		PythonKernelCompletionProvider,
-		PythonKernelCompletionProvider,
+		PythonKernelCompletionProvider
 	); // Used in tests
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonKernelCompletionProviderRegistration,
+		PythonKernelCompletionProviderRegistration
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		NotebookCellBangInstallDiagnosticsProvider,
+		NotebookCellBangInstallDiagnosticsProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		NonPythonKernelCompletionProvider,
+		NonPythonKernelCompletionProvider
 	);
 
 	serviceManager.addSingleton<NotebookPythonPathService>(
 		NotebookPythonPathService,
-		NotebookPythonPathService,
+		NotebookPythonPathService
 	);
 	serviceManager.addBinding(
 		NotebookPythonPathService,
-		IExtensionSyncActivationService,
+		IExtensionSyncActivationService
 	);
 	serviceManager.addSingleton<INotebookCompletionProvider>(
 		INotebookCompletionProvider,
-		IntellisenseProvider,
+		IntellisenseProvider
 	);
 }

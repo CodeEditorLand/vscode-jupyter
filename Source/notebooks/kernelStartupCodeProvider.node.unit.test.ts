@@ -41,28 +41,28 @@ suite("KernelWorkingFolder", function () {
 		kernelWorkingFolder = new KernelStartupCodeProvider(
 			instance(configService),
 			instance(fs),
-			instance(registry),
+			instance(registry)
 		);
 		kernel = mock<IKernel>();
 		connectionMetadata = mock<KernelConnectionMetadata>();
 		kernelSpec = mock<IJupyterKernelSpec>();
 		when(configService.getSettings(anything())).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 		when(kernel.kernelConnectionMetadata).thenReturn(
-			instance(connectionMetadata),
+			instance(connectionMetadata)
 		);
 	});
 	test("No working folder for Remote Kernel Specs", async () => {
 		when(connectionMetadata.kind).thenReturn("startUsingRemoteKernelSpec");
 		assert.isUndefined(
-			await kernelWorkingFolder.getWorkingDirectory(instance(kernel)),
+			await kernelWorkingFolder.getWorkingDirectory(instance(kernel))
 		);
 	});
 	test("No working folder for Remote Kernel", async () => {
 		when(connectionMetadata.kind).thenReturn("connectToLiveRemoteKernel");
 		assert.isUndefined(
-			await kernelWorkingFolder.getWorkingDirectory(instance(kernel)),
+			await kernelWorkingFolder.getWorkingDirectory(instance(kernel))
 		);
 	});
 	test("No working folder for Non-Python Local Kernelspec", async () => {
@@ -72,7 +72,7 @@ suite("KernelWorkingFolder", function () {
 		when(localKernelSpec.kernelSpec).thenReturn(instance(kernelSpec));
 		when(kernelSpec.language).thenReturn("Java");
 		assert.isUndefined(
-			await kernelWorkingFolder.getWorkingDirectory(instance(kernel)),
+			await kernelWorkingFolder.getWorkingDirectory(instance(kernel))
 		);
 	});
 	const connectionType: [
@@ -88,14 +88,14 @@ suite("KernelWorkingFolder", function () {
 						connectionMetadata as LocalKernelSpecConnectionMetadata;
 					when(localKernelSpec.kind).thenReturn(item);
 					when(localKernelSpec.kernelSpec).thenReturn(
-						instance(kernelSpec),
+						instance(kernelSpec)
 					);
 					when(kernelSpec.language).thenReturn(PYTHON_LANGUAGE);
 				} else {
 					let pythonKernel =
 						connectionMetadata as PythonKernelConnectionMetadata;
 					when(pythonKernel.kind).thenReturn(
-						"startUsingPythonInterpreter",
+						"startUsingPythonInterpreter"
 					);
 				}
 				when(fs.exists(uriEquals(__dirname))).thenResolve(true);
@@ -103,88 +103,88 @@ suite("KernelWorkingFolder", function () {
 			test(`Has working folder`, async () => {
 				when(settings.notebookFileRoot).thenReturn(__dirname);
 				when(
-					mockedVSCodeNamespaces.workspace.workspaceFolders,
+					mockedVSCodeNamespaces.workspace.workspaceFolders
 				).thenReturn([workspaceFolder]);
 
 				const uri = await kernelWorkingFolder.getWorkingDirectory(
-					instance(kernel),
+					instance(kernel)
 				);
 
 				assert.strictEqual(
 					uri?.toString(),
-					Uri.file(__dirname).toString(),
+					Uri.file(__dirname).toString()
 				);
 			});
 			test("No working folder if setting `notebookFileRoot` is invalid", async () => {
 				when(settings.notebookFileRoot).thenReturn("bogus value");
 				when(
-					mockedVSCodeNamespaces.workspace.workspaceFolders,
+					mockedVSCodeNamespaces.workspace.workspaceFolders
 				).thenReturn([workspaceFolder]);
 				when(fs.exists(anything())).thenResolve(false);
 
 				assert.isUndefined(
 					await kernelWorkingFolder.getWorkingDirectory(
-						instance(kernel),
-					),
+						instance(kernel)
+					)
 				);
 			});
 			test("Has working folder and points to first workspace folder if setting `notebookFileRoot` points to non-existent path", async () => {
 				when(settings.notebookFileRoot).thenReturn(
-					path.join(__dirname, "xyz1234"),
+					path.join(__dirname, "xyz1234")
 				);
 				when(
-					mockedVSCodeNamespaces.workspace.workspaceFolders,
+					mockedVSCodeNamespaces.workspace.workspaceFolders
 				).thenReturn([workspaceFolder]);
 				when(fs.exists(anything())).thenResolve(false);
 				when(fs.exists(uriEquals(__dirname))).thenResolve(true);
 
 				const uri = await kernelWorkingFolder.getWorkingDirectory(
-					instance(kernel),
+					instance(kernel)
 				);
 
 				assert.strictEqual(
 					uri?.toString(),
-					workspaceFolder.uri.toString(),
+					workspaceFolder.uri.toString()
 				);
 			});
 			test("Has working folder and points to folder of kernel resource when there are no workspace folders", async () => {
 				when(settings.notebookFileRoot).thenReturn(
-					path.join(__dirname, "xyz1234"),
+					path.join(__dirname, "xyz1234")
 				);
 				when(
-					mockedVSCodeNamespaces.workspace.workspaceFolders,
+					mockedVSCodeNamespaces.workspace.workspaceFolders
 				).thenReturn([]);
 				when(fs.exists(anything())).thenResolve(false);
 				when(fs.exists(uriEquals(__dirname))).thenResolve(false);
 				const kernelResourceUri = Uri.file(
-					path.join(__dirname, "dev", "kernel.ipynb"),
+					path.join(__dirname, "dev", "kernel.ipynb")
 				);
 				when(kernel.resourceUri).thenReturn(kernelResourceUri);
 				when(fs.exists(uriEquals(kernelResourceUri))).thenResolve(true);
 				when(
-					fs.exists(uriEquals(path.join(__dirname, "dev"))),
+					fs.exists(uriEquals(path.join(__dirname, "dev")))
 				).thenResolve(true);
 
 				const uri = await kernelWorkingFolder.getWorkingDirectory(
-					instance(kernel),
+					instance(kernel)
 				);
 
 				assert.strictEqual(
 					uri?.toString(),
-					Uri.file(path.join(__dirname, "dev")).toString(),
+					Uri.file(path.join(__dirname, "dev")).toString()
 				);
 			});
 			test("No working folder if no workspace folders", async () => {
 				when(settings.notebookFileRoot).thenReturn(__dirname);
 				when(
-					mockedVSCodeNamespaces.workspace.workspaceFolders,
+					mockedVSCodeNamespaces.workspace.workspaceFolders
 				).thenReturn([]);
 				when(fs.exists(anything())).thenResolve(false);
 
 				assert.isUndefined(
 					await kernelWorkingFolder.getWorkingDirectory(
-						instance(kernel),
-					),
+						instance(kernel)
+					)
 				);
 			});
 		});

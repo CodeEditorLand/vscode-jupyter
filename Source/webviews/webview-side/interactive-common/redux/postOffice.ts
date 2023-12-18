@@ -9,7 +9,7 @@ import { isAllowedAction, unwrapPostableAction } from "./helpers";
 import { CommonActionType } from "./reducers/types";
 
 export function generatePostOfficeSendReducer(
-	postOffice: PostOffice,
+	postOffice: PostOffice
 ): Redux.Reducer<{}, Redux.AnyAction> {
 	// eslint-disable-next-line
 	return function (_state: {} | undefined, action: Redux.AnyAction): {} {
@@ -21,7 +21,7 @@ export function generatePostOfficeSendReducer(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				postOffice.sendMessage<IInteractiveWindowMapping>(
 					type,
-					payload?.data as any,
+					payload?.data as any
 				);
 			}
 		}

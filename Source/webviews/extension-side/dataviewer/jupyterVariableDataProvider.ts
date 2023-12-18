@@ -29,11 +29,13 @@ export class JupyterVariableDataProvider
 	private variable: IJupyterVariable | undefined;
 
 	constructor(
-        @inject(IJupyterVariables) @named(Identifiers.ALL_VARIABLES) private variableManager: IJupyterVariables,
-        @inject(IDataViewerDependencyService)
-        @optional()
-        private dependencyService: IDataViewerDependencyService | undefined
-    ) {}
+		@inject(IJupyterVariables)
+		@named(Identifiers.ALL_VARIABLES)
+		private variableManager: IJupyterVariables,
+		@inject(IDataViewerDependencyService)
+		@optional()
+		private dependencyService: IDataViewerDependencyService | undefined
+	) {}
 
 	public get kernel(): IKernel | undefined {
 		return this._kernel;
@@ -46,7 +48,7 @@ export class JupyterVariableDataProvider
 	 * @returns Array of columns with normalized type
 	 */
 	private static getNormalizedColumns(
-		columns: { key: string; type: string }[],
+		columns: { key: string; type: string }[]
 	): { key: string; type: ColumnType }[] {
 		return columns.map((column: { key: string; type: string }) => {
 			let normalizedType: ColumnType;
@@ -84,7 +86,7 @@ export class JupyterVariableDataProvider
 			}
 		} catch (e) {
 			traceError(
-				`Could not parse IJupyterVariable with malformed shape: ${shape}`,
+				`Could not parse IJupyterVariable with malformed shape: ${shape}`
 			);
 		}
 		return undefined;
@@ -101,7 +103,7 @@ export class JupyterVariableDataProvider
 
 	public async getDataFrameInfo(
 		sliceExpression?: string,
-		isRefresh?: boolean,
+		isRefresh?: boolean
 	): Promise<IDataFrameInfo> {
 		let dataFrameInfo: IDataFrameInfo = {};
 		await this.ensureInitialized();
@@ -112,14 +114,14 @@ export class JupyterVariableDataProvider
 					variable,
 					this._kernel,
 					sliceExpression,
-					isRefresh,
+					isRefresh
 				);
 			}
 			dataFrameInfo = {
 				columns: variable.columns
 					? JupyterVariableDataProvider.getNormalizedColumns(
-							variable.columns,
-					  )
+							variable.columns
+						)
 					: variable.columns,
 				indexColumn: variable.indexColumn,
 				rowCount: variable.rowCount,
@@ -147,7 +149,7 @@ export class JupyterVariableDataProvider
 				0,
 				this.variable.rowCount,
 				this._kernel,
-				sliceExpression,
+				sliceExpression
 			);
 			allRows = dataFrameRows.data;
 		}
@@ -163,7 +165,7 @@ export class JupyterVariableDataProvider
 				start,
 				end,
 				this._kernel,
-				sliceExpression,
+				sliceExpression
 			);
 			rows = dataFrameRows.data;
 		}
@@ -182,12 +184,12 @@ export class JupyterVariableDataProvider
 					isWeb()
 						? this._kernel
 						: this._kernel?.kernelConnectionMetadata.interpreter ||
-						  this._kernel,
+								this._kernel
 				);
 			}
 			this.variable = await this.variableManager.getDataFrameInfo(
 				this.variable,
-				this._kernel,
+				this._kernel
 			);
 		}
 	}

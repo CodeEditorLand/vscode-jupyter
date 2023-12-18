@@ -156,7 +156,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 
 		when(settings.jupyterLaunchTimeout).thenReturn(jupyterLaunchTimeout);
 		when(configService.getSettings(anything())).thenReturn(
-			instance(settings),
+			instance(settings)
 		);
 
 		when(
@@ -165,15 +165,15 @@ suite("New Jupyter Kernel Session Factory", () => {
 				kernelConnectionMetadata,
 				ui,
 				token.token,
-				false,
-			),
+				false
+			)
 		).thenResolve();
 		when(jupyterConnection.createConnectionInfo(anything())).thenResolve(
-			resolvableInstance(connection),
+			resolvableInstance(connection)
 		);
 		when(connection.settings).thenReturn(instance(serverSettings));
 		when(jupyterNotebookProvider.getOrStartServer(anything())).thenResolve(
-			resolvableInstance(connection),
+			resolvableInstance(connection)
 		);
 
 		when(connection.baseUrl).thenReturn("http://localhost:8888");
@@ -202,7 +202,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 			instance(jupyterConnection),
 			asyncDisposables as any,
 			instance(kernelService),
-			instance(configService),
+			instance(configService)
 		);
 	});
 	teardown(async () => {
@@ -210,8 +210,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 		disposables = dispose(disposables);
 		await Promise.all(
 			asyncDisposables.map((d) =>
-				swallowExceptions(() => d.dispose().catch(noop)),
-			),
+				swallowExceptions(() => d.dispose().catch(noop))
+			)
 		);
 	});
 	function createSession() {
@@ -221,7 +221,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		when(session.dispose()).thenReturn();
 		when(session.kernel).thenReturn(instance(kernel));
 		const sessionDisposed = new Signal<Session.ISessionConnection, void>(
-			instance(session),
+			instance(session)
 		);
 		const sessionPropertyChanged = new Signal<
 			Session.ISessionConnection,
@@ -257,19 +257,19 @@ suite("New Jupyter Kernel Session Factory", () => {
 		when(session.kernelChanged).thenReturn(sessionKernelChanged);
 		when(session.statusChanged).thenReturn(
 			new Signal<Session.ISessionConnection, Kernel.Status>(
-				instance(session),
-			),
+				instance(session)
+			)
 		);
 		when(session.unhandledMessage).thenReturn(sessionUnhandledMessage);
 		when(session.connectionStatusChanged).thenReturn(
-			sessionConnectionStatusChanged,
+			sessionConnectionStatusChanged
 		);
 		when(session.anyMessage).thenReturn(sessionAnyMessage);
 		when(session.isDisposed).thenReturn(false);
 		when(kernel.status).thenReturn("idle");
 		when(kernel.connectionStatus).thenReturn("connected");
 		when(kernel.statusChanged).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>()),
+			instance(mock<ISignal<Kernel.IKernelConnection, Kernel.Status>>())
 		);
 		when(kernel.iopubMessage).thenReturn(
 			instance(
@@ -278,8 +278,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 					>
-				>(),
-			),
+				>()
+			)
 		);
 		when(kernel.anyMessage).thenReturn({
 			connect: noop,
@@ -292,24 +292,24 @@ suite("New Jupyter Kernel Session Factory", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IMessage<KernelMessage.MessageType>
 					>
-				>(),
-			),
+				>()
+			)
 		);
 		when(kernel.disposed).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, void>>()),
+			instance(mock<ISignal<Kernel.IKernelConnection, void>>())
 		);
 		when(kernel.connectionStatusChanged).thenReturn(
 			instance(
 				mock<
 					ISignal<Kernel.IKernelConnection, Kernel.ConnectionStatus>
-				>(),
-			),
+				>()
+			)
 		);
 		disposables.push(
-			new Disposable(() => Signal.disconnectAll(instance(session))),
+			new Disposable(() => Signal.disconnectAll(instance(session)))
 		);
 		disposables.push(
-			new Disposable(() => Signal.disconnectAll(instance(kernel))),
+			new Disposable(() => Signal.disconnectAll(instance(kernel)))
 		);
 		return { session, kernel };
 	}
@@ -325,7 +325,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.startNew(anything(), anything())).thenResolve(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -338,8 +338,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).never();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).once();
 		verify(sessionManager.startNew(anything(), anything())).once();
@@ -362,7 +362,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.startNew(anything(), anything())).thenResolve(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -375,8 +375,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).once();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).once();
 		verify(sessionManager.startNew(anything(), anything())).once();
@@ -397,7 +397,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 			ui,
 		};
 		when(sessionManager.startNew(anything(), anything())).thenReject(
-			new Error("Kaboom"),
+			new Error("Kaboom")
 		);
 
 		const promise = factory.create(options);
@@ -417,7 +417,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		const { session } = createSession();
 		when(session.kernel).thenReturn(null);
 		when(sessionManager.startNew(anything(), anything())).thenResolve(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const promise = factory.create(options);
@@ -435,7 +435,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.connectTo(anything())).thenReturn(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -448,8 +448,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).never();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).never();
 		verify(sessionManager.connectTo(anything())).once();
@@ -472,7 +472,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.startNew(anything(), anything())).thenCall(() =>
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -485,8 +485,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).never();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).never();
 		verify(sessionManager.startNew(anything(), anything())).once();
@@ -495,7 +495,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 
 		assert.strictEqual(
 			capture(sessionManager.startNew).first()[0].type,
-			"notebook",
+			"notebook"
 		);
 
 		when(kernel.status).thenReturn("idle");
@@ -514,7 +514,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.startNew(anything(), anything())).thenResolve(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -527,8 +527,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).never();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).never();
 		verify(sessionManager.startNew(anything(), anything())).once();
@@ -536,7 +536,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 
 		assert.strictEqual(
 			capture(sessionManager.startNew).first()[0].type,
-			"notebook",
+			"notebook"
 		);
 
 		when(kernel.status).thenReturn("idle");
@@ -555,7 +555,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.startNew(anything(), anything())).thenResolve(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -568,8 +568,8 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).never();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).never();
 		verify(sessionManager.startNew(anything(), anything())).once();
@@ -577,7 +577,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 
 		assert.strictEqual(
 			capture(sessionManager.startNew).first()[0].type,
-			"console",
+			"console"
 		);
 
 		when(kernel.status).thenReturn("idle");
@@ -596,7 +596,7 @@ suite("New Jupyter Kernel Session Factory", () => {
 		};
 		const { session, kernel } = createSession();
 		when(sessionManager.startNew(anything(), anything())).thenResolve(
-			resolvableInstance(session),
+			resolvableInstance(session)
 		);
 
 		const wrapperSession = await factory.create(options);
@@ -609,15 +609,15 @@ suite("New Jupyter Kernel Session Factory", () => {
 				anything(),
 				anything(),
 				anything(),
-				false,
-			),
+				false
+			)
 		).never();
 		verify(jupyterNotebookProvider.getOrStartServer(anything())).never();
 		verify(sessionManager.startNew(anything(), anything())).once();
 		verify(jupyterConnection.createConnectionInfo(anything())).once();
 		assert.strictEqual(
 			capture(sessionManager.startNew).first()[0].type,
-			"notebook",
+			"notebook"
 		);
 
 		when(kernel.status).thenReturn("idle");
@@ -629,19 +629,19 @@ suite("New Jupyter Kernel Session Factory", () => {
 		assert.notStrictEqual(newSessionOptions.name, "abc.ipynb");
 		assert.ok(
 			newSessionOptions.name.startsWith("abc-"),
-			`Session name should start with abc, ${newSessionOptions.name}}`,
+			`Session name should start with abc, ${newSessionOptions.name}}`
 		);
 		assert.ok(
 			newSessionOptions.name.endsWith(".ipynb"),
-			`Session name should start with .ipynb, ${newSessionOptions.name}}`,
+			`Session name should start with .ipynb, ${newSessionOptions.name}}`
 		);
 		assert.ok(
 			newSessionOptions.path.startsWith("abc-jvsc-"),
-			`Session path should start with abc, ${newSessionOptions.name}}`,
+			`Session path should start with abc, ${newSessionOptions.name}}`
 		);
 		assert.ok(
 			newSessionOptions.path.endsWith(".ipynb"),
-			`Session should path start with .ipynb, ${newSessionOptions.name}}`,
+			`Session should path start with .ipynb, ${newSessionOptions.name}}`
 		);
 		assert.strictEqual(newSessionOptions.type, "notebook");
 		assert.deepStrictEqual(newSessionOptions.kernel, { name: "python3" });

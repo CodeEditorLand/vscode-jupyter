@@ -15,10 +15,10 @@ suite("Configuration Migration tests", () => {
 		when(jupyterConfig.inspect(anyString())).thenCall(
 			(settingKey: string) => {
 				return { key: settingKey };
-			},
+			}
 		);
 		when(
-			jupyterConfig.update(anyString(), anything(), anything()),
+			jupyterConfig.update(anyString(), anything(), anything())
 		).thenReturn(Promise.resolve());
 	});
 
@@ -38,21 +38,21 @@ suite("Configuration Migration tests", () => {
 		await configMigration.migrateSettings();
 
 		verify(
-			jupyterConfig.update(anyString(), anything(), anything()),
+			jupyterConfig.update(anyString(), anything(), anything())
 		).twice();
 		verify(
 			jupyterConfig.update(
 				newSetting,
 				true,
-				ConfigurationTarget.Workspace,
-			),
+				ConfigurationTarget.Workspace
+			)
 		).once();
 		verify(
 			jupyterConfig.update(
 				oldSetting,
 				undefined,
-				ConfigurationTarget.Workspace,
-			),
+				ConfigurationTarget.Workspace
+			)
 		).once();
 	});
 
@@ -71,14 +71,14 @@ suite("Configuration Migration tests", () => {
 		await configMigration.migrateSettings();
 
 		verify(
-			jupyterConfig.update(anyString(), anything(), anything()),
+			jupyterConfig.update(anyString(), anything(), anything())
 		).once();
 		verify(
 			jupyterConfig.update(
 				oldSetting,
 				undefined,
-				ConfigurationTarget.Workspace,
-			),
+				ConfigurationTarget.Workspace
+			)
 		).once();
 	});
 
@@ -97,29 +97,29 @@ suite("Configuration Migration tests", () => {
 			jupyterConfig.update(
 				newSetting,
 				"perfile",
-				ConfigurationTarget.Workspace,
-			),
+				ConfigurationTarget.Workspace
+			)
 		).once();
 		verify(
 			jupyterConfig.update(
 				oldSetting,
 				undefined,
-				ConfigurationTarget.Workspace,
-			),
+				ConfigurationTarget.Workspace
+			)
 		).once();
 		verify(
 			jupyterConfig.update(
 				newSetting,
 				"single",
-				ConfigurationTarget.Global,
-			),
+				ConfigurationTarget.Global
+			)
 		).once();
 		verify(
 			jupyterConfig.update(
 				oldSetting,
 				undefined,
-				ConfigurationTarget.Global,
-			),
+				ConfigurationTarget.Global
+			)
 		).once();
 	});
 });

@@ -16,7 +16,7 @@ export class ResetKernelController implements IDebuggingDelegate {
 	}
 
 	public async willSendRequest(
-		request: DebugProtocol.Request,
+		request: DebugProtocol.Request
 	): Promise<undefined | DebugProtocol.Response> {
 		// before attaching, send a 'debugInfo' request
 		// reset breakpoints and continue stopped threads if there are any
@@ -28,7 +28,7 @@ export class ResetKernelController implements IDebuggingDelegate {
 
 			// If there's stopped threads at this point, continue them all
 			info.stoppedThreads.forEach((threadId) =>
-				this.debugAdapter.continueDirect(threadId),
+				this.debugAdapter.continueDirect(threadId)
 			);
 		}
 

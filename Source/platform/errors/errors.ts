@@ -22,7 +22,7 @@ export function getErrorTags(stdErrOrStackTrace: string | string[]) {
 
 function tagWithChildProcessExited(
 	stdErrOrStackTrace: string,
-	tags: string[] = [],
+	tags: string[] = []
 ) {
 	// StackTrace = at ChildProcess.exithandler child_process.js:312:12\n\tat ChildProcess.emit events.js:315:20\n\tat maybeClose <REDACTED: user-file-path>:1021:16\n\tat Process.ChildProcess._handle.onexit <REDACTED: user-file-path>:286:5"
 	// StackTrace = at ChildProcess.exithandler child_process.js:312:12\n\tat ChildProcess.emit events.js:315:20\n\tat ChildProcess.EventEmitter.emit domain.js:483:12\n\tat maybeClose <REDACTED: user-file-path>:1021:16\n\tat Socket <REDACTED: user-file-path>:443:11\n\tat Socket.emit events.js:315:20\n\tat Socket.EventEmitter.emit domain.js:483:12\n\tat Pipe net.js:674:12"
@@ -32,7 +32,7 @@ function tagWithChildProcessExited(
 }
 function tagWithKernelRestarterFailed(
 	stdErrOrStackTrace: string,
-	tags: string[] = [],
+	tags: string[] = []
 ) {
 	/*
     [I 14:48:13.999 NotebookApp] KernelRestarter: restarting kernel (1/5), new random ports
@@ -43,7 +43,7 @@ function tagWithKernelRestarterFailed(
     */
 	if (
 		stdErrOrStackTrace.includes(
-			"KernelRestarter: restart failed".toLowerCase(),
+			"KernelRestarter: restart failed".toLowerCase()
 		)
 	) {
 		tags.push("KernelRestarter.failed");

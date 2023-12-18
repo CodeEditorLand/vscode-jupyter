@@ -24,24 +24,27 @@ export class RemoteKernelConnectionHandler
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IControllerRegistration) private readonly controllers: IControllerRegistration,
-        @inject(ILiveRemoteKernelConnectionUsageTracker)
-        private readonly liveKernelTracker: ILiveRemoteKernelConnectionUsageTracker,
-        @inject(PreferredRemoteKernelIdProvider)
-        private readonly preferredRemoteKernelIdProvider: PreferredRemoteKernelIdProvider
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IControllerRegistration)
+		private readonly controllers: IControllerRegistration,
+		@inject(ILiveRemoteKernelConnectionUsageTracker)
+		private readonly liveKernelTracker: ILiveRemoteKernelConnectionUsageTracker,
+		@inject(PreferredRemoteKernelIdProvider)
+		private readonly preferredRemoteKernelIdProvider: PreferredRemoteKernelIdProvider
+	) {}
 	activate(): void {
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.controllers.onControllerSelectionChanged(
 			this.onNotebookControllerSelectionChanged,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private onNotebookControllerSelectionChanged({
@@ -64,13 +67,13 @@ export class RemoteKernelConnectionHandler
 				this.liveKernelTracker.trackKernelIdAsUsed(
 					notebook.uri,
 					controller.connection.serverProviderHandle,
-					controller.connection.kernelModel.id,
+					controller.connection.kernelModel.id
 				);
 			} else {
 				this.liveKernelTracker.trackKernelIdAsNotUsed(
 					notebook.uri,
 					controller.connection.serverProviderHandle,
-					controller.connection.kernelModel.id,
+					controller.connection.kernelModel.id
 				);
 			}
 		}
@@ -96,7 +99,7 @@ export class RemoteKernelConnectionHandler
 			const kernelId = kernel.session?.kernel?.id;
 			if (!kernel.disposed && !kernel.disposing && kernelId) {
 				traceVerbose(
-					`Updating preferred kernel for remote notebook ${kernelId}`,
+					`Updating preferred kernel for remote notebook ${kernelId}`
 				);
 				this.preferredRemoteKernelIdProvider
 					.storePreferredRemoteKernelId(resource, kernelId)
@@ -104,7 +107,7 @@ export class RemoteKernelConnectionHandler
 				this.liveKernelTracker.trackKernelIdAsUsed(
 					resource,
 					serverId,
-					kernelId,
+					kernelId
 				);
 			}
 		};

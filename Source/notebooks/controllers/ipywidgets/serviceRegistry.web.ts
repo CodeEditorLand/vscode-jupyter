@@ -17,30 +17,30 @@ import { IExtensionSyncActivationService } from "../../../platform/activation/ty
 
 export function registerTypes(
 	serviceManager: IServiceManager,
-	_isDevMode: boolean,
+	_isDevMode: boolean
 ) {
 	serviceManager.addSingleton<IPyWidgetMessageDispatcherFactory>(
 		IPyWidgetMessageDispatcherFactory,
-		IPyWidgetMessageDispatcherFactory,
+		IPyWidgetMessageDispatcherFactory
 	);
 	serviceManager.addSingleton(
 		IWidgetScriptSourceProviderFactory,
-		ScriptSourceProviderFactory,
+		ScriptSourceProviderFactory
 	);
 	serviceManager.addSingleton(
 		IIPyWidgetScriptManagerFactory,
-		IPyWidgetScriptManagerFactory,
+		IPyWidgetScriptManagerFactory
 	);
 	serviceManager.addSingleton(
 		INbExtensionsPathProvider,
-		NbExtensionsPathProvider,
+		NbExtensionsPathProvider
 	);
 	serviceManager.addSingleton(
 		CDNWidgetScriptSourceProvider,
-		CDNWidgetScriptSourceProvider,
+		CDNWidgetScriptSourceProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		RendererVersionChecker,
+		RendererVersionChecker
 	);
 }

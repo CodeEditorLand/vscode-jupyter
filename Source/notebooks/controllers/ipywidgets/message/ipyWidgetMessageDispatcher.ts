@@ -42,7 +42,7 @@ const kernelCommTargets = new WeakMap<
 
 export function registerCommTargetFor3rdPartyExtensions(
 	kernel: Kernel.IKernelConnection,
-	targetName: string,
+	targetName: string
 ) {
 	const targets = kernelCommTargets.get(kernel);
 	if (targets) {
@@ -53,7 +53,7 @@ export function registerCommTargetFor3rdPartyExtensions(
 
 export function remoteCommTargetFor3rdPartyExtensions(
 	kernel: Kernel.IKernelConnection,
-	targetName: string,
+	targetName: string
 ) {
 	kernelCommTargets.get(kernel)?.targets?.delete?.(targetName);
 }
@@ -106,12 +106,12 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	private fullHandleMessage?: { id: string; promise: Deferred<void> };
 	private isUsingIPyWidgets = false;
 	private readonly deserialize: (
-		data: string | ArrayBuffer,
+		data: string | ArrayBuffer
 	) => KernelMessage.IMessage<KernelMessage.MessageType>;
 
 	constructor(
 		private readonly kernelProvider: IKernelProvider,
-		public readonly document: NotebookDocument,
+		public readonly document: NotebookDocument
 	) {
 		// Always register this comm target.
 		// Possible auto start is disabled, and when cell is executed with widget stuff, this comm target will not have
@@ -124,7 +124,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.mirrorSend = this.mirrorSend.bind(this);
 		this.onKernelSocketMessage = this.onKernelSocketMessage.bind(this);
@@ -164,7 +164,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				break;
 			case IPyWidgetMessages.IPyWidgets_binary_msg:
 				this.sendRawPayloadToKernelSocket(
-					deserializeDataViews(message.payload)![0],
+					deserializeDataViews(message.payload)![0]
 				);
 				break;
 
@@ -275,7 +275,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				registerCommTarget: (targetName: string) => {
 					this.raisePostMessage(
 						IPyWidgetMessages.IPyWidgets_registerCommTarget,
-						targetName,
+						targetName
 					);
 				},
 			});
@@ -308,7 +308,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	}
 	private async mirrorSend(
 		data: any,
-		_cb?: (err?: Error) => void,
+		_cb?: (err?: Error) => void
 	): Promise<void> {
 		// If this is shell control message, mirror to the other side. This is how
 		// we get the kernel in the UI to have the same set of futures we have on this side
@@ -320,7 +320,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			const startTime = Date.now();
 			// eslint-disable-next-line @typescript-eslint/no-require-imports
 			const msg = this.deserialize(
-				data,
+				data
 			) as KernelMessage.IExecuteRequestMsg;
 			if (
 				msg.channel === "shell" &&
@@ -330,7 +330,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 					return;
 				}
 				const promise = this.mirrorExecuteRequest(
-					msg as KernelMessage.IExecuteRequestMsg,
+					msg as KernelMessage.IExecuteRequestMsg
 				); // NOSONAR
 				// If there are no ipywidgets thusfar in the notebook, then no need to synchronize messages.
 				if (this.isUsingIPyWidgets) {
@@ -345,7 +345,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	private sendRestartKernel() {
 		this.raisePostMessage(
 			IPyWidgetMessages.IPyWidgets_onRestartKernel,
-			undefined,
+			undefined
 		);
 	}
 
@@ -496,11 +496,11 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				}
 				if (msg.channel === "control") {
 					this.kernel.session.kernel!.sendControlMessage(
-						msg as unknown as KernelMessage.IControlMessage,
+						msg as unknown as KernelMessage.IControlMessage
 					);
 				} else {
 					this.kernel.session.kernel!.sendShellMessage(
-						msg as unknown as KernelMessage.IShellMessage,
+						msg as unknown as KernelMessage.IShellMessage
 					);
 				}
 				// The only other message that can be send is an input reply,
@@ -555,7 +555,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 		if (this.kernel && !this.kernelRestartHandlerAttached) {
 			this.kernelRestartHandlerAttached = true;
 			this.disposables.push(
-				this.kernel.onRestarted(this.handleKernelRestarts, this),
+				this.kernel.onRestarted(this.handleKernelRestarts, this)
 			);
 		}
 		return this.kernel;
@@ -598,7 +598,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				{
 					id: msgId,
 					type: IPyWidgetMessages.IPyWidgets_RegisterMessageHook,
-				},
+				}
 			);
 		}
 	}
@@ -612,7 +612,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			if (args.lastHookedMsgId) {
 				this.pendingHookRemovals.set(
 					args.lastHookedMsgId,
-					args.hookMsgId,
+					args.hookMsgId
 				);
 			} else {
 				this.removeMessageHook(args.hookMsgId);
@@ -625,7 +625,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				{
 					id: args.hookMsgId,
 					type: IPyWidgetMessages.IPyWidgets_RemoveMessageHook,
-				},
+				}
 			);
 		}
 	}
@@ -639,7 +639,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	}
 
 	private async messageHookCallback(
-		msg: KernelMessage.IIOPubMessage,
+		msg: KernelMessage.IIOPubMessage
 	): Promise<boolean> {
 		const promise = createDeferred<boolean>();
 		const requestId = uuid();
@@ -649,7 +649,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			this.messageHookRequests.set(requestId, promise);
 			this.raisePostMessage(
 				IPyWidgetMessages.IPyWidgets_MessageHookCall,
-				{ requestId, parentId, msg },
+				{ requestId, parentId, msg }
 			);
 		} else {
 			promise.resolve(true);

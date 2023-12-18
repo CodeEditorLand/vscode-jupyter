@@ -21,14 +21,14 @@ export class KernelApi implements IExtensionSyncActivationService {
 	activate(): void {
 		const disposables =
 			ServiceContainer.instance.get<IDisposableRegistry>(
-				IDisposableRegistry,
+				IDisposableRegistry
 			);
 		const disposableStore = new DisposableStore();
 		disposables.push(disposableStore);
 		disposables.push(
 			commands.registerCommand("jupyter.manageAccessToKernels", () =>
-				manageKernelAccess(disposableStore),
-			),
+				manageKernelAccess(disposableStore)
+			)
 		);
 	}
 }
@@ -59,11 +59,11 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	>();
 	quickPick.title = l10n.t("Manage Access To Jupyter Kernels");
 	quickPick.placeholder = l10n.t(
-		"Choose which extensions can access Jupyter Kernels",
+		"Choose which extensions can access Jupyter Kernels"
 	);
 	quickPick.items = quickPickItems;
 	quickPick.selectedItems = quickPickItems.filter(
-		(item) => accessInfo.get(item.extensionId) === true,
+		(item) => accessInfo.get(item.extensionId) === true
 	);
 	quickPick.canSelectMany = true;
 	quickPick.ignoreFocusOut = false;
@@ -72,7 +72,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	quickPick.show();
 	await Promise.race([
 		toPromise(quickPick.onDidAccept, undefined, disposables).then(
-			() => (accepted = true),
+			() => (accepted = true)
 		),
 		toPromise(quickPick.onDidHide, undefined, disposables),
 	]);
@@ -80,7 +80,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 		return;
 	}
 	await updateListOfExtensionsAllowedToAccessApi(
-		quickPick.selectedItems.map((item) => item.extensionId),
+		quickPick.selectedItems.map((item) => item.extensionId)
 	);
 	disposables = dispose(disposables);
 }

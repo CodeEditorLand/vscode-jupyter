@@ -26,7 +26,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 		protected readonly moduleName: string,
 		protected args: string[],
 		protected readonly pythonExecutionFactory: IPythonExecutionFactory,
-		private readonly _interpreter: PythonEnvironment,
+		private readonly _interpreter: PythonEnvironment
 	) {
 		this.interpreterPromise = Promise.resolve(this._interpreter);
 		this.pythonLauncher = this.interpreterPromise.then(
@@ -34,7 +34,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 				return pythonExecutionFactory.createActivatedEnvironment({
 					interpreter,
 				});
-			},
+			}
 		);
 	}
 	public interpreter(): Promise<PythonEnvironment | undefined> {
@@ -43,7 +43,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 
 	public async exec(
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ExecutionResult<string>> {
 		const newOptions = { ...options };
 		const launcher = await this.pythonLauncher;
@@ -68,7 +68,7 @@ export class InterpreterJupyterNotebookCommand extends InterpreterJupyterCommand
 		moduleName: string,
 		args: string[],
 		pythonExecutionFactory: IPythonExecutionFactory,
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	) {
 		super(moduleName, args, pythonExecutionFactory, interpreter);
 	}
@@ -88,7 +88,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 		moduleName: string,
 		args: string[],
 		pythonExecutionFactory: IPythonExecutionFactory,
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	) {
 		super(moduleName, args, pythonExecutionFactory, interpreter);
 	}
@@ -117,7 +117,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 	 */
 	public override async exec(
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ExecutionResult<string>> {
 		let exception: Error | undefined;
 		let output: ExecutionResult<string> = { stdout: "" };
@@ -135,7 +135,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 			if (exception) {
 				traceError(
 					`Exception attempting to enumerate kernelspecs: `,
-					exception,
+					exception
 				);
 				throw exception;
 			}
@@ -167,7 +167,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 		} catch (innerEx) {
 			traceError(
 				"Failed to get a list of the kernelspec using python script",
-				innerEx,
+				innerEx
 			);
 		}
 		return defaultAction();
@@ -175,7 +175,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 
 	private async getKernelSpecList(
 		interpreter: PythonEnvironment,
-		options: SpawnOptions,
+		options: SpawnOptions
 	) {
 		// Try getting kernels using python script, if that fails (even if there's output in stderr) rethrow original exception.
 		const activatedEnv =
@@ -188,15 +188,15 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 					EXTENSION_ROOT_DIR,
 					"pythonFiles",
 					"vscode_datascience_helpers",
-					"getJupyterKernels.py",
+					"getJupyterKernels.py"
 				),
 			],
-			{ ...options, throwOnStdErr: true },
+			{ ...options, throwOnStdErr: true }
 		);
 	}
 	private async getKernelSpecVersion(
 		interpreter: PythonEnvironment,
-		options: SpawnOptions,
+		options: SpawnOptions
 	) {
 		// Try getting kernels using python script, if that fails (even if there's output in stderr) rethrow original exception.
 		const activatedEnv =
@@ -209,10 +209,10 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 					EXTENSION_ROOT_DIR,
 					"pythonFiles",
 					"vscode_datascience_helpers",
-					"getJupyterKernelspecVersion.py",
+					"getJupyterKernelspecVersion.py"
 				),
 			],
-			{ ...options, throwOnStdErr: true },
+			{ ...options, throwOnStdErr: true }
 		);
 	}
 }
@@ -220,34 +220,37 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 // eslint-disable-next-line max-classes-per-file
 @injectable()
 export class JupyterCommandFactory implements IJupyterCommandFactory {
-	constructor(@inject(IPythonExecutionFactory) private readonly executionFactory: IPythonExecutionFactory) {}
+	constructor(
+		@inject(IPythonExecutionFactory)
+		private readonly executionFactory: IPythonExecutionFactory
+	) {}
 
 	public createInterpreterCommand(
 		command: JupyterCommands,
 		moduleName: string,
 		args: string[],
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): IJupyterCommand {
 		if (command === JupyterCommands.NotebookCommand) {
 			return new InterpreterJupyterNotebookCommand(
 				moduleName,
 				args,
 				this.executionFactory,
-				interpreter,
+				interpreter
 			);
 		} else if (command === JupyterCommands.KernelSpecCommand) {
 			return new InterpreterJupyterKernelSpecCommand(
 				moduleName,
 				args,
 				this.executionFactory,
-				interpreter,
+				interpreter
 			);
 		}
 		return new InterpreterJupyterCommand(
 			moduleName,
 			args,
 			this.executionFactory,
-			interpreter,
+			interpreter
 		);
 	}
 }

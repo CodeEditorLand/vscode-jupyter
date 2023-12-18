@@ -138,12 +138,12 @@ export class RemoteKernelFinder
 		readonly serverProviderHandle: JupyterServerProviderHandle,
 		private readonly jupyterConnection: JupyterConnection,
 		private readonly fs: IFileSystem,
-		private readonly context: IExtensionContext,
+		private readonly context: IExtensionContext
 	) {
 		super();
 		this.cacheFile = Uri.joinPath(
 			context.globalStorageUri,
-			RemoteKernelSpecCacheFileName,
+			RemoteKernelSpecCacheFileName
 		);
 		this.cacheKey = generateIdFromRemoteProvider(serverProviderHandle);
 		// When we register, add a disposable to clean ourselves up from the main kernel finder list
@@ -151,10 +151,7 @@ export class RemoteKernelFinder
 		this._register(kernelFinder.registerKernelFinder(this));
 
 		this._register(
-			this._onDidChangeKernels.event(
-				() => this._onDidChange.fire(),
-				this,
-			),
+			this._onDidChangeKernels.event(() => this._onDidChange.fire(), this)
 		);
 		this._register(this._onDidChangeKernels);
 		this._register(this._onDidChange);
@@ -188,7 +185,7 @@ export class RemoteKernelFinder
 					// update remote kernels
 					this.updateCache().then(noop, noop);
 				}
-			}, this),
+			}, this)
 		);
 
 		// For kernel dispose we need to wait a bit, otherwise the list comes back the
@@ -202,11 +199,11 @@ export class RemoteKernelFinder
 					}, REMOTE_KERNEL_REFRESH_INTERVAL);
 
 					this.kernelDisposeDelayTimer = new Disposable(() =>
-						clearTimeout(timer),
+						clearTimeout(timer)
 					);
 					return timer;
 				}
-			}, this),
+			}, this)
 		);
 	}
 
@@ -218,7 +215,7 @@ export class RemoteKernelFinder
 	private numberOfFailures = 0;
 	private getListOfKernelsWithCachedConnection(
 		displayProgress: boolean,
-		ignoreCache: boolean = false,
+		ignoreCache: boolean = false
 	): Promise<RemoteKernelConnectionMetadata[]> {
 		const usingCache = !!this.cachedConnection;
 		this.cachedConnection =
@@ -242,14 +239,14 @@ export class RemoteKernelFinder
 				if (this.numberOfFailures > 9) {
 					traceWarning(
 						`Remote Kernel Finder: ${this.id} has failed to connect 10 times in a row.`,
-						ex,
+						ex
 					);
 					return Promise.reject(ex);
 				}
 				if (usingCache) {
 					return this.getListOfKernelsWithCachedConnection(
 						displayProgress,
-						ignoreCache,
+						ignoreCache
 					);
 				}
 				this.cachedConnection = undefined;
@@ -259,7 +256,7 @@ export class RemoteKernelFinder
 
 	public async loadCache(
 		ignoreCache: boolean = false,
-		displayProgress: boolean = false,
+		displayProgress: boolean = false
 	): Promise<void> {
 		traceInfoIfCI(`Remote Kernel Finder load cache Server: ${this.id}`);
 		const promise = (async () => {
@@ -287,7 +284,7 @@ export class RemoteKernelFinder
 				try {
 					kernels =
 						await this.getListOfKernelsWithCachedConnection(
-							displayProgress,
+							displayProgress
 						);
 					this._lastError = undefined;
 				} catch (ex) {
@@ -295,7 +292,7 @@ export class RemoteKernelFinder
 					if (!(ex instanceof CancellationError)) {
 						traceError(
 							"UniversalRemoteKernelFinder: Failed to get kernels without cache",
-							ex,
+							ex
 						);
 						this._lastError = ex;
 						this._onDidChange.fire();
@@ -321,17 +318,17 @@ export class RemoteKernelFinder
 					await this.getListOfKernelsWithCachedConnection(false);
 			} catch (ex) {
 				traceWarning(
-					`Could not fetch kernels from the ${this.kind} server, falling back to cache: ${ex}`,
+					`Could not fetch kernels from the ${this.kind} server, falling back to cache: ${ex}`
 				);
 				// Since fetching the remote kernels failed, we fall back to the cache,
 				// at this point no need to display all of the kernel specs,
 				// Its possible the connection is dead, just display the live kernels we had.
 				// I.e. if user had a notebook connected to a remote kernel, then just display that live kernel.
 				kernels = await this.getFromCache(
-					updateCacheCancellationToken.token,
+					updateCacheCancellationToken.token
 				);
 				kernels = kernels.filter(
-					(item) => item.kind === "connectToLiveRemoteKernel",
+					(item) => item.kind === "connectToLiveRemoteKernel"
 				);
 			}
 
@@ -346,15 +343,15 @@ export class RemoteKernelFinder
 	}
 
 	private async getRemoteConnectionInfo(
-		displayProgress: boolean = true,
+		displayProgress: boolean = true
 	): Promise<IJupyterConnection | undefined> {
 		const disposables: IDisposable[] = [];
 		if (displayProgress) {
 			disposables.push(
 				KernelProgressReporter.createProgressReporter(
 					undefined,
-					DataScience.connectingToJupyter,
-				),
+					DataScience.connectingToJupyter
+				)
 			);
 		}
 		return this.jupyterConnection
@@ -363,7 +360,7 @@ export class RemoteKernelFinder
 	}
 
 	private async getFromCache(
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<RemoteKernelConnectionMetadata[]> {
 		try {
 			if (cancelToken?.isCancellationRequested) {
@@ -383,14 +380,14 @@ export class RemoteKernelFinder
 					if (await this.isValidCachedKernel(item)) {
 						validValues.push(item);
 					}
-				}),
+				})
 			);
 			await raceCancellation(cancelToken, promise);
 			return validValues;
 		} catch (ex) {
 			traceError(
 				"UniversalRemoteKernelFinder: Failed to get from cache",
-				ex,
+				ex
 			);
 		}
 
@@ -408,7 +405,7 @@ export class RemoteKernelFinder
 			const cache = json.data[this.cacheKey] || [];
 			if (Array.isArray(cache)) {
 				return cache.map((item) =>
-					BaseKernelConnectionMetadata.fromJSON(item),
+					BaseKernelConnectionMetadata.fromJSON(item)
 				) as RemoteKernelConnectionMetadata[];
 			} else {
 				return [];
@@ -420,7 +417,7 @@ export class RemoteKernelFinder
 	}
 	// Talk to the remote server to determine sessions
 	public async listKernelsFromConnection(
-		connInfo: IJupyterConnection,
+		connInfo: IJupyterConnection
 	): Promise<RemoteKernelConnectionMetadata[]> {
 		const disposables: IAsyncDisposable[] = [];
 		try {
@@ -478,13 +475,13 @@ export class RemoteKernelFinder
 
 			// Filter out excluded ids
 			const filtered = mappedLive.filter(
-				(k) => !this.kernelIdsToHide.has(k.kernelModel.id || ""),
+				(k) => !this.kernelIdsToHide.has(k.kernelModel.id || "")
 			);
 			return [...filtered, ...mappedSpecs];
 		} catch (ex) {
 			traceError(
 				`Error fetching kernels from ${connInfo.baseUrl} (${connInfo.displayName}):`,
-				ex,
+				ex
 			);
 			throw ex;
 		} finally {
@@ -495,24 +492,24 @@ export class RemoteKernelFinder
 	private async writeToCache(values: RemoteKernelConnectionMetadata[]) {
 		try {
 			traceVerbose(
-				`UniversalRemoteKernelFinder: Writing ${values.length} remote kernel connection metadata to cache`,
+				`UniversalRemoteKernelFinder: Writing ${values.length} remote kernel connection metadata to cache`
 			);
 
 			const oldValues = this.cache;
 			const oldKernels = new Map(
-				oldValues.map((item) => [item.id, item]),
+				oldValues.map((item) => [item.id, item])
 			);
 			const latestValidKernels = new Map(
-				values.map((item) => [item.id, item]),
+				values.map((item) => [item.id, item])
 			);
 			const added = values.filter((k) => !oldKernels.has(k.id));
 			const updated = values.filter(
 				(k) =>
 					oldKernels.has(k.id) &&
-					!areObjectsWithUrisTheSame(k, oldKernels.get(k.id)),
+					!areObjectsWithUrisTheSame(k, oldKernels.get(k.id))
 			);
 			const removed = oldValues.filter(
-				(k) => !latestValidKernels.has(k.id),
+				(k) => !latestValidKernels.has(k.id)
 			);
 
 			const key = this.cacheKey;
@@ -558,8 +555,8 @@ export class RemoteKernelFinder
 				.then(() =>
 					this.fs.writeFile(
 						this.cacheFile,
-						JSON.stringify(currentData),
-					),
+						JSON.stringify(currentData)
+					)
 				)
 				.catch((ex) => {
 					traceError(`Failed to cache the remote kernels.`, ex);
@@ -572,13 +569,13 @@ export class RemoteKernelFinder
 		} catch (ex) {
 			traceError(
 				"UniversalRemoteKernelFinder: Failed to write to cache",
-				ex,
+				ex
 			);
 		}
 	}
 
 	private async isValidCachedKernel(
-		kernel: RemoteKernelConnectionMetadata,
+		kernel: RemoteKernelConnectionMetadata
 	): Promise<boolean> {
 		switch (kernel.kind) {
 			case "startUsingRemoteKernelSpec":

@@ -60,18 +60,18 @@ import { NbExtensionsPathProvider as WebNbExtensionsPathProvider } from "./nbExt
 		});
 		test("Returns base url for local non-python kernelspec", async () => {
 			when(kernel.kernelConnectionMetadata).thenReturn(
-				localNonPythonKernelSpec,
+				localNonPythonKernelSpec
 			);
 			assert.isUndefined(
-				await provider.getNbExtensionsParentPath(instance(kernel)),
+				await provider.getNbExtensionsParentPath(instance(kernel))
 			);
 		});
 		test("Returns base url for local python kernelspec", async () => {
 			when(kernel.kernelConnectionMetadata).thenReturn(
-				localPythonKernelSpec,
+				localPythonKernelSpec
 			);
 			const baseUrl = await provider.getNbExtensionsParentPath(
-				instance(kernel),
+				instance(kernel)
 			);
 			if (isWeb) {
 				assert.isUndefined(baseUrl);
@@ -82,30 +82,30 @@ import { NbExtensionsPathProvider as WebNbExtensionsPathProvider } from "./nbExt
 						path.join(
 							localPythonKernelSpec.interpreter.sysPrefix,
 							"share",
-							"jupyter",
-						),
-					).toString(),
+							"jupyter"
+						)
+					).toString()
 				);
 			}
 		});
 		test("Returns base url for remote kernelspec", async () => {
 			when(kernel.kernelConnectionMetadata).thenReturn(remoteKernelSpec);
 			const baseUrl = await provider.getNbExtensionsParentPath(
-				instance(kernel),
+				instance(kernel)
 			);
 			assert.strictEqual(
 				baseUrl?.toString(),
-				Uri.parse(remoteKernelSpec.baseUrl).toString(),
+				Uri.parse(remoteKernelSpec.baseUrl).toString()
 			);
 		});
 		test("Returns base url for remote live kernel", async () => {
 			when(kernel.kernelConnectionMetadata).thenReturn(remoteLiveKernel);
 			const baseUrl = await provider.getNbExtensionsParentPath(
-				instance(kernel),
+				instance(kernel)
 			);
 			assert.strictEqual(
 				baseUrl?.toString(),
-				Uri.parse(remoteLiveKernel.baseUrl).toString(),
+				Uri.parse(remoteLiveKernel.baseUrl).toString()
 			);
 		});
 	});

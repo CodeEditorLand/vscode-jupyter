@@ -15,7 +15,7 @@ import { ICellRange, IDisposable } from "../../platform/common/types";
 
 // Wraps the vscode CodeLensProvider base class
 export const IDataScienceCodeLensProvider = Symbol(
-	"IDataScienceCodeLensProvider",
+	"IDataScienceCodeLensProvider"
 );
 export interface IDataScienceCodeLensProvider extends CodeLensProvider {
 	getCodeWatcher(document: TextDocument): ICodeWatcher | undefined;
@@ -42,14 +42,14 @@ export interface ICodeWatcher extends IDisposable {
 	runCurrentCellAndAdvance(): Promise<void>;
 	runSelectionOrLine(
 		activeEditor: TextEditor | undefined,
-		text: string | undefined,
+		text: string | undefined
 	): Promise<void>;
 	runToLine(targetLine: number): Promise<void>;
 	runFromLine(targetLine: number): Promise<void>;
 	runAllCellsAbove(stopLine: number, stopCharacter: number): Promise<void>;
 	runCellAndAllBelow(
 		startLine: number,
-		startCharacter: number,
+		startCharacter: number
 	): Promise<void>;
 	runFileInteractive(): Promise<void>;
 	debugFileInteractive(): Promise<void>;
@@ -117,12 +117,12 @@ export interface IGeneratedCodeStore {
 }
 
 export const IGeneratedCodeStorageFactory = Symbol(
-	"IGeneratedCodeStorageFactory",
+	"IGeneratedCodeStorageFactory"
 );
 export interface IGeneratedCodeStorageFactory {
 	getOrCreate(notebook: NotebookDocument): IGeneratedCodeStore;
 	get(
-		options: { notebook: NotebookDocument } | { fileUri: Uri },
+		options: { notebook: NotebookDocument } | { fileUri: Uri }
 	): IGeneratedCodeStore | undefined;
 }
 export type InteractiveCellMetadata = {
@@ -145,7 +145,7 @@ export interface IInteractiveWindowCodeGenerator extends IDisposable {
 		>,
 		cellIndex: number,
 		debug: boolean,
-		usingJupyterDebugProtocol?: boolean,
+		usingJupyterDebugProtocol?: boolean
 	): Promise<IGeneratedCode | undefined>;
 }
 
@@ -153,6 +153,6 @@ export const ICodeGeneratorFactory = Symbol("ICodeGeneratorFactory");
 export interface ICodeGeneratorFactory {
 	getOrCreate(notebook: NotebookDocument): IInteractiveWindowCodeGenerator;
 	get(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): IInteractiveWindowCodeGenerator | undefined;
 }

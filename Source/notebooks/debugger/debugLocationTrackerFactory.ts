@@ -30,26 +30,29 @@ export class DebugLocationTrackerFactory
 	private updatedEmitter: EventEmitter<void> = new EventEmitter<void>();
 
 	constructor(
-        @inject(IDebugService) debugService: IDebugService,
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry
-    ) {
-        disposableRegistry.push(debugService.registerDebugAdapterTrackerFactory('python', this));
-    }
+		@inject(IDebugService) debugService: IDebugService,
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry
+	) {
+		disposableRegistry.push(
+			debugService.registerDebugAdapterTrackerFactory("python", this)
+		);
+	}
 
 	public createDebugAdapterTracker(
-		session: DebugSession,
+		session: DebugSession
 	): DebugAdapterTracker {
 		const result = new DebugLocationTracker(session.id);
 		this.activeTrackers.set(session, result);
 		result.sessionEnded(
 			() => this.activeTrackers.delete(session),
 			this,
-			this.disposableRegistry,
+			this.disposableRegistry
 		);
 		result.debugLocationUpdated(
 			this.onLocationUpdated,
 			this,
-			this.disposableRegistry,
+			this.disposableRegistry
 		);
 		this.onLocationUpdated();
 		return result;

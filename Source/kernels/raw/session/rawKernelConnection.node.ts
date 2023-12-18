@@ -78,7 +78,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		IIOPubMessage<IOPubMessageType>
 	>(this);
 	public readonly unhandledMessage = new Signal<this, IMessage<MessageType>>(
-		this,
+		this
 	);
 	public readonly anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
 	public readonly disposed = new Signal<this, void>(this);
@@ -139,7 +139,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		private readonly workingDirectory: Uri,
 		private readonly launchTimeout: number,
 
-		private readonly kernelConnectionMetadata: LocalKernelConnectionMetadata,
+		private readonly kernelConnectionMetadata: LocalKernelConnectionMetadata
 	) {
 		this.name =
 			getNameOfKernelConnection(kernelConnectionMetadata) || "python3";
@@ -179,8 +179,8 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 					this.resource,
 					DataScience.connectingToKernel(
 						getDisplayNameOrNameOfKernelConnection(
-							this.kernelConnectionMetadata,
-						),
+							this.kernelConnectionMetadata
+						)
 					),
 					() =>
 						this.kernelLauncher.launch(
@@ -188,8 +188,8 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 							this.launchTimeout,
 							this.resource,
 							this.workingDirectory.fsPath,
-							token,
-						),
+							token
+						)
 				));
 			if (token.isCancellationRequested) {
 				throw new CancellationError();
@@ -199,19 +199,19 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 				this.kernelProcess,
 				this.clientId,
 				this.username,
-				this.model,
+				this.model
 			);
 			this.kernelProcess = result.kernelProcess;
 			this.realKernel = result.realKernel;
 			this.socket = result.socket;
 			result.realKernel.info.then(
 				(info) => this.infoDeferred.resolve(info),
-				(ex) => this.infoDeferred.reject(ex),
+				(ex) => this.infoDeferred.reject(ex)
 			);
 
 			const timeout = setTimeout(
 				() => postStartToken.cancel(),
-				this.launchTimeout,
+				this.launchTimeout
 			);
 			disposables.push({ dispose: () => clearTimeout(timeout) });
 			await KernelProgressReporter.wrapAndReportProgress(
@@ -223,8 +223,8 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 						this.launchTimeout,
 						this.resource,
 						this.kernelConnectionMetadata,
-						result.realKernel,
-					),
+						result.realKernel
+					)
 			);
 			if (token.isCancellationRequested) {
 				throw new CancellationError();
@@ -241,8 +241,8 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 					.catch((ex) =>
 						traceWarning(
 							`Failed to shutdown kernel, ${this.kernelConnectionMetadata.id}`,
-							ex,
-						),
+							ex
+						)
 					),
 			]);
 			if (
@@ -252,7 +252,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			) {
 				// This happens when we timeout waiting for the kernel to connect.
 				throw new KernelConnectionTimeoutError(
-					this.kernelConnectionMetadata,
+					this.kernelConnectionMetadata
 				);
 			}
 			if (isCancellationError(error) || token.isCancellationRequested) {
@@ -286,7 +286,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 				}
 
 				traceError(
-					`Disposing session as kernel process died ExitCode: ${e.exitCode}, Reason: ${e.reason}`,
+					`Disposing session as kernel process died ExitCode: ${e.exitCode}, Reason: ${e.reason}`
 				);
 				// Send telemetry so we know why the kernel process exited,
 				// as this affects our kernel startup success
@@ -297,14 +297,14 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 					{
 						exitReason:
 							getTelemetrySafeErrorMessageFromPythonTraceback(
-								e.reason,
+								e.reason
 							),
-					},
+					}
 				);
 
 				this.shutdown().catch(noop);
 			},
-			this,
+			this
 		);
 	}
 	public dispose(): void {
@@ -350,7 +350,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		_options?: Pick<
 			Kernel.IKernelConnection.IOptions,
 			"clientId" | "username" | "handleComms"
-		>,
+		>
 	): Kernel.IKernelConnection {
 		return this;
 	}
@@ -359,7 +359,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			isUserRegisteredKernelSpecConnection(this.kernelConnectionMetadata)
 		) {
 			const kernelSpec = JSON.parse(
-				JSON.stringify(this.kernelConnectionMetadata.kernelSpec),
+				JSON.stringify(this.kernelConnectionMetadata.kernelSpec)
 			) as any;
 			const resources =
 				"resources" in kernelSpec ? kernelSpec.resources : {};
@@ -374,7 +374,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 	public sendShellMessage<T extends KernelMessage.ShellMessageType>(
 		msg: KernelMessage.IShellMessage<T>,
 		expectReply?: boolean,
-		disposeOnDone?: boolean,
+		disposeOnDone?: boolean
 	): Kernel.IShellFuture<
 		KernelMessage.IShellMessage<T>,
 		KernelMessage.IShellMessage<KernelMessage.ShellMessageType>
@@ -382,13 +382,13 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		return this.realKernel!.sendShellMessage(
 			msg,
 			expectReply,
-			disposeOnDone,
+			disposeOnDone
 		);
 	}
 	public sendControlMessage<T extends KernelMessage.ControlMessageType>(
 		msg: KernelMessage.IControlMessage<T>,
 		expectReply?: boolean,
-		disposeOnDone?: boolean,
+		disposeOnDone?: boolean
 	): Kernel.IControlFuture<
 		KernelMessage.IControlMessage<T>,
 		KernelMessage.IControlMessage<KernelMessage.ControlMessageType>
@@ -396,12 +396,12 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		return this.realKernel!.sendControlMessage(
 			msg,
 			expectReply,
-			disposeOnDone,
+			disposeOnDone
 		);
 	}
 	public reconnect(): Promise<void> {
 		throw new Error(
-			"Reconnect is not supported for Local Kernels as connections cannot be lost.",
+			"Reconnect is not supported for Local Kernels as connections cannot be lost."
 		);
 	}
 	public async interrupt(): Promise<void> {
@@ -428,9 +428,9 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			await this.realKernel!.sendShellMessage<"interrupt_request">(
 				msg as any,
 				true,
-				true,
+				true
 			).done.catch((ex) =>
-				traceError("Failed to interrupt via a message", ex),
+				traceError("Failed to interrupt via a message", ex)
 			);
 		} else {
 			traceError("Kernel interrupt not supported");
@@ -456,7 +456,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		content:
 			| KernelMessage.IHistoryRequestRange
 			| KernelMessage.IHistoryRequestSearch
-			| KernelMessage.IHistoryRequestTail,
+			| KernelMessage.IHistoryRequestTail
 	): Promise<KernelMessage.IHistoryReplyMsg> {
 		return this.realKernel!.requestHistory(content);
 	}
@@ -470,7 +470,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			stop_on_error?: boolean;
 		},
 		disposeOnDone?: boolean,
-		metadata?: import("@lumino/coreutils").JSONObject,
+		metadata?: import("@lumino/coreutils").JSONObject
 	): Kernel.IShellFuture<
 		KernelMessage.IExecuteRequestMsg,
 		KernelMessage.IExecuteReplyMsg
@@ -478,7 +478,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		return this.realKernel!.requestExecute(
 			content,
 			disposeOnDone,
-			metadata,
+			metadata
 		);
 	}
 	public requestDebug(
@@ -489,7 +489,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			command: string;
 			arguments?: any;
 		},
-		disposeOnDone?: boolean,
+		disposeOnDone?: boolean
 	): Kernel.IControlFuture<
 		KernelMessage.IDebugRequestMsg,
 		KernelMessage.IDebugReplyMsg
@@ -508,7 +508,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		return this.realKernel!.requestCommInfo(content);
 	}
 	public sendInputReply(
-		content: KernelMessage.IInputReplyMsg["content"],
+		content: KernelMessage.IInputReplyMsg["content"]
 	): void {
 		return this.realKernel!.sendInputReply(content);
 	}
@@ -516,8 +516,8 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		targetName: string,
 		callback: (
 			comm: Kernel.IComm,
-			msg: KernelMessage.ICommOpenMsg,
-		) => void | PromiseLike<void>,
+			msg: KernelMessage.ICommOpenMsg
+		) => void | PromiseLike<void>
 	): void {
 		return this.realKernel!.registerCommTarget(targetName, callback);
 	}
@@ -525,24 +525,24 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		targetName: string,
 		callback: (
 			comm: Kernel.IComm,
-			msg: KernelMessage.ICommOpenMsg,
-		) => void | PromiseLike<void>,
+			msg: KernelMessage.ICommOpenMsg
+		) => void | PromiseLike<void>
 	): void {
 		return this.realKernel!.removeCommTarget(targetName, callback);
 	}
 	public registerMessageHook(
 		msgId: string,
 		hook: (
-			msg: KernelMessage.IIOPubMessage,
-		) => boolean | PromiseLike<boolean>,
+			msg: KernelMessage.IIOPubMessage
+		) => boolean | PromiseLike<boolean>
 	): void {
 		this.realKernel!.registerMessageHook(msgId, hook);
 	}
 	public removeMessageHook(
 		msgId: string,
 		hook: (
-			msg: KernelMessage.IIOPubMessage,
-		) => boolean | PromiseLike<boolean>,
+			msg: KernelMessage.IIOPubMessage
+		) => boolean | PromiseLike<boolean>
 	): void {
 		this.realKernel!.removeMessageHook(msgId, hook);
 	}
@@ -551,7 +551,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		this.realKernel!.iopubMessage.connect(this.onIOPubMessage, this);
 		this.realKernel!.unhandledMessage.connect(
 			this.onUnhandledMessage,
-			this,
+			this
 		);
 		this.realKernel!.statusChanged.connect(this.onStatusChanged, this);
 		this.realKernel!.disposed.connect(this.onDisposed, this);
@@ -561,32 +561,32 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		this.realKernel!.iopubMessage.disconnect(this.onIOPubMessage, this);
 		this.realKernel!.unhandledMessage.disconnect(
 			this.onUnhandledMessage,
-			this,
+			this
 		);
 		this.realKernel!.statusChanged.disconnect(this.onStatusChanged, this);
 		this.realKernel!.disposed.disconnect(this.onDisposed, this);
 	}
 	private onAnyMessage(
 		_connection: Kernel.IKernelConnection,
-		msg: Kernel.IAnyMessageArgs,
+		msg: Kernel.IAnyMessageArgs
 	) {
 		this.anyMessage.emit(msg);
 	}
 	private onIOPubMessage(
 		_connection: Kernel.IKernelConnection,
-		msg: IIOPubMessage,
+		msg: IIOPubMessage
 	) {
 		this.iopubMessage.emit(msg);
 	}
 	private onUnhandledMessage(
 		_connection: Kernel.IKernelConnection,
-		msg: IMessage<MessageType>,
+		msg: IMessage<MessageType>
 	) {
 		this.unhandledMessage.emit(msg);
 	}
 	private onStatusChanged(
 		_connection: Kernel.IKernelConnection,
-		msg: Kernel.Status,
+		msg: Kernel.Status
 	) {
 		this.statusChanged.emit(msg);
 	}
@@ -600,19 +600,19 @@ async function postStartKernel(
 	launchTimeout: number,
 	resource: Resource,
 	kernelConnectionMetadata: LocalKernelConnectionMetadata,
-	kernel: Kernel.IKernelConnection,
+	kernel: Kernel.IKernelConnection
 ): Promise<void> {
 	try {
 		// Wait for it to be ready
 		traceVerbose(
-			"Waiting for Raw Session to be ready in postStartRawSession",
+			"Waiting for Raw Session to be ready in postStartRawSession"
 		);
 		await raceCancellationError(
 			token,
-			waitForReady(kernel, kernelConnectionMetadata, launchTimeout),
+			waitForReady(kernel, kernelConnectionMetadata, launchTimeout)
 		);
 		traceVerbose(
-			"Successfully waited for Raw Session to be ready in postStartRawSession",
+			"Successfully waited for Raw Session to be ready in postStartRawSession"
 		);
 	} catch (ex) {
 		traceError("Failed waiting for Raw Session to be ready", ex);
@@ -625,7 +625,7 @@ async function postStartKernel(
 	// Attempt to get kernel to respond to requests (this is what jupyter does today).
 	// Kinda warms up the kernel communication & ensure things are in the right state.
 	traceVerbose(
-		`Kernel status is '${kernel?.status}' before requesting kernel info and after ready`,
+		`Kernel status is '${kernel?.status}' before requesting kernel info and after ready`
 	);
 	// Lets wait for the response (max of 3s), like jupyter (python code) & jupyter client (jupyter lab npm) does.
 	// Lets not wait for full timeout, we don't want to slow kernel startup.
@@ -682,7 +682,7 @@ async function postStartKernel(
 						kernelInfoRequestHandled.promise,
 					]),
 					// Jupyter lab too waits for 500ms before trying again.
-					sleep(Math.min(launchTimeout, 500)).then(noop),
+					sleep(Math.min(launchTimeout, 500)).then(noop)
 				);
 			} catch (ex) {
 				traceError("Failed to request kernel info", ex);
@@ -702,11 +702,11 @@ async function postStartKernel(
 		}
 		if (gotIoPubMessage.completed && kernelInfoRequestHandled.completed) {
 			traceVerbose(
-				`Successfully completed postStartRawSession after ${attempts} attempt(s) in ${stopWatch.elapsedTime}ms`,
+				`Successfully completed postStartRawSession after ${attempts} attempt(s) in ${stopWatch.elapsedTime}ms`
 			);
 		} else {
 			traceWarning(
-				`Didn't get response for requestKernelInfo after ${attempts} attempt(s) in ${stopWatch.elapsedTime}ms.`,
+				`Didn't get response for requestKernelInfo after ${attempts} attempt(s) in ${stopWatch.elapsedTime}ms.`
 			);
 		}
 		sendKernelTelemetryEvent(
@@ -717,7 +717,7 @@ async function postStartKernel(
 				timedout:
 					!gotIoPubMessage.completed ||
 					!kernelInfoRequestHandled.completed,
-			},
+			}
 		);
 	} finally {
 		kernel.iopubMessage.disconnect(iopubHandler);
@@ -761,7 +761,7 @@ function newRawKernel(
 	kernelProcess: IKernelProcess,
 	clientId: string,
 	username: string,
-	model: Kernel.IModel,
+	model: Kernel.IModel
 ) {
 	const jupyterLab =
 		require("@jupyterlab/services") as typeof import("@jupyterlab/services"); // NOSONAR
@@ -813,10 +813,10 @@ function newRawKernel(
 async function waitForReady(
 	kernel: Kernel.IKernelConnection,
 	kernelConnectionMetadata: LocalKernelConnectionMetadata,
-	launchTimeout: number,
+	launchTimeout: number
 ): Promise<void> {
 	traceVerbose(
-		`Waiting for Raw session to be ready, status: ${kernel.connectionStatus}`,
+		`Waiting for Raw session to be ready, status: ${kernel.connectionStatus}`
 	);
 	// When our kernel connects and gets a status message it triggers the ready promise
 	const deferred = createDeferred<"connected">();

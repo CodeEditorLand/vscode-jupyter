@@ -28,19 +28,22 @@ export class CodeGeneratorFactory
 	>();
 
 	constructor(
-        @inject(IConfigurationService) private readonly configService: IConfigurationService,
-        @inject(IGeneratedCodeStorageFactory) private readonly storageFactory: IGeneratedCodeStorageFactory,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService,
+		@inject(IGeneratedCodeStorageFactory)
+		private readonly storageFactory: IGeneratedCodeStorageFactory,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	public activate(): void {
 		workspace.onDidCloseNotebookDocument(
 			this.onDidCloseNotebook,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public getOrCreate(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): IInteractiveWindowCodeGenerator {
 		const existing = this.get(notebook);
 		if (existing) {
@@ -50,13 +53,13 @@ export class CodeGeneratorFactory
 			this.configService,
 			this.storageFactory.getOrCreate(notebook),
 			notebook,
-			this.disposables,
+			this.disposables
 		);
 		this.codeGenerators.set(notebook, codeGenerator);
 		return codeGenerator;
 	}
 	public get(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): IInteractiveWindowCodeGenerator | undefined {
 		return this.codeGenerators.get(notebook);
 	}

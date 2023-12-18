@@ -42,7 +42,7 @@ suite("Kernel Common Helpers", () => {
 		when(session.dispose()).thenReturn();
 		when(session.kernel).thenReturn(instance(kernel));
 		sessionDisposed = new Signal<Session.ISessionConnection, void>(
-			instance(session),
+			instance(session)
 		);
 		const sessionPropertyChanged = new Signal<
 			Session.ISessionConnection,
@@ -78,12 +78,12 @@ suite("Kernel Common Helpers", () => {
 		when(session.kernelChanged).thenReturn(sessionKernelChanged);
 		when(session.statusChanged).thenReturn(
 			new Signal<Session.ISessionConnection, Kernel.Status>(
-				instance(session),
-			),
+				instance(session)
+			)
 		);
 		when(session.unhandledMessage).thenReturn(sessionUnhandledMessage);
 		when(session.connectionStatusChanged).thenReturn(
-			sessionConnectionStatusChanged,
+			sessionConnectionStatusChanged
 		);
 		when(session.anyMessage).thenReturn(sessionAnyMessage);
 		when(session.isDisposed).thenReturn(false);
@@ -91,8 +91,8 @@ suite("Kernel Common Helpers", () => {
 		when(kernel.connectionStatus).thenReturn("connected");
 		when(kernel.statusChanged).thenReturn(
 			new Signal<Kernel.IKernelConnection, Kernel.Status>(
-				instance(kernel),
-			),
+				instance(kernel)
+			)
 		);
 		when(kernel.iopubMessage).thenReturn(
 			instance(
@@ -101,8 +101,8 @@ suite("Kernel Common Helpers", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>
 					>
-				>(),
-			),
+				>()
+			)
 		);
 		when(kernel.anyMessage).thenReturn({
 			connect: noop,
@@ -115,24 +115,24 @@ suite("Kernel Common Helpers", () => {
 						Kernel.IKernelConnection,
 						KernelMessage.IMessage<KernelMessage.MessageType>
 					>
-				>(),
-			),
+				>()
+			)
 		);
 		when(kernel.disposed).thenReturn(
-			instance(mock<ISignal<Kernel.IKernelConnection, void>>()),
+			instance(mock<ISignal<Kernel.IKernelConnection, void>>())
 		);
 		when(kernel.connectionStatusChanged).thenReturn(
 			instance(
 				mock<
 					ISignal<Kernel.IKernelConnection, Kernel.ConnectionStatus>
-				>(),
-			),
+				>()
+			)
 		);
 		disposables.push(
-			new Disposable(() => Signal.disconnectAll(instance(session))),
+			new Disposable(() => Signal.disconnectAll(instance(session)))
 		);
 		disposables.push(
-			new Disposable(() => Signal.disconnectAll(instance(kernel))),
+			new Disposable(() => Signal.disconnectAll(instance(kernel)))
 		);
 	});
 	teardown(() => (disposables = dispose(disposables)));
@@ -144,7 +144,7 @@ suite("Kernel Common Helpers", () => {
 			Uri.file("one.ipynb"),
 			instance(session),
 			1_000,
-			token.token,
+			token.token
 		);
 	});
 	test("Wait for Idle (wait for status to change within the timeout period)", async () => {
@@ -157,7 +157,7 @@ suite("Kernel Common Helpers", () => {
 			Uri.file("one.ipynb"),
 			instance(session),
 			10_000,
-			token.token,
+			token.token
 		);
 		setTimeout(() => {
 			when(kernel.status).thenReturn("idle");
@@ -184,7 +184,7 @@ suite("Kernel Common Helpers", () => {
 			Uri.file("one.ipynb"),
 			instance(session),
 			10_000,
-			token.token,
+			token.token
 		);
 
 		clock.tick(11_000);
@@ -192,7 +192,7 @@ suite("Kernel Common Helpers", () => {
 
 		await assert.isRejected(
 			promise,
-			new JupyterWaitForIdleError(kernelConnectionMetadata).message,
+			new JupyterWaitForIdleError(kernelConnectionMetadata).message
 		);
 	});
 	test("Cancel waiting for idle", async () => {
@@ -205,7 +205,7 @@ suite("Kernel Common Helpers", () => {
 			Uri.file("one.ipynb"),
 			instance(session),
 			10_000,
-			token.token,
+			token.token
 		);
 		setTimeout(() => token.cancel(), 3_000);
 		clock.tick(3_000);
@@ -223,7 +223,7 @@ suite("Kernel Common Helpers", () => {
 			Uri.file("one.ipynb"),
 			instance(session),
 			10_000,
-			token.token,
+			token.token
 		);
 		setTimeout(() => {
 			when(session.isDisposed).thenReturn(true);
@@ -234,7 +234,7 @@ suite("Kernel Common Helpers", () => {
 
 		await assert.isRejected(
 			promise,
-			new JupyterInvalidKernelError(kernelConnectionMetadata).message,
+			new JupyterInvalidKernelError(kernelConnectionMetadata).message
 		);
 	});
 	test("Waiting for idle fails without a Kernel", async () => {
@@ -245,12 +245,12 @@ suite("Kernel Common Helpers", () => {
 			Uri.file("one.ipynb"),
 			instance(session),
 			10_000,
-			token.token,
+			token.token
 		);
 
 		await assert.isRejected(
 			promise,
-			new JupyterInvalidKernelError(kernelConnectionMetadata).message,
+			new JupyterInvalidKernelError(kernelConnectionMetadata).message
 		);
 	});
 });

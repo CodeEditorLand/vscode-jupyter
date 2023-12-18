@@ -47,31 +47,31 @@ suite("Kernel Refresh Indicator (node)", () => {
 		interpreterService = mock<IInterpreterService>();
 		when(kernelFinder.status).thenReturn("idle");
 		when(kernelFinder.onDidChangeStatus).thenReturn(
-			onDidChangeStatus.event,
+			onDidChangeStatus.event
 		);
 		when(
-			extensionChecker.onPythonExtensionInstallationStatusChanged,
+			extensionChecker.onPythonExtensionInstallationStatusChanged
 		).thenReturn(onPythonExtensionInstallationStatusChanged.event);
 		when(mockedVSCodeNamespaces.window.activeNotebookEditor).thenReturn(
-			undefined,
+			undefined
 		);
 		taskNb = mock<NotebookControllerDetectionTask>();
 		taskIW = mock<NotebookControllerDetectionTask>();
 		when(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				JupyterNotebookView,
-			),
+				JupyterNotebookView
+			)
 		).thenReturn(instance(taskNb));
 		when(
 			mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-				InteractiveWindowView,
-			),
+				InteractiveWindowView
+			)
 		).thenReturn(instance(taskIW));
 		indicator = new KernelRefreshIndicator(
 			disposables,
 			instance(extensionChecker),
 			instance(interpreterService),
-			instance(kernelFinder),
+			instance(kernelFinder)
 		);
 		clock = fakeTimers.install();
 		disposables.push(new Disposable(() => clock.uninstall()));
@@ -93,13 +93,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).never();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).never();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -111,13 +111,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).once();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).once();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -137,13 +137,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).never();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).never();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -154,13 +154,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).once();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).once();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -187,13 +187,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).never();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).never();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -210,7 +210,7 @@ suite("Kernel Refresh Indicator (node)", () => {
 			when(kernelFinder.status).thenReturn("discovering");
 			const deferred = createDeferred<void>();
 			when(interpreterService.refreshInterpreters()).thenReturn(
-				deferred.promise,
+				deferred.promise
 			);
 			when(interpreterService.status).thenReturn("idle");
 
@@ -219,13 +219,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).once();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).once();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -258,13 +258,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).never();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).never();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -276,13 +276,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).once();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).once();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -307,13 +307,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).twice();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).twice();
 			verify(taskNb.dispose()).once();
 			verify(taskIW.dispose()).once();
@@ -343,13 +343,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).once();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).once();
 			verify(taskNb.dispose()).never();
 			verify(taskIW.dispose()).never();
@@ -374,13 +374,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					JupyterNotebookView,
-				),
+					JupyterNotebookView
+				)
 			).twice();
 			verify(
 				mockedVSCodeNamespaces.notebooks.createNotebookControllerDetectionTask(
-					InteractiveWindowView,
-				),
+					InteractiveWindowView
+				)
 			).twice();
 			verify(taskNb.dispose()).once();
 			verify(taskIW.dispose()).once();
@@ -409,13 +409,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 			when(interpreterService.status).thenReturn("idle");
 			when(interpreterService.refreshInterpreters()).thenResolve();
 			when(
-				interpreterService.refreshInterpreters(anything()),
+				interpreterService.refreshInterpreters(anything())
 			).thenResolve();
 			when(
-				mockedVSCodeNamespaces.workspace.onDidOpenNotebookDocument,
+				mockedVSCodeNamespaces.workspace.onDidOpenNotebookDocument
 			).thenReturn(onDidOpenNotebookDocument.event);
 			when(
-				mockedVSCodeNamespaces.window.onDidChangeActiveNotebookEditor,
+				mockedVSCodeNamespaces.window.onDidChangeActiveNotebookEditor
 			).thenReturn(onDidChangeActiveNotebookEditor.event);
 
 			indicator.activate();
@@ -446,13 +446,13 @@ suite("Kernel Refresh Indicator (node)", () => {
 			when(interpreterService.status).thenReturn("idle");
 			when(interpreterService.refreshInterpreters()).thenResolve();
 			when(
-				interpreterService.refreshInterpreters(anything()),
+				interpreterService.refreshInterpreters(anything())
 			).thenResolve();
 			when(
-				mockedVSCodeNamespaces.workspace.onDidOpenNotebookDocument,
+				mockedVSCodeNamespaces.workspace.onDidOpenNotebookDocument
 			).thenReturn(onDidOpenNotebookDocument.event);
 			when(
-				mockedVSCodeNamespaces.window.onDidChangeActiveNotebookEditor,
+				mockedVSCodeNamespaces.window.onDidChangeActiveNotebookEditor
 			).thenReturn(onDidChangeActiveNotebookEditor.event);
 
 			indicator.activate();

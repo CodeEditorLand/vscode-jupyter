@@ -51,9 +51,9 @@ export class ApiAccessService {
 	>();
 	private promiseChain = new PromiseChain();
 	constructor(
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private globalState: Memento,
-        @inject(IExtensionContext) private context: IExtensionContext
-    ) {}
+		@inject(IMemento) @named(GLOBAL_MEMENTO) private globalState: Memento,
+		@inject(IExtensionContext) private context: IExtensionContext
+	) {}
 	public async getAccessInformation(info: {
 		extensionId: string;
 		displayName: string;
@@ -72,7 +72,7 @@ export class ApiAccessService {
 				!PublishersAllowedWithPrompts.has(publisherId)
 			) {
 				traceWarning(
-					`Publisher ${publisherId} is allowed to access the Kernel API with a message.`,
+					`Publisher ${publisherId} is allowed to access the Kernel API with a message.`
 				);
 				const displayName =
 					extensions.getExtension(info.extensionId)?.packageJSON
@@ -84,8 +84,8 @@ export class ApiAccessService {
 				window
 					.showErrorMessage(
 						DataScience.thanksForUsingJupyterKernelApiPleaseRegisterWithUs(
-							extensionDisplay,
-						),
+							extensionDisplay
+						)
 					)
 					.then(noop, noop);
 			}
@@ -108,11 +108,11 @@ export class ApiAccessService {
 			// This way extension author knows they need to contact us.
 			window
 				.showErrorMessage(
-					`Please contact the Jupyter Extension to get access to the Kernel API. Publisher ${publisherId}`,
+					`Please contact the Jupyter Extension to get access to the Kernel API. Publisher ${publisherId}`
 				)
 				.then(noop, noop);
 			traceError(
-				`Publisher ${publisherId} is not allowed to access the Kernel API.`,
+				`Publisher ${publisherId} is not allowed to access the Kernel API.`
 			);
 			return { extensionId: info.extensionId, accessAllowed: false };
 		}
@@ -120,7 +120,7 @@ export class ApiAccessService {
 			ApiExtensionInfo | undefined
 		>(API_ACCESS_GLOBAL_KEY);
 		const extensionPermission = extensionPermissions?.find(
-			(item) => item.extensionId === info.extensionId,
+			(item) => item.extensionId === info.extensionId
 		);
 		if (extensionPermission) {
 			sendTelemetryEvent(Telemetry.JupyterKernelApiAccess, undefined, {
@@ -139,13 +139,13 @@ export class ApiAccessService {
 		const promise = (async () => {
 			const msg = DataScience.allowExtensionToUseJupyterKernelApi(
 				`${info.displayName} (${info.extensionId})`,
-				Common.bannerLabelYes,
+				Common.bannerLabelYes
 			);
 			const selection = await window.showInformationMessage(
 				msg,
 				{ modal: true },
 				Common.bannerLabelYes,
-				Common.bannerLabelNo,
+				Common.bannerLabelNo
 			);
 			const allow = selection === Common.bannerLabelYes;
 			this.promiseChain
@@ -153,11 +153,11 @@ export class ApiAccessService {
 					let extensionPermissions = [
 						...this.globalState.get<ApiExtensionInfo>(
 							API_ACCESS_GLOBAL_KEY,
-							[],
+							[]
 						),
 					];
 					extensionPermissions = extensionPermissions.filter(
-						(item) => item.extensionId !== info.extensionId,
+						(item) => item.extensionId !== info.extensionId
 					);
 					extensionPermissions.push({
 						allowed: allow ? "yes" : "no",
@@ -165,7 +165,7 @@ export class ApiAccessService {
 					});
 					return this.globalState.update(
 						API_ACCESS_GLOBAL_KEY,
-						extensionPermissions,
+						extensionPermissions
 					);
 				})
 				.then(noop, noop);

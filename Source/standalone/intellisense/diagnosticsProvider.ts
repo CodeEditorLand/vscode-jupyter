@@ -59,20 +59,20 @@ export class NotebookCellBangInstallDiagnosticsProvider
 	>();
 	private readonly cellsToProcess = new Set<NotebookCell>();
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        this.problems = languages.createDiagnosticCollection(diagnosticSource);
-        this.disposables.push(this.problems);
-        disposables.push(this);
-    }
+		this.problems = languages.createDiagnosticCollection(diagnosticSource);
+		this.disposables.push(this.problems);
+		disposables.push(this);
+	}
 	public dispose() {
 		dispose(this.disposables);
 		this.problems.dispose();
 	}
 	public activate(): void {
 		this.disposables.push(
-			languages.registerCodeActionsProvider(PYTHON_LANGUAGE, this),
+			languages.registerCodeActionsProvider(PYTHON_LANGUAGE, this)
 		);
 		this.disposables.push(
-			languages.registerHoverProvider(PYTHON_LANGUAGE, this),
+			languages.registerHoverProvider(PYTHON_LANGUAGE, this)
 		);
 		workspace.onDidChangeTextDocument(
 			(e) => {
@@ -88,7 +88,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.onDidCloseNotebookDocument(
 			(e) => {
@@ -101,13 +101,13 @@ export class NotebookCellBangInstallDiagnosticsProvider
 				cells.forEach((_, uri) => this.problems.delete(Uri.parse(uri)));
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 
 		workspace.onDidOpenNotebookDocument(
 			(e) => this.analyzeNotebook(e),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.onDidChangeNotebookDocument(
 			(e) => {
@@ -117,22 +117,22 @@ export class NotebookCellBangInstallDiagnosticsProvider
 						cells?.delete(cell.document.uri.toString());
 					});
 					change.addedCells.forEach((cell) =>
-						this.queueCellForProcessing(cell),
+						this.queueCellForProcessing(cell)
 					);
 				});
 				e.cellChanges.forEach((change) =>
-					this.queueCellForProcessing(change.cell),
+					this.queueCellForProcessing(change.cell)
 				);
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.notebookDocuments.map((e) => this.analyzeNotebook(e));
 	}
 	public provideHover(
 		document: TextDocument,
 		position: Position,
-		_token: CancellationToken,
+		_token: CancellationToken
 	) {
 		const notebook = getAssociatedJupyterNotebook(document);
 		if (notebook?.notebookType !== JupyterNotebookView) {
@@ -143,7 +143,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 			return;
 		}
 		const diagnostic = diagnostics.find(
-			(d) => d.message === pipMessage || d.message === condaMessage,
+			(d) => d.message === pipMessage || d.message === condaMessage
 		);
 		if (!diagnostic || !diagnostic.range.contains(position)) {
 			return;
@@ -152,9 +152,9 @@ export class NotebookCellBangInstallDiagnosticsProvider
 		return new Hover(
 			DataScience.pipCondaInstallHoverWarning(
 				installer,
-				"https://aka.ms/jupyterCellMagicBangInstall",
+				"https://aka.ms/jupyterCellMagicBangInstall"
 			),
-			diagnostic.range,
+			diagnostic.range
 		);
 	}
 
@@ -162,7 +162,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 		document: TextDocument,
 		_range: Range | Selection,
 		context: CodeActionContext,
-		_token: CancellationToken,
+		_token: CancellationToken
 	): CodeAction[] {
 		if (!getAssociatedJupyterNotebook(document)) {
 			return [];
@@ -172,12 +172,12 @@ export class NotebookCellBangInstallDiagnosticsProvider
 			switch (d.message) {
 				case pipMessage:
 					codeActions.push(
-						this.createReplaceCodeAction(document, "pip", d),
+						this.createReplaceCodeAction(document, "pip", d)
 					);
 					break;
 				case condaMessage:
 					codeActions.push(
-						this.createReplaceCodeAction(document, "conda", d),
+						this.createReplaceCodeAction(document, "conda", d)
 					);
 					break;
 
@@ -186,10 +186,10 @@ export class NotebookCellBangInstallDiagnosticsProvider
 						this.createGotoWikiAction(
 							document,
 							Uri.parse(
-								"https://aka.ms/vscodejupytermatplotlibwidget",
+								"https://aka.ms/vscodejupytermatplotlibwidget"
 							),
-							d,
-						),
+							d
+						)
 					);
 					break;
 
@@ -202,11 +202,11 @@ export class NotebookCellBangInstallDiagnosticsProvider
 	private createReplaceCodeAction(
 		document: TextDocument,
 		type: "pip" | "conda",
-		d: Diagnostic,
+		d: Diagnostic
 	) {
 		const codeAction = new CodeAction(
 			DataScience.replacePipCondaInstallCodeAction(type),
-			CodeActionKind.QuickFix,
+			CodeActionKind.QuickFix
 		);
 		codeAction.isPreferred = true;
 		codeAction.diagnostics = [d];
@@ -215,9 +215,9 @@ export class NotebookCellBangInstallDiagnosticsProvider
 			document.uri,
 			new Range(
 				d.range.start,
-				new Position(d.range.start.line, d.range.start.character + 1),
+				new Position(d.range.start.line, d.range.start.character + 1)
 			),
-			"%",
+			"%"
 		);
 		codeAction.edit = edit;
 		return codeAction;
@@ -225,11 +225,11 @@ export class NotebookCellBangInstallDiagnosticsProvider
 	private createGotoWikiAction(
 		_document: TextDocument,
 		uri: Uri,
-		d: Diagnostic,
+		d: Diagnostic
 	) {
 		const codeAction = new CodeAction(
 			DataScience.matplotlibWidgetCodeActionTitle,
-			CodeActionKind.QuickFix,
+			CodeActionKind.QuickFix
 		);
 		codeAction.isPreferred = true;
 		codeAction.diagnostics = [d];
@@ -248,7 +248,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 		notebook
 			.getCells()
 			.forEach((cell, i) =>
-				i < 100 ? this.queueCellForProcessing(cell) : undefined,
+				i < 100 ? this.queueCellForProcessing(cell) : undefined
 			);
 	}
 
@@ -290,7 +290,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 			new Map<CellUri, CellVersion>();
 		cellsUrisWithProblems.set(
 			cell.document.uri.toString(),
-			cell.document.version,
+			cell.document.version
 		);
 		this.notebooksProcessed.set(cell.notebook, cellsUrisWithProblems);
 
@@ -305,7 +305,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 					line.lineNumber,
 					startPos,
 					line.lineNumber,
-					endPos + 2,
+					endPos + 2
 				);
 				this.problems.set(cell.document.uri, [
 					{
@@ -322,7 +322,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 					line.lineNumber,
 					startPos,
 					line.lineNumber,
-					endPos + 2,
+					endPos + 2
 				);
 				this.problems.set(cell.document.uri, [
 					{
@@ -343,7 +343,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 					line.lineNumber,
 					startPos,
 					line.lineNumber,
-					endPos,
+					endPos
 				);
 				this.problems.set(cell.document.uri, [
 					{

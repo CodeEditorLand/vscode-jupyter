@@ -21,7 +21,7 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 	private providers: Set<IEmbedNotebookEditorProvider> = new Set();
 
 	registerEmbedNotebookProvider(
-		provider: IEmbedNotebookEditorProvider,
+		provider: IEmbedNotebookEditorProvider
 	): void {
 		this.providers.add(provider);
 	}
@@ -31,8 +31,8 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 		const notebook =
 			getResourceType(resource) === "notebook"
 				? workspace.notebookDocuments.find(
-						(item) => getComparisonKey(item.uri, true) === key,
-				  )
+						(item) => getComparisonKey(item.uri, true) === key
+					)
 				: undefined;
 		const targetNotebookEditor =
 			notebook && window.activeNotebookEditor?.notebook === notebook
@@ -55,7 +55,7 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 	get activeNotebookEditor(): NotebookEditor | undefined {
 		return (
 			this.findNotebookEditor(
-				window.activeNotebookEditor?.notebook.uri,
+				window.activeNotebookEditor?.notebook.uri
 			) || this.findNotebookEditor(window.activeTextEditor?.document.uri)
 		);
 	}

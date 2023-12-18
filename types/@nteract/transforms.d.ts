@@ -59,7 +59,7 @@ declare module "@nteract/transforms" {
 				p2: any,
 				p3: any,
 				p4: any,
-				p5: any,
+				p5: any
 			): any;
 			namespace MathJax {
 				function isRequired(
@@ -68,7 +68,7 @@ declare module "@nteract/transforms" {
 					p2: any,
 					p3: any,
 					p4: any,
-					p5: any,
+					p5: any
 				): any;
 			}
 			function MathJaxContext(
@@ -77,7 +77,7 @@ declare module "@nteract/transforms" {
 				p2: any,
 				p3: any,
 				p4: any,
-				p5: any,
+				p5: any
 			): any;
 			namespace MathJaxContext {
 				function isRequired(
@@ -86,7 +86,7 @@ declare module "@nteract/transforms" {
 					p2: any,
 					p3: any,
 					p4: any,
-					p5: any,
+					p5: any
 				): any;
 			}
 		}

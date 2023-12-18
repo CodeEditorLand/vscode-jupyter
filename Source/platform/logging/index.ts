@@ -45,7 +45,7 @@ const logLevelMap: Map<string | undefined, LogLevel> = new Map([
 
 let globalLoggingLevel: LogLevel = LogLevel.Debug;
 export function setLoggingLevel(
-	level?: LoggingLevelSettingType | number,
+	level?: LoggingLevelSettingType | number
 ): void {
 	globalLoggingLevel =
 		typeof level === "number"
@@ -92,8 +92,8 @@ function formatErrors(...args: Arguments) {
 			) {
 				info.push(
 					`Interpreter Id = ${getDisplayPath(
-						arg.kernelConnectionMetadata.interpreter.id,
-					)}`,
+						arg.kernelConnectionMetadata.interpreter.id
+					)}`
 				);
 			}
 		}
@@ -122,7 +122,7 @@ function formatErrors(...args: Arguments) {
 		Object.keys(arg)
 			.filter((key) => propertiesToIgnore.indexOf(key) === -1)
 			.forEach((key) =>
-				info.push(`${key} = ${String((arg as any)[key]).trim()}`),
+				info.push(`${key} = ${String((arg as any)[key]).trim()}`)
 			);
 		return info
 			.filter((l) => l.trim().length)
@@ -156,7 +156,7 @@ export function traceVerbose(message: string, ...args: Arguments): void {
 	}
 }
 export function traceInfoIfCI(
-	msg: () => [message: string, ...args: string[]] | string,
+	msg: () => [message: string, ...args: string[]] | string
 ): void;
 export function traceInfoIfCI(message: string, ...args: string[]): void;
 export function traceInfoIfCI(arg1: any, ...args: Arguments): void {
@@ -184,7 +184,7 @@ export function traceInfoIfCI(arg1: any, ...args: Arguments): void {
 
 export function traceDecoratorVerbose(
 	message: string,
-	opts: TraceOptions = DEFAULT_OPTS,
+	opts: TraceOptions = DEFAULT_OPTS
 ): TraceDecoratorType {
 	return createTracingDecorator({ message, opts, level: LogLevel.Trace });
 }
@@ -227,12 +227,12 @@ export function logValue<T>(property: keyof T) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		target: any,
 		methodName: string | symbol,
-		parameterIndex: number,
+		parameterIndex: number
 	) => {
 		if (!formattedParameters.has(target)) {
 			formattedParameters.set(
 				target,
-				new Map<MethodName, ParameterLogInformation[]>(),
+				new Map<MethodName, ParameterLogInformation[]>()
 			);
 		}
 		let parameterInfos = formattedParameters.get(target);
@@ -242,7 +242,7 @@ export function logValue<T>(property: keyof T) {
 				(parameterInfos = new Map<
 					MethodName,
 					ParameterLogInformation[]
-				>()),
+				>())
 			);
 		}
 		if (!parameterInfos.has(methodName)) {
@@ -260,12 +260,12 @@ export function ignoreLogging() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		target: any,
 		methodName: string | symbol,
-		parameterIndex: number,
+		parameterIndex: number
 	) => {
 		if (!formattedParameters.has(target)) {
 			formattedParameters.set(
 				target,
-				new Map<MethodName, ParameterLogInformation[]>(),
+				new Map<MethodName, ParameterLogInformation[]>()
 			);
 		}
 		let parameterInfos = formattedParameters.get(target);
@@ -275,7 +275,7 @@ export function ignoreLogging() {
 				(parameterInfos = new Map<
 					MethodName,
 					ParameterLogInformation[]
-				>()),
+				>())
 			);
 		}
 		if (!parameterInfos.has(methodName)) {
@@ -291,7 +291,7 @@ export function ignoreLogging() {
 export function createTracingDecorator(logInfo: LogInfo) {
 	return traceDecorator(
 		(call, traced) => logResult(logInfo, traced, call),
-		(logInfo.opts & TraceOptions.BeforeCall) > 0,
+		(logInfo.opts & TraceOptions.BeforeCall) > 0
 	);
 }
 
@@ -300,7 +300,7 @@ export function tracing<T>(logInfo: LogInfo, run: () => T, call?: CallInfo): T {
 	return _tracing(
 		(traced) => logResult(logInfo, traced, call),
 		run,
-		(logInfo.opts & TraceOptions.BeforeCall) > 0,
+		(logInfo.opts & TraceOptions.BeforeCall) > 0
 	);
 }
 
@@ -353,7 +353,7 @@ function formatArgument(
 	target: Object,
 	method: MethodName,
 	arg: any,
-	parameterIndex: number,
+	parameterIndex: number
 ) {
 	if (isUri(arg)) {
 		// Where possible strip user names from paths, then users will be more likely to provide the logs.
@@ -364,7 +364,7 @@ function formatArgument(
 	}
 	const parameterInfos = formattedParameters.get(target)?.get(method);
 	const info = parameterInfos?.find(
-		(info) => info.parameterIndex === parameterIndex,
+		(info) => info.parameterIndex === parameterIndex
 	);
 	if (!info) {
 		return typeof arg === "string" ? removeUserPaths(arg) : arg;
@@ -384,7 +384,7 @@ function formatArgument(
 function formatMessages(
 	info: LogInfo,
 	traced: TraceInfo,
-	call?: CallInfo,
+	call?: CallInfo
 ): string {
 	call = normalizeCall(call!);
 	``;
@@ -393,7 +393,7 @@ function formatMessages(
 	if (traced) {
 		messages.push(`completed in ${traced.elapsed}ms`);
 		messages.push(
-			`has a ${traced.returnValue ? "truthy" : "falsy"} return value`,
+			`has a ${traced.returnValue ? "truthy" : "falsy"} return value`
 		);
 	} else {
 		messages[messages.length - 1] = `${
@@ -411,11 +411,11 @@ function formatMessages(
 									call.target,
 									call.methodName,
 									arg,
-									index,
-							  )
-							: arg,
-					),
-				),
+									index
+								)
+							: arg
+					)
+				)
 			);
 		} else {
 			messages.push(argsToLogString(call.args));

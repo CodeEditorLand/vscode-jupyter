@@ -25,7 +25,7 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 		resetVSCodeMocks();
 		session = mock<IKernelSession>();
 		when(session.kernel).thenReturn(
-			instance(mock<Kernel.IKernelConnection>()),
+			instance(mock<Kernel.IKernelConnection>())
 		);
 		kernel = mock<IKernel>();
 		when(kernel.session).thenReturn(instance(session));
@@ -42,13 +42,13 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 
 		const resultPromise =
 			dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 
 		await assert.isRejected(
 			resultPromise,
 			"No no active kernel session.",
-			"Failed to determine if there was an active kernel session",
+			"Failed to determine if there was an active kernel session"
 		);
 	});
 
@@ -62,17 +62,17 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 					output_type: "stream",
 					text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`,
 				},
-			]),
+			])
 		);
 
 		const result =
 			await dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 		assert.equal(result, undefined);
 		assert.deepEqual(
 			stub.getCalls().map((call) => call.lastArg),
-			[kernelGetPandasVersion],
+			[kernelGetPandasVersion]
 		);
 	});
 
@@ -87,17 +87,17 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 					output_type: "stream",
 					text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`,
 				},
-			]),
+			])
 		);
 
 		const result =
 			await dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 		assert.equal(result, undefined);
 		assert.deepEqual(
 			stub.getCalls().map((call) => call.lastArg),
-			[kernelGetPandasVersion],
+			[kernelGetPandasVersion]
 		);
 	});
 
@@ -112,24 +112,24 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 					output_type: "stream",
 					text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`,
 				},
-			]),
+			])
 		);
 
 		const resultPromise =
 			dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 		await assert.isRejected(
 			resultPromise,
 			DataScience.pandasTooOldForViewingFormat(
 				"0.20.",
-				pandasMinimumVersionSupportedByVariableViewer,
+				pandasMinimumVersionSupportedByVariableViewer
 			),
-			"Failed to identify too old pandas",
+			"Failed to identify too old pandas"
 		);
 		assert.deepEqual(
 			stub.getCalls().map((call) => call.lastArg),
-			[kernelGetPandasVersion],
+			[kernelGetPandasVersion]
 		);
 	});
 
@@ -144,24 +144,24 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 					output_type: "stream",
 					text: `${version}\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`,
 				},
-			]),
+			])
 		);
 
 		const resultPromise =
 			dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 		await assert.isRejected(
 			resultPromise,
 			DataScience.pandasTooOldForViewingFormat(
 				"0.10.",
-				pandasMinimumVersionSupportedByVariableViewer,
+				pandasMinimumVersionSupportedByVariableViewer
 			),
-			"Failed to identify too old pandas",
+			"Failed to identify too old pandas"
 		);
 		assert.deepEqual(
 			stub.getCalls().map((call) => call.lastArg),
-			[kernelGetPandasVersion],
+			[kernelGetPandasVersion]
 		);
 	});
 
@@ -170,7 +170,7 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 		stub.returns(
 			Promise.resolve([
 				{ ename: "stdout", output_type: "stream", text: "" },
-			]),
+			])
 		);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,18 +178,18 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(Common.install as any);
 
 		const resultPromise =
 			dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 		assert.equal(await resultPromise, undefined);
 		assert.deepEqual(
 			stub.getCalls().map((call) => call.lastArg),
-			[kernelGetPandasVersion, "%pip install pandas"],
+			[kernelGetPandasVersion, "%pip install pandas"]
 		);
 	});
 
@@ -198,30 +198,30 @@ suite("DataViewerDependencyService (IKernel, Web)", () => {
 		stub.returns(
 			Promise.resolve([
 				{ ename: "stdout", output_type: "stream", text: "" },
-			]),
+			])
 		);
 
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve();
 
 		const resultPromise =
 			dependencyService.checkAndInstallMissingDependencies(
-				instance(kernel),
+				instance(kernel)
 			);
 		await assert.isRejected(
 			resultPromise,
 			DataScience.pandasRequiredForViewing(
-				pandasMinimumVersionSupportedByVariableViewer,
-			),
+				pandasMinimumVersionSupportedByVariableViewer
+			)
 		);
 		assert.deepEqual(
 			stub.getCalls().map((call) => call.lastArg),
-			[kernelGetPandasVersion],
+			[kernelGetPandasVersion]
 		);
 	});
 });

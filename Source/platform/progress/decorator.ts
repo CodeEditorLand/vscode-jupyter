@@ -35,7 +35,7 @@ export function reportAction(action: ReportableAction) {
 	return function (
 		_target: Object,
 		_propertyName: string,
-		descriptor: TypedPropertyDescriptor<PromiseFunction>,
+		descriptor: TypedPropertyDescriptor<PromiseFunction>
 	) {
 		const originalMethod = descriptor.value!;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any,

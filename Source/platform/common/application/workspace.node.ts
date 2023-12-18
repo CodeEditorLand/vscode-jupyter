@@ -18,7 +18,7 @@ export class WorkspaceService extends BaseWorkspaceService {
 	}
 }
 export async function computeWorkingDirectory(
-	resource: Resource,
+	resource: Resource
 ): Promise<string> {
 	const fileExists =
 		resource && resource.scheme === "file"

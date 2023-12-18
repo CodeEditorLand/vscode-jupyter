@@ -44,14 +44,15 @@ export class PoetryInstaller extends ModuleInstaller {
 	}
 
 	constructor(
-        @inject(IServiceContainer) serviceContainer: IServiceContainer,
-        @inject(IConfigurationService) private readonly configurationService: IConfigurationService
-    ) {
-        super(serviceContainer);
-    }
+		@inject(IServiceContainer) serviceContainer: IServiceContainer,
+		@inject(IConfigurationService)
+		private readonly configurationService: IConfigurationService
+	) {
+		super(serviceContainer);
+	}
 
 	public async isSupported(
-		interpreter: PythonEnvironment | Environment,
+		interpreter: PythonEnvironment | Environment
 	): Promise<boolean> {
 		if (
 			("executable" in interpreter
@@ -71,7 +72,7 @@ export class PoetryInstaller extends ModuleInstaller {
 			return isPoetryEnvironmentRelatedToFolder(
 				executable.fsPath,
 				folder.fsPath,
-				this.configurationService.getSettings(undefined).poetryPath,
+				this.configurationService.getSettings(undefined).poetryPath
 			);
 		}
 
@@ -80,7 +81,7 @@ export class PoetryInstaller extends ModuleInstaller {
 
 	protected async getExecutionArgs(
 		moduleName: string,
-		interpreter: PythonEnvironment | Environment,
+		interpreter: PythonEnvironment | Environment
 	): Promise<ExecutionInstallArgs> {
 		const execPath =
 			this.configurationService.getSettings(undefined).poetryPath;

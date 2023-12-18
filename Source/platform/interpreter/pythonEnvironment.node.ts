@@ -33,19 +33,19 @@ class PythonEnvironment {
 			exec(
 				file: string,
 				args: string[],
-				options?: SpawnOptions,
+				options?: SpawnOptions
 			): Promise<ExecutionResult<string>>;
 			shellExec(
 				command: string,
-				timeout: number,
+				timeout: number
 			): Promise<ExecutionResult<string>>;
-		},
+		}
 	) {
 		this.pythonEnvId = interpreter.id;
 		if ("executable" in interpreter) {
 			if (!interpreter.executable.uri) {
 				throw new Error(
-					`interpreter.executable.uri is not defined for ${interpreter.id}`,
+					`interpreter.executable.uri is not defined for ${interpreter.id}`
 				);
 			}
 			this.executable = interpreter.executable.uri;
@@ -59,7 +59,7 @@ class PythonEnvironment {
 		return buildPythonExecInfo(python, pythonArgs);
 	}
 	public getExecutionObservableInfo(
-		pythonArgs: string[] = [],
+		pythonArgs: string[] = []
 	): PythonExecInfo {
 		const python = this.deps.getObservablePythonArgv(this.executable);
 		return buildPythonExecInfo(python, pythonArgs);
@@ -86,7 +86,7 @@ class PythonEnvironment {
 		} catch (ex) {
 			traceWarning(
 				`Module ${moduleName} not installed in environment ${this.pythonEnvId}`,
-				ex,
+				ex
 			);
 			return false;
 		}
@@ -101,12 +101,12 @@ function createDeps(
 	exec: (
 		file: string,
 		args: string[],
-		options?: SpawnOptions,
+		options?: SpawnOptions
 	) => Promise<ExecutionResult<string>>,
 	shellExec: (
 		command: string,
-		options?: ShellOptions,
-	) => Promise<ExecutionResult<string>>,
+		options?: ShellOptions
+	) => Promise<ExecutionResult<string>>
 ) {
 	return {
 		getPythonArgv: (python: Uri) => pythonArgv || [getFilePath(python)],
@@ -116,12 +116,12 @@ function createDeps(
 		exec: async (
 			cmd: string,
 			args: string[],
-			options: SpawnOptions | undefined,
+			options: SpawnOptions | undefined
 		) =>
 			exec(
 				cmd,
 				args,
-				Object.assign({ throwOnStdErr: true }, options || {}),
+				Object.assign({ throwOnStdErr: true }, options || {})
 			),
 		shellExec: async (text: string, timeout: number) =>
 			shellExec(text, { timeout }),
@@ -132,7 +132,7 @@ export function createPythonEnv(
 	interpreter: { uri: Uri; id: string } | Environment,
 	// These are used to generate the deps.
 	procs: IProcessService,
-	fs: IFileSystem,
+	fs: IFileSystem
 ): PythonEnvironment {
 	const deps = createDeps(
 		async (filename: Uri) => fs.exists(filename),
@@ -140,7 +140,7 @@ export function createPythonEnv(
 		undefined,
 		undefined,
 		(file, args, opts) => procs.exec(file, args, opts),
-		(command, opts) => procs.shellExec(command, opts),
+		(command, opts) => procs.shellExec(command, opts)
 	);
 	return new PythonEnvironment(interpreter, deps);
 }
@@ -155,7 +155,7 @@ export function createCondaEnv(
 	interpreter: { uri: Uri; id: string } | Environment,
 	// These are used to generate the deps.
 	procs: IProcessService,
-	fs: IFileSystem,
+	fs: IFileSystem
 ): PythonEnvironment {
 	const runArgs = ["run"];
 	if (condaInfo.name === "") {
@@ -173,7 +173,7 @@ export function createCondaEnv(
 		// See https://github.com/microsoft/vscode-python/issues/8473.
 		undefined,
 		(file, args, opts) => procs.exec(file, args, opts),
-		(command, opts) => procs.shellExec(command, opts),
+		(command, opts) => procs.shellExec(command, opts)
 	);
 	return new PythonEnvironment(interpreter, deps);
 }

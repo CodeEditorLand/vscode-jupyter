@@ -8,7 +8,7 @@ import { IJupyterKernelSpec } from "../../types";
 const shellScripts = ["/bin/sh", "/bin/bash", "/bin/zsh"];
 export function sendKernelSpecTelemetry(
 	kernelSpec: IJupyterKernelSpec,
-	kind: "local" | "remote",
+	kind: "local" | "remote"
 ) {
 	const usesShell = (kernelSpec.argv || []).some((arg) => {
 		arg = arg.toLowerCase();

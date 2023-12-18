@@ -28,13 +28,16 @@ export type SelectJupyterUriCommandSource =
 @injectable()
 export class CodespacesJupyterServerSelector {
 	constructor(
-        @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage,
-        @inject(JupyterConnection) private readonly jupyterConnection: JupyterConnection,
-        @inject(IJupyterServerProviderRegistry) readonly serverProviderRegistry: IJupyterServerProviderRegistry
-    ) {}
+		@inject(IJupyterServerUriStorage)
+		private readonly serverUriStorage: IJupyterServerUriStorage,
+		@inject(JupyterConnection)
+		private readonly jupyterConnection: JupyterConnection,
+		@inject(IJupyterServerProviderRegistry)
+		readonly serverProviderRegistry: IJupyterServerProviderRegistry
+	) {}
 
 	public async addJupyterServer(
-		provider: JupyterServerProviderHandle,
+		provider: JupyterServerProviderHandle
 	): Promise<void> {
 		if (
 			provider.extensionId.toLowerCase() !=
@@ -48,7 +51,7 @@ export class CodespacesJupyterServerSelector {
 		} catch (err) {
 			traceError(
 				`Error in validating the Remote Uri ${provider.id}.${provider.handle}`,
-				err,
+				err
 			);
 			return;
 		}
@@ -57,7 +60,7 @@ export class CodespacesJupyterServerSelector {
 		// Only codespaces uses the old API.
 		if (
 			!this.serverProviderRegistry.jupyterCollections.some(
-				(c) => c.extensionId === provider.extensionId,
+				(c) => c.extensionId === provider.extensionId
 			)
 		) {
 			await this.serverUriStorage.add(provider);

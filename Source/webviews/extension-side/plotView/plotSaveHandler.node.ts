@@ -12,16 +12,18 @@ import {
 
 @injectable()
 export class PlotSaveHandler extends PlotSaveHandlerBase {
-	constructor(@inject(IFileSystemNode) protected readonly fsNode: IFileSystemNode) {
-        super(fsNode);
-    }
+	constructor(
+		@inject(IFileSystemNode) protected readonly fsNode: IFileSystemNode
+	) {
+		super(fsNode);
+	}
 
 	protected override async saveAsPdf(
 		output: NotebookCellOutput,
-		target: Uri,
+		target: Uri
 	) {
 		const svgXml = Buffer.from(
-			output.items.find((item) => item.mime === svgMimeType)!.data,
+			output.items.find((item) => item.mime === svgMimeType)!.data
 		).toString();
 		await saveSvgToPdf(svgXml, this.fsNode, target);
 	}

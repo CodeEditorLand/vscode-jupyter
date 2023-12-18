@@ -40,10 +40,13 @@ export class CondaService {
 	private _previousVersionCall?: Promise<SemVer | undefined>;
 	private _previousFileCall?: Promise<Uri | undefined>;
 	constructor(
-        @inject(IPythonApiProvider) private readonly pythonApi: IPythonApiProvider,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalState: Memento,
-        @inject(IFileSystem) private readonly fs: IFileSystem
-    ) {}
+		@inject(IPythonApiProvider)
+		private readonly pythonApi: IPythonApiProvider,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly globalState: Memento,
+		@inject(IFileSystem) private readonly fs: IFileSystem
+	) {}
 
 	async getCondaVersion() {
 		if (this._version) {
@@ -61,7 +64,7 @@ export class CondaService {
 				})
 				.catch(noop);
 			const cachedInfo = createDeferredFromPromise(
-				this.getCachedInformation(),
+				this.getCachedInformation()
 			);
 			await Promise.race([cachedInfo.promise, latestInfo]);
 			if (cachedInfo.completed && cachedInfo.value?.version) {
@@ -83,19 +86,19 @@ export class CondaService {
 			const latestInfo = this.pythonApi
 				.getApi()
 				.then((api) =>
-					api.getCondaFile ? api.getCondaFile() : undefined,
+					api.getCondaFile ? api.getCondaFile() : undefined
 				);
 			latestInfo
 				.then((file) => {
 					traceVerbose(
-						`Conda file returned by Python Extension is ${file}`,
+						`Conda file returned by Python Extension is ${file}`
 					);
 					this._file = file ? Uri.file(file) : undefined;
 					this.updateCache().catch(noop);
 				})
 				.catch(noop);
 			const cachedInfo = createDeferredFromPromise(
-				this.getCachedInformation(),
+				this.getCachedInformation()
 			);
 			await Promise.race([cachedInfo.promise, latestInfo]);
 			if (cachedInfo.completed && cachedInfo.value?.file) {
@@ -160,7 +163,7 @@ export class CondaService {
 		return this.pythonApi
 			.getApi()
 			.then((api) =>
-				api.getCondaVersion ? api.getCondaVersion() : undefined,
+				api.getCondaVersion ? api.getCondaVersion() : undefined
 			);
 	}
 }

@@ -10,7 +10,7 @@ declare module "./api" {
 		 * @param serverProvider object called back when picking jupyter server URI
 		 */
 		registerRemoteServerProvider(
-			serverProvider: IJupyterUriProvider,
+			serverProvider: IJupyterUriProvider
 		): Disposable;
 		/**
 		 * Adds a remote Jupyter Server to the list of Remote Jupyter servers.
@@ -18,7 +18,7 @@ declare module "./api" {
 		 */
 		addRemoteJupyterServer(
 			providerId: string,
-			handle: string,
+			handle: string
 		): Promise<void>;
 	}
 	//#region Jupyter Server Providers
@@ -54,7 +54,7 @@ declare module "./api" {
 		 */
 		readonly fetch?: (
 			input: RequestInfo,
-			init?: RequestInit,
+			init?: RequestInit
 		) => Promise<Response>;
 		/**
 		 * The `WebSocket` object constructor.
@@ -90,7 +90,7 @@ declare module "./api" {
 		 */
 		handleQuickPick?(
 			item: QuickPickItem,
-			backEnabled: boolean,
+			backEnabled: boolean
 		): Promise<string | "back" | undefined>;
 		/**
 		 * Given the handle, returns the Jupyter Server information.

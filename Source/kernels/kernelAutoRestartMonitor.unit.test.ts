@@ -39,20 +39,20 @@ suite("Jupyter Execution", async () => {
 	setup(() => {
 		kernelProvider = mock<IKernelProvider>();
 		when(kernelProvider.onDidRestartKernel).thenReturn(
-			onDidReStartKernel.event,
+			onDidReStartKernel.event
 		);
 		when(kernelProvider.onDidStartKernel).thenReturn(
-			onDidStartKernel.event,
+			onDidStartKernel.event
 		);
 		when(kernelProvider.onDidDisposeKernel).thenReturn(
-			onDidDisposeKernel.event,
+			onDidDisposeKernel.event
 		);
 		when(kernelProvider.onKernelStatusChanged).thenReturn(
-			onKernelStatusChanged.event,
+			onKernelStatusChanged.event
 		);
 		restartMonitor = new KernelAutoRestartMonitor(
 			disposables,
-			instance(kernelProvider),
+			instance(kernelProvider)
 		);
 	});
 	teardown(() => {
@@ -74,7 +74,7 @@ suite("Jupyter Execution", async () => {
 		verifyProgressDisplay("localJupyter");
 	});
 	function verifyProgressDisplay(
-		sessionType: "remoteJupyter" | "localJupyter" | "localRaw",
+		sessionType: "remoteJupyter" | "localJupyter" | "localRaw"
 	) {
 		restartMonitor.activate();
 

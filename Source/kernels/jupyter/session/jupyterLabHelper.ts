@@ -46,7 +46,7 @@ export class JupyterLabHelper {
 		return this._jupyterlab!;
 	}
 	private constructor(
-		private readonly serverSettings: ServerConnection.ISettings,
+		private readonly serverSettings: ServerConnection.ISettings
 	) {
 		this.kernelSpecManager = new this.jupyterlab.KernelSpecManager({
 			serverSettings: this.serverSettings,
@@ -79,7 +79,7 @@ export class JupyterLabHelper {
 			}
 			if (this.sessionManager && !this.sessionManager.isDisposed) {
 				traceVerbose(
-					"ShutdownSessionAndConnection - dispose session manager",
+					"ShutdownSessionAndConnection - dispose session manager"
 				);
 				// Make sure it finishes startup.
 				await raceTimeout(10_000, this.sessionManager.ready);
@@ -122,7 +122,7 @@ export class JupyterLabHelper {
 
 	public async getRunningKernels(): Promise<IJupyterKernel[]> {
 		const models = await this.jupyterlab.KernelAPI.listRunning(
-			this.serverSettings,
+			this.serverSettings
 		);
 		// Remove duplicates.
 		const dup = new Set<string>();
@@ -135,8 +135,8 @@ export class JupyterLabHelper {
 					name: m.name,
 					lastActivityTime: jsonObject.last_activity
 						? new Date(
-								Date.parse(jsonObject.last_activity.toString()),
-						  )
+								Date.parse(jsonObject.last_activity.toString())
+							)
 						: new Date(),
 					numberOfConnections: jsonObject.connections
 						? parseInt(jsonObject.connections.toString(), 10)
@@ -166,8 +166,8 @@ export class JupyterLabHelper {
 			if (!specsManager) {
 				traceError(
 					`No SessionManager to enumerate kernelspecs (no specs manager). Returning a default kernel. Specs ${JSON.stringify(
-						this.kernelSpecManager?.specs?.kernelspecs || {},
-					)}.`,
+						this.kernelSpecManager?.specs?.kernelspecs || {}
+					)}.`
 				);
 				sendTelemetryEvent(
 					Telemetry.JupyterKernelSpecEnumeration,
@@ -175,7 +175,7 @@ export class JupyterLabHelper {
 					{
 						failed: true,
 						reason: "NoSpecsManager",
-					},
+					}
 				);
 				// If for some reason the session manager refuses to communicate, fall
 				// back to a default. This may not exist, but it's likely.
@@ -189,7 +189,7 @@ export class JupyterLabHelper {
 				waitedForChangeEvent: false,
 			};
 			const getKernelSpecs = (
-				defaultValue: Record<string, ISpecModel | undefined> = {},
+				defaultValue: Record<string, ISpecModel | undefined> = {}
 			) => {
 				return specsManager.specs &&
 					Object.keys(specsManager.specs.kernelspecs).length
@@ -221,8 +221,8 @@ export class JupyterLabHelper {
 				specsManager.specsChanged.connect(resolve);
 				disposables.push(
 					new Disposable(() =>
-						specsManager.specsChanged.disconnect(resolve),
-					),
+						specsManager.specsChanged.disconnect(resolve)
+					)
 				);
 				const allPromises = Promise.all([
 					promise.promise,
@@ -246,7 +246,7 @@ export class JupyterLabHelper {
 									? "SpecsDidNotChangeInTime"
 									: "SessionManagerIsNotReady"
 								: "SpecManagerIsNotReady",
-						},
+						}
 					);
 				}
 				dispose(disposables);
@@ -263,14 +263,14 @@ export class JupyterLabHelper {
 				sendTelemetryEvent(
 					Telemetry.JupyterKernelSpecEnumeration,
 					{ duration: stopWatch.elapsedTime },
-					telemetryProperties,
+					telemetryProperties
 				);
 				return specs;
 			} else {
 				traceError(
 					`Jupyter Lab Helper cannot enumerate kernelspecs. Returning a default kernel. Specs ${JSON.stringify(
-						kernelspecs,
-					)}.`,
+						kernelspecs
+					)}.`
 				);
 				if (!telemetrySent) {
 					sendTelemetryEvent(
@@ -279,7 +279,7 @@ export class JupyterLabHelper {
 						{
 							failed: true,
 							reason: "NoSpecsEventAfterRefresh",
-						},
+						}
 					);
 				}
 				// If for some reason the session manager refuses to communicate, fall

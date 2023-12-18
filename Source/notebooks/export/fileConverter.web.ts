@@ -13,10 +13,10 @@ import { IExportUtil } from "./types";
 @injectable()
 export class FileConverter extends FileConverterBase {
 	constructor(
-        @inject(IExportUtil) override readonly exportUtil: IExportUtil,
-        @inject(ProgressReporter) progressReporter: ProgressReporter,
-        @inject(IConfigurationService) configuration: IConfigurationService
-    ) {
-        super(exportUtil, progressReporter, configuration);
-    }
+		@inject(IExportUtil) override readonly exportUtil: IExportUtil,
+		@inject(ProgressReporter) progressReporter: ProgressReporter,
+		@inject(IConfigurationService) configuration: IConfigurationService
+	) {
+		super(exportUtil, progressReporter, configuration);
+	}
 }

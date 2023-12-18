@@ -52,14 +52,16 @@ export class LocalNotebookKernelSourceSelector
 	private localDisposables: IDisposable[] = [];
 	private cancellationTokenSource: CancellationTokenSource | undefined;
 	constructor(
-        @inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
-        @inject(IMultiStepInputFactory) private readonly multiStepFactory: IMultiStepInputFactory,
-        @inject(PythonEnvironmentFilter)
-        private readonly pythonEnvFilter: PythonEnvironmentFilter,
-        @inject(JupyterConnection) private readonly jupyterConnection: JupyterConnection
-    ) {}
+		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
+		@inject(IMultiStepInputFactory)
+		private readonly multiStepFactory: IMultiStepInputFactory,
+		@inject(PythonEnvironmentFilter)
+		private readonly pythonEnvFilter: PythonEnvironmentFilter,
+		@inject(JupyterConnection)
+		private readonly jupyterConnection: JupyterConnection
+	) {}
 	public async selectLocalKernel(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): Promise<LocalKernelConnectionMetadata | undefined> {
 		// Reject if it's not our type
 		if (
@@ -78,7 +80,7 @@ export class LocalNotebookKernelSourceSelector
 		const state: MultiStepResult = { disposables: [], notebook };
 		const kernelFinder = this.kernelFinder.registered.find(
 			(finder) =>
-				finder.id === ContributedKernelFinderKind.LocalKernelSpec,
+				finder.id === ContributedKernelFinderKind.LocalKernelSpec
 		)!;
 		try {
 			const result = await multiStep.run(
@@ -87,9 +89,9 @@ export class LocalNotebookKernelSourceSelector
 					kernelFinder,
 					this.cancellationTokenSource.token,
 					multiStep,
-					state,
+					state
 				),
-				state,
+				state
 			);
 			if (
 				result === InputFlowAction.cancel ||
@@ -115,14 +117,14 @@ export class LocalNotebookKernelSourceSelector
 		source: IContributedKernelFinder<KernelConnectionMetadata>,
 		token: CancellationToken,
 		multiStep: IMultiStepInput<MultiStepResult>,
-		state: MultiStepResult,
+		state: MultiStepResult
 	) {
 		const provider = new QuickPickKernelItemProvider(
 			state.notebook,
 			source.kind,
 			source,
 			this.pythonEnvFilter,
-			this.jupyterConnection,
+			this.jupyterConnection
 		);
 		state.disposables.push(provider);
 		return this.selectKernel(provider, token, multiStep, state);
@@ -134,7 +136,7 @@ export class LocalNotebookKernelSourceSelector
 		provider: IQuickPickKernelItemProvider,
 		token: CancellationToken,
 		multiStep: IMultiStepInput<MultiStepResult>,
-		state: MultiStepResult,
+		state: MultiStepResult
 	): Promise<InputStep<MultiStepResult> | void> {
 		if (token.isCancellationRequested) {
 			return;
@@ -142,7 +144,7 @@ export class LocalNotebookKernelSourceSelector
 		const selector = new BaseKernelSelector(provider, token);
 		state.disposables.push(selector);
 		const quickPickFactory: CreateAndSelectItemFromQuickPick = (
-			options,
+			options
 		) => {
 			const { quickPick, selection } = multiStep.showLazyLoadQuickPick({
 				...options,

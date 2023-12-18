@@ -14,7 +14,9 @@ export class TrustedKernelPaths implements ITrustedKernelPaths {
 	private readonly programData = process.env["PROGRAMDATA"]
 		? Uri.file(path.normalize(process.env["PROGRAMDATA"]))
 		: undefined;
-	constructor(@inject(IPlatformService) private readonly platform: IPlatformService) {}
+	constructor(
+		@inject(IPlatformService) private readonly platform: IPlatformService
+	) {}
 	private get trustedKernelSpecs(): string[] {
 		return workspace
 			.getConfiguration("jupyter", undefined)
@@ -38,7 +40,7 @@ export class TrustedKernelPaths implements ITrustedKernelPaths {
 				.includes(
 					this.platform.isWindows
 						? kernelPath.path.toLowerCase()
-						: kernelPath.path,
+						: kernelPath.path
 				)
 		) {
 			return true;

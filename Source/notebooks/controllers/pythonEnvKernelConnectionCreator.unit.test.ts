@@ -121,29 +121,29 @@ suite("Python Environment Kernel Connection Creator", () => {
 		disposables.push(onDidChangePythonKernels);
 		disposables.push(onControllerSelected);
 		when(controllerRegistration.onControllerSelected).thenReturn(
-			onControllerSelected.event,
+			onControllerSelected.event
 		);
 		when(serviceContainer.get<IKernelFinder>(IKernelFinder)).thenReturn(
-			instance(kernelFinder),
+			instance(kernelFinder)
 		);
 		when(
-			serviceContainer.get<IInterpreterService>(IInterpreterService),
+			serviceContainer.get<IInterpreterService>(IInterpreterService)
 		).thenReturn(instance(interpreterService));
 		when(
 			serviceContainer.get<IControllerRegistration>(
-				IControllerRegistration,
-			),
+				IControllerRegistration
+			)
 		).thenReturn(instance(controllerRegistration));
 		when(
 			serviceContainer.get<IKernelDependencyService>(
-				IKernelDependencyService,
-			),
+				IKernelDependencyService
+			)
 		).thenReturn(instance(kernelDependencyService));
 		when(localPythonEnvFinder.kind).thenReturn(
-			ContributedKernelFinderKind.LocalPythonEnvironment,
+			ContributedKernelFinderKind.LocalPythonEnvironment
 		);
 		when(localPythonEnvFinder.onDidChangeKernels).thenReturn(
-			onDidChangePythonKernels.event,
+			onDidChangePythonKernels.event
 		);
 		when(kernelFinder.registered).thenReturn([
 			instance(localPythonEnvFinder),
@@ -151,7 +151,7 @@ suite("Python Environment Kernel Connection Creator", () => {
 
 		pythonEnvKernelConnectionCreator = new PythonEnvKernelConnectionCreator(
 			notebook,
-			cancellation.token,
+			cancellation.token
 		);
 		disposables.push(pythonEnvKernelConnectionCreator);
 	});
@@ -160,8 +160,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(
 			mockedVSCodeNamespaces.commands.executeCommand(
 				"python.createEnvironment",
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(undefined);
 
 		const kernel =
@@ -175,8 +175,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(
 			mockedVSCodeNamespaces.commands.executeCommand(
 				"python.createEnvironment",
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve({
 			path: newCondaEnvPath,
 		} as any);
@@ -184,8 +184,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(localPythonEnvFinder.status).thenReturn("idle");
 		when(
 			interpreterService.getInterpreterDetails(
-				deepEqual({ path: newCondaEnvPath }),
-			),
+				deepEqual({ path: newCondaEnvPath })
+			)
 		).thenCall(() => {
 			cancellation.cancel();
 			return Promise.resolve(newCondaPythonKernel.interpreter);
@@ -198,8 +198,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		assert.isUndefined(connection);
 		verify(
 			interpreterService.getInterpreterDetails(
-				deepEqual({ path: newCondaEnvPath }),
-			),
+				deepEqual({ path: newCondaEnvPath })
+			)
 		).once();
 	});
 	test("Installs missing dependencies and returns the kernel connection", async () => {
@@ -207,8 +207,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(
 			mockedVSCodeNamespaces.commands.executeCommand(
 				"python.createEnvironment",
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve({
 			path: newCondaEnvPath,
 		} as any);
@@ -219,11 +219,11 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(localPythonEnvFinder.status).thenReturn("idle");
 		when(
 			interpreterService.getInterpreterDetails(
-				deepEqual({ path: newCondaEnvPath }),
-			),
+				deepEqual({ path: newCondaEnvPath })
+			)
 		).thenResolve(newCondaPythonKernel.interpreter);
 		when(
-			kernelDependencyService.installMissingDependencies(anything()),
+			kernelDependencyService.installMissingDependencies(anything())
 		).thenResolve(KernelInterpreterDependencyResponse.ok);
 
 		const kernel =
@@ -236,14 +236,14 @@ suite("Python Environment Kernel Connection Creator", () => {
 		assert.strictEqual(kernelConnection, newCondaPythonKernel);
 		verify(
 			interpreterService.getInterpreterDetails(
-				deepEqual({ path: newCondaEnvPath }),
-			),
+				deepEqual({ path: newCondaEnvPath })
+			)
 		).once();
 		verify(
-			kernelDependencyService.installMissingDependencies(anything()),
+			kernelDependencyService.installMissingDependencies(anything())
 		).once();
 		const args = capture(
-			kernelDependencyService.installMissingDependencies,
+			kernelDependencyService.installMissingDependencies
 		).first()[0];
 		assert.strictEqual(args.cannotChangeKernels, true);
 		assert.strictEqual(args.installWithoutPrompting, true);
@@ -256,8 +256,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(
 			mockedVSCodeNamespaces.commands.executeCommand(
 				"python.createEnvironment",
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve({
 			path: newCondaEnvPath,
 		} as any);
@@ -265,8 +265,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		when(localPythonEnvFinder.status).thenReturn("idle");
 		when(
 			interpreterService.getInterpreterDetails(
-				deepEqual({ path: newCondaEnvPath }),
-			),
+				deepEqual({ path: newCondaEnvPath })
+			)
 		).thenCall(async () => {
 			const differentController = mock<IVSCodeNotebookController>();
 			const differentConnection =
@@ -275,7 +275,7 @@ suite("Python Environment Kernel Connection Creator", () => {
 					kernelSpec: instance(mock<IJupyterKernelSpec>()),
 				});
 			when(differentController.connection).thenReturn(
-				differentConnection,
+				differentConnection
 			);
 			onControllerSelected.fire({
 				notebook,
@@ -292,8 +292,8 @@ suite("Python Environment Kernel Connection Creator", () => {
 		assert.isUndefined(connection);
 		verify(
 			interpreterService.getInterpreterDetails(
-				deepEqual({ path: newCondaEnvPath }),
-			),
+				deepEqual({ path: newCondaEnvPath })
+			)
 		).once();
 	});
 });

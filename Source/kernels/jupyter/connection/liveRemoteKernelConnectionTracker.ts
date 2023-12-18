@@ -43,26 +43,30 @@ export class LiveRemoteKernelConnectionUsageTracker
 	private usedRemoteKernelServerIdsAndSessions: UriSessionUsedByResources =
 		{};
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IJupyterServerUriStorage) private readonly uriStorage: IJupyterServerUriStorage,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly memento: Memento
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IJupyterServerUriStorage)
+		private readonly uriStorage: IJupyterServerUriStorage,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		private readonly memento: Memento
+	) {}
 	public activate(): void {
 		this.usedRemoteKernelServerIdsAndSessions =
 			this.memento.get<UriSessionUsedByResources>(
 				mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,
-				{},
+				{}
 			);
 		this.uriStorage.onDidRemove(
 			this.onDidRemoveServers,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
 	public wasKernelUsed(connection: LiveRemoteKernelConnectionMetadata) {
 		const id = generateIdFromRemoteProvider(
-			connection.serverProviderHandle,
+			connection.serverProviderHandle
 		);
 		return (
 			id in this.usedRemoteKernelServerIdsAndSessions &&
@@ -74,7 +78,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 	public trackKernelIdAsUsed(
 		resource: Uri,
 		serverId: JupyterServerProviderHandle,
-		kernelId: string,
+		kernelId: string
 	) {
 		const id = generateIdFromRemoteProvider(serverId);
 		this.usedRemoteKernelServerIdsAndSessions[id] =
@@ -89,14 +93,14 @@ export class LiveRemoteKernelConnectionUsageTracker
 		this.memento
 			.update(
 				mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,
-				this.usedRemoteKernelServerIdsAndSessions,
+				this.usedRemoteKernelServerIdsAndSessions
 			)
 			.then(noop, noop);
 	}
 	public trackKernelIdAsNotUsed(
 		resource: Uri,
 		serverId: JupyterServerProviderHandle,
-		kernelId: string,
+		kernelId: string
 	) {
 		const id = generateIdFromRemoteProvider(serverId);
 		if (!(id in this.usedRemoteKernelServerIdsAndSessions)) {
@@ -123,7 +127,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 		this.memento
 			.update(
 				mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,
-				this.usedRemoteKernelServerIdsAndSessions,
+				this.usedRemoteKernelServerIdsAndSessions
 			)
 			.then(noop, noop);
 	}
@@ -134,7 +138,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 			this.memento
 				.update(
 					mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,
-					this.usedRemoteKernelServerIdsAndSessions,
+					this.usedRemoteKernelServerIdsAndSessions
 				)
 				.then(noop, noop);
 		});

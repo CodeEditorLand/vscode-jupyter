@@ -42,12 +42,12 @@ interface IVariableExplorerProps {
 	containerHeight: number;
 	showDataExplorer(
 		targetVariable: IJupyterVariable,
-		numberOfColumns: number,
+		numberOfColumns: number
 	): void;
 	closeVariableExplorer(): void;
 	setVariableExplorerHeight(
 		containerHeight: number,
-		gridHeight: number,
+		gridHeight: number
 	): void;
 	pageIn(startIndex: number, pageSize: number): void;
 	sort(sortColumn: string, sortAscending: boolean): void;
@@ -203,7 +203,7 @@ export class VariableExplorer extends React.Component<
 
 	public override shouldComponentUpdate(
 		nextProps: IVariableExplorerProps,
-		prevState: IVariableState,
+		prevState: IVariableState
 	): boolean {
 		if (this.props.fontSize !== nextProps.fontSize) {
 			// Size has changed, recompute page size
@@ -249,16 +249,14 @@ export class VariableExplorer extends React.Component<
 					<div
 						className="variable-explorer"
 						ref={this.variableExplorerRef}
-						style={variableExplorerStyles}
-					>
+						style={variableExplorerStyles}>
 						<div
 							className="variable-explorer-menu-bar"
-							ref={this.variableExplorerMenuBarRef}
-						>
+							ref={this.variableExplorerMenuBarRef}>
 							<label className="inputLabel variable-explorer-label">
 								{getLocString(
 									"collapseVariableExplorerLabel",
-									"Variables",
+									"Variables"
 								)}
 							</label>
 						</div>
@@ -288,9 +286,8 @@ export class VariableExplorer extends React.Component<
 				role="table"
 				aria-label={getLocString(
 					"collapseVariableExplorerLabel",
-					"Variables",
-				)}
-			>
+					"Variables"
+				)}>
 				<AdazzleReactDataGrid
 					columns={this.gridColumns.map((c) => {
 						return { ...defaultColumnProperties, ...c };
@@ -315,7 +312,7 @@ export class VariableExplorer extends React.Component<
 	private saveCurrentSize() {
 		this.props.setVariableExplorerHeight(
 			this.state.containerHeight,
-			this.state.gridHeight,
+			this.state.gridHeight
 		);
 	}
 
@@ -423,7 +420,7 @@ export class VariableExplorer extends React.Component<
 						supportsDataExplorer: variable.supportsDataExplorer,
 						variable,
 						numberOfColumns: this.getColumnCountFromShape(
-							variable.shape,
+							variable.shape
 						),
 					},
 					name: variable.name,
@@ -435,8 +432,8 @@ export class VariableExplorer extends React.Component<
 							? value
 							: getLocString(
 									"variableLoadingValue",
-									"Loading...",
-							  ),
+									"Loading..."
+								),
 				};
 			}
 		}
@@ -464,8 +461,8 @@ export class VariableExplorer extends React.Component<
 					16,
 					Math.round(
 						this.variableExplorerRef.current.offsetHeight /
-							this.props.fontSize,
-					),
+							this.props.fontSize
+					)
 				);
 			} else {
 				this.pageSize = 50;
@@ -485,7 +482,7 @@ export class VariableExplorer extends React.Component<
 			this.props.refreshCount !== this.requestedRefreshCount;
 		// eslint-disable-next-line @typescript-eslint/restrict-plus-operands
 		const notRequested = !this.requestedPages.find(
-			(n) => n <= index && index < n + pageSize,
+			(n) => n <= index && index < n + pageSize
 		);
 		if (!haveValue && (newExecution || notRequested)) {
 			// Try to find a page of data around this index.
@@ -542,14 +539,14 @@ export class VariableExplorer extends React.Component<
 		) {
 			this.props.showDataExplorer(
 				row.buttons.variable,
-				row.buttons.numberOfColumns,
+				row.buttons.numberOfColumns
 			);
 		}
 	};
 
 	private sortRows(
 		sortColumn: string,
-		sortDirection: "ASC" | "DESC" | "NONE",
+		sortDirection: "ASC" | "DESC" | "NONE"
 	) {
 		const sortAscending = sortDirection === "ASC";
 		if (sortDirection === "NONE") {

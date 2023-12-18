@@ -13,7 +13,7 @@ import { dispose } from "./utils/lifecycle";
 
 export function isCancellationError(
 	ex: Error,
-	includeErrorsWithTheMessageCanceled = false,
+	includeErrorsWithTheMessageCanceled = false
 ) {
 	if (typeof ex !== "object" || !ex) {
 		return false;
@@ -113,11 +113,11 @@ export function wrapCancellationTokens(...tokens: CancellationToken[]) {
 		token.onCancellationRequested(
 			() => wrappedCancellationToken.cancel(),
 			undefined,
-			disposables,
+			disposables
 		);
 	}
 	const oldDispose = wrappedCancellationToken.dispose.bind(
-		wrappedCancellationToken,
+		wrappedCancellationToken
 	);
 	wrappedCancellationToken.dispose = () => {
 		oldDispose();

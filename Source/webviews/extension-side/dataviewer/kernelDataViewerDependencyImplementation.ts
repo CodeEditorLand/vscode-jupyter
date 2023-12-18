@@ -27,7 +27,7 @@ function kernelPackaging(kernel: IKernel): "%conda" | "%pip" {
 export class KernelDataViewerDependencyImplementation extends BaseDataViewerDependencyImplementation<IKernel> {
 	protected async execute(
 		command: string,
-		kernel: IKernel,
+		kernel: IKernel
 	): Promise<(string | undefined)[]> {
 		if (!kernel.session?.kernel) {
 			throw new SessionDisposedError();
@@ -48,7 +48,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 		if (!output?.includes(separator)) {
 			traceWarning(
 				DataScience.failedToGetVersionOfPandas,
-				`Output is ${output}`,
+				`Output is ${output}`
 			);
 			return "";
 		}
@@ -68,7 +68,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 				Telemetry.UserInstalledPandas,
 				undefined,
 				undefined,
-				e,
+				e
 			);
 			throw new Error(DataScience.failedToInstallPandas);
 		}

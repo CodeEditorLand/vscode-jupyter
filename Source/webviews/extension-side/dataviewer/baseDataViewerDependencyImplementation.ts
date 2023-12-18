@@ -26,21 +26,21 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 	implements IDataViewerDependencyService
 {
 	abstract checkAndInstallMissingDependencies(
-		executionEnvironment: IKernel | PythonEnvironment,
+		executionEnvironment: IKernel | PythonEnvironment
 	): Promise<void>;
 
 	protected abstract _getVersion(
 		executer: TExecuter,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<string | undefined>;
 	protected abstract _doInstall(
 		executer: TExecuter,
-		tokenSource: CancellationTokenSource,
+		tokenSource: CancellationTokenSource
 	): Promise<void>;
 
 	protected async getVersion(
 		executer: TExecuter,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<SemVer | undefined> {
 		try {
 			const version = await this._getVersion(executer, token);
@@ -58,24 +58,24 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 	protected async promptInstall(
 		executer: TExecuter,
 		tokenSource: CancellationTokenSource,
-		version?: string,
+		version?: string
 	): Promise<void> {
 		let message = version
 			? DataScience.pandasTooOldForViewingFormat(
 					version,
-					pandasMinimumVersionSupportedByVariableViewer,
-			  )
+					pandasMinimumVersionSupportedByVariableViewer
+				)
 			: DataScience.pandasRequiredForViewing(
-					pandasMinimumVersionSupportedByVariableViewer,
-			  );
+					pandasMinimumVersionSupportedByVariableViewer
+				);
 
 		let selection = isCodeSpace()
 			? Common.install
 			: await window.showErrorMessage(
 					message,
 					{ modal: true },
-					Common.install,
-			  );
+					Common.install
+				);
 
 		if (selection === Common.install) {
 			await this._doInstall(executer, tokenSource);
@@ -91,7 +91,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 		try {
 			const pandasVersion = await this.getVersion(
 				executer,
-				tokenSource.token,
+				tokenSource.token
 			);
 
 			if (tokenSource.token.isCancellationRequested) {
@@ -102,7 +102,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 			if (pandasVersion) {
 				if (
 					pandasVersion.compare(
-						pandasMinimumVersionSupportedByVariableViewer,
+						pandasMinimumVersionSupportedByVariableViewer
 					) > 0
 				) {
 					sendTelemetryEvent(Telemetry.PandasOK);

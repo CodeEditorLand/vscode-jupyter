@@ -109,7 +109,7 @@ export class KernelProcess implements IKernelProcess {
 		return (
 			isPythonKernelConnection(this.kernelConnectionMetadata) &&
 			isKernelLaunchedViaLocalPythonIPyKernel(
-				this.kernelConnectionMetadata,
+				this.kernelConnectionMetadata
 			)
 		);
 	}
@@ -150,14 +150,14 @@ export class KernelProcess implements IKernelProcess {
 		private readonly jupyterSettings: IJupyterSettings,
 		private readonly jupyterPaths: JupyterPaths,
 		private readonly pythonKernelInterruptDaemon: PythonKernelInterruptDaemon,
-		private readonly platform: IPlatformService,
+		private readonly platform: IPlatformService
 	) {
 		this._kernelConnectionMetadata = kernelConnectionMetadata;
 	}
 	public async interrupt(): Promise<void> {
 		if (!this.canInterrupt) {
 			throw new Error(
-				"Kernel interrupt not supported in KernelProcess.ts",
+				"Kernel interrupt not supported in KernelProcess.ts"
 			);
 		} else if (
 			this._kernelConnectionMetadata.kernelSpec.interrupt_mode !==
@@ -187,7 +187,7 @@ export class KernelProcess implements IKernelProcess {
 	public async launch(
 		workingDirectory: string,
 		timeout: number,
-		cancelToken: CancellationToken,
+		cancelToken: CancellationToken
 	): Promise<void> {
 		if (this.launchedOnce) {
 			throw new Error("Kernel has already been launched.");
@@ -199,7 +199,7 @@ export class KernelProcess implements IKernelProcess {
 		Cancellation.throwIfCanceled(cancelToken);
 		const exeObs = await this.launchAsObservable(
 			workingDirectory,
-			cancelToken,
+			cancelToken
 		);
 		const proc = exeObs.proc;
 		if (cancelToken.isCancellationRequested) {
@@ -219,20 +219,20 @@ export class KernelProcess implements IKernelProcess {
 				exitCode = exitCode || providedExitCode;
 				if (this.disposed) {
 					traceVerbose(
-						`KernelProcess Exited, Exit Code - ${exitCode}`,
+						`KernelProcess Exited, Exit Code - ${exitCode}`
 					);
 					return;
 				}
 				traceVerbose(
 					`KernelProcess Exited, Exit Code - ${exitCode}`,
-					stderrProc,
+					stderrProc
 				);
 				if (!exitEventFired) {
 					this.exitEvent.fire({
 						exitCode: exitCode || undefined,
 						reason:
 							getTelemetrySafeErrorMessageFromPythonTraceback(
-								stderrProc,
+								stderrProc
 							) || stderrProc,
 					});
 					exitEventFired = true;
@@ -243,8 +243,8 @@ export class KernelProcess implements IKernelProcess {
 						new KernelProcessExitedError(
 							exitCode || -1,
 							stderr,
-							this.kernelConnectionMetadata,
-						),
+							this.kernelConnectionMetadata
+						)
 					);
 				}
 			});
@@ -275,7 +275,7 @@ export class KernelProcess implements IKernelProcess {
 
 				if (output.out.trim().length) {
 					traceWarning(
-						`StdErr from Kernel Process ${output.out.trim()}`,
+						`StdErr from Kernel Process ${output.out.trim()}`
 					);
 				}
 			} else {
@@ -285,7 +285,7 @@ export class KernelProcess implements IKernelProcess {
 					stdout = stdout.replace(kernelOutputToNotLog, "");
 					stdout = stdout.replace(
 						kernelOutputToNotLog.split(/\r?\n/).join(os.EOL),
-						"",
+						""
 					);
 					// Strip the leading space, as we've removed some leading text.
 					stdout = stdout.trimStart();
@@ -345,12 +345,12 @@ export class KernelProcess implements IKernelProcess {
 				tcpPortUsed.waitUntilUsed(
 					this.connection.shell_port,
 					200,
-					timeout,
+					timeout
 				),
 				tcpPortUsed.waitUntilUsed(
 					this.connection.iopub_port,
 					200,
-					timeout,
+					timeout
 				),
 			]).catch((ex) => {
 				if (cancelToken.isCancellationRequested || deferred.rejected) {
@@ -363,7 +363,7 @@ export class KernelProcess implements IKernelProcess {
 				// Possible we're blocking it.
 				traceWarning(
 					`Waited ${stopwtach.elapsedTime}ms for kernel to start`,
-					ex,
+					ex
 				);
 
 				// For the new experiment, we don't want to throw an error if the kernel doesn't start.
@@ -371,15 +371,15 @@ export class KernelProcess implements IKernelProcess {
 					// Throw an error we recognize.
 					return Promise.reject(
 						new KernelPortNotUsedTimeoutError(
-							this.kernelConnectionMetadata,
-						),
+							this.kernelConnectionMetadata
+						)
 					);
 				}
 			});
 			await raceCancellationError(
 				cancelToken,
 				portsUsed,
-				deferred.promise,
+				deferred.promise
 			);
 		} catch (e) {
 			const stdErrToLog = (stderrProc || stderr || "").trim();
@@ -419,7 +419,7 @@ export class KernelProcess implements IKernelProcess {
 				traceInfoIfCI(
 					`KernelDiedError raised`,
 					errorMessage,
-					stderrProc + "\n" + stderr + "\n",
+					stderrProc + "\n" + stderr + "\n"
 				);
 				console.error(`KernelDiedError raised`, e);
 				throw new KernelDiedError(
@@ -428,7 +428,7 @@ export class KernelProcess implements IKernelProcess {
 					stderrProc + "\n" + stderr + "\n",
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					e as any,
-					this.kernelConnectionMetadata,
+					this.kernelConnectionMetadata
 				);
 			}
 		}
@@ -447,7 +447,7 @@ export class KernelProcess implements IKernelProcess {
 		this._disposingPromise = (async () => {
 			await raceTimeout(
 				1_000, // Wait for a max of 1s, we don't want to delay killing the kernel process.
-				this.killChildProcesses(this._process?.pid).catch(noop),
+				this.killChildProcesses(this._process?.pid).catch(noop)
 			);
 			try {
 				this.interrupter?.dispose().catch(noop);
@@ -463,8 +463,8 @@ export class KernelProcess implements IKernelProcess {
 						.catch((ex) =>
 							traceWarning(
 								`Failed to delete connection file ${this.connectionFile} for pid ${pid}`,
-								ex,
-							),
+								ex
+							)
 						);
 				}
 			});
@@ -495,11 +495,11 @@ export class KernelProcess implements IKernelProcess {
 						if (ex) {
 							traceWarning(
 								`Failed to kill children for ${pid}`,
-								ex,
+								ex
 							);
 						} else {
 							pids.forEach((procId) =>
-								ProcessService.kill(procId),
+								ProcessService.kill(procId)
 							);
 						}
 						resolve();
@@ -547,15 +547,15 @@ export class KernelProcess implements IKernelProcess {
 		// First check to see if we have a kernelspec that expects a connection file,
 		// Error if we don't have one. We expect '-f', '{connectionfile}' in our launch args
 		const indexOfConnectionFile = findIndexOfConnectionFile(
-			this.launchKernelSpec,
+			this.launchKernelSpec
 		);
 
 		// Technically if we don't have a kernelspec then index should already be -1, but the check here lets us avoid ? on the type
 		if (indexOfConnectionFile === -1) {
 			throw new Error(
 				`Connection file not found in kernelspec json args, ${this.launchKernelSpec.argv.join(
-					" ",
-				)}`,
+					" "
+				)}`
 			);
 		}
 
@@ -566,8 +566,8 @@ export class KernelProcess implements IKernelProcess {
 		) {
 			throw new Error(
 				`Connection file not found in kernelspec json args, ${this.launchKernelSpec.argv.join(
-					" ",
-				)}`,
+					" "
+				)}`
 			);
 		}
 
@@ -579,16 +579,16 @@ export class KernelProcess implements IKernelProcess {
 
 			// Add in our connection command line args
 			this.launchKernelSpec.argv.push(
-				...this.addPythonConnectionArgs(this.connectionFile),
+				...this.addPythonConnectionArgs(this.connectionFile)
 			);
 			await this.fileSystem.writeFile(
 				this.connectionFile,
-				JSON.stringify(this._connection),
+				JSON.stringify(this._connection)
 			);
 		} else {
 			await this.fileSystem.writeFile(
 				this.connectionFile,
-				JSON.stringify(this._connection),
+				JSON.stringify(this._connection)
 			);
 
 			// Replace the connection file argument with this file
@@ -596,23 +596,23 @@ export class KernelProcess implements IKernelProcess {
 			// hence we should not replace the entire entry, but just replace the text `{connection_file}`
 			// See https://github.com/microsoft/vscode-jupyter/issues/7203
 			const quotedConnectionFile = this.connectionFile.fsPath.includes(
-				" ",
+				" "
 			)
 				? `"${this.connectionFile.fsPath}"` // Quoted for spaces in file paths.
 				: this.connectionFile.fsPath;
 			if (
 				this.launchKernelSpec.argv[indexOfConnectionFile].includes(
-					"--connection-file",
+					"--connection-file"
 				)
 			) {
 				this.launchKernelSpec.argv[indexOfConnectionFile] =
 					this.launchKernelSpec.argv[indexOfConnectionFile].replace(
 						connectionFilePlaceholder,
-						quotedConnectionFile,
+						quotedConnectionFile
 					);
 			} else if (
 				this.launchKernelSpec.argv[indexOfConnectionFile].includes(
-					`=${connectionFilePlaceholder}`,
+					`=${connectionFilePlaceholder}`
 				) &&
 				!this.launchKernelSpec.argv[indexOfConnectionFile]
 					.trim()
@@ -621,7 +621,7 @@ export class KernelProcess implements IKernelProcess {
 				this.launchKernelSpec.argv[indexOfConnectionFile] =
 					this.launchKernelSpec.argv[indexOfConnectionFile].replace(
 						connectionFilePlaceholder,
-						quotedConnectionFile,
+						quotedConnectionFile
 					);
 			} else {
 				// Even though we don't have `--connection-file=${connection_file}` don't assume it won't be `--config-file=${connection_file}` for other kernels.
@@ -629,7 +629,7 @@ export class KernelProcess implements IKernelProcess {
 				this.launchKernelSpec.argv[indexOfConnectionFile] =
 					this.launchKernelSpec.argv[indexOfConnectionFile].replace(
 						connectionFilePlaceholder,
-						this.connectionFile.fsPath,
+						this.connectionFile.fsPath
 					);
 			}
 		}
@@ -673,19 +673,19 @@ export class KernelProcess implements IKernelProcess {
 
 	private async launchAsObservable(
 		workingDirectory: string,
-		@ignoreLogging() cancelToken: CancellationToken,
+		@ignoreLogging() cancelToken: CancellationToken
 	) {
 		let exeObs: ObservableExecutionResult<string>;
 		traceVerbose(
 			`Launching kernel ${
 				this.kernelConnectionMetadata.id
 			} for ${getDisplayPath(this.resource)} in ${getDisplayPath(
-				workingDirectory,
+				workingDirectory
 			)} with ports ${this.connection.control_port}, ${
 				this.connection.hb_port
 			}, ${this.connection.iopub_port}, ${this.connection.shell_port}, ${
 				this.connection.stdin_port
-			}`,
+			}`
 		);
 		if (
 			this.isPythonKernel &&
@@ -705,7 +705,7 @@ export class KernelProcess implements IKernelProcess {
 					this.resource,
 					this._kernelConnectionMetadata.interpreter,
 					this._kernelConnectionMetadata.kernelSpec,
-					cancelToken,
+					cancelToken
 				),
 			]);
 
@@ -720,12 +720,12 @@ export class KernelProcess implements IKernelProcess {
 					// See the code ProcessPollingWindows inside of ipykernel for it listening to this event handle.
 					env.JPY_INTERRUPT_EVENT = `${handle}`;
 					traceInfoIfCI(
-						`Got interrupt handle kernel id ${handle} for interpreter ${this._kernelConnectionMetadata.interpreter.id}`,
+						`Got interrupt handle kernel id ${handle} for interpreter ${this._kernelConnectionMetadata.interpreter.id}`
 					);
 				} catch (ex) {
 					traceError(
 						`Failed to get interrupt handle kernel id ${this._kernelConnectionMetadata.id} for interpreter ${this._kernelConnectionMetadata.interpreter.id}`,
-						ex,
+						ex
 					);
 				}
 			}
@@ -746,7 +746,7 @@ export class KernelProcess implements IKernelProcess {
 			// First part of argument is always the executable.
 			const executable = this.launchKernelSpec.argv[0];
 			traceInfo(
-				`Launching Raw Kernel ${this.launchKernelSpec.display_name} # ${executable}`,
+				`Launching Raw Kernel ${this.launchKernelSpec.display_name} # ${executable}`
 			);
 			const [executionService, env] = await Promise.all([
 				this.processExecutionFactory.create(this.resource, cancelToken),
@@ -758,7 +758,7 @@ export class KernelProcess implements IKernelProcess {
 					this.resource,
 					this._kernelConnectionMetadata.interpreter,
 					this.launchKernelSpec,
-					cancelToken,
+					cancelToken
 				),
 			]);
 			Cancellation.throwIfCanceled(cancelToken);
@@ -783,7 +783,7 @@ export class KernelProcess implements IKernelProcess {
 			this.interrupter =
 				await this.pythonKernelInterruptDaemon.createInterrupter(
 					this._kernelConnectionMetadata.interpreter!,
-					this.resource,
+					this.resource
 				);
 		}
 		return this.interrupter.handle;
@@ -801,14 +801,14 @@ function stripUnwantedMessages(output: string) {
 	if (
 		lines.some((line) =>
 			line.includes(
-				`FutureWarning: Supporting extra quotes around strings is deprecated in traitlets 5.0.`,
-			),
+				`FutureWarning: Supporting extra quotes around strings is deprecated in traitlets 5.0.`
+			)
 		) &&
 		lines.some((line) => line.trim() === "warn(") &&
 		lines.some((line) =>
 			line.includes(
-				`FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0.`,
-			),
+				`FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0.`
+			)
 		)
 	) {
 		// No point displaying false positives.
@@ -818,11 +818,11 @@ function stripUnwantedMessages(output: string) {
 			.filter((line) => {
 				return (
 					!line.endsWith(
-						`FutureWarning: Supporting extra quotes around strings is deprecated in traitlets 5.0. You can use 'hmac-sha256' instead of '"hmac-sha256"' if you require traitlets >=5.`,
+						`FutureWarning: Supporting extra quotes around strings is deprecated in traitlets 5.0. You can use 'hmac-sha256' instead of '"hmac-sha256"' if you require traitlets >=5.`
 					) &&
 					line.trim() !== "warn(" &&
 					!line.includes(
-						`FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0. Use`,
+						`FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0. Use`
 					)
 				);
 			})

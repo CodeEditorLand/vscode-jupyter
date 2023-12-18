@@ -17,26 +17,29 @@ export class WorkspaceInterpreterTracker
 {
 	public static isActiveWorkspaceInterpreter: (
 		resource: Resource,
-		interpreter?: PythonEnvironment,
+		interpreter?: PythonEnvironment
 	) => boolean = () => false;
 	constructor(
-        @inject(IWorkspaceInterpreterTracker)
-        @optional()
-        private readonly workspaceInterpreterTracker: IWorkspaceInterpreterTracker | undefined
-    ) {
-        WorkspaceInterpreterTracker.isActiveWorkspaceInterpreter = this.isActiveWorkspaceInterpreterImpl.bind(this);
-    }
+		@inject(IWorkspaceInterpreterTracker)
+		@optional()
+		private readonly workspaceInterpreterTracker:
+			| IWorkspaceInterpreterTracker
+			| undefined
+	) {
+		WorkspaceInterpreterTracker.isActiveWorkspaceInterpreter =
+			this.isActiveWorkspaceInterpreterImpl.bind(this);
+	}
 	public activate() {
 		this.workspaceInterpreterTracker?.activate();
 	}
 	public isActiveWorkspaceInterpreterImpl(
 		resource: Resource,
-		interpreter?: PythonEnvironment,
+		interpreter?: PythonEnvironment
 	) {
 		return (
 			this.workspaceInterpreterTracker?.isActiveWorkspaceInterpreter(
 				resource,
-				interpreter,
+				interpreter
 			) ?? false
 		);
 	}

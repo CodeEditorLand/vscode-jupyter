@@ -12,7 +12,10 @@ export class RawNotebookSupportedService
 	implements IRawNotebookSupportedService
 {
 	private _isSupported?: boolean;
-	constructor(@inject(IConfigurationService) private readonly configuration: IConfigurationService) {}
+	constructor(
+		@inject(IConfigurationService)
+		private readonly configuration: IConfigurationService
+	) {}
 
 	// Check to see if we have all that we need for supporting raw kernel launch
 	public get isSupported(): boolean {

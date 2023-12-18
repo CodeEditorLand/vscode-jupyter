@@ -39,24 +39,27 @@ export class JupyterInterpreterService {
 	}
 
 	constructor(
-        @inject(JupyterInterpreterStateStore) private readonly interpreterSelectionState: JupyterInterpreterStateStore,
-        @inject(JupyterInterpreterSelector) private readonly jupyterInterpreterSelector: JupyterInterpreterSelector,
-        @inject(JupyterInterpreterDependencyService)
-        private readonly interpreterConfiguration: JupyterInterpreterDependencyService,
-        @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry
-    ) {
-        workspace.onDidGrantWorkspaceTrust(
-            () => {
-                if (this.getInitialInterpreterPromiseFailed) {
-                    this.getInitialInterpreterPromise = undefined;
-                    this.getInitialInterpreterPromiseFailed = false;
-                }
-            },
-            this,
-            disposables
-        );
-    }
+		@inject(JupyterInterpreterStateStore)
+		private readonly interpreterSelectionState: JupyterInterpreterStateStore,
+		@inject(JupyterInterpreterSelector)
+		private readonly jupyterInterpreterSelector: JupyterInterpreterSelector,
+		@inject(JupyterInterpreterDependencyService)
+		private readonly interpreterConfiguration: JupyterInterpreterDependencyService,
+		@inject(IInterpreterService)
+		private readonly interpreterService: IInterpreterService,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry
+	) {
+		workspace.onDidGrantWorkspaceTrust(
+			() => {
+				if (this.getInitialInterpreterPromiseFailed) {
+					this.getInitialInterpreterPromise = undefined;
+					this.getInitialInterpreterPromiseFailed = false;
+				}
+			},
+			this,
+			disposables
+		);
+	}
 	/**
 	 * Gets the selected interpreter configured to run Jupyter.
 	 *
@@ -65,7 +68,7 @@ export class JupyterInterpreterService {
 	 * @memberof JupyterInterpreterService
 	 */
 	public async getSelectedInterpreter(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment | undefined> {
 		// Before we return _selected interpreter make sure that we have run our initial set interpreter once
 		// because _selectedInterpreter can be changed by other function and at other times, this promise
@@ -78,11 +81,11 @@ export class JupyterInterpreterService {
 	// To be run one initial time. Check our saved locations and then current interpreter to try to start off
 	// with a valid jupyter interpreter
 	public async setInitialInterpreter(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment | undefined> {
 		if (!this.getInitialInterpreterPromise) {
 			this.getInitialInterpreterPromise = this.getInitialInterpreterImpl(
-				token,
+				token
 			).then((result) => {
 				// Set ourselves as a valid interpreter if we found something
 				if (result) {
@@ -91,7 +94,7 @@ export class JupyterInterpreterService {
 				return result;
 			});
 			this.getInitialInterpreterPromise.catch(
-				() => (this.getInitialInterpreterPromiseFailed = true),
+				() => (this.getInitialInterpreterPromiseFailed = true)
 			);
 		}
 
@@ -116,7 +119,7 @@ export class JupyterInterpreterService {
 		const result =
 			await this.interpreterConfiguration.installMissingDependencies(
 				interpreter,
-				undefined,
+				undefined
 			);
 		switch (result) {
 			case JupyterInterpreterDependencyResponse.ok: {
@@ -134,7 +137,7 @@ export class JupyterInterpreterService {
 	// If there is no jupyter selected interpreter, prompt for install into the
 	// current active interpreter and set as active if successful
 	public async installMissingDependencies(
-		err?: JupyterInstallError,
+		err?: JupyterInstallError
 	): Promise<JupyterInterpreterDependencyResponse> {
 		const jupyterInterpreter = await this.getSelectedInterpreter();
 		let interpreter = jupyterInterpreter;
@@ -147,7 +150,7 @@ export class JupyterInterpreterService {
 					const selection = await window.showErrorMessage(
 						err.message,
 						{ modal: true },
-						DataScience.selectDifferentJupyterInterpreter,
+						DataScience.selectDifferentJupyterInterpreter
 					);
 					if (
 						selection !==
@@ -167,7 +170,7 @@ export class JupyterInterpreterService {
 		const response =
 			await this.interpreterConfiguration.installMissingDependencies(
 				interpreter,
-				err,
+				err
 			);
 		if (
 			response ===
@@ -191,7 +194,7 @@ export class JupyterInterpreterService {
 	// Set the specified interpreter as our current selected interpreter. Public so can
 	// be set by the test code.
 	public async setAsSelectedInterpreter(
-		interpreter: PythonEnvironment,
+		interpreter: PythonEnvironment
 	): Promise<void> {
 		// Make sure that our initial set has happened before we allow a set so that
 		// calculation of the initial interpreter doesn't clobber the existing one
@@ -203,7 +206,7 @@ export class JupyterInterpreterService {
 		this._selectedInterpreter = interpreter;
 		this._onDidChangeInterpreter.fire(interpreter);
 		this.interpreterSelectionState.updateSelectedPythonPath(
-			interpreter.uri,
+			interpreter.uri
 		);
 	}
 
@@ -211,20 +214,20 @@ export class JupyterInterpreterService {
 	// if so, return the interpreter
 	private async validateInterpreterPath(
 		pythonPath: Uri,
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment | undefined> {
 		try {
 			// First see if we can get interpreter details
 			const interpreter = await raceCancellation(
 				token,
-				this.interpreterService.getInterpreterDetails(pythonPath),
+				this.interpreterService.getInterpreterDetails(pythonPath)
 			);
 			if (interpreter) {
 				// Then check that dependencies are installed
 				if (
 					await this.interpreterConfiguration.areDependenciesInstalled(
 						interpreter,
-						token,
+						token
 					)
 				) {
 					return interpreter;
@@ -238,7 +241,7 @@ export class JupyterInterpreterService {
 	}
 
 	private async getInitialInterpreterImpl(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment | undefined> {
 		let interpreter: PythonEnvironment | undefined;
 
@@ -246,13 +249,13 @@ export class JupyterInterpreterService {
 		if (this.interpreterSelectionState.selectedPythonPath) {
 			interpreter = await this.validateInterpreterPath(
 				this.interpreterSelectionState.selectedPythonPath,
-				token,
+				token
 			);
 
 			// If we had a global path, but it's not valid, trash it
 			if (!interpreter) {
 				this.interpreterSelectionState.updateSelectedPythonPath(
-					undefined,
+					undefined
 				);
 			}
 		}
@@ -266,7 +269,7 @@ export class JupyterInterpreterService {
 				if (
 					await this.interpreterConfiguration.areDependenciesInstalled(
 						currentInterpreter,
-						token,
+						token
 					)
 				) {
 					interpreter = currentInterpreter;

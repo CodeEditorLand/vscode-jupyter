@@ -15,7 +15,7 @@ export interface IJupyterCommand {
 	interpreter(): Promise<PythonEnvironment | undefined>;
 	exec(
 		args: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ExecutionResult<string>>;
 }
 
@@ -26,12 +26,12 @@ export interface IJupyterCommandFactory {
 		moduleName: string,
 		args: string[],
 		interpreter: PythonEnvironment,
-		isActiveInterpreter: boolean,
+		isActiveInterpreter: boolean
 	): IJupyterCommand;
 }
 
 export const IJupyterSubCommandExecutionService = Symbol(
-	"IJupyterSubCommandExecutionService",
+	"IJupyterSubCommandExecutionService"
 );
 /**
  * Responsible for execution of jupyter subcommands such as `notebook`, `nbconvert`, etc.
@@ -71,7 +71,7 @@ export interface IJupyterSubCommandExecutionService {
 	 * @memberof IJupyterInterpreterService
 	 */
 	getSelectedInterpreter(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<PythonEnvironment | undefined>;
 	/**
 	 * Starts the jupyter notebook server
@@ -83,7 +83,7 @@ export interface IJupyterSubCommandExecutionService {
 	 */
 	startNotebook(
 		notebookArgs: string[],
-		options: SpawnOptions,
+		options: SpawnOptions
 	): Promise<ObservableExecutionResult<string>>;
 	/**
 	 * Gets a list of all locally running jupyter notebook servers.
@@ -93,6 +93,6 @@ export interface IJupyterSubCommandExecutionService {
 	 * @memberof IJupyterSubCommandExecutionService
 	 */
 	getRunningJupyterServers(
-		token?: CancellationToken,
+		token?: CancellationToken
 	): Promise<JupyterServerInfo[] | undefined>;
 }

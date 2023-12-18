@@ -21,7 +21,7 @@ function reportIfMissing(context, node, allowed, name) {
 	if (importType.default(name, context) === "builtin" && name === "path") {
 		context.report(
 			node,
-			`Do not import path builtin module. Use the custom vscode-path instead.`,
+			`Do not import path builtin module. Use the custom vscode-path instead.`
 		);
 	}
 }
@@ -59,7 +59,7 @@ module.exports = {
 					(source, node) => {
 						reportIfMissing(context, node, allowed, source.value);
 					},
-					{ commonjs: true },
+					{ commonjs: true }
 				);
 			},
 		},
@@ -80,7 +80,7 @@ module.exports = {
 						) {
 							context.report(
 								node,
-								`process.env is not allowed in anything but .node files`,
+								`process.env is not allowed in anything but .node files`
 							);
 						}
 					},
@@ -104,7 +104,7 @@ module.exports = {
 						) {
 							context.report(
 								node,
-								`fsPath is not allowed in anything but .node files`,
+								`fsPath is not allowed in anything but .node files`
 							);
 						}
 					},
@@ -128,7 +128,7 @@ module.exports = {
 						) {
 							context.report(
 								node,
-								`${objectName} is not allowed in anything but .node files`,
+								`${objectName} is not allowed in anything but .node files`
 							);
 						}
 					},

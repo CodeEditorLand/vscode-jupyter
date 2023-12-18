@@ -18,7 +18,7 @@ export function cache(expiryDurationMs: number) {
 	return function (
 		target: Object,
 		propertyName: string,
-		descriptor: TypedPropertyDescriptor<PromiseFunctionWithAnyArgs>,
+		descriptor: TypedPropertyDescriptor<PromiseFunctionWithAnyArgs>
 	) {
 		const originalMethod = descriptor.value!;
 		const className =
@@ -41,8 +41,8 @@ export function cache(expiryDurationMs: number) {
 				.then((result) =>
 					cacheStoreForMethods.set(
 						key,
-						new DataWithExpiry(expiryDurationMs, result),
-					),
+						new DataWithExpiry(expiryDurationMs, result)
+					)
 				)
 				.catch(noop);
 			return promise;
@@ -62,7 +62,7 @@ export function swallowExceptions(scopeName?: string) {
 	return function (
 		_target: any,
 		propertyName: string,
-		descriptor: TypedPropertyDescriptor<any>,
+		descriptor: TypedPropertyDescriptor<any>
 	) {
 		const originalMethod = descriptor.value!;
 		const errorMessage = `Jupyter Extension (Error in ${
@@ -113,13 +113,13 @@ export type CallInfo = {
 // Return a decorator that traces the decorated function.
 export function trace(
 	log: (c: CallInfo, t: TraceInfo) => void,
-	logBeforeCall?: boolean,
+	logBeforeCall?: boolean
 ) {
 	// eslint-disable-next-line , @typescript-eslint/no-explicit-any
 	return function (
 		target: Object,
 		methodName: string,
-		descriptor: TypedPropertyDescriptor<any>,
+		descriptor: TypedPropertyDescriptor<any>
 	) {
 		const originalMethod = descriptor.value;
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any
@@ -139,7 +139,7 @@ export function trace(
 				(t) => log(call, t),
 				// "run()"
 				() => originalMethod.apply(scope, args),
-				logBeforeCall,
+				logBeforeCall
 			);
 		};
 
@@ -153,14 +153,14 @@ export function testOnlyMethod() {
 	return function (
 		_target: Object,
 		propertyKey: string,
-		descriptor: TypedPropertyDescriptor<any>,
+		descriptor: TypedPropertyDescriptor<any>
 	) {
 		const originalMethod = descriptor.value;
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any
 		descriptor.value = function (...args: any[]) {
 			if (!isTestExecution()) {
 				throw new Error(
-					`Function: ${propertyKey} can only be called from test code`,
+					`Function: ${propertyKey} can only be called from test code`
 				);
 			}
 			return originalMethod.apply(this, args);
@@ -176,7 +176,7 @@ export function chainable() {
 	return function (
 		_target: Object,
 		propertyKey: string,
-		descriptor: TypedPropertyDescriptor<PromiseFunction>,
+		descriptor: TypedPropertyDescriptor<PromiseFunction>
 	) {
 		const originalMethod = descriptor.value!;
 		const chainedKey = `chainedPromiseFor_${propertyKey}`;
@@ -187,7 +187,7 @@ export function chainable() {
 			let currentValue = (this as any)[chainedKey] as Promise<any>;
 			if (currentValue) {
 				currentValue = currentValue.then(() =>
-					originalMethod.apply(this, args),
+					originalMethod.apply(this, args)
 				);
 			} else {
 				currentValue = originalMethod.apply(this, args);

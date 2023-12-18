@@ -23,10 +23,13 @@ export class PythonKernelCompletionProviderRegistration
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IConfigurationService) private readonly config: IConfigurationService,
-        @inject(PythonKernelCompletionProvider) private readonly completionProvider: PythonKernelCompletionProvider
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IConfigurationService)
+		private readonly config: IConfigurationService,
+		@inject(PythonKernelCompletionProvider)
+		private readonly completionProvider: PythonKernelCompletionProvider
+	) {}
 	public activate() {
 		let triggerChars =
 			this.config
@@ -47,7 +50,7 @@ export class PythonKernelCompletionProviderRegistration
 		const disposable = languages.registerCompletionItemProvider(
 			NOTEBOOK_SELECTOR,
 			this.completionProvider,
-			...triggerChars,
+			...triggerChars
 		);
 		this.disposables.push(disposable);
 	}

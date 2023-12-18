@@ -25,15 +25,16 @@ export class NbConvertInterpreterDependencyChecker
 	// Track interpreters that nbconvert has been installed into
 	private readonly nbconvertInstalledInInterpreter = new ResourceSet();
 	constructor(
-        @inject(IInstaller) private readonly installer: IInstaller,
-        @inject(IJupyterCommandFactory) private readonly commandFactory: IJupyterCommandFactory
-    ) {}
+		@inject(IInstaller) private readonly installer: IInstaller,
+		@inject(IJupyterCommandFactory)
+		private readonly commandFactory: IJupyterCommandFactory
+	) {}
 
 	// Check to see if nbconvert is installed in the given interpreter, note that we also need jupyter since that supplies the needed
 	// template files for conversion
 	public async isNbConvertInstalled(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken,
+		_token?: CancellationToken
 	): Promise<boolean> {
 		if (this.nbconvertInstalledInInterpreter.has(interpreter.uri)) {
 			return true;
@@ -41,7 +42,7 @@ export class NbConvertInterpreterDependencyChecker
 		const isInstalled: boolean =
 			!!(await this.installer.isInstalled(
 				Product.nbconvert,
-				interpreter,
+				interpreter
 			)) &&
 			!!(await this.installer.isInstalled(Product.jupyter, interpreter));
 		if (isInstalled === true) {
@@ -53,14 +54,14 @@ export class NbConvertInterpreterDependencyChecker
 	// Get the specific version of nbconvert installed in the given interpreter
 	public async getNbConvertVersion(
 		interpreter: PythonEnvironment,
-		_token?: CancellationToken,
+		_token?: CancellationToken
 	): Promise<SemVer | undefined> {
 		const command = this.commandFactory.createInterpreterCommand(
 			JupyterCommands.ConvertCommand,
 			"jupyter",
 			["-m", "jupyter", "nbconvert"],
 			interpreter,
-			false,
+			false
 		);
 
 		const result = await command.exec(["--version"], {

@@ -30,7 +30,7 @@ suite("Kernel Connection Helpers", () => {
 				},
 				baseUrl: "",
 				serverProviderHandle: { handle: "1", id: "1", extensionId: "" },
-			}),
+			})
 		);
 
 		assert.strictEqual(name, "livexyz");
@@ -46,7 +46,7 @@ suite("Kernel Connection Helpers", () => {
 						name: "kspec",
 						executable: "path",
 					},
-				}),
+				})
 			);
 
 			assert.strictEqual(name, "kspecname");
@@ -62,7 +62,7 @@ suite("Kernel Connection Helpers", () => {
 						executable: "path",
 						language: "abc",
 					},
-				}),
+				})
 			);
 
 			assert.strictEqual(name, "kspecname");
@@ -82,7 +82,7 @@ suite("Kernel Connection Helpers", () => {
 						id: Uri.file("pyPath").fsPath,
 						sysPrefix: "sysPrefix",
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -102,7 +102,7 @@ suite("Kernel Connection Helpers", () => {
 						sysPrefix: "sysPrefix",
 						envType: EnvironmentType.Unknown,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -124,7 +124,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something",
 						envType: EnvironmentType.Pipenv,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -146,7 +146,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Pipenv,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -168,7 +168,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something",
 						envType: EnvironmentType.Conda,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname (.env)");
 		});
@@ -190,7 +190,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Conda,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname (.env)");
 		});
@@ -207,7 +207,7 @@ suite("Kernel Connection Helpers", () => {
 						executable: "path",
 						language: "python",
 					},
-				}),
+				})
 			);
 
 			assert.strictEqual(name, "kspecname");
@@ -230,7 +230,7 @@ suite("Kernel Connection Helpers", () => {
 						envName: ".env",
 						displayName: "Something 64-bit",
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -253,7 +253,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Unknown,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -277,7 +277,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something",
 						envType: EnvironmentType.Pipenv,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -300,7 +300,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Pipenv,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -329,7 +329,7 @@ suite("Kernel Connection Helpers", () => {
 						},
 						envType: EnvironmentType.Conda,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -358,7 +358,7 @@ suite("Kernel Connection Helpers", () => {
 						},
 						envType: EnvironmentType.Conda,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname (Python 9.8.7)");
 		});
@@ -387,7 +387,7 @@ suite("Kernel Connection Helpers", () => {
 						},
 						envType: EnvironmentType.Conda,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname (Python 9.8.7)");
 		});
@@ -411,7 +411,7 @@ suite("Kernel Connection Helpers", () => {
 						envName: "",
 						displayName: "Something 64-bit",
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "kspecname");
 		});
@@ -434,7 +434,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Unknown,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "Python");
 		});
@@ -458,7 +458,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Unknown,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "Python 1.2.3");
 		});
@@ -481,7 +481,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something",
 						envType: EnvironmentType.Pipenv,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "Python");
 		});
@@ -504,7 +504,7 @@ suite("Kernel Connection Helpers", () => {
 						displayName: "Something 64-bit",
 						envType: EnvironmentType.Pipenv,
 					},
-				}),
+				})
 			);
 			assert.strictEqual(name, "Python");
 		});
@@ -527,7 +527,7 @@ suite("Kernel Connection Helpers", () => {
 					id: "",
 					kernelSpec: instance(kernelSpec),
 					interpreter: instance(interpreter),
-				}),
+				})
 			);
 			assert.strictEqual(name, "Python 9.8.7");
 		});
@@ -550,7 +550,7 @@ suite("Kernel Connection Helpers", () => {
 					id: "",
 					kernelSpec: instance(kernelSpec),
 					interpreter: instance(interpreter),
-				}),
+				})
 			);
 			assert.strictEqual(name, ".env (Python 9.8.7)");
 		});
@@ -573,7 +573,7 @@ suite("Kernel Connection Helpers", () => {
 					id: "",
 					kernelSpec: instance(kernelSpec),
 					interpreter: instance(interpreter),
-				}),
+				})
 			);
 			assert.strictEqual(name, ".env (Python 9.8.7)");
 		});

@@ -57,38 +57,60 @@ export class ActiveEditorContextService
 	private hasNativeNotebookOrInteractiveWindowOpen: ContextKey;
 	private kernelSourceContext: ContextKey<string>;
 	constructor(
-        @inject(IInteractiveWindowProvider)
-        @optional()
-        private readonly interactiveProvider: IInteractiveWindowProvider | undefined,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IControllerRegistration) private readonly controllers: IControllerRegistration,
-        @inject(IJupyterServerProviderRegistry)
-        private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry
-    ) {
-        disposables.push(this);
-        this.nativeContext = new ContextKey(EditorContexts.IsNativeActive);
-        this.canRestartNotebookKernelContext = new ContextKey(EditorContexts.CanRestartNotebookKernel);
-        this.canInterruptNotebookKernelContext = new ContextKey(EditorContexts.CanInterruptNotebookKernel);
-        this.canRestartInteractiveWindowKernelContext = new ContextKey(
-            EditorContexts.CanRestartInteractiveWindowKernel
-        );
-        this.canInterruptInteractiveWindowKernelContext = new ContextKey(
-            EditorContexts.CanInterruptInteractiveWindowKernel
-        );
-        this.interactiveContext = new ContextKey(EditorContexts.IsInteractiveActive);
-        this.interactiveOrNativeContext = new ContextKey(EditorContexts.IsInteractiveOrNativeActive);
-        this.pythonOrNativeContext = new ContextKey(EditorContexts.IsPythonOrNativeActive);
-        this.pythonOrInteractiveContext = new ContextKey(EditorContexts.IsPythonOrInteractiveActive);
-        this.pythonOrInteractiveOrNativeContext = new ContextKey(EditorContexts.IsPythonOrInteractiveOrNativeActive);
-        this.hasNativeNotebookCells = new ContextKey(EditorContexts.HaveNativeCells);
-        this.isPythonNotebook = new ContextKey(EditorContexts.IsPythonNotebook);
-        this.isJupyterKernelSelected = new ContextKey(EditorContexts.IsJupyterKernelSelected);
-        this.hasNativeNotebookOrInteractiveWindowOpen = new ContextKey(
-            EditorContexts.HasNativeNotebookOrInteractiveWindowOpen
-        );
-        this.kernelSourceContext = new ContextKey(EditorContexts.KernelSource);
-    }
+		@inject(IInteractiveWindowProvider)
+		@optional()
+		private readonly interactiveProvider:
+			| IInteractiveWindowProvider
+			| undefined,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IControllerRegistration)
+		private readonly controllers: IControllerRegistration,
+		@inject(IJupyterServerProviderRegistry)
+		private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry
+	) {
+		disposables.push(this);
+		this.nativeContext = new ContextKey(EditorContexts.IsNativeActive);
+		this.canRestartNotebookKernelContext = new ContextKey(
+			EditorContexts.CanRestartNotebookKernel
+		);
+		this.canInterruptNotebookKernelContext = new ContextKey(
+			EditorContexts.CanInterruptNotebookKernel
+		);
+		this.canRestartInteractiveWindowKernelContext = new ContextKey(
+			EditorContexts.CanRestartInteractiveWindowKernel
+		);
+		this.canInterruptInteractiveWindowKernelContext = new ContextKey(
+			EditorContexts.CanInterruptInteractiveWindowKernel
+		);
+		this.interactiveContext = new ContextKey(
+			EditorContexts.IsInteractiveActive
+		);
+		this.interactiveOrNativeContext = new ContextKey(
+			EditorContexts.IsInteractiveOrNativeActive
+		);
+		this.pythonOrNativeContext = new ContextKey(
+			EditorContexts.IsPythonOrNativeActive
+		);
+		this.pythonOrInteractiveContext = new ContextKey(
+			EditorContexts.IsPythonOrInteractiveActive
+		);
+		this.pythonOrInteractiveOrNativeContext = new ContextKey(
+			EditorContexts.IsPythonOrInteractiveOrNativeActive
+		);
+		this.hasNativeNotebookCells = new ContextKey(
+			EditorContexts.HaveNativeCells
+		);
+		this.isPythonNotebook = new ContextKey(EditorContexts.IsPythonNotebook);
+		this.isJupyterKernelSelected = new ContextKey(
+			EditorContexts.IsJupyterKernelSelected
+		);
+		this.hasNativeNotebookOrInteractiveWindowOpen = new ContextKey(
+			EditorContexts.HasNativeNotebookOrInteractiveWindowOpen
+		);
+		this.kernelSourceContext = new ContextKey(EditorContexts.KernelSource);
+	}
 	public dispose() {
 		this.disposables.forEach((item) => item.dispose());
 	}
@@ -96,19 +118,19 @@ export class ActiveEditorContextService
 		window.onDidChangeActiveTextEditor(
 			this.onDidChangeActiveTextEditor,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.kernelProvider.onKernelStatusChanged(
 			this.onDidKernelStatusChange,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		// Interactive provider might not be available
 		if (this.interactiveProvider) {
 			this.interactiveProvider.onDidChangeActiveInteractiveWindow(
 				this.onDidChangeActiveInteractiveWindow,
 				this,
-				this.disposables,
+				this.disposables
 			);
 
 			if (this.interactiveProvider.activeWindow) {
@@ -121,7 +143,7 @@ export class ActiveEditorContextService
 		window.onDidChangeActiveNotebookEditor(
 			this.onDidChangeActiveNotebookEditor,
 			this,
-			this.disposables,
+			this.disposables
 		);
 
 		// Do we already have python file opened.
@@ -131,22 +153,22 @@ export class ActiveEditorContextService
 		window.onDidChangeNotebookEditorSelection(
 			this.updateNativeNotebookInteractiveWindowOpenContext,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.onDidOpenNotebookDocument(
 			this.updateNativeNotebookInteractiveWindowOpenContext,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		workspace.onDidCloseNotebookDocument(
 			this.updateNativeNotebookInteractiveWindowOpenContext,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.controllers.onControllerSelectionChanged(
 			() => this.updateSelectedKernelContext(),
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.updateSelectedKernelContext();
 	}
@@ -173,7 +195,7 @@ export class ActiveEditorContextService
 			.set(
 				e && isJupyterNotebookDoc
 					? isPythonNotebook(getNotebookMetadata(e.notebook))
-					: false,
+					: false
 			)
 			.catch(noop);
 		this.updateContextOfActiveNotebookKernel(e);
@@ -188,8 +210,8 @@ export class ActiveEditorContextService
 				workspace.notebookDocuments.some(
 					(nb) =>
 						nb.notebookType === JupyterNotebookView ||
-						nb.notebookType === InteractiveWindowView,
-				),
+						nb.notebookType === InteractiveWindowView
+				)
 			)
 			.catch(noop);
 	}
@@ -230,7 +252,7 @@ export class ActiveEditorContextService
 				(c) =>
 					c.extensionId ===
 						connection.serverProviderHandle.extensionId &&
-					c.id === connection.serverProviderHandle.id,
+					c.id === connection.serverProviderHandle.id
 			);
 
 		if (!provider) {
@@ -288,7 +310,7 @@ export class ActiveEditorContextService
 			notebook === window.activeNotebookEditor?.notebook
 		) {
 			this.updateContextOfActiveNotebookKernel(
-				window.activeNotebookEditor,
+				window.activeNotebookEditor
 			);
 		}
 	}
@@ -304,26 +326,26 @@ export class ActiveEditorContextService
 		this.interactiveOrNativeContext
 			.set(
 				this.nativeContext.value === true ||
-					this.interactiveContext.value === true,
+					this.interactiveContext.value === true
 			)
 			.catch(noop);
 		this.pythonOrNativeContext
 			.set(
 				this.nativeContext.value === true ||
-					this.isPythonFileActive === true,
+					this.isPythonFileActive === true
 			)
 			.catch(noop);
 		this.pythonOrInteractiveContext
 			.set(
 				this.interactiveContext.value === true ||
-					this.isPythonFileActive === true,
+					this.isPythonFileActive === true
 			)
 			.catch(noop);
 		this.pythonOrInteractiveOrNativeContext
 			.set(
 				this.nativeContext.value === true ||
 					(this.interactiveContext.value === true &&
-						this.isPythonFileActive === true),
+						this.isPythonFileActive === true)
 			)
 			.catch(noop);
 	}

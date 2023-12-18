@@ -25,17 +25,19 @@ import { computeWorkingDirectory } from "../../../platform/common/application/wo
 @injectable()
 export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 	constructor(
-        @inject(IConfigurationService) private readonly configService: IConfigurationService,
-        @inject(IKernelLauncher) private readonly kernelLauncher: IKernelLauncher
-    ) {}
+		@inject(IConfigurationService)
+		private readonly configService: IConfigurationService,
+		@inject(IKernelLauncher)
+		private readonly kernelLauncher: IKernelLauncher
+	) {}
 
 	public async create(
-		options: LocaLKernelSessionCreationOptions,
+		options: LocaLKernelSessionCreationOptions
 	): Promise<IRawKernelSession> {
 		traceVerbose(
 			`Creating raw notebook for resource '${getDisplayPath(
-				options.resource,
-			)}'`,
+				options.resource
+			)}'`
 		);
 		let session: RawSessionConnection | undefined;
 
@@ -43,18 +45,18 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 			raceCancellationError(
 				options.token,
 				computeWorkingDirectory(options.resource).then((dir) =>
-					vscode.Uri.file(dir),
-				),
+					vscode.Uri.file(dir)
+				)
 			),
 			raceCancellationError(
 				options.token,
 				trackKernelResourceInformation(options.resource, {
 					kernelConnection: options.kernelConnection,
-				}),
+				})
 			),
 		]);
 		const launchTimeout = this.configService.getSettings(
-			options.resource,
+			options.resource
 		).jupyterLaunchTimeout;
 		session = new RawSessionConnection(
 			options.resource,
@@ -64,12 +66,12 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 			launchTimeout,
 			(options.resource?.path || "").toLowerCase().endsWith(".ipynb")
 				? "notebook"
-				: "console",
+				: "console"
 		);
 		try {
 			await raceCancellationError(
 				options.token,
-				session.startKernel(options),
+				session.startKernel(options)
 			);
 		} catch (error) {
 			if (
@@ -85,8 +87,8 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 				?.shutdown()
 				.catch((error) =>
 					traceError(
-						`Failed to dispose of raw session on launch error: ${error} `,
-					),
+						`Failed to dispose of raw session on launch error: ${error} `
+					)
 				)
 				.finally(() => session?.dispose())
 				.catch(noop);
@@ -96,7 +98,7 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 		return new RawJupyterSessionWrapper(
 			session,
 			options.resource,
-			options.kernelConnection,
+			options.kernelConnection
 		);
 	}
 }

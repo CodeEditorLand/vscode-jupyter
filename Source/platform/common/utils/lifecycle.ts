@@ -26,7 +26,7 @@ export function trackDisposable<T extends IDisposable>(x: T): T {
  */
 export function dispose<T extends IDisposable>(disposable: T): T;
 export function dispose<T extends IDisposable>(
-	disposable: T | undefined,
+	disposable: T | undefined
 ): T | undefined;
 export function dispose<
 	T extends IDisposable,
@@ -34,11 +34,11 @@ export function dispose<
 >(disposables: A): A;
 export function dispose<T extends IDisposable>(disposables: Array<T>): Array<T>;
 export function dispose<T extends IDisposable>(
-	disposables: ReadonlyArray<T>,
+	disposables: ReadonlyArray<T>
 ): ReadonlyArray<T>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function dispose<T extends IDisposable>(
-	arg: T | Iterable<T> | undefined,
+	arg: T | Iterable<T> | undefined
 ): any {
 	if (Iterable.is(arg)) {
 		for (const d of arg) {
@@ -146,8 +146,8 @@ export class DisposableStore implements IDisposable {
 			if (!DisposableStore.DISABLE_DISPOSED_WARNING) {
 				console.warn(
 					new Error(
-						"Trying to add a disposable to a DisposableStore that has already been disposed of. The added object will be leaked!",
-					).stack,
+						"Trying to add a disposable to a DisposableStore that has already been disposed of. The added object will be leaked!"
+					).stack
 				);
 			}
 		} else {
@@ -268,8 +268,8 @@ export class DisposableMap<K, V extends IDisposable = IDisposable>
 		if (this._isDisposed) {
 			console.warn(
 				new Error(
-					"Trying to add a disposable to a DisposableMap that has already been disposed of. The added object will be leaked!",
-				).stack,
+					"Trying to add a disposable to a DisposableMap that has already been disposed of. The added object will be leaked!"
+				).stack
 			);
 		}
 

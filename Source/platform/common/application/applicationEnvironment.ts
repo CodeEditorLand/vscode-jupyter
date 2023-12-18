@@ -15,7 +15,10 @@ export class ApplicationEnvironment implements IApplicationEnvironment {
 		// eslint-disable-next-line
 		return this.extensionContext.extension.packageJSON.version;
 	}
-	constructor(@inject(IExtensionContext) private readonly extensionContext: vscode.ExtensionContext) {}
+	constructor(
+		@inject(IExtensionContext)
+		private readonly extensionContext: vscode.ExtensionContext
+	) {}
 }
 
 export function getVSCodeChannel() {

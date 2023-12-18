@@ -15,7 +15,7 @@ import { ReportableAction } from "./types";
 import { mockedVSCodeNamespaces } from "../../test/vscode-mock";
 type Task<R> = (
 	progress: VSCProgress<{ message?: string; increment?: number }>,
-	token: CancellationToken,
+	token: CancellationToken
 ) => Promise<R>;
 
 // eslint-disable-next-line
@@ -42,11 +42,11 @@ suite("Progress Reporter", () => {
 		let callbackPromise: Promise<{}> | undefined;
 		const cancel = new CancellationTokenSource();
 		when(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).thenCall((_, cb: Task<{}>) => {
 			return (callbackPromise = cb(
 				instance(vscodeProgressReporter),
-				cancel.token,
+				cancel.token
 			));
 		});
 
@@ -65,11 +65,11 @@ suite("Progress Reporter", () => {
 		let callbackPromise: Promise<{}> | undefined;
 		const cancel = new CancellationTokenSource();
 		when(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).thenCall((_, cb: Task<{}>) => {
 			return (callbackPromise = cb(
 				instance(vscodeProgressReporter),
-				cancel.token,
+				cancel.token
 			));
 		});
 
@@ -86,11 +86,11 @@ suite("Progress Reporter", () => {
 		let callbackPromise: Promise<{}> | undefined;
 		const cancel = new CancellationTokenSource();
 		when(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).thenCall((_, cb: Task<{}>) => {
 			return (callbackPromise = cb(
 				instance(vscodeProgressReporter),
-				cancel.token,
+				cancel.token
 			));
 		});
 
@@ -106,11 +106,11 @@ suite("Progress Reporter", () => {
 		let callbackPromise: Promise<{}> | undefined;
 		const cancel = new CancellationTokenSource();
 		when(
-			mockedVSCodeNamespaces.window.withProgress(anything(), anything()),
+			mockedVSCodeNamespaces.window.withProgress(anything(), anything())
 		).thenCall((_, cb: Task<{}>) => {
 			return (callbackPromise = cb(
 				instance(vscodeProgressReporter),
-				cancel.token,
+				cancel.token
 			));
 		});
 
@@ -119,7 +119,7 @@ suite("Progress Reporter", () => {
 		const expectedProgressMessages: string[] = [];
 
 		when(vscodeProgressReporter.report(anything())).thenCall(
-			(msg: { message: string }) => progressMessages.push(msg.message),
+			(msg: { message: string }) => progressMessages.push(msg.message)
 		);
 		// Perform an action and ensure that we display the message.
 
@@ -129,7 +129,7 @@ suite("Progress Reporter", () => {
 			phase: "started",
 		});
 		expectedProgressMessages.push(
-			getUserMessageForAction(ReportableAction.NotebookStart)!,
+			getUserMessageForAction(ReportableAction.NotebookStart)!
 		);
 
 		//2. Get kernel specs & ensure we display kernel specs message.
@@ -138,7 +138,7 @@ suite("Progress Reporter", () => {
 			phase: "started",
 		});
 		expectedProgressMessages.push(
-			getUserMessageForAction(ReportableAction.KernelsGetKernelSpecs)!,
+			getUserMessageForAction(ReportableAction.KernelsGetKernelSpecs)!
 		);
 
 		//3. Register kernel & ensure we display registering message.
@@ -147,7 +147,7 @@ suite("Progress Reporter", () => {
 			phase: "started",
 		});
 		expectedProgressMessages.push(
-			getUserMessageForAction(ReportableAction.KernelsRegisterKernel)!,
+			getUserMessageForAction(ReportableAction.KernelsRegisterKernel)!
 		);
 
 		//4. Wait for idle & ensure we display registering message.
@@ -157,8 +157,8 @@ suite("Progress Reporter", () => {
 		});
 		expectedProgressMessages.push(
 			getUserMessageForAction(
-				ReportableAction.JupyterSessionWaitForIdleSession,
-			)!,
+				ReportableAction.JupyterSessionWaitForIdleSession
+			)!
 		);
 
 		//5. Finish getting kernel specs, should display previous (idle) message again.
@@ -168,8 +168,8 @@ suite("Progress Reporter", () => {
 		});
 		expectedProgressMessages.push(
 			getUserMessageForAction(
-				ReportableAction.JupyterSessionWaitForIdleSession,
-			)!,
+				ReportableAction.JupyterSessionWaitForIdleSession
+			)!
 		);
 
 		//6. Finish waiting for idle, should display the register kernel as that's still in progress.
@@ -178,7 +178,7 @@ suite("Progress Reporter", () => {
 			phase: "completed",
 		});
 		expectedProgressMessages.push(
-			getUserMessageForAction(ReportableAction.KernelsRegisterKernel)!,
+			getUserMessageForAction(ReportableAction.KernelsRegisterKernel)!
 		);
 
 		//6. Finish registering kernel, should display the starting notebook as that's still in progress.
@@ -187,7 +187,7 @@ suite("Progress Reporter", () => {
 			phase: "completed",
 		});
 		expectedProgressMessages.push(
-			getUserMessageForAction(ReportableAction.NotebookStart)!,
+			getUserMessageForAction(ReportableAction.NotebookStart)!
 		);
 
 		//6. Finish starting notebook, no new messages to display.
@@ -196,13 +196,13 @@ suite("Progress Reporter", () => {
 			phase: "completed",
 		});
 		verify(vscodeProgressReporter.report(anything())).times(
-			expectedProgressMessages.length,
+			expectedProgressMessages.length
 		);
 
 		// Confirm the messages were displayed in the order we expected.
 		assert.equal(
 			progressMessages.join(", "),
-			expectedProgressMessages.join(", "),
+			expectedProgressMessages.join(", ")
 		);
 
 		// mockedVSCodeNamespaces.window.WithProgress should complete.

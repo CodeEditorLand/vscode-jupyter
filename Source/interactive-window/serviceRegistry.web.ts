@@ -35,63 +35,63 @@ import { InteractiveControllerHelper } from "./InteractiveControllerHelper";
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IInteractiveWindowProvider>(
 		IInteractiveWindowProvider,
-		InteractiveWindowProvider,
+		InteractiveWindowProvider
 	);
 	serviceManager.addSingleton<IInteractiveControllerHelper>(
 		IInteractiveControllerHelper,
-		InteractiveControllerHelper,
+		InteractiveControllerHelper
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CommandRegistry,
+		CommandRegistry
 	);
 	serviceManager.add<ICodeWatcher>(ICodeWatcher, CodeWatcher);
 	serviceManager.addSingleton<ICodeLensFactory>(
 		ICodeLensFactory,
-		CodeLensFactory,
+		CodeLensFactory
 	);
 	serviceManager.addSingleton<IDataScienceCodeLensProvider>(
 		IDataScienceCodeLensProvider,
-		DataScienceCodeLensProvider,
+		DataScienceCodeLensProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodeLensProviderActivator,
+		CodeLensProviderActivator
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonCellFoldingProvider,
+		PythonCellFoldingProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		Decorator,
+		Decorator
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GeneratedCodeStorageManager,
+		GeneratedCodeStorageManager
 	);
 	serviceManager.addSingleton<ICodeGeneratorFactory>(
 		ICodeGeneratorFactory,
 		CodeGeneratorFactory,
 		undefined,
-		[IExtensionSyncActivationService],
+		[IExtensionSyncActivationService]
 	);
 	serviceManager.addSingleton<IGeneratedCodeStorageFactory>(
 		IGeneratedCodeStorageFactory,
-		GeneratedCodeStorageFactory,
+		GeneratedCodeStorageFactory
 	);
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
-		InteractiveWindowTracebackFormatter,
+		InteractiveWindowTracebackFormatter
 	);
 	serviceManager.addSingleton<IInteractiveWindowDebuggingManager>(
 		IInteractiveWindowDebuggingManager,
 		InteractiveWindowDebuggingManager,
 		undefined,
-		[IExtensionSyncActivationService],
+		[IExtensionSyncActivationService]
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InteractiveWindowDebuggingStartupCodeProvider,
+		InteractiveWindowDebuggingStartupCodeProvider
 	);
 }

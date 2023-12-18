@@ -60,18 +60,22 @@ export class DebuggingManager
 	>();
 
 	public constructor(
-        @inject(IKernelProvider) kernelProvider: IKernelProvider,
-        @inject(IControllerRegistration) controllerRegistration: IControllerRegistration,
-        @inject(IConfigurationService) private readonly configurationService: IConfigurationService,
-        @inject(IPlatformService) private readonly platform: IPlatformService,
-        @inject(IDebugService) private readonly debugService: IDebugService,
-        @inject(IServiceContainer) serviceContainer: IServiceContainer
-    ) {
-        super(kernelProvider, controllerRegistration, serviceContainer);
-        this.runByLineCells = new ContextKey(EditorContexts.RunByLineCells);
-        this.runByLineDocuments = new ContextKey(EditorContexts.RunByLineDocuments);
-        this.debugDocuments = new ContextKey(EditorContexts.DebugDocuments);
-    }
+		@inject(IKernelProvider) kernelProvider: IKernelProvider,
+		@inject(IControllerRegistration)
+		controllerRegistration: IControllerRegistration,
+		@inject(IConfigurationService)
+		private readonly configurationService: IConfigurationService,
+		@inject(IPlatformService) private readonly platform: IPlatformService,
+		@inject(IDebugService) private readonly debugService: IDebugService,
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super(kernelProvider, controllerRegistration, serviceContainer);
+		this.runByLineCells = new ContextKey(EditorContexts.RunByLineCells);
+		this.runByLineDocuments = new ContextKey(
+			EditorContexts.RunByLineDocuments
+		);
+		this.debugDocuments = new ContextKey(EditorContexts.DebugDocuments);
+	}
 
 	public override activate() {
 		super.activate();
@@ -82,13 +86,13 @@ export class DebuggingManager
 				{
 					createDebugAdapterDescriptor: async (session) =>
 						this.createDebugAdapterDescriptor(session),
-				},
-			),
+				}
+			)
 		);
 	}
 
 	public getDebugMode(
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): KernelDebugMode | undefined {
 		const controller = this.notebookToRunByLineController.get(notebook);
 		return controller?.getMode();
@@ -116,10 +120,10 @@ export class DebuggingManager
 	private updateDebugContextKey() {
 		const debugDocumentUris = new ResourceSet();
 		this.notebookToDebugAdapter.forEach((_, notebook) =>
-			debugDocumentUris.add(notebook.uri),
+			debugDocumentUris.add(notebook.uri)
 		);
 		this.notebookInProgress.forEach((notebook) =>
-			debugDocumentUris.add(notebook.uri),
+			debugDocumentUris.add(notebook.uri)
 		);
 		this.debugDocuments
 			.set(Array.from(debugDocumentUris.values()))
@@ -129,7 +133,7 @@ export class DebuggingManager
 	public async tryToStartDebugging(
 		mode: KernelDebugMode,
 		cell: NotebookCell,
-		skipIpykernelCheck = false,
+		skipIpykernelCheck = false
 	) {
 		traceInfo(`Starting debugging with mode ${mode}`);
 
@@ -137,7 +141,7 @@ export class DebuggingManager
 			const ipykernelResult = await this.checkIpykernelAndPrompt(cell);
 			if (ipykernelResult !== IpykernelCheckResult.Ok) {
 				traceInfo(
-					`Ipykernel check failed: ${IpykernelCheckResult[ipykernelResult]}`,
+					`Ipykernel check failed: ${IpykernelCheckResult[ipykernelResult]}`
 				);
 				return;
 			}
@@ -153,7 +157,7 @@ export class DebuggingManager
 
 	public runByLineNext(cell: NotebookCell) {
 		const controller = this.notebookToRunByLineController.get(
-			cell.notebook,
+			cell.notebook
 		);
 		if (
 			controller &&
@@ -166,7 +170,7 @@ export class DebuggingManager
 
 	public runByLineStop(cell: NotebookCell) {
 		const controller = this.notebookToRunByLineController.get(
-			cell.notebook,
+			cell.notebook
 		);
 		if (controller) {
 			sendTelemetryEvent(DebuggingTelemetry.endedSession, undefined, {
@@ -178,7 +182,7 @@ export class DebuggingManager
 
 	private async startDebuggingCell(
 		mode: KernelDebugMode.Cell | KernelDebugMode.RunByLine,
-		cell: NotebookCell,
+		cell: NotebookCell
 	) {
 		const doc = cell.notebook;
 		const settings = this.configurationService.getSettings(doc.uri);
@@ -200,46 +204,46 @@ export class DebuggingManager
 						suppressDebugToolbar: true,
 						suppressDebugView: true,
 						suppressSaveBeforeStart: true,
-				  }
+					}
 				: { suppressSaveBeforeStart: true };
 		return this.startDebuggingConfig(config, opts);
 	}
 
 	protected async createDebugAdapterDescriptor(
-		session: DebugSession,
+		session: DebugSession
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const config = session.configuration;
 		assertIsDebugConfig(config);
 
 		const notebookUri = config.__notebookUri;
 		const notebook = workspace.notebookDocuments.find(
-			(doc) => doc.uri.toString() === notebookUri,
+			(doc) => doc.uri.toString() === notebookUri
 		);
 
 		if (!notebook) {
 			traceInfo(
-				`Cannot start debugging. Notebook ${notebookUri} not found.`,
+				`Cannot start debugging. Notebook ${notebookUri} not found.`
 			);
 			return;
 		}
 
 		if (this.notebookInProgress.has(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook`,
+				`Cannot start debugging. Already debugging this notebook`
 			);
 			return;
 		}
 
 		if (this.isDebugging(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook document.`,
+				`Cannot start debugging. Already debugging this notebook document.`
 			);
 			return;
 		}
 
 		this.notebookToDebugger.set(
 			notebook,
-			new Debugger(notebook, config, session),
+			new Debugger(notebook, config, session)
 		);
 		try {
 			this.notebookInProgress.add(notebook);
@@ -247,7 +251,7 @@ export class DebuggingManager
 			return await this.doCreateDebugAdapterDescriptor(
 				config,
 				session,
-				notebook,
+				notebook
 			);
 		} finally {
 			this.notebookInProgress.delete(notebook);
@@ -258,7 +262,7 @@ export class DebuggingManager
 	private async doCreateDebugAdapterDescriptor(
 		config: INotebookDebugConfig,
 		session: DebugSession,
-		notebook: NotebookDocument,
+		notebook: NotebookDocument
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const kernel = await this.ensureKernelIsRunning(notebook);
 		if (kernel?.session) {
@@ -268,7 +272,7 @@ export class DebuggingManager
 				kernel.session,
 				kernel,
 				this.platform,
-				this.debugService,
+				this.debugService
 			);
 
 			if (
@@ -280,7 +284,7 @@ export class DebuggingManager
 					adapter,
 					cell,
 					this.kernelProvider.getKernelExecution(kernel!),
-					this.configurationService,
+					this.configurationService
 				);
 				adapter.addDebuggingDelegates([
 					rblController,
@@ -288,7 +292,7 @@ export class DebuggingManager
 						KernelDebugMode.RunByLine,
 						adapter,
 						cell,
-						this.serviceContainer,
+						this.serviceContainer
 					),
 				]);
 				this.notebookToRunByLineController.set(notebook, rblController);
@@ -301,7 +305,7 @@ export class DebuggingManager
 				const controller = new DebugCellController(
 					adapter,
 					cell,
-					this.kernelProvider.getKernelExecution(kernel!),
+					this.kernelProvider.getKernelExecution(kernel!)
 				);
 				adapter.addDebuggingDelegates([
 					controller,
@@ -309,7 +313,7 @@ export class DebuggingManager
 						KernelDebugMode.Cell,
 						adapter,
 						cell,
-						this.serviceContainer,
+						this.serviceContainer
 					),
 				]);
 			}

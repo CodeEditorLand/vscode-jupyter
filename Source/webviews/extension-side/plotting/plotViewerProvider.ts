@@ -19,11 +19,12 @@ export class PlotViewerProvider
 	private currentViewerClosed: IDisposable | undefined;
 	private imageList: string[] = [];
 	constructor(
-        @inject(IServiceContainer) private serviceContainer: IServiceContainer,
-        @inject(IAsyncDisposableRegistry) asyncRegistry: IAsyncDisposableRegistry
-    ) {
-        asyncRegistry.push(this);
-    }
+		@inject(IServiceContainer) private serviceContainer: IServiceContainer,
+		@inject(IAsyncDisposableRegistry)
+		asyncRegistry: IAsyncDisposableRegistry
+	) {
+		asyncRegistry.push(this);
+	}
 
 	public async dispose() {
 		if (this.currentViewer) {
@@ -45,7 +46,7 @@ export class PlotViewerProvider
 			this.currentViewer =
 				this.serviceContainer.get<IPlotViewer>(IPlotViewer);
 			this.currentViewerClosed = this.currentViewer.closed(
-				this.closedViewer,
+				this.closedViewer
 			);
 			this.currentViewer.removed(this.removedPlot);
 			sendTelemetryEvent(Telemetry.OpenPlotViewer);

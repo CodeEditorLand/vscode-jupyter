@@ -17,7 +17,7 @@ export class KernelStartupCodeProviders implements IStartupCodeProviders {
 	public getProviders(
 		notebookViewType:
 			| typeof JupyterNotebookView
-			| typeof InteractiveWindowView,
+			| typeof InteractiveWindowView
 	): IStartupCodeProvider[] {
 		return (this.providers.get(notebookViewType) || []).slice();
 	}
@@ -25,11 +25,11 @@ export class KernelStartupCodeProviders implements IStartupCodeProviders {
 		provider: IStartupCodeProvider,
 		notebookViewType:
 			| typeof JupyterNotebookView
-			| typeof InteractiveWindowView,
+			| typeof InteractiveWindowView
 	): void {
 		this.providers.set(
 			notebookViewType,
-			this.providers.get(notebookViewType) || [],
+			this.providers.get(notebookViewType) || []
 		);
 		this.providers.get(notebookViewType)!.push(provider);
 	}

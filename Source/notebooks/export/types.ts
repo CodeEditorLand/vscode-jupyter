@@ -17,7 +17,7 @@ export interface IFileConverter {
 		format: ExportFormat,
 		sourceDocument: NotebookDocument,
 		defaultFileName?: string,
-		candidateInterpreter?: PythonEnvironment,
+		candidateInterpreter?: PythonEnvironment
 	): Promise<undefined>;
 	importIpynb(source: Uri): Promise<void>;
 }
@@ -29,7 +29,7 @@ export interface IExportBase {
 		target: Uri,
 		format: ExportFormat,
 		interpreter: PythonEnvironment,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<void>;
 }
 
@@ -38,7 +38,7 @@ export interface IExport {
 	export(
 		sourceDocument: NotebookDocument,
 		target: Uri,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<void>;
 }
 
@@ -48,6 +48,6 @@ export interface IExportUtil {
 	getTargetFile(
 		format: ExportFormat,
 		source: Uri,
-		defaultFileName?: string | undefined,
+		defaultFileName?: string | undefined
 	): Promise<Uri | undefined>;
 }

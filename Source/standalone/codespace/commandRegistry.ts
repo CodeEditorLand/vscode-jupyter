@@ -12,7 +12,10 @@ import { ICommandNameArgumentTypeMapping } from "../../commands";
 export class CommandRegistry
 	implements IDisposable, IExtensionSyncActivationService
 {
-	constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry) {}
+	constructor(
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	activate() {
 		this.registerCommandsIfTrusted();
 	}
@@ -27,7 +30,7 @@ export class CommandRegistry
 
 		this.registerCommand(
 			Commands.ContinueEditSessionInCodespace,
-			this.continueEditSessionInCodespace,
+			this.continueEditSessionInCodespace
 		);
 	}
 
@@ -42,7 +45,7 @@ export class CommandRegistry
 
 	private async continueEditSessionInCodespace() {
 		await commands.executeCommand(
-			"_workbench.editSessions.actions.continueEditSession.github.codespaces.continueEditSessionInCodespaceWithJupyterServer",
+			"_workbench.editSessions.actions.continueEditSession.github.codespaces.continueEditSessionInCodespaceWithJupyterServer"
 		);
 	}
 }

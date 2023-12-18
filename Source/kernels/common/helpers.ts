@@ -23,7 +23,7 @@ export async function waitForIdleOnSession(
 	resource: Resource,
 	session: Session.ISessionConnection,
 	timeout: number,
-	token: CancellationToken,
+	token: CancellationToken
 ): Promise<void> {
 	if (!session.kernel) {
 		throw new JupyterInvalidKernelError(kernelConnectionMetadata);
@@ -31,7 +31,7 @@ export async function waitForIdleOnSession(
 
 	const progress = KernelProgressReporter.reportProgress(
 		resource,
-		DataScience.waitingForJupyterSessionToBeIdle,
+		DataScience.waitingForJupyterSessionToBeIdle
 	);
 	const disposables: IDisposable[] = [];
 	if (progress) {
@@ -39,7 +39,7 @@ export async function waitForIdleOnSession(
 	}
 	try {
 		traceVerbose(
-			`Waiting for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
+			`Waiting for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`
 		);
 
 		// When our kernel connects and gets a status message it triggers the ready promise
@@ -47,11 +47,11 @@ export async function waitForIdleOnSession(
 		token.onCancellationRequested(
 			() => kernelStatus.reject(new CancellationError()),
 			undefined,
-			disposables,
+			disposables
 		);
 		const handler = (
 			_session: Kernel.IKernelConnection,
-			status: KernelMessage.Status,
+			status: KernelMessage.Status
 		) => {
 			traceVerbose(`Got status ${status} in waitForIdleOnSession`);
 			if (status == "idle") {
@@ -61,10 +61,10 @@ export async function waitForIdleOnSession(
 		session.kernel.statusChanged?.connect(handler);
 		disposables.push(
 			new Disposable(() =>
-				swallowExceptions(() =>
-					session.kernel?.statusChanged?.disconnect(handler),
-				),
-			),
+				swallowExceptions(
+					() => session.kernel?.statusChanged?.disconnect(handler)
+				)
+			)
 		);
 		if (session.kernel.status == "idle") {
 			kernelStatus.resolve(session.kernel.status);
@@ -78,10 +78,10 @@ export async function waitForIdleOnSession(
 				swallowExceptions(() =>
 					session.disposed.disconnect(
 						sessionDisposedHandler,
-						sessionDisposed,
-					),
-				),
-			),
+						sessionDisposed
+					)
+				)
+			)
 		);
 		sessionDisposed.promise.catch(noop);
 		kernelStatus.promise.catch(noop);
@@ -89,24 +89,24 @@ export async function waitForIdleOnSession(
 			timeout,
 			"",
 			kernelStatus.promise,
-			sessionDisposed.promise,
+			sessionDisposed.promise
 		);
 		if (session.isDisposed) {
 			traceError(
-				"Session disposed while waiting for session to be idle.",
+				"Session disposed while waiting for session to be idle."
 			);
 			throw new JupyterInvalidKernelError(kernelConnectionMetadata);
 		}
 
 		traceVerbose(
-			`Finished waiting for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
+			`Finished waiting for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`
 		);
 
 		if (result == "idle") {
 			return;
 		}
 		traceError(
-			`Shutting down after failing to wait for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
+			`Shutting down after failing to wait for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`
 		);
 		throw new JupyterWaitForIdleError(kernelConnectionMetadata);
 	} catch (ex) {

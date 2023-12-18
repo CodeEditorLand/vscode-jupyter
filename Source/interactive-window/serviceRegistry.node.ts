@@ -44,80 +44,80 @@ import { KernelStartupCodeProvider } from "./kernelStartupCodeProvider.node";
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IInteractiveWindowProvider>(
 		IInteractiveWindowProvider,
-		InteractiveWindowProvider,
+		InteractiveWindowProvider
 	);
 	serviceManager.addSingleton<IInteractiveControllerHelper>(
 		IInteractiveControllerHelper,
-		InteractiveControllerHelper,
+		InteractiveControllerHelper
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CommandRegistry,
+		CommandRegistry
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		HoverProvider,
+		HoverProvider
 	);
 	serviceManager.add<ICodeWatcher>(ICodeWatcher, CodeWatcher);
 	serviceManager.addSingleton<ICodeLensFactory>(
 		ICodeLensFactory,
-		CodeLensFactory,
+		CodeLensFactory
 	);
 	serviceManager.addSingleton<IDataScienceCodeLensProvider>(
 		IDataScienceCodeLensProvider,
-		DataScienceCodeLensProvider,
+		DataScienceCodeLensProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodeLensProviderActivator,
+		CodeLensProviderActivator
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonCellFoldingProvider,
+		PythonCellFoldingProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		Decorator,
+		Decorator
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GeneratedCodeStorageManager,
+		GeneratedCodeStorageManager
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelStartupCodeProvider,
+		KernelStartupCodeProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InteractiveWindowDebuggingStartupCodeProvider,
+		InteractiveWindowDebuggingStartupCodeProvider
 	);
 	serviceManager.addSingleton<ICodeGeneratorFactory>(
 		ICodeGeneratorFactory,
 		CodeGeneratorFactory,
 		undefined,
-		[IExtensionSyncActivationService],
+		[IExtensionSyncActivationService]
 	);
 	serviceManager.addSingleton<IGeneratedCodeStorageFactory>(
 		IGeneratedCodeStorageFactory,
-		GeneratedCodeStorageFactory,
+		GeneratedCodeStorageFactory
 	);
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
-		InteractiveWindowTracebackFormatter,
+		InteractiveWindowTracebackFormatter
 	);
 	serviceManager.addSingleton<IInteractiveWindowDebugger>(
 		IInteractiveWindowDebugger,
-		InteractiveWindowDebugger,
+		InteractiveWindowDebugger
 	);
 	serviceManager.addSingleton<IInteractiveWindowDebuggingManager>(
 		IInteractiveWindowDebuggingManager,
 		InteractiveWindowDebuggingManager,
 		undefined,
-		[IExtensionSyncActivationService],
+		[IExtensionSyncActivationService]
 	);
 	serviceManager.addSingleton<IJupyterExtensionBanner>(
 		IJupyterExtensionBanner,
 		InteractiveShiftEnterBanner,
-		BANNER_NAME_INTERACTIVE_SHIFTENTER,
+		BANNER_NAME_INTERACTIVE_SHIFTENTER
 	);
 }

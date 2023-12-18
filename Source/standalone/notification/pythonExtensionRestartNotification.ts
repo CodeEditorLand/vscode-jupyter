@@ -17,29 +17,32 @@ export class PythonExtensionRestartNotification
 	implements IExtensionSyncActivationService
 {
 	constructor(
-        @inject(IPythonExtensionChecker) private readonly extensionChecker: IPythonExtensionChecker,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider
-    ) {}
+		@inject(IPythonExtensionChecker)
+		private readonly extensionChecker: IPythonExtensionChecker,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider
+	) {}
 	activate(): void {
 		this.extensionChecker.onPythonExtensionInstallationStatusChanged(
 			this.onPythonExtensionInstallationStatusChanged,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 
 	// When the python extension is installed we need to notify if any active kernels might need to be
 	// restarted to pick up changes
 	private async onPythonExtensionInstallationStatusChanged(
-		status: "installed" | "uninstalled",
+		status: "installed" | "uninstalled"
 	) {
 		if (status === "installed" && this.anyKernelsAreActive()) {
 			// Restart required notification message
 			window
 				.showInformationMessage(
 					localize.DataScience.pythonExtensionInstalled,
-					localize.Common.ok,
+					localize.Common.ok
 				)
 				.then(noop, noop);
 		}

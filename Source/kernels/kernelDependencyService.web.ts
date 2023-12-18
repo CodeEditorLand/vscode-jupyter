@@ -30,7 +30,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 	public async areDependenciesInstalled(
 		_kernelConnection: KernelConnectionMetadata,
 		_token?: CancellationToken,
-		_ignoreCache?: boolean,
+		_ignoreCache?: boolean
 	): Promise<boolean> {
 		return false;
 	}

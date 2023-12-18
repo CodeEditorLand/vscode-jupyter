@@ -37,11 +37,13 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 	];
 
 	constructor(
-        @inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory,
-        @inject(IConfigurationService) private configuration: IConfigurationService
-    ) {
-        this.initialize();
-    }
+		@inject(IPersistentStateFactory)
+		private persistentState: IPersistentStateFactory,
+		@inject(IConfigurationService)
+		private configuration: IConfigurationService
+	) {
+		this.initialize();
+	}
 
 	public initialize() {
 		if (this.initialized) {
@@ -57,7 +59,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 	public isEnabled(): boolean {
 		return this.persistentState.createGlobalPersistentState<boolean>(
 			InteractiveShiftEnterStateKeys.ShowBanner,
-			true,
+			true
 		).value;
 	}
 
@@ -74,7 +76,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		sendTelemetryEvent(Telemetry.ShiftEnterBannerShown);
 		const response = await window.showInformationMessage(
 			this.bannerMessage,
-			...this.bannerLabels,
+			...this.bannerLabels
 		);
 		switch (response) {
 			case this.bannerLabels[InteractiveShiftEnterLabelIndex.Yes]: {
@@ -97,7 +99,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		return Promise.resolve(
 			this.isEnabled() &&
 				!this.disabledInCurrentSession &&
-				!settings.sendSelectionToInteractiveWindow,
+				!settings.sendSelectionToInteractiveWindow
 		);
 	}
 
@@ -107,7 +109,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 			"interactiveWindow.textEditor.executeSelection",
 			false,
 			undefined,
-			ConfigurationTarget.Global,
+			ConfigurationTarget.Global
 		);
 		await this.disableBanner();
 	}
@@ -118,7 +120,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 			"interactiveWindow.textEditor.executeSelection",
 			true,
 			undefined,
-			ConfigurationTarget.Global,
+			ConfigurationTarget.Global
 		);
 		await this.disableBanner();
 	}
@@ -127,7 +129,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		await this.persistentState
 			.createGlobalPersistentState<boolean>(
 				InteractiveShiftEnterStateKeys.ShowBanner,
-				false,
+				false
 			)
 			.updateValue(false);
 	}

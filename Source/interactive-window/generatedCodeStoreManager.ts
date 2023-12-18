@@ -23,14 +23,18 @@ export class GeneratedCodeStorageManager
 {
 	private readonly disposables: IDisposable[] = [];
 	constructor(
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry,
-        @inject(ICodeGeneratorFactory) private readonly codeGeneratorFactory: ICodeGeneratorFactory,
-        @inject(IGeneratedCodeStorageFactory) private readonly storageFactory: IGeneratedCodeStorageFactory,
-        @inject(IControllerRegistration) private readonly controllers: IControllerRegistration
-    ) {
-        disposables.push(this);
-    }
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
+		@inject(ICodeGeneratorFactory)
+		private readonly codeGeneratorFactory: ICodeGeneratorFactory,
+		@inject(IGeneratedCodeStorageFactory)
+		private readonly storageFactory: IGeneratedCodeStorageFactory,
+		@inject(IControllerRegistration)
+		private readonly controllers: IControllerRegistration
+	) {
+		disposables.push(this);
+	}
 	dispose() {
 		dispose(this.disposables);
 	}
@@ -38,17 +42,19 @@ export class GeneratedCodeStorageManager
 		this.kernelProvider.onDidCreateKernel(
 			this.onDidCreateKernel,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.controllers.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private onNotebookControllerSelected({
 		notebook,
-	}: { notebook: NotebookDocument }) {
+	}: {
+		notebook: NotebookDocument;
+	}) {
 		this.storageFactory.get({ notebook })?.clear();
 		this.codeGeneratorFactory.get(notebook)?.reset();
 	}
@@ -69,7 +75,7 @@ export class GeneratedCodeStorageManager
 				this.codeGeneratorFactory.getOrCreate(notebook).reset();
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 }

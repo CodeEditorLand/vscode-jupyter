@@ -9,7 +9,7 @@ import { getFilePath } from "../../common/platform/fs-paths";
 import { getTelemetrySafeHashedString } from "../../telemetry/helpers";
 
 export function getInterpreterHash(
-	interpreter: PythonEnvironment | { uri: Uri },
+	interpreter: PythonEnvironment | { uri: Uri }
 ) {
 	const interpreterPath = getNormalizedInterpreterPath(interpreter.uri);
 	return getTelemetrySafeHashedString(interpreterPath.path);
@@ -25,17 +25,17 @@ export function areInterpreterPathsSame(
 	path1: Uri = Uri.file(""),
 	path2: Uri = Uri.file(""),
 	ostype = getOSType(),
-	forceLowerCase: boolean = false,
+	forceLowerCase: boolean = false
 ) {
 	const norm1 = getNormalizedInterpreterPath(
 		path1,
 		ostype,
-		ostype == OSType.Windows || forceLowerCase,
+		ostype == OSType.Windows || forceLowerCase
 	);
 	const norm2 = getNormalizedInterpreterPath(
 		path2,
 		ostype,
-		ostype == OSType.Windows || forceLowerCase,
+		ostype == OSType.Windows || forceLowerCase
 	);
 	return norm1 === norm2 || uriPath.isEqual(norm1, norm2, true);
 }
@@ -49,7 +49,7 @@ export function areInterpreterPathsSame(
 export function getNormalizedInterpreterPath(
 	path: Uri = Uri.file(""),
 	ostype = getOSType(),
-	forceLowerCase: boolean = false,
+	forceLowerCase: boolean = false
 ) {
 	let fsPath = getFilePath(path);
 	if (forceLowerCase) {

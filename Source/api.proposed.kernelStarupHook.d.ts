@@ -33,7 +33,7 @@ declare module "./api" {
 				server: JupyterServer;
 				session: Session.ISessionConnection;
 			},
-			token: CancellationToken,
+			token: CancellationToken
 		): Promise<void>;
 	}
 }

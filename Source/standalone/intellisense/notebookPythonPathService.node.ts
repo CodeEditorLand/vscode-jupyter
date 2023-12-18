@@ -34,15 +34,21 @@ export class NotebookPythonPathService
 	private _isEnabled: boolean | undefined;
 
 	constructor(
-        @inject(IPythonApiProvider) private readonly apiProvider: IPythonApiProvider,
-        @inject(IPythonExtensionChecker) private readonly extensionChecker: IPythonExtensionChecker,
-        @inject(INotebookEditorProvider) private readonly notebookEditorProvider: INotebookEditorProvider,
-        @inject(IControllerRegistration) private readonly controllerRegistration: IControllerRegistration
-    ) {
-        if (!this._isPylanceExtensionInstalled()) {
-            this.extensionChangeHandler = extensions.onDidChange(this.extensionsChangeHandler.bind(this));
-        }
-    }
+		@inject(IPythonApiProvider)
+		private readonly apiProvider: IPythonApiProvider,
+		@inject(IPythonExtensionChecker)
+		private readonly extensionChecker: IPythonExtensionChecker,
+		@inject(INotebookEditorProvider)
+		private readonly notebookEditorProvider: INotebookEditorProvider,
+		@inject(IControllerRegistration)
+		private readonly controllerRegistration: IControllerRegistration
+	) {
+		if (!this._isPylanceExtensionInstalled()) {
+			this.extensionChangeHandler = extensions.onDidChange(
+				this.extensionsChangeHandler.bind(this)
+			);
+		}
+	}
 
 	public activate() {
 		if (
@@ -57,7 +63,7 @@ export class NotebookPythonPathService
 			.then((api) => {
 				if (api.registerJupyterPythonPathFunction !== undefined) {
 					api.registerJupyterPythonPathFunction((uri) =>
-						this._jupyterPythonPathFunction(uri),
+						this._jupyterPythonPathFunction(uri)
 					);
 				}
 				if (
@@ -65,7 +71,7 @@ export class NotebookPythonPathService
 					undefined
 				) {
 					api.registerGetNotebookUriForTextDocumentUriFunction(
-						(uri) => this._getNotebookUriForTextDocumentUri(uri),
+						(uri) => this._getNotebookUriForTextDocumentUri(uri)
 					);
 				}
 			})
@@ -121,7 +127,7 @@ export class NotebookPythonPathService
 	 * path used by Pylance. Return undefined to allow Python to determine the path.
 	 */
 	private async _jupyterPythonPathFunction(
-		uri: Uri,
+		uri: Uri
 	): Promise<string | undefined> {
 		const notebook =
 			this.notebookEditorProvider.findAssociatedNotebookDocument(uri);
@@ -141,8 +147,8 @@ export class NotebookPythonPathService
 			// Empty string is special, means do not use any interpreter at all.
 			traceInfo(
 				`No interpreter for Pylance for Notebook URI "${getDisplayPath(
-					notebook.uri,
-				)}"`,
+					notebook.uri
+				)}"`
 			);
 			return "";
 		}
@@ -150,7 +156,7 @@ export class NotebookPythonPathService
 	}
 
 	private _getNotebookUriForTextDocumentUri(
-		textDocumentUri: Uri,
+		textDocumentUri: Uri
 	): Uri | undefined {
 		const notebookUri = getNotebookUriFromInputBoxUri(textDocumentUri);
 		if (!notebookUri) {
@@ -174,7 +180,7 @@ export class NotebookPythonPathService
 }
 
 export function getNotebookUriFromInputBoxUri(
-	textDocumentUri: Uri,
+	textDocumentUri: Uri
 ): Uri | undefined {
 	if (textDocumentUri.scheme !== "vscode-interactive-input") {
 		return undefined;
@@ -182,9 +188,9 @@ export function getNotebookUriFromInputBoxUri(
 
 	const notebookPath = `${textDocumentUri.path.replace(
 		"InteractiveInput-",
-		"Interactive-",
+		"Interactive-"
 	)}.interactive`;
 	return workspace.notebookDocuments.find(
-		(doc) => doc.uri.path === notebookPath,
+		(doc) => doc.uri.path === notebookPath
 	)?.uri;
 }

@@ -36,42 +36,42 @@ export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingletonInstance<boolean>(IsWindows, false);
 	serviceManager.addSingleton<IExperimentService>(
 		IExperimentService,
-		ExperimentService,
+		ExperimentService
 	);
 	serviceManager.addSingleton<IFeaturesManager>(
 		IFeaturesManager,
-		FeatureManager,
+		FeatureManager
 	);
 	serviceManager.addSingleton<IPersistentStateFactory>(
 		IPersistentStateFactory,
-		PersistentStateFactory,
+		PersistentStateFactory
 	);
 	serviceManager.addSingleton<IExtensions>(IExtensions, Extensions);
 	serviceManager.addSingleton<ICryptoUtils>(ICryptoUtils, CryptoUtils);
 	serviceManager.addSingleton<IEncryptedStorage>(
 		IEncryptedStorage,
-		EncryptedStorage,
+		EncryptedStorage
 	);
 	serviceManager.addSingleton<IDebugService>(IDebugService, DebugService);
 	serviceManager.addSingleton<IAsyncDisposableRegistry>(
 		IAsyncDisposableRegistry,
-		AsyncDisposableRegistry,
+		AsyncDisposableRegistry
 	);
 	serviceManager.addSingleton<IMultiStepInputFactory>(
 		IMultiStepInputFactory,
-		MultiStepInputFactory,
+		MultiStepInputFactory
 	);
 	serviceManager.addSingleton<IDataFrameScriptGenerator>(
 		IDataFrameScriptGenerator,
-		DataFrameScriptGenerator,
+		DataFrameScriptGenerator
 	);
 	serviceManager.addSingleton<IVariableScriptGenerator>(
 		IVariableScriptGenerator,
-		VariableScriptGenerator,
+		VariableScriptGenerator
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		OldCacheCleaner,
+		OldCacheCleaner
 	);
 
 	registerPlatformTypes(serviceManager);

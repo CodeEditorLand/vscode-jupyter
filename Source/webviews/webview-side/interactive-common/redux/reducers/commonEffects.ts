@@ -16,7 +16,7 @@ export namespace CommonEffects {
 	}
 
 	export function handleLocInit(
-		arg: CommonReducerArg<CommonActionType, string>,
+		arg: CommonReducerArg<CommonActionType, string>
 	): IMainState {
 		// Read in the loc strings
 		const locJSON: LocalizedMessages = JSON.parse(arg.payload.data);
@@ -34,7 +34,7 @@ export namespace CommonEffects {
 
 	// Extension has requested HTML for the webview, get it by ID and send it back as a message
 	export function getHTMLByIdRequest(
-		arg: CommonReducerArg<CommonActionType, string>,
+		arg: CommonReducerArg<CommonActionType, string>
 	): IMainState {
 		const element = document.getElementById(arg.payload.data);
 
@@ -42,7 +42,7 @@ export namespace CommonEffects {
 			postActionToExtension(
 				arg,
 				InteractiveWindowMessages.GetHTMLByIdResponse,
-				element.innerHTML,
+				element.innerHTML
 			);
 		}
 		return arg.prevState;

@@ -36,36 +36,36 @@ import { ExposeUsedAzMLServerHandles } from "./api/usedAzMLServerHandles";
 export function registerTypes(
 	context: IExtensionContext,
 	serviceManager: IServiceManager,
-	isDevMode: boolean,
+	isDevMode: boolean
 ) {
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		GlobalActivation,
+		GlobalActivation
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		WorkspaceActivation,
+		WorkspaceActivation
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExtensionRecommendationService,
+		ExtensionRecommendationService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ActiveEditorContextService,
+		ActiveEditorContextService
 	);
 	serviceManager.addSingleton<IImportTracker>(IImportTracker, ImportTracker);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ImportTracker,
+		ImportTracker
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		EagerlyActivateJupyterUriProviders,
+		EagerlyActivateJupyterUriProviders
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		JupyterServerSelectorCommand,
+		JupyterServerSelectorCommand
 	);
 
 	// Import/Export
@@ -73,39 +73,39 @@ export function registerTypes(
 	serviceManager.add<INotebookImporter>(INotebookImporter, JupyterImporter);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExportCommandRegistry,
+		ExportCommandRegistry
 	);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		CodespaceCommandRegistry,
+		CodespaceCommandRegistry
 	);
 
 	serviceManager.addSingleton<ISurveyBanner>(
 		ISurveyBanner,
-		DataScienceSurveyBanner,
+		DataScienceSurveyBanner
 	);
 	serviceManager.addBinding(ISurveyBanner, IExtensionSyncActivationService);
 	// Activation Manager
 	serviceManager.add<IExtensionActivationManager>(
 		IExtensionActivationManager,
-		ExtensionActivationManager,
+		ExtensionActivationManager
 	);
 
 	// API
 	serviceManager.addSingleton<IExportedKernelServiceFactory>(
 		IExportedKernelServiceFactory,
-		JupyterKernelServiceFactory,
+		JupyterKernelServiceFactory
 	);
 	serviceManager.addSingleton<ApiAccessService>(
 		ApiAccessService,
-		ApiAccessService,
+		ApiAccessService
 	);
 
 	// Notification
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		PythonExtensionRestartNotification,
+		PythonExtensionRestartNotification
 	);
 
 	// Intellisense
@@ -117,10 +117,10 @@ export function registerTypes(
 	// User jupyter server url provider
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		UserJupyterServerUrlProvider,
+		UserJupyterServerUrlProvider
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		ExposeUsedAzMLServerHandles,
+		ExposeUsedAzMLServerHandles
 	);
 }

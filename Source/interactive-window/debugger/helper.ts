@@ -6,7 +6,7 @@ import { getFilePath } from "../../platform/common/platform/fs-paths";
 import { IFileGeneratedCodes } from "../editor-integration/types";
 
 export function buildSourceMap(
-	fileHash: IFileGeneratedCodes,
+	fileHash: IFileGeneratedCodes
 ): ISourceMapRequest {
 	const sourceMapRequest: ISourceMapRequest = {
 		source: { path: getFilePath(fileHash.uri) },
@@ -22,7 +22,7 @@ export function buildSourceMap(
 				},
 				runtimeLine: generatedCode.runtimeLine,
 			};
-		},
+		}
 	);
 
 	return sourceMapRequest;

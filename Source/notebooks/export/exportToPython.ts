@@ -11,7 +11,7 @@ export class ExportToPython {
 		sourceDocument: NotebookDocument,
 		target: Uri,
 		interpreter: PythonEnvironment,
-		token: CancellationToken,
+		token: CancellationToken
 	): Promise<void> {
 		const exportBase =
 			ServiceContainer.instance.get<IExportBase>(IExportBase);
@@ -20,7 +20,7 @@ export class ExportToPython {
 			target,
 			ExportFormat.python,
 			interpreter,
-			token,
+			token
 		);
 	}
 }

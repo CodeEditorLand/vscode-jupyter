@@ -55,16 +55,16 @@ export interface IProcessService extends IDisposable {
 	execObservable(
 		file: string,
 		args: string[],
-		options?: SpawnOptions,
+		options?: SpawnOptions
 	): ObservableExecutionResult<string>;
 	exec(
 		file: string,
 		args: string[],
-		options?: SpawnOptions,
+		options?: SpawnOptions
 	): Promise<ExecutionResult<string>>;
 	shellExec(
 		command: string,
-		options?: ShellOptions,
+		options?: ShellOptions
 	): Promise<ExecutionResult<string>>;
 }
 
@@ -73,7 +73,7 @@ export const IProcessServiceFactory = Symbol("IProcessServiceFactory");
 export interface IProcessServiceFactory {
 	create(
 		resource: Resource,
-		cancelToken?: CancellationToken,
+		cancelToken?: CancellationToken
 	): Promise<IProcessService>;
 }
 

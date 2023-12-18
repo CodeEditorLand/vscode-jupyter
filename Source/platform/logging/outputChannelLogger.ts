@@ -13,7 +13,7 @@ export class OutputChannelLogger implements ILogger {
 	constructor(
 		private readonly channel: OutputChannel,
 		homeRegEx?: RegExp,
-		userNameRegEx?: RegExp,
+		userNameRegEx?: RegExp
 	) {
 		this.homeReplaceRegEx = homeRegEx;
 		this.userNameReplaceRegEx = userNameRegEx;
@@ -32,7 +32,7 @@ export class OutputChannelLogger implements ILogger {
 		if (this.userNameReplaceRegEx) {
 			logMessage = logMessage.replace(
 				this.userNameReplaceRegEx,
-				"<username>",
+				"<username>"
 			);
 		}
 		return logMessage;

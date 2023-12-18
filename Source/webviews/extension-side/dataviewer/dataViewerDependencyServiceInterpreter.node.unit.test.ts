@@ -53,21 +53,21 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 		dependencyService = new DataViewerDependencyService(
 			instance(installer),
 			instance(pythonExecFactory),
-			instance(interpreterService),
+			instance(interpreterService)
 		);
 
 		when(interpreterService.getActiveInterpreter()).thenResolve(
-			interpreter,
+			interpreter
 		);
 		when(interpreterService.getActiveInterpreter(anything())).thenResolve(
-			interpreter,
+			interpreter
 		);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(instance(pythonExecService) as any).then = undefined;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(pythonExecService as any).then = undefined;
 		when(
-			pythonExecFactory.createActivatedEnvironment(anything()),
+			pythonExecFactory.createActivatedEnvironment(anything())
 		).thenResolve(instance(pythonExecService));
 	});
 	teardown(() => resetVSCodeMocks());
@@ -78,8 +78,8 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 					"-c",
 					'import pandas;print(pandas.__version__);print("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d")',
 				]),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve({
 			stdout: "0.30.0\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d",
 		});
@@ -92,8 +92,8 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 					"-c",
 					'import pandas;print(pandas.__version__);print("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d")',
 				]),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve({
 			stdout: "0.20.0\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d",
 		});
@@ -105,8 +105,8 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 			promise,
 			DataScience.pandasTooOldForViewingFormat(
 				"0.20.",
-				pandasMinimumVersionSupportedByVariableViewer,
-			),
+				pandasMinimumVersionSupportedByVariableViewer
+			)
 		);
 	});
 	test("Throw exception if pandas is installed and version is < 0.20", async () => {
@@ -116,8 +116,8 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 					"-c",
 					'import pandas;print(pandas.__version__);print("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d")',
 				]),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve({
 			stdout: "0.10.0\n5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d",
 		});
@@ -129,8 +129,8 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 			promise,
 			DataScience.pandasTooOldForViewingFormat(
 				"0.10.",
-				pandasMinimumVersionSupportedByVariableViewer,
-			),
+				pandasMinimumVersionSupportedByVariableViewer
+			)
 		);
 	});
 	test("Prompt to install pandas and install pandas", async () => {
@@ -140,19 +140,19 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 					"-c",
 					'import pandas;print(pandas.__version__);print("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d")',
 				]),
-				anything(),
-			),
+				anything()
+			)
 		).thenReject(new Error("Not Found"));
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve(Common.install as any);
 		when(
-			installer.install(Product.pandas, interpreter, anything()),
+			installer.install(Product.pandas, interpreter, anything())
 		).thenResolve();
 
 		await dependencyService.checkAndInstallMissingDependencies(interpreter);
@@ -160,14 +160,14 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				DataScience.pandasRequiredForViewing(
-					pandasMinimumVersionSupportedByVariableViewer,
+					pandasMinimumVersionSupportedByVariableViewer
 				),
 				deepEqual({ modal: true }),
-				Common.install,
-			),
+				Common.install
+			)
 		).once();
 		verify(
-			installer.install(Product.pandas, interpreter, anything()),
+			installer.install(Product.pandas, interpreter, anything())
 		).once();
 	});
 	test("Prompt to install pandas and throw error if user does not install pandas", async () => {
@@ -177,15 +177,15 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 					"-c",
 					'import pandas;print(pandas.__version__);print("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d")',
 				]),
-				anything(),
-			),
+				anything()
+			)
 		).thenReject(new Error("Not Found"));
 		when(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				anything(),
 				anything(),
-				anything(),
-			),
+				anything()
+			)
 		).thenResolve();
 
 		const promise =
@@ -194,17 +194,17 @@ suite("DataViewerDependencyService (PythonEnvironment, Node)", () => {
 		await assert.isRejected(
 			promise,
 			DataScience.pandasRequiredForViewing(
-				pandasMinimumVersionSupportedByVariableViewer,
-			),
+				pandasMinimumVersionSupportedByVariableViewer
+			)
 		);
 		verify(
 			mockedVSCodeNamespaces.window.showErrorMessage(
 				DataScience.pandasRequiredForViewing(
-					pandasMinimumVersionSupportedByVariableViewer,
+					pandasMinimumVersionSupportedByVariableViewer
 				),
 				deepEqual({ modal: true }),
-				Common.install,
-			),
+				Common.install
+			)
 		).once();
 		verify(installer.install(anything(), anything(), anything())).never();
 	});

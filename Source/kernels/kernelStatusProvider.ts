@@ -17,11 +17,12 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 	private readonly restartProgress = new WeakMap<IKernel, IDisposable>();
 	private readonly interruptProgress = new WeakMap<IKernel, IDisposable>();
 	constructor(
-        @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
-        @inject(IDisposableRegistry) disposables: IDisposableRegistry
-    ) {
-        disposables.push(this);
-    }
+		@inject(IKernelProvider)
+		private readonly kernelProvider: IKernelProvider,
+		@inject(IDisposableRegistry) disposables: IDisposableRegistry
+	) {
+		disposables.push(this);
+	}
 	public dispose(): void {
 		dispose(this.disposables);
 	}
@@ -29,7 +30,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 		this.kernelProvider.onDidCreateKernel(
 			this.onDidCreateKernel,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.kernelProvider.onDidDisposeKernel(
 			(kernel) => {
@@ -37,7 +38,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 				this.interruptProgress.get(kernel)?.dispose();
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private onDidCreateKernel(kernel: IKernel) {
@@ -50,14 +51,14 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 					kernel.resourceUri,
 					DataScience.restartingKernelStatus(
 						`: ${getDisplayNameOrNameOfKernelConnection(
-							kernel.kernelConnectionMetadata,
-						)}`,
-					),
+							kernel.kernelConnectionMetadata
+						)}`
+					)
 				);
 				this.restartProgress.set(kernel, progress);
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.addHook(
 			"restartCompleted",
@@ -66,7 +67,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 				this.interruptProgress.get(kernel)?.dispose();
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.addHook(
 			"willInterrupt",
@@ -84,23 +85,23 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 							kernel.resourceUri,
 							DataScience.interruptKernelStatus(
 								getDisplayNameOrNameOfKernelConnection(
-									kernel.kernelConnectionMetadata,
-								),
-							),
-						),
+									kernel.kernelConnectionMetadata
+								)
+							)
+						)
 					);
 				}, 1_000);
 				disposable.add(new Disposable(() => clearTimeout(timeout)));
 				this.interruptProgress.set(kernel, disposable);
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		kernel.addHook(
 			"interruptCompleted",
 			async () => this.interruptProgress.get(kernel)?.dispose(),
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 }

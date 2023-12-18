@@ -4,11 +4,11 @@
 import { JupyterServerProviderHandle, IRemoteKernelFinder } from "../types";
 
 export const IRemoteKernelFinderController = Symbol(
-	"RemoteKernelFinderController",
+	"RemoteKernelFinderController"
 );
 export interface IRemoteKernelFinderController {
 	getOrCreateRemoteKernelFinder(
 		serverProviderHandle: JupyterServerProviderHandle,
-		displayName: string,
+		displayName: string
 	): IRemoteKernelFinder;
 }

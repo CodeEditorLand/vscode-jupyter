@@ -36,7 +36,7 @@ export class Extensions implements IExtensions {
 				.filter((item) => item && item.toLowerCase().startsWith("http"))
 				.filter(
 					(item) =>
-						item && !item.toLowerCase().startsWith(jupyterExtRoot),
+						item && !item.toLowerCase().startsWith(jupyterExtRoot)
 				) as string[];
 			parseStack(new Error("Ex")).forEach((item) => {
 				const fileName = item.getFileName();
@@ -51,7 +51,7 @@ export class Extensions implements IExtensions {
 				const matchingExt = extensions.all.find(
 					(ext) =>
 						ext.id !== JVSC_EXTENSION_ID &&
-						frame.startsWith(ext.extensionUri.toString()),
+						frame.startsWith(ext.extensionUri.toString())
 				);
 				if (matchingExt) {
 					return {
@@ -62,7 +62,7 @@ export class Extensions implements IExtensions {
 			}
 			traceError(
 				`Unable to determine the caller of the extension API for trace stack.`,
-				stack,
+				stack
 			);
 		}
 		return {

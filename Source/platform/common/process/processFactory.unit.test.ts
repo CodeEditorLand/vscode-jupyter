@@ -41,8 +41,8 @@ suite("Process - ProcessServiceFactory", () => {
 				envVariablesProvider.getEnvironmentVariables(
 					resource,
 					"RunNonPythonCode",
-					anything(),
-				),
+					anything()
+				)
 			).thenResolve({
 				x: "test",
 			});
@@ -52,8 +52,8 @@ suite("Process - ProcessServiceFactory", () => {
 				envVariablesProvider.getEnvironmentVariables(
 					resource,
 					"RunNonPythonCode",
-					anything(),
-				),
+					anything()
+				)
 			).once();
 
 			expect(disposableRegistry.length).equal(1);

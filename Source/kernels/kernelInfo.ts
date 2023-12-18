@@ -28,7 +28,7 @@ const CACHE_EXPIRY_IN_MS = 1000 * 60 * 60 * 24 * 2;
 export async function getKernelInfo(
 	session: IKernelSession,
 	kernelConnectionMetadata: KernelConnectionMetadata,
-	workspaceMemento: Memento,
+	workspaceMemento: Memento
 ) {
 	const promises: Promise<
 		| KernelMessage.IReplyErrorContent
@@ -56,8 +56,8 @@ export async function getKernelInfo(
 				cacheKernelInfo(
 					workspaceMemento,
 					kernelConnectionMetadata,
-					content,
-				),
+					content
+				)
 			)
 			.catch(noop);
 	}
@@ -75,15 +75,15 @@ export async function getKernelInfo(
 			cacheKernelInfo(
 				workspaceMemento,
 				kernelConnectionMetadata,
-				content as KernelMessage.IInfoReply | undefined,
-			),
+				content as KernelMessage.IInfoReply | undefined
+			)
 		)
 		.catch(noop);
 	// If this doesn't complete in 5 seconds for remote kernels, assume the kernel is busy & provide some default content.
 	if (kernelConnectionMetadata.kind === "connectToLiveRemoteKernel") {
 		const cachedInfo = getCacheKernelInfo(
 			workspaceMemento,
-			kernelConnectionMetadata,
+			kernelConnectionMetadata
 		);
 		if (cachedInfo) {
 			promises.push(Promise.resolve(cachedInfo));
@@ -94,7 +94,7 @@ export async function getKernelInfo(
 	const content = await Promise.race(promises);
 	if (content === defaultResponse) {
 		traceWarning(
-			"Failed to Kernel info in a timely manner, defaulting to empty info!",
+			"Failed to Kernel info in a timely manner, defaulting to empty info!"
 		);
 	} else {
 		traceVerbose("Got Kernel info");
@@ -109,7 +109,7 @@ async function cacheKernelInfo(
 		| KernelMessage.IReplyErrorContent
 		| KernelMessage.IReplyAbortContent
 		| KernelMessage.IInfoReply
-		| undefined,
+		| undefined
 ) {
 	if (!info || !isRemoteConnection(kernelConnection)) {
 		return;
@@ -128,7 +128,7 @@ async function cacheKernelInfo(
 }
 function getCacheKernelInfo(
 	storage: Memento,
-	kernelConnection: KernelConnectionMetadata,
+	kernelConnection: KernelConnectionMetadata
 ) {
 	if (!isRemoteConnection(kernelConnection)) {
 		return;

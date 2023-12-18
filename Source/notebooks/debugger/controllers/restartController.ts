@@ -22,11 +22,11 @@ export class RestartController implements IDebuggingDelegate {
 		private readonly mode: KernelDebugMode,
 		private readonly debugAdapter: IKernelDebugAdapter,
 		public readonly debugCell: NotebookCell,
-		private readonly serviceContainer: IServiceContainer,
+		private readonly serviceContainer: IServiceContainer
 	) {
 		this.debuggingManager =
 			this.serviceContainer.get<INotebookDebuggingManager>(
-				INotebookDebuggingManager,
+				INotebookDebuggingManager
 			);
 	}
 
@@ -39,16 +39,17 @@ export class RestartController implements IDebuggingDelegate {
 	}
 
 	public async willSendResponse(
-		response: DebugProtocol.Response,
+		response: DebugProtocol.Response
 	): Promise<void> {
 		if (response.command === "initialize" && response.body) {
-			(response as DebugProtocol.InitializeResponse)
-				.body!.supportsRestartRequest = true;
+			(
+				response as DebugProtocol.InitializeResponse
+			).body!.supportsRestartRequest = true;
 		}
 	}
 
 	public async willSendRequest(
-		request: DebugProtocol.Request,
+		request: DebugProtocol.Request
 	): Promise<undefined | DebugProtocol.Response> {
 		if (request.command === "restart") {
 			// We have to implement restart manually because the previous launch config includes the cell index, but the cell index may have changed.
@@ -63,7 +64,7 @@ export class RestartController implements IDebuggingDelegate {
 						return this.debuggingManager.tryToStartDebugging(
 							this.mode,
 							this.debugCell,
-							true,
+							true
 						);
 					})
 					.catch((err) => {

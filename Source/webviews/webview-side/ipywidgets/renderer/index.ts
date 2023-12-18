@@ -16,7 +16,7 @@ import { NotebookMetadata } from "../../../../platform/common/utils";
 import { logErrorMessage } from "../../react-common/logger";
 
 function convertVSCodeOutputToExecuteResultOrDisplayData(
-	outputItem: OutputItem,
+	outputItem: OutputItem
 ):
 	| (nbformat.IMimeBundle & {
 			model_id: string;
@@ -158,11 +158,11 @@ export const activate: ActivationFunction = (context) => {
 				if (e.widgetState && ipywidgetsKernel && e.version) {
 					await ipywidgetsKernel.restoreWidgets(e.widgetState);
 					rendererInitPromise.resolve(
-						Object.assign({}, e, { widgetStateLoaded: true }),
+						Object.assign({}, e, { widgetStateLoaded: true })
 					);
 				} else {
 					rendererInitPromise.resolve(
-						Object.assign({}, e, { widgetStateLoaded: false }),
+						Object.assign({}, e, { widgetStateLoaded: false })
 					);
 				}
 			}
@@ -175,7 +175,7 @@ export const activate: ActivationFunction = (context) => {
 	 * This function will tell us whether the current kernel has the necessary state required to render this widget.
 	 */
 	async function doesKernelHaveWidgetState(
-		model_id: string,
+		model_id: string
 	): Promise<{ hasWidgetState: boolean; kernelSelected: boolean }> {
 		if (!context.postMessage) {
 			return { hasWidgetState: false, kernelSelected: false };
@@ -202,7 +202,7 @@ export const activate: ActivationFunction = (context) => {
 		async renderOutputItem(
 			outputItem: OutputItem,
 			element: HTMLElement,
-			_signal: AbortController,
+			_signal: AbortController
 		) {
 			logger(`Got item for Rendering ${outputItem.id}}`);
 			try {
@@ -211,7 +211,7 @@ export const activate: ActivationFunction = (context) => {
 				if (!widgetModel) {
 					logger(
 						`Error: Model not found to render output ${outputItem.id}`,
-						"error",
+						"error"
 					);
 					throw new FallbackRenderer();
 				}
@@ -227,20 +227,20 @@ export const activate: ActivationFunction = (context) => {
 				if (!hasWidgetState) {
 					logger(
 						`Model not found in Kernel state to render output ${outputItem.id}, rendering a fallback mime type`,
-						"info",
+						"info"
 					);
 					throw new FallbackRenderer();
 				}
 				if (!kernelSelected) {
 					logger(
 						`No Kernel selected, hence not rendering widget output ${outputItem.id}`,
-						"error",
+						"error"
 					);
 					throw new FallbackRenderer();
 				}
 				if (renderOutputFunc) {
 					logger(
-						`Rendering ${outputItem.id} widget renderer found *************`,
+						`Rendering ${outputItem.id} widget renderer found *************`
 					);
 					element.className =
 						(element.className || "") +
@@ -250,13 +250,13 @@ export const activate: ActivationFunction = (context) => {
 						widgetModel,
 						element,
 						logger,
-						doesKernelHaveWidgetState,
+						doesKernelHaveWidgetState
 					);
 				}
 				throw new FallbackRenderer();
 			} catch (ex) {
 				logErrorMessage(
-					`Failed to render output ${outputItem.id}, ${ex}`,
+					`Failed to render output ${outputItem.id}, ${ex}`
 				);
 				throw ex;
 			} finally {
@@ -297,7 +297,7 @@ function hookupTestScripts(context: RendererContext<unknown>) {
 function sendRenderOutputItem(
 	context: RendererContext<unknown>,
 	outputItem: OutputItem,
-	element: HTMLElement,
+	element: HTMLElement
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const anyWindow = window as any;

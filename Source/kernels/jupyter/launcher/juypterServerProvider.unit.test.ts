@@ -49,7 +49,7 @@ suite("Jupyter Server Provider", () => {
 		// Create the server provider
 		serverProvider = new JupyterServerProvider(
 			instance(jupyterServerHelper),
-			instance(interpreterService),
+			instance(interpreterService)
 		);
 		source = new CancellationTokenSource();
 		disposables.push(source);
@@ -58,11 +58,11 @@ suite("Jupyter Server Provider", () => {
 
 	test("Get Or Create", async () => {
 		when(jupyterServerHelper.getUsableJupyterPython()).thenResolve(
-			workingPython,
+			workingPython
 		);
 		const connection = createTypeMoq<IJupyterConnection>("jupyter server");
 		when(
-			jupyterServerHelper.startServer(anything(), anything()),
+			jupyterServerHelper.startServer(anything(), anything())
 		).thenResolve(connection.object);
 
 		// Disable UI just lets us skip mocking the progress reporter

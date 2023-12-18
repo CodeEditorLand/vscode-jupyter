@@ -11,7 +11,7 @@ class BaseRuleWalker extends Lint.RuleWalker {
 		if (sourceFile && sourceFile.fileName) {
 			const filename = path.resolve(
 				util.ExtensionRootDir,
-				sourceFile.fileName,
+				sourceFile.fileName
 			);
 			if (filesToIgnore.indexOf(filename.replace(/\//g, path.sep)) >= 0) {
 				return true;

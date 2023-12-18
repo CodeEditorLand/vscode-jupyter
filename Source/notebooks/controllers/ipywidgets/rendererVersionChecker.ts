@@ -28,8 +28,8 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	static messageDisplayed: boolean = false;
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
-        disposables.push(this);
-    }
+		disposables.push(this);
+	}
 	dispose(): void {
 		dispose(this.disposables);
 	}
@@ -37,7 +37,7 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 		workspace.onDidChangeNotebookDocument(
 			this.onDidChangeNotebookDocument,
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	private onDidChangeNotebookDocument(e: NotebookDocumentChangeEvent) {
@@ -52,9 +52,9 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 						(o) =>
 							o.items &&
 							o.items.some(
-								(item) => item.mime === WIDGET_MIMETYPE,
-							),
-					),
+								(item) => item.mime === WIDGET_MIMETYPE
+							)
+					)
 			)
 		) {
 			return;
@@ -96,7 +96,7 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 			.showInformationMessage(
 				DataScience.rendererExtensionRequired,
 				{ modal: true },
-				Common.bannerLabelYes,
+				Common.bannerLabelYes
 			)
 			.then((answer) => {
 				if (answer === Common.bannerLabelYes) {
@@ -116,7 +116,7 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 			.showInformationMessage(
 				DataScience.rendererExtension1015Required,
 				{ modal: true },
-				Common.bannerLabelYes,
+				Common.bannerLabelYes
 			)
 			.then((answer) => {
 				if (answer === Common.bannerLabelYes) {

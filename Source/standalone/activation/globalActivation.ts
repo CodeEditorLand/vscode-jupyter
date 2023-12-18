@@ -27,14 +27,16 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 	private changeHandler: IDisposable | undefined;
 	private startTime: number = Date.now();
 	constructor(
-        @inject(IDisposableRegistry) private disposableRegistry: IDisposableRegistry,
-        @inject(IConfigurationService) private configuration: IConfigurationService,
-        @inject(IRawNotebookSupportedService)
-        @optional()
-        private rawSupported: IRawNotebookSupportedService | undefined,
-        @multiInject(IDataScienceCommandListener)
-        private commandListeners: IDataScienceCommandListener[]
-    ) {}
+		@inject(IDisposableRegistry)
+		private disposableRegistry: IDisposableRegistry,
+		@inject(IConfigurationService)
+		private configuration: IConfigurationService,
+		@inject(IRawNotebookSupportedService)
+		@optional()
+		private rawSupported: IRawNotebookSupportedService | undefined,
+		@multiInject(IDataScienceCommandListener)
+		private commandListeners: IDataScienceCommandListener[]
+	) {}
 
 	public get activationStartTime(): number {
 		return this.startTime;
@@ -51,8 +53,8 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 		// Listen for active editor changes so we can detect have code cells or not
 		this.disposableRegistry.push(
 			window.onDidChangeActiveTextEditor(() =>
-				this.onChangedActiveTextEditor(),
-			),
+				this.onChangedActiveTextEditor()
+			)
 		);
 		this.onChangedActiveTextEditor();
 
@@ -100,8 +102,8 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 				.set(
 					hasCells(
 						activeEditor.document,
-						this.configuration.getSettings(),
-					),
+						this.configuration.getSettings()
+					)
 				)
 				.catch(noop);
 		} else {

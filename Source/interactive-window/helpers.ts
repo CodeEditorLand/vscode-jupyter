@@ -15,7 +15,7 @@ import { InteractiveCellMetadata } from "./editor-integration/types";
 import { InteractiveTab } from "./types";
 
 export function getInteractiveCellMetadata(
-	cell: NotebookCell,
+	cell: NotebookCell
 ): InteractiveCellMetadata | undefined {
 	if (cell.metadata.interactive !== undefined) {
 		return cell.metadata as InteractiveCellMetadata;
@@ -30,7 +30,7 @@ export function getInteractiveCellMetadata(
 export function generateInteractiveCode(
 	code: string,
 	settings: IJupyterSettings,
-	cellMatcher: CellMatcher,
+	cellMatcher: CellMatcher
 ): string {
 	const lines = splitLines(code, { trim: false, removeEmptyEntries: false });
 
@@ -43,7 +43,7 @@ export function generateInteractiveCode(
 	const withMagicsAndLinefeeds = appendLineFeed(
 		noLeadingOrTrailing,
 		"\n",
-		settings.magicCommandsAsComments ? uncommentMagicCommands : undefined,
+		settings.magicCommandsAsComments ? uncommentMagicCommands : undefined
 	);
 
 	return withMagicsAndLinefeeds.join("");

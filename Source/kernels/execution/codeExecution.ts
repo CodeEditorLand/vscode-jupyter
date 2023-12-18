@@ -69,7 +69,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 	public readonly executionId: string;
 	private constructor(
 		public readonly code: string,
-		public readonly extensionId: string,
+		public readonly extensionId: string
 	) {
 		let executionId = extensionIdsPerExtension.get(extensionId) || 0;
 		executionId += 1;
@@ -86,7 +86,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 		if (this.cancelHandled) {
 			traceExecMessage(
 				this.executionId,
-				"Not starting as it was cancelled",
+				"Not starting as it was cancelled"
 			);
 			return;
 		}
@@ -104,10 +104,10 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 		if (this.started) {
 			traceExecMessage(
 				this.executionId,
-				"Code has already been started yet CodeExecution.Start invoked again",
+				"Code has already been started yet CodeExecution.Start invoked again"
 			);
 			traceError(
-				`Code has already been started yet CodeExecution.Start invoked again ${this.executionId}`,
+				`Code has already been started yet CodeExecution.Start invoked again ${this.executionId}`
 			);
 			// TODO: Send telemetry this should never happen, if it does we have problems.
 			return this.done;
@@ -115,7 +115,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 
 		// Begin the request that will modify our cell.
 		await this.execute(this.code.replace(/\r\n/g, "\n"), session).catch(
-			noop,
+			noop
 		);
 	}
 
@@ -134,7 +134,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			// stop handling execution results & the like from the kernel.
 			traceExecMessage(
 				this.executionId,
-				"Code is already running, interrupting and waiting for it to finish or kernel to start",
+				"Code is already running, interrupting and waiting for it to finish or kernel to start"
 			);
 			const kernel = this.session?.kernel;
 			if (kernel) {
@@ -182,7 +182,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			this._onRequestSent.fire();
 			traceExecMessage(
 				this.executionId,
-				`Execution Request Sent to Kernel`,
+				`Execution Request Sent to Kernel`
 			);
 			// For Jupyter requests, silent === don't output, while store_history === don't update execution count
 			// https://jupyter-client.readthedocs.io/en/stable/api/client.html#jupyter_client.KernelClient.execute
@@ -194,14 +194,14 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 					if (outputs.length) {
 						this._onDidEmitOutput.fire(outputs);
 					}
-				},
+				}
 			);
 			// Don't want dangling promises.
 			this.request.done.then(noop, noop);
 		} catch (ex) {
 			traceError(
 				`Code execution failed without request, for exec ${this.executionId}`,
-				ex,
+				ex
 			);
 			this._completed = true;
 			this._done.resolve();
@@ -230,12 +230,12 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 				// Or even when the kernel dies when running a cell with the code `os.kill(os.getpid(), 9)`
 				traceError(
 					`Error in waiting for code ${this.executionId} to complete`,
-					ex,
+					ex
 				);
 			} else {
 				traceError(
 					`Some other execution error for exec ${this.executionId}`,
-					ex,
+					ex
 				);
 			}
 			this._done.resolve();

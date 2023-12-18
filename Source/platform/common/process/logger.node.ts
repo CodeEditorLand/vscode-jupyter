@@ -13,7 +13,7 @@ import { toCommandArgument } from "../helpers";
 export function logProcess(
 	file: string,
 	args: string[],
-	options?: SpawnOptions,
+	options?: SpawnOptions
 ) {
 	const argsList = args.reduce((accumulator, current, index) => {
 		let formattedArg = toCommandArgument(current);
@@ -33,8 +33,8 @@ export function logProcess(
 	if (options && options.cwd) {
 		message.push(
 			`    > ${Logging.currentWorkingDirectory} ${getDisplayPath(
-				options.cwd.toString(),
-			)}`,
+				options.cwd.toString()
+			)}`
 		);
 	}
 	traceInfo(message.join("\n"));

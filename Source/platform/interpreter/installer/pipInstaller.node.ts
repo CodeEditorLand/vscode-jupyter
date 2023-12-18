@@ -29,9 +29,11 @@ import { workspace } from "vscode";
 @injectable()
 export class PipInstaller extends ModuleInstaller {
 	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
-	constructor(@inject(IServiceContainer) serviceContainer: IServiceContainer) {
-        super(serviceContainer);
-    }
+	constructor(
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super(serviceContainer);
+	}
 
 	public get name(): string {
 		return "Pip";
@@ -48,7 +50,7 @@ export class PipInstaller extends ModuleInstaller {
 		return 0;
 	}
 	public async isSupported(
-		interpreter: PythonEnvironment | Environment,
+		interpreter: PythonEnvironment | Environment
 	): Promise<boolean> {
 		const envType =
 			"executable" in interpreter
@@ -68,7 +70,7 @@ export class PipInstaller extends ModuleInstaller {
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
-		flags: ModuleInstallFlags = 0,
+		flags: ModuleInstallFlags = 0
 	): Promise<ExecutionInstallArgs> {
 		if (moduleName === translateProductToModule(Product.pip)) {
 			// If `ensurepip` is available, if not, then install pip using the script file.
@@ -104,16 +106,16 @@ export class PipInstaller extends ModuleInstaller {
 		}
 		return {
 			args: ["-m", "pip", ...args, moduleName].concat(
-				getPinnedPackages("pip", moduleName),
+				getPinnedPackages("pip", moduleName)
 			),
 		};
 	}
 	private isPipAvailable(
-		interpreter: PythonEnvironment | Environment,
+		interpreter: PythonEnvironment | Environment
 	): Promise<boolean> {
 		const pythonExecutionFactory =
 			this.serviceContainer.get<IPythonExecutionFactory>(
-				IPythonExecutionFactory,
+				IPythonExecutionFactory
 			);
 		return pythonExecutionFactory
 			.create({ resource: undefined, interpreter })

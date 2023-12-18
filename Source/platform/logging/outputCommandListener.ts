@@ -13,16 +13,19 @@ import { commands } from "vscode";
 @injectable()
 export class OutputCommandListener implements IDataScienceCommandListener {
 	constructor(
-        @inject(IOutputChannel) @named(STANDARD_OUTPUT_CHANNEL) private jupyterOutput: IOutputChannel,
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry
-    ) {}
+		@inject(IOutputChannel)
+		@named(STANDARD_OUTPUT_CHANNEL)
+		private jupyterOutput: IOutputChannel,
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry
+	) {}
 	register(): void {
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.ViewJupyterOutput,
 				this.viewJupyterOutput,
-				this,
-			),
+				this
+			)
 		);
 	}
 

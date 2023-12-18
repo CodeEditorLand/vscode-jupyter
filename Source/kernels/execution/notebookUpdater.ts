@@ -29,7 +29,7 @@ const pendingCellUpdates = new WeakMap<NotebookDocument, Promise<unknown>>();
 
 export async function chainWithPendingUpdates(
 	document: NotebookDocument,
-	update: (edit: WorkspaceEdit) => void | Promise<void>,
+	update: (edit: WorkspaceEdit) => void | Promise<void>
 ): Promise<boolean> {
 	const notebook = document;
 	if (document.isClosed) {
@@ -51,7 +51,7 @@ export async function chainWithPendingUpdates(
 			}
 			await workspace.applyEdit(edit).then(
 				(result) => deferred.resolve(result),
-				(ex) => deferred.reject(ex),
+				(ex) => deferred.reject(ex)
 			);
 		})
 		.catch(noop);

@@ -17,22 +17,22 @@ import { IPythonApiProvider, IPythonExtensionChecker } from "./types";
 export function registerTypes(serviceManager: IServiceManager): void {
 	serviceManager.addSingleton<IPythonApiProvider>(
 		IPythonApiProvider,
-		OldPythonApiProvider,
+		OldPythonApiProvider
 	);
 	serviceManager.addSingleton<IPythonExtensionChecker>(
 		IPythonExtensionChecker,
-		PythonExtensionChecker,
+		PythonExtensionChecker
 	);
 	serviceManager.addSingleton<IInterpreterService>(
 		IInterpreterService,
-		InterpreterService,
+		InterpreterService
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		InterpreterStatusBarVisibility,
+		InterpreterStatusBarVisibility
 	);
 	serviceManager.addSingleton<IEnvironmentActivationService>(
 		IEnvironmentActivationService,
-		EnvironmentActivationService,
+		EnvironmentActivationService
 	);
 }

@@ -22,5 +22,5 @@ ReactDOM.render(
 		baseTheme={baseTheme}
 		skipDefault={typeof acquireVsCodeApi !== "undefined"}
 	/>, // Turn this back off when we have real variable explorer data
-	document.getElementById("root") as HTMLElement,
+	document.getElementById("root") as HTMLElement
 );

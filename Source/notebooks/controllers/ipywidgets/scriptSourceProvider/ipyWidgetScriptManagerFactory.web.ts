@@ -23,10 +23,11 @@ export class IPyWidgetScriptManagerFactory
 {
 	private readonly managers = new WeakMap<IKernel, IIPyWidgetScriptManager>();
 	constructor(
-        @inject(IExtensionContext) private readonly context: IExtensionContext,
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry
-    ) {}
+		@inject(IExtensionContext) private readonly context: IExtensionContext,
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry
+	) {}
 	getOrCreate(kernel: IKernel): IIPyWidgetScriptManager {
 		if (!this.managers.has(kernel)) {
 			if (
@@ -38,17 +39,17 @@ export class IPyWidgetScriptManagerFactory
 				const scriptManager = new RemoteIPyWidgetScriptManager(
 					kernel,
 					this.context,
-					this.fs,
+					this.fs
 				);
 				this.managers.set(kernel, scriptManager);
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
-					this.disposables,
+					this.disposables
 				);
 			} else {
 				throw new Error(
-					"Cannot enumerate Widget Scripts using local kernels on the Web",
+					"Cannot enumerate Widget Scripts using local kernels on the Web"
 				);
 			}
 		}

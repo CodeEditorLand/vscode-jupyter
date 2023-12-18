@@ -12,12 +12,12 @@ export class KernelProcessExitedError extends BaseKernelError {
 	constructor(
 		public readonly exitCode: number = -1,
 		public override readonly stdErr: string,
-		kernelConnectionMetadata: KernelConnectionMetadata,
+		kernelConnectionMetadata: KernelConnectionMetadata
 	) {
 		super(
 			"kerneldied",
 			DataScience.kernelDied(stdErr.trim()),
-			kernelConnectionMetadata,
+			kernelConnectionMetadata
 		);
 	}
 }

@@ -24,7 +24,7 @@ export function translateProductToModule(product: Product): string {
 			return "ensurepip";
 		default: {
 			throw new Error(
-				`Product ${product} cannot be installed as a Python Module.`,
+				`Product ${product} cannot be installed as a Python Module.`
 			);
 		}
 	}

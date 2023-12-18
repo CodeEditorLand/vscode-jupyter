@@ -78,29 +78,38 @@ export class DataViewer
 	private _onDidChangeDataViewerViewState = new EventEmitter<void>();
 
 	constructor(
-        @inject(IWebviewPanelProvider) provider: IWebviewPanelProvider,
-        @inject(IConfigurationService) configuration: IConfigurationService,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) readonly globalMemento: Memento,
-        @inject(IDataScienceErrorHandler) readonly errorHandler: IDataScienceErrorHandler,
-        @inject(IExtensionContext) readonly context: IExtensionContext
-    ) {
-        const dataExplorerDir = joinPath(context.extensionUri, 'dist', 'webviews', 'webview-side', 'viewers');
-        super(
-            configuration,
-            provider,
-            (c, v, d) => new DataViewerMessageListener(c, v, d),
-            dataExplorerDir,
-            [joinPath(dataExplorerDir, 'dataExplorer.js')],
-            localize.DataScience.dataExplorerTitle,
-            globalMemento.get(PREFERRED_VIEWGROUP) ?? ViewColumn.One
-        );
-        this.onDidDispose(this.dataViewerDisposed, this);
-    }
+		@inject(IWebviewPanelProvider) provider: IWebviewPanelProvider,
+		@inject(IConfigurationService) configuration: IConfigurationService,
+		@inject(IMemento)
+		@named(GLOBAL_MEMENTO)
+		readonly globalMemento: Memento,
+		@inject(IDataScienceErrorHandler)
+		readonly errorHandler: IDataScienceErrorHandler,
+		@inject(IExtensionContext) readonly context: IExtensionContext
+	) {
+		const dataExplorerDir = joinPath(
+			context.extensionUri,
+			"dist",
+			"webviews",
+			"webview-side",
+			"viewers"
+		);
+		super(
+			configuration,
+			provider,
+			(c, v, d) => new DataViewerMessageListener(c, v, d),
+			dataExplorerDir,
+			[joinPath(dataExplorerDir, "dataExplorer.js")],
+			localize.DataScience.dataExplorerTitle,
+			globalMemento.get(PREFERRED_VIEWGROUP) ?? ViewColumn.One
+		);
+		this.onDidDispose(this.dataViewerDisposed, this);
+	}
 
 	@capturePerfTelemetry(Telemetry.DataViewerWebviewLoaded)
 	public async showData(
 		dataProvider: IDataViewerDataProvider | IJupyterVariableDataProvider,
-		title: string,
+		title: string
 	): Promise<void> {
 		if (!this.isDisposed) {
 			// Save the data provider
@@ -119,7 +128,7 @@ export class DataViewer
 			// If higher dimensional data, preselect a slice to show
 			if (dataFrameInfo.shape && dataFrameInfo.shape.length > 2) {
 				this.maybeSendSliceDataDimensionalityTelemetry(
-					dataFrameInfo.shape.length,
+					dataFrameInfo.shape.length
 				);
 				const slice = preselectedSliceExpression(dataFrameInfo.shape);
 				dataFrameInfo = await this.getDataFrameInfo(slice);
@@ -128,7 +137,7 @@ export class DataViewer
 			// Send a message with our data
 			this.postMessage(
 				DataViewerMessages.InitializeData,
-				dataFrameInfo,
+				dataFrameInfo
 			).catch(noop);
 		}
 	}
@@ -160,17 +169,17 @@ export class DataViewer
 			if (
 				isValidSliceExpression(
 					currentSliceExpression,
-					dataFrameInfo.shape,
+					dataFrameInfo.shape
 				)
 			) {
 				dataFrameInfo = await this.getDataFrameInfo(
-					currentSliceExpression,
+					currentSliceExpression
 				);
 			} else {
 				// Previously applied slice expression isn't valid anymore
 				// Generate a preselected slice
 				const newSlice = preselectedSliceExpression(
-					dataFrameInfo.shape,
+					dataFrameInfo.shape
 				);
 				dataFrameInfo = await this.getDataFrameInfo(newSlice);
 			}
@@ -179,7 +188,7 @@ export class DataViewer
 		// Send a message with our data
 		this.postMessage(
 			DataViewerMessages.InitializeData,
-			dataFrameInfo,
+			dataFrameInfo
 		).catch(noop);
 	}
 
@@ -194,7 +203,7 @@ export class DataViewer
 	}
 
 	protected override async onViewStateChanged(
-		args: WebViewViewChangeEventArgs,
+		args: WebViewViewChangeEventArgs
 	) {
 		if (
 			args.current.active &&
@@ -204,7 +213,7 @@ export class DataViewer
 		) {
 			await this.globalMemento.update(
 				PREFERRED_VIEWGROUP,
-				this.webPanel?.viewColumn,
+				this.webPanel?.viewColumn
 			);
 		}
 		this._onDidChangeDataViewerViewState.fire();
@@ -242,7 +251,7 @@ export class DataViewer
 						newState: payload.newState
 							? CheckboxState.Checked
 							: CheckboxState.Unchecked,
-					},
+					}
 				);
 				break;
 
@@ -255,7 +264,7 @@ export class DataViewer
 
 	private getDataFrameInfo(
 		sliceExpression?: string,
-		isRefresh?: boolean,
+		isRefresh?: boolean
 	): Promise<IDataFrameInfo> {
 		// If requesting a new slice, refresh our cached info promise
 		if (
@@ -299,7 +308,7 @@ export class DataViewer
 				this.pendingRowsCount = 0;
 				return this.postMessage(
 					DataViewerMessages.GetAllRowsResponse,
-					allRows,
+					allRows
 				);
 			}
 		});
@@ -311,17 +320,17 @@ export class DataViewer
 				const payload = await this.getDataFrameInfo(request.slice);
 				if (payload.shape?.length) {
 					this.maybeSendSliceDataDimensionalityTelemetry(
-						payload.shape.length,
+						payload.shape.length
 					);
 				}
 				sendTelemetryEvent(
 					Telemetry.DataViewerSliceOperation,
 					undefined,
-					{ source: request.source },
+					{ source: request.source }
 				);
 				return this.postMessage(
 					DataViewerMessages.InitializeData,
-					payload,
+					payload
 				);
 			}
 		});
@@ -331,19 +340,19 @@ export class DataViewer
 		return this.wrapRequest(async () => {
 			if (this.dataProvider) {
 				const dataFrameInfo = await this.getDataFrameInfo(
-					request.sliceExpression,
+					request.sliceExpression
 				);
 				const rows = await this.dataProvider.getRows(
 					request.start,
 					Math.min(
 						request.end,
-						dataFrameInfo.rowCount ? dataFrameInfo.rowCount : 0,
+						dataFrameInfo.rowCount ? dataFrameInfo.rowCount : 0
 					),
-					request.sliceExpression,
+					request.sliceExpression
 				);
 				this.pendingRowsCount = Math.max(
 					0,
-					this.pendingRowsCount - rows.length,
+					this.pendingRowsCount - rows.length
 				);
 				return this.postMessage(DataViewerMessages.GetRowsResponse, {
 					rows,
@@ -365,13 +374,13 @@ export class DataViewer
 				window
 					.showErrorMessage(
 						localize.DataScience.jupyterDataRateExceeded,
-						actionTitle,
+						actionTitle
 					)
 					.then((v) => {
 						// User clicked on the link, open it.
 						if (v === actionTitle) {
 							void env.openExternal(
-								Uri.parse(HelpLinks.JupyterDataRateHelpLink),
+								Uri.parse(HelpLinks.JupyterDataRateHelpLink)
 							);
 						}
 					}, noop);
@@ -393,7 +402,7 @@ export class DataViewer
 	}
 
 	private maybeSendSliceDataDimensionalityTelemetry(
-		numberOfDimensions: number,
+		numberOfDimensions: number
 	) {
 		if (!this.sentDataViewerSliceDimensionalityTelemetry) {
 			sendTelemetryEvent(Telemetry.DataViewerDataDimensionality, {

@@ -33,7 +33,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 		fs: IFileSystem,
 		disposableRegistry: IDisposableRegistry,
 		panelOptions: IWebviewPanelOptions,
-		additionalRootPaths: Uri[] = [],
+		additionalRootPaths: Uri[] = []
 	) {
 		super(fs, disposableRegistry, panelOptions, additionalRootPaths);
 	}
@@ -81,7 +81,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 	}
 
 	protected createWebview(
-		webviewOptions: WebviewOptions,
+		webviewOptions: WebviewOptions
 	): vscodeWebviewPanel {
 		return window.createWebviewPanel(
 			this.panelOptions.title.toLowerCase().replace(" ", ""),
@@ -91,7 +91,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 				retainContextWhenHidden: true,
 				enableFindWidget: true,
 				...webviewOptions,
-			},
+			}
 		);
 	}
 
@@ -101,7 +101,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 			webviewHost.onDidDispose(() => {
 				this.webviewHost = undefined;
 				this.panelOptions.listener.dispose().catch(noop);
-			}),
+			})
 		);
 
 		this.disposableRegistry.push(
@@ -109,16 +109,16 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 				// Pass the message onto our listener
 				this.panelOptions.listener.onMessage(
 					message.type,
-					message.payload,
+					message.payload
 				);
-			}),
+			})
 		);
 
 		this.disposableRegistry.push(
 			webviewHost.onDidChangeViewState((_e) => {
 				// Pass the state change onto our listener
 				this.panelOptions.listener.onChangeViewState(this);
-			}),
+			})
 		);
 
 		// Set initial state
@@ -129,10 +129,11 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 @injectable()
 export class WebviewPanelProvider implements IWebviewPanelProvider {
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IFileSystem) private readonly fs: IFileSystem,
-        @inject(IExtensionContext) private readonly context: IExtensionContext
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IFileSystem) private readonly fs: IFileSystem,
+		@inject(IExtensionContext) private readonly context: IExtensionContext
+	) {}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async create(options: IWebviewPanelOptions): Promise<IWebviewPanel> {
@@ -148,7 +149,7 @@ export class WebviewPanelProvider implements IWebviewPanelProvider {
 			this.fs,
 			this.disposableRegistry,
 			options,
-			additionalRootPaths,
+			additionalRootPaths
 		);
 	}
 }

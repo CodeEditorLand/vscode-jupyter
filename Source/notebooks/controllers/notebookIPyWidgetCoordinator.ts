@@ -45,7 +45,7 @@ class NotebookCommunication implements IWebviewCommunication, IDisposable {
 	}
 	constructor(
 		public readonly editor: NotebookEditor,
-		controller: IVSCodeNotebookController,
+		controller: IVSCodeNotebookController
 	) {
 		this.changeController(controller);
 	}
@@ -73,7 +73,7 @@ class NotebookCommunication implements IWebviewCommunication, IDisposable {
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 	}
 	public dispose() {
@@ -130,25 +130,28 @@ export class NotebookIPyWidgetCoordinator
 		NotebookEditor[]
 	>();
 	constructor(
-        @inject(IServiceContainer) private readonly serviceContainer: IServiceContainer,
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-        @inject(IControllerRegistration) private readonly controllerManager: IControllerRegistration
-    ) {}
+		@inject(IServiceContainer)
+		private readonly serviceContainer: IServiceContainer,
+		@inject(IDisposableRegistry)
+		private readonly disposableRegistry: IDisposableRegistry,
+		@inject(IControllerRegistration)
+		private readonly controllerManager: IControllerRegistration
+	) {}
 	public activate(): void {
 		window.onDidChangeVisibleNotebookEditors(
 			this.onDidChangeVisibleNotebookEditors,
 			this,
-			this.disposableRegistry,
+			this.disposableRegistry
 		);
 		workspace.onDidCloseNotebookDocument(
 			this.onDidCloseNotebookDocument,
 			this,
-			this.disposableRegistry,
+			this.disposableRegistry
 		);
 		this.controllerManager.onControllerSelected(
 			this.onDidSelectController,
 			this,
-			this.disposableRegistry,
+			this.disposableRegistry
 		);
 	}
 	public onDidSelectController(e: {
@@ -178,12 +181,12 @@ export class NotebookIPyWidgetCoordinator
 		window.visibleNotebookEditors
 			.filter((editor) => editor.notebook === e.notebook)
 			.forEach((editor) =>
-				this.initializeNotebookCommunication(editor, e.controller),
+				this.initializeNotebookCommunication(editor, e.controller)
 			);
 	}
 	private initializeNotebookCommunication(
 		editor: NotebookEditor,
-		controller: IVSCodeNotebookController | undefined,
+		controller: IVSCodeNotebookController | undefined
 	) {
 		if (editor.notebook.isClosed || !isJupyterNotebook(editor.notebook)) {
 			return;
@@ -192,23 +195,23 @@ export class NotebookIPyWidgetCoordinator
 		if (!controller) {
 			traceVerbose(
 				`No controller, hence notebook communications cannot be initialized for editor ${getDisplayPath(
-					editor.notebook.uri,
-				)}`,
+					editor.notebook.uri
+				)}`
 			);
 			return;
 		}
 		if (this.notebookCommunications.has(editor)) {
 			traceVerbose(
 				`notebook communications already initialized for editor ${getDisplayPath(
-					editor.notebook.uri,
-				)}`,
+					editor.notebook.uri
+				)}`
 			);
 			return;
 		}
 		traceVerbose(
 			`Initialize notebook communications for editor ${getDisplayPath(
-				editor.notebook.uri,
-			)}`,
+				editor.notebook.uri
+			)}`
 		);
 		const comms = new NotebookCommunication(editor, controller);
 		this.addNotebookDisposables(notebook, [comms]);
@@ -217,14 +220,14 @@ export class NotebookIPyWidgetCoordinator
 		// entire VS code session, we have a map of notebook document to message coordinator
 		traceVerbose(
 			`Resolving notebook UI Comms (resolve) for ${getDisplayPath(
-				notebook.uri,
-			)}`,
+				notebook.uri
+			)}`
 		);
 		let coordinator = this.messageCoordinators.get(notebook);
 		if (!coordinator) {
 			coordinator = new CommonMessageCoordinator(
 				notebook,
-				this.serviceContainer,
+				this.serviceContainer
 			);
 			this.messageCoordinators.set(notebook, coordinator);
 		}
@@ -232,7 +235,7 @@ export class NotebookIPyWidgetCoordinator
 	}
 	private addNotebookDisposables(
 		notebook: NotebookDocument,
-		disposables: IDisposable[],
+		disposables: IDisposable[]
 	) {
 		const currentDisposables: IDisposable[] =
 			this.notebookDisposables.get(notebook) || [];
@@ -240,13 +243,13 @@ export class NotebookIPyWidgetCoordinator
 		this.notebookDisposables.set(notebook, currentDisposables);
 	}
 	private async onDidChangeVisibleNotebookEditors(
-		e: readonly NotebookEditor[],
+		e: readonly NotebookEditor[]
 	) {
 		// Find any new editors that may be associated with the current notebook.
 		// This can happen when users split editors.
 		e.forEach((editor) => {
 			const controller = this.controllerManager.getSelected(
-				editor.notebook,
+				editor.notebook
 			);
 			this.initializeNotebookCommunication(editor, controller);
 		});
@@ -254,8 +257,8 @@ export class NotebookIPyWidgetCoordinator
 	private onDidCloseNotebookDocument(notebook: NotebookDocument) {
 		const editors = this.notebookEditors.get(notebook) || [];
 		dispose(this.notebookDisposables.get(notebook) || []);
-		editors.forEach((editor) =>
-			this.notebookCommunications.get(editor)?.dispose(),
+		editors.forEach(
+			(editor) => this.notebookCommunications.get(editor)?.dispose()
 		);
 
 		this.messageCoordinators.get(notebook)?.dispose();

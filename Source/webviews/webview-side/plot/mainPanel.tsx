@@ -86,7 +86,7 @@ export class MainPanel
 
 		// Tell the plot viewer code we have started.
 		this.postOffice.sendMessage<IPlotViewerMapping>(
-			PlotViewerMessages.Started,
+			PlotViewerMessages.Started
 		);
 
 		// Listen to key events
@@ -380,7 +380,7 @@ export class MainPanel
 
 	private sendMessage<M extends IPlotViewerMapping, T extends keyof M>(
 		type: T,
-		payload?: M[T],
+		payload?: M[T]
 	) {
 		this.postOffice.sendMessage<M, T>(type, payload);
 	}
@@ -400,7 +400,7 @@ export class MainPanel
 							[this.state.images[this.state.currentImage]],
 							{
 								type: "image/svg+xml;charset=utf-8",
-							},
+							}
 						);
 						const img = new Image();
 						const url = window.URL.createObjectURL(svgBlob);
@@ -450,7 +450,7 @@ export class MainPanel
 				sizes: this.state.sizes.filter((_v, i) => i !== oldCurrent),
 				values: this.state.values.filter((_v, i) => i !== oldCurrent),
 				thumbnails: this.state.thumbnails.filter(
-					(_v, i) => i !== oldCurrent,
+					(_v, i) => i !== oldCurrent
 				),
 				currentImage: newCurrent,
 			});

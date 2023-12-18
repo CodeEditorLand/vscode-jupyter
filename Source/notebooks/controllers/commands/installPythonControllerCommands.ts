@@ -39,39 +39,44 @@ export class InstallPythonControllerCommands
 	// WeakSet of executing cells, so they get cleaned up on document close without worrying
 	private executingCells: WeakSet<NotebookCell> = new WeakSet<NotebookCell>();
 	constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IPythonExtensionChecker) private readonly extensionChecker: IPythonExtensionChecker,
-        @inject(ProgressReporter) private readonly progressReporter: ProgressReporter,
-        @inject(IPythonApiProvider) private readonly pythonApi: IPythonApiProvider,
-        @inject(IDataScienceErrorHandler) private readonly errorHandler: IDataScienceErrorHandler
-    ) {}
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IPythonExtensionChecker)
+		private readonly extensionChecker: IPythonExtensionChecker,
+		@inject(ProgressReporter)
+		private readonly progressReporter: ProgressReporter,
+		@inject(IPythonApiProvider)
+		private readonly pythonApi: IPythonApiProvider,
+		@inject(IDataScienceErrorHandler)
+		private readonly errorHandler: IDataScienceErrorHandler
+	) {}
 	public activate() {
 		this.disposables.push(
 			notebooks.onDidChangeNotebookCellExecutionState(
 				this.onDidChangeNotebookCellExecutionState,
-				this,
-			),
+				this
+			)
 		);
 		// Register our commands that will handle installing the python extension or python via the kernel picker
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.InstallPythonExtensionViaKernelPicker,
 				this.installPythonExtensionViaKernelPicker,
-				this,
-			),
+				this
+			)
 		);
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.InstallPythonViaKernelPicker,
 				this.installPythonViaKernelPicker,
-				this,
-			),
+				this
+			)
 		);
 	}
 
 	// Track if there are any cells currently executing or pending
 	private onDidChangeNotebookCellExecutionState(
-		stateEvent: NotebookCellExecutionStateChangeEvent,
+		stateEvent: NotebookCellExecutionStateChangeEvent
 	) {
 		if (stateEvent.cell.notebook.notebookType === JupyterNotebookView) {
 			if (
@@ -100,7 +105,7 @@ export class InstallPythonControllerCommands
 		const selection = await window.showErrorMessage(
 			DataScience.pythonNotInstalled,
 			{ modal: true },
-			...buttons,
+			...buttons
 		);
 
 		if (selection === Common.install) {
@@ -116,7 +121,7 @@ export class InstallPythonControllerCommands
 			});
 			await commands.executeCommand(
 				"jupyter.reloadVSCode",
-				DataScience.reloadRequired,
+				DataScience.reloadRequired
 			);
 		} else {
 			sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, {
@@ -140,12 +145,12 @@ export class InstallPythonControllerCommands
 			sendTelemetryEvent(
 				Telemetry.PythonExtensionNotInstalled,
 				undefined,
-				{ action: "displayed" },
+				{ action: "displayed" }
 			);
 
 			// Now start to indicate that we are performing the install and locating kernels
 			const reporter = this.progressReporter.createProgressIndicator(
-				DataScience.installingPythonExtension,
+				DataScience.installingPythonExtension
 			);
 			try {
 				await this.extensionChecker.directlyInstallPythonExtension();
@@ -157,7 +162,7 @@ export class InstallPythonControllerCommands
 				const hookResult = await raceTimeout(
 					60_000,
 					"timeout",
-					this.pythonApi.pythonExtensionHooked.then(() => hooked),
+					this.pythonApi.pythonExtensionHooked.then(() => hooked)
 				);
 
 				// Make sure that we didn't timeout waiting for the hook
@@ -166,33 +171,33 @@ export class InstallPythonControllerCommands
 					hookResult === hooked
 				) {
 					traceVerbose(
-						"Python Extension installed via Kernel Picker command",
+						"Python Extension installed via Kernel Picker command"
 					);
 					sendTelemetryEvent(
 						Telemetry.PythonExtensionInstalledViaKernelPicker,
 						undefined,
 						{
 							action: "success",
-						},
+						}
 					);
 
 					return true;
 				} else {
 					traceError(
-						"Failed to install Python Extension via Kernel Picker command",
+						"Failed to install Python Extension via Kernel Picker command"
 					);
 					sendTelemetryEvent(
 						Telemetry.PythonExtensionInstalledViaKernelPicker,
 						undefined,
 						{
 							action: "failed",
-						},
+						}
 					);
 					this.errorHandler
 						.handleError(
 							new Error(
-								DataScience.failedToInstallPythonExtension,
-							),
+								DataScience.failedToInstallPythonExtension
+							)
 						)
 						.then(noop, noop);
 				}

@@ -7,7 +7,7 @@ import { findNotebookAndCell, noop } from "./common";
 import { SymbolsTracker } from "./symbols";
 
 export async function activate(
-	context: vscode.ExtensionContext,
+	context: vscode.ExtensionContext
 ): Promise<void> {
 	const optInto = vscode.workspace
 		.getConfiguration("jupyter")
@@ -36,10 +36,10 @@ export async function activate(
 				const { notebook, cell: currentCell } = matched;
 				await symbolsManager.selectSuccessorCells(
 					notebook,
-					currentCell,
+					currentCell
 				);
-			},
-		),
+			}
+		)
 	);
 
 	context.subscriptions.push(
@@ -53,8 +53,8 @@ export async function activate(
 
 				const { notebook, cell: currentCell } = matched;
 				await symbolsManager.runPrecedentCells(notebook, currentCell);
-			},
-		),
+			}
+		)
 	);
 
 	context.subscriptions.push(
@@ -68,8 +68,8 @@ export async function activate(
 
 				const { notebook, cell: currentCell } = matched;
 				await symbolsManager.runSuccessorCells(notebook, currentCell);
-			},
-		),
+			}
+		)
 	);
 
 	context.subscriptions.push(
@@ -84,10 +84,10 @@ export async function activate(
 				const { notebook, cell: currentCell } = matched;
 				await symbolsManager.selectPrecedentCells(
 					notebook,
-					currentCell,
+					currentCell
 				);
-			},
-		),
+			}
+		)
 	);
 
 	context.subscriptions.push(
@@ -98,8 +98,8 @@ export async function activate(
 				if (notebookEditor) {
 					await symbolsManager.debugSymbols(notebookEditor.notebook);
 				}
-			},
-		),
+			}
+		)
 	);
 }
 

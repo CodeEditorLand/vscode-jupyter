@@ -60,21 +60,21 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	constructor(
 		protected configService: IConfigurationService,
 		protected rootPath: Uri,
-		protected scripts: Uri[],
+		protected scripts: Uri[]
 	) {
 		// Listen for settings changes from vscode.
 		this._disposables.push(
 			workspace.onDidChangeConfiguration(
 				this.onPossibleSettingsChange,
-				this,
-			),
+				this
+			)
 		);
 
 		// Listen for settings changes
 		this._disposables.push(
 			this.configService
 				.getSettings(undefined)
-				.onDidChange(this.onDataScienceSettingsChanged.bind(this)),
+				.onDidChange(this.onDataScienceSettingsChanged.bind(this))
 		);
 	}
 
@@ -97,7 +97,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 			this.activeHTMLRequest = createDeferred<string>();
 			this.postMessageInternal(
 				InteractiveWindowMessages.GetHTMLByIdRequest,
-				id,
+				id
 			).catch(noop);
 		} else {
 			throw new Error("getHTMLById request already in progress");
@@ -111,7 +111,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	@testOnlyMethod()
 	// @ts-ignore Property will be accessed in test code via casting to ITestWebviewHost
 	private addMessageListener(
-		callback: (message: string, payload: any) => void,
+		callback: (message: string, payload: any) => void
 	) {
 		this.onMessageListeners.push(callback);
 	}
@@ -121,7 +121,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	@testOnlyMethod()
 	// @ts-ignore Property will be accessed in test code via casting to ITestWebviewHost
 	private removeMessageListener(
-		callback: (message: string, payload: any) => void,
+		callback: (message: string, payload: any) => void
 	) {
 		const index = this.onMessageListeners.indexOf(callback);
 		if (index >= 0) {
@@ -133,18 +133,18 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		cwd: Uri,
 		settings: IJupyterExtraSettings,
 		workspaceFolder: Resource,
-		vscodeWebview?: vscodeWebviewPanel | vscodeWebviewView,
+		vscodeWebview?: vscodeWebviewPanel | vscodeWebviewView
 	): Promise<IWebview>;
 
 	// Post a message to our webview and update our new datascience settings
 	protected onDataScienceSettingsChanged = async () => {
 		// Stringify our settings to send over to the panel
 		const dsSettings = JSON.stringify(
-			await this.generateDataScienceExtraSettings(),
+			await this.generateDataScienceExtraSettings()
 		);
 		this.postMessageInternal(
 			SharedMessages.UpdateSettings,
-			dsSettings,
+			dsSettings
 		).catch(noop);
 	};
 
@@ -157,7 +157,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 
 	protected postMessage<M extends IMapping, T extends keyof M>(
 		type: T,
-		payload?: M[T],
+		payload?: M[T]
 	): Promise<void> {
 		// Then send it the message
 		return this.postMessageInternal(type.toString(), payload);
@@ -190,7 +190,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 
 	protected async loadWebview(
 		cwd: Uri,
-		webView?: vscodeWebviewPanel | vscodeWebviewView,
+		webView?: vscodeWebviewPanel | vscodeWebviewView
 	) {
 		// Make not disposed anymore
 		this.disposed = false;
@@ -209,12 +209,12 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 				cwd,
 				settings,
 				workspaceFolder,
-				webView,
+				webView
 			);
 
 			// Track to see if our webview fails to load
 			this._disposables.push(
-				this.webview.loadFailed(this.onWebViewLoadFailed, this),
+				this.webview.loadFailed(this.onWebViewLoadFailed, this)
 			);
 		}
 
@@ -234,7 +234,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 			: workbench.get<string>("colorTheme", DefaultTheme);
 		const pythonExt = extensions.getExtension(PythonExtension);
 		const sendableSettings = JSON.parse(
-			JSON.stringify(this.configService.getSettings(resource)),
+			JSON.stringify(this.configService.getSettings(resource))
 		);
 
 		return {
@@ -245,50 +245,50 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 					cursorBlink: this.getValue(
 						editor,
 						"cursorBlinking",
-						"blink",
+						"blink"
 					),
 					autoClosingBrackets: this.getValue(
 						editor,
 						"autoClosingBrackets",
-						"languageDefined",
+						"languageDefined"
 					),
 					autoClosingQuotes: this.getValue(
 						editor,
 						"autoClosingQuotes",
-						"languageDefined",
+						"languageDefined"
 					),
 					autoSurround: this.getValue(
 						editor,
 						"autoSurround",
-						"languageDefined",
+						"languageDefined"
 					),
 					autoIndent: this.getValue(editor, "autoIndent", false),
 					fontLigatures: this.getValue(
 						editor,
 						"fontLigatures",
-						false,
+						false
 					),
 					scrollBeyondLastLine: this.getValue(
 						editor,
 						"scrollBeyondLastLine",
-						true,
+						true
 					),
 					// VS Code puts a value for this, but it's 10 (the explorer bar size) not 14 the editor size for vert
 					verticalScrollbarSize: this.getValue(
 						editor,
 						"scrollbar.verticalScrollbarSize",
-						14,
+						14
 					),
 					horizontalScrollbarSize: this.getValue(
 						editor,
 						"scrollbar.horizontalScrollbarSize",
-						10,
+						10
 					),
 					fontSize: this.getValue(editor, "fontSize", 14),
 					fontFamily: this.getValue(
 						editor,
 						"fontFamily",
-						"Consolas, 'Courier New', monospace",
+						"Consolas, 'Courier New', monospace"
 					),
 				},
 				theme,
@@ -347,14 +347,14 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		};
 		this.postMessageInternal(
 			SharedMessages.LocInit,
-			JSON.stringify(locStrings),
+			JSON.stringify(locStrings)
 		).catch(noop);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected async postMessageInternal(
 		type: string,
-		payload?: any,
+		payload?: any
 	): Promise<void> {
 		if (this.webviewInit) {
 			// Make sure the webpanel is up before we send it anything.
@@ -386,7 +386,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	private getValue<T>(
 		workspaceConfig: WorkspaceConfiguration,
 		section: string,
-		defaultValue: T,
+		defaultValue: T
 	): T {
 		if (workspaceConfig) {
 			return workspaceConfig.get(section, defaultValue);
@@ -396,7 +396,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 
 	// Post a message to our webpanel and update our new datascience settings
 	private onPossibleSettingsChange = async (
-		event: ConfigurationChangeEvent,
+		event: ConfigurationChangeEvent
 	) => {
 		if (
 			event.affectsConfiguration("workbench.colorTheme") ||
@@ -411,10 +411,10 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 			event.affectsConfiguration("editor.scrollBeyondLastLine") ||
 			event.affectsConfiguration("editor.fontLigatures") ||
 			event.affectsConfiguration(
-				"editor.scrollbar.verticalScrollbarSize",
+				"editor.scrollbar.verticalScrollbarSize"
 			) ||
 			event.affectsConfiguration(
-				"editor.scrollbar.horizontalScrollbarSize",
+				"editor.scrollbar.horizontalScrollbarSize"
 			) ||
 			event.affectsConfiguration("files.autoSave") ||
 			event.affectsConfiguration("files.autoSaveDelay") ||
@@ -426,7 +426,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 				const dsSettings = JSON.stringify(newSettings);
 				this.postMessageInternal(
 					SharedMessages.UpdateSettings,
-					dsSettings,
+					dsSettings
 				).catch(noop);
 			}
 		}

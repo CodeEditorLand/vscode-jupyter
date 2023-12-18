@@ -14,7 +14,7 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 	constructor(
 		private readonly kernel: IKernel,
 		private readonly controller: NotebookController,
-		private readonly notebook: NotebookDocument,
+		private readonly notebook: NotebookDocument
 	) {
 		super();
 	}
@@ -39,21 +39,21 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 				if (e === notebook) {
 					this.dispose();
 				}
-			}, this),
+			}, this)
 		);
 		this._register(
 			controller.onDidChangeSelectedNotebooks((e) => {
 				if (e.notebook === notebook && e.selected === false) {
 					this.dispose();
 				}
-			}, this),
+			}, this)
 		);
 		this._register(
 			kernel.onStatusChanged((status) => {
 				if (status !== "busy" && status !== "unknown") {
 					this.dispose();
 				}
-			}, this),
+			}, this)
 		);
 		const execution = controller.createNotebookExecution(notebook);
 		execution.start();

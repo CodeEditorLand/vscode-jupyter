@@ -106,7 +106,7 @@ suite(`Remote Kernel Finder`, () => {
 					model: {},
 				},
 			};
-		},
+		}
 	);
 	const globalStorageUri = Uri.file("globalStorage");
 	const serverEntry = {
@@ -141,31 +141,31 @@ suite(`Remote Kernel Finder`, () => {
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName,
-					),
-				),
-			),
+						RemoteKernelSpecCacheFileName
+					)
+				)
+			)
 		).thenReject(new Error("File does not exist"));
 		when(
 			fs.writeFile(
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName,
-					),
+						RemoteKernelSpecCacheFileName
+					)
 				),
-				anything(),
-			),
+				anything()
+			)
 		).thenCall(async (_, data: string) => {
 			when(
 				fs.readFile(
 					uriEquals(
 						Uri.joinPath(
 							globalStorageUri,
-							RemoteKernelSpecCacheFileName,
-						),
-					),
-				),
+							RemoteKernelSpecCacheFileName
+						)
+					)
+				)
 			).thenResolve(data);
 		});
 		cachedRemoteKernelValidator =
@@ -179,7 +179,7 @@ suite(`Remote Kernel Finder`, () => {
 		disposables.push(kernelsChanged);
 		jupyterConnection = mock<JupyterConnection>();
 		when(jupyterConnection.createConnectionInfo(anything())).thenResolve(
-			connInfo,
+			connInfo
 		);
 		remoteKernelFinder = new RemoteKernelFinder(
 			"currentremote",
@@ -191,7 +191,7 @@ suite(`Remote Kernel Finder`, () => {
 			serverEntry.provider,
 			instance(jupyterConnection),
 			instance(fs),
-			instance(context),
+			instance(context)
 		);
 	});
 	teardown(() => {
@@ -215,27 +215,27 @@ suite(`Remote Kernel Finder`, () => {
 		assert.equal(
 			getDisplayNameOrNameOfKernelConnection(kernels[0]),
 			"Python 3 on Disk",
-			"Did not find correct python kernel",
+			"Did not find correct python kernel"
 		);
 		assert.equal(
 			getDisplayNameOrNameOfKernelConnection(kernels[1]),
 			"Python 2 on Disk",
-			"Did not find correct python 2 kernel",
+			"Did not find correct python 2 kernel"
 		);
 		assert.equal(
 			getDisplayNameOrNameOfKernelConnection(kernels[2]),
 			"Julia on Disk",
-			"Did not find correct julia kernel",
+			"Did not find correct julia kernel"
 		);
 	});
 	test("Live sessions", async () => {
 		remoteKernelFinder.activate().then(noop, noop);
 
 		when(jupyterSessionManager.getRunningKernels()).thenResolve(
-			python3Kernels,
+			python3Kernels
 		);
 		when(jupyterSessionManager.getRunningSessions()).thenResolve(
-			python3Sessions,
+			python3Sessions
 		);
 		when(jupyterSessionManager.getKernelSpecs()).thenResolve([
 			python3spec,
@@ -246,7 +246,7 @@ suite(`Remote Kernel Finder`, () => {
 		const kernels =
 			await remoteKernelFinder.listKernelsFromConnection(connInfo);
 		const liveKernels = kernels.filter(
-			(k) => k.kind === "connectToLiveRemoteKernel",
+			(k) => k.kind === "connectToLiveRemoteKernel"
 		);
 		assert.equal(liveKernels.length, 3, "Live kernels not found");
 	});
@@ -286,7 +286,7 @@ suite(`Remote Kernel Finder`, () => {
 			liveRemoteKernel.toJSON(),
 		] as KernelConnectionMetadata[];
 		when(cachedRemoteKernelValidator.isValid(anything())).thenResolve(
-			false,
+			false
 		);
 
 		const cacheKey = generateIdFromRemoteProvider(serverEntry.provider);
@@ -295,15 +295,15 @@ suite(`Remote Kernel Finder`, () => {
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName,
-					),
-				),
-			),
+						RemoteKernelSpecCacheFileName
+					)
+				)
+			)
 		).thenResolve(
 			JSON.stringify(<CacheDataFormat>{
 				extensionVersion: "",
 				data: { [cacheKey]: cachedKernels },
-			}),
+			})
 		);
 		when(jupyterSessionManager.getRunningKernels()).thenResolve([]);
 		when(jupyterSessionManager.getRunningSessions()).thenResolve([]);
@@ -354,7 +354,7 @@ suite(`Remote Kernel Finder`, () => {
 			liveRemoteKernel.toJSON(),
 		];
 		when(cachedRemoteKernelValidator.isValid(anything())).thenCall(
-			async (k) => liveRemoteKernel.id === k.id,
+			async (k) => liveRemoteKernel.id === k.id
 		);
 		const cacheKey = generateIdFromRemoteProvider(serverEntry.provider);
 		when(
@@ -362,15 +362,15 @@ suite(`Remote Kernel Finder`, () => {
 				uriEquals(
 					Uri.joinPath(
 						globalStorageUri,
-						RemoteKernelSpecCacheFileName,
-					),
-				),
-			),
+						RemoteKernelSpecCacheFileName
+					)
+				)
+			)
 		).thenResolve(
 			JSON.stringify(<CacheDataFormat>{
 				extensionVersion: "",
 				data: { [cacheKey]: cachedKernels },
-			}),
+			})
 		);
 		when(jupyterSessionManager.getRunningKernels()).thenResolve([]);
 		when(jupyterSessionManager.getRunningSessions()).thenResolve([]);
@@ -393,7 +393,7 @@ suite(`Remote Kernel Finder`, () => {
 				}
 				return k;
 			}),
-			[liveRemoteKernel],
+			[liveRemoteKernel]
 		);
 	});
 });

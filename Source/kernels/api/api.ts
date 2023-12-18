@@ -19,7 +19,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 			const kernelProvider =
 				ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
 			const notebook = workspace.notebookDocuments.find(
-				(item) => item.uri.toString() === uri.toString(),
+				(item) => item.uri.toString() === uri.toString()
 			);
 			const kernel = kernelProvider.get(notebook || uri);
 			// We are only interested in returning kernels that have been started by the user.
@@ -31,7 +31,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 						extensionId,
 						pemUsed: "getKernel",
 						accessAllowed,
-					},
+					}
 				);
 				return;
 			}
@@ -50,7 +50,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 						extensionId,
 						pemUsed: "getKernel",
 						accessAllowed,
-					},
+					}
 				);
 				return;
 			}

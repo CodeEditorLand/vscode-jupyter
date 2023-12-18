@@ -64,19 +64,23 @@ export class ContributedLocalKernelSpecFinder
 
 	private cache: LocalKernelConnectionMetadata[] = [];
 	constructor(
-        @inject(LocalKnownPathKernelSpecFinder) private readonly nonPythonKernelFinder: LocalKnownPathKernelSpecFinder,
-        @inject(LocalPythonAndRelatedNonPythonKernelSpecFinder)
-        private readonly pythonKernelFinder: ILocalKernelFinder<LocalKernelConnectionMetadata>,
-        @inject(IKernelFinder) kernelFinder: KernelFinder,
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-        @inject(IPythonExtensionChecker) private readonly extensionChecker: IPythonExtensionChecker,
-        @inject(IInterpreterService) private readonly interpreters: IInterpreterService
-    ) {
-        kernelFinder.registerKernelFinder(this);
-        this.disposables.push(this._onDidChangeStatus);
-        this.disposables.push(this._onDidChangeKernels);
-        this.disposables.push(this.promiseMonitor);
-    }
+		@inject(LocalKnownPathKernelSpecFinder)
+		private readonly nonPythonKernelFinder: LocalKnownPathKernelSpecFinder,
+		@inject(LocalPythonAndRelatedNonPythonKernelSpecFinder)
+		private readonly pythonKernelFinder: ILocalKernelFinder<LocalKernelConnectionMetadata>,
+		@inject(IKernelFinder) kernelFinder: KernelFinder,
+		@inject(IDisposableRegistry)
+		private readonly disposables: IDisposableRegistry,
+		@inject(IPythonExtensionChecker)
+		private readonly extensionChecker: IPythonExtensionChecker,
+		@inject(IInterpreterService)
+		private readonly interpreters: IInterpreterService
+	) {
+		kernelFinder.registerKernelFinder(this);
+		this.disposables.push(this._onDidChangeStatus);
+		this.disposables.push(this._onDidChangeKernels);
+		this.disposables.push(this.promiseMonitor);
+	}
 
 	activate() {
 		this.promiseMonitor.onStateChange(() => {
@@ -113,23 +117,23 @@ export class ContributedLocalKernelSpecFinder
 		this.nonPythonKernelFinder.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.pythonKernelFinder.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.interpreters.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.updateCache();
 		this.interpreters.onDidChangeInterpreters(
 			this.updateCache,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		extensions.onDidChange(
 			() => {
@@ -142,17 +146,17 @@ export class ContributedLocalKernelSpecFinder
 				}
 			},
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.nonPythonKernelFinder.onDidChangeKernels(
 			this.updateCache,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.pythonKernelFinder.onDidChangeKernels(
 			this.updateCache,
 			this,
-			this.disposables,
+			this.disposables
 		);
 		this.wasPythonInstalledWhenFetchingControllers =
 			this.extensionChecker.isPythonExtensionInstalled;
@@ -181,11 +185,11 @@ export class ContributedLocalKernelSpecFinder
 						return item.kernelSpec.language !== PYTHON_LANGUAGE;
 					}
 					return true;
-				},
+				}
 			);
 			const kernelSpecsFromPythonKernelFinder =
 				this.pythonKernelFinder.kernels.filter((item) =>
-					isUserRegisteredKernelSpecConnection(item),
+					isUserRegisteredKernelSpecConnection(item)
 				) as LocalKernelConnectionMetadata[];
 			kernels = kernels
 				.concat(kernelSpecs)
@@ -203,7 +207,7 @@ export class ContributedLocalKernelSpecFinder
 		// This is because the python kernel finder would have more information about the kernel (such as the matching python env).
 		this.pythonKernelFinder.kernels.forEach((connection) => {
 			const kernelSpecKind = getKernelRegistrationInfo(
-				connection.kernelSpec,
+				connection.kernelSpec
 			);
 			if (
 				connection.kernelSpec.specFile &&
@@ -242,7 +246,7 @@ export class ContributedLocalKernelSpecFinder
 		const updated = values.filter(
 			(k) =>
 				oldKernels.has(k.id) &&
-				!areObjectsWithUrisTheSame(k, oldKernels.get(k.id)),
+				!areObjectsWithUrisTheSame(k, oldKernels.get(k.id))
 		);
 		const removed = oldValues.filter((k) => !kernels.has(k.id));
 

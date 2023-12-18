@@ -10,7 +10,10 @@ import { commands } from "vscode";
 export class ExposeUsedAzMLServerHandles
 	implements IExtensionSyncActivationService
 {
-	constructor(@inject(IJupyterServerUriStorage) private readonly uriStorage: IJupyterServerUriStorage) {}
+	constructor(
+		@inject(IJupyterServerUriStorage)
+		private readonly uriStorage: IJupyterServerUriStorage
+	) {}
 	activate(): void {
 		commands.registerCommand("jupyter.getUsedAzMLServerHandles", () => {
 			const usedItems: { id: string; handle: string }[] = [];

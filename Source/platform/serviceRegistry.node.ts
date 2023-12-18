@@ -34,11 +34,11 @@ export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addBinding(FileSystem, IFileSystem);
 	serviceManager.addSingleton<IWorkspaceService>(
 		IWorkspaceService,
-		WorkspaceService,
+		WorkspaceService
 	);
 	serviceManager.addSingleton<IConfigurationService>(
 		IConfigurationService,
-		ConfigurationService,
+		ConfigurationService
 	);
 
 	registerApiTypes(serviceManager);
@@ -49,28 +49,28 @@ export function registerTypes(serviceManager: IServiceManager) {
 	// Root platform types
 	serviceManager.addSingletonInstance<number>(
 		DataScienceStartupTime,
-		Date.now(),
+		Date.now()
 	);
 
 	serviceManager.addSingleton<ProgressReporter>(
 		ProgressReporter,
-		ProgressReporter,
+		ProgressReporter
 	);
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
-		KernelProgressReporter,
+		KernelProgressReporter
 	);
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
-		OutputCommandListener,
+		OutputCommandListener
 	);
 
 	serviceManager.add<IWebviewViewProvider>(
 		IWebviewViewProvider,
-		WebviewViewProvider,
+		WebviewViewProvider
 	);
 	serviceManager.add<IWebviewPanelProvider>(
 		IWebviewPanelProvider,
-		WebviewPanelProvider,
+		WebviewPanelProvider
 	);
 }

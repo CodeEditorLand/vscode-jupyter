@@ -21,13 +21,13 @@ export abstract class BaseProductPathsService implements IProductPathService {
 	protected readonly productInstaller: IInstaller;
 	constructor(protected serviceContainer: IServiceContainer) {
 		this.configService = serviceContainer.get<IConfigurationService>(
-			IConfigurationService,
+			IConfigurationService
 		);
 		this.productInstaller = serviceContainer.get<IInstaller>(IInstaller);
 	}
 	public abstract getExecutableNameFromSettings(
 		product: Product,
-		resource?: Uri,
+		resource?: Uri
 	): string;
 	public isExecutableAModule(product: Product, resource?: Uri): boolean {
 		if (product === Product.kernelspec) {
@@ -37,7 +37,7 @@ export abstract class BaseProductPathsService implements IProductPathService {
 		try {
 			moduleName = this.productInstaller.translateProductToModuleName(
 				product,
-				ModuleNamePurpose.run,
+				ModuleNamePurpose.run
 			);
 			// eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
 		} catch {}
@@ -45,7 +45,7 @@ export abstract class BaseProductPathsService implements IProductPathService {
 		// User may have customized the module name or provided the fully qualified path.
 		const executableName = this.getExecutableNameFromSettings(
 			product,
-			resource,
+			resource
 		);
 
 		return (
@@ -59,13 +59,15 @@ export abstract class BaseProductPathsService implements IProductPathService {
 @injectable()
 export class DataScienceProductPathService extends BaseProductPathsService {
 	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
-	constructor(@inject(IServiceContainer) serviceContainer: IServiceContainer) {
-        super(serviceContainer);
-    }
+	constructor(
+		@inject(IServiceContainer) serviceContainer: IServiceContainer
+	) {
+		super(serviceContainer);
+	}
 	public getExecutableNameFromSettings(product: Product, _?: Uri): string {
 		return this.productInstaller.translateProductToModuleName(
 			product,
-			ModuleNamePurpose.run,
+			ModuleNamePurpose.run
 		);
 	}
 }

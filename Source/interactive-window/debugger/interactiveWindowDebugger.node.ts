@@ -36,19 +36,21 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	private readonly tracingDisableCode: string;
 	private debuggingActive: boolean = false;
 	constructor(
-        @inject(IPythonApiProvider) private readonly apiProvider: IPythonApiProvider,
-        @inject(IConfigurationService) private configService: IConfigurationService,
-        @inject(IJupyterDebugService)
-        @named(Identifiers.MULTIPLEXING_DEBUGSERVICE)
-        private debugService: IJupyterDebugService,
-        @inject(IPlatformService) private platform: IPlatformService
-    ) {
-        this.debuggerPackage = 'debugpy';
-        this.enableDebuggerCode = `import debugpy;debugpy.listen(('localhost', 0))`;
-        this.waitForDebugClientCode = `import debugpy;debugpy.wait_for_client()`;
-        this.tracingEnableCode = `from debugpy import trace_this_thread;trace_this_thread(True)`;
-        this.tracingDisableCode = `from debugpy import trace_this_thread;trace_this_thread(False)`;
-    }
+		@inject(IPythonApiProvider)
+		private readonly apiProvider: IPythonApiProvider,
+		@inject(IConfigurationService)
+		private configService: IConfigurationService,
+		@inject(IJupyterDebugService)
+		@named(Identifiers.MULTIPLEXING_DEBUGSERVICE)
+		private debugService: IJupyterDebugService,
+		@inject(IPlatformService) private platform: IPlatformService
+	) {
+		this.debuggerPackage = "debugpy";
+		this.enableDebuggerCode = `import debugpy;debugpy.listen(('localhost', 0))`;
+		this.waitForDebugClientCode = `import debugpy;debugpy.wait_for_client()`;
+		this.tracingEnableCode = `from debugpy import trace_this_thread;trace_this_thread(True)`;
+		this.tracingDisableCode = `from debugpy import trace_this_thread;trace_this_thread(False)`;
+	}
 	public async attach(kernel: IKernel): Promise<void> {
 		if (!kernel.session) {
 			throw new Error("Notebook not initialized");
@@ -67,7 +69,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			{
 				justMyCode: settings.debugJustMyCode,
 				python: pythonPath,
-			},
+			}
 		);
 	}
 
@@ -93,7 +95,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	}
 
 	public async updateSourceMaps(
-		hashes: IFileGeneratedCodes[],
+		hashes: IFileGeneratedCodes[]
 	): Promise<void> {
 		// Make sure that we have an active debugging session at this point
 		if (this.debugService.activeDebugSession && this.debuggingActive) {
@@ -103,10 +105,10 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 					if (this.debuggingActive) {
 						return this.debugService.activeDebugSession!.customRequest(
 							"setPydevdSourceMap",
-							buildSourceMap(fileHash),
+							buildSourceMap(fileHash)
 						);
 					}
-				}),
+				})
 			);
 		}
 	}
@@ -138,7 +140,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	private async startDebugSession(
 		startCommand: (config: DebugConfiguration) => Thenable<boolean>,
 		kernel: IKernel,
-		extraConfig: Partial<DebugConfiguration>,
+		extraConfig: Partial<DebugConfiguration>
 	) {
 		traceInfo("start debugging");
 		if (!kernel.session?.kernel) {
@@ -166,7 +168,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 							"Execute_request failure starting debug session for IW",
 						telemetryName:
 							Telemetry.InteractiveWindowDebugSetupCodeFailure,
-					},
+					}
 				);
 				if (
 					importResults.some((item) => item.output_type === "error")
@@ -175,8 +177,8 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 				} else {
 					traceInfo(
 						`import startup: ${getPlainTextOrStreamOutput(
-							importResults,
-						)}`,
+							importResults
+						)}`
 					);
 				}
 
@@ -188,7 +190,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 
 	private async connect(
 		kernel: IKernel,
-		extraConfig: Partial<DebugConfiguration>,
+		extraConfig: Partial<DebugConfiguration>
 	): Promise<DebugConfiguration | undefined> {
 		const notebook = kernel.notebook;
 		// If we already have configuration, we're already attached, don't do it again.
@@ -233,14 +235,14 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	}
 
 	private async calculateDebuggerPathList(
-		kernel: IKernel,
+		kernel: IKernel
 	): Promise<string | undefined> {
 		const extraPaths: string[] = [];
 
 		// Add the settings path first as it takes precedence over the ptvsd extension path
 		// eslint-disable-next-line no-multi-str
 		let settingsPath = this.configService.getSettings(
-			kernel.resourceUri,
+			kernel.resourceUri
 		).debugpyDistPath;
 		// Escape windows path chars so they end up in the source escaped
 		if (settingsPath) {
@@ -297,15 +299,15 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 								"Execute_request failure appending debugger paths for IW",
 							telemetryName:
 								Telemetry.InteractiveWindowDebugSetupCodeFailure,
-						},
-				  )
+						}
+					)
 				: [];
 			traceInfo(`Appending paths: ${getPlainTextOrStreamOutput(result)}`);
 		}
 	}
 
 	private async connectToLocal(
-		kernel: IKernel,
+		kernel: IKernel
 	): Promise<{ port: number; host: string }> {
 		const outputs = kernel.session?.kernel
 			? await executeSilently(
@@ -317,8 +319,8 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 							"Execute_request failure enabling debugging for IW",
 						telemetryName:
 							Telemetry.InteractiveWindowDebugSetupCodeFailure,
-					},
-			  )
+					}
+				)
 			: [];
 
 		// Pull our connection info out from the cells returned by enable_attach
@@ -345,13 +347,13 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			throw new JupyterDebuggerNotInstalledError(
 				this.debuggerPackage,
 				error.ename,
-				kernel.kernelConnectionMetadata,
+				kernel.kernelConnectionMetadata
 			);
 		}
 		throw new JupyterDebuggerNotInstalledError(
 			DataScience.jupyterDebuggerOutputParseError(this.debuggerPackage),
 			undefined,
-			kernel.kernelConnectionMetadata,
+			kernel.kernelConnectionMetadata
 		);
 	}
 }

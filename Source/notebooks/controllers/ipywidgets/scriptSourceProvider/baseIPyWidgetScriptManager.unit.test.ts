@@ -88,29 +88,29 @@ suite("ipywidget - CDN", () => {
 				"test",
 				"datascience",
 				"ipywidgets",
-				"samples",
+				"samples"
 			);
 			const file = path.join(
 				nbExtensionsFolder,
 				item.file,
-				"extension.js",
+				"extension.js"
 			);
 			const contents = fs.readFileSync(file).toString();
 			const config = await extractRequireConfigFromWidgetEntry(
 				Uri.file(nbExtensionsFolder),
 				item.file,
-				contents,
+				contents
 			);
 			// Convert values to strings for easy comparison.
 			Object.keys(config!).forEach(
-				(key) => (config![key] = config![key].toString() as any),
+				(key) => (config![key] = config![key].toString() as any)
 			);
 
 			const expectedConfig: Record<string, any> = item.config;
 			Object.keys(item.config).forEach((key) => {
 				if (!expectedConfig[key].startsWith("http")) {
 					expectedConfig[key] = Uri.file(
-						path.join(nbExtensionsFolder, expectedConfig[key]),
+						path.join(nbExtensionsFolder, expectedConfig[key])
 					).toString();
 				}
 			});

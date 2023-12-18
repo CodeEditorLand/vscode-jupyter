@@ -145,7 +145,7 @@ export class MainPanel
 
 		// Tell the dataviewer code we have started.
 		this.postOffice.sendMessage<IDataViewerMapping>(
-			DataViewerMessages.Started,
+			DataViewerMessages.Started
 		);
 	}
 
@@ -274,7 +274,7 @@ export class MainPanel
 	private renderGrid() {
 		const filterRowsTooltip = getLocString(
 			"filterRowsTooltip",
-			"Click to filter",
+			"Click to filter"
 		);
 		return (
 			<ReactSlickGrid
@@ -312,7 +312,7 @@ export class MainPanel
 				const variableName = this.state.variableName ?? variable.name;
 				const fileName = this.state.fileName ?? variable.fileName;
 				const isSliceDataEnabled = SliceableTypes.has(
-					originalVariableType || "",
+					originalVariableType || ""
 				);
 				const sliceExpression = variable.sliceExpression;
 
@@ -342,26 +342,26 @@ export class MainPanel
 
 				// Compute our row fetch sizes based on the number of columns
 				this.rowFetchSizeAll = Math.round(
-					CellFetchAllLimit / columns.length,
+					CellFetchAllLimit / columns.length
 				);
 				this.rowFetchSizeFirst = Math.round(
-					Math.max(2, CellFetchSizeFirst / columns.length),
+					Math.max(2, CellFetchSizeFirst / columns.length)
 				);
 				this.rowFetchSizeSubsequent = Math.round(
-					Math.max(2, CellFetchSizeSubsequent / columns.length),
+					Math.max(2, CellFetchSizeSubsequent / columns.length)
 				);
 				if (this.state.maximumRowChunkSize) {
 					this.rowFetchSizeAll = Math.min(
 						this.rowFetchSizeAll,
-						this.state.maximumRowChunkSize,
+						this.state.maximumRowChunkSize
 					);
 					this.rowFetchSizeFirst = Math.min(
 						this.rowFetchSizeFirst,
-						this.state.maximumRowChunkSize,
+						this.state.maximumRowChunkSize
 					);
 					this.rowFetchSizeSubsequent = Math.min(
 						this.rowFetchSizeSubsequent,
-						this.state.maximumRowChunkSize,
+						this.state.maximumRowChunkSize
 					);
 				}
 
@@ -370,7 +370,7 @@ export class MainPanel
 					this.getRowsInChunks(
 						initialRows.length,
 						totalRowCount,
-						variable.sliceExpression,
+						variable.sliceExpression
 					);
 				}
 			}
@@ -380,7 +380,7 @@ export class MainPanel
 	private getRowsInChunks(
 		startIndex: number,
 		endIndex: number,
-		sliceExpression?: string,
+		sliceExpression?: string
 	) {
 		// Ask for our first chunk. Don't spam jupyter though with all requests at once
 		// Instead, do them one at a time.
@@ -437,7 +437,7 @@ export class MainPanel
 			const chunkStart = response.end;
 			const chunkEnd = Math.min(
 				chunkStart + this.rowFetchSizeSubsequent,
-				this.state.totalRowCount,
+				this.state.totalRowCount
 			);
 			this.sendMessage(DataViewerMessages.GetRowsRequest, {
 				start: chunkStart,
@@ -449,7 +449,7 @@ export class MainPanel
 
 	private generateColumns(
 		variable: IDataFrameInfo,
-		indexColumn: string,
+		indexColumn: string
 	): Slick.Column<Slick.SlickData>[] {
 		if (variable.columns) {
 			// Generate a column for row numbers
@@ -462,7 +462,7 @@ export class MainPanel
 				(
 					accum: Slick.Column<Slick.SlickData>[],
 					c: { key: string; type: ColumnType },
-					i: number,
+					i: number
 				) => {
 					// Only show index column for pandas DataFrame and Series
 					const isDataFrameOrSeries =
@@ -485,7 +485,7 @@ export class MainPanel
 					}
 					return accum;
 				},
-				[],
+				[]
 			);
 		}
 		return [];
@@ -539,7 +539,7 @@ export class MainPanel
 			const columns = this.state.gridColumns;
 			columns
 				.filter(
-					(column) => column.name && columnsToUpdate.has(column.name),
+					(column) => column.name && columnsToUpdate.has(column.name)
 				)
 				.forEach((column) => {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -552,7 +552,7 @@ export class MainPanel
 
 	private sendMessage<M extends IDataViewerMapping, T extends keyof M>(
 		type: T,
-		payload?: M[T],
+		payload?: M[T]
 	) {
 		this.postOffice.sendMessage<M, T>(type, payload);
 	}

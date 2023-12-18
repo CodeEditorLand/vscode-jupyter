@@ -55,29 +55,31 @@ export class KernelAutoReconnectMonitor
 	>();
 
 	constructor(
-        @inject(IDisposableRegistry) private disposableRegistry: IDisposableRegistry,
-        @inject(IKernelProvider) private kernelProvider: IKernelProvider,
-        @inject(IJupyterServerUriStorage) private readonly serverUriStorage: IJupyterServerUriStorage,
-        @inject(IJupyterServerProviderRegistry)
-        private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry
-    ) {}
+		@inject(IDisposableRegistry)
+		private disposableRegistry: IDisposableRegistry,
+		@inject(IKernelProvider) private kernelProvider: IKernelProvider,
+		@inject(IJupyterServerUriStorage)
+		private readonly serverUriStorage: IJupyterServerUriStorage,
+		@inject(IJupyterServerProviderRegistry)
+		private readonly jupyterUriProviderRegistration: IJupyterServerProviderRegistry
+	) {}
 	public activate(): void {
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
-			this.disposableRegistry,
+			this.disposableRegistry
 		);
 		this.disposableRegistry.push(
 			this.kernelProvider.onDidDisposeKernel((kernel) => {
 				this.kernelReconnectProgress.get(kernel)?.dispose();
 				this.kernelReconnectProgress.delete(kernel);
-			}, this),
+			}, this)
 		);
 		this.disposableRegistry.push(
 			this.kernelProvider.onDidRestartKernel((kernel) => {
 				this.kernelReconnectProgress.get(kernel)?.dispose();
 				this.kernelReconnectProgress.delete(kernel);
-			}, this),
+			}, this)
 		);
 		this.disposableRegistry.push(
 			notebooks.onDidChangeNotebookCellExecutionState((e) => {
@@ -96,7 +98,7 @@ export class KernelAutoReconnectMonitor
 				}
 				// Ok, the cell has completed.
 				this.lastExecutedCellPerKernel.delete(kernel);
-			}),
+			})
 		);
 	}
 	private onDidStartKernel(kernel: IKernel) {
@@ -106,7 +108,7 @@ export class KernelAutoReconnectMonitor
 				.onPreExecute(
 					(cell) => this.lastExecutedCellPerKernel.set(kernel, cell),
 					this,
-					this.disposableRegistry,
+					this.disposableRegistry
 				);
 
 			if (!kernel.session?.kernel) {
@@ -115,11 +117,11 @@ export class KernelAutoReconnectMonitor
 			this.kernelsStartedSuccessfully.add(kernel);
 			this.kernelConnectionToKernelMapping.set(
 				kernel.session.kernel,
-				kernel,
+				kernel
 			);
 			kernel.session?.kernel?.connectionStatusChanged.connect(
 				this.onKernelStatusChanged,
-				this,
+				this
 			);
 			kernel.onDisposed(
 				() => {
@@ -127,7 +129,7 @@ export class KernelAutoReconnectMonitor
 					this.kernelReconnectProgress.delete(kernel);
 				},
 				this,
-				this.disposableRegistry,
+				this.disposableRegistry
 			);
 			kernel.addHook(
 				"willRestart",
@@ -137,18 +139,18 @@ export class KernelAutoReconnectMonitor
 					this.kernelsRestarting.add(kernel);
 				},
 				this,
-				this.disposableRegistry,
+				this.disposableRegistry
 			);
 			kernel.onRestarted(
 				() => this.kernelsRestarting.delete(kernel),
 				this,
-				this.disposableRegistry,
+				this.disposableRegistry
 			);
 		}
 	}
 	private onKernelStatusChanged(
 		connection: Kernel.IKernelConnection,
-		connectionStatus: Kernel.ConnectionStatus,
+		connectionStatus: Kernel.ConnectionStatus
 	) {
 		const kernel = this.kernelConnectionToKernelMapping.get(connection);
 		if (!kernel) {
@@ -188,7 +190,7 @@ export class KernelAutoReconnectMonitor
 		if (isRemoteConnection(kernel.kernelConnectionMetadata)) {
 			const handled = await this.handleRemoteServerShutdown(
 				kernel,
-				kernel.kernelConnectionMetadata,
+				kernel.kernelConnectionMetadata
 			);
 
 			if (handled) {
@@ -199,13 +201,13 @@ export class KernelAutoReconnectMonitor
 		const message =
 			DataScience.automaticallyReconnectingToAKernelProgressMessage(
 				getDisplayNameOrNameOfKernelConnection(
-					kernel.kernelConnectionMetadata,
-				),
+					kernel.kernelConnectionMetadata
+				)
 			);
 		window
 			.withProgress(
 				{ location: ProgressLocation.Notification, title: message },
-				async () => deferred.promise,
+				async () => deferred.promise
 			)
 			.then(noop, noop);
 
@@ -224,7 +226,7 @@ export class KernelAutoReconnectMonitor
 		if (isRemoteConnection(kernel.kernelConnectionMetadata)) {
 			const handled = await this.handleRemoteServerShutdown(
 				kernel,
-				kernel.kernelConnectionMetadata,
+				kernel.kernelConnectionMetadata
 			);
 
 			if (handled) {
@@ -235,12 +237,12 @@ export class KernelAutoReconnectMonitor
 		const message = isLocalConnection(kernel.kernelConnectionMetadata)
 			? DataScience.kernelDisconnected(
 					getDisplayNameOrNameOfKernelConnection(
-						kernel.kernelConnectionMetadata,
-					),
-			  )
+						kernel.kernelConnectionMetadata
+					)
+				)
 			: DataScience.remoteJupyterConnectionFailedWithServer(
-					kernel.kernelConnectionMetadata.baseUrl,
-			  );
+					kernel.kernelConnectionMetadata.baseUrl
+				);
 
 		window.showErrorMessage(message).then(noop, noop);
 
@@ -260,7 +262,7 @@ export class KernelAutoReconnectMonitor
 				lastExecutedCell,
 				kernel.controller,
 				message,
-				false,
+				false
 			);
 		} finally {
 			// Given the fact that we know the kernel connection is dead, dispose the kernel to clean everything.
@@ -275,14 +277,14 @@ export class KernelAutoReconnectMonitor
 	 */
 	private async handleRemoteServerShutdown(
 		kernel: IKernel,
-		metadata: RemoteKernelConnectionMetadata,
+		metadata: RemoteKernelConnectionMetadata
 	): Promise<boolean> {
 		const collection =
 			this.jupyterUriProviderRegistration.jupyterCollections.find(
 				(c) =>
 					c.extensionId ===
 						metadata.serverProviderHandle.extensionId &&
-					c.id === metadata.serverProviderHandle.id,
+					c.id === metadata.serverProviderHandle.id
 			);
 		if (!collection) {
 			return false;
@@ -291,12 +293,12 @@ export class KernelAutoReconnectMonitor
 		const token = new CancellationTokenSource();
 		try {
 			const servers = await Promise.resolve(
-				collection.serverProvider.provideJupyterServers(token.token),
+				collection.serverProvider.provideJupyterServers(token.token)
 			);
 			const handles = (servers || []).map((s) => s.id);
 			if (!handles.includes(metadata.serverProviderHandle.handle)) {
 				await this.serverUriStorage.remove(
-					metadata.serverProviderHandle,
+					metadata.serverProviderHandle
 				);
 				this.kernelReconnectProgress.get(kernel)?.dispose();
 				this.kernelReconnectProgress.delete(kernel);

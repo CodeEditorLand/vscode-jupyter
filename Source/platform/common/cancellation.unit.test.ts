@@ -21,7 +21,7 @@ suite("Cancellation", () => {
 			cts.token,
 			sleep(100)
 				.catch(noop)
-				.finally(() => (triggered = true)),
+				.finally(() => (triggered = true))
 		);
 		cts.cancel();
 
@@ -53,7 +53,7 @@ suite("Cancellation", () => {
 			sleep(100)
 				.catch(noop)
 				.then(() => "timeout")
-				.finally(() => (triggered = true)),
+				.finally(() => (triggered = true))
 		);
 		cts.cancel();
 
@@ -67,7 +67,7 @@ suite("Cancellation", () => {
 		const p = raceCancellation(
 			cts.token,
 			"Default Value",
-			Promise.resolve("HelloWorld"),
+			Promise.resolve("HelloWorld")
 		);
 
 		assert.equal(await p, "HelloWorld");
@@ -76,7 +76,7 @@ suite("Cancellation", () => {
 		const p = raceCancellation(
 			undefined,
 			"Default Value",
-			Promise.resolve("HelloWorld"),
+			Promise.resolve("HelloWorld")
 		);
 
 		assert.equal(await p, "HelloWorld");
@@ -96,7 +96,7 @@ suite("Cancellation", () => {
 				.finally(() => (triggered = true)),
 			sleep(100)
 				.catch(noop)
-				.finally(() => (triggered = true)),
+				.finally(() => (triggered = true))
 		);
 		cts.cancel();
 
@@ -120,7 +120,7 @@ suite("Cancellation", () => {
 			sleep(100)
 				.catch(noop)
 				.then(() => "timeout"),
-			Promise.resolve("HelloWorld"),
+			Promise.resolve("HelloWorld")
 		);
 
 		assert.equal(await p, "HelloWorld");
@@ -137,7 +137,7 @@ suite("Cancellation", () => {
 			sleep(100)
 				.catch(noop)
 				.then(() => "timeout"),
-			Promise.resolve("HelloWorld"),
+			Promise.resolve("HelloWorld")
 		);
 
 		assert.equal(await p, "HelloWorld");
@@ -161,7 +161,7 @@ suite("Cancellation", () => {
 			sleep(100)
 				.catch(noop)
 				.then(() => "timeout")
-				.finally(() => (triggered = true)),
+				.finally(() => (triggered = true))
 		);
 		cts.cancel();
 
@@ -179,7 +179,7 @@ suite("Cancellation", () => {
 			sleep(100)
 				.catch(noop)
 				.then(() => "timeout")
-				.finally(() => (triggered = true)),
+				.finally(() => (triggered = true))
 		);
 		cts.cancel();
 
@@ -194,7 +194,7 @@ suite("Cancellation", () => {
 			cts.token,
 			sleep(10)
 				.catch(noop)
-				.then(() => "timeout"),
+				.then(() => "timeout")
 		);
 
 		assert.equal(await p, "timeout");
@@ -205,7 +205,7 @@ suite("Cancellation", () => {
 			undefined,
 			sleep(100)
 				.catch(noop)
-				.then(() => "timeout"),
+				.then(() => "timeout")
 		);
 
 		assert.equal(await p, "timeout");
@@ -229,7 +229,7 @@ suite("Cancellation", () => {
 			sleep(100)
 				.catch(noop)
 				.then(() => "timeout")
-				.finally(() => (triggered = true)),
+				.finally(() => (triggered = true))
 		);
 		cts.cancel();
 
@@ -250,7 +250,7 @@ suite("Cancellation", () => {
 				.then(() => "timeout2"),
 			sleep(100)
 				.catch(noop)
-				.then(() => "timeout"),
+				.then(() => "timeout")
 		);
 
 		assert.equal(await p, "timeout2");
@@ -266,7 +266,7 @@ suite("Cancellation", () => {
 				.then(() => "timeout"),
 			sleep(100)
 				.catch(noop)
-				.then(() => "timeout"),
+				.then(() => "timeout")
 		);
 
 		assert.equal(await p, "timeout");
