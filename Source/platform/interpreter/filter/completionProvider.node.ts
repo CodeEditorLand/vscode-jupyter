@@ -69,8 +69,10 @@ export class PythonEnvFilterCompletionProvider
 		_token: CancellationToken,
 	): Promise<CompletionItem[]> {
 		if (
-			!this.pythonExtChecker.isPythonExtensionInstalled ||
-			!this.pythonExtChecker.isPythonExtensionActive ||
+			!(
+				this.pythonExtChecker.isPythonExtensionInstalled &&
+				this.pythonExtChecker.isPythonExtensionActive
+			) ||
 			this.interpreters.resolvedEnvironments.length === 0 ||
 			!PythonEnvFilterCompletionProvider.canProvideCompletions(
 				document,
@@ -134,7 +136,7 @@ export class PythonEnvFilterCompletionProvider
 			return Array.isArray(items) ? items : [];
 		} catch (ex) {
 			traceWarning(
-				`Failed to provide completions for python env filter`,
+				"Failed to provide completions for python env filter",
 				ex,
 			);
 			return [];

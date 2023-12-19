@@ -47,13 +47,13 @@ export class ChainingExecuteRequester {
 		this.previousKernel = kernel;
 		nextExecute.done
 			.then(() => {
-				if (this.previousExecute == nextExecute) {
+				if (this.previousExecute === nextExecute) {
 					this.previousExecute = undefined;
 					this.previousKernel = undefined;
 				}
 			})
 			.catch(() => {
-				if (this.previousExecute == nextExecute) {
+				if (this.previousExecute === nextExecute) {
 					this.previousExecute = undefined;
 					this.previousKernel = undefined;
 				}

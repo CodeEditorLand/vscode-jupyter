@@ -22,8 +22,8 @@ export class Extensions implements IExtensions {
 		try {
 			if (stack) {
 				const jupyterExtRoot = extensions
-					.getExtension(JVSC_EXTENSION_ID)!
-					.extensionUri.toString()
+					.getExtension(JVSC_EXTENSION_ID)
+					?.extensionUri.toString()
 					.toLowerCase();
 				const frames = stack
 					.split("\n")
@@ -76,10 +76,10 @@ export class Extensions implements IExtensions {
 			};
 		} catch (ex) {
 			traceError(
-				`Unable to determine the caller of the extension API for trace stack.`,
+				"Unable to determine the caller of the extension API for trace stack.",
 				stack,
 			);
-			traceError(`Failure error`, ex);
+			traceError("Failure error", ex);
 			return {
 				extensionId: unknownExtensionId,
 				displayName: DataScience.unknownPackage,

@@ -400,8 +400,7 @@ function comptePropertyGroupsFromReferenceNode(
 		type.aliasTypeArguments?.length === 1
 	) {
 		if (
-			type.aliasTypeArguments[0].symbol &&
-			type.aliasTypeArguments[0].symbol.declarations &&
+			type.aliasTypeArguments[0].symbol?.declarations &&
 			type.aliasTypeArguments[0].symbol.declarations?.length === 1 &&
 			type.aliasTypeArguments[0].symbol.declarations[0].kind ===
 				ts.SyntaxKind.TypeLiteral
@@ -546,7 +545,7 @@ function getTsCompilerOptionsJson(): any {
 function generateDocumentationForCommonTypes(fileNames: string[]): void {
 	const configFile = getTsCompilerOptionsJson();
 	const program = ts.createProgram(fileNames, configFile.options);
-	const typeChecker = program!.getTypeChecker();
+	const typeChecker = program?.getTypeChecker();
 
 	// Visit every sourceFile in the program
 	if (program) {
@@ -600,7 +599,7 @@ function generateDocumentation(fileNames: string[]): void {
 		ts.LanguageServiceMode.Semantic,
 	);
 	const program = languageService.getProgram()!;
-	const typeChecker = program!.getTypeChecker();
+	const typeChecker = program?.getTypeChecker();
 	const entries = new Map<string, TelemetryEntry>();
 
 	// First generate documentation for common properties and measures.
@@ -665,7 +664,7 @@ function generateDocumentation(fileNames: string[]): void {
 									m.name.end - 1,
 								);
 							if (defs) {
-								const refSourceFile = program!.getSourceFile(
+								const refSourceFile = program?.getSourceFile(
 									defs[0].fileName,
 								);
 								if (refSourceFile) {
@@ -954,8 +953,8 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 	commonFields.push('       "${F1}"\n');
 	commonFields.push("     ]");
 	fs.appendFileSync(file, `${fieldListForFile.join(",\n")}\n`);
-	fs.appendFileSync(file, `   }\n`);
-	fs.appendFileSync(file, ` */\n`);
+	fs.appendFileSync(file, "   }\n");
+	fs.appendFileSync(file, " */\n");
 	fs.appendFileSync(file, "\n");
 
 	output.forEach((item) => {
@@ -1021,7 +1020,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 				entries.length ? "\n" : ""
 			}${commonFields.join("\n")}\n${footer.join("\n")}`.trim(),
 		);
-		fs.appendFileSync(file, `\n`);
+		fs.appendFileSync(file, "\n");
 	});
 }
 

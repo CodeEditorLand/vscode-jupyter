@@ -254,7 +254,7 @@ import { ITrustedKernelPaths } from "./types";
 					(testData.globalKernelSpecs || []).map(
 						async (kernelSpec) => {
 							const jsonFile = path.join(
-								globalSpecPath!.fsPath,
+								globalSpecPath?.fsPath,
 								kernelSpec.name,
 								"kernel.json",
 							);
@@ -626,7 +626,7 @@ import { ITrustedKernelPaths } from "./types";
 						"Kernelspec registered by very old version of extension",
 					language: "python",
 					// Initial versions of extensions used a GUID in kernelnames & contained the interpreter in metadata.
-					name: `kernelspecRegisteredByVeryOldVersionOfExtensionaaaa1111222233334444555566667777`,
+					name: "kernelspecRegisteredByVeryOldVersionOfExtensionaaaa1111222233334444555566667777",
 					resources: {},
 					env: {
 						HELLO: "World",
@@ -685,7 +685,7 @@ import { ITrustedKernelPaths } from "./types";
 				await Promise.all(
 					expectedGlobalKernelSpecs.map(async (kernelSpec) => {
 						const kernelspecFile = path.join(
-							globalSpecPath!.fsPath,
+							globalSpecPath?.fsPath,
 							kernelSpec.name,
 							"kernel.json",
 						);
@@ -995,7 +995,7 @@ import { ITrustedKernelPaths } from "./types";
 				assert.strictEqual(
 					actual?.kernelSpec.specFile,
 					path.join(
-						globalSpecPath!.fsPath,
+						globalSpecPath?.fsPath,
 						expected.name,
 						"kernel.json",
 					),

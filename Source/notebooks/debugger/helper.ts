@@ -22,7 +22,7 @@ export enum IpykernelCheckResult {
 export async function isUsingIpykernel6OrLater(
 	execution: INotebookKernelExecution,
 ): Promise<IpykernelCheckResult> {
-	const delimiter = `5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`;
+	const delimiter = "5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d";
 	const code = `import builtins
 import ipykernel
 builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
@@ -32,7 +32,9 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 
 	// It is necessary to traverse all the output to determine the version of ipykernel, some jupyter servers may return extra status metadata
 	for (const line of output) {
-		if (line.output_type !== "stream") continue;
+		if (line.output_type !== "stream") {
+			continue;
+		}
 
 		const lineText = line.text?.toString().trim() ?? "";
 		if (!lineText.includes(delimiter)) {
@@ -91,33 +93,37 @@ export function getMessageSourceAndHookIt(
 	) => void,
 ): void {
 	switch (msg.type) {
-		case "event":
+		case "event": {
 			const event = msg as DebugProtocol.Event;
 			switch (event.event) {
-				case "output":
+				case "output": {
 					sourceHook((event as DebugProtocol.OutputEvent).body);
 					break;
-				case "loadedSource":
+				}
+				case "loadedSource": {
 					sourceHook((event as DebugProtocol.LoadedSourceEvent).body);
 					break;
-				case "breakpoint":
+				}
+				case "breakpoint": {
 					sourceHook(
 						(event as DebugProtocol.BreakpointEvent).body
 							.breakpoint,
 					);
 					break;
+				}
 				default:
 					break;
 			}
 			break;
-		case "request":
+		}
+		case "request": {
 			const request = msg as DebugProtocol.Request;
 			switch (request.command) {
-				case "setBreakpoints":
+				case "setBreakpoints": {
 					const args =
 						request.arguments as DebugProtocol.SetBreakpointsArguments;
 					const breakpoints = args.breakpoints;
-					if (breakpoints && breakpoints.length) {
+					if (breakpoints?.length) {
 						const originalLine = breakpoints[0].line;
 						breakpoints.forEach((bp) => {
 							sourceHook(bp, { ...args.source });
@@ -130,38 +136,44 @@ export function getMessageSourceAndHookIt(
 						args.source = objForSource.source;
 					}
 					break;
-				case "breakpointLocations":
+				}
+				case "breakpointLocations": {
 					// TODO this technically would have to be mapped to two different sources, in reality, I don't think that will happen in vscode
 					sourceHook(
 						request.arguments as DebugProtocol.BreakpointLocationsArguments,
 					);
 					break;
-				case "source":
+				}
+				case "source": {
 					sourceHook(
 						request.arguments as DebugProtocol.SourceArguments,
 					);
 					break;
-				case "gotoTargets":
+				}
+				case "gotoTargets": {
 					sourceHook(
 						request.arguments as DebugProtocol.GotoTargetsArguments,
 					);
 					break;
+				}
 				default:
 					break;
 			}
 			break;
-		case "response":
+		}
+		case "response": {
 			const response = msg as DebugProtocol.Response;
 			if (response.success && response.body) {
 				switch (response.command) {
-					case "stackTrace":
+					case "stackTrace": {
 						(
 							response as DebugProtocol.StackTraceResponse
 						).body.stackFrames.forEach((frame) => {
 							sourceHook(frame);
 						});
 						break;
-					case "loadedSources":
+					}
+					case "loadedSources": {
 						(
 							response as DebugProtocol.LoadedSourcesResponse
 						).body.sources.forEach((source) => {
@@ -170,32 +182,37 @@ export function getMessageSourceAndHookIt(
 							source.path = fakeObj.source.path;
 						});
 						break;
-					case "scopes":
+					}
+					case "scopes": {
 						(
 							response as DebugProtocol.ScopesResponse
 						).body.scopes.forEach((scope) => {
 							sourceHook(scope);
 						});
 						break;
-					case "setFunctionBreakpoints":
+					}
+					case "setFunctionBreakpoints": {
 						(
 							response as DebugProtocol.SetFunctionBreakpointsResponse
 						).body.breakpoints.forEach((bp) => {
 							sourceHook(bp);
 						});
 						break;
-					case "setBreakpoints":
+					}
+					case "setBreakpoints": {
 						(
 							response as DebugProtocol.SetBreakpointsResponse
 						).body.breakpoints.forEach((bp) => {
 							sourceHook(bp);
 						});
 						break;
+					}
 					default:
 						break;
 				}
 			}
 			break;
+		}
 	}
 }
 

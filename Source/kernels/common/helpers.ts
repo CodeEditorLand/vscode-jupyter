@@ -54,7 +54,7 @@ export async function waitForIdleOnSession(
 			status: KernelMessage.Status,
 		) => {
 			traceVerbose(`Got status ${status} in waitForIdleOnSession`);
-			if (status == "idle") {
+			if (status === "idle") {
 				kernelStatus.resolve(status);
 			}
 		};
@@ -66,7 +66,7 @@ export async function waitForIdleOnSession(
 				),
 			),
 		);
-		if (session.kernel.status == "idle") {
+		if (session.kernel.status === "idle") {
 			kernelStatus.resolve(session.kernel.status);
 		}
 		// Check for possibility that kernel has died.
@@ -102,7 +102,7 @@ export async function waitForIdleOnSession(
 			`Finished waiting for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
 		);
 
-		if (result == "idle") {
+		if (result === "idle") {
 			return;
 		}
 		traceError(
@@ -110,7 +110,7 @@ export async function waitForIdleOnSession(
 		);
 		throw new JupyterWaitForIdleError(kernelConnectionMetadata);
 	} catch (ex) {
-		traceInfoIfCI(`Error waiting for idle`, ex);
+		traceInfoIfCI("Error waiting for idle", ex);
 		throw ex;
 	} finally {
 		dispose(disposables);

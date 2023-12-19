@@ -562,7 +562,7 @@ export class RemoteKernelFinder
 					),
 				)
 				.catch((ex) => {
-					traceError(`Failed to cache the remote kernels.`, ex);
+					traceError("Failed to cache the remote kernels.", ex);
 				});
 
 			if (added.length || updated.length || removed.length) {

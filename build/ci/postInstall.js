@@ -16,7 +16,7 @@ const { downloadZMQ } = require("@vscode/zeromq");
  * at runtime.
  */
 function createJupyterKernelWithoutSerialization() {
-	var relativePath = path.join(
+	const relativePath = path.join(
 		"node_modules",
 		"@jupyterlab",
 		"services",
@@ -24,16 +24,14 @@ function createJupyterKernelWithoutSerialization() {
 		"kernel",
 		"default.js",
 	);
-	var filePath = path.join(constants.ExtensionRootDir, relativePath);
+	const filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		throw new Error(
-			"Jupyter lab default kernel not found '" +
-				filePath +
-				"' (Jupyter Extension post install script)",
+			`Jupyter lab default kernel not found '${filePath}' (Jupyter Extension post install script)`,
 		);
 	}
-	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
-	var replacedContents = fileContents
+	const fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
+	const replacedContents = fileContents
 		.replace(
 			/^const serialize =.*$/gm,
 			"const serialize = { serialize: (a) => a, deserialize: (a) => a };",
@@ -47,12 +45,15 @@ function createJupyterKernelWithoutSerialization() {
 			"Jupyter lab default kernel cannot be made non serializing",
 		);
 	}
-	var destPath = path.join(path.dirname(filePath), "nonSerializingKernel.js");
+	const destPath = path.join(
+		path.dirname(filePath),
+		"nonSerializingKernel.js",
+	);
 	fs.writeFileSync(destPath, replacedContents);
-	console.log(colors.green(destPath + " file generated (by Jupyter VSC)"));
+	console.log(colors.green(`${destPath} file generated (by Jupyter VSC)`));
 }
 function fixVariableNameInKernelDefaultJs() {
-	var relativePath = path.join(
+	const relativePath = path.join(
 		"node_modules",
 		"@jupyterlab",
 		"services",
@@ -60,17 +61,15 @@ function fixVariableNameInKernelDefaultJs() {
 		"kernel",
 		"default.js",
 	);
-	var filePath = path.join(constants.ExtensionRootDir, relativePath);
+	const filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		throw new Error(
-			"Jupyter lab default kernel not found '" +
-				filePath +
-				"' (Jupyter Extension post install script)",
+			`Jupyter lab default kernel not found '${filePath}' (Jupyter Extension post install script)`,
 		);
 	}
-	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
+	const fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
 	const replacement = "const owned = parentHeader.session === this.clientId;";
-	var replacedContents = fileContents.replace(
+	const replacedContents = fileContents.replace(
 		"const owned = team.session === this.clientId;",
 		replacement,
 	);
@@ -83,10 +82,10 @@ function fixVariableNameInKernelDefaultJs() {
 		);
 	}
 	fs.writeFileSync(filePath, replacedContents);
-	console.log(colors.green(filePath + " file updated (by Jupyter VSC)"));
+	console.log(colors.green(`${filePath} file updated (by Jupyter VSC)`));
 }
 function removeUnnecessaryLoggingFromKernelDefault() {
-	var relativePath = path.join(
+	const relativePath = path.join(
 		"node_modules",
 		"@jupyterlab",
 		"services",
@@ -94,16 +93,14 @@ function removeUnnecessaryLoggingFromKernelDefault() {
 		"kernel",
 		"default.js",
 	);
-	var filePath = path.join(constants.ExtensionRootDir, relativePath);
+	const filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		throw new Error(
-			"Jupyter lab default kernel not found '" +
-				filePath +
-				"' (Jupyter Extension post install script)",
+			`Jupyter lab default kernel not found '${filePath}' (Jupyter Extension post install script)`,
 		);
 	}
-	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
-	var replacedContents = fileContents.replace(
+	const fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
+	const replacedContents = fileContents.replace(
 		"console.debug(`Starting WebSocket: ${display}`);",
 		"",
 	);
@@ -112,30 +109,28 @@ function removeUnnecessaryLoggingFromKernelDefault() {
 		return;
 	}
 	fs.writeFileSync(filePath, replacedContents);
-	console.log(colors.green(filePath + " file updated (by Jupyter VSC)"));
+	console.log(colors.green(`${filePath} file updated (by Jupyter VSC)`));
 }
 
 /**
  * Fix compilation issues in jsdom files.
  */
 function updateJSDomTypeDefinition() {
-	var relativePath = path.join(
+	const relativePath = path.join(
 		"node_modules",
 		"@types",
 		"jsdom",
 		"base.d.ts",
 	);
-	var filePath = path.join(constants.ExtensionRootDir, relativePath);
+	const filePath = path.join(constants.ExtensionRootDir, relativePath);
 	if (!fs.existsSync(filePath)) {
 		console.warn(
-			"JSdom base.d.ts not found '" +
-				filePath +
-				"' (Jupyter Extension post install script)",
+			`JSdom base.d.ts not found '${filePath}' (Jupyter Extension post install script)`,
 		);
 		return;
 	}
-	var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
-	var replacedContents = fileContents.replace(
+	const fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
+	const replacedContents = fileContents.replace(
 		/\s*globalThis: DOMWindow;\s*readonly \["Infinity"]: number;\s*readonly \["NaN"]: number;/g,
 		[
 			"globalThis: DOMWindow;",
@@ -165,32 +160,30 @@ function makeVariableExplorerAlwaysSorted() {
 	const originalCode =
 		"case g.NONE:e=r?g.DESC:g.ASC;break;case g.ASC:e=r?g.NONE:g.DESC;break;case g.DESC:e=r?g.ASC:g.NONE";
 	for (const fileName of fileNames) {
-		var relativePath = path.join(
+		const relativePath = path.join(
 			"node_modules",
 			"react-data-grid",
 			"dist",
 			fileName,
 		);
-		var filePath = path.join(constants.ExtensionRootDir, relativePath);
+		const filePath = path.join(constants.ExtensionRootDir, relativePath);
 		if (!fs.existsSync(filePath)) {
 			throw new Error(
-				"react-data-grid dist file not found '" +
-					filePath +
-					"' (pvsc post install script)",
+				`react-data-grid dist file not found '${filePath}' (pvsc post install script)`,
 			);
 		}
-		var fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
+		const fileContents = fs.readFileSync(filePath, { encoding: "utf8" });
 		if (fileContents.indexOf(alwaysSortedCode) > 0) {
 			// tslint:disable-next-line:no-console
 			console.log(
 				colors.blue(
-					relativePath + " file already updated (by Jupyter VSC)",
+					`${relativePath} file already updated (by Jupyter VSC)`,
 				),
 			);
 			return;
 		}
 		if (fileContents.indexOf(originalCode) > 0) {
-			var replacedText = fileContents.replace(
+			const replacedText = fileContents.replace(
 				originalCode,
 				alwaysSortedCode,
 			);
@@ -202,12 +195,12 @@ function makeVariableExplorerAlwaysSorted() {
 			fs.writeFileSync(filePath, replacedText);
 			// tslint:disable-next-line:no-console
 			console.log(
-				colors.green(relativePath + " file updated (by Jupyter VSC)"),
+				colors.green(`${relativePath} file updated (by Jupyter VSC)`),
 			);
 		} else {
 			// tslint:disable-next-line:no-console
 			console.log(
-				colors.red(relativePath + " file does not need updating."),
+				colors.red(`${relativePath} file does not need updating.`),
 			);
 		}
 	}
@@ -241,7 +234,7 @@ function fixJupyterLabRenderers() {
 		);
 	});
 	if (warnings.length === 2) {
-		throw new Error(warnings[0] + "\n" + warnings[1]);
+		throw new Error(`${warnings[0]}\n${warnings[1]}`);
 	}
 }
 
@@ -379,22 +372,22 @@ function fixUiFabricCompilationIssues() {
 				"export declare type IStyleSet<TStyleSet extends IStyleSet<TStyleSet> = {",
 				`    [P in keyof Omit<TStyleSet, 'subComponentStyles'>]: IStyle;`,
 				`        [P in keyof TStyleSet['subComponentStyles']]: IStyleFunctionOrObject<any, any>;`,
-				`export declare type IConcatenatedStyleSet<TStyleSet extends IStyleSet<TStyleSet>> = {`,
-				`export declare type IProcessedStyleSet<TStyleSet extends IStyleSet<TStyleSet>> = {`,
+				"export declare type IConcatenatedStyleSet<TStyleSet extends IStyleSet<TStyleSet>> = {",
+				"export declare type IProcessedStyleSet<TStyleSet extends IStyleSet<TStyleSet>> = {",
 			],
 		},
 		{
 			file: "node_modules/@uifabric/utilities/lib/classNamesFunction.d.ts",
 			lines: [
-				`export declare function classNamesFunction<TStyleProps extends {}, TStyleSet extends IStyleSet<TStyleSet>>(options?: IClassNamesFunctionOptions): (getStyles: IStyleFunctionOrObject<TStyleProps, TStyleSet> | undefined, styleProps?: TStyleProps) => IProcessedStyleSet<TStyleSet>;`,
+				"export declare function classNamesFunction<TStyleProps extends {}, TStyleSet extends IStyleSet<TStyleSet>>(options?: IClassNamesFunctionOptions): (getStyles: IStyleFunctionOrObject<TStyleProps, TStyleSet> | undefined, styleProps?: TStyleProps) => IProcessedStyleSet<TStyleSet>;",
 			],
 		},
 		{
 			file: "node_modules/@uifabric/utilities/lib/styled.d.ts",
 			lines: [
-				`export interface IPropsWithStyles<TStyleProps, TStyleSet extends IStyleSet<TStyleSet>> {`,
-				`export declare function styled<TComponentProps extends IPropsWithStyles<TStyleProps, TStyleSet>, TStyleProps, TStyleSet extends IStyleSet<TStyleSet>>(Component: React.ComponentClass<TComponentProps> | React.FunctionComponent<TComponentProps>, baseStyles: IStyleFunctionOrObject<TStyleProps, TStyleSet>, getProps?: (props: TComponentProps) => Partial<TComponentProps>, customizable?: ICustomizableProps, pure?: boolean): React.FunctionComponent<TComponentProps>;`,
-				`export declare function styled<TComponentProps extends IPropsWithStyles<TStyleProps, TStyleSet> & React.RefAttributes<TRef>, TStyleProps, TStyleSet extends IStyleSet<TStyleSet>, TRef = unknown>(Component: React.ComponentClass<TComponentProps> | React.FunctionComponent<TComponentProps>, baseStyles: IStyleFunctionOrObject<TStyleProps, TStyleSet>, getProps?: (props: TComponentProps) => Partial<TComponentProps>, customizable?: ICustomizableProps, pure?: boolean): React.ForwardRefExoticComponent<React.PropsWithoutRef<TComponentProps> & React.RefAttributes<TRef>>;`,
+				"export interface IPropsWithStyles<TStyleProps, TStyleSet extends IStyleSet<TStyleSet>> {",
+				"export declare function styled<TComponentProps extends IPropsWithStyles<TStyleProps, TStyleSet>, TStyleProps, TStyleSet extends IStyleSet<TStyleSet>>(Component: React.ComponentClass<TComponentProps> | React.FunctionComponent<TComponentProps>, baseStyles: IStyleFunctionOrObject<TStyleProps, TStyleSet>, getProps?: (props: TComponentProps) => Partial<TComponentProps>, customizable?: ICustomizableProps, pure?: boolean): React.FunctionComponent<TComponentProps>;",
+				"export declare function styled<TComponentProps extends IPropsWithStyles<TStyleProps, TStyleSet> & React.RefAttributes<TRef>, TStyleProps, TStyleSet extends IStyleSet<TStyleSet>, TRef = unknown>(Component: React.ComponentClass<TComponentProps> | React.FunctionComponent<TComponentProps>, baseStyles: IStyleFunctionOrObject<TStyleProps, TStyleSet>, getProps?: (props: TComponentProps) => Partial<TComponentProps>, customizable?: ICustomizableProps, pure?: boolean): React.ForwardRefExoticComponent<React.PropsWithoutRef<TComponentProps> & React.RefAttributes<TRef>>;",
 			],
 		},
 	];

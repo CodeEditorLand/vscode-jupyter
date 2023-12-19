@@ -57,13 +57,13 @@ export class SvgViewer extends React.Component<
 	}
 
 	public move(offsetX: number, offsetY: number) {
-		if (this.svgPanZoomRef && this.svgPanZoomRef.current) {
+		if (this.svgPanZoomRef?.current) {
 			this.svgPanZoomRef.current.pan(offsetX, offsetY);
 		}
 	}
 
 	public zoom(amount: number) {
-		if (this.svgPanZoomRef && this.svgPanZoomRef.current) {
+		if (this.svgPanZoomRef?.current) {
 			this.svgPanZoomRef.current.zoomOnViewerCenter(amount);
 		}
 	}

@@ -5,17 +5,17 @@
  * Module dependencies.
  */
 
-var Base = require("mocha/lib/reporters/base");
-var constants = require("mocha/lib/runner").constants;
-var EVENT_RUN_BEGIN = constants.EVENT_RUN_BEGIN;
-var EVENT_RUN_END = constants.EVENT_RUN_END;
-var EVENT_SUITE_BEGIN = constants.EVENT_SUITE_BEGIN;
-var EVENT_SUITE_END = constants.EVENT_SUITE_END;
-var EVENT_TEST_FAIL = constants.EVENT_TEST_FAIL;
-var EVENT_TEST_PASS = constants.EVENT_TEST_PASS;
-var EVENT_TEST_PENDING = constants.EVENT_TEST_PENDING;
-var inherits = require("mocha/lib/utils").inherits;
-var color = Base.color;
+const Base = require("mocha/lib/reporters/base");
+const constants = require("mocha/lib/runner").constants;
+const EVENT_RUN_BEGIN = constants.EVENT_RUN_BEGIN;
+const EVENT_RUN_END = constants.EVENT_RUN_END;
+const EVENT_SUITE_BEGIN = constants.EVENT_SUITE_BEGIN;
+const EVENT_SUITE_END = constants.EVENT_SUITE_END;
+const EVENT_TEST_FAIL = constants.EVENT_TEST_FAIL;
+const EVENT_TEST_PASS = constants.EVENT_TEST_PASS;
+const EVENT_TEST_PENDING = constants.EVENT_TEST_PENDING;
+const inherits = require("mocha/lib/utils").inherits;
+const color = Base.color;
 
 /**
  * Expose `Spec`.
@@ -39,8 +39,8 @@ const prefix = process.env.VSC_JUPYTER_CI_TEST_PARALLEL
  */
 function Spec(runner, options) {
 	Base.call(this, runner, options);
-	var indents = 0;
-	var n = 0;
+	let indents = 0;
+	let n = 0;
 
 	function indent() {
 		return Array(indents).join("  ");
@@ -63,12 +63,12 @@ function Spec(runner, options) {
 	});
 
 	runner.on(EVENT_TEST_PENDING, (test) => {
-		var fmt = indent() + color("pending", `${prefix} %s`);
+		const fmt = indent() + color("pending", `${prefix} %s`);
 		Base.consoleLog(fmt, test.title);
 	});
 
 	runner.on(EVENT_TEST_PASS, (test) => {
-		var fmt;
+		let fmt;
 		if (test.speed === "fast") {
 			fmt =
 				indent() +

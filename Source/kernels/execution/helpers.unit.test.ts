@@ -13,7 +13,7 @@ import { updateNotebookMetadata } from "./helpers";
 
 // Function return type
 // type updateNotebookMetadataReturn = { changed: boolean; kernelId: string | undefined };
-suite(`UpdateNotebookMetadata`, () => {
+suite("UpdateNotebookMetadata", () => {
 	const python36Global: PythonEnvironment = {
 		uri: Uri.file("/usr/bin/python36"),
 		id: Uri.file("/usr/bin/python36").fsPath,

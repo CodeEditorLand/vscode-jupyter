@@ -166,17 +166,19 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected onMessage(message: string, payload: any) {
 		switch (message) {
-			case SharedMessages.Started:
+			case SharedMessages.Started: {
 				this.webViewRendered();
 				break;
+			}
 
-			case InteractiveWindowMessages.GetHTMLByIdResponse:
+			case InteractiveWindowMessages.GetHTMLByIdResponse: {
 				// Webview has returned HTML, resolve the request and clear it
 				if (this.activeHTMLRequest) {
 					this.activeHTMLRequest.resolve(payload);
 					this.activeHTMLRequest = undefined;
 				}
 				break;
+			}
 
 			default:
 				break;

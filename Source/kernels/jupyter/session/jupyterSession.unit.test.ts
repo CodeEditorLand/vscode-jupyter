@@ -65,7 +65,7 @@ suite("JupyterSession", () => {
 	>;
 	let kernelService: JupyterKernelService;
 	function createJupyterSession(
-		resource: Resource = undefined,
+		resource: Resource,
 		kernelConnectionMetadata: KernelConnectionMetadata,
 	) {
 		connection = mock<IJupyterConnection>();
@@ -420,7 +420,7 @@ suite("JupyterSession", () => {
 			assert.strictEqual(disposeSignalled, true);
 		});
 	});
-	suite(`Wait for session idle`, () => {
+	suite("Wait for session idle", () => {
 		["local", "remote"].forEach((connectionType) => {
 			suite(connectionType, () => {
 				const token = new CancellationTokenSource();
@@ -506,14 +506,14 @@ suite("JupyterSession", () => {
 					instance(future) as any,
 				);
 
-				const result = jupyterSession.kernel!.requestExecute({
+				const result = jupyterSession.kernel?.requestExecute({
 					code: "",
 					allow_stdin: false,
 					silent: false,
 				});
 
 				assert.isOk(result);
-				await result!.done;
+				await result?.done;
 			}
 
 			test("Restart should just restart the kernel", async () => {

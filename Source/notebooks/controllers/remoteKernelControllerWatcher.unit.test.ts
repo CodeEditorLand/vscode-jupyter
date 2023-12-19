@@ -187,7 +187,7 @@ suite("RemoteKernelControllerWatcher", () => {
 		when(serverProvider1.provideJupyterServers(anything())).thenResolve([
 			instance(server1),
 		] as any);
-		serverProvider1DidChange1.fire!();
+		serverProvider1DidChange1.fire?.();
 		await clock.runAllAsync();
 
 		verify(uriStorage.remove(anything())).never();
@@ -202,7 +202,7 @@ suite("RemoteKernelControllerWatcher", () => {
 		when(serverProvider1.provideJupyterServers(anything())).thenResolve([
 			instance(server1A),
 		] as any);
-		serverProvider1DidChange1.fire!();
+		serverProvider1DidChange1.fire?.();
 		await clock.runAllAsync();
 
 		verify(uriStorage.remove(deepEqual(serverProviderHandle))).once();

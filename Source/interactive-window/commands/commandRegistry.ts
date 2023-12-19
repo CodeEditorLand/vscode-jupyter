@@ -604,7 +604,7 @@ export class CommandRegistry
 		) {
 			// Attempt to get the interactive window for this file
 			const iw = this.interactiveWindowProvider.get(uri);
-			if (iw && iw.notebookDocument) {
+			if (iw?.notebookDocument) {
 				const kernel = this.kernelProvider.get(iw.notebookDocument);
 				if (kernel) {
 					traceVerbose(
@@ -766,11 +766,7 @@ export class CommandRegistry
 	// Get our matching code watcher for the active document
 	private getCurrentCodeWatcher(): ICodeWatcher | undefined {
 		const activeEditor = window.activeTextEditor;
-		if (
-			!activeEditor ||
-			!activeEditor.document ||
-			!this.dataScienceCodeLensProvider
-		) {
+		if (!(activeEditor?.document && this.dataScienceCodeLensProvider)) {
 			return undefined;
 		}
 
@@ -783,7 +779,7 @@ export class CommandRegistry
 	private openPythonExtensionPage() {
 		env.openExternal(
 			Uri.parse(
-				`https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter`,
+				"https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter",
 			),
 		).then(noop, noop);
 	}
@@ -880,8 +876,7 @@ export class CommandRegistry
 			// If the current file is the active editor, then generate cells from the document.
 			const activeEditor = window.activeTextEditor;
 			if (
-				activeEditor &&
-				activeEditor.document &&
+				activeEditor?.document &&
 				this.fileSystem.arePathsSame(activeEditor.document.uri, file)
 			) {
 				const cells = generateCellsFromDocument(
@@ -1098,7 +1093,7 @@ export class CommandRegistry
 	}
 
 	private async goToCodeInInteractiveWindow(context?: NotebookCell) {
-		if (context && context.metadata?.interactive) {
+		if (context?.metadata?.interactive) {
 			const uri = Uri.parse(context.metadata.interactive.uristring);
 			const line = context.metadata.interactive.lineIndex;
 

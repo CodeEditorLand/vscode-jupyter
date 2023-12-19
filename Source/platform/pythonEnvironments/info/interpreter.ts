@@ -30,12 +30,12 @@ export function areInterpreterPathsSame(
 	const norm1 = getNormalizedInterpreterPath(
 		path1,
 		ostype,
-		ostype == OSType.Windows || forceLowerCase,
+		ostype === OSType.Windows || forceLowerCase,
 	);
 	const norm2 = getNormalizedInterpreterPath(
 		path2,
 		ostype,
-		ostype == OSType.Windows || forceLowerCase,
+		ostype === OSType.Windows || forceLowerCase,
 	);
 	return norm1 === norm2 || uriPath.isEqual(norm1, norm2, true);
 }

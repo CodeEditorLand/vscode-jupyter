@@ -143,11 +143,9 @@ export class JupyterHubPasswordConnect {
 			try {
 				const json = await response.json();
 				traceVerbose(
-					`JupyterHub version is ${
-						json && json.version
-					} for url ${url}`,
+					`JupyterHub version is ${json?.version} for url ${url}`,
 				);
-				return json && json.version;
+				return json?.version;
 			} catch {
 				//
 			}
@@ -287,7 +285,7 @@ export class JupyterHubPasswordConnect {
 			// how to fetch it other than in the info for a default token
 			if (response.ok && response.status === 200) {
 				const body = await response.json();
-				if (body && body.token && body.id) {
+				if (body?.token && body.id) {
 					// Response should have the token to use for this user.
 
 					// Make sure the server is running for this user. Don't need
@@ -360,7 +358,7 @@ export class JupyterHubPasswordConnect {
 
 		if (response.ok && response.status === 200) {
 			const body = await response.json();
-			if (body && body.user && body.user.server && body.token) {
+			if (body?.user?.server && body.token) {
 				// Response should have the token to use for this user.
 				return {
 					requestHeaders: {},

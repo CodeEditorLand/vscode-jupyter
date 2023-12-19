@@ -185,10 +185,9 @@ export function createJupyterConnectionInfo(
 		serverProviderHandle: jupyterHandle,
 		token,
 		hostName,
-		displayName:
-			serverUri && serverUri.displayName
-				? serverUri.displayName
-				: getJupyterConnectionDisplayName(token, baseUrl),
+		displayName: serverUri?.displayName
+			? serverUri.displayName
+			: getJupyterConnectionDisplayName(token, baseUrl),
 		dispose: () => toDispose?.dispose(),
 		rootDirectory,
 		// For remote jupyter servers that are managed by us, we can provide the auth header.

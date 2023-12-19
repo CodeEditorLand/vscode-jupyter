@@ -122,14 +122,14 @@ export class ScriptManager extends EventEmitter {
 					type === IPyWidgetMessages.IPyWidgets_kernelOptions
 				) {
 					logMessage(
-						`Received IPyWidgets_kernelOptions in ScriptManager`,
+						"Received IPyWidgets_kernelOptions in ScriptManager",
 					);
 					if (
 						this.previousKernelOptions &&
 						!fastDeepEqual(this.previousKernelOptions, payload)
 					) {
 						logMessage(
-							`Received IPyWidgets_kernelOptions in ScriptManager with new kernel options`,
+							"Received IPyWidgets_kernelOptions in ScriptManager with new kernel options",
 						);
 						this.previousKernelOptions = payload;
 						this.clear();
@@ -138,7 +138,7 @@ export class ScriptManager extends EventEmitter {
 					type === IPyWidgetMessages.IPyWidgets_onKernelChanged
 				) {
 					logMessage(
-						`Received IPyWidgets_onKernelChanged in ScriptManager`,
+						"Received IPyWidgets_onKernelChanged in ScriptManager",
 					);
 					this.clear();
 				}
@@ -400,7 +400,7 @@ export class ScriptManager extends EventEmitter {
 				};
 				this.widgetSourceRequests.set(source.moduleName, request);
 			}
-			if (source.requestId && source.requestId === request!.requestId) {
+			if (source.requestId && source.requestId === request?.requestId) {
 				request.source = source.source;
 				request.deferred.resolve();
 			} else if (!source.requestId) {

@@ -247,10 +247,12 @@ export class InvisibleCharacters {
 	private static _data: Set<number> | undefined = undefined;
 
 	private static getData() {
-		if (!this._data) {
-			this._data = new Set(InvisibleCharacters.getRawData());
+		if (!InvisibleCharacters._data) {
+			InvisibleCharacters._data = new Set(
+				InvisibleCharacters.getRawData(),
+			);
 		}
-		return this._data;
+		return InvisibleCharacters._data;
 	}
 
 	public static isInvisibleCharacter(codePoint: number): boolean {

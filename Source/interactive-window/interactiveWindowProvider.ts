@@ -130,8 +130,10 @@ export class InteractiveWindowProvider
 			.get(InteractiveWindowCacheKey, [] as IInteractiveWindowCache[])
 			.forEach((iw) => {
 				if (
-					!iw.uriString ||
-					!interactiveWindowMapping.get(iw.uriString)
+					!(
+						iw.uriString &&
+						interactiveWindowMapping.get(iw.uriString)
+					)
 				) {
 					return;
 				}
@@ -366,8 +368,10 @@ export class InteractiveWindowProvider
 			!this.globalMemento.get(AskedForPerFileSettingKey) &&
 			this._windows.length === 1 &&
 			// Only prompt if the submitting file is different
-			(!this._windows[0].owner ||
-				!this.fs.arePathsSame(this._windows[0].owner, resource))
+			!(
+				this._windows[0].owner &&
+				this.fs.arePathsSame(this._windows[0].owner, resource)
+			)
 		) {
 			// See if the first window was tied to a file or not.
 			this.globalMemento
@@ -433,7 +437,7 @@ export class InteractiveWindowProvider
 
 		// Otherwise match the owner.
 		return this._windows.find((w) => {
-			if (!owner && !w.owner && !connection) {
+			if (!(owner || w.owner || connection)) {
 				return true;
 			}
 			if (owner && w.owner && this.fs.arePathsSame(owner, w.owner)) {
@@ -486,7 +490,7 @@ export class InteractiveWindowProvider
 
 	findNotebookEditor(resource: Resource): NotebookEditor | undefined {
 		let notebook: NotebookDocument | undefined;
-		if (resource && resource.path.endsWith(".interactive")) {
+		if (resource?.path.endsWith(".interactive")) {
 			notebook = this.get(resource)?.notebookDocument;
 		} else {
 			const mode =

@@ -113,7 +113,7 @@ suite("isPoetryEnvironment Tests", () => {
 			expect(result).to.equal(false);
 		});
 
-		test(`Return false if running poetry for project dir as cwd fails (pyproject.toml file is invalid)`, async () => {
+		test("Return false if running poetry for project dir as cwd fails (pyproject.toml file is invalid)", async () => {
 			sinon
 				.stub(platformApis, "getOSType")
 				.callsFake(() => platformApis.OSType.Linux);
@@ -164,7 +164,7 @@ suite("Poetry binary is located correctly", async () => {
 		getPythonSetting.returns("poetryPath");
 		shellExecute.callsFake((command: string, options: ShellOptions) => {
 			if (
-				command === `poetryPath env list --full-path` &&
+				command === "poetryPath env list --full-path" &&
 				options.cwd &&
 				fileUtils.arePathsSame(options.cwd.toString(), project1)
 			) {
@@ -182,7 +182,7 @@ suite("Poetry binary is located correctly", async () => {
 		getPythonSetting.returns("poetry"); // Setting returns the default value
 		shellExecute.callsFake((command: string, options: ShellOptions) => {
 			if (
-				command === `poetry env list --full-path` &&
+				command === "poetry env list --full-path" &&
 				options.cwd &&
 				fileUtils.arePathsSame(options.cwd.toString(), project1)
 			) {

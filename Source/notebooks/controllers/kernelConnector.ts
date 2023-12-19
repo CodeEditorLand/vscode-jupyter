@@ -279,7 +279,7 @@ export class KernelConnector {
 		if (isKernelDead(kernel)) {
 			// If the kernel is dead, then remove the cached promise, & try to get the kernel again.
 			// At that point, it will get restarted.
-			this.deleteKernelInfo(notebookResource, promise);
+			KernelConnector.deleteKernelInfo(notebookResource, promise);
 			if (deadKernelAction === "deadKernelWasNoRestarted") {
 				throw new KernelDeadError(kernel.kernelConnectionMetadata);
 			} else if (deadKernelAction === "deadKernelWasRestarted") {
@@ -313,7 +313,7 @@ export class KernelConnector {
 			kernel: IBaseKernel | IKernel,
 		) => void = () => noop(),
 	): Promise<IBaseKernel | IKernel> {
-		let currentPromise = this.getKernelInfo(notebookResource);
+		let currentPromise = KernelConnector.getKernelInfo(notebookResource);
 		if (!options.disableUI && currentPromise?.options.disableUI) {
 			currentPromise.options.disableUI = false;
 		}
@@ -325,7 +325,7 @@ export class KernelConnector {
 			(currentPromise?.kernel.value?.kernel?.disposed ||
 				currentPromise?.kernel.value?.kernel?.disposing)
 		) {
-			this.deleteKernelInfo(notebookResource);
+			KernelConnector.deleteKernelInfo(notebookResource);
 			currentPromise = undefined;
 		}
 
@@ -372,7 +372,7 @@ export class KernelConnector {
 			.then((result) => {
 				result.kernel.onDisposed(
 					() => {
-						this.deleteKernelInfo(
+						KernelConnector.deleteKernelInfo(
 							notebookResource,
 							deferred.promise,
 						);
@@ -382,10 +382,13 @@ export class KernelConnector {
 				);
 			})
 			.catch(() => {
-				this.deleteKernelInfo(notebookResource, deferred.promise);
+				KernelConnector.deleteKernelInfo(
+					notebookResource,
+					deferred.promise,
+				);
 			});
 
-		this.setKernelInfo(notebookResource, deferred, options);
+		KernelConnector.setKernelInfo(notebookResource, deferred, options);
 		return KernelConnector.verifyKernelState(
 			serviceContainer,
 			notebookResource,
@@ -483,7 +486,7 @@ export class KernelConnector {
 		metadata: KernelConnectionMetadata,
 		serviceContainer: IServiceContainer,
 	) {
-		if (!isLocalConnection(metadata) || !metadata.kernelSpec.specFile) {
+		if (!(isLocalConnection(metadata) && metadata.kernelSpec.specFile)) {
 			return;
 		}
 		const trustedKernelPaths =

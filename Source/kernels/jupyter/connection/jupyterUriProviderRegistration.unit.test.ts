@@ -205,8 +205,8 @@ suite("Uri Provider Registration", () => {
 			"ext",
 			"b",
 		);
-		when(provider1.getHandles!()).thenResolve(["handle1", "handle2"]);
-		when(provider2.getHandles!()).thenResolve(["handlea", "handleb"]);
+		when(provider1.getHandles?.()).thenResolve(["handle1", "handle2"]);
+		when(provider2.getHandles?.()).thenResolve(["handlea", "handleb"]);
 
 		await assert.isRejected(
 			registration.getJupyterServerUri({
@@ -239,8 +239,8 @@ suite("Uri Provider Registration", () => {
 			"ext",
 			"b",
 		);
-		when(provider1.getHandles!()).thenResolve(["handle1", "handle2"]);
-		when(provider2.getHandles!()).thenResolve(["handlea", "handleb"]);
+		when(provider1.getHandles?.()).thenResolve(["handle1", "handle2"]);
+		when(provider2.getHandles?.()).thenResolve(["handlea", "handleb"]);
 		const serverForHandle1 = mock<IJupyterServerUri>();
 		when(serverForHandle1.baseUrl).thenReturn("http://server1/");
 		when(serverForHandle1.displayName).thenReturn("Server 1");
@@ -275,16 +275,19 @@ suite("Uri Provider Registration", () => {
 			"a",
 			"1",
 		);
-		when(mockProvider.getHandles!()).thenResolve(["handle1", "handle2"]);
+		when(mockProvider.getHandles?.()).thenResolve(["handle1", "handle2"]);
 
 		const provider = await registration.getProvider("a", "1");
 
-		assert.deepEqual(await provider!.getHandles!(), ["handle1", "handle2"]);
+		assert.deepEqual(await provider?.getHandles?.(), [
+			"handle1",
+			"handle2",
+		]);
 	});
 	test("Verify onDidChangeHandles is triggered", async () => {
 		const { provider: mockProvider, onDidChangeHandles } =
 			createAndRegisterJupyterUriProvider("a", "1");
-		when(mockProvider.getHandles!()).thenResolve(["handle1", "handle2"]);
+		when(mockProvider.getHandles?.()).thenResolve(["handle1", "handle2"]);
 
 		const provider = await registration.getProvider("a", "1");
 		const eventHandler = createEventHandler(
@@ -306,7 +309,7 @@ suite("Uri Provider Registration", () => {
 
 		onDidChangeHandles.fire();
 
-		assert.deepEqual(await provider!.getQuickPickEntryItems!(), []);
+		assert.deepEqual(await provider?.getQuickPickEntryItems?.(), []);
 	});
 	test("Returns a list of the quick pick items", async () => {
 		const { provider: mockProvider1 } = createAndRegisterJupyterUriProvider(
@@ -329,10 +332,10 @@ suite("Uri Provider Registration", () => {
 			},
 			{ label: "Item Y" },
 		];
-		when(mockProvider1.getQuickPickEntryItems!(anything())).thenResolve(
+		when(mockProvider1.getQuickPickEntryItems?.(anything())).thenResolve(
 			quickPickItemsForHandle1 as any,
 		);
-		when(mockProvider2.getQuickPickEntryItems!(anything())).thenResolve(
+		when(mockProvider2.getQuickPickEntryItems?.(anything())).thenResolve(
 			quickPickItemsForHandle2 as any,
 		);
 
@@ -340,7 +343,7 @@ suite("Uri Provider Registration", () => {
 		const provider2 = await registration.getProvider("ext2", "b");
 
 		assert.deepEqual(
-			await provider1!.getQuickPickEntryItems!(),
+			await provider1?.getQuickPickEntryItems?.(),
 			quickPickItemsForHandle1.map((item) => {
 				return {
 					...item,
@@ -350,7 +353,7 @@ suite("Uri Provider Registration", () => {
 			}),
 		);
 		assert.deepEqual(
-			await provider2!.getQuickPickEntryItems!(),
+			await provider2?.getQuickPickEntryItems?.(),
 			quickPickItemsForHandle2.map((item) => {
 				return {
 					...item,
@@ -370,10 +373,10 @@ suite("Uri Provider Registration", () => {
 			"b",
 		);
 		when(
-			mockProvider1.handleQuickPick!(anything(), anything()),
+			mockProvider1.handleQuickPick?.(anything(), anything()),
 		).thenResolve();
 		when(
-			mockProvider2.handleQuickPick!(anything(), anything()),
+			mockProvider2.handleQuickPick?.(anything(), anything()),
 		).thenResolve();
 		const quickPickItemsForHandle1: QuickPickItem[] = [
 			{
@@ -387,17 +390,17 @@ suite("Uri Provider Registration", () => {
 			},
 			{ label: "Item Y" },
 		];
-		when(mockProvider1.getQuickPickEntryItems!()).thenResolve(
+		when(mockProvider1.getQuickPickEntryItems?.()).thenResolve(
 			quickPickItemsForHandle1 as any,
 		);
-		when(mockProvider2.getQuickPickEntryItems!()).thenResolve(
+		when(mockProvider2.getQuickPickEntryItems?.()).thenResolve(
 			quickPickItemsForHandle2 as any,
 		);
 
 		const provider1 = await registration.getProvider("a", "1");
 		const provider2 = await registration.getProvider("ext2", "b");
 
-		await provider1?.handleQuickPick!(
+		await provider1?.handleQuickPick?.(
 			{
 				...quickPickItemsForHandle1[0],
 				original: quickPickItemsForHandle1[0],
@@ -406,12 +409,12 @@ suite("Uri Provider Registration", () => {
 		);
 
 		verify(
-			mockProvider1.handleQuickPick!(quickPickItemsForHandle1[0], false),
+			mockProvider1.handleQuickPick?.(quickPickItemsForHandle1[0], false),
 		).once();
-		verify(mockProvider2.handleQuickPick!(anything(), anything())).never();
+		verify(mockProvider2.handleQuickPick?.(anything(), anything())).never();
 		reset(mockProvider1);
 
-		await provider2?.handleQuickPick!(
+		await provider2?.handleQuickPick?.(
 			{
 				...quickPickItemsForHandle2[1],
 				original: quickPickItemsForHandle2[1],
@@ -419,9 +422,9 @@ suite("Uri Provider Registration", () => {
 			true,
 		);
 
-		verify(mockProvider1.handleQuickPick!(anything(), anything())).never();
+		verify(mockProvider1.handleQuickPick?.(anything(), anything())).never();
 		verify(
-			mockProvider2.handleQuickPick!(quickPickItemsForHandle2[1], true),
+			mockProvider2.handleQuickPick?.(quickPickItemsForHandle2[1], true),
 		).once();
 	});
 

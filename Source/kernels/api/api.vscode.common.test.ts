@@ -119,7 +119,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 		// const statusChange = createEventHandler(kernel, 'onDidChangeStatus', disposables);
 
 		// Verify we can execute code using the kernel.
-		traceInfo(`Execute code silently`);
+		traceInfo("Execute code silently");
 		const expectedMime = NotebookCellOutputItem.stdout("").mime;
 		const token = new CancellationTokenSource();
 		await waitForOutput(
@@ -127,7 +127,7 @@ suiteMandatory("Kernel API Tests @python", function () {
 			"1234",
 			expectedMime,
 		);
-		traceInfo(`Execute code silently completed`);
+		traceInfo("Execute code silently completed");
 		// // Wait for kernel to be idle.
 		// await waitForCondition(
 		//     () => kernel.status === 'idle',

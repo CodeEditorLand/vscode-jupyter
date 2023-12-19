@@ -95,7 +95,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 	}
 	protected onWorkspaceFoldersChanged() {
 		//If an activated workspace folder was removed, delete its key
-		const workspaceKeys = (workspace.workspaceFolders || [])!.map(
+		const workspaceKeys = (workspace.workspaceFolders || [])?.map(
 			(workspaceFolder) => this.getWorkspaceKey(workspaceFolder.uri),
 		);
 		const activatedWkspcKeys = Array.from(this.activatedWorkspaces.keys());

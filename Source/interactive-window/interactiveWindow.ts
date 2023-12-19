@@ -259,7 +259,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 	public async ensureInitialized() {
 		if (!this.notebookDocument) {
 			traceVerbose(
-				`Showing Interactive editor to initialize codeGenerator from notebook document`,
+				"Showing Interactive editor to initialize codeGenerator from notebook document",
 			);
 			await this.showInteractiveEditor();
 
@@ -299,7 +299,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 			group.tabs.find((tab) => {
 				if (
 					isInteractiveInputTab(tab) &&
-					tab.input.uri.toString() == this.notebookUri.toString()
+					tab.input.uri.toString() === this.notebookUri.toString()
 				) {
 					currentTab = tab;
 				}
@@ -472,7 +472,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 		// Multiple cells that have split our code.
 		const promises = cells.map((c) => {
 			const deferred = createDeferred<void>();
-			this.controller!.setPendingCellAdd(deferred.promise);
+			this.controller?.setPendingCellAdd(deferred.promise);
 			// Add the cell first. We don't need to wait for this part as we want to add them
 			// as quickly as possible
 			const notebookCellPromise = this.addNotebookCell(c, fileUri, line);
@@ -528,7 +528,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 		notebookCellPromise: Promise<NotebookCell>,
 		isDebug: boolean,
 	) {
-		if (!this.controller || !this.notebookDocument) {
+		if (!(this.controller && this.notebookDocument)) {
 			return false;
 		}
 		traceInfoIfCI("InteractiveWindow.ts.createExecutionPromise.start");
@@ -664,7 +664,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 		}
 
 		// Add to the list of 'submitters' for this window.
-		if (!this._submitters.find((s) => s.toString() == file.toString())) {
+		if (!this._submitters.find((s) => s.toString() === file.toString())) {
 			this._submitters.push(file);
 		}
 	}
@@ -806,7 +806,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 		}
 
 		let defaultFileName;
-		if (this.submitters && this.submitters.length) {
+		if (this.submitters?.length) {
 			const lastSubmitter = this.submitters[this.submitters.length - 1];
 			lastSubmitter;
 			defaultFileName = path.basename(

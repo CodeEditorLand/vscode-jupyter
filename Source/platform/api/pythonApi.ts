@@ -78,9 +78,9 @@ export function deserializePythonEnvironment(
 		};
 
 		// Cleanup stuff that shouldn't be there.
-		delete result.path;
+		result.path = undefined;
 		if (!pythonVersion.envPath) {
-			delete result.envPath;
+			result.envPath = undefined;
 		}
 		return result;
 	}
@@ -244,7 +244,7 @@ export function serializePythonEnvironment(
 				: undefined,
 		});
 		// Cleanup stuff that shouldn't be there.
-		delete (result as any).uri;
+		(result as any).uri = undefined;
 		return result;
 	}
 }
@@ -348,7 +348,7 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 				await pythonExtension.activate();
 				activated = true;
 			} catch (ex) {
-				traceError(`Failed activating the python extension: `, ex);
+				traceError("Failed activating the python extension: ", ex);
 				this.api.reject(new PythonExtensionActicationFailedError(ex));
 				return;
 			}
@@ -363,7 +363,7 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 		if (pythonExtension.exports?.jupyter) {
 			pythonExtension.exports.jupyter.registerHooks();
 		} else {
-			traceError(`Python extension is not exporting the jupyter API`);
+			traceError("Python extension is not exporting the jupyter API");
 			this.api.reject(new PythonExtensionApiNotExportedError());
 		}
 		this._pythonExtensionHooked.resolve();
@@ -644,9 +644,9 @@ export class InterpreterService implements IInterpreterService {
 				await api.environments.refreshEnvironments({ forceRefresh });
 				this.interpreterListCachePromise = undefined;
 				await this.getInterpreters();
-				traceVerbose(`Refreshed Environments`);
+				traceVerbose("Refreshed Environments");
 			} catch (ex) {
-				traceError(`Failed to refresh the list of interpreters`);
+				traceError("Failed to refresh the list of interpreters");
 			}
 		})();
 		this.refreshPromises.push(promise);
@@ -809,7 +809,7 @@ export class InterpreterService implements IInterpreterService {
 					// eslint-disable-next-line local-rules/dont-use-fspath
 					isUri(pythonPath)
 						? pythonPath.fsPath
-						: typeof pythonPath == "string"
+						: typeof pythonPath === "string"
 						  ? pythonPath
 						  : pythonPath.path,
 				);
@@ -853,10 +853,12 @@ export class InterpreterService implements IInterpreterService {
 				.catch(noop);
 
 			if (
-				!this._interpreters.get(env.id) ||
-				!areObjectsWithUrisTheSame(
-					resolved,
-					this._interpreters.get(env.id)?.resolved,
+				!(
+					this._interpreters.get(env.id) &&
+					areObjectsWithUrisTheSame(
+						resolved,
+						this._interpreters.get(env.id)?.resolved,
+					)
 				)
 			) {
 				// Also update the interpreter details in place, so that old references get the latest details
@@ -1013,7 +1015,7 @@ export class InterpreterService implements IInterpreterService {
 				);
 			} catch (ex) {
 				traceError(
-					`Failed to refresh list of interpreters and get their details`,
+					"Failed to refresh list of interpreters and get their details",
 					ex,
 				);
 			}
@@ -1093,7 +1095,7 @@ export class InterpreterService implements IInterpreterService {
 					api.environments.onDidChangeActiveEnvironmentPath(
 						() => {
 							traceVerbose(
-								`Detected change in Active Python environment via Python API`,
+								"Detected change in Active Python environment via Python API",
 							);
 							this.interpreterListCachePromise = undefined;
 							this.workspaceCachedActiveInterpreter.clear();

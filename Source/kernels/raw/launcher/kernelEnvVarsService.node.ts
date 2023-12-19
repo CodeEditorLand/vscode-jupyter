@@ -146,11 +146,11 @@ export class KernelEnvironmentVariablesService {
 				// Similarly for `PTYHONPATH`
 				// Additionally the 'PATH' variable may have different case in each, so account for that.
 				let otherEnvPathKey = Object.keys(interpreterEnv).find(
-					(k) => k.toLowerCase() == "path",
+					(k) => k.toLowerCase() === "path",
 				);
 				const processPathKey =
 					Object.keys(mergedVars).find(
-						(k) => k.toLowerCase() == "path",
+						(k) => k.toLowerCase() === "path",
 					) || otherEnvPathKey;
 				if (otherEnvPathKey && processPathKey) {
 					mergedVars[processPathKey] =
@@ -160,7 +160,7 @@ export class KernelEnvironmentVariablesService {
 					mergedVars["PYTHONPATH"] = interpreterEnv["PYTHONPATH"];
 				}
 				otherEnvPathKey = Object.keys(customEnvVars).find(
-					(k) => k.toLowerCase() == "path",
+					(k) => k.toLowerCase() === "path",
 				);
 				if (otherEnvPathKey && customEnvVars[otherEnvPathKey]) {
 					this.envVarsService.appendPath(
@@ -169,7 +169,7 @@ export class KernelEnvironmentVariablesService {
 					);
 				}
 				otherEnvPathKey = Object.keys(kernelEnv).find(
-					(k) => k.toLowerCase() == "path",
+					(k) => k.toLowerCase() === "path",
 				);
 				if (otherEnvPathKey && kernelEnv[otherEnvPathKey]) {
 					this.envVarsService.appendPath(

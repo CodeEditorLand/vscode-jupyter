@@ -28,7 +28,7 @@ export class SystemVariables extends AbstractSystemVariables {
 			: rootFolder?.fsPath || __dirname;
 		this._workspaceFolderName = path.basename(this._workspaceFolder);
 		this._filePath = file ? file.fsPath : undefined;
-		if (window && window.activeTextEditor) {
+		if (window?.activeTextEditor) {
 			this._lineNumber =
 				window.activeTextEditor.selection.anchor.line + 1;
 			this._selectedText = window.activeTextEditor.document.getText(

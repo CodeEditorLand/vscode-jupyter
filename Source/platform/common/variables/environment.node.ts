@@ -49,7 +49,7 @@ export class EnvironmentVariablesService
 		}
 		Object.keys(source).forEach((setting) => {
 			const lowerCase = setting.toLowerCase();
-			if (lowerCase == "pythonpath" || lowerCase == "path") {
+			if (lowerCase === "pythonpath" || lowerCase === "path") {
 				// PATH can be path, Path, or PATH on the same OS depending
 				// upon the source so check all cases.
 				return;
@@ -116,7 +116,7 @@ export class EnvironmentVariablesService
 		const variableNameLower = variableName.toLowerCase();
 		const matchingKey = vars
 			? Object.keys(vars).find(
-					(k) => k.toLowerCase() == variableNameLower,
+					(k) => k.toLowerCase() === variableNameLower,
 			  )
 			: undefined;
 		const existingValue =
@@ -136,9 +136,11 @@ export class EnvironmentVariablesService
 				vars[setKey] =
 					existingValue + path.delimiter + valueToAppendOrPrepend;
 			} else if (
-				!append &&
-				!(vars[setKey] || "").startsWith(
-					valueToAppendOrPrepend + path.delimiter,
+				!(
+					append ||
+					(vars[setKey] || "").startsWith(
+						valueToAppendOrPrepend + path.delimiter,
+					)
 				)
 			) {
 				vars[setKey] =
@@ -173,9 +175,11 @@ export class EnvironmentVariablesService
 					vars[setKey] =
 						existingValue + path.delimiter + valueToAppendOrPrepend;
 				} else if (
-					!append &&
-					!(vars[setKey] || "").startsWith(
-						valueToAppendOrPrepend + path.delimiter,
+					!(
+						append ||
+						(vars[setKey] || "").startsWith(
+							valueToAppendOrPrepend + path.delimiter,
+						)
 					)
 				) {
 					vars[setKey] =

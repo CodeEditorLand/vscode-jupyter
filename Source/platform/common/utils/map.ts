@@ -278,7 +278,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 	}
 
 	isEmpty(): boolean {
-		return !this._head && !this._tail;
+		return !(this._head || this._tail);
 	}
 
 	get size(): number {
@@ -318,18 +318,22 @@ export class LinkedMap<K, V> implements Map<K, V> {
 		} else {
 			item = { key, value, next: undefined, previous: undefined };
 			switch (touch) {
-				case Touch.None:
+				case Touch.None: {
 					this.addItemLast(item);
 					break;
-				case Touch.AsOld:
+				}
+				case Touch.AsOld: {
 					this.addItemFirst(item);
 					break;
-				case Touch.AsNew:
+				}
+				case Touch.AsNew: {
 					this.addItemLast(item);
 					break;
-				default:
+				}
+				default: {
 					this.addItemLast(item);
 					break;
+				}
 			}
 			this._map.set(key, item);
 			this._size++;
@@ -353,10 +357,10 @@ export class LinkedMap<K, V> implements Map<K, V> {
 	}
 
 	shift(): V | undefined {
-		if (!this._head && !this._tail) {
+		if (!(this._head || this._tail)) {
 			return undefined;
 		}
-		if (!this._head || !this._tail) {
+		if (!(this._head && this._tail)) {
 			throw new Error("Invalid list");
 		}
 		const item = this._head;
@@ -380,7 +384,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 				callbackfn(current.value, current.key, this);
 			}
 			if (this._state !== state) {
-				throw new Error(`LinkedMap got modified during iteration.`);
+				throw new Error("LinkedMap got modified during iteration.");
 			}
 			current = current.next;
 		}
@@ -396,7 +400,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 			},
 			next(): IteratorResult<K> {
 				if (map._state !== state) {
-					throw new Error(`LinkedMap got modified during iteration.`);
+					throw new Error("LinkedMap got modified during iteration.");
 				}
 				if (current) {
 					const result = { value: current.key, done: false };
@@ -420,7 +424,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 			},
 			next(): IteratorResult<V> {
 				if (map._state !== state) {
-					throw new Error(`LinkedMap got modified during iteration.`);
+					throw new Error("LinkedMap got modified during iteration.");
 				}
 				if (current) {
 					const result = { value: current.value, done: false };
@@ -444,7 +448,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 			},
 			next(): IteratorResult<[K, V]> {
 				if (map._state !== state) {
-					throw new Error(`LinkedMap got modified during iteration.`);
+					throw new Error("LinkedMap got modified during iteration.");
 				}
 				if (current) {
 					const result: IteratorResult<[K, V]> = {
@@ -490,7 +494,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 
 	private addItemFirst(item: Item<K, V>): void {
 		// First time Insert
-		if (!this._head && !this._tail) {
+		if (!(this._head || this._tail)) {
 			this._tail = item;
 		} else if (this._head) {
 			item.next = this._head;
@@ -504,7 +508,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 
 	private addItemLast(item: Item<K, V>): void {
 		// First time Insert
-		if (!this._head && !this._tail) {
+		if (!(this._head || this._tail)) {
 			this._head = item;
 		} else if (this._tail) {
 			item.previous = this._tail;
@@ -539,7 +543,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 		} else {
 			const next = item.next;
 			const previous = item.previous;
-			if (!next || !previous) {
+			if (!(next && previous)) {
 				throw new Error("Invalid list");
 			}
 			next.previous = previous;
@@ -551,7 +555,7 @@ export class LinkedMap<K, V> implements Map<K, V> {
 	}
 
 	private touch(item: Item<K, V>, touch: Touch): void {
-		if (!this._head || !this._tail) {
+		if (!(this._head && this._tail)) {
 			throw new Error("Invalid list");
 		}
 		if (touch !== Touch.AsOld && touch !== Touch.AsNew) {

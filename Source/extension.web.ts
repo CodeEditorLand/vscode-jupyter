@@ -7,7 +7,7 @@ import "./platform/ioc/reflectMetadata";
 // Naive polyfill for setImmediate as it is required by @jupyterlab/services/lib/kernel/future.js
 // when running in a web worker as it selects either requestAnimationFrame or setImmediate, both of
 // which are not available in a worker in Safari.
-declare var self: {};
+declare let self: {};
 if (
 	typeof requestAnimationFrame === "undefined" &&
 	typeof setImmediate === "undefined"
@@ -127,7 +127,7 @@ export async function activate(
 	context: IExtensionContext,
 ): Promise<IExtensionApi> {
 	setDisposableTracker(context.subscriptions);
-	setIsCodeSpace(env.uiKind == UIKind.Web);
+	setIsCodeSpace(env.uiKind === UIKind.Web);
 	setIsWebExtension(true);
 	context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
 	try {
@@ -322,9 +322,9 @@ function addOutputChannel(
 		!workspace.workspaceFolders ||
 		workspace.workspaceFolders.length === 0
 	) {
-		standardOutputChannel.appendLine(`No workspace folder opened.`);
+		standardOutputChannel.appendLine("No workspace folder opened.");
 	} else {
-		standardOutputChannel.appendLine(`Opened workspace folder.`);
+		standardOutputChannel.appendLine("Opened workspace folder.");
 	}
 }
 

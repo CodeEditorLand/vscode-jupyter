@@ -73,17 +73,17 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	}
 
 	public async dispose(): Promise<void> {
-		traceInfo(`Disposing HostJupyterExecution`);
+		traceInfo("Disposing HostJupyterExecution");
 		if (!this._disposed) {
 			this._disposed = true;
-			traceVerbose(`Disposing super HostJupyterExecution`);
+			traceVerbose("Disposing super HostJupyterExecution");
 			this.disposed = true;
 
 			// Cleanup on dispose. We are going away permanently
-			traceVerbose(`Cleaning up server cache`);
+			traceVerbose("Cleaning up server cache");
 			await this.cache?.then((s) => s.dispose()).catch(noop);
 		}
-		traceVerbose(`Finished disposing HostJupyterExecution`);
+		traceVerbose("Finished disposing HostJupyterExecution");
 	}
 
 	public async startServer(
@@ -99,7 +99,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 				cancelToken,
 			));
 			promise.catch((ex) => {
-				traceError(`Failed to start the Jupyter Server`, ex);
+				traceError("Failed to start the Jupyter Server", ex);
 				if (this.cache === promise) {
 					this.cache = undefined;
 				}
@@ -132,13 +132,12 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	): Promise<PythonEnvironment | undefined> {
 		// Only try to compute this once.
 		if (
-			!this.usablePythonInterpreter &&
-			!this.disposed &&
+			!(this.usablePythonInterpreter || this.disposed) &&
 			this.jupyterInterpreterService
 		) {
 			this.usablePythonInterpreter = await raceCancellationError(
 				cancelToken,
-				this.jupyterInterpreterService!.getSelectedInterpreter(
+				this.jupyterInterpreterService?.getSelectedInterpreter(
 					cancelToken,
 				),
 			);
@@ -166,7 +165,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 					// Start or connect to the process
 					connection = await this.startImpl(resource, cancelToken);
 
-					traceVerbose(`Connection complete server`);
+					traceVerbose("Connection complete server");
 					return connection;
 				} catch (err) {
 					lastTryError = err;
@@ -204,7 +203,7 @@ export class JupyterServerHelper implements IJupyterServerHelper {
 	): Promise<IJupyterConnection> {
 		// If our uri is undefined or if it's set to local launch we need to launch a server locally
 		// If that works, then attempt to start the server
-		traceInfo(`Launching server`);
+		traceInfo("Launching server");
 		const settings = this.configuration.getSettings(resource);
 		const useDefaultConfig = settings.useDefaultConfigForJupyter;
 		const workingDir = await computeWorkingDirectory(resource);

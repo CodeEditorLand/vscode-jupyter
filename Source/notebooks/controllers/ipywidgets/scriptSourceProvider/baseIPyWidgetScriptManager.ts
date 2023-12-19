@@ -138,7 +138,7 @@ export async function extractRequireConfigFromWidgetEntry(
 			: Uri.joinPath(baseUrl, value);
 	});
 
-	if (!requireConfig || !Object.keys(requireConfig).length) {
+	if (!(requireConfig && Object.keys(requireConfig).length)) {
 		sendTelemetryEvent(Telemetry.IPyWidgetExtensionJsInfo, undefined, {
 			widgetFolderNameHash,
 			failed: true,
@@ -258,10 +258,10 @@ export abstract class BaseIPyWidgetScriptManager
 		);
 		// Exclude entries that are not required (widgets that we have already bundled with our code).
 		if (config && Object.keys(config).length) {
-			delete config["jupyter-js-widgets"];
-			delete config["@jupyter-widgets/base"];
-			delete config["@jupyter-widgets/controls"];
-			delete config["@jupyter-widgets/output"];
+			config["jupyter-js-widgets"] = undefined;
+			config["@jupyter-widgets/base"] = undefined;
+			config["@jupyter-widgets/controls"] = undefined;
+			config["@jupyter-widgets/output"] = undefined;
 		} else {
 			traceInfoIfCI(
 				`No config, entryPoints = ${JSON.stringify(

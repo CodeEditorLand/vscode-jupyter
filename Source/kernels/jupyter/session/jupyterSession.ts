@@ -97,7 +97,7 @@ export class JupyterSessionWrapper
 				token,
 			);
 		} catch (ex) {
-			traceInfoIfCI(`Error waiting for idle`, ex);
+			traceInfoIfCI("Error waiting for idle", ex);
 			await this.shutdown().catch(noop);
 			throw ex;
 		}
@@ -121,9 +121,11 @@ export class JupyterSessionWrapper
 		ui: DisplayOptions,
 	) {
 		if (
-			!this.kernelConnectionMetadata?.interpreter ||
-			!isLocalConnection(this.kernelConnectionMetadata) ||
-			!this.kernelService
+			!(
+				this.kernelConnectionMetadata?.interpreter &&
+				isLocalConnection(this.kernelConnectionMetadata) &&
+				this.kernelService
+			)
 		) {
 			return;
 		}

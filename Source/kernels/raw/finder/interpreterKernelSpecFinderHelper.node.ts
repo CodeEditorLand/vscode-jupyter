@@ -699,7 +699,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 		);
 	}
 	private async listKernelSpecsImpl() {
-		traceVerbose(`Finding Global Python KernelSpecs`);
+		traceVerbose("Finding Global Python KernelSpecs");
 		const cancelToken = this.cancelToken.token;
 		const globalPythonKernelSpecs =
 			this.listGlobalPythonKernelSpecs().filter(

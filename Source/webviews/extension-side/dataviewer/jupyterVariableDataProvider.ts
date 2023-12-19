@@ -53,18 +53,20 @@ export class JupyterVariableDataProvider
 		return columns.map((column: { key: string; type: string }) => {
 			let normalizedType: ColumnType;
 			switch (column.type) {
-				case "bool":
+				case "bool": {
 					normalizedType = ColumnType.Bool;
 					break;
+				}
 				case "integer":
 				case "int32":
 				case "int64":
 				case "float":
 				case "float32":
 				case "float64":
-				case "number":
+				case "number": {
 					normalizedType = ColumnType.Number;
 					break;
+				}
 				default:
 					normalizedType = ColumnType.String;
 			}
@@ -143,7 +145,7 @@ export class JupyterVariableDataProvider
 	public async getAllRows(sliceExpression?: string) {
 		let allRows: IRowsResponse = [];
 		await this.ensureInitialized();
-		if (this.variable && this.variable.rowCount) {
+		if (this.variable?.rowCount) {
 			const dataFrameRows = await this.variableManager.getDataFrameRows(
 				this.variable,
 				0,
@@ -159,7 +161,7 @@ export class JupyterVariableDataProvider
 	public async getRows(start: number, end: number, sliceExpression?: string) {
 		let rows: IRowsResponse = [];
 		await this.ensureInitialized();
-		if (this.variable && this.variable.rowCount) {
+		if (this.variable?.rowCount) {
 			const dataFrameRows = await this.variableManager.getDataFrameRows(
 				this.variable,
 				start,

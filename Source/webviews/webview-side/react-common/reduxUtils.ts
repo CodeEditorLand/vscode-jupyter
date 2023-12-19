@@ -49,7 +49,7 @@ export function combineReducers<S, M>(
 	defaultState: S,
 	map: M,
 ): Reducer<S, QueuableAction<M>> {
-	return (currentState: S = defaultState, action: QueuableAction<M>) => {
+	return (currentState: S, action: QueuableAction<M>) => {
 		const func = map[action.type];
 		if (typeof func === "function") {
 			// Call the reducer, giving it

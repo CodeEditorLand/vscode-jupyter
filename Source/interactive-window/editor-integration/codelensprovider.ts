@@ -242,7 +242,7 @@ export class DataScienceCodeLensProvider
 
 	private matchWatcher(uri: vscode.Uri): ICodeWatcher | undefined {
 		const index = this.activeCodeWatchers.findIndex(
-			(item) => item.uri && item.uri.toString() == uri.toString(),
+			(item) => item.uri && item.uri.toString() === uri.toString(),
 		);
 		if (index >= 0) {
 			return this.activeCodeWatchers[index];

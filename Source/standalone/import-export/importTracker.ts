@@ -97,7 +97,7 @@ export class ImportTracker
 		notebooks.onDidChangeNotebookCellExecutionState(
 			(e) => {
 				if (
-					e.state == NotebookCellExecutionState.Pending &&
+					e.state === NotebookCellExecutionState.Pending &&
 					!this.isTelemetryDisabled
 				) {
 					this.checkNotebookCell(e.cell, "onExecution").catch(noop);
@@ -214,7 +214,7 @@ export class ImportTracker
 		try {
 			for (const s of lines) {
 				// No need of regex if we don't have imports
-				if (!s.includes("import") && !s.includes("from")) {
+				if (!(s.includes("import") || s.includes("from"))) {
 					continue;
 				}
 				const match = s ? ImportRegEx.exec(s) : null;

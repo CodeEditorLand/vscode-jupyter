@@ -311,8 +311,8 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		test("Kernel Dies when the Kernel process dies", async () => {
 			let disposed = false;
 			const statuses: Kernel.Status[] = [];
-			session.kernel!.statusChanged.connect((_, s) => statuses.push(s));
-			session.kernel!.disposed.connect(() => (disposed = true));
+			session.kernel?.statusChanged.connect((_, s) => statuses.push(s));
+			session.kernel?.disposed.connect(() => (disposed = true));
 
 			exitedEvent.fire({ exitCode: 1, reason: "Killed" });
 
@@ -332,7 +332,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		test("Dispose", async () => {
 			let disposed = false;
 			const statuses: Kernel.Status[] = [];
-			session.kernel!.statusChanged.connect((_, s) => statuses.push(s));
+			session.kernel?.statusChanged.connect((_, s) => statuses.push(s));
 			session.disposed.connect(() => (disposed = true));
 
 			session.dispose();
@@ -355,7 +355,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		test("Shutdown", async () => {
 			let disposed = false;
 			const statuses: Kernel.Status[] = [];
-			session.kernel!.statusChanged.connect((_, s) => statuses.push(s));
+			session.kernel?.statusChanged.connect((_, s) => statuses.push(s));
 			session.disposed.connect(() => (disposed = true));
 
 			await session.shutdown();
@@ -430,7 +430,7 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		test("Shutdown & then Restart", async () => {
 			let disposed = false;
 			const statuses: Kernel.Status[] = [];
-			session.kernel!.statusChanged.connect((_, s) => statuses.push(s));
+			session.kernel?.statusChanged.connect((_, s) => statuses.push(s));
 			session.disposed.connect(() => (disposed = true));
 
 			await session.shutdown();
@@ -476,12 +476,12 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		test("Restart after kernel status turns dead", async () => {
 			let disposed = false;
 			const statuses: Kernel.Status[] = [];
-			session.kernel!.statusChanged.connect((_, s) => statuses.push(s));
+			session.kernel?.statusChanged.connect((_, s) => statuses.push(s));
 			session.disposed.connect(() => (disposed = true));
 
 			when(kernel.status).thenReturn("dead");
 			(
-				session.kernel!.statusChanged as Signal<
+				session.kernel?.statusChanged as Signal<
 					Kernel.IKernelConnection,
 					Kernel.Status
 				>
@@ -526,10 +526,10 @@ suite("Raw Session & Raw Kernel Connection", () => {
 		test("Restart after kernel is shutdown", async () => {
 			let disposed = false;
 			const statuses: Kernel.Status[] = [];
-			session.kernel!.statusChanged.connect((_, s) => statuses.push(s));
+			session.kernel?.statusChanged.connect((_, s) => statuses.push(s));
 			session.disposed.connect(() => (disposed = true));
 
-			await session.kernel!.shutdown();
+			await session.kernel?.shutdown();
 
 			assert.strictEqual(session.status, "dead");
 			assert.deepEqual(statuses, ["dead"]);

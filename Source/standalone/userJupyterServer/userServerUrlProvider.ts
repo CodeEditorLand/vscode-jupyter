@@ -257,7 +257,7 @@ export class UserJupyterServerUrlProvider
 			if (ex instanceof CancellationError) {
 				throw ex;
 			}
-			traceError(`Failed to select a Jupyter Server`, ex);
+			traceError("Failed to select a Jupyter Server", ex);
 			return;
 		} finally {
 			token.cancel();
@@ -508,8 +508,8 @@ export class UserJupyterServerUrlProvider
 							failedUrlPasswordCapture = false;
 							if (
 								err instanceof CancellationError ||
-								err == InputFlowAction.back ||
-								err == InputFlowAction.cancel
+								err === InputFlowAction.back ||
+								err === InputFlowAction.cancel
 							) {
 								throw err;
 							} else if (
@@ -636,8 +636,8 @@ export class UserJupyterServerUrlProvider
 							}
 							if (
 								err instanceof CancellationError ||
-								err == InputFlowAction.back ||
-								err == InputFlowAction.cancel
+								err === InputFlowAction.back ||
+								err === InputFlowAction.cancel
 							) {
 								throw err;
 							} else if (
@@ -836,7 +836,7 @@ export class UserJupyterServerUrlProvider
 				serverUriToReturn.token = passwordResult.remappedToken;
 			}
 		} catch (ex) {
-			traceError(`Failed to validate Password info`, ex);
+			traceError("Failed to validate Password info", ex);
 		}
 
 		return serverUriToReturn;
@@ -851,12 +851,12 @@ export class UserJupyterServerUriInput {
 
 	async getUrlFromUser(
 		initialValue: string,
-		initialErrorMessage = "",
+		initialErrorMessage,
 		disposables: Disposable[],
 	): Promise<{ url: string; jupyterServerUri: IJupyterServerUri }> {
 		// In the browser, users are prompted to allow access to clipboard, and
 		// thats not a good UX, because as soon as user clicks kernel picker they get prompted to allow clipbpard access
-		if (!initialValue && !isWeb) {
+		if (!(initialValue || isWeb)) {
 			try {
 				const text = await env.clipboard.readText();
 				const parsedUri = text.trim().startsWith("https://github.com/")
@@ -941,8 +941,10 @@ export class UserJupyterServerUriInput {
 			(await getBaseJupyterUrl(uri, this.requestCreator)) ||
 			jupyterServerUri.baseUrl;
 		if (
-			!uri.toLowerCase().startsWith("http:") &&
-			!uri.toLowerCase().startsWith("https:")
+			!(
+				uri.toLowerCase().startsWith("http:") ||
+				uri.toLowerCase().startsWith("https:")
+			)
 		) {
 			return {
 				validationError: DataScience.jupyterSelectURIMustBeHttpOrHttps,
@@ -983,12 +985,12 @@ export async function getBaseJupyterUrl(
 			redirect: "manual",
 		});
 		const loginPage = response.headers.get("location");
-		if (loginPage && loginPage.includes("login?")) {
+		if (loginPage?.includes("login?")) {
 			return loginPage.substring(0, loginPage.indexOf("login?"));
 		}
 	} catch (ex) {
 		traceVerbose(
-			`Unable to identify the baseUrl of the Jupyter Server`,
+			"Unable to identify the baseUrl of the Jupyter Server",
 			ex,
 		);
 	}

@@ -70,7 +70,7 @@ suite("Jupyter Interpreter Command", () => {
 		assert.isFunction(handler);
 
 		// Invoking handler must select jupyter interpreter.
-		handler!();
+		handler?.();
 
 		verify(interpreterService.selectInterpreter()).once();
 	});

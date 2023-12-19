@@ -61,12 +61,14 @@ export class PythonEnvFilterSettingMigration
 			);
 		let filters: OldInterpreterFilter[] = [];
 		switch (configurationTarget) {
-			case ConfigurationTarget.Global:
+			case ConfigurationTarget.Global: {
 				filters = result?.globalValue || [];
 				break;
-			case ConfigurationTarget.Workspace:
+			}
+			case ConfigurationTarget.Workspace: {
 				filters = result?.workspaceValue || [];
 				break;
+			}
 			default:
 				filters = result?.workspaceFolderValue || [];
 		}

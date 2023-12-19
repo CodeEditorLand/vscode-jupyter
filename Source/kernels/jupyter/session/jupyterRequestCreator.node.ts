@@ -31,7 +31,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 				// Add all of the authorization parts onto the headers.
 				const origHeaders = this.headers;
-				const authorizationHeader = getAuthHeader!();
+				const authorizationHeader = getAuthHeader?.();
 				const keys = Object.keys(authorizationHeader);
 				keys.forEach((k) =>
 					origHeaders.append(k, authorizationHeader[k].toString()),

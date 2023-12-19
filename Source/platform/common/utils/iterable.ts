@@ -130,7 +130,7 @@ export namespace Iterable {
 	 * Returns an iterable slice of the array, with the same semantics as `array.slice()`.
 	 */
 	export function* slice<T>(
-		arr: ReadonlyArray<T>,
+		arr: readonly T[],
 		from: number,
 		to = arr.length,
 	): Iterable<T> {

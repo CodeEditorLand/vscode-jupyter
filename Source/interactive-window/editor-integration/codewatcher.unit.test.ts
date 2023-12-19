@@ -243,7 +243,7 @@ suite("Code Watcher Unit Tests", () => {
 		markdownCell = false,
 	) {
 		if (codeLenses[startLensIndex].command) {
-			expect(codeLenses[startLensIndex].command!.command).to.be.equal(
+			expect(codeLenses[startLensIndex].command?.command).to.be.equal(
 				Commands.RunCell,
 				"Run Cell code lens command incorrect",
 			);
@@ -256,7 +256,7 @@ suite("Code Watcher Unit Tests", () => {
 		if (!firstCell) {
 			if (codeLenses[startLensIndex + 1].command) {
 				expect(
-					codeLenses[startLensIndex + 1].command!.command,
+					codeLenses[startLensIndex + 1].command?.command,
 				).to.be.equal(
 					Commands.RunAllCellsAbove,
 					"Run Above code lens command incorrect",
@@ -272,7 +272,7 @@ suite("Code Watcher Unit Tests", () => {
 			const indexAdd = 2;
 			if (codeLenses[startLensIndex + indexAdd].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd].command!.command,
+					codeLenses[startLensIndex + indexAdd].command?.command,
 				).to.be.equal(Commands.DebugCell, "Debug command incorrect");
 			}
 			expect(
@@ -282,7 +282,7 @@ suite("Code Watcher Unit Tests", () => {
 			// Debugger mode commands
 			if (codeLenses[startLensIndex + indexAdd + 1].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd + 1].command!.command,
+					codeLenses[startLensIndex + indexAdd + 1].command?.command,
 				).to.be.equal(
 					Commands.DebugContinue,
 					"Debug command incorrect",
@@ -293,7 +293,7 @@ suite("Code Watcher Unit Tests", () => {
 			).to.be.deep.equal(targetRange, "Debug code lens range incorrect");
 			if (codeLenses[startLensIndex + indexAdd + 2].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd + 2].command!.command,
+					codeLenses[startLensIndex + indexAdd + 2].command?.command,
 				).to.be.equal(Commands.DebugStop, "Debug command incorrect");
 			}
 			expect(
@@ -301,7 +301,7 @@ suite("Code Watcher Unit Tests", () => {
 			).to.be.deep.equal(targetRange, "Debug code lens range incorrect");
 			if (codeLenses[startLensIndex + indexAdd + 3].command) {
 				expect(
-					codeLenses[startLensIndex + indexAdd + 3].command!.command,
+					codeLenses[startLensIndex + indexAdd + 3].command?.command,
 				).to.be.equal(
 					Commands.DebugStepOver,
 					"Debug command incorrect",
@@ -316,7 +316,7 @@ suite("Code Watcher Unit Tests", () => {
 	test("Add a file with just a #%% mark to a code watcher", () => {
 		const fileName = Uri.file("test.py").fsPath;
 		const version = 1;
-		const inputText = `#%%`;
+		const inputText = "#%%";
 		const document = createDocument(
 			inputText,
 			fileName,
@@ -352,7 +352,7 @@ suite("Code Watcher Unit Tests", () => {
 	test("Add a file without a mark to a code watcher", () => {
 		const fileName = Uri.file("test.py").fsPath;
 		const version = 1;
-		const inputText = `dummy`;
+		const inputText = "dummy";
 		const document = createDocument(
 			inputText,
 			fileName,
@@ -568,7 +568,7 @@ fourth line
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(testString),
-					TypeMoq.It.is((u) => u.fsPath == fileName),
+					TypeMoq.It.is((u) => u.fsPath === fileName),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -605,7 +605,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -616,7 +616,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -653,7 +653,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("testing0\n#%%\ntesting1"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -664,7 +664,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(3),
 				),
 			)
@@ -705,7 +705,7 @@ testing3`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -719,7 +719,7 @@ testing3`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -733,7 +733,7 @@ testing3`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting3"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(4),
 				),
 			)
@@ -775,7 +775,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -824,7 +824,7 @@ testing3`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText1),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -835,7 +835,7 @@ testing3`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText2),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(4),
 				),
 			)
@@ -881,7 +881,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText1),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(1),
 				),
 			)
@@ -892,7 +892,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText2),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(3),
 				),
 			)
@@ -933,7 +933,7 @@ testing1`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -969,7 +969,7 @@ print('testing')`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isAny(),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isAnyNumber(),
 				),
 			)
@@ -1013,7 +1013,7 @@ testing3`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -1062,7 +1062,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("testing2"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(3),
 				),
 			)
@@ -1117,7 +1117,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("text arg"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(3),
 				),
 			)
@@ -1160,7 +1160,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -1229,7 +1229,7 @@ testing1
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1\n"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -1368,7 +1368,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText1),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -1383,7 +1383,7 @@ testing2`;
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue(targetText2),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -1419,7 +1419,7 @@ testing2`; // Command tests override getText, so just need the ranges here
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting1"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(0),
 				),
 			)
@@ -1434,7 +1434,7 @@ testing2`; // Command tests override getText, so just need the ranges here
 			.setup((h) =>
 				h.addCode(
 					TypeMoq.It.isValue("#%%\ntesting2"),
-					TypeMoq.It.is((u) => u.fsPath == fileName.fsPath),
+					TypeMoq.It.is((u) => u.fsPath === fileName.fsPath),
 					TypeMoq.It.isValue(2),
 				),
 			)
@@ -1693,7 +1693,7 @@ testing2`,
 
 		codeWatcher.deleteCells();
 
-		expect(mockTextEditor.document.getText()).to.equal(`testing0`);
+		expect(mockTextEditor.document.getText()).to.equal("testing0");
 	});
 
 	test("Delete cell no cells in selection", async () => {

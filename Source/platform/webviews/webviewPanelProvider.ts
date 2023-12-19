@@ -29,15 +29,6 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 		return this.options as IWebviewPanelOptions;
 	}
 
-	constructor(
-		fs: IFileSystem,
-		disposableRegistry: IDisposableRegistry,
-		panelOptions: IWebviewPanelOptions,
-		additionalRootPaths: Uri[] = [],
-	) {
-		super(fs, disposableRegistry, panelOptions, additionalRootPaths);
-	}
-
 	public async show(preserveFocus: boolean) {
 		await this.loadPromise;
 		if (!this.panel) {

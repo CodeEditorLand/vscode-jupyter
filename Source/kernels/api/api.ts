@@ -23,7 +23,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 			);
 			const kernel = kernelProvider.get(notebook || uri);
 			// We are only interested in returning kernels that have been started by the user.
-			if (!kernel || !kernel.startedAtLeastOnce) {
+			if (!kernel?.startedAtLeastOnce) {
 				sendTelemetryEvent(
 					Telemetry.NewJupyterKernelsApiUsage,
 					undefined,

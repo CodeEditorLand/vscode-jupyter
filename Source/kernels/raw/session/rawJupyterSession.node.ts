@@ -75,7 +75,7 @@ export class RawJupyterSessionWrapper
 				token,
 			);
 		} catch (ex) {
-			traceInfoIfCI(`Error waiting for idle`, ex);
+			traceInfoIfCI("Error waiting for idle", ex);
 			await this.shutdown().catch(noop);
 			throw ex;
 		}

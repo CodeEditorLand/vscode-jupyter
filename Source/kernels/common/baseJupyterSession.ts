@@ -12,7 +12,7 @@ export function suppressShutdownErrors(realKernel: any) {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	if (isTestExecution()) {
 		const defaultKernel = realKernel as any; // NOSONAR
-		if (defaultKernel && defaultKernel._futures) {
+		if (defaultKernel?._futures) {
 			const futures = defaultKernel._futures as Map<any, any>; // NOSONAR
 			if (futures.forEach) {
 				// Requires for unit tests when things are mocked.
@@ -23,7 +23,7 @@ export function suppressShutdownErrors(realKernel: any) {
 				});
 			}
 		}
-		if (defaultKernel && defaultKernel._reconnectLimit) {
+		if (defaultKernel?._reconnectLimit) {
 			defaultKernel._reconnectLimit = 0;
 		}
 	}

@@ -166,7 +166,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		matchingVariable: IJupyterVariable | undefined,
 	): Promise<{ [attributeName: string]: string }> {
 		const result: { [attributeName: string]: string } = {};
-		if (matchingVariable && matchingVariable.value) {
+		if (matchingVariable?.value) {
 			result[`${word}`] = matchingVariable.value;
 		}
 		return result;
@@ -276,7 +276,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				codeCellOutput.output_type === "execute_result"
 			) {
 				const data = codeCellOutput.data;
-				if (data && data.hasOwnProperty("text/plain")) {
+				if (data?.hasOwnProperty("text/plain")) {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					return (data as any)["text/plain"];
 				}

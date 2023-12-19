@@ -31,7 +31,7 @@ type ContextKeyPrimitiveValue =
 
 export type ContextKeyValue =
 	| ContextKeyPrimitiveValue
-	| Array<ContextKeyPrimitiveValue>
+	| ContextKeyPrimitiveValue[]
 	| Record<string, ContextKeyPrimitiveValue>;
 
 /**

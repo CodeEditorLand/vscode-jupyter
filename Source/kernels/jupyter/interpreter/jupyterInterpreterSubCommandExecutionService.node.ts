@@ -201,7 +201,7 @@ export class JupyterInterpreterSubCommandExecutionService
 				`Start Jupyter Notebook with PATH variable. ${pathValues}`,
 			);
 		} else {
-			traceError(`Start Jupyter Notebook without a PATH variable`);
+			traceError("Start Jupyter Notebook without a PATH variable");
 		}
 		return executionService.execModuleObservable(
 			"jupyter",

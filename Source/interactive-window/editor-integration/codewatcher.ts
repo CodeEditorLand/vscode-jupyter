@@ -126,7 +126,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	public getCodeLenses() {
 		const document = this.document;
-		if (document && document.version != this.version) {
+		if (document && document.version !== this.version) {
 			this.codeLenses = this.codeLensFactory.createCodeLenses(document);
 			this.cells = this.codeLensFactory.getCellRanges(document);
 			this.version = document.version;
@@ -136,7 +136,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	@captureUsageTelemetry(Telemetry.DebugCurrentCell)
 	public async debugCurrentCell() {
-		if (!window.activeTextEditor || !window.activeTextEditor.document) {
+		if (!window.activeTextEditor?.document) {
 			return;
 		}
 
@@ -180,10 +180,10 @@ export class CodeWatcher implements ICodeWatcher {
 		for (const lens of runCellCommands) {
 			// Make sure that we have the correct command (RunCell) lenses
 			let range: Range = new Range(
-				lens.command!.arguments![1],
-				lens.command!.arguments![2],
-				lens.command!.arguments![3],
-				lens.command!.arguments![4],
+				lens.command?.arguments?.[1],
+				lens.command?.arguments?.[2],
+				lens.command?.arguments?.[3],
+				lens.command?.arguments?.[4],
 			);
 			if (this.document) {
 				// Special case, if this is the first, expand our range to always include the top.
@@ -382,7 +382,7 @@ export class CodeWatcher implements ICodeWatcher {
 				),
 			);
 
-			if (code && code.trim().length) {
+			if (code?.trim().length) {
 				await this.addCode(iw, code, this.document.uri, 0);
 			}
 		}
@@ -402,7 +402,7 @@ export class CodeWatcher implements ICodeWatcher {
 				),
 			);
 
-			if (code && code.trim().length) {
+			if (code?.trim().length) {
 				await this.addCode(iw, code, this.document.uri, targetLine);
 			}
 		}
@@ -410,7 +410,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	@traceDecoratorVerbose("CodeWatcher::runCell", TraceOptions.BeforeCall)
 	public async runCell(range: Range): Promise<void> {
-		if (!window.activeTextEditor || !window.activeTextEditor.document) {
+		if (!window.activeTextEditor?.document) {
 			return;
 		}
 
@@ -424,7 +424,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	@captureUsageTelemetry(Telemetry.DebugCurrentCell)
 	public async debugCell(range: Range): Promise<void> {
-		if (!window.activeTextEditor || !window.activeTextEditor.document) {
+		if (!window.activeTextEditor?.document) {
 			return;
 		}
 
@@ -434,7 +434,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	@captureUsageTelemetry(Telemetry.RunCurrentCell)
 	public async runCurrentCell(): Promise<void> {
-		if (!window.activeTextEditor || !window.activeTextEditor.document) {
+		if (!window.activeTextEditor?.document) {
 			return;
 		}
 
@@ -444,7 +444,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	@captureUsageTelemetry(Telemetry.RunCurrentCellAndAdvance)
 	public async runCurrentCellAndAdvance() {
-		if (!window.activeTextEditor || !window.activeTextEditor.document) {
+		if (!window.activeTextEditor?.document) {
 			return;
 		}
 
@@ -462,7 +462,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	@capturePerfTelemetry(Telemetry.RunCurrentCellAndAddBelow)
 	public async runCurrentCellAndAddBelow(): Promise<void> {
-		if (!window.activeTextEditor || !window.activeTextEditor.document) {
+		if (!window.activeTextEditor?.document) {
 			return;
 		}
 
@@ -517,7 +517,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.InsertCellBelowPosition)
 	public insertCellBelowPosition() {
 		const editor = window.activeTextEditor;
-		if (editor && editor.selection) {
+		if (editor?.selection) {
 			this.insertCell(editor, editor.selection.end.line + 1);
 		}
 	}
@@ -525,7 +525,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.InsertCellBelow)
 	public insertCellBelow() {
 		const editor = window.activeTextEditor;
-		if (editor && editor.selection) {
+		if (editor?.selection) {
 			const cell = this.getCellFromPosition(editor.selection.end);
 			if (cell) {
 				this.insertCell(editor, cell.range.end.line + 1);
@@ -538,7 +538,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.InsertCellAbove)
 	public insertCellAbove() {
 		const editor = window.activeTextEditor;
-		if (editor && editor.selection) {
+		if (editor?.selection) {
 			const cell = this.getCellFromPosition(editor.selection.start);
 			if (cell) {
 				this.insertCell(editor, cell.range.start.line);
@@ -551,7 +551,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.DeleteCells)
 	public deleteCells() {
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return;
 		}
 
@@ -591,7 +591,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.SelectCell)
 	public selectCell() {
 		const editor = window.activeTextEditor;
-		if (editor && editor.selection) {
+		if (editor?.selection) {
 			const startEndCells = this.getStartEndCells(editor.selection);
 			if (startEndCells) {
 				const startCell = startEndCells[0];
@@ -618,7 +618,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.SelectCellContents)
 	public selectCellContents() {
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return;
 		}
 		const startEndCellIndex = this.getStartEndCellIndex(editor.selection);
@@ -679,7 +679,7 @@ export class CodeWatcher implements ICodeWatcher {
 		// selection range. If the active cursor is above, it expands the
 		// selection range.
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return;
 		}
 		const currentSelection = editor.selection;
@@ -699,9 +699,33 @@ export class CodeWatcher implements ICodeWatcher {
 		const endCell = cells[endCellIndex];
 
 		if (
-			!startCell.range.start.isEqual(currentSelection.start) ||
-			!endCell.range.end.isEqual(currentSelection.end)
+			startCell.range.start.isEqual(currentSelection.start) &&
+			endCell.range.end.isEqual(currentSelection.end)
 		) {
+			let newCell: ICellRange | undefined;
+			// full cell range is selected now decide if expanding or contracting?
+			if (isAnchorLessThanActive && startCellIndex < endCellIndex) {
+				// anchor is above active, contract selection by cell below.
+				newCell = cells[endCellIndex - 1];
+				editor.selection = new Selection(
+					startCell.range.start,
+					newCell.range.end,
+				);
+			} else {
+				// anchor is below active, expand selection by cell above.
+				if (startCellIndex > 0) {
+					newCell = cells[startCellIndex - 1];
+					editor.selection = new Selection(
+						endCell.range.end,
+						newCell.range.start,
+					);
+				}
+			}
+
+			if (newCell) {
+				editor.revealRange(newCell.range, TextEditorRevealType.Default);
+			}
+		} else {
 			// full cell range not selected, first select a full cell range.
 			let selection: Selection;
 			if (isAnchorLessThanActive) {
@@ -726,30 +750,6 @@ export class CodeWatcher implements ICodeWatcher {
 				);
 			}
 			editor.selection = selection;
-		} else {
-			let newCell: ICellRange | undefined;
-			// full cell range is selected now decide if expanding or contracting?
-			if (isAnchorLessThanActive && startCellIndex < endCellIndex) {
-				// anchor is above active, contract selection by cell below.
-				newCell = cells[endCellIndex - 1];
-				editor.selection = new Selection(
-					startCell.range.start,
-					newCell.range.end,
-				);
-			} else {
-				// anchor is below active, expand selection by cell above.
-				if (startCellIndex > 0) {
-					newCell = cells[startCellIndex - 1];
-					editor.selection = new Selection(
-						endCell.range.end,
-						newCell.range.start,
-					);
-				}
-			}
-
-			if (newCell) {
-				editor.revealRange(newCell.range, TextEditorRevealType.Default);
-			}
 		}
 	}
 
@@ -762,7 +762,7 @@ export class CodeWatcher implements ICodeWatcher {
 		// selection range. If the active cursor is above, it contracts the
 		// selection range.
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return;
 		}
 		const currentSelection = editor.selection;
@@ -782,32 +782,9 @@ export class CodeWatcher implements ICodeWatcher {
 		const endCell = cells[endCellIndex];
 
 		if (
-			!startCell.range.start.isEqual(currentSelection.start) ||
-			!endCell.range.end.isEqual(currentSelection.end)
+			startCell.range.start.isEqual(currentSelection.start) &&
+			endCell.range.end.isEqual(currentSelection.end)
 		) {
-			// full cell range not selected, first select a full cell range.
-			let selection: Selection;
-			if (isAnchorLessEqualActive) {
-				// active at start of start cell.
-				selection = new Selection(
-					startCell.range.start,
-					endCell.range.end,
-				);
-			} else if (startCellIndex < endCellIndex) {
-				// active at end of cell before endCell
-				selection = new Selection(
-					cells[startCellIndex + 1].range.start,
-					endCell.range.end,
-				);
-			} else {
-				// active at end of startCell
-				selection = new Selection(
-					endCell.range.start,
-					endCell.range.end,
-				);
-			}
-			editor.selection = selection;
-		} else {
 			let newCell: ICellRange | undefined;
 			// full cell range is selected now decide if expanding or contracting?
 			if (isAnchorLessEqualActive || startCellIndex === endCellIndex) {
@@ -833,6 +810,29 @@ export class CodeWatcher implements ICodeWatcher {
 			if (newCell) {
 				editor.revealRange(newCell.range, TextEditorRevealType.Default);
 			}
+		} else {
+			// full cell range not selected, first select a full cell range.
+			let selection: Selection;
+			if (isAnchorLessEqualActive) {
+				// active at start of start cell.
+				selection = new Selection(
+					startCell.range.start,
+					endCell.range.end,
+				);
+			} else if (startCellIndex < endCellIndex) {
+				// active at end of cell before endCell
+				selection = new Selection(
+					cells[startCellIndex + 1].range.start,
+					endCell.range.end,
+				);
+			} else {
+				// active at end of startCell
+				selection = new Selection(
+					endCell.range.start,
+					endCell.range.end,
+				);
+			}
+			editor.selection = selection;
 		}
 	}
 
@@ -863,7 +863,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.GotoNextCellInFile)
 	public gotoNextCell() {
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return;
 		}
 
@@ -882,7 +882,7 @@ export class CodeWatcher implements ICodeWatcher {
 	@capturePerfTelemetry(Telemetry.GotoPrevCellInFile)
 	public gotoPreviousCell() {
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return;
 		}
 
@@ -909,7 +909,7 @@ export class CodeWatcher implements ICodeWatcher {
 	) {
 		const editor = window.activeTextEditor;
 		const startEndCellIndex = this.getStartEndCellIndex(editor?.selection);
-		if (!editor || !startEndCellIndex) {
+		if (!(editor && startEndCellIndex)) {
 			return;
 		}
 		const cells = this.cells;
@@ -988,7 +988,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 	private async moveCellsDirection(directionUp: boolean): Promise<boolean> {
 		const editor = window.activeTextEditor;
-		if (!editor || !editor.selection) {
+		if (!editor?.selection) {
 			return false;
 		}
 		const startEndCellIndex = this.getStartEndCellIndex(editor.selection);
@@ -1000,7 +1000,7 @@ export class CodeWatcher implements ICodeWatcher {
 		const cells = this.cells;
 		const startCell = cells[startCellIndex];
 		const endCell = cells[endCellIndex];
-		if (!startCell || !endCell) {
+		if (!(startCell && endCell)) {
 			return false;
 		}
 		const currentRange = new Range(
@@ -1322,7 +1322,7 @@ export class CodeWatcher implements ICodeWatcher {
 	private getCellFromPosition(position?: Position): ICellRange | undefined {
 		if (!position) {
 			const editor = window.activeTextEditor;
-			if (editor && editor.selection) {
+			if (editor?.selection) {
 				position = editor.selection.active;
 			}
 		}

@@ -372,7 +372,7 @@ function initialize(
 	widgetState?: NotebookMetadata["widgets"],
 ) {
 	if (initialized) {
-		logErrorMessage(`Error: WidgetManager already initialized`);
+		logErrorMessage("Error: WidgetManager already initialized");
 		return;
 	}
 	try {

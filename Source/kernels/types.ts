@@ -999,7 +999,7 @@ function sendKernelTelemetry(kernel: KernelConnectionMetadata) {
 	let argv = "";
 	const interpreter =
 		"interpreter" in kernel ? kernel.interpreter : undefined;
-	const separator = `<#>`;
+	const separator = "<#>";
 	let isArgv0SameAsInterpreter: undefined | boolean = undefined;
 	if (
 		kernelSpec &&

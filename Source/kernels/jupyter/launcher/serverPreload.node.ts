@@ -97,7 +97,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		const ui = new DisplayOptions(true);
 		try {
 			traceInfo(
-				`Attempting to start a server because of preload conditions ...`,
+				"Attempting to start a server because of preload conditions ...",
 			);
 
 			// If it didn't start, attempt for local and if allowed.
@@ -113,7 +113,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 				});
 			}
 		} catch (exc) {
-			traceError(`Error starting server in serverPreload: `, exc);
+			traceError("Error starting server in serverPreload: ", exc);
 		} finally {
 			ui.dispose();
 			source.dispose();

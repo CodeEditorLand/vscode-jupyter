@@ -87,7 +87,7 @@ export abstract class Webview implements IWebview {
 			.asWebviewUri(this.options.cwd)
 			.toString();
 		const uris = this.options.scripts.map((script) =>
-			this.webviewHost!.webview!.asWebviewUri(script),
+			this.webviewHost?.webview?.asWebviewUri(script),
 		);
 
 		const rootPath = this.webviewHost.webview

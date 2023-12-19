@@ -36,7 +36,7 @@ import { JupyterLabHelper } from "../session/jupyterLabHelper";
 import { IJupyterKernel, IJupyterRemoteCachedKernelValidator } from "../types";
 import { CacheDataFormat, RemoteKernelFinder } from "./remoteKernelFinder";
 
-suite(`Remote Kernel Finder`, () => {
+suite("Remote Kernel Finder", () => {
 	let disposables: Disposable[] = [];
 	let remoteKernelFinder: RemoteKernelFinder;
 	let kernelFinder: KernelFinder;
@@ -380,16 +380,17 @@ suite(`Remote Kernel Finder`, () => {
 		await remoteKernelFinder.loadCache();
 
 		assert.lengthOf(kernelFinder.kernels, 1);
-		delete (
+		(
 			liveRemoteKernel.kernelModel as Partial<
 				typeof liveRemoteKernel.kernelModel
 			>
-		).lastActivityTime;
+		).lastActivityTime = undefined;
 		assert.deepEqual(
 			kernelFinder.kernels.map((k) => {
 				if (k.kind === "connectToLiveRemoteKernel") {
-					delete (k.kernelModel as Partial<typeof k.kernelModel>)
-						.lastActivityTime;
+					(
+						k.kernelModel as Partial<typeof k.kernelModel>
+					).lastActivityTime = undefined;
 				}
 				return k;
 			}),

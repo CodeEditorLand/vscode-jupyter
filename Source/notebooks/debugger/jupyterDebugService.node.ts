@@ -300,18 +300,20 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 
 	private sendToTrackers(args: any) {
 		switch (args.type) {
-			case "request":
+			case "request": {
 				this.debugAdapterTrackers.forEach((d) => {
 					if (d.onWillReceiveMessage) {
 						d.onWillReceiveMessage(args);
 					}
 				});
 				break;
-			default:
+			}
+			default: {
 				this.debugAdapterTrackers.forEach((d) =>
-					d.onDidSendMessage!(args),
+					d.onDidSendMessage?.(args),
 				);
 				break;
+			}
 		}
 	}
 

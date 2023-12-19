@@ -123,7 +123,7 @@ export class CondaService {
 			.catch(() => (this.isAvailable = false)); // eslint-disable-line no-return-assign
 	}
 	private async updateCache() {
-		if (!this._file || !this._version) {
+		if (!(this._file && this._version)) {
 			return;
 		}
 		const fileHash = this._file.fsPath.toLowerCase().endsWith("conda")

@@ -233,7 +233,7 @@ export class VariableExplorer extends React.Component<
 	}
 
 	public override render() {
-		const contentClassName = `variable-explorer-content`;
+		const contentClassName = "variable-explorer-content";
 		let variableExplorerStyles: React.CSSProperties = {
 			fontSize: `${this.props.fontSize.toString()}px`,
 		};
@@ -343,7 +343,7 @@ export class VariableExplorer extends React.Component<
 		const variablePanel = this.variablePanelRef.current;
 		const variableExplorer = this.variableExplorerRef.current;
 
-		if (!variableExplorerMenuBar || !variablePanel || !variableExplorer) {
+		if (!(variableExplorerMenuBar && variablePanel && variableExplorer)) {
 			return;
 		}
 
@@ -493,8 +493,7 @@ export class VariableExplorer extends React.Component<
 			while (
 				pageIndex >= 0 &&
 				pageIndex > index - pageSize / 2 &&
-				(!this.props.variables[pageIndex] ||
-					!this.props.variables[pageIndex].value)
+				!this.props.variables[pageIndex]?.value
 			) {
 				pageIndex -= 1;
 			}

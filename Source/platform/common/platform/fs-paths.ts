@@ -23,8 +23,7 @@ export function getFilePath(file: Uri | undefined) {
 		// Example, if you create a URI with Uri.file('hello world'), the fsPath will come out as '\Hello World' on windows. We don't want that
 		// However if you create a URI from a network drive, like '\\mydrive\foo\bar\python.exe', we want to keep the \\ on the front.
 		if (
-			fsPath &&
-			fsPath.startsWith(path.sep) &&
+			fsPath?.startsWith(path.sep) &&
 			fsPath.length > 1 &&
 			fsPath[1] !== path.sep &&
 			isWindows

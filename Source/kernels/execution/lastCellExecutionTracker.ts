@@ -82,12 +82,14 @@ export class LastCellExecutionTracker
 			return;
 		}
 		if (
-			!isRemoteConnection(kernel.kernelConnectionMetadata) ||
-			!kernel.session?.id
+			!(
+				isRemoteConnection(kernel.kernelConnectionMetadata) &&
+				kernel.session?.id
+			)
 		) {
 			return;
 		}
-		if (this.staleState && this.staleState[notebook.uri.toString()]) {
+		if (this.staleState?.[notebook.uri.toString()]) {
 			return this.staleState[notebook.uri.toString()];
 		}
 
@@ -197,8 +199,10 @@ export class LastCellExecutionTracker
 			return;
 		}
 		if (
-			!isRemoteConnection(kernel.kernelConnectionMetadata) ||
-			!kernel.session?.id
+			!(
+				isRemoteConnection(kernel.kernelConnectionMetadata) &&
+				kernel.session?.id
+			)
 		) {
 			return;
 		}
@@ -242,12 +246,14 @@ export class LastCellExecutionTracker
 		kernel: IKernel,
 		info: Partial<CellExecutionInfo>,
 	) {
-		if (!info.executionCount || !info.msg_id || !info.startTime) {
+		if (!(info.executionCount && info.msg_id && info.startTime)) {
 			return;
 		}
 		if (
-			!isRemoteConnection(kernel.kernelConnectionMetadata) ||
-			!kernel.session?.id
+			!(
+				isRemoteConnection(kernel.kernelConnectionMetadata) &&
+				kernel.session?.id
+			)
 		) {
 			return;
 		}

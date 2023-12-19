@@ -27,7 +27,7 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	private readonly disposables: IDisposable[] = [];
 	constructor(
 		private readonly baseMulticaster: IPyWidgetMessageDispatcher,
-		private oldMessages: ReadonlyArray<IPyWidgetMessage>,
+		private oldMessages: readonly IPyWidgetMessage[],
 	) {
 		baseMulticaster.postMessage(
 			this.raisePostMessage,
@@ -135,7 +135,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		// & pass to the dispatcher so it can re-broadcast those old messages.
 		// If there are no old messages, even then return a new instance of the class.
 		// This way, the reference to that will be controlled by calling code.
-		let messages: ReadonlyArray<IPyWidgetMessage> = [];
+		let messages: readonly IPyWidgetMessage[] = [];
 		if (document && this.messagesPerNotebook.get(document)) {
 			messages = this.messagesPerNotebook.get(document) || [];
 		}
@@ -174,7 +174,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			message.message === IPyWidgetMessages.IPyWidgets_kernelOptions ||
 			message.message === IPyWidgetMessages.IPyWidgets_registerCommTarget
 		) {
-			this.messagesPerNotebook.get(document)!.push(message);
+			this.messagesPerNotebook.get(document)?.push(message);
 		}
 	}
 }

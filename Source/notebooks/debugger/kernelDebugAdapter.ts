@@ -35,7 +35,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		endLine?: number;
 	}): void {
 		const source = location.source;
-		if (source && source.path) {
+		if (source?.path) {
 			const mapping = this.cellToFile.get(source.path);
 			if (mapping) {
 				source.path = mapping;

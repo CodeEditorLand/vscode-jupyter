@@ -15,23 +15,19 @@ export const sliceRegEx =
  */
 export function preselectedSliceExpression(shape: number[]) {
 	let numDimensionsToPreselect = shape.length - 2;
-	return (
-		"[" +
-		shape
-			.map(() => {
-				if (numDimensionsToPreselect > 0) {
-					numDimensionsToPreselect -= 1;
-					return "0";
-				}
-				return ":";
-			})
-			.join(", ") +
-		"]"
-	);
+	return `[${shape
+		.map(() => {
+			if (numDimensionsToPreselect > 0) {
+				numDimensionsToPreselect -= 1;
+				return "0";
+			}
+			return ":";
+		})
+		.join(", ")}]`;
 }
 
 export function fullSliceExpression(shape: number[]) {
-	return "[" + shape.map(() => ":").join(", ") + "]";
+	return `[${shape.map(() => ":").join(", ")}]`;
 }
 
 export function validateSliceExpression(

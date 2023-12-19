@@ -91,12 +91,12 @@ suite("Jupyter Paths", () => {
 			instance(context),
 			instance(pythonExecFactory),
 		);
-		delete process.env["JUPYTER_PATH"];
-		delete process.env["APPDATA"];
-		delete process.env["PROGRAMDATA"];
-		delete process.env["JUPYTER_CONFIG_DIR"];
-		delete process.env["JUPYTER_DATA_DIR"];
-		delete process.env["ALLUSERSPROFILE"];
+		process.env["JUPYTER_PATH"] = undefined;
+		process.env["APPDATA"] = undefined;
+		process.env["PROGRAMDATA"] = undefined;
+		process.env["JUPYTER_CONFIG_DIR"] = undefined;
+		process.env["JUPYTER_DATA_DIR"] = undefined;
+		process.env["ALLUSERSPROFILE"] = undefined;
 	});
 	teardown(async () => {
 		disposables = dispose(disposables);

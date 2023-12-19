@@ -57,8 +57,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 				? workspace.getWorkspaceFolder(resource)
 				: undefined;
 			if (
-				!interpreter ||
-				!workspaceFolder ||
+				!(interpreter && workspaceFolder) ||
 				interpreter.envType !== EnvironmentType.Pipenv
 			) {
 				return false;

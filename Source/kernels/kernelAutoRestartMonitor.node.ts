@@ -62,8 +62,7 @@ export class KernelAutoRestartMonitor
 	}) {
 		// We're only interested in kernels that started successfully.
 		if (
-			!this.kernelsStartedSuccessfully.has(kernel) ||
-			!kernel.session ||
+			!(this.kernelsStartedSuccessfully.has(kernel) && kernel.session) ||
 			kernel.session.kind === "localRaw"
 		) {
 			return;

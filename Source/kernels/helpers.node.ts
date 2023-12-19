@@ -25,9 +25,11 @@ export async function sendTelemetryForPythonKernelExecutable(
 	kernelConnection: KernelConnectionMetadata,
 ) {
 	if (
-		!kernelConnection.interpreter ||
-		!isPythonKernelConnection(kernelConnection) ||
-		!session.kernel ||
+		!(
+			kernelConnection.interpreter &&
+			isPythonKernelConnection(kernelConnection) &&
+			session.kernel
+		) ||
 		session.kernel.status === "dead" ||
 		session.kernel.status === "terminating"
 	) {

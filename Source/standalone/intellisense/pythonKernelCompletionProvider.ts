@@ -117,7 +117,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		const triggerChars =
 			config.getSettings().pythonCompletionTriggerCharacters;
 		this.allowStringFilter =
-			triggerChars != undefined &&
+			triggerChars !== undefined &&
 			(triggerChars.includes("'") || triggerChars.includes('"'));
 		workspace.onDidChangeConfiguration(
 			(e) => {
@@ -129,7 +129,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 					const triggerChars =
 						config.getSettings().pythonCompletionTriggerCharacters;
 					this.allowStringFilter =
-						triggerChars != undefined &&
+						triggerChars !== undefined &&
 						(triggerChars.includes("'") ||
 							triggerChars.includes('"'));
 				}
@@ -160,7 +160,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		}
 
 		const kernel = this.kernelProvider.get(notebookDocument);
-		if (!kernel || !kernel.session || !kernel.session.kernel) {
+		if (!kernel.session?.kernel) {
 			traceVerbose(
 				`Live Notebook not available for ${getDisplayPath(
 					notebookDocument.uri,
@@ -197,7 +197,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 				)}.`,
 			);
 		} else {
-			traceInfoIfCI(`Notebook completions not found.`);
+			traceInfoIfCI("Notebook completions not found.");
 			return [];
 		}
 
@@ -304,7 +304,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 		const { kernelId, kernelRef, documentRef, position } = info;
 		const document = documentRef.deref();
 		const kernel = kernelRef.deref();
-		if (!document || !kernel || !kernel.session?.kernel) {
+		if (!(document && kernel && kernel.session?.kernel)) {
 			return item;
 		}
 		return resolveCompletionItem(
@@ -356,7 +356,7 @@ export class PythonKernelCompletionProvider implements CompletionItemProvider {
 			}: ${result ? JSON.stringify(result) : "empty"}`,
 		);
 		traceVerbose(`Jupyter completion time: ${stopWatch.elapsedTime}`);
-		if (result && result.content) {
+		if (result?.content) {
 			if ("matches" in result.content) {
 				return {
 					matches: result.content.matches,
@@ -448,8 +448,8 @@ export function filterCompletions(
 	const wordDot = word.endsWith(".") || isPreviousCharTriggerCharacter;
 	const insideString =
 		allowStringFilter &&
-		(triggerCharacter == "'" ||
-			triggerCharacter == '"' ||
+		(triggerCharacter === "'" ||
+			triggerCharacter === '"' ||
 			positionInsideString(line, position));
 
 	traceInfoIfCI(
@@ -564,7 +564,7 @@ export function filterCompletions(
 		});
 	} else {
 		result = result.filter(
-			(r) => !r.itemText.includes(".") && !r.itemText.endsWith("/"),
+			(r) => !(r.itemText.includes(".") || r.itemText.endsWith("/")),
 		);
 	}
 

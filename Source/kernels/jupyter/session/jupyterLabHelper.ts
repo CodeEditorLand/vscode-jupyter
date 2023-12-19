@@ -71,7 +71,7 @@ export class JupyterLabHelper {
 			return;
 		}
 		this.disposed = true;
-		traceVerbose(`Disposing Jupyter Lab Helper`);
+		traceVerbose("Disposing Jupyter Lab Helper");
 		try {
 			if (this.contentsManager) {
 				traceVerbose("SessionManager - dispose contents manager");
@@ -94,7 +94,7 @@ export class JupyterLabHelper {
 				this.kernelSpecManager?.dispose();
 			}
 		} catch (e) {
-			traceError(`Exception on Jupyter Lab Helper shutdown: `, e);
+			traceError("Exception on Jupyter Lab Helper shutdown: ", e);
 		} finally {
 			traceVerbose("Finished disposing Jupyter Lab Helper");
 		}
@@ -154,9 +154,11 @@ export class JupyterLabHelper {
 
 	public async getKernelSpecs(): Promise<IJupyterKernelSpec[]> {
 		if (
-			!this.serverSettings ||
-			!this.sessionManager ||
-			!this.contentsManager
+			!(
+				this.serverSettings &&
+				this.sessionManager &&
+				this.contentsManager
+			)
 		) {
 			throw new SessionDisposedError();
 		}
@@ -287,7 +289,7 @@ export class JupyterLabHelper {
 				return [await createInterpreterKernelSpec()];
 			}
 		} catch (e) {
-			traceError(`Jupyter Lab Helper:getKernelSpecs failure: `, e);
+			traceError("Jupyter Lab Helper:getKernelSpecs failure: ", e);
 			// For some reason this is failing. Just return nothing
 			return [];
 		}

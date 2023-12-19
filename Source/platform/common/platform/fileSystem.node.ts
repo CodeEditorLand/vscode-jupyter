@@ -149,8 +149,8 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 	): Promise<void> {
 		if (isLocalFile(source) && isLocalFile(destination)) {
 			const overwrite =
-				typeof options === undefined ||
-				typeof options?.overwrite == undefined
+				typeof options === "undefined" ||
+				typeof options?.overwrite === "undefined"
 					? true
 					: options?.overwrite;
 			await fs.copy(getFilePath(source), getFilePath(destination), {

@@ -184,15 +184,11 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		if (!isTestExecution()) {
 			throw new Error("Dispose can only be called from unit tests");
 		}
-		JupyterSettings.jupyterSettings.forEach(
-			(item) => item && item.dispose(),
-		);
+		JupyterSettings.jupyterSettings.forEach((item) => item?.dispose());
 		JupyterSettings.jupyterSettings.clear();
 	}
 	public dispose() {
-		this._disposables.forEach(
-			(disposable) => disposable && disposable.dispose(),
-		);
+		this._disposables.forEach((disposable) => disposable?.dispose());
 		this._disposables = [];
 	}
 

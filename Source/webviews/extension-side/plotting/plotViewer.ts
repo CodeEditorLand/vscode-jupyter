@@ -113,17 +113,20 @@ export class PlotViewer
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected override onMessage(message: string, payload: any) {
 		switch (message) {
-			case PlotViewerMessages.CopyPlot:
+			case PlotViewerMessages.CopyPlot: {
 				this.copyPlot(payload.toString()).catch(noop);
 				break;
+			}
 
-			case PlotViewerMessages.ExportPlot:
+			case PlotViewerMessages.ExportPlot: {
 				this.exportPlot(payload).catch(noop);
 				break;
+			}
 
-			case PlotViewerMessages.RemovePlot:
+			case PlotViewerMessages.RemovePlot: {
 				this.removePlot(payload);
 				break;
+			}
 
 			default:
 				break;
@@ -157,19 +160,19 @@ export class PlotViewer
 			if (file) {
 				const ext = path.extname(file.path);
 				switch (ext.toLowerCase()) {
-					case ".png":
+					case ".png": {
 						const buffer = Buffer.from(
 							payload.png.replace("data:image/png;base64", ""),
 							"base64",
 						);
 						await this.fs.writeFile(file, buffer);
 						break;
-
-					default:
-					case ".svg":
+					}
+					default: {
 						// This is the easy one:
 						await this.fs.writeFile(file, payload.svg);
 						break;
+					}
 				}
 			}
 		} catch (e) {

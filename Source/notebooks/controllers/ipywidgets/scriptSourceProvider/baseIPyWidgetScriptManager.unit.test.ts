@@ -103,7 +103,7 @@ suite("ipywidget - CDN", () => {
 			);
 			// Convert values to strings for easy comparison.
 			Object.keys(config!).forEach(
-				(key) => (config![key] = config![key].toString() as any),
+				(key) => (config![key] = config?.[key].toString() as any),
 			);
 
 			const expectedConfig: Record<string, any> = item.config;

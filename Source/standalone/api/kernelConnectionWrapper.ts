@@ -30,7 +30,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 	}
 
 	constructor(readonly kernel: IBaseKernel, disposables: IDisposable[]) {
-		super(kernel.session!.kernel!, disposables);
+		super(kernel.session?.kernel!, disposables);
 		const emiStatusChangeEvents = () => {
 			this.statusChanged.emit(kernel.status);
 			if (
@@ -53,7 +53,7 @@ export class KernelConnectionWrapper extends BaseKernelConnectionWrapper {
 		kernel.onStarted(emiStatusChangeEvents, this, disposables);
 		kernel.onRestarted(emiStatusChangeEvents, this, disposables);
 		kernel.onStatusChanged(emiStatusChangeEvents, this, disposables);
-		this.startHandleKernelMessages(kernel.session!.kernel!);
+		this.startHandleKernelMessages(kernel.session?.kernel!);
 	}
 	async shutdown(): Promise<void> {
 		if (

@@ -100,7 +100,7 @@ export class PythonKernelInterruptDaemon {
 				resource,
 			);
 		} catch (ex) {
-			traceError(`Failed to create interrupter, trying again`, ex);
+			traceError("Failed to create interrupter, trying again", ex);
 			return this.createInterrupterImpl(pythonEnvironment, resource);
 		}
 	}
@@ -114,8 +114,8 @@ export class PythonKernelInterruptDaemon {
 			resource,
 		)) as number;
 		if (!interruptHandle) {
-			traceError(`Unable to initialize interrupt handle`);
-			throw new Error(`Unable to initialize interrupt handle`);
+			traceError("Unable to initialize interrupt handle");
+			throw new Error("Unable to initialize interrupt handle");
 		}
 
 		return {
@@ -356,7 +356,7 @@ export class PythonKernelInterruptDaemon {
 			pythonEnvironment,
 			resource,
 		);
-		if (!proc || !proc.stdin) {
+		if (!proc?.stdin) {
 			// An impossible scenario, but types in node.js requires this, and we need to check to keep the compiler happy
 			traceError("No process or stdin");
 			throw new Error("No process or stdin");

@@ -173,13 +173,13 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		source?: DebugProtocol.Source,
 	) {
 		source = location?.source ?? source;
-		if (!source || !source.path) {
+		if (!source?.path) {
 			return;
 		}
 
 		// Find the cell that matches this line in the IW file by mapping the debugFilePath to the IW file.
 		const cell = this.cellToDebugFileSortedInReverseOrderByLineNumber.find(
-			(item) => item.debugFilePath === source!.path,
+			(item) => item.debugFilePath === source?.path,
 		);
 		if (!cell) {
 			return;
@@ -188,10 +188,10 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		source.name = path.basename(cell.interactiveWindow.path);
 		source.path = cell.interactiveWindow.toString();
 		if (typeof location?.endLine === "number") {
-			location.endLine = location.endLine + (cell.lineOffset || 0);
+			location.endLine += cell.lineOffset || 0;
 		}
 		if (typeof location?.line === "number") {
-			location.line = location.line + (cell.lineOffset || 0);
+			location.line += cell.lineOffset || 0;
 		}
 	}
 
@@ -205,7 +205,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	) {
 		const startLine = location.line;
 		source = location?.source ?? source;
-		if (!source || !source.path || typeof startLine !== "number") {
+		if (!source?.path || typeof startLine !== "number") {
 			return;
 		}
 
@@ -220,10 +220,10 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		source.path = cell.debugFilePath;
 
 		if (typeof location?.endLine === "number") {
-			location.endLine = location.endLine - (cell.lineOffset || 0);
+			location.endLine -= cell.lineOffset || 0;
 		}
 		if (typeof location?.line === "number") {
-			location.line = location.line - (cell.lineOffset || 0);
+			location.line -= cell.lineOffset || 0;
 		}
 	}
 
@@ -233,7 +233,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		if (request.command === "setBreakpoints") {
 			const args =
 				request.arguments as DebugProtocol.SetBreakpointsArguments;
-			delete args.lines; // deprecated, we will only use breakpoints
+			args.lines = undefined; // deprecated, we will only use breakpoints
 			if (
 				args.source.path !==
 				this.cellToDebugFileSortedInReverseOrderByLineNumber[0]
@@ -264,8 +264,8 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					this.cellToDebugFileSortedInReverseOrderByLineNumber.find(
 						(cell) => {
 							return (
-								bp.line >= cell.metadata.generatedCode!.line &&
-								bp.line <= cell.metadata.generatedCode!.endLine
+								bp.line >= cell.metadata.generatedCode?.line &&
+								bp.line <= cell.metadata.generatedCode?.endLine
 							);
 						},
 					);

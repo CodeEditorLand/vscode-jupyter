@@ -52,7 +52,7 @@ export class ScriptSourceProviderFactory
 		// Only remote is supported at the moment
 		switch (kernel.kernelConnectionMetadata.kind) {
 			case "connectToLiveRemoteKernel":
-			case "startUsingRemoteKernelSpec":
+			case "startUsingRemoteKernelSpec": {
 				scriptProviders.push(
 					new RemoteWidgetScriptSourceProvider(
 						kernel,
@@ -60,6 +60,7 @@ export class ScriptSourceProviderFactory
 					),
 				);
 				break;
+			}
 		}
 
 		return scriptProviders;

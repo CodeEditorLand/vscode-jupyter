@@ -69,9 +69,10 @@ function fixupOutput(output: nbformat.IOutput): nbformat.IOutput {
 		case "stream":
 		case "error":
 		case "execute_result":
-		case "display_data":
+		case "display_data": {
 			allowedKeys = AllowedCellOutputKeys[output.output_type];
 			break;
+		}
 		default:
 			return output;
 	}
@@ -97,9 +98,9 @@ export function pruneCell(cell: nbformat.ICell): nbformat.ICell {
 	if (result.cell_type !== "code") {
 		// Map to any so nyc will build.
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		delete (<any>result).outputs;
+		(<any>result).outputs = undefined;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		delete (<any>result).execution_count;
+		(<any>result).execution_count = undefined;
 	} else if (result.cell_type) {
 		// Clean outputs from code cells
 		const cellResult = result as nbformat.ICodeCell;
@@ -114,13 +115,12 @@ export function pruneCell(cell: nbformat.ICell): nbformat.ICell {
 export function traceCellResults(prefix: string, results: ICell[]) {
 	if (results.length > 0 && results[0].data.cell_type === "code") {
 		const cell = results[0].data as nbformat.ICodeCell;
-		const error =
-			cell.outputs && cell.outputs[0]
-				? "evalue" in cell.outputs[0]
-				: undefined;
+		const error = cell.outputs?.[0]
+			? "evalue" in cell.outputs[0]
+			: undefined;
 		if (error) {
 			traceError(`${prefix} Error : ${error}`);
-		} else if (cell.outputs && cell.outputs[0]) {
+		} else if (cell.outputs?.[0]) {
 			if (cell.outputs[0].output_type.includes("image")) {
 				traceInfo(`${prefix} Output: image`);
 			} else {
@@ -295,9 +295,9 @@ function fixBackspace(txt: string) {
 function fixCarriageReturn(txt: string) {
 	txt = txt.replace(/\r+\n/gm, "\n"); // \r followed by \n --> newline
 	while (txt.search(/\r[^$]/g) > -1) {
-		var base = txt.match(/^(.*)\r+/m)![1];
-		var insert = txt.match(/\r+(.*)$/m)![1];
-		insert = insert + base.slice(insert.length, base.length);
+		const base = txt.match(/^(.*)\r+/m)?.[1];
+		let insert = txt.match(/\r+(.*)$/m)?.[1];
+		insert += base.slice(insert.length, base.length);
 		txt = txt.replace(/\r+.*$/m, "\r").replace(/^.*\r/m, insert);
 	}
 	return txt;

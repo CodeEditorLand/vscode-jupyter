@@ -131,10 +131,10 @@ suite("Jupyter Provider Tests", function () {
 							token,
 						);
 					assert.strictEqual(actions?.length, 1);
-					if (actions![0].label === "First Collection") {
+					if (actions?.[0].label === "First Collection") {
 						matchingDisposable1 = disposable;
 					}
-					if (actions![0].label === "Second Collection") {
+					if (actions?.[0].label === "Second Collection") {
 						matchingDisposable2 = disposable;
 					}
 					if (matchingDisposable1 && matchingDisposable2) {
@@ -146,7 +146,7 @@ suite("Jupyter Provider Tests", function () {
 			120_000,
 			"Providers not registered for IW and Notebook",
 		);
-		if (!matchingDisposable1 || !matchingDisposable2) {
+		if (!(matchingDisposable1 && matchingDisposable2)) {
 			throw new Error("Provider not registered");
 		}
 		// Once we dispose the collection, this item should no longer be in the list of the actions.
@@ -334,7 +334,7 @@ suite("Jupyter Provider Tests", function () {
 						);
 					assert.strictEqual(actions?.length, 1);
 					if (
-						actions![0].label === "First Collection For Third Test"
+						actions?.[0].label === "First Collection For Third Test"
 					) {
 						matchingProvider = provider;
 						return true;
@@ -368,7 +368,7 @@ suite("Jupyter Provider Tests", function () {
 			});
 		const actions =
 			await matchingProvider.provideNotebookKernelSourceActions(token);
-		const actionCommand: Command = actions![0]
+		const actionCommand: Command = actions?.[0]
 			.command as unknown as Command;
 		const controllerId = await commands.executeCommand(
 			actionCommand.command,

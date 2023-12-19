@@ -117,7 +117,7 @@ export class ExperimentService implements IExperimentService {
 		}
 	}
 	public inExperiment(experiment: ExperimentGroups): boolean {
-		if (!this.experimentationService || !this.enabled) {
+		if (!(this.experimentationService && this.enabled)) {
 			return false;
 		}
 		// Currently the service doesn't support opting in and out of experiments,
@@ -168,8 +168,7 @@ export class ExperimentService implements IExperimentService {
 		experiment: ExperimentGroups,
 	): Promise<T | undefined> {
 		if (
-			!this.experimentationService ||
-			!this.enabled ||
+			!(this.experimentationService && this.enabled) ||
 			this._optOutFrom.includes(experiment as unknown as string)
 		) {
 			return;

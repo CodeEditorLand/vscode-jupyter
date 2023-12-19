@@ -92,7 +92,7 @@ export function isPythonEnvInListOfHiddenEnvs(
 			: interpreter.environment?.folderUri;
 	const interpreterUri =
 		"uri" in interpreter ? interpreter.uri : interpreter.executable.uri;
-	if (!interpreterUri && !envFolderUri) {
+	if (!(interpreterUri || envFolderUri)) {
 		return false;
 	}
 	const hidden = hiddenList.some((item) => {

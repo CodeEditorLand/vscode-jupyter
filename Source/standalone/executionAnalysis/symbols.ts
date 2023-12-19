@@ -85,7 +85,7 @@ export class CellAnalysis {
 		const virtualCellList = forceReadNotebook
 			? this._notebookDocument.getCells()
 			: this._getVirtualCellList(cell);
-		var i;
+		let i;
 		for (
 			i = virtualCellList.length - 1;
 			i >= 0 &&

@@ -48,7 +48,7 @@ export class RunByLineController implements IDebuggingDelegate {
 	}
 
 	public stop(): void {
-		traceInfoIfCI(`RunbylineController::stop()`);
+		traceInfoIfCI("RunbylineController::stop()");
 		// When debugpy gets stuck, running a cell fixes it and allows us to start another debugging session
 		this.execution.executeHidden("pass").then(noop, noop);
 		this.debugAdapter.disconnect().then(noop, noop);
@@ -107,7 +107,7 @@ export class RunByLineController implements IDebuggingDelegate {
 			levels: 1,
 		});
 
-		if (stResponse && stResponse.stackFrames[0]) {
+		if (stResponse?.stackFrames[0]) {
 			const sf = stResponse.stackFrames[0];
 			const pausePos = new Position(sf.line, sf.column);
 			if (this.lastPausePosition?.isEqual(pausePos)) {

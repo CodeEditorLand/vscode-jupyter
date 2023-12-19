@@ -181,7 +181,7 @@ export abstract class DataScienceErrorHandler
 	) {
 		error = WrappedError.unwrap(error);
 		if (!isCancellationError(error)) {
-			traceError(`Error in execution (get message for cell)`, error);
+			traceError("Error in execution (get message for cell)", error);
 		}
 		if (error instanceof KernelDeadError) {
 			// When we get this we've already asked the user to restart the kernel,
@@ -484,7 +484,7 @@ export abstract class DataScienceErrorHandler
 			const id = err.serverProviderHandle.id;
 			const collection =
 				this.jupyterUriProviderRegistration.jupyterCollections.find(
-					(c) => c.extensionId === extensionId && c.id == id,
+					(c) => c.extensionId === extensionId && c.id === id,
 				);
 			if (
 				!collection ||
@@ -819,7 +819,7 @@ function getCombinedErrorMessage(prefix = "", message = "") {
 		errorMessage.indexOf("command:jupyter.viewOutput") === -1
 	) {
 		return `${
-			errorMessage.endsWith(".") ? errorMessage : errorMessage + "."
+			errorMessage.endsWith(".") ? errorMessage : `${errorMessage}.`
 		} \n${DataScience.viewJupyterLogForFurtherInfo}`;
 	}
 	return errorMessage;
@@ -867,7 +867,7 @@ function getIPyKernelMissingErrorMessageForCell(
 		ipyKernelName,
 		installerCommand,
 	);
-	return message + "\n" + installationInstructions;
+	return `${message}\n${installationInstructions}`;
 }
 function getJupyterMissingErrorMessageForCell(err: JupyterInstallError) {
 	const productNames = `${ProductNames.get(Product.jupyter)} ${
@@ -883,13 +883,9 @@ function getJupyterMissingErrorMessageForCell(err: JupyterInstallError) {
 		installerCommand,
 	);
 
-	return (
-		err.message +
-		"\n" +
-		installationInstructions +
-		"\n" +
-		Common.clickHereForMoreInfoWithHtml(
-			"https://aka.ms/installJupyterForVSCode",
-		)
-	);
+	return `${
+		err.message
+	}\n${installationInstructions}\n${Common.clickHereForMoreInfoWithHtml(
+		"https://aka.ms/installJupyterForVSCode",
+	)}`;
 }

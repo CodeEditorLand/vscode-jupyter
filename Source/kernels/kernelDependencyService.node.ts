@@ -101,9 +101,11 @@ export class KernelDependencyService implements IKernelDependencyService {
 		installWithoutPrompting?: boolean;
 	}): Promise<KernelInterpreterDependencyResponse> {
 		if (
-			!isLocalConnection(kernelConnection) ||
-			!isPythonKernelConnection(kernelConnection) ||
-			!kernelConnection.interpreter
+			!(
+				isLocalConnection(kernelConnection) &&
+				isPythonKernelConnection(kernelConnection) &&
+				kernelConnection.interpreter
+			)
 		) {
 			return KernelInterpreterDependencyResponse.ok;
 		}
@@ -201,7 +203,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				dependencyResponse = KernelInterpreterDependencyResponse.cancel;
 			}
 		} catch (ex) {
-			traceInfoIfCI(`Failed to install kernel dependency`, ex);
+			traceInfoIfCI("Failed to install kernel dependency", ex);
 			// Failure occurred
 			dependencyResponse = KernelInterpreterDependencyResponse.failed;
 		} finally {
@@ -338,7 +340,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 		options.push(moreInfoOption);
 
 		try {
-			if (!isCodeSpace() || !installWithoutPrompting) {
+			if (!(isCodeSpace() && installWithoutPrompting)) {
 				sendKernelTelemetryEvent(
 					resource,
 					Telemetry.PythonModuleInstall,

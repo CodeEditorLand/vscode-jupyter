@@ -120,10 +120,9 @@ export function isKernelDead(k: IBaseKernel) {
 	return (
 		k.status === "dead" ||
 		(k.status === "terminating" && !k.disposed && !k.disposing) ||
-		(!k.disposed &&
-			!k.disposing &&
-			(k.session?.status == "unknown" ||
-				k.session?.kernel?.status == "unknown") &&
+		(!(k.disposed || k.disposing) &&
+			(k.session?.status === "unknown" ||
+				k.session?.kernel?.status === "unknown") &&
 			(k.session.kernel?.isDisposed || k.session.isDisposed))
 	);
 }
@@ -133,7 +132,7 @@ export function isKernelSessionDead(k: IKernelSession) {
 		k.status === "dead" ||
 		(k.status === "terminating" && !k.isDisposed) ||
 		(!k.isDisposed &&
-			(k.status == "unknown" || k.kernel?.status == "unknown") &&
+			(k.status === "unknown" || k.kernel?.status === "unknown") &&
 			(k.kernel?.isDisposed || k.isDisposed))
 	);
 }
@@ -597,7 +596,7 @@ abstract class BaseKernel implements IBaseKernel {
 			),
 		);
 
-		if (session && session.kernel) {
+		if (session?.kernel) {
 			traceInfo(`Interrupting kernel: ${session.kernel.name}`);
 
 			// Start our interrupt. If it fails, indicate a restart
@@ -713,8 +712,7 @@ abstract class BaseKernel implements IBaseKernel {
 					ex,
 				);
 			} else if (
-				!this.startCancellation.token &&
-				!isCancellationError(ex)
+				!(this.startCancellation.token || isCancellationError(ex))
 			) {
 				traceError(
 					`failed to create IJupyterKernelConnectionSession in kernel, UI Disabled = ${this.startupUI.disableUI}`,
@@ -732,7 +730,7 @@ abstract class BaseKernel implements IBaseKernel {
 				),
 			);
 			throw WrappedError.from(
-				message + " " + ("message" in ex ? ex.message : ex.toString()),
+				`${message} ${"message" in ex ? ex.message : ex.toString()}`,
 				ex,
 			);
 		} finally {
@@ -878,7 +876,7 @@ abstract class BaseKernel implements IBaseKernel {
 			// This must happen early on as the state of the kernel needs to be synced with the Kernel in the webview (renderer)
 			// And the longer we wait, the more data we need to hold onto in memory that later needs to be sent to the kernel in renderer.
 			this.determineVersionOfIPyWidgets(session).catch((ex) =>
-				traceError(`Failed to determine IPyWidget version`, ex),
+				traceError("Failed to determine IPyWidget version", ex),
 			);
 
 			// Gather all of the startup code at one time and execute as one cell
@@ -891,7 +889,7 @@ abstract class BaseKernel implements IBaseKernel {
 					}),
 				)
 				.catch((ex) =>
-					traceError(`Failed to execute internal startup code`, ex),
+					traceError("Failed to execute internal startup code", ex),
 				);
 		} else {
 			// As users can have IPyWidgets at any point in time, we need to determine the version of ipywidgets
@@ -946,7 +944,7 @@ abstract class BaseKernel implements IBaseKernel {
 			// For all other kernels, assume we are using the older version of IPyWidgets.
 			// There are very few kernels that support IPyWidgets, however IPyWidgets 8 is very new
 			// & it is unlikely that others have supported this new version.
-			this._ipywidgetsVersion == WIDGET_VERSION_NON_PYTHON_KERNELS;
+			this._ipywidgetsVersion === WIDGET_VERSION_NON_PYTHON_KERNELS;
 			this._onIPyWidgetVersionResolved.fire(
 				WIDGET_VERSION_NON_PYTHON_KERNELS,
 			);
@@ -986,7 +984,7 @@ abstract class BaseKernel implements IBaseKernel {
 					  : undefined);
 				traceVerbose(`Determined IPyWidgets Version as ${newVersion}`);
 				// If user does not have ipywidgets installed, then this event will never get fired.
-				this._ipywidgetsVersion == newVersion;
+				this._ipywidgetsVersion === newVersion;
 				this._onIPyWidgetVersionResolved.fire(newVersion);
 			} else {
 				traceWarning(
@@ -1129,7 +1127,7 @@ abstract class BaseKernel implements IBaseKernel {
 
 		// Convert to string in case we get an array of startup commands.
 		if (Array.isArray(setting)) {
-			setting = setting.join(`\n`);
+			setting = setting.join("\n");
 		}
 
 		if (setting) {
@@ -1232,8 +1230,8 @@ function wrapPythonStartupBlock(
 	});
 
 	// Add the try except
-	inputCode.unshift(`try:`);
-	inputCode.push(`except:`, `    print('${pythonMessage}')`);
+	inputCode.unshift("try:");
+	inputCode.push("except:", `    print('${pythonMessage}')`);
 
 	return inputCode;
 }
@@ -1244,7 +1242,7 @@ function wrapPythonStartupBlock(
 export function getPlainTextOrStreamOutput(outputs: nbformat.IOutput[]) {
 	if (outputs.length > 0) {
 		const data = outputs[0].data;
-		if (data && data.hasOwnProperty("text/plain")) {
+		if (data?.hasOwnProperty("text/plain")) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			return concatMultilineString((data as any)["text/plain"]);
 		}

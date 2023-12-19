@@ -12,7 +12,6 @@ export function detectBaseTheme():
 	if (body) {
 		switch (body.className) {
 			default:
-			case "vscode-light":
 				return "vscode-light";
 			case "vscode-dark":
 				return "vscode-dark";

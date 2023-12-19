@@ -72,19 +72,22 @@ suite("Quick Pick Kernel Item Provider", () => {
 				);
 				when(finder.kind).thenReturn(kind);
 				switch (kind) {
-					case ContributedKernelFinderKind.LocalKernelSpec:
+					case ContributedKernelFinderKind.LocalKernelSpec: {
 						when(finder.displayName).thenReturn(
 							DataScience.localKernelSpecs,
 						);
 						break;
-					case ContributedKernelFinderKind.LocalPythonEnvironment:
+					}
+					case ContributedKernelFinderKind.LocalPythonEnvironment: {
 						when(finder.displayName).thenReturn(
 							DataScience.localPythonEnvironments,
 						);
 						break;
-					case ContributedKernelFinderKind.Remote:
+					}
+					case ContributedKernelFinderKind.Remote: {
 						when(finder.displayName).thenReturn("Remote Server");
 						break;
+					}
 				}
 				when(finder.displayName).thenReturn("x");
 				when(finder.kernels).thenReturn([]);
@@ -119,20 +122,23 @@ suite("Quick Pick Kernel Item Provider", () => {
 
 				let expectedTitle = "";
 				switch (kind) {
-					case ContributedKernelFinderKind.LocalKernelSpec:
+					case ContributedKernelFinderKind.LocalKernelSpec: {
 						expectedTitle =
 							DataScience.kernelPickerSelectLocalKernelSpecTitle;
 						break;
-					case ContributedKernelFinderKind.LocalPythonEnvironment:
+					}
+					case ContributedKernelFinderKind.LocalPythonEnvironment: {
 						expectedTitle =
 							DataScience.quickPickSelectPythonEnvironmentTitle;
 						break;
-					default:
+					}
+					default: {
 						expectedTitle =
 							DataScience.kernelPickerSelectKernelFromRemoteTitle(
 								instance(finder).displayName,
 							);
 						break;
+					}
 				}
 				assert.strictEqual(provider.title, expectedTitle);
 			});

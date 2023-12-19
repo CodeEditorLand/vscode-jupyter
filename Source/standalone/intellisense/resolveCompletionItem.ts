@@ -73,7 +73,7 @@ export async function resolveCompletionItem(
 	position: Position,
 	toDispose: DisposableStore,
 ): Promise<CompletionItem> {
-	if (!item.range || !kernel.session?.kernel) {
+	if (!(item.range && kernel.session?.kernel)) {
 		// We always set a range in the completion item we send.
 		// Except for Python.
 		return item;
@@ -342,7 +342,7 @@ function checkHowLongKernelTakesToReplyEvenAfterTimeoutOrCancellation(
 
 	void request.finally(() => {
 		// We do not care if the request didn't time out or it was not cancelled.
-		if (!properties.cancelled || !properties.requestTimedout) {
+		if (!(properties.cancelled && properties.requestTimedout)) {
 			return;
 		}
 		timeoutDisposable.dispose();

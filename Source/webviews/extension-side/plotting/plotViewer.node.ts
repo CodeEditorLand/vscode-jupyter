@@ -46,23 +46,24 @@ export class PlotViewer extends PlotViewerBase {
 			if (file) {
 				const ext = path.extname(file.fsPath);
 				switch (ext.toLowerCase()) {
-					case ".pdf":
+					case ".pdf": {
 						await saveSvgToPdf(payload.svg, this.fsNode, file);
 						break;
+					}
 
-					case ".png":
+					case ".png": {
 						const buffer = Buffer.from(
 							payload.png.replace("data:image/png;base64", ""),
 							"base64",
 						);
 						await this.fs.writeFile(file, buffer);
 						break;
-
-					default:
-					case ".svg":
+					}
+					default: {
 						// This is the easy one:
 						await this.fs.writeFile(file, payload.svg);
 						break;
+					}
 				}
 			}
 		} catch (e) {

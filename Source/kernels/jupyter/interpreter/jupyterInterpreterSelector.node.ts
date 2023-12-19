@@ -68,8 +68,10 @@ export class JupyterInterpreterSelector {
 			)
 			.withFilter(
 				(item) =>
-					!isCondaEnvironmentWithoutPython(item) &&
-					!filter.isPythonEnvironmentExcluded(item),
+					!(
+						isCondaEnvironmentWithoutPython(item) ||
+						filter.isPythonEnvironmentExcluded(item)
+					),
 			);
 		const findSelectedEnvironment = () =>
 			provider.items.find((item) =>
@@ -122,7 +124,7 @@ export class JupyterInterpreterSelector {
 			return item;
 		} catch (ex) {
 			traceError(
-				`Failed to select a Python Environment to start Jupyter`,
+				"Failed to select a Python Environment to start Jupyter",
 				ex,
 			);
 		} finally {

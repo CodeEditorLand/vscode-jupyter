@@ -105,15 +105,18 @@ export class ExportBase implements IExportBase {
 		let fileExt = "";
 
 		switch (format) {
-			case ExportFormat.html:
+			case ExportFormat.html: {
 				fileExt = ".html";
 				break;
-			case ExportFormat.pdf:
+			}
+			case ExportFormat.pdf: {
 				fileExt = ".pdf";
 				break;
-			case ExportFormat.python:
+			}
+			case ExportFormat.python: {
 				fileExt = ".py";
 				break;
+			}
 		}
 
 		const backingFile = await this.createBackingFile(
@@ -125,7 +128,7 @@ export class ExportBase implements IExportBase {
 			return;
 		}
 		await contentsManager
-			.save(backingFile!.filePath, {
+			.save(backingFile?.filePath, {
 				content: JSON.parse(contents),
 				type: "notebook",
 			})
@@ -293,7 +296,7 @@ export class ExportBase implements IExportBase {
 		}
 		const outputs = await executeSilently(
 			kernel.session.kernel,
-			`import os;os.getcwd();`,
+			"import os;os.getcwd();",
 		);
 		if (outputs.length === 0) {
 			return;

@@ -113,16 +113,19 @@ export async function trackKernelResourceInformation(
 		}
 		let language: string | undefined;
 		switch (kernelConnection.kind) {
-			case "connectToLiveRemoteKernel":
+			case "connectToLiveRemoteKernel": {
 				language = kernelConnection.kernelModel.language;
 				break;
+			}
 			case "startUsingRemoteKernelSpec":
-			case "startUsingLocalKernelSpec":
+			case "startUsingLocalKernelSpec": {
 				language = kernelConnection.kernelSpec.language;
 				break;
-			case "startUsingPythonInterpreter":
+			}
+			case "startUsingPythonInterpreter": {
 				language = PYTHON_LANGUAGE;
 				break;
+			}
 			default:
 				break;
 		}

@@ -119,7 +119,7 @@ export class ProcessService implements IProcessService {
 		if (options.token) {
 			disposables.push(
 				options.token.onCancellationRequested(() => {
-					if (!procExited && !proc.killed) {
+					if (!(procExited || proc.killed)) {
 						ProcessService.kill(proc.pid);
 						procExited = true;
 					}
@@ -173,7 +173,7 @@ export class ProcessService implements IProcessService {
 		const deferred = createDeferred<ExecutionResult<string>>();
 		const disposable: IDisposable = {
 			dispose: () => {
-				if (!proc.killed && !deferred.completed) {
+				if (!(proc.killed || deferred.completed)) {
 					ProcessService.kill(proc.pid);
 				}
 			},
@@ -294,7 +294,7 @@ export class ProcessService implements IProcessService {
 				execOptions.encoding.length > 0
 					? execOptions.encoding
 					: DEFAULT_ENCODING);
-			delete execOptions.encoding;
+			execOptions.encoding = undefined;
 			execOptions.encoding = encoding;
 		}
 		if (

@@ -456,9 +456,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 		// comm message (requests) sent by an output widget.
 		// See https://github.com/microsoft/vscode-jupyter/issues/9503 for more information.
 		if (
-			!msg.parent_header ||
-			!("msg_id" in msg.parent_header) ||
-			!this.ownedRequestMsgIds.has(msg.parent_header.msg_id) ||
+			!(
+				msg.parent_header &&
+				"msg_id" in msg.parent_header &&
+				this.ownedRequestMsgIds.has(msg.parent_header.msg_id)
+			) ||
 			msg.channel !== "iopub"
 		) {
 			return;
@@ -467,11 +469,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.handleIOPub(msg);
 		} catch (ex) {
 			traceError(
-				`Failed to handle iopub message as a result of some comm message`,
+				"Failed to handle iopub message as a result of some comm message",
 				msg,
 				ex,
 			);
-			if (!this.completedExecution && !this.cell.document.isClosed) {
+			if (!(this.completedExecution || this.cell.document.isClosed)) {
 				// If there are problems handling the execution, then bubble those to the calling code.
 				// Else just log the errors.
 				this._onErrorHandlingIOPubMessage.fire(ex);
@@ -818,9 +820,9 @@ export class CellExecutionMessageHandler implements IDisposable {
 	) {
 		const mime = outputItem.mime;
 		if (
-			mime == CellOutputMimeTypes.stderr ||
-			mime == CellOutputMimeTypes.stdout ||
-			mime == CellOutputMimeTypes.error
+			mime === CellOutputMimeTypes.stderr ||
+			mime === CellOutputMimeTypes.stdout ||
+			mime === CellOutputMimeTypes.error
 		) {
 			// These are plain text mimetypes that can be rendered by the Jupyter Lab widget manager.
 			return true;
@@ -909,7 +911,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					) as { model_id?: string };
 					return value.model_id === expectedModelId;
 				} catch (ex) {
-					traceWarning(`Failed to deserialize the widget data`, ex);
+					traceWarning("Failed to deserialize the widget data", ex);
 				}
 				return false;
 			});
@@ -1049,7 +1051,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 						payload as unknown as ISetNextInputPayload,
 					);
 				}
-				if (payload.data && payload.data.hasOwnProperty("text/plain")) {
+				if (payload.data?.hasOwnProperty("text/plain")) {
 					this.addToCellData(
 						{
 							// Mark as stream output so the text is formatted because it likely has ansi codes in it.
@@ -1119,7 +1121,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.outputsAreSpecificToAWidget.length &&
 			this.outputsAreSpecificToAWidget[
 				this.outputsAreSpecificToAWidget.length - 1
-			].msgIdsToSwallow == getParentHeaderMsgId(msg)
+			].msgIdsToSwallow === getParentHeaderMsgId(msg)
 		) {
 			// Stream messages will be handled by the Output Widget.
 			return;
@@ -1146,9 +1148,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 		// & the last output is an output with the same stream output items then use that (instead of creating a whole new output).
 		// Because with streams we always append to the existing output (unless we have different mime types or different stream types)
 		if (
-			!this.request &&
-			!this.streamsReAttachedToExecutingCell &&
-			!this.lastUsedStreamOutput
+			!(
+				this.request ||
+				this.streamsReAttachedToExecutingCell ||
+				this.lastUsedStreamOutput
+			)
 		) {
 			if (
 				this.cell.outputs.length &&

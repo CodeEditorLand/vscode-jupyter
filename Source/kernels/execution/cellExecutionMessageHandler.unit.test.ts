@@ -31,7 +31,7 @@ import { IKernelController } from "../types";
 import { CellExecutionMessageHandlerService } from "./cellExecutionMessageHandlerService";
 import { translateCellDisplayOutput } from "./helpers";
 
-suite(`Cell Execution Message Handler`, () => {
+suite("Cell Execution Message Handler", () => {
 	let disposables: IDisposable[] = [];
 	let controller: IKernelController;
 	let context: IExtensionContext;
@@ -277,7 +277,7 @@ suite(`Cell Execution Message Handler`, () => {
 			});
 			assert.strictEqual(cell.outputs.length, 1);
 			const output = translateCellDisplayOutput(cell.outputs[0]);
-			delete output.transient;
+			output.transient = undefined;
 			assert.deepEqual(output, imageOutput);
 		});
 		test("Execute cell and update Display Data with metadata (Issue 8621)", async () => {
@@ -308,7 +308,7 @@ suite(`Cell Execution Message Handler`, () => {
 			});
 			assert.strictEqual(cell.outputs.length, 1);
 			const output = translateCellDisplayOutput(cell.outputs[0]);
-			delete output.transient;
+			output.transient = undefined;
 			assert.deepEqual(output, imageOutput);
 
 			// Now update the display data of the first cell from the second cell
@@ -328,7 +328,7 @@ suite(`Cell Execution Message Handler`, () => {
 			);
 			assert.strictEqual(cell.outputs.length, 1);
 			const output2 = translateCellDisplayOutput(cell.outputs[0]);
-			delete output2.transient;
+			output2.transient = undefined;
 			assert.deepEqual(
 				output2,
 				Object.assign({}, imageOutput, {
@@ -368,7 +368,7 @@ suite(`Cell Execution Message Handler`, () => {
 			});
 			assert.strictEqual(cell.outputs.length, 1);
 			const output = translateCellDisplayOutput(cell.outputs[0]);
-			delete output.transient;
+			output.transient = undefined;
 			assert.deepEqual(output, imageOutput);
 
 			// Mimic a situation where the cell outputs have not yet been updated in the DOM.
@@ -393,7 +393,7 @@ suite(`Cell Execution Message Handler`, () => {
 			);
 			assert.strictEqual(cell.outputs.length, 1);
 			const output2 = translateCellDisplayOutput(cell.outputs[0]);
-			delete output2.transient;
+			output2.transient = undefined;
 			assert.deepEqual(
 				output2,
 				Object.assign({}, imageOutput, {

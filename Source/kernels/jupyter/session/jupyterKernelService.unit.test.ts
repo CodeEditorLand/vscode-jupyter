@@ -45,7 +45,7 @@ suite("JupyterKernelService", () => {
 		// eslint-disable-next-line local-rules/dont-use-process
 		process.platform === "win32"
 			? "PATH"
-			: Object.keys(process.env).find((k) => k.toLowerCase() == "path")!;
+			: Object.keys(process.env).find((k) => k.toLowerCase() === "path")!;
 
 	// Set of kernels. Generated this by running the localKernelFinder unit test and stringifying
 	// the results returned.

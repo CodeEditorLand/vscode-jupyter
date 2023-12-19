@@ -280,18 +280,22 @@ export class ProductInstaller implements IInstaller {
 				this._onInstalled.fire({ product, resource: interpreter });
 			}
 			switch (result) {
-				case InstallerResponse.Cancelled:
+				case InstallerResponse.Cancelled: {
 					action = "cancelled";
 					break;
-				case InstallerResponse.Installed:
+				}
+				case InstallerResponse.Installed: {
 					action = "installed";
 					break;
-				case InstallerResponse.Ignore:
+				}
+				case InstallerResponse.Ignore: {
 					action = "ignored";
 					break;
-				case InstallerResponse.Disabled:
+				}
+				case InstallerResponse.Disabled: {
 					action = "disabled";
 					break;
+				}
 				default:
 					break;
 			}

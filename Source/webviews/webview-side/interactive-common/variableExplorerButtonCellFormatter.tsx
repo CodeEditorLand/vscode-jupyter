@@ -63,11 +63,7 @@ export class VariableExplorerButtonCellFormatter extends React.Component<IVariab
 	}
 
 	private onDataExplorerClick = () => {
-		if (
-			this.props.value !== null &&
-			this.props.value !== undefined &&
-			this.props.value.variable
-		) {
+		if (this.props.value?.variable) {
 			this.props.showDataExplorer(
 				this.props.value.variable,
 				this.props.value.numberOfColumns,

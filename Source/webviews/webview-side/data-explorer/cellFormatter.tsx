@@ -14,11 +14,6 @@ interface ICellFormatterProps {
 }
 
 class CellFormatter extends React.Component<ICellFormatterProps> {
-	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
-	constructor(props: ICellFormatterProps) {
-		super(props);
-	}
-
 	public override render() {
 		// Render based on type
 		if (

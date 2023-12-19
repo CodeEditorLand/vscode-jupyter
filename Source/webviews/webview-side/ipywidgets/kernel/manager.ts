@@ -158,10 +158,9 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		const state = notebook.metadata.get(
 			"widgets",
 		) as NotebookMetadata["widgets"];
-		const widgetState =
-			state && state[WIDGET_STATE_MIMETYPE]
-				? state[WIDGET_STATE_MIMETYPE]
-				: undefined;
+		const widgetState = state?.[WIDGET_STATE_MIMETYPE]
+			? state[WIDGET_STATE_MIMETYPE]
+			: undefined;
 		if (widgetState) {
 			const deferred = createDeferred<void>();
 			deferred.resolve();
@@ -215,7 +214,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		logMessage(
 			`Waiting for model to be available before rendering it ${data.model_id}`,
 		);
-		await this.modelIdsToBeDisplayed.get(modelId)!.promise;
+		await this.modelIdsToBeDisplayed.get(modelId)?.promise;
 
 		const modelPromise = this.manager.get_model(data.model_id);
 		if (!modelPromise) {
@@ -301,8 +300,10 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 			require("@jupyterlab/services") as typeof import("@jupyterlab/services"); // NOSONAR
 
 		if (
-			!jupyterLab.KernelMessage.isDisplayDataMsg(payload) &&
-			!jupyterLab.KernelMessage.isExecuteResultMsg(payload)
+			!(
+				jupyterLab.KernelMessage.isDisplayDataMsg(payload) ||
+				jupyterLab.KernelMessage.isExecuteResultMsg(payload)
+			)
 		) {
 			return;
 		}
@@ -310,11 +311,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 			| KernelMessage.IDisplayDataMsg
 			| KernelMessage.IExecuteResultMsg;
 
-		if (
-			displayMsg.content &&
-			displayMsg.content.data &&
-			displayMsg.content.data[WIDGET_MIMETYPE]
-		) {
+		if (displayMsg.content?.data?.[WIDGET_MIMETYPE]) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const data = displayMsg.content.data[WIDGET_MIMETYPE] as any;
 			const modelId = data.model_id;

@@ -42,9 +42,9 @@ export function getZeroMQ(): typeof import("zeromq") {
 				e.message || e.toString(),
 				e2.message || e2.toString(),
 			).catch(noop);
-			traceWarning(`Exception while attempting zmq :`, e.message || e); // No need to display the full stack (when this fails we know why if fails, hence a stack is not useful)
+			traceWarning("Exception while attempting zmq :", e.message || e); // No need to display the full stack (when this fails we know why if fails, hence a stack is not useful)
 			traceWarning(
-				`Exception while attempting zmq (fallback) :`,
+				"Exception while attempting zmq (fallback) :",
 				e2.message || e2,
 			); // No need to display the full stack (when this fails we know why if fails, hence a stack is not useful)
 			throw e2;
@@ -97,7 +97,7 @@ async function getLocalZmqBinaries() {
 				.replace(/\//g, "<sep>"),
 		);
 	} catch (ex) {
-		traceWarning(`Failed to determine local zmq binaries.`, ex);
+		traceWarning("Failed to determine local zmq binaries.", ex);
 		return ["Failed to determine local zmq binaries."];
 	}
 }
@@ -154,8 +154,7 @@ function isAlpine(platform: string) {
 function getPlatformInfo() {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const vars: Record<string, any> =
-			(process.config && process.config.variables) || {};
+		const vars: Record<string, any> = process.config?.variables || {};
 		const npmConfigArch = (process.env.npm_config_arch || "").trim();
 		const arch = npmConfigArch || os.arch();
 		const platform = process.env.npm_config_platform || os.platform();
@@ -175,7 +174,7 @@ function getPlatformInfo() {
 		};
 	} catch (ex) {
 		traceWarning(
-			`Failed to determine platform information used to load zeromq binary.`,
+			"Failed to determine platform information used to load zeromq binary.",
 			ex,
 		);
 		return {};

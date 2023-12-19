@@ -199,7 +199,7 @@ suite("Import Tracker", async () => {
 	});
 
 	test("Open document", async () => {
-		const code = `import pandas\r\n`;
+		const code = "import pandas\r\n";
 		const nb = createMockedNotebookDocument([
 			{ kind: NotebookCellKind.Code, languageId: "python", value: code },
 		]);
@@ -212,7 +212,7 @@ suite("Import Tracker", async () => {
 		);
 	});
 	test("Close document", async () => {
-		const code = `import pandas\r\n`;
+		const code = "import pandas\r\n";
 		const nb = createMockedNotebookDocument([
 			{ kind: NotebookCellKind.Code, languageId: "python", value: code },
 		]);
@@ -225,7 +225,7 @@ suite("Import Tracker", async () => {
 		);
 	});
 	test("Save document", async () => {
-		const code = `import pandas\r\n`;
+		const code = "import pandas\r\n";
 		const nb = createMockedNotebookDocument([
 			{ kind: NotebookCellKind.Code, languageId: "python", value: code },
 		]);
@@ -239,7 +239,7 @@ suite("Import Tracker", async () => {
 	});
 
 	test("Already opened documents", async () => {
-		const code = `import pandas\r\n`;
+		const code = "import pandas\r\n";
 		const nb = createMockedNotebookDocument([
 			{ kind: NotebookCellKind.Code, languageId: "python", value: code },
 		]);
@@ -365,7 +365,7 @@ suite("Import Tracker", async () => {
 	});
 
 	test("from <pkg> import _ as _", async () => {
-		const code = `from pandas import DataFrame as df`;
+		const code = "from pandas import DataFrame as df";
 		await testImports(code, "jupyter-notebook", pandasHash);
 	});
 
@@ -408,7 +408,7 @@ suite("Import Tracker", async () => {
 		await testImports(code, "interactive");
 	});
 	test("Track packages when a cell is executed", async () => {
-		const code = `import numpy`;
+		const code = "import numpy";
 		const nb = createMockedNotebookDocument([
 			{ kind: NotebookCellKind.Code, languageId: "python", value: code },
 		]);

@@ -22,8 +22,8 @@ export class ErrorUtils {
 		content?: string,
 	): boolean {
 		return content &&
-			(content!.indexOf(`No module named ${moduleName}`) > 0 ||
-				content!.indexOf(`No module named '${moduleName}'`) > 0)
+			(content?.indexOf(`No module named ${moduleName}`) > 0 ||
+				content?.indexOf(`No module named '${moduleName}'`) > 0)
 			? true
 			: false;
 	}
@@ -125,7 +125,7 @@ export function getLastFrameFromPythonTraceback(
 	if (!lastFrame) {
 		return;
 	}
-	const file = lastFrame.substring(0, lastFrame.lastIndexOf(".py")) + ".py";
+	const file = `${lastFrame.substring(0, lastFrame.lastIndexOf(".py"))}.py`;
 	const parts = file.replace(/\\/g, "/").split("/");
 	const indexOfSitePackages = parts.indexOf("site-packages");
 	const packageName =
@@ -374,11 +374,11 @@ export function analyzeKernelErrors(
         import xyz
         ImportError: DLL load failed: ....
         */
-		const moduleName =
-			lastTwolinesOfError &&
-			lastTwolinesOfError[0].toLowerCase().startsWith("import")
-				? lastTwolinesOfError[0].substring("import".length).trim()
-				: undefined;
+		const moduleName = lastTwolinesOfError?.[0]
+			.toLowerCase()
+			.startsWith("import")
+			? lastTwolinesOfError[0].substring("import".length).trim()
+			: undefined;
 		return {
 			reason: KernelFailureReason.dllLoadFailure,
 			moduleName,
@@ -479,10 +479,7 @@ export function analyzeKernelErrors(
 		}
 	}
 
-	if (
-		lastTwolinesOfError &&
-		lastTwolinesOfError[1].toLowerCase().startsWith("importerror")
-	) {
+	if (lastTwolinesOfError?.[1].toLowerCase().startsWith("importerror")) {
 		const info = extractModuleAndFileFromImportError(
 			lastTwolinesOfError[1],
 		);
@@ -520,7 +517,7 @@ export function analyzeKernelErrors(
 	// This happens when ipykernel is not installed and we attempt to run without checking for ipykernel.
 	// '/home/don/samples/pySamples/sample/.venv/bin/python: No module named ipykernel_launcher\n'
 	const noModule = "No module named".toLowerCase();
-	const isNotAPackage = `is not a package`.toLowerCase();
+	const isNotAPackage = "is not a package".toLowerCase();
 	if (stdErr.includes(noModule) && !isNotAPackage) {
 		const line = splitLines(stdErrOrStackTrace)
 			.map((line) => line.trim())
@@ -644,8 +641,7 @@ export function analyzeKernelErrors(
 			telemetrySafeTags: ["import.error", "override.modules"],
 		};
 	} else if (
-		lastTwolinesOfError &&
-		lastTwolinesOfError[1]
+		lastTwolinesOfError?.[1]
 			.toLowerCase()
 			.startsWith("ModuleNotFoundError".toLowerCase())
 	) {

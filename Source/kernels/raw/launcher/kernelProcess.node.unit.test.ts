@@ -484,10 +484,10 @@ suite("kernel Process", () => {
 				);
 				when(connectionMetadata.kernelSpec).thenReturn(kernelSpec);
 				const expectedArgs = [
-					`-m`,
-					`ipykernel`,
+					"-m",
+					"ipykernel",
 					`--f="${expectedConnectionFile}"`,
-					`--debug`,
+					"--debug",
 				];
 				await kernelProcess.launch(__dirname, 0, token.token);
 
@@ -548,10 +548,10 @@ suite("kernel Process", () => {
 				);
 				when(connectionMetadata.kernelSpec).thenReturn(kernelSpec);
 				const expectedArgs = [
-					`-m`,
-					`ipykernel`,
+					"-m",
+					"ipykernel",
 					`--f="${Uri.file(tempFile).fsPath}"`,
-					`--debug`,
+					"--debug",
 				];
 				await kernelProcess.launch(__dirname, 0, token.token);
 
@@ -597,10 +597,10 @@ suite("kernel Process", () => {
 				);
 				when(connectionMetadata.kernelSpec).thenReturn(kernelSpec);
 				const expectedArgs = [
-					`-m`,
-					`ipykernel`,
+					"-m",
+					"ipykernel",
 					`--f=${Uri.file("connection.json").fsPath}`,
-					`--debug`,
+					"--debug",
 				];
 				await kernelProcess.launch(__dirname, 0, token.token);
 

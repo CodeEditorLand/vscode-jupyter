@@ -182,7 +182,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			this._onRequestSent.fire();
 			traceExecMessage(
 				this.executionId,
-				`Execution Request Sent to Kernel`,
+				"Execution Request Sent to Kernel",
 			);
 			// For Jupyter requests, silent === don't output, while store_history === don't update execution count
 			// https://jupyter-client.readthedocs.io/en/stable/api/client.html#jupyter_client.KernelClient.execute
@@ -216,7 +216,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			// When the request finishes we are done
 			// request.done resolves even before all iopub messages have been sent through.
 			// Solution is to wait for all messages to get processed.
-			await this.request!.done.catch(noop);
+			await this.request?.done.catch(noop);
 			this._completed = true;
 			this._done.resolve();
 			traceExecMessage(this.executionId, "Executed successfully");
@@ -225,16 +225,16 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			if (this.cancelHandled) {
 				return;
 			}
-			if (!this.disposed && !this.cancelRequested) {
+			if (this.disposed || this.cancelRequested) {
+				traceError(
+					`Some other execution error for exec ${this.executionId}`,
+					ex,
+				);
+			} else {
 				// @jupyterlab/services throws a `Canceled` error when the kernel is interrupted.
 				// Or even when the kernel dies when running a cell with the code `os.kill(os.getpid(), 9)`
 				traceError(
 					`Error in waiting for code ${this.executionId} to complete`,
-					ex,
-				);
-			} else {
-				traceError(
-					`Some other execution error for exec ${this.executionId}`,
 					ex,
 				);
 			}

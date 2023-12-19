@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export interface INotebookCompletion {
-	matches: ReadonlyArray<string>;
+	matches: readonly string[];
 	cursor: {
 		start: number;
 		end: number;

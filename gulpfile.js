@@ -300,7 +300,7 @@ async function buildWebPack(webpackConfigName, args, env) {
 			(item) =>
 				allowedWarnings.findIndex((allowedWarning) =>
 					item.toLowerCase().startsWith(allowedWarning.toLowerCase()),
-				) == -1,
+				) === -1,
 		);
 	const errors = stdOutLines.some((item) => item.startsWith("ERROR in"));
 	if (errors) {
@@ -430,9 +430,11 @@ function hasNativeDependencies() {
 		.filter((item) => item.length > 0)
 		.filter(
 			(item) =>
-				!item.includes("zeromq") &&
-				!item.includes("canvas") &&
-				!item.includes("keytar"),
+				!(
+					item.includes("zeromq") ||
+					item.includes("canvas") ||
+					item.includes("keytar")
+				),
 		) // Known native modules
 		.filter(
 			(item) =>

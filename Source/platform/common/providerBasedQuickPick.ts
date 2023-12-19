@@ -190,10 +190,11 @@ export class BaseProviderBasedQuickPick<
 					() => {
 						timeout && clearTimeout(timeout);
 						switch (provider.status) {
-							case "discovering":
+							case "discovering": {
 								quickPick.busy = true;
 								break;
-							case "idle":
+							}
+							case "idle": {
 								timeout = setTimeout(
 									() => (quickPick.busy = false),
 									500,
@@ -204,6 +205,7 @@ export class BaseProviderBasedQuickPick<
 									),
 								);
 								break;
+							}
 						}
 					},
 					this,
@@ -622,7 +624,7 @@ export class BaseProviderBasedQuickPick<
 }
 
 function groupBy<T>(
-	data: ReadonlyArray<T>,
+	data: readonly T[],
 	compare: (a: T, b: T) => number,
 ): T[][] {
 	const result: T[][] = [];

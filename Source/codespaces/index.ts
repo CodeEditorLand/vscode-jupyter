@@ -56,7 +56,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 			};
 			serverMap.set(handle, { serverUri, server });
 		}
-		return serverMap.get(handle)!.server;
+		return serverMap.get(handle)?.server;
 	};
 	const onDidChangeServers = new EventEmitter<void>();
 
@@ -85,7 +85,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 		onDidChangeServers: onDidChangeServers.event,
 	};
 
-	if (!provider.handleQuickPick || !provider.getQuickPickEntryItems) {
+	if (!(provider.handleQuickPick && provider.getQuickPickEntryItems)) {
 		return { serverProvider };
 	}
 
@@ -96,7 +96,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 	const commandProvider: JupyterServerCommandProvider = {
 		async handleCommand(command, token) {
 			const quickPickItem = quickPickMap.get(command.label);
-			if (!quickPickItem || !provider.handleQuickPick) {
+			if (!(quickPickItem && provider.handleQuickPick)) {
 				return;
 			}
 			const handle = await raceCancellationError(

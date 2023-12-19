@@ -57,13 +57,13 @@ export class JupyterConnection {
 			);
 		}
 		const serverUri: IJupyterServerUri = {
-			baseUrl: server.connectionInformation!.baseUrl.toString(true),
+			baseUrl: server.connectionInformation?.baseUrl.toString(true),
 			displayName: server.label,
-			token: server.connectionInformation!.token || "",
-			authorizationHeader: server.connectionInformation!.headers || {},
-			fetch: server.connectionInformation!.fetch,
+			token: server.connectionInformation?.token || "",
+			authorizationHeader: server.connectionInformation?.headers || {},
+			fetch: server.connectionInformation?.fetch,
 			mappedRemoteNotebookDir: undefined,
-			WebSocket: server.connectionInformation!.WebSocket,
+			WebSocket: server.connectionInformation?.WebSocket,
 		};
 
 		return createJupyterConnectionInfo(
@@ -87,14 +87,14 @@ export class JupyterConnection {
 			if (server) {
 				serverUri = {
 					baseUrl:
-						server.connectionInformation!.baseUrl.toString(true),
+						server.connectionInformation?.baseUrl.toString(true),
 					displayName: server.label,
-					token: server.connectionInformation!.token || "",
+					token: server.connectionInformation?.token || "",
 					authorizationHeader:
-						server.connectionInformation!.headers || {},
-					fetch: server.connectionInformation!.fetch,
+						server.connectionInformation?.headers || {},
+					fetch: server.connectionInformation?.fetch,
 					mappedRemoteNotebookDir: undefined,
-					WebSocket: server.connectionInformation!.WebSocket,
+					WebSocket: server.connectionInformation?.WebSocket,
 				};
 			} else {
 				throw new Error(

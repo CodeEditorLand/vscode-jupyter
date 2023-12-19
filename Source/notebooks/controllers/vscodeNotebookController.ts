@@ -392,7 +392,7 @@ export class VSCodeNotebookController
 				this.connection.id
 			} ${
 				nbDocumentUris.length
-					? "and documents " + nbDocumentUris.join(", ")
+					? `and documents ${nbDocumentUris.join(", ")}`
 					: ""
 			}`,
 		);
@@ -401,7 +401,7 @@ export class VSCodeNotebookController
 				this.connection.id
 			} ${
 				nbDocumentUris.length
-					? "and documents " + nbDocumentUris.join(", ")
+					? `and documents ${nbDocumentUris.join(", ")}`
 					: ""
 			} called from ${new Error("").stack}`,
 		);
@@ -566,7 +566,7 @@ export class VSCodeNotebookController
 			controller: this,
 		});
 		this._onNotebookControllerSelectionChanged.fire(event);
-		traceVerbose(`Controller selection change completed`);
+		traceVerbose("Controller selection change completed");
 		deferred.resolve();
 	}
 
@@ -765,7 +765,7 @@ export class VSCodeNotebookController
 			return await promise;
 		} catch (ex) {
 			if (!isCancellationError(ex)) {
-				traceError(`Error in execution`, ex);
+				traceError("Error in execution", ex);
 			}
 			if (!kernelStarted) {
 				exec.start();

@@ -144,8 +144,8 @@ export class InterpreterPackages implements IInterpreterPackages {
 			});
 		}
 		return this.interpreterPackages
-			.get(workspaceKey)!
-			.then((items) => Array.from(items));
+			.get(workspaceKey)
+			?.then((items) => Array.from(items));
 	}
 	private async listPackagesImpl(resource?: Resource): Promise<Set<string>> {
 		const interpreter =

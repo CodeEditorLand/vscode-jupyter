@@ -93,7 +93,7 @@ function style({
 					return {
 						errors,
 						warnings,
-						contents: outputFiles![0].text,
+						contents: outputFiles?.[0].text,
 						loader: "text",
 					};
 				},
@@ -208,4 +208,4 @@ async function buildAll() {
 }
 
 const started = Date.now();
-buildAll().then(() => console.log(`Watching for changes in esbuild...`));
+buildAll().then(() => console.log("Watching for changes in esbuild..."));

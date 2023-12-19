@@ -6,7 +6,7 @@ const constants = require("../constants");
 const common = require("./common");
 const entryItems = {
 	// jsonc-parser does not get bundled propertly with esbuild.
-	[`node_modules/jsonc-parser`]: `./node_modules/jsonc-parser`,
+	["node_modules/jsonc-parser"]: "./node_modules/jsonc-parser",
 };
 
 const config = {

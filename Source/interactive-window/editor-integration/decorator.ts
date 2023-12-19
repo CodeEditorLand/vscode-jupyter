@@ -93,7 +93,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 	}
 
 	private changedSelection(e: vscode.TextEditorSelectionChangeEvent) {
-		if (e.textEditor && e.textEditor.selection.anchor) {
+		if (e.textEditor?.selection.anchor) {
 			this.triggerUpdate(e.textEditor);
 		}
 	}
@@ -162,8 +162,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 			editor === undefined ? window.visibleTextEditors : [editor];
 		for (const editor of editorsToCheck) {
 			if (
-				editor &&
-				editor.document &&
+				editor?.document &&
 				editor.document.languageId === PYTHON_LANGUAGE &&
 				!getAssociatedJupyterNotebook(editor.document) &&
 				this.currentCellTop &&
@@ -206,7 +205,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 							  ]
 							: [];
 					const nonCurrentCells: vscode.Range[] = [];
-					if (settings.decorateCells === "allCells")
+					if (settings.decorateCells === "allCells") {
 						cells.forEach((cell) => {
 							const cellTop = cell.range.start;
 							if (cellTop !== currentRange[0].start) {
@@ -215,6 +214,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 								);
 							}
 						});
+					}
 					if (window.activeTextEditor === editor) {
 						editor.setDecorations(this.currentCellTop, rangeTop);
 						editor.setDecorations(

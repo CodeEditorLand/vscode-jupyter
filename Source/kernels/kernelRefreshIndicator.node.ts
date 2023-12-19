@@ -118,7 +118,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 					isJupyterNotebook(e.notebook)
 				) {
 					refreshedInterpreters = true;
-					traceInfo(`Start refreshing Interpreter Kernel Picker`);
+					traceInfo("Start refreshing Interpreter Kernel Picker");
 					this.interpreterService.refreshInterpreters().catch(noop);
 				}
 			},
@@ -129,7 +129,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			(e) => {
 				if (!refreshedInterpreters && isJupyterNotebook(e)) {
 					refreshedInterpreters = true;
-					traceInfo(`Start refreshing Interpreter Kernel Picker`);
+					traceInfo("Start refreshing Interpreter Kernel Picker");
 					this.interpreterService.refreshInterpreters().catch(noop);
 				}
 			},

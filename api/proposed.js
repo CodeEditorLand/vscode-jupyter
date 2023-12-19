@@ -56,7 +56,7 @@ fs.readdirSync(path.join(__dirname, "../src")).forEach((file) => {
 
 		// Remove the trailing `}`
 		// Do not trim leading spaces, as we need to preserve the indentation.
-		proposedApi += ("1" + newSource).trim().slice(0, -1).substring(1) + EOL;
+		proposedApi += `1${newSource}`.trim().slice(0, -1).substring(1) + EOL;
 	}
 });
 // Add module namespace to the main api.d.ts file.
@@ -105,10 +105,7 @@ const newSource = source
 // Do not trim leading spaces, as we need to preserve the indentation.
 fs.writeFileSync(
 	path.join(__dirname, "api.d.ts"),
-	newSource.trim() +
-		EOL +
-		`1${proposedApi}`.trim().substring(1) +
-		EOL +
-		"}" +
-		EOL,
+	`${
+		newSource.trim() + EOL + `1${proposedApi}`.trim().substring(1) + EOL
+	}}${EOL}`,
 );

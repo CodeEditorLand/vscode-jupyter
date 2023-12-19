@@ -105,18 +105,21 @@ export class QuickPickKernelItemProvider
 				);
 		}
 		switch (finder.kind) {
-			case ContributedKernelFinderKind.LocalKernelSpec:
+			case ContributedKernelFinderKind.LocalKernelSpec: {
 				this.title = DataScience.kernelPickerSelectLocalKernelSpecTitle;
 				break;
-			case ContributedKernelFinderKind.LocalPythonEnvironment:
+			}
+			case ContributedKernelFinderKind.LocalPythonEnvironment: {
 				this.title = DataScience.quickPickSelectPythonEnvironmentTitle;
 				break;
-			default:
+			}
+			default: {
 				this.title =
 					DataScience.kernelPickerSelectKernelFromRemoteTitle(
 						finder.displayName,
 					);
 				break;
+			}
 		}
 		finder.onDidChangeKernels(
 			() => {
@@ -176,7 +179,7 @@ export class QuickPickKernelItemProvider
 		return kernels.filter(
 			(k) =>
 				k.kind !== "startUsingPythonInterpreter" ||
-				!filter!.isPythonEnvironmentExcluded(k.interpreter),
+				!filter?.isPythonEnvironmentExcluded(k.interpreter),
 		);
 	}
 	private computePreferredRemoteKernel(

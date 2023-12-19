@@ -202,7 +202,7 @@ export class LocalKernelSpecFinder implements IDisposable {
 					return [];
 				}
 				const files = await this.fs.searchLocal(
-					`**/kernel.json`,
+					"**/kernel.json",
 					kernelSearchPath.fsPath,
 					true,
 				);
@@ -378,7 +378,7 @@ export abstract class LocalKernelSpecFinderBase<
 				// Interpreters have to still exist
 				return this.fs.exists(kernel.interpreter.uri);
 
-			case "startUsingLocalKernelSpec":
+			case "startUsingLocalKernelSpec": {
 				// Spec files have to still exist and interpreters have to exist
 				const promiseSpec = kernel.kernelSpec.specFile
 					? this.fs.exists(Uri.file(kernel.kernelSpec.specFile))
@@ -388,6 +388,7 @@ export abstract class LocalKernelSpecFinderBase<
 						? this.fs.exists(kernel.interpreter.uri)
 						: Promise.resolve(true);
 				});
+			}
 		}
 	}
 }
@@ -473,7 +474,7 @@ export async function loadKernelSpec(
 	if (kernelJson.metadata.originalSpecFile) {
 		kernelJson.metadata.vscode.originalSpecFile =
 			kernelJson.metadata.originalSpecFile;
-		delete kernelJson.metadata.originalSpecFile;
+		kernelJson.metadata.originalSpecFile = undefined;
 	}
 
 	const kernelSpec: IJupyterKernelSpec = new JupyterKernelSpec(

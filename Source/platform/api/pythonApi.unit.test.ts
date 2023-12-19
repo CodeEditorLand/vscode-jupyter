@@ -19,7 +19,7 @@ import { IInterpreterService } from "../interpreter/contracts";
 import { InterpreterService } from "./pythonApi";
 import { IPythonApiProvider, IPythonExtensionChecker } from "./types";
 
-suite(`Interpreter Service`, () => {
+suite("Interpreter Service", () => {
 	let clock: fakeTimers.InstalledClock;
 	let interpreterService: IInterpreterService;
 	let apiProvider: IPythonApiProvider;

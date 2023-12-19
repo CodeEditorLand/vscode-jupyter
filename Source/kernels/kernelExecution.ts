@@ -132,7 +132,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 				cell.notebook.uri,
 			)}`,
 		);
-		if (cell.kind == NotebookCellKind.Markup) {
+		if (cell.kind === NotebookCellKind.Markup) {
 			return NotebookCellRunState.Success;
 		}
 
@@ -176,7 +176,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			? pendingInspectRequests.get(this.kernel.session.kernel)?.count || 0
 			: 0;
 		const stopWatch = new StopWatch();
-		if (cell.kind == NotebookCellKind.Markup) {
+		if (cell.kind === NotebookCellKind.Markup) {
 			return NotebookCellRunState.Success;
 		}
 
@@ -359,8 +359,10 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 						)}`,
 					);
 					if (
-						!newCellExecutionQueue.failed ||
-						!newCellExecutionQueue.isEmpty
+						!(
+							newCellExecutionQueue.failed &&
+							newCellExecutionQueue.isEmpty
+						)
 					) {
 						await newCellExecutionQueue.cancel(true);
 					}

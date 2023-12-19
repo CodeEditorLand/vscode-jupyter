@@ -60,7 +60,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 		flags?: ModuleInstallFlags,
 	): Promise<void> {
 		const name =
-			typeof productOrModuleName == "string"
+			typeof productOrModuleName === "string"
 				? productOrModuleName
 				: translateProductToModule(productOrModuleName);
 		const args = await this.getExecutionArgs(name, interpreter, flags);
@@ -206,8 +206,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 								// HINT: This error might have occurred since this system does not have Windows Long Path support enabled. You can find information on how to enable this at https://pip.pypa.io/warnings/enable-long-paths`;
 								// Remove the `[notice]` lines from the error messages
 								if (
-									couldNotInstallErr &&
-									couldNotInstallErr.includes(
+									couldNotInstallErr?.includes(
 										"https://pip.pypa.io/warnings/enable-long-paths",
 									)
 								) {

@@ -78,7 +78,7 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 		const lines = code.split("\n");
 		const firstNonEmptyLine = lines.find((line) => line.trim().length > 0);
 		if (firstNonEmptyLine) {
-			const leadingSpaces = firstNonEmptyLine.match(/^\s*/)![0];
+			const leadingSpaces = firstNonEmptyLine.match(/^\s*/)?.[0];
 			return lines
 				.map((line) => {
 					if (line.startsWith(leadingSpaces)) {

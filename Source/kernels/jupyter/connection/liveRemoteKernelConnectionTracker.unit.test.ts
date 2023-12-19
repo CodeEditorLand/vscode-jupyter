@@ -201,11 +201,9 @@ suite("Live kernel Connection Tracker", async () => {
 		);
 
 		assert.deepEqual(
-			cachedItems[
-				generateIdFromRemoteProvider(
-					remoteLiveKernel1.serverProviderHandle,
-				)
-			][remoteLiveKernel1.kernelModel.id!],
+			remoteLiveKernel1.kernelModel.id?.[
+				remoteLiveKernel1.kernelModel.id
+			],
 			[Uri.file("a.ipynb").toString()],
 		);
 
@@ -216,11 +214,9 @@ suite("Live kernel Connection Tracker", async () => {
 		);
 
 		assert.deepEqual(
-			cachedItems[
-				generateIdFromRemoteProvider(
-					remoteLiveKernel2.serverProviderHandle,
-				)
-			][remoteLiveKernel2.kernelModel.id!],
+			remoteLiveKernel2.kernelModel.id?.[
+				remoteLiveKernel2.kernelModel.id
+			],
 			[Uri.file("a.ipynb").toString()],
 		);
 
@@ -231,11 +227,9 @@ suite("Live kernel Connection Tracker", async () => {
 		);
 
 		assert.deepEqual(
-			cachedItems[
-				generateIdFromRemoteProvider(
-					remoteLiveKernel3.serverProviderHandle,
-				)
-			][remoteLiveKernel3.kernelModel.id!],
+			remoteLiveKernel3.kernelModel.id?.[
+				remoteLiveKernel3.kernelModel.id
+			],
 			[Uri.file("a.ipynb").toString()],
 		);
 
@@ -246,11 +240,9 @@ suite("Live kernel Connection Tracker", async () => {
 		);
 
 		assert.deepEqual(
-			cachedItems[
-				generateIdFromRemoteProvider(
-					remoteLiveKernel3.serverProviderHandle,
-				)
-			][remoteLiveKernel3.kernelModel.id!],
+			remoteLiveKernel3.kernelModel.id?.[
+				remoteLiveKernel3.kernelModel.id
+			],
 			[Uri.file("a.ipynb").toString(), Uri.file("b.ipynb").toString()],
 		);
 

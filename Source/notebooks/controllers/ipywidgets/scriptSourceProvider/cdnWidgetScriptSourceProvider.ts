@@ -365,10 +365,11 @@ export class CDNWidgetScriptSourceProvider
 				);
 				break;
 			}
-			default:
+			default: {
 				selectionForTelemetry =
 					selection === Common.cancel ? "cancel" : "dismissed";
 				break;
+			}
 		}
 
 		sendTelemetryEvent(

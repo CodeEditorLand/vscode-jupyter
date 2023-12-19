@@ -177,13 +177,14 @@ export abstract class FileConverterBase implements IFileConverter {
 	): Promise<Uri | undefined> {
 		if (target) {
 			switch (format) {
-				case ExportFormat.python:
+				case ExportFormat.python: {
 					await new ExportToPythonPlain().export(
 						sourceDocument,
 						target,
 						cancelToken,
 					);
 					break;
+				}
 			}
 		}
 

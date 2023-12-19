@@ -50,8 +50,6 @@ class Base64Visitor {
  * url("./src/datascience-ui/history-react/images/foo.svg")
  */
 class Base64Plugin {
-	constructor() {}
-
 	install(less, pluginManager) {
 		pluginManager.addVisitor(new Base64Visitor());
 	}

@@ -308,7 +308,7 @@ export class NotebookCellSpecificKernelCompletionProvider
 		item: CompletionItem,
 		token: CancellationToken,
 	): Promise<CompletionItem> {
-		if (!item.range || !this.kernel.session?.kernel) {
+		if (!(item.range && this.kernel.session?.kernel)) {
 			// We always set a range in the completion item we send.
 			return item;
 		}
@@ -514,22 +514,26 @@ function getKernelLanguageAsMonacoLanguage(kernel: IKernel) {
 function getKernelLanguage(kernel: IKernel) {
 	let kernelSpecLanguage: string | undefined = "";
 	switch (kernel.kernelConnectionMetadata.kind) {
-		case "connectToLiveRemoteKernel":
+		case "connectToLiveRemoteKernel": {
 			kernelSpecLanguage =
 				kernel.kernelConnectionMetadata.kernelModel.language;
 			break;
-		case "startUsingRemoteKernelSpec":
+		}
+		case "startUsingRemoteKernelSpec": {
 			kernelSpecLanguage =
 				kernel.kernelConnectionMetadata.kernelSpec.language;
 			break;
-		case "startUsingLocalKernelSpec":
+		}
+		case "startUsingLocalKernelSpec": {
 			kernelSpecLanguage =
 				kernel.kernelConnectionMetadata.kernelSpec.language;
 			break;
-		default:
+		}
+		default: {
 			kernelSpecLanguage =
 				kernel.kernelConnectionMetadata.kernelSpec.language;
 			break;
+		}
 	}
 
 	return (kernelSpecLanguage || "").toLowerCase();

@@ -39,7 +39,7 @@ declare namespace AdazzleReactDataGrid {
 		 * Gets the data to render in each row. Required.
 		 * Can be an array or a function that takes an index and returns an object.
 		 */
-		rowGetter: Array<T> | ((rowIdx: number) => T);
+		rowGetter: T[] | ((rowIdx: number) => T);
 		/**
 		 * The total number of rows to render. Required.
 		 */
@@ -47,7 +47,7 @@ declare namespace AdazzleReactDataGrid {
 		/**
 		 * The columns to render.
 		 */
-		columns?: Array<Column<T>>;
+		columns?: Column<T>[];
 
 		/**
 		 * Invoked when the user changes the value of a single cell.
@@ -193,7 +193,7 @@ declare namespace AdazzleReactDataGrid {
 		 * Called when a row is selected.
 		 * @param rows The (complete) current selection of rows.
 		 */
-		onRowSelect?: (rows: Array<T>) => void;
+		onRowSelect?: (rows: T[]) => void;
 		/**
 		 * A property that's unique to every row.
 		 * This property is required to enable row selection.
@@ -238,11 +238,11 @@ declare namespace AdazzleReactDataGrid {
 		rowSelection?: {
 			showCheckbox?: boolean;
 			enableShiftSelect?: boolean;
-			onRowsSelected?: (rows: Array<SelectionParams<T>>) => void;
-			onRowsDeselected?: (rows: Array<SelectionParams<T>>) => void;
+			onRowsSelected?: (rows: SelectionParams<T>[]) => void;
+			onRowsDeselected?: (rows: SelectionParams<T>[]) => void;
 			selectBy?: {
-				indexes?: Array<number>;
-				keys?: { rowKey: string; values: Array<any> };
+				indexes?: number[];
+				keys?: { rowKey: string; values: any[] };
 				isSelectedKey?: string;
 			};
 		};
@@ -281,7 +281,7 @@ declare namespace AdazzleReactDataGrid {
 		 * displays a list of options.
 		 * @param columnKey the column key that we are looking to pull values from
 		 */
-		getValidFilterValues?: (columnKey: string) => Array<any>;
+		getValidFilterValues?: (columnKey: string) => any[];
 
 		getCellActions?: (
 			column: Column<T>,

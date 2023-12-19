@@ -121,7 +121,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 	}
 
 	public async dispose() {
-		traceInfoIfCI(`Disposing all kernels from kernel provider`);
+		traceInfoIfCI("Disposing all kernels from kernel provider");
 		const items = Array.from(this.pendingDisposables.values());
 		this.pendingDisposables.clear();
 		await Promise.all(items);
@@ -295,7 +295,7 @@ export abstract class BaseThirdPartyKernelProvider
 	}
 
 	public async dispose() {
-		traceInfoIfCI(`Disposing all kernels from kernel provider`);
+		traceInfoIfCI("Disposing all kernels from kernel provider");
 		const items = Array.from(this.pendingDisposables.values());
 		this.pendingDisposables.clear();
 		await Promise.all(items);

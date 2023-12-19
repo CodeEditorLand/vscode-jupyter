@@ -82,7 +82,7 @@ export abstract class KernelDebugAdapterBase
 		private readonly platformService: IPlatformService,
 		private readonly debugService: IDebugService,
 	) {
-		traceInfoIfCI(`Creating kernel debug adapter for debugging notebooks`);
+		traceInfoIfCI("Creating kernel debug adapter for debugging notebooks");
 		const configuration = this.session.configuration;
 		assertIsDebugConfig(configuration);
 		this.configuration = configuration;
@@ -227,8 +227,7 @@ export abstract class KernelDebugAdapterBase
 			) {
 				const args = (message as DebugProtocol.Request).arguments;
 				if (
-					args.source &&
-					args.source.path &&
+					args.source?.path &&
 					args.source.path.indexOf("vscode-notebook-cell:") === 0
 				) {
 					const cell = this.notebookDocument
@@ -307,7 +306,7 @@ export abstract class KernelDebugAdapterBase
 						}),
 					]);
 				} catch (e) {
-					traceError(`Failed to disconnect debug session`, e);
+					traceError("Failed to disconnect debug session", e);
 				}
 			}
 			this.endSession.fire(this.session);
@@ -447,7 +446,7 @@ export abstract class KernelDebugAdapterBase
 		source?: DebugProtocol.Source,
 	) {
 		source = location?.source ?? source;
-		if (source && source.path) {
+		if (source?.path) {
 			const mapping =
 				this.fileToCell.get(source.path) ??
 				this.lookupCellByLongName(source.path);
@@ -476,7 +475,7 @@ export abstract class KernelDebugAdapterBase
 			const fileListString = fileValues
 				.map((filePath) => {
 					// escape Windows path separators again for python
-					return '"' + filePath.replace(/\\/g, "\\\\") + '"';
+					return `"${filePath.replace(/\\/g, "\\\\")}"`;
 				})
 				.join(",");
 

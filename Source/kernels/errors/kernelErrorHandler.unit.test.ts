@@ -577,7 +577,7 @@ suite("Error Handler Unit Tests", () => {
 			);
 		});
 		test("Unable to import <name> from user overriding module in workspace folder (unix)", async function () {
-			if (getOSType() == OSType.Windows) {
+			if (getOSType() === OSType.Windows) {
 				// Patsh get converted to `\` when using `Uri.file` as values for Workspace folder.
 				return this.skip();
 			}
@@ -696,7 +696,7 @@ ImportError: No module named 'xyz'
 			await dataScienceErrorHandler.handleKernelError(
 				new KernelDiedError(
 					"Hello",
-					`ImportError: DLL load failed`,
+					"ImportError: DLL load failed",
 					undefined,
 					kernelConnection,
 				),
@@ -718,7 +718,7 @@ ImportError: No module named 'xyz'
 			await dataScienceErrorHandler.handleKernelError(
 				new KernelDiedError(
 					"Hello",
-					`import XYZ\nImportError: DLL load failed`,
+					"import XYZ\nImportError: DLL load failed",
 					undefined,
 					kernelConnection,
 				),
@@ -749,7 +749,7 @@ ImportError: No module named 'xyz'
 				jupyterInterpreterService.getSelectedInterpreter(anything()),
 			).thenResolve(jupyterInterpreter);
 			await dataScienceErrorHandler.handleKernelError(
-				new JupyterConnectError(stdError, `xyz`),
+				new JupyterConnectError(stdError, "xyz"),
 				"start",
 				kernelConnection,
 				undefined,

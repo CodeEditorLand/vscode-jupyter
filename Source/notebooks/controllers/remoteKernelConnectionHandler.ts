@@ -97,7 +97,7 @@ export class RemoteKernelConnectionHandler
 		const serverId = kernel.kernelConnectionMetadata.serverProviderHandle;
 		const storeKernelInfo = () => {
 			const kernelId = kernel.session?.kernel?.id;
-			if (!kernel.disposed && !kernel.disposing && kernelId) {
+			if (!(kernel.disposed || kernel.disposing) && kernelId) {
 				traceVerbose(
 					`Updating preferred kernel for remote notebook ${kernelId}`,
 				);

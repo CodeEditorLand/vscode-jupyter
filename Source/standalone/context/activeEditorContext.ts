@@ -241,7 +241,7 @@ export class ActiveEditorContextService
 		this.updateSelectedKernelContext();
 	}
 	private async updateKernelSourceContext(kernel: IKernel | undefined) {
-		if (!kernel || !isRemoteConnection(kernel.kernelConnectionMetadata)) {
+		if (!(kernel && isRemoteConnection(kernel.kernelConnectionMetadata))) {
 			this.kernelSourceContext.set("").catch(noop);
 			return;
 		}

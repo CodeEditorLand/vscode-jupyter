@@ -215,7 +215,6 @@ export class JupyterInterpreterDependencyService {
 						);
 						if (response === InstallerResponse.Installed) {
 							productToInstall = productsToInstall.shift();
-							continue;
 						} else {
 							return JupyterInterpreterDependencyResponse.cancel;
 						}
@@ -239,9 +238,10 @@ export class JupyterInterpreterDependencyService {
 					return JupyterInterpreterDependencyResponse.cancel;
 				}
 
-				default:
+				default: {
 					sendTelemetryEvent(Telemetry.UserDidNotInstallJupyter);
 					return JupyterInterpreterDependencyResponse.cancel;
+				}
 			}
 		} finally {
 			tokenSource.dispose();
@@ -341,7 +341,7 @@ export class JupyterInterpreterDependencyService {
 			.exec(["--version"], { throwOnStdErr: true })
 			.then(() => true)
 			.catch((e) => {
-				traceError(`Kernel spec not found: `, e);
+				traceError("Kernel spec not found: ", e);
 				return false;
 			});
 	}

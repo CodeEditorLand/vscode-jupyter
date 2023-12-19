@@ -170,7 +170,7 @@ export class JupyterPasswordConnect {
 			}
 
 			if (
-				typeof userPassword === undefined &&
+				typeof userPassword === "undefined" &&
 				!userPassword &&
 				options.isTokenEmpty
 			) {
@@ -259,7 +259,7 @@ export class JupyterPasswordConnect {
 		let headers;
 		let tokenUrl = new URL("login?", addTrailingSlash(url)).toString();
 
-		if (sessionCookie != "") {
+		if (sessionCookie !== "") {
 			tokenUrl = new URL("tree", addTrailingSlash(url)).toString();
 			headers = {
 				Connection: "keep-alive",
@@ -277,7 +277,7 @@ export class JupyterPasswordConnect {
 			headers,
 		});
 
-		if (response !== undefined && response.ok) {
+		if (response?.ok) {
 			const cookies = this.getCookies(response);
 			if (cookies.has("_xsrf")) {
 				xsrfCookie = cookies.get("_xsrf")?.split(";")[0];

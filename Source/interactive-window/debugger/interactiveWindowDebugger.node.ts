@@ -47,9 +47,9 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	) {
 		this.debuggerPackage = "debugpy";
 		this.enableDebuggerCode = `import debugpy;debugpy.listen(('localhost', 0))`;
-		this.waitForDebugClientCode = `import debugpy;debugpy.wait_for_client()`;
-		this.tracingEnableCode = `from debugpy import trace_this_thread;trace_this_thread(True)`;
-		this.tracingDisableCode = `from debugpy import trace_this_thread;trace_this_thread(False)`;
+		this.waitForDebugClientCode = "import debugpy;debugpy.wait_for_client()";
+		this.tracingEnableCode = "from debugpy import trace_this_thread;trace_this_thread(True)";
+		this.tracingDisableCode = "from debugpy import trace_this_thread;trace_this_thread(False)";
 	}
 	public async attach(kernel: IKernel): Promise<void> {
 		if (!kernel.session) {
@@ -99,11 +99,11 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	): Promise<void> {
 		// Make sure that we have an active debugging session at this point
 		if (this.debugService.activeDebugSession && this.debuggingActive) {
-			traceInfoIfCI(`Sending debug request for source map`);
+			traceInfoIfCI("Sending debug request for source map");
 			await Promise.all(
 				hashes.map(async (fileHash) => {
 					if (this.debuggingActive) {
-						return this.debugService.activeDebugSession!.customRequest(
+						return this.debugService.activeDebugSession?.customRequest(
 							"setPydevdSourceMap",
 							buildSourceMap(fileHash),
 						);

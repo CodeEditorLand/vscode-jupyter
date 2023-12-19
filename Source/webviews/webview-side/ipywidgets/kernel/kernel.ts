@@ -349,12 +349,13 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		// Handle messages as they come in. Note: Do not await anything here. THey have to be inorder.
 		// If not, we could switch to message chaining or an observable instead.
 		switch (type) {
-			case IPyWidgetMessages.IPyWidgets_MessageHookCall:
+			case IPyWidgetMessages.IPyWidgets_MessageHookCall: {
 				this.sendHookResult(payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_msg:
-				if (this.websocket && this.websocket.onmessage) {
+			case IPyWidgetMessages.IPyWidgets_msg: {
+				if (this.websocket?.onmessage) {
 					this.websocket.onmessage({
 						target: this.websocket,
 						data: payload.data,
@@ -363,10 +364,13 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 				}
 				this.sendResponse(payload.id);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_binary_msg:
-				if (this.websocket && this.websocket.onmessage) {
-					const deserialized = deserializeDataViews(payload.data)![0];
+			case IPyWidgetMessages.IPyWidgets_binary_msg: {
+				if (this.websocket?.onmessage) {
+					const deserialized = deserializeDataViews(
+						payload.data,
+					)?.[0];
 					this.websocket.onmessage({
 						target: this.websocket,
 						data: deserialized as any,
@@ -375,18 +379,22 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 				}
 				this.sendResponse(payload.id);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_mirror_execute:
+			case IPyWidgetMessages.IPyWidgets_mirror_execute: {
 				this.handleMirrorExecute(payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_ExtensionOperationHandled:
+			case IPyWidgetMessages.IPyWidgets_ExtensionOperationHandled: {
 				this.extensionOperationFinished(payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_registerCommTarget:
+			case IPyWidgetMessages.IPyWidgets_registerCommTarget: {
 				this.realKernel.registerCommTarget(payload, noop);
 				break;
+			}
 
 			default:
 				break;

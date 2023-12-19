@@ -242,9 +242,9 @@ export const activate: ActivationFunction = (context) => {
 					logger(
 						`Rendering ${outputItem.id} widget renderer found *************`,
 					);
-					element.className =
-						(element.className || "") +
-						" cell-output-ipywidget-background";
+					element.className = `${
+						element.className || ""
+					} cell-output-ipywidget-background`;
 					return renderOutputFunc(
 						outputItem,
 						widgetModel,

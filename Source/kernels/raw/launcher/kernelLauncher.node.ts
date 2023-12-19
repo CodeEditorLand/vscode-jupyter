@@ -48,7 +48,7 @@ import { IKernelConnection, IKernelLauncher, IKernelProcess } from "../types";
 import { KernelEnvironmentVariablesService } from "./kernelEnvVarsService.node";
 import { KernelProcess } from "./kernelProcess.node";
 
-const PortFormatString = `kernelLauncherPortStart_{0}.tmp`;
+const PortFormatString = "kernelLauncherPortStart_{0}.tmp";
 // Launches and returns a kernel process given a resource or python interpreter.
 // If the given interpreter is undefined, it will try to use the selected interpreter.
 // If the selected interpreter doesn't have a kernel, it will find a kernel on disk and use that.
@@ -90,7 +90,7 @@ export class KernelLauncher implements IKernelLauncher {
 			await fsextra.remove(filePath);
 		} catch (exc) {
 			// If it fails it doesn't really matter. Just a temp file
-			traceWarning(`Kernel port mutex failed to cleanup: `, exc);
+			traceWarning("Kernel port mutex failed to cleanup: ", exc);
 		}
 	}
 
@@ -179,9 +179,11 @@ export class KernelLauncher implements IKernelLauncher {
 	) {
 		const interpreter = kernelConnectionMetadata.interpreter;
 		if (
-			!isLocalConnection(kernelConnectionMetadata) ||
-			!isPythonKernelConnection(kernelConnectionMetadata) ||
-			!interpreter
+			!(
+				isLocalConnection(kernelConnectionMetadata) &&
+				isPythonKernelConnection(kernelConnectionMetadata) &&
+				interpreter
+			)
 		) {
 			return;
 		}

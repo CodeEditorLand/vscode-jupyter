@@ -187,7 +187,7 @@ suite("Extension Recommendation", () => {
 							),
 						).never();
 					});
-					test(`Got recommendations once per session when opening a notebook`, async () => {
+					test("Got recommendations once per session when opening a notebook", async () => {
 						const nb = createNotebook(languageToBeTested);
 						const nb2 = createNotebook(languageToBeTested);
 						onDidOpenNotebookDocument.fire(nb);
@@ -206,7 +206,7 @@ suite("Extension Recommendation", () => {
 							),
 						).once();
 					});
-					test(`Got recommendations once per session when selecting a kernel`, async () => {
+					test("Got recommendations once per session when selecting a kernel", async () => {
 						const notebook = createNotebook("python");
 						const notebook2 = createNotebook("python");
 						const controller = createController(languageToBeTested);
@@ -230,7 +230,7 @@ suite("Extension Recommendation", () => {
 							),
 						).once();
 					});
-					test(`Never show prompt again when opening a notebook in a new session`, async () => {
+					test("Never show prompt again when opening a notebook in a new session", async () => {
 						when(
 							mockedVSCodeNamespaces.window.showInformationMessage(
 								anything(),
@@ -267,7 +267,7 @@ suite("Extension Recommendation", () => {
 							),
 						).never();
 					});
-					test(`Open extension page to install the recommended extension`, async () => {
+					test("Open extension page to install the recommended extension", async () => {
 						when(
 							mockedVSCodeNamespaces.window.showInformationMessage(
 								anything(),

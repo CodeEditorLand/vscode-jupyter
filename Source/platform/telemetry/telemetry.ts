@@ -67,7 +67,7 @@ async function getPythonEnvironmentPackages(
 	options: { interpreter: PythonEnvironment } | { interpreterHash: string },
 ) {
 	if (!_interpreterPackageProvider) {
-		traceError(`Python package provider is not initialized.`);
+		traceError("Python package provider is not initialized.");
 		return "{}";
 	}
 	let interpreter: PythonEnvironment | undefined;

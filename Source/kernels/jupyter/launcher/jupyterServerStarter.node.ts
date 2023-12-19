@@ -164,7 +164,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 					new URL(connection.baseUrl).port || "0",
 					10,
 				);
-				if (port && !isNaN(port)) {
+				if (port && !Number.isNaN(port)) {
 					if (launchResult.proc) {
 						launchResult.proc.on("exit", () =>
 							UsedPorts.delete(port),
@@ -239,10 +239,9 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 		// Check for the debug environment variable being set. Setting this
 		// causes Jupyter to output a lot more information about what it's doing
 		// under the covers and can be used to investigate problems with Jupyter.
-		const debugArgs =
-			process.env && process.env.VSCODE_JUPYTER_DEBUG_JUPYTER
-				? ["--debug"]
-				: [];
+		const debugArgs = process.env?.VSCODE_JUPYTER_DEBUG_JUPYTER
+			? ["--debug"]
+			: [];
 
 		// Use this temp file and config file to generate a list of args for our command
 		return [...args, ...dockerArgs, ...debugArgs];
@@ -334,7 +333,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			const cgroup = await this.fs
 				.readFile(Uri.file("/proc/self/cgroup"))
 				.catch(() => "");
-			if (!cgroup.includes("docker") && !cgroup.includes("kubepods")) {
+			if (!(cgroup.includes("docker") || cgroup.includes("kubepods"))) {
 				return args;
 			}
 			// We definitely need an ip address.
@@ -347,7 +346,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 					"id",
 					{ encoding: "utf-8" },
 					(_, stdout: string | Buffer) => {
-						if (stdout && stdout.toString().includes("(root)")) {
+						if (stdout?.toString().includes("(root)")) {
 							args.push("--allow-root");
 						}
 						resolve(args);

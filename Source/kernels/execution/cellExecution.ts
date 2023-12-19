@@ -379,14 +379,14 @@ export class CellExecution implements ICellExecution, IDisposable {
 			// We cancelled the cell, hence don't do anything.
 			return;
 		}
-		if (!this.disposed && !this.cancelRequested) {
-			traceWarning(`Cell completed with errors`, error);
-		} else {
+		if (this.disposed || this.cancelRequested) {
 			traceWarning(
 				`Cell completed with errors (${
 					this.disposed ? "disposed" : "cancelled"
 				})`,
 			);
+		} else {
+			traceWarning("Cell completed with errors", error);
 		}
 		traceCellMessage(this.cell, "Completed with errors");
 
@@ -609,7 +609,7 @@ export class CellExecution implements ICellExecution, IDisposable {
 			if (this.cancelHandled) {
 				return;
 			}
-			if (!this.disposed && !this.cancelRequested) {
+			if (!(this.disposed || this.cancelRequested)) {
 				// @jupyterlab/services throws a `Canceled` error when the kernel is interrupted.
 				// Or even when the kernel dies when running a cell with the code `os.kill(os.getpid(), 9)`
 				traceError("Error in waiting for cell to complete", ex);

@@ -119,7 +119,7 @@ export async function activate(
 	context: IExtensionContext,
 ): Promise<IExtensionApi> {
 	setDisposableTracker(context.subscriptions);
-	setIsCodeSpace(env.uiKind == UIKind.Web);
+	setIsCodeSpace(env.uiKind === UIKind.Web);
 	setIsWebExtension(false);
 	context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
 	try {
@@ -360,7 +360,7 @@ function addOutputChannel(
 		!workspace.workspaceFolders ||
 		workspace.workspaceFolders.length === 0
 	) {
-		standardOutputChannel.appendLine(`No workspace folder opened.`);
+		standardOutputChannel.appendLine("No workspace folder opened.");
 	} else if (workspace.workspaceFolders.length === 1) {
 		standardOutputChannel.appendLine(
 			`Workspace folder ${getDisplayPath(

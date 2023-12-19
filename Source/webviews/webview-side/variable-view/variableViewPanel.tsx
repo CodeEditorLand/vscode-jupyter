@@ -54,13 +54,13 @@ export class VariableViewPanel extends React.Component<IVariableViewPanelProps> 
 	public override render() {
 		// If in test mode, update our count. Use this to determine how many renders a normal update takes.
 		if (this.props.testMode) {
-			this.renderCount = this.renderCount + 1;
+			this.renderCount += 1;
 		}
 
 		// Return our variable panel, we wrap this in one more top level element "variable-view-main-panel" so that
 		// we can size and host it differently from the variable panel in the interactive window or native editor
 		return (
-			<div id="variable-view-main-panel" role="Main" ref={this.panelRef}>
+			<div id="variable-view-main-panel" ref={this.panelRef}>
 				<div className="styleSetter">
 					<style>{`${this.props.rootCss ? this.props.rootCss : ""}
 ${buildSettingsCss(this.props.settings)}`}</style>

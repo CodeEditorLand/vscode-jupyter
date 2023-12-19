@@ -15,7 +15,7 @@ export function isString(str: unknown): str is string {
  * @returns whether the provided parameter is a JavaScript Number or not.
  */
 export function isNumber(obj: unknown): obj is number {
-	return typeof obj === "number" && !isNaN(obj);
+	return typeof obj === "number" && !Number.isNaN(obj);
 }
 
 /**
@@ -72,7 +72,7 @@ export function validateConstraint(
 			return;
 		}
 		throw new Error(
-			`argument does not match one of these constraints: arg instanceof constraint, arg.constructor === constraint, nor constraint(arg) === true`,
+			"argument does not match one of these constraints: arg instanceof constraint, arg.constructor === constraint, nor constraint(arg) === true",
 		);
 	}
 }

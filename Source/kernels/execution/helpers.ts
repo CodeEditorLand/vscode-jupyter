@@ -158,8 +158,8 @@ function sortOutputItemsBasedOnDisplayOrder(
 		if (isEmptyVendoredMimeType(outputItemB)) {
 			indexOfMimeTypeB = -1;
 		}
-		indexOfMimeTypeA = indexOfMimeTypeA == -1 ? 100 : indexOfMimeTypeA;
-		indexOfMimeTypeB = indexOfMimeTypeB == -1 ? 100 : indexOfMimeTypeB;
+		indexOfMimeTypeA = indexOfMimeTypeA === -1 ? 100 : indexOfMimeTypeA;
+		indexOfMimeTypeB = indexOfMimeTypeB === -1 ? 100 : indexOfMimeTypeB;
 		return indexOfMimeTypeA - indexOfMimeTypeB;
 	});
 }
@@ -500,7 +500,7 @@ function convertOutputMimeToJupyterOutput(mime: string, value: Uint8Array) {
 					encodeURIComponent(stringValue).replace(
 						/%([0-9A-F]{2})/g,
 						(_match, p1) =>
-							String.fromCharCode(Number.parseInt("0x" + p1)),
+							String.fromCharCode(Number.parseInt(`0x${p1}`)),
 					),
 				);
 			}
@@ -851,16 +851,19 @@ export async function updateNotebookMetadata(
 
 	let language: string | undefined;
 	switch (kernelConnection?.kind) {
-		case "connectToLiveRemoteKernel":
+		case "connectToLiveRemoteKernel": {
 			language = kernelConnection.kernelModel.language;
 			break;
+		}
 		case "startUsingRemoteKernelSpec":
-		case "startUsingLocalKernelSpec":
+		case "startUsingLocalKernelSpec": {
 			language = kernelConnection.kernelSpec.language;
 			break;
-		case "startUsingPythonInterpreter":
+		}
+		case "startUsingPythonInterpreter": {
 			language = PYTHON_LANGUAGE;
 			break;
+		}
 		default:
 			break;
 	}
@@ -890,8 +893,7 @@ export async function updateNotebookMetadata(
 			? `${interpreter.version.major}.${interpreter.version.minor}.${interpreter.version.patch}`
 			: "";
 		if (
-			interpreter &&
-			interpreter.version &&
+			interpreter?.version &&
 			metadata &&
 			metadata.language_info &&
 			metadata.language_info.version !== version
@@ -931,9 +933,10 @@ export async function updateNotebookMetadata(
 		let name = "";
 		switch (getKernelRegistrationInfo(kernelSpec)) {
 			case "registeredByOldVersionOfExt":
-			case "registeredByNewVersionOfExt":
+			case "registeredByNewVersionOfExt": {
 				name = "python3";
 				break;
+			}
 			case "registeredByNewVersionOfExtForCustomKernelSpec": {
 				const originalNameFromOriginalSpecFile = kernelSpec.metadata
 					?.vscode?.originalSpecFile
@@ -950,9 +953,10 @@ export async function updateNotebookMetadata(
 					displayName;
 				break;
 			}
-			default:
+			default: {
 				name = kernelSpec.name;
 				break;
+			}
 		}
 
 		if (metadata.kernelspec?.name !== name) {
@@ -963,10 +967,10 @@ export async function updateNotebookMetadata(
 				display_name: displayName,
 			};
 			if ("vscode" in metadata) {
-				delete metadata["vscode"];
+				metadata["vscode"] = undefined;
 			}
 			if ("interpreter" in metadata) {
-				delete metadata["interpreter"];
+				metadata["interpreter"] = undefined;
 			}
 		}
 	} else if (kernelSpecOrModel && !metadata.kernelspec) {
@@ -1033,7 +1037,7 @@ export async function updateNotebookMetadata(
 		try {
 			// This is set only for when we select an interpreter.
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			delete (metadata.kernelspec as any).metadata;
+			(metadata.kernelspec as any).metadata = undefined;
 		} catch {
 			// Noop.
 		}

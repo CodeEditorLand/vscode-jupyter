@@ -41,8 +41,8 @@ export class ClearJupyterServersCommand
 							)
 							.map(async (provider) => {
 								if (
-									!provider.serverProvider ||
-									!provider.serverProvider.removeJupyterServer
+									!provider.serverProvider
+										?.removeJupyterServer
 								) {
 									return;
 								}
@@ -54,10 +54,9 @@ export class ClearJupyterServersCommand
 								);
 								await Promise.all(
 									(servers || []).map((server) =>
-										provider.serverProvider!
-											.removeJupyterServer!(server).catch(
-											noop,
-										),
+										provider.serverProvider
+											?.removeJupyterServer?.(server)
+											.catch(noop),
 									),
 								);
 							}),

@@ -7,7 +7,7 @@ export function handleLinkClick(
 ) {
 	// If this is an anchor element, forward the click as Jupyter does.
 	let anchor = ev.target as HTMLAnchorElement;
-	if (anchor && anchor.href) {
+	if (anchor?.href) {
 		// Href may be redirected to an inner anchor
 		if (
 			anchor.href.startsWith("vscode") ||
@@ -18,7 +18,7 @@ export function handleLinkClick(
 				anchor = inner[0];
 			}
 		}
-		if (!anchor || !anchor.href || anchor.href.startsWith("vscode")) {
+		if (!anchor?.href || anchor.href.startsWith("vscode")) {
 			return;
 		}
 

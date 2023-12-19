@@ -14,5 +14,5 @@ try {
 		}
 	}
 } catch (ex) {
-	console.warn(`Failed to kill Jupyter Server`, ex);
+	console.warn("Failed to kill Jupyter Server", ex);
 }

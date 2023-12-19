@@ -62,8 +62,10 @@ export class KernelStartupCodeProvider
 	async getWorkingDirectory(kernel: IKernel): Promise<Uri | undefined> {
 		// If this is a remote kernel, we shouldn't be changing the startup directory
 		if (
-			!isLocalConnection(kernel.kernelConnectionMetadata) &&
-			!isLocalHostConnection(kernel.kernelConnectionMetadata)
+			!(
+				isLocalConnection(kernel.kernelConnectionMetadata) ||
+				isLocalHostConnection(kernel.kernelConnectionMetadata)
+			)
 		) {
 			return;
 		}
@@ -114,7 +116,7 @@ export class KernelStartupCodeProvider
 		// so only do this setting if we actually have a valid workspace open
 		if (fileRootStr && workspace.workspaceFolders?.length) {
 			const fileRoot = Uri.file(fileRootStr);
-			const workspaceFolderPath = workspace.workspaceFolders![0].uri;
+			const workspaceFolderPath = workspace.workspaceFolders?.[0].uri;
 			if (path.isAbsolute(fileRootStr)) {
 				if (await this.fs.exists(fileRoot)) {
 					// User setting is absolute and exists, use it

@@ -145,7 +145,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 		const diagnostic = diagnostics.find(
 			(d) => d.message === pipMessage || d.message === condaMessage,
 		);
-		if (!diagnostic || !diagnostic.range.contains(position)) {
+		if (!diagnostic?.range.contains(position)) {
 			return;
 		}
 		const installer = diagnostic.message === pipMessage ? "pip" : "conda";
@@ -170,18 +170,20 @@ export class NotebookCellBangInstallDiagnosticsProvider
 		const codeActions: CodeAction[] = [];
 		context.diagnostics.forEach((d) => {
 			switch (d.message) {
-				case pipMessage:
+				case pipMessage: {
 					codeActions.push(
 						this.createReplaceCodeAction(document, "pip", d),
 					);
 					break;
-				case condaMessage:
+				}
+				case condaMessage: {
 					codeActions.push(
 						this.createReplaceCodeAction(document, "conda", d),
 					);
 					break;
+				}
 
-				case matplotlibMessage:
+				case matplotlibMessage: {
 					codeActions.push(
 						this.createGotoWikiAction(
 							document,
@@ -192,6 +194,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
 						),
 					);
 					break;
+				}
 
 				default:
 					break;

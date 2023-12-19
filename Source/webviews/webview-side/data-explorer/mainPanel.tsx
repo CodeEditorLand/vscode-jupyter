@@ -209,8 +209,9 @@ export class MainPanel
 	private renderBreadcrumb() {
 		let breadcrumbText = this.state.variableName;
 		if (this.state.originalVariableShape) {
-			breadcrumbText +=
-				" (" + this.state.originalVariableShape?.join(", ") + ")";
+			breadcrumbText += ` (${this.state.originalVariableShape?.join(
+				", ",
+			)})`;
 		}
 		if (breadcrumbText) {
 			return (
@@ -231,25 +232,30 @@ export class MainPanel
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public handleMessage = (msg: string, payload?: any) => {
 		switch (msg) {
-			case DataViewerMessages.InitializeData:
+			case DataViewerMessages.InitializeData: {
 				this.initializeData(payload);
 				break;
+			}
 
-			case DataViewerMessages.GetAllRowsResponse:
+			case DataViewerMessages.GetAllRowsResponse: {
 				this.handleGetAllRowsResponse(payload as IRowsResponse);
 				break;
+			}
 
-			case DataViewerMessages.GetRowsResponse:
+			case DataViewerMessages.GetRowsResponse: {
 				this.handleGetRowChunkResponse(payload as IGetRowsResponse);
 				break;
+			}
 
-			case SharedMessages.UpdateSettings:
+			case SharedMessages.UpdateSettings: {
 				this.updateSettings(payload);
 				break;
+			}
 
-			case SharedMessages.LocInit:
+			case SharedMessages.LocInit: {
 				this.initializeLoc(payload);
 				break;
+			}
 
 			default:
 				break;
@@ -506,7 +512,7 @@ export class MainPanel
 			r[RowNumberColumnName] = this.state.fetchedRowCount + idx;
 			for (const [key, value] of Object.entries(r)) {
 				switch (value) {
-					case "nan":
+					case "nan": {
 						r[key] = NaN;
 						if (!this.columnsContainingInfOrNaN.has(key)) {
 							// Don't add column to columnsToUpdate just because of this because
@@ -514,20 +520,23 @@ export class MainPanel
 							this.columnsContainingInfOrNaN.add(key);
 						}
 						break;
-					case "-inf":
+					}
+					case "-inf": {
 						r[key] = -Infinity;
 						if (!this.columnsContainingInfOrNaN.has(key)) {
 							columnsToUpdate.add(key);
 							this.columnsContainingInfOrNaN.add(key);
 						}
 						break;
-					case "inf":
+					}
+					case "inf": {
 						r[key] = Infinity;
 						if (!this.columnsContainingInfOrNaN.has(key)) {
 							columnsToUpdate.add(key);
 							this.columnsContainingInfOrNaN.add(key);
 						}
 						break;
+					}
 					default:
 				}
 			}

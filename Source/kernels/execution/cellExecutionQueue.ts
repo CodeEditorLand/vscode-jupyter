@@ -392,7 +392,7 @@ export class CellExecutionQueue implements Disposable {
 				kernelConnection.status === "terminating"
 			) {
 				this.cancelledOrCompletedWithErrors = true;
-				traceWarning(`Cancel all remaining cells due to dead kernel`);
+				traceWarning("Cancel all remaining cells due to dead kernel");
 				await this.cancel();
 				break;
 			}

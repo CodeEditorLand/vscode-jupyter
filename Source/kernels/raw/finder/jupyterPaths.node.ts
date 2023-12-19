@@ -172,7 +172,7 @@ export class JupyterPaths {
 			}
 		}
 		if (!runtimeDir) {
-			traceError(`Failed to determine Jupyter runtime directory`);
+			traceError("Failed to determine Jupyter runtime directory");
 			return;
 		}
 
@@ -348,7 +348,7 @@ export class JupyterPaths {
 					"Library",
 					"Jupyter",
 				);
-			case OSType.Windows:
+			case OSType.Windows: {
 				const appData = process.env["APPDATA"]
 					? Uri.file(path.normalize(process.env["APPDATA"]))
 					: "";
@@ -364,6 +364,7 @@ export class JupyterPaths {
 					"Library",
 					"Jupyter",
 				);
+			}
 			default: {
 				// Linux, non-OS X Unix, AIX, etc.
 				const xdgDataHome = process.env["XDG_DATA_HOME"]

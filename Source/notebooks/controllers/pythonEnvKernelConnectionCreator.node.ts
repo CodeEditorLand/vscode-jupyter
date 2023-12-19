@@ -259,7 +259,7 @@ export class PythonEnvKernelConnectionCreator {
 			}
 			if (!path) {
 				traceWarning(
-					`Python Environment not created, either user cancelled the creation or there was an error in the Python Extension`,
+					"Python Environment not created, either user cancelled the creation or there was an error in the Python Extension",
 				);
 				return { action: "Cancel" };
 			}

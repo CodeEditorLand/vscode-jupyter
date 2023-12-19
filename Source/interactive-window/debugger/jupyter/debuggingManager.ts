@@ -94,7 +94,7 @@ export class InteractiveWindowDebuggingManager
 	}
 
 	public async start(notebook: NotebookDocument, cell: NotebookCell) {
-		traceInfoIfCI(`Starting debugging IW`);
+		traceInfoIfCI("Starting debugging IW");
 
 		const ipykernelResult = await this.checkIpykernelAndPrompt(cell);
 		if (ipykernelResult === IpykernelCheckResult.Ok) {
@@ -145,14 +145,14 @@ export class InteractiveWindowDebuggingManager
 
 		if (this.notebookInProgress.has(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook`,
+				"Cannot start debugging. Already debugging this notebook",
 			);
 			return;
 		}
 
 		if (this.isDebugging(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook document. Toolbar should update`,
+				"Cannot start debugging. Already debugging this notebook document. Toolbar should update",
 			);
 			return;
 		}
@@ -227,7 +227,7 @@ export class InteractiveWindowDebuggingManager
 		// Make sure that we have an active debugging session at this point
 		const debugSession = this.getDebugSession(notebookEditor.notebook);
 		if (debugSession) {
-			traceInfoIfCI(`Sending debug request for source map`);
+			traceInfoIfCI("Sending debug request for source map");
 			await Promise.all(
 				hashes.map(async (fileHash) => {
 					if (debugSession) {

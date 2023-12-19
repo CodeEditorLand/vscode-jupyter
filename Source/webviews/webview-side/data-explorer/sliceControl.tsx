@@ -383,7 +383,7 @@ export class SliceControl extends React.Component<
 				}
 			}
 
-			const newSliceExpression = "[" + shape.join(", ") + "]";
+			const newSliceExpression = `[${shape.join(", ")}]`;
 			const fullSlice = fullSliceExpression(
 				this.props.originalVariableShape,
 			);

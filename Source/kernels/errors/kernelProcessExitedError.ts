@@ -10,7 +10,7 @@ import { BaseKernelError } from "./types";
  */
 export class KernelProcessExitedError extends BaseKernelError {
 	constructor(
-		public readonly exitCode: number = -1,
+		public readonly exitCode: number,
 		public override readonly stdErr: string,
 		kernelConnectionMetadata: KernelConnectionMetadata,
 	) {

@@ -208,11 +208,11 @@ suite("Jupyter Connection", async () => {
 		assert.ok(connection, "Connection not returned");
 		assert.strictEqual(
 			connection.baseUrl,
-			jupyterServer.connectionInformation!.baseUrl.toString(false),
+			jupyterServer.connectionInformation?.baseUrl.toString(false),
 			"Base url is incorrect",
 		);
 		assert.deepEqual(
-			connection.getAuthHeader!(),
+			connection.getAuthHeader?.(),
 			jupyterServer.connectionInformation?.headers,
 			"Auth Headers are incorrect",
 		);

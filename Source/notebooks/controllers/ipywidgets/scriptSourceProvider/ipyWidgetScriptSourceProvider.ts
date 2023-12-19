@@ -67,7 +67,7 @@ export class IPyWidgetScriptSourceProvider
 			return;
 		}
 
-		return provider.getBaseUrl!();
+		return provider.getBaseUrl?.();
 	}
 	public async getWidgetScriptSources() {
 		const sources: WidgetScriptSource[] = [];
@@ -174,7 +174,7 @@ export class IPyWidgetScriptSourceProvider
 		});
 	}
 	private disposeScriptProviders() {
-		while (this.scriptProviders && this.scriptProviders.length) {
+		while (this.scriptProviders?.length) {
 			const item = this.scriptProviders.shift();
 			if (item) {
 				item.dispose();

@@ -212,7 +212,7 @@ export class DataViewerCommandRegistry
 	private getActiveKernel() {
 		const activeNotebook = window.activeNotebookEditor?.notebook;
 		const activeJupyterNotebookKernel =
-			activeNotebook?.notebookType == JupyterNotebookView
+			activeNotebook?.notebookType === JupyterNotebookView
 				? this.kernelProvider.get(activeNotebook)
 				: undefined;
 

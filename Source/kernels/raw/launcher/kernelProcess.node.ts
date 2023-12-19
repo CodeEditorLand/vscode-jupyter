@@ -238,7 +238,7 @@ export class KernelProcess implements IKernelProcess {
 					exitEventFired = true;
 				}
 				if (!cancelToken.isCancellationRequested) {
-					traceInfoIfCI(`KernelProcessExitedError raised`, stderr);
+					traceInfoIfCI("KernelProcessExitedError raised", stderr);
 					deferred.reject(
 						new KernelProcessExitedError(
 							exitCode || -1,
@@ -384,8 +384,10 @@ export class KernelProcess implements IKernelProcess {
 		} catch (e) {
 			const stdErrToLog = (stderrProc || stderr || "").trim();
 			if (
-				!cancelToken?.isCancellationRequested &&
-				!isCancellationError(e)
+				!(
+					cancelToken?.isCancellationRequested ||
+					isCancellationError(e)
+				)
 			) {
 				traceError("Disposing kernel process due to an error", e);
 				if (
@@ -417,15 +419,15 @@ export class KernelProcess implements IKernelProcess {
 					getErrorMessageFromPythonTraceback(stdErrToLog) ||
 					stdErrToLog.substring(0, 100);
 				traceInfoIfCI(
-					`KernelDiedError raised`,
+					"KernelDiedError raised",
 					errorMessage,
-					stderrProc + "\n" + stderr + "\n",
+					`${stderrProc}\n${stderr}\n`,
 				);
-				console.error(`KernelDiedError raised`, e);
+				console.error("KernelDiedError raised", e);
 				throw new KernelDiedError(
 					DataScience.kernelDied(errorMessage),
 					// Include what ever we have as the stderr.
-					stderrProc + "\n" + stderr + "\n",
+					`${stderrProc}\n${stderr}\n`,
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					e as any,
 					this.kernelConnectionMetadata,
@@ -476,7 +478,7 @@ export class KernelProcess implements IKernelProcess {
 		// Do not remove this code, in in unit tests we end up running this,
 		// then we run into the danger of kill all of the processes on the machine.
 		// because calling `pidtree` without a pid will return all pids and hence everything ends up getting killed.
-		if (!pid || !ProcessService.isAlive(pid)) {
+		if (!(pid && ProcessService.isAlive(pid))) {
 			return;
 		}
 		try {
@@ -801,13 +803,13 @@ function stripUnwantedMessages(output: string) {
 	if (
 		lines.some((line) =>
 			line.includes(
-				`FutureWarning: Supporting extra quotes around strings is deprecated in traitlets 5.0.`,
+				"FutureWarning: Supporting extra quotes around strings is deprecated in traitlets 5.0.",
 			),
 		) &&
 		lines.some((line) => line.trim() === "warn(") &&
 		lines.some((line) =>
 			line.includes(
-				`FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0.`,
+				"FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0.",
 			),
 		)
 	) {
@@ -822,7 +824,7 @@ function stripUnwantedMessages(output: string) {
 					) &&
 					line.trim() !== "warn(" &&
 					!line.includes(
-						`FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0. Use`,
+						"FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0. Use",
 					)
 				);
 			})

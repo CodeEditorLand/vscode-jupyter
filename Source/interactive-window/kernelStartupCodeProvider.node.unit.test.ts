@@ -107,7 +107,7 @@ suite("KernelWorkingFolder", () => {
 				}
 				when(fs.exists(uriEquals(__dirname))).thenResolve(true);
 			});
-			test(`Has working folder`, async () => {
+			test("Has working folder", async () => {
 				when(settings.notebookFileRoot).thenReturn(__dirname);
 				when(
 					mockedVSCodeNamespaces.workspace.workspaceFolders,

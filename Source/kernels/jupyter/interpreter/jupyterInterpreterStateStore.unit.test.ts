@@ -46,6 +46,6 @@ suite("Jupyter Interpreter State", () => {
 			uri,
 		);
 
-		assert.isTrue(arePathsSame(selected.selectedPythonPath!.fsPath, uri));
+		assert.isTrue(arePathsSame(selected.selectedPythonPath?.fsPath, uri));
 	});
 });

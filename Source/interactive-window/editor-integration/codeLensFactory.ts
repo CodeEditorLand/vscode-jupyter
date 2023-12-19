@@ -218,7 +218,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						firstCell,
 					);
 					if (codeLens) {
-						cache!.documentLenses.push(codeLens);
+						cache?.documentLenses.push(codeLens);
 					}
 				});
 				firstCell = false;
@@ -245,7 +245,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 							item.uri.toString() === document.uri.toString(),
 				  )?.generatedCodes
 				: undefined;
-			if (generatedCodes && generatedCodes.length) {
+			if (generatedCodes?.length) {
 				cache.cellRanges.forEach((r) => {
 					const codeLens = this.createExecutionLens(
 						document,
@@ -410,7 +410,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					debugCurrentCellTitle,
 				);
 
-			case Commands.DebugCell:
+			case Commands.DebugCell: {
 				// If it's not a code cell (e.g. markdown), don't add the "Debug cell" action.
 				if (cell_type !== "code") {
 					break;
@@ -427,8 +427,9 @@ export class CodeLensFactory implements ICodeLensFactory {
 						range.end.character,
 					],
 				);
+			}
 
-			case Commands.DebugStepOver:
+			case Commands.DebugStepOver: {
 				// Only code cells get debug actions
 				if (cell_type !== "code") {
 					break;
@@ -439,8 +440,9 @@ export class CodeLensFactory implements ICodeLensFactory {
 					debugStepOverTitle,
 					[document.uri],
 				);
+			}
 
-			case Commands.DebugContinue:
+			case Commands.DebugContinue: {
 				// Only code cells get debug actions
 				if (cell_type !== "code") {
 					break;
@@ -451,8 +453,9 @@ export class CodeLensFactory implements ICodeLensFactory {
 					DebugContinueTitle,
 					[document.uri],
 				);
+			}
 
-			case Commands.DebugStop:
+			case Commands.DebugStop: {
 				// Only code cells get debug actions
 				if (cell_type !== "code") {
 					break;
@@ -463,6 +466,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					debugStopTitle,
 					[document.uri],
 				);
+			}
 
 			case Commands.RunCurrentCell:
 			case Commands.RunCell:
@@ -488,7 +492,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 				);
 
 			case Commands.RunAllCellsAbovePalette:
-			case Commands.RunAllCellsAbove:
+			case Commands.RunAllCellsAbove: {
 				if (isFirst) {
 					return this.generateCodeLens(
 						range,
@@ -505,6 +509,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 					);
 				}
 				break;
+			}
 			case Commands.RunCellAndAllBelowPalette:
 			case Commands.RunCellAndAllBelow:
 				return this.generateCodeLens(
@@ -514,9 +519,10 @@ export class CodeLensFactory implements ICodeLensFactory {
 					[document.uri, range.start.line, range.start.character],
 				);
 
-			default:
+			default: {
 				traceWarning(`Invalid command for code lens ${commandName}`);
 				break;
+			}
 		}
 
 		return undefined;
@@ -540,7 +546,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 			const rangeMatches = generatedCodes
 				.filter((h) => h.line - 2 === range.start.line)
 				.sort((a, b) => a.timestamp - b.timestamp);
-			if (rangeMatches && rangeMatches.length) {
+			if (rangeMatches?.length) {
 				const rangeMatch = rangeMatches[rangeMatches.length - 1];
 				const matchingExecutionCount =
 					this.findMatchingCellExecutionCount(rangeMatch.id);

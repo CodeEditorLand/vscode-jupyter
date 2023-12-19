@@ -45,16 +45,10 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 			return;
 		}
 		if (
-			!e.cellChanges.some(
-				(c) =>
-					c.outputs &&
-					c.outputs.some(
-						(o) =>
-							o.items &&
-							o.items.some(
-								(item) => item.mime === WIDGET_MIMETYPE,
-							),
-					),
+			!e.cellChanges.some((c) =>
+				c.outputs?.some((o) =>
+					o.items?.some((item) => item.mime === WIDGET_MIMETYPE),
+				),
 			)
 		) {
 			return;

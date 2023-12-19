@@ -383,7 +383,7 @@ declare namespace Slick {
 	 * @static
 	 * @constructor
 	 **/
-	export var GlobalEditorLock: EditorLock<Slick.SlickData>;
+	export let GlobalEditorLock: EditorLock<Slick.SlickData>;
 
 	/**
 	 * slick.grid.js
@@ -1624,10 +1624,10 @@ declare namespace Slick {
 	}
 
 	export namespace Formatters {
-		var PercentComplete: Formatter<Slick.SlickData>;
-		var PercentCompleteBar: Formatter<Slick.SlickData>;
-		var YesNo: Formatter<Slick.SlickData>;
-		var Checkmark: Formatter<Slick.SlickData>;
+		let PercentComplete: Formatter<Slick.SlickData>;
+		let PercentCompleteBar: Formatter<Slick.SlickData>;
+		let YesNo: Formatter<Slick.SlickData>;
+		let Checkmark: Formatter<Slick.SlickData>;
 	}
 
 	export namespace Data {

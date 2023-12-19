@@ -159,7 +159,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 				progressList: [],
 				dispose: noop,
 			};
-			KernelProgressReporter.instance!.kernelResourceProgressReporter.set(
+			KernelProgressReporter.instance?.kernelResourceProgressReporter.set(
 				key,
 				progressInfo,
 			);
@@ -212,7 +212,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 						}
 					} else {
 						// If we have no more messages, then remove the reporter.
-						KernelProgressReporter.instance!.kernelResourceProgressReporter.delete(
+						KernelProgressReporter.instance?.kernelResourceProgressReporter.delete(
 							key,
 						);
 						progressInfo.dispose();
@@ -235,7 +235,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		const deferred = createDeferred();
 		const disposable = new Disposable(() => deferred.resolve());
 		const existingInfo =
-			KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
+			KernelProgressReporter.instance?.kernelResourceProgressReporter.get(
 				key,
 			) || {
 				title,
@@ -259,7 +259,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 					{ location: ProgressLocation.Notification, title },
 					async (progress, token: CancellationToken) => {
 						const info =
-							KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
+							KernelProgressReporter.instance?.kernelResourceProgressReporter.get(
 								key,
 							);
 						if (!info) {
@@ -278,11 +278,11 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 						}
 						await raceCancellation(token, deferred.promise);
 						if (
-							KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
+							KernelProgressReporter.instance?.kernelResourceProgressReporter.get(
 								key,
 							) === info
 						) {
-							KernelProgressReporter.instance!.kernelResourceProgressReporter.delete(
+							KernelProgressReporter.instance?.kernelResourceProgressReporter.delete(
 								key,
 							);
 						}
@@ -292,7 +292,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 				.then(noop, noop);
 		};
 
-		KernelProgressReporter.instance!.kernelResourceProgressReporter.set(
+		KernelProgressReporter.instance?.kernelResourceProgressReporter.set(
 			key,
 			{
 				...existingInfo,

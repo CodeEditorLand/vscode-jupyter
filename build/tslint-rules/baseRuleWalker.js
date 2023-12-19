@@ -7,7 +7,7 @@ const util = require("../util");
 class BaseRuleWalker extends Lint.RuleWalker {
 	shouldIgnoreCurrentFile(node, filesToIgnore) {
 		const sourceFile = node.getSourceFile();
-		if (sourceFile && sourceFile.fileName) {
+		if (sourceFile?.fileName) {
 			const filename = path.resolve(
 				util.ExtensionRootDir,
 				sourceFile.fileName,

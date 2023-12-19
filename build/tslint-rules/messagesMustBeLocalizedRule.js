@@ -44,7 +44,7 @@ class NoStringLiteralsInMessages extends baseRuleWalker.BaseRuleWalker {
 			return true;
 		}
 		const sourceFile = node.getSourceFile();
-		if (sourceFile && sourceFile.fileName) {
+		if (sourceFile?.fileName) {
 			if (sourceFile.fileName.startsWith(ignoredPrefix)) {
 				return true;
 			}

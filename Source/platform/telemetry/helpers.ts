@@ -11,11 +11,11 @@ export function getTelemetrySafeVersion(version: string): string | undefined {
 		const [major, minor, patch] = `${version.trim()}...`
 			.split(".")
 			.map((item) => parseInt(item, 10));
-		if (isNaN(major)) {
+		if (Number.isNaN(major)) {
 			return;
-		} else if (isNaN(minor)) {
+		} else if (Number.isNaN(minor)) {
 			return major.toString();
-		} else if (isNaN(patch)) {
+		} else if (Number.isNaN(patch)) {
 			return `${major}.${minor}`;
 		}
 		return `${major}.${minor}.${patch}`;

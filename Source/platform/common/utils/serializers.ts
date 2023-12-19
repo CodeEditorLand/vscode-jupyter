@@ -11,7 +11,7 @@
 export function serializeDataViews(
 	buffers: undefined | (ArrayBuffer | ArrayBufferView)[],
 ) {
-	if (!buffers || !Array.isArray(buffers) || buffers.length === 0) {
+	if (!(buffers && Array.isArray(buffers)) || buffers.length === 0) {
 		return;
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

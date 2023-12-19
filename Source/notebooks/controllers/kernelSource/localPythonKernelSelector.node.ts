@@ -185,7 +185,7 @@ export class LocalPythonKernelSelector extends DisposableBase {
 					},
 					(ex) => {
 						traceError(
-							`Failed to install the Python extension`,
+							"Failed to install the Python extension",
 							ex,
 						);
 						pythonExtensionNotInstalled.resolve();

@@ -130,7 +130,7 @@ export class HoverProvider
 						// Note, getVariableProperties is non null here because we are specifically
 						// injecting kernelVariables, which does define this interface method
 						...notebooks.map((n) =>
-							this.variableProvider.getVariableProperties!(
+							this.variableProvider.getVariableProperties?.(
 								word,
 								n,
 								token,
@@ -139,12 +139,11 @@ export class HoverProvider
 					);
 					const entries = Object.entries(attributes || {});
 					if (entries.length > 0) {
-						const asMarkdown =
-							entries.reduce(
-								(accum, entry) =>
-									accum + `${entry[0]}: ${entry[1]}\n`,
-								"```\n",
-							) + "```";
+						const asMarkdown = `${entries.reduce(
+							(accum, entry) =>
+								accum + `${entry[0]}: ${entry[1]}\n`,
+							"```\n",
+						)}\`\`\``;
 						const result = {
 							contents: [new vscode.MarkdownString(asMarkdown)],
 						};

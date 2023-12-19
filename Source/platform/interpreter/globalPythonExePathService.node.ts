@@ -101,7 +101,7 @@ export class GlobalPythonExecutablePathService {
 			} else {
 				sitePath = Uri.joinPath(outputPath, "bin");
 			}
-			if (!sitePath || !this.fs.exists(sitePath)) {
+			if (!(sitePath && this.fs.exists(sitePath))) {
 				throw new Error(
 					`USER_SITE ${
 						sitePath.fsPath

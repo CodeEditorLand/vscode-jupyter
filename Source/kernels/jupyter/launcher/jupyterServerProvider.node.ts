@@ -50,7 +50,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 
 		// Check to see if we support ipykernel or not
 		try {
-			traceVerbose(`Checking for server usability.`);
+			traceVerbose("Checking for server usability.");
 
 			const usable = await this.checkUsable();
 			if (!usable) {
@@ -63,7 +63,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				);
 			}
 			// Then actually start the server
-			traceVerbose(`Starting notebook server.`);
+			traceVerbose("Starting notebook server.");
 			const result = await jupyterServerHelper.startServer(
 				options.resource,
 				options.token,

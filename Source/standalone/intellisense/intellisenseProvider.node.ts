@@ -207,7 +207,7 @@ export class IntellisenseProvider
 			// If we had one, tell the old language server to stop watching this notebook
 			if (
 				oldLanguageServer &&
-				newServer?.interpreterId != oldLanguageServer.interpreterId
+				newServer?.interpreterId !== oldLanguageServer.interpreterId
 			) {
 				oldLanguageServer.stopWatching(e.notebook);
 			}
@@ -295,7 +295,7 @@ export class IntellisenseProvider
 			.find((c) => c.document.uri.toString() === uri.toString());
 
 		return (
-			interpreterId == notebookId &&
+			interpreterId === notebookId &&
 			(!cell || cell.document.languageId === "python")
 		);
 	}
@@ -307,7 +307,7 @@ export class IntellisenseProvider
 
 		// Convert to string in case we get an array of startup commands.
 		if (Array.isArray(setting)) {
-			setting = setting.join(`\n`);
+			setting = setting.join("\n");
 		}
 
 		if (setting) {

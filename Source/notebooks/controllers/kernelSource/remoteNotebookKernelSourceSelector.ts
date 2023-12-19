@@ -221,7 +221,7 @@ export class RemoteNotebookKernelSourceSelector
 				serversAndTimes.push({ server, time: lastUsedTime?.time });
 			});
 		serversAndTimes.sort((a, b) => {
-			if (!a.time && !b.time) {
+			if (!(a.time || b.time)) {
 				return a.server.displayName.localeCompare(b.server.displayName);
 			}
 			if (!a.time && b.time) {
@@ -508,7 +508,7 @@ export class RemoteNotebookKernelSourceSelector
 						),
 						token,
 					).catch((ex) =>
-						traceError(`Failed to select a kernel`, ex),
+						traceError("Failed to select a kernel", ex),
 					);
 					if (result && result === InputFlowAction.back) {
 						if (selectedSource === defaultSelection) {
@@ -552,7 +552,7 @@ export class RemoteNotebookKernelSourceSelector
 						finderPromise,
 						token,
 					).catch((ex) =>
-						traceError(`Failed to select a kernel`, ex),
+						traceError("Failed to select a kernel", ex),
 					);
 					if (result && result === InputFlowAction.back) {
 						if (selectedSource === defaultSelection) {
@@ -660,7 +660,7 @@ export class RemoteNotebookKernelSourceSelector
 			state.notebook,
 			finderPromise,
 			token,
-		).catch((ex) => traceError(`Failed to select a kernel`, ex));
+		).catch((ex) => traceError("Failed to select a kernel", ex));
 		if (result && result === InputFlowAction.back) {
 			// Do not go back to the previous command,
 			// We have no idea whta the previous command in the 3rd party extension does,
@@ -727,7 +727,7 @@ export class RemoteNotebookKernelSourceSelector
 				remoteKernelPicker.selected = item;
 			})
 			.catch((ex) =>
-				traceError(`Failed to determine preferred remote kernel`, ex),
+				traceError("Failed to determine preferred remote kernel", ex),
 			);
 		return remoteKernelPicker.selectItem(token);
 	}

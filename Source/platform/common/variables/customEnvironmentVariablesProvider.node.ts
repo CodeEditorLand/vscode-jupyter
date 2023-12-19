@@ -264,18 +264,18 @@ export class CustomEnvironmentVariablesProvider
 			mergedVars.PYTHONPATH = process.env.PYTHONPATH;
 		}
 		const pathKey = customEnvVars
-			? Object.keys(customEnvVars).find((k) => k.toLowerCase() == "path")
+			? Object.keys(customEnvVars).find((k) => k.toLowerCase() === "path")
 			: undefined;
-		if (pathKey && customEnvVars![pathKey]) {
+		if (pathKey && customEnvVars?.[pathKey]) {
 			this.envVarsService.appendPath(
 				mergedVars!,
-				customEnvVars![pathKey]!,
+				customEnvVars?.[pathKey]!,
 			);
 		}
-		if (customEnvVars!.PYTHONPATH) {
+		if (customEnvVars?.PYTHONPATH) {
 			this.envVarsService.appendPythonPath(
 				mergedVars!,
-				customEnvVars!.PYTHONPATH,
+				customEnvVars?.PYTHONPATH,
 			);
 		}
 		return mergedVars;

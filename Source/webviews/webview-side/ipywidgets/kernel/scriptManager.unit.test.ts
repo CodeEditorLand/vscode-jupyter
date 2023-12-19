@@ -45,7 +45,7 @@ suite("IPyWidget Script Manager", () => {
 	});
 	teardown(() => {
 		scriptsAlreadyRegisteredInRequireJs.clear();
-		delete (globalThis as any).window;
+		(globalThis as any).window = undefined;
 		// Just to
 		if (postOfficeCallBack?.dispose) {
 			postOfficeCallBack.dispose();

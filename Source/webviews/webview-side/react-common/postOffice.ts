@@ -28,8 +28,8 @@ interface IMessageApi {
 	dispose(): void;
 }
 
-declare var onDidReceiveKernelMessage: KernelMessagingApi["onDidReceiveKernelMessage"];
-declare var postKernelMessage: KernelMessagingApi["postKernelMessage"];
+declare let onDidReceiveKernelMessage: KernelMessagingApi["onDidReceiveKernelMessage"];
+declare let postKernelMessage: KernelMessagingApi["postKernelMessage"];
 
 // This special function talks to vscode from a web panel
 export declare function acquireVsCodeApi(): IVsCodeApi;
@@ -72,7 +72,7 @@ class VsCodeMessageApi implements IMessageApi {
 				const api = this.vscodeApi as any as
 					| undefined
 					| { handleMessage?: Function };
-				if (api && api.handleMessage) {
+				if (api?.handleMessage) {
 					api.handleMessage(this.handleVSCodeApiMessages.bind(this));
 				}
 			} catch {

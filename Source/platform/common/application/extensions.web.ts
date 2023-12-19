@@ -21,8 +21,8 @@ export class Extensions implements IExtensions {
 		stack = stack || new Error().stack;
 		if (stack) {
 			const jupyterExtRoot = extensions
-				.getExtension(JVSC_EXTENSION_ID)!
-				.extensionUri.toString()
+				.getExtension(JVSC_EXTENSION_ID)
+				?.extensionUri.toString()
 				.toLowerCase();
 			const frames = stack
 				.split("\n")
@@ -33,7 +33,7 @@ export class Extensions implements IExtensions {
 					}
 				})
 				// Since this is web, look for paths that start with http (which also includes https).
-				.filter((item) => item && item.toLowerCase().startsWith("http"))
+				.filter((item) => item?.toLowerCase().startsWith("http"))
 				.filter(
 					(item) =>
 						item && !item.toLowerCase().startsWith(jupyterExtRoot),
@@ -61,7 +61,7 @@ export class Extensions implements IExtensions {
 				}
 			}
 			traceError(
-				`Unable to determine the caller of the extension API for trace stack.`,
+				"Unable to determine the caller of the extension API for trace stack.",
 				stack,
 			);
 		}

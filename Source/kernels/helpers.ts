@@ -360,7 +360,7 @@ export function getDisplayNameOrNameOfKernelConnection(
 				return oldDisplayName;
 			}
 		}
-		case "startUsingPythonInterpreter":
+		case "startUsingPythonInterpreter": {
 			const pythonVersion = (
 				getTelemetrySafeVersion(
 					kernelConnection.interpreter.version?.raw || "",
@@ -399,6 +399,7 @@ export function getDisplayNameOrNameOfKernelConnection(
 			} else {
 				return `Python ${pythonVersion}`.trim();
 			}
+		}
 	}
 	return oldDisplayName;
 }
@@ -716,7 +717,7 @@ export function areKernelConnectionsEqual(
 	connection1?: KernelConnectionMetadata,
 	connection2?: KernelConnectionMetadata,
 ) {
-	if (!connection1 && !connection2) {
+	if (!(connection1 || connection2)) {
 		return true;
 	}
 	if (!connection1 && connection2) {
@@ -811,7 +812,7 @@ export async function executeSilently(
 				outputs.push(streamOutput);
 			}
 		} else if (jupyterLab.KernelMessage.isExecuteResultMsg(msg)) {
-			traceInfoIfCI(`Got io pub message (execresult)}`);
+			traceInfoIfCI("Got io pub message (execresult)}");
 			const output: nbformat.IExecuteResult = {
 				data: msg.content.data,
 				execution_count: msg.content.execution_count,
@@ -820,7 +821,7 @@ export async function executeSilently(
 			};
 			outputs.push(output);
 		} else if (jupyterLab.KernelMessage.isDisplayDataMsg(msg)) {
-			traceInfoIfCI(`Got io pub message (displaydata)}`);
+			traceInfoIfCI("Got io pub message (displaydata)}");
 			const output: nbformat.IDisplayData = {
 				data: msg.content.data,
 				metadata: msg.content.metadata,

@@ -24,7 +24,7 @@ export class TrustedKernelPaths implements ITrustedKernelPaths {
 	}
 	public isTrusted(kernelPath: Uri): boolean {
 		const trusted = this.isTrustedImpl(kernelPath);
-		if (!trusted && !TrustedKernelPaths.IsKernelSpecHidden.completed) {
+		if (!(trusted || TrustedKernelPaths.IsKernelSpecHidden.completed)) {
 			TrustedKernelPaths.IsKernelSpecHidden.resolve(true);
 		}
 		return trusted;

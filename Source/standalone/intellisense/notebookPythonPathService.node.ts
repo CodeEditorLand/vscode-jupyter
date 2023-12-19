@@ -52,8 +52,10 @@ export class NotebookPythonPathService
 
 	public activate() {
 		if (
-			!this.isUsingPylance() ||
-			!this.extensionChecker.isPythonExtensionInstalled
+			!(
+				this.isUsingPylance() &&
+				this.extensionChecker.isPythonExtensionInstalled
+			)
 		) {
 			return;
 		}
@@ -112,10 +114,10 @@ export class NotebookPythonPathService
 			// versions of Python and Pylance support the experiment.
 			this._isEnabled = false;
 			if (languageServer !== "Pylance" && languageServer !== "Default") {
-				traceInfo(`Not using Pylance`);
+				traceInfo("Not using Pylance");
 			} else {
 				this._isEnabled = true;
-				traceInfo(`Using Pylance`);
+				traceInfo("Using Pylance");
 			}
 		}
 

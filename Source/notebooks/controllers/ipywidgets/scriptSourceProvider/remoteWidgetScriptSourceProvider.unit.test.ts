@@ -48,7 +48,7 @@ suite("ipywidget - Remote Widget Script Source", () => {
 		);
 	});
 	test("Get baseurl", async () => {
-		const uri = await scriptSourceProvider.getBaseUrl!();
+		const uri = await scriptSourceProvider.getBaseUrl?.();
 
 		assert.strictEqual(uri?.toString(), baseUrl.toString());
 	});
@@ -64,8 +64,8 @@ suite("ipywidget - Remote Widget Script Source", () => {
 	});
 	test("Return empty source for widgets that cannot be found", async () => {
 		when(scriptManager.getWidgetModuleMappings()).thenResolve({
-			widget1: Uri.parse(baseUrl + "nbextensions/widget1/inex.js"),
-			widget2: Uri.parse(baseUrl + "nbextensions/widget2/inex.js"),
+			widget1: Uri.parse(`${baseUrl}nbextensions/widget1/inex.js`),
+			widget2: Uri.parse(`${baseUrl}nbextensions/widget2/inex.js`),
 		});
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
@@ -78,8 +78,8 @@ suite("ipywidget - Remote Widget Script Source", () => {
 	});
 	test("Finds the widget source", async () => {
 		when(scriptManager.getWidgetModuleMappings()).thenResolve({
-			widget1: Uri.parse(baseUrl + "nbextensions/widget1/inex.js"),
-			widget2: Uri.parse(baseUrl + "nbextensions/widget2/inex.js"),
+			widget1: Uri.parse(`${baseUrl}nbextensions/widget1/inex.js`),
+			widget2: Uri.parse(`${baseUrl}nbextensions/widget2/inex.js`),
 		});
 
 		const value = await scriptSourceProvider.getWidgetScriptSource(
@@ -90,30 +90,30 @@ suite("ipywidget - Remote Widget Script Source", () => {
 			moduleName: "widget1",
 			source: "remote",
 			scriptUri: Uri.parse(
-				baseUrl + "nbextensions/widget1/inex.js",
+				`${baseUrl}nbextensions/widget1/inex.js`,
 			).toString(),
 		});
 	});
 	test("Gets the widget script sources", async () => {
 		when(scriptManager.getWidgetModuleMappings()).thenResolve({
-			widget1: Uri.parse(baseUrl + "nbextensions/widget1/inex.js"),
-			widget2: Uri.parse(baseUrl + "nbextensions/widget2/inex.js"),
+			widget1: Uri.parse(`${baseUrl}nbextensions/widget1/inex.js`),
+			widget2: Uri.parse(`${baseUrl}nbextensions/widget2/inex.js`),
 		});
 
-		const values = await scriptSourceProvider.getWidgetScriptSources!();
+		const values = await scriptSourceProvider.getWidgetScriptSources?.();
 		assert.deepEqual(values, [
 			{
 				moduleName: "widget1",
 				source: "remote",
 				scriptUri: Uri.parse(
-					baseUrl + "nbextensions/widget1/inex.js",
+					`${baseUrl}nbextensions/widget1/inex.js`,
 				).toString(),
 			},
 			{
 				moduleName: "widget2",
 				source: "remote",
 				scriptUri: Uri.parse(
-					baseUrl + "nbextensions/widget2/inex.js",
+					`${baseUrl}nbextensions/widget2/inex.js`,
 				).toString(),
 			},
 		]);

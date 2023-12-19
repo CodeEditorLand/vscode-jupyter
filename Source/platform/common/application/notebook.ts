@@ -48,7 +48,7 @@ export class VSCodeNotebook implements IVSCodeNotebook {
 	public get onDidChangeNotebookCellExecutionState(): Event<NotebookCellExecutionStateChangeEvent> {
 		return notebooks.onDidChangeNotebookCellExecutionState;
 	}
-	public get notebookDocuments(): ReadonlyArray<NotebookDocument> {
+	public get notebookDocuments(): readonly NotebookDocument[] {
 		return workspace.notebookDocuments;
 	}
 	public get notebookEditors() {

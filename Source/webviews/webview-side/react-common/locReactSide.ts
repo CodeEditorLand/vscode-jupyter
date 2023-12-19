@@ -12,7 +12,7 @@ export function getLocString(
 	key: keyof LocalizedMessages,
 	defValue: string,
 ): string {
-	if (loadedCollection && loadedCollection.hasOwnProperty(key)) {
+	if (loadedCollection?.hasOwnProperty(key)) {
 		return loadedCollection[key];
 	}
 

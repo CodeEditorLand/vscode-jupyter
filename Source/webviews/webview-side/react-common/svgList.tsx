@@ -59,7 +59,7 @@ export class SvgList extends React.Component<ISvgListProps> {
 					key={index}
 				>
 					<div className="svg-list-item-image">
-						<SvgLoader svgXML={image}></SvgLoader>
+						<SvgLoader svgXML={image} />
 					</div>
 				</div>
 			);

@@ -104,16 +104,16 @@ class ColumnFilter {
 		if (text && text.length > 0) {
 			const columnType = (column as any).type;
 			switch (columnType) {
-				case ColumnType.Number:
+				case ColumnType.Number: {
 					this.matchFunc = this.generateNumericOperation(text);
 					break;
-
-				case ColumnType.String:
-				default:
+				}
+				default: {
 					this.textRegex = buildDataViewerFilterRegex(text);
 					this.matchFunc = (v: any) =>
 						this.matchStringWithWildcards(v);
 					break;
+				}
 			}
 		} else {
 			this.matchFunc = (_v: any) => true;
@@ -135,7 +135,7 @@ class ColumnFilter {
 
 	private extractDigits(text: string, regex: RegExp): number {
 		const match = regex.exec(text);
-		if (match && match.groups) {
+		if (match?.groups) {
 			if (match.groups.Number) {
 				return parseFloat(match.groups.Number);
 			} else if (match.groups.Inf) {
@@ -222,7 +222,7 @@ export class ReactSlickGrid extends React.Component<
 				),
 				10,
 			);
-			if (isNaN(fontSize)) {
+			if (Number.isNaN(fontSize)) {
 				fontSize = 15;
 			}
 
@@ -287,7 +287,7 @@ export class ReactSlickGrid extends React.Component<
 			const canvasElement = grid.getCanvasNode();
 			slickgridJQ(canvasElement).off("keydown");
 
-			if (this.containerRef && this.containerRef.current) {
+			if (this.containerRef?.current) {
 				// slickgrid creates empty focus sink div elements that capture tab input we don't want that
 				// so unhook their key handlers and remove their tabindex
 				const firstFocus = slickgridJQ(".react-grid-container")
@@ -320,7 +320,7 @@ export class ReactSlickGrid extends React.Component<
 			const indexColumn = columns.find(
 				(c) => c.field === this.props.idProperty,
 			);
-			if (indexColumn && indexColumn.id) {
+			if (indexColumn?.id) {
 				grid.setSortColumn(indexColumn.id, true);
 			}
 
@@ -369,7 +369,7 @@ export class ReactSlickGrid extends React.Component<
 					className="react-grid-container"
 					style={style}
 					ref={this.containerRef}
-				></div>
+				/>
 				<div className="react-grid-measure" ref={this.measureRef} />
 			</div>
 		);
@@ -394,7 +394,7 @@ export class ReactSlickGrid extends React.Component<
 		text: string,
 		column: Slick.Column<Slick.SlickData>,
 	) => {
-		if (column && column.field) {
+		if (column?.field) {
 			this.columnFilters.set(
 				column.field,
 				new ColumnFilter(text, column),
@@ -460,42 +460,50 @@ export class ReactSlickGrid extends React.Component<
 		if (this.state.grid) {
 			// The slickgrid version of jquery populates keyCode not code, so use the numerical values here
 			switch (e.keyCode) {
-				case KeyCodes.LeftArrow:
+				case KeyCodes.LeftArrow: {
 					this.state.grid.navigateLeft();
 					handled = true;
 					break;
-				case KeyCodes.UpArrow:
+				}
+				case KeyCodes.UpArrow: {
 					this.state.grid.navigateUp();
 					handled = true;
 					break;
-				case KeyCodes.RightArrow:
+				}
+				case KeyCodes.RightArrow: {
 					this.state.grid.navigateRight();
 					handled = true;
 					break;
-				case KeyCodes.DownArrow:
+				}
+				case KeyCodes.DownArrow: {
 					this.state.grid.navigateDown();
 					handled = true;
 					break;
-				case KeyCodes.PageUp:
+				}
+				case KeyCodes.PageUp: {
 					this.state.grid.navigatePageUp();
 					handled = true;
 					break;
-				case KeyCodes.PageDown:
+				}
+				case KeyCodes.PageDown: {
 					this.state.grid.navigatePageDown();
 					handled = true;
 					break;
-				case KeyCodes.End:
+				}
+				case KeyCodes.End: {
 					e.ctrlKey
 						? this.state.grid.navigateBottom()
 						: this.state.grid.navigateRowEnd();
 					handled = true;
 					break;
-				case KeyCodes.Home:
+				}
+				case KeyCodes.Home: {
 					e.ctrlKey
 						? this.state.grid.navigateTop()
 						: this.state.grid.navigateRowStart();
 					handled = true;
 					break;
+				}
 				default:
 			}
 		}
@@ -776,8 +784,8 @@ export class ReactSlickGrid extends React.Component<
 // Modified version of https://github.com/6pac/SlickGrid/blob/master/slick.editors.js#L24
 // with some fixes to get things working in our context
 function readonlyCellEditor(this: any, args: any) {
-	var $input: any;
-	var defaultValue: any;
+	let $input: any;
+	let defaultValue: any;
 
 	this.init = function init() {
 		$input = slickgridJQ("<input type=text class='editor-text'/>")
@@ -822,8 +830,8 @@ function readonlyCellEditor(this: any, args: any) {
 	};
 
 	function handleKeyDown(this: any, e: KeyboardEvent) {
-		var cursorPosition = this.selectionStart;
-		var textLength = this.value.length;
+		const cursorPosition = this.selectionStart;
+		const textLength = this.value.length;
 		// In the original SlickGrid TextEditor this references
 		// $.ui.keyDown.LEFT which is undefined, so couldn't use
 		// that out of the box if we wanted to allow the user

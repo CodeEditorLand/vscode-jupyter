@@ -44,5 +44,5 @@ export enum TraceOptions {
 
 export enum ConsoleForegroundColors {
 	Green = "\x1b[32m",
-	Red = `\x1b[31m`,
+	Red = "\x1b[31m",
 }

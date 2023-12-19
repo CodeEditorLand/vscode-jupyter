@@ -384,9 +384,9 @@ export class ControllerRegistration
 		);
 	}
 	private canControllerBeDisposed(controller: IVSCodeNotebookController) {
-		return (
-			!this._activeInterpreterControllerIds.has(controller.id) &&
-			!this.isControllerAttachedToADocument(controller)
+		return !(
+			this._activeInterpreterControllerIds.has(controller.id) ||
+			this.isControllerAttachedToADocument(controller)
 		);
 	}
 	public getSelected(

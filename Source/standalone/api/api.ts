@@ -160,7 +160,7 @@ export function buildApi(
 				`The API registerRemoteServerProvider has being deprecated and will be removed soon, please use createJupyterServerCollection (extension ${extensionId}).`,
 			);
 			if (
-				extensionId.toLowerCase() != CodespaceExtensionId.toLowerCase()
+				extensionId.toLowerCase() !== CodespaceExtensionId.toLowerCase()
 			) {
 				throw new Error("Deprecated API");
 			}
@@ -204,7 +204,7 @@ export function buildApi(
 			const extensionId =
 				extensions.determineExtensionFromCallStack().extensionId;
 			if (
-				extensionId.toLowerCase() != CodespaceExtensionId.toLowerCase()
+				extensionId.toLowerCase() !== CodespaceExtensionId.toLowerCase()
 			) {
 				throw new Error("Deprecated API");
 			}

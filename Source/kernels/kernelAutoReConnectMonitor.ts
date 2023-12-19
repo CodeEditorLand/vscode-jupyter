@@ -173,11 +173,12 @@ export class KernelAutoReconnectMonitor
 				}
 				return;
 			}
-			case "connecting":
+			case "connecting": {
 				if (!this.kernelReconnectProgress.has(kernel)) {
 					this.onKernelConnecting(kernel)?.catch(noop);
 				}
 				return;
+			}
 			default:
 				return;
 		}

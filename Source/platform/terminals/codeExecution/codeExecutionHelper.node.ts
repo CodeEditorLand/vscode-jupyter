@@ -50,7 +50,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 			code = code.replace(/\r/g, "");
 			if (codeTrimmed.indexOf("\n") === -1) {
 				// the input is a single line, maybe indented, without terminator
-				return codeTrimmed + "\n";
+				return `${codeTrimmed}\n`;
 			}
 
 			const interpreter =

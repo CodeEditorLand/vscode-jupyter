@@ -46,7 +46,7 @@ suite("Export File Opener", () => {
 		);
 		sinon.stub(ServiceContainer, "instance").get(() => ({
 			get: (id: unknown) =>
-				id == IFileSystem ? instance(fileSystem) : undefined,
+				id === IFileSystem ? instance(fileSystem) : undefined,
 		}));
 		disposables.push(new Disposable(() => sinon.restore()));
 		fileOpener = new ExportFileOpener();

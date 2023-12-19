@@ -30,7 +30,7 @@ export function logProcess(
 	}, "");
 
 	const message = [`Process Execution: ${getDisplayPath(file)} ${argsList}`];
-	if (options && options.cwd) {
+	if (options?.cwd) {
 		message.push(
 			`    > ${Logging.currentWorkingDirectory} ${getDisplayPath(
 				options.cwd.toString(),

@@ -70,19 +70,22 @@ export class DataScienceSurveyBanner
 {
 	public isEnabled(type: BannerType): boolean {
 		switch (type) {
-			case BannerType.InsidersNotebookSurvey:
+			case BannerType.InsidersNotebookSurvey: {
 				if (getVSCodeChannel() === "insiders") {
 					return this.isEnabledInternal(type);
 				}
 				break;
-			case BannerType.ExperimentNotebookSurvey:
+			}
+			case BannerType.ExperimentNotebookSurvey: {
 				if (getVSCodeChannel() === "stable") {
 					return this.isEnabledInternal(type);
 				}
 				break;
-			default:
+			}
+			default: {
 				traceError("Invalid Banner Type");
 				return false;
+			}
 		}
 		return false;
 	}
@@ -91,10 +94,10 @@ export class DataScienceSurveyBanner
 			return false;
 		}
 
-		if (!this.showBannerState.get(type)!.value.expiry) {
+		if (!this.showBannerState.get(type)?.value.expiry) {
 			return true;
 		}
-		return this.showBannerState.get(type)!.value.expiry! < Date.now();
+		return this.showBannerState.get(type)?.value.expiry! < Date.now();
 	}
 
 	private disabledInCurrentSession = false;
@@ -200,7 +203,7 @@ export class DataScienceSurveyBanner
 		const monthsTillNextPrompt = answer === DSSurveyLabelIndex.Yes ? 6 : 4;
 
 		if (monthsTillNextPrompt) {
-			await this.showBannerState.get(type)!.updateValue({
+			await this.showBannerState.get(type)?.updateValue({
 				expiry:
 					monthsTillNextPrompt * 31 * MillisecondsInADay + Date.now(),
 				data: true,
@@ -218,9 +221,10 @@ export class DataScienceSurveyBanner
 				return this.getPersistentState(
 					ExperimentNotebookSurveyStateKeys.ExecutionCount,
 				);
-			default:
+			default: {
 				traceError("Invalid Banner type");
 				return -1;
+			}
 		}
 	}
 
@@ -268,9 +272,10 @@ export class DataScienceSurveyBanner
 			case BannerType.ExperimentNotebookSurvey:
 				return localize.InsidersNativeNotebooksSurveyBanner
 					.bannerMessage;
-			default:
+			default: {
 				traceError("Invalid Banner type");
 				return "";
+			}
 		}
 	}
 
@@ -280,9 +285,10 @@ export class DataScienceSurveyBanner
 				return "https://aka.ms/vscjupyternb";
 			case BannerType.ExperimentNotebookSurvey:
 				return "https://aka.ms/vscnbexp";
-			default:
+			default: {
 				traceError("Invalid Banner type");
 				return "";
+			}
 		}
 	}
 }

@@ -226,24 +226,28 @@ export class DataViewer
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected override onMessage(message: string, payload: any) {
 		switch (message) {
-			case DataViewerMessages.GetAllRowsRequest:
+			case DataViewerMessages.GetAllRowsRequest: {
 				this.getAllRows(payload as string).catch(noop);
 				break;
+			}
 
-			case DataViewerMessages.GetRowsRequest:
+			case DataViewerMessages.GetRowsRequest: {
 				this.getRowChunk(payload as IGetRowsRequest).catch(noop);
 				break;
+			}
 
-			case DataViewerMessages.GetSliceRequest:
+			case DataViewerMessages.GetSliceRequest: {
 				this.getSlice(payload as IGetSliceRequest).catch(noop);
 				break;
+			}
 
-			case DataViewerMessages.RefreshDataViewer:
+			case DataViewerMessages.RefreshDataViewer: {
 				this.refreshData().catch(noop);
 				void sendTelemetryEvent(Telemetry.RefreshDataViewer);
 				break;
+			}
 
-			case DataViewerMessages.SliceEnablementStateChanged:
+			case DataViewerMessages.SliceEnablementStateChanged: {
 				void sendTelemetryEvent(
 					Telemetry.DataViewerSliceEnablementStateChanged,
 					undefined,
@@ -254,6 +258,7 @@ export class DataViewer
 					},
 				);
 				break;
+			}
 
 			default:
 				break;

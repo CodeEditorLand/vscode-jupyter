@@ -207,8 +207,8 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				disposables,
 			);
 		}
-		input.matchOnDescription = matchOnDescription || false;
-		input.matchOnDetail = matchOnDetail || false;
+		input.matchOnDescription = matchOnDescription;
+		input.matchOnDetail = matchOnDetail;
 		if (activeItem) {
 			input.activeItems = [activeItem];
 		} else {

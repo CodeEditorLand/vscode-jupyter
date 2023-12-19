@@ -88,7 +88,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 		} else {
 			vscode.window
 				.showErrorMessage(
-					`Command should be run with a jupyter notebook open`,
+					"Command should be run with a jupyter notebook open",
 				)
 				.then(noop, noop);
 		}
@@ -124,8 +124,8 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				this.activeNotebook
 			) {
 				const converter = await this.getConverter();
-				step.textDocument.uri = converter!
-					.getConcatDocument(
+				step.textDocument.uri = converter
+					?.getConcatDocument(
 						this.activeNotebook.cellAt(0).document.uri.toString(),
 					)
 					.concatUri?.toString();
@@ -157,16 +157,16 @@ export class LogReplayService implements IExtensionSyncActivationService {
 					// a line with a magic in it
 					if (
 						change.text.startsWith(
-							`import IPython\nIPython.get_ipython()\n`,
+							"import IPython\nIPython.get_ipython()\n",
 						)
 					) {
 						// Just replace the entire cell contents.
 						const newContents = change.text
 							.slice(
-								`import IPython\nIPython.get_ipython()\n`
+								"import IPython\nIPython.get_ipython()\n"
 									.length,
 							)
-							.replace(` # type: ignore`, "");
+							.replace(" # type: ignore", "");
 						const entireCell = this.activeNotebook
 							.getCells()
 							.find(
@@ -260,7 +260,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				async () => {
 					return (
 						vscode.window.visibleTextEditors.find(
-							(e) => e.document === cell!.document,
+							(e) => e.document === cell?.document,
 						) !== undefined
 					);
 				},
@@ -269,7 +269,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 			);
 			// Find the associated document and apply the edit
 			const editor = vscode.window.visibleTextEditors.find(
-				(e) => e.document === cell!.document,
+				(e) => e.document === cell?.document,
 			);
 			if (editor) {
 				const vscodeRange = new vscode.Range(
@@ -297,7 +297,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 
 				// Then do the actual edit
 				await editor.edit((b) => {
-					if (change.text == "") {
+					if (change.text === "") {
 						// This is a delete
 						b.delete(vscodeRange);
 					} else if (change.rangeLength > 0) {
@@ -320,7 +320,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 		) {
 			window
 				.showErrorMessage(
-					`You changed the notebook editor in the middle of stepping through the log`,
+					"You changed the notebook editor in the middle of stepping through the log",
 				)
 				.then(noop, noop);
 		}
@@ -339,7 +339,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 			if (match.index === regex.lastIndex) {
 				regex.lastIndex++;
 			}
-			if (match.groups && match.groups["json_event"]) {
+			if (match.groups?.["json_event"]) {
 				const json = JSON.parse(match.groups["json_event"]);
 
 				// Json should already be a TextDocumentChangeEvent
@@ -357,7 +357,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 
 		// Convert to string in case we get an array of startup commands.
 		if (Array.isArray(setting)) {
-			setting = setting.join(`\n`);
+			setting = setting.join("\n");
 		}
 
 		if (setting) {
@@ -373,7 +373,7 @@ export class LogReplayService implements IExtensionSyncActivationService {
 				"@vscode/lsp-notebook-concat"
 			);
 			const converter = createConverter(
-				(_u) => this.getNotebookHeader(this.activeNotebook!.uri),
+				(_u) => this.getNotebookHeader(this.activeNotebook?.uri),
 				() => os.platform(),
 			);
 			this.activeNotebook

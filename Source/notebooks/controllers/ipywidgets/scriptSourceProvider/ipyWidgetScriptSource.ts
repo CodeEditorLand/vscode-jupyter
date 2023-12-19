@@ -80,17 +80,18 @@ export class IPyWidgetScriptSource {
 		this.uriConverter = new ScriptUriConverter(
 			isWebExtension(),
 			(resource) => {
-				if (!this.uriTranslationRequests.has(resource))
+				if (!this.uriTranslationRequests.has(resource)) {
 					this.uriTranslationRequests.set(
 						resource,
 						createDeferred<Uri>(),
 					);
+				}
 				this.postEmitter.fire({
 					message:
 						InteractiveWindowMessages.ConvertUriForUseInWebViewRequest,
 					payload: resource,
 				});
-				return this.uriTranslationRequests.get(resource)!.promise;
+				return this.uriTranslationRequests.get(resource)?.promise;
 			},
 		);
 		// Don't leave dangling promises.
@@ -123,8 +124,8 @@ export class IPyWidgetScriptSource {
 				payload;
 			if (response && this.uriTranslationRequests.has(response.request)) {
 				this.uriTranslationRequests
-					.get(response.request)!
-					.resolve(response.response);
+					.get(response.request)
+					?.resolve(response.response);
 			}
 		} else if (message === IPyWidgetMessages.IPyWidgets_Ready) {
 			this.sendBaseUrl();
@@ -195,7 +196,7 @@ export class IPyWidgetScriptSource {
 					});
 				}
 			})
-			.catch((ex) => traceError(`Failed to get baseUrl`, ex));
+			.catch((ex) => traceError("Failed to get baseUrl", ex));
 	}
 	/**
 	 * Outputs like HTML and JavaScript can have references to widget scripts as well,
@@ -230,7 +231,7 @@ export class IPyWidgetScriptSource {
 				});
 			});
 		} catch (ex) {
-			traceWarning(`Failed to fetch script sources`, ex);
+			traceWarning("Failed to fetch script sources", ex);
 		} finally {
 			this.allWidgetScriptsSent = true;
 		}
@@ -282,7 +283,7 @@ export class IPyWidgetScriptSource {
 		if (!moduleName || moduleName.startsWith("@jupyter")) {
 			return;
 		}
-		if (!this.kernel || !this.scriptProvider) {
+		if (!(this.kernel && this.scriptProvider)) {
 			this.pendingModuleRequests.set(moduleName, {
 				moduleVersion,
 				requestId,

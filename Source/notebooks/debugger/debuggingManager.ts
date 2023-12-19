@@ -229,14 +229,14 @@ export class DebuggingManager
 
 		if (this.notebookInProgress.has(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook`,
+				"Cannot start debugging. Already debugging this notebook",
 			);
 			return;
 		}
 
 		if (this.isDebugging(notebook)) {
 			traceInfo(
-				`Cannot start debugging. Already debugging this notebook document.`,
+				"Cannot start debugging. Already debugging this notebook document.",
 			);
 			return;
 		}

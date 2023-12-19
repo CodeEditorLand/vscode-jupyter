@@ -8,7 +8,7 @@ import { JupyterNotebookView } from "../../platform/common/constants";
 import { IConfigurationService } from "../../platform/common/types";
 import { NotebookTracebackFormatter } from "./tracebackFormatter";
 
-suite(`Notebook trace formatter`, () => {
+suite("Notebook trace formatter", () => {
 	let notebook: NotebookDocument;
 	let cell: NotebookCell;
 	let document: TextDocument;

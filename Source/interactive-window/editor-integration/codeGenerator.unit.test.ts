@@ -595,33 +595,33 @@ suite.skip("Code Generator Unit Tests", () => {
 		assert.ok(fooHash, "No hash for foo.py");
 		assert.ok(barHash, "No hash for bar.py");
 		assert.equal(
-			fooHash!.generatedCodes.length,
+			fooHash?.generatedCodes.length,
 			2,
 			"Not enough hashes found",
 		);
-		assert.equal(fooHash!.generatedCodes[0].line, 4, "Wrong start line");
-		assert.equal(fooHash!.generatedCodes[0].endLine, 5, "Wrong end line");
+		assert.equal(fooHash?.generatedCodes[0].line, 4, "Wrong start line");
+		assert.equal(fooHash?.generatedCodes[0].endLine, 5, "Wrong end line");
 		assert.equal(
-			fooHash!.generatedCodes[0].executionCount,
+			fooHash?.generatedCodes[0].executionCount,
 			4,
 			"Wrong execution count",
 		);
-		assert.equal(fooHash!.generatedCodes[1].line, 6, "Wrong start line");
-		assert.equal(fooHash!.generatedCodes[1].endLine, 6, "Wrong end line");
+		assert.equal(fooHash?.generatedCodes[1].line, 6, "Wrong start line");
+		assert.equal(fooHash?.generatedCodes[1].endLine, 6, "Wrong end line");
 		assert.equal(
-			fooHash!.generatedCodes[1].executionCount,
+			fooHash?.generatedCodes[1].executionCount,
 			3,
 			"Wrong execution count",
 		);
 		assert.equal(
-			barHash!.generatedCodes.length,
+			barHash?.generatedCodes.length,
 			1,
 			"Not enough hashes found",
 		);
-		assert.equal(barHash!.generatedCodes[0].line, 4, "Wrong start line");
-		assert.equal(barHash!.generatedCodes[0].endLine, 5, "Wrong end line");
+		assert.equal(barHash?.generatedCodes[0].line, 4, "Wrong start line");
+		assert.equal(barHash?.generatedCodes[0].endLine, 5, "Wrong end line");
 		assert.equal(
-			barHash!.generatedCodes[0].executionCount,
+			barHash?.generatedCodes[0].executionCount,
 			2,
 			"Wrong execution count",
 		);

@@ -289,7 +289,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			) {
 				if (!options.kernelConnection.kernelModel.model) {
 					throw new Error(
-						`Kernel model not defined when connecting to an existing session`,
+						"Kernel model not defined when connecting to an existing session",
 					);
 				}
 				session = options.sessionManager.connectTo({
@@ -415,7 +415,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			);
 			if (!session.kernel) {
 				throw new JupyterSessionStartError(
-					new Error(`No kernel created`),
+					new Error("No kernel created"),
 				);
 			}
 			traceInfo(

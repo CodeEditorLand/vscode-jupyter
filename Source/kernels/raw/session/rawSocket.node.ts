@@ -88,7 +88,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 			try {
 				closable.close();
 			} catch (ex) {
-				traceError(`Error during socket shutdown`, ex);
+				traceError("Error during socket shutdown", ex);
 			}
 		};
 		closer(this.channels.control);
@@ -99,14 +99,15 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 
 	public emit(event: string | symbol, ...args: any[]): boolean {
 		switch (event) {
-			case "message":
+			case "message": {
 				this.onmessage({
 					data: args[0],
 					type: "message",
 					target: this,
 				});
 				break;
-			case "close":
+			}
+			case "close": {
 				this.onclose({
 					wasClean: true,
 					code: 0,
@@ -114,7 +115,8 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 					target: this,
 				});
 				break;
-			case "error":
+			}
+			case "error": {
 				this.onerror({
 					error: "",
 					message: "to do",
@@ -122,9 +124,11 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 					target: this,
 				});
 				break;
-			case "open":
+			}
+			case "open": {
 				this.onopen({ target: this });
 				break;
+			}
 			default:
 				break;
 		}
@@ -357,7 +361,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 		const socket = (this.channels as any)[channel];
 		if (socket) {
 			(socket as Dealer).send(data).catch((exc) => {
-				traceError(`Error communicating with the kernel`, exc);
+				traceError("Error communicating with the kernel", exc);
 			});
 		} else {
 			traceError(
@@ -460,18 +464,22 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 			) {
 				// Looks like a mandatory field is missing, add the field with a default value.
 				switch (args[0]) {
-					case "string":
+					case "string": {
 						content[fieldName] = "";
 						break;
-					case "boolean":
+					}
+					case "boolean": {
 						content[fieldName] = false;
 						break;
-					case "object":
+					}
+					case "object": {
 						content[fieldName] = {};
 						break;
-					case "number":
+					}
+					case "number": {
 						content[fieldName] = 0;
 						break;
+					}
 				}
 			}
 		}

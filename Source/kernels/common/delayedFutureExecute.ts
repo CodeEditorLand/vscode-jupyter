@@ -150,7 +150,7 @@ export class DelayedFutureExecute
 			msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
 		) => boolean | PromiseLike<boolean>,
 	): void {
-		this.pendingHooks = this.pendingHooks.filter((h) => h != hook);
+		this.pendingHooks = this.pendingHooks.filter((h) => h !== hook);
 		if (this.requestFuture) {
 			this.requestFuture.removeMessageHook(hook);
 		}

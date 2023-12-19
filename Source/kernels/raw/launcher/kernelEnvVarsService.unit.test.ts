@@ -82,7 +82,7 @@ suite("Kernel Environment Variables Service", () => {
 			processEnv = process.env;
 		}
 		processPath = Object.keys(processEnv).find(
-			(k) => k.toLowerCase() == "path",
+			(k) => k.toLowerCase() === "path",
 		);
 	});
 	teardown(() => Object.assign(process.env, originalEnvVars));
@@ -126,7 +126,7 @@ suite("Kernel Environment Variables Service", () => {
 		);
 
 		assert.isOk(processPath);
-		assert.strictEqual(vars![processPath!], `foobar`);
+		assert.strictEqual(vars?.[processPath], "foobar");
 	});
 	test("Interpreter env variable trumps process", async () => {
 		process.env["HELLO_VAR"] = "process";
@@ -167,7 +167,7 @@ suite("Kernel Environment Variables Service", () => {
 			kernelSpec,
 		);
 
-		assert.strictEqual(vars!["HELLO_VAR"], "new");
+		assert.strictEqual(vars?.["HELLO_VAR"], "new");
 		// Compare ignoring the PATH variable.
 		assert.deepEqual(
 			Object.assign(vars!, { PATH: "", Path: "" }),
@@ -207,7 +207,7 @@ suite("Kernel Environment Variables Service", () => {
 			kernelSpec,
 		);
 
-		assert.strictEqual(vars!["HELLO_VAR"], "interpreter");
+		assert.strictEqual(vars?.["HELLO_VAR"], "interpreter");
 		// Compare ignoring the PATH variable.
 		assert.deepEqual(
 			vars,
@@ -217,7 +217,7 @@ suite("Kernel Environment Variables Service", () => {
 
 	test("Custom env variable trumps process (non-python)", async () => {
 		process.env["HELLO_VAR"] = "very old";
-		delete kernelSpec.interpreterPath;
+		kernelSpec.interpreterPath = undefined;
 		when(
 			envActivation.getActivatedEnvironmentVariables(
 				anything(),
@@ -241,7 +241,7 @@ suite("Kernel Environment Variables Service", () => {
 			kernelSpec,
 		);
 
-		assert.strictEqual(vars!["HELLO_VAR"], "new");
+		assert.strictEqual(vars?.["HELLO_VAR"], "new");
 		// Compare ignoring the PATH variable.
 		assert.deepEqual(
 			Object.assign(vars!, { PATH: "", Path: "" }),
@@ -255,7 +255,7 @@ suite("Kernel Environment Variables Service", () => {
 	});
 
 	test("Returns process.env vars if no interpreter and no kernelspec.env", async () => {
-		delete kernelSpec.interpreterPath;
+		kernelSpec.interpreterPath = undefined;
 		when(
 			customVariablesService.getCustomEnvironmentVariables(
 				anything(),
@@ -299,7 +299,7 @@ suite("Kernel Environment Variables Service", () => {
 			kernelSpec,
 		);
 		assert.isOk(processPath);
-		assert.strictEqual(vars![processPath!], `foobar`);
+		assert.strictEqual(vars?.[processPath], "foobar");
 	});
 
 	test("KernelSpec interpreterPath used if interpreter is undefined", async () => {
@@ -337,7 +337,7 @@ suite("Kernel Environment Variables Service", () => {
 			kernelSpec,
 		);
 		assert.isOk(processPath);
-		assert.strictEqual(vars![processPath!], `pathInInterpreterEnv`);
+		assert.strictEqual(vars?.[processPath], "pathInInterpreterEnv");
 	});
 
 	async function testPYTHONNOUSERSITE(
@@ -381,12 +381,12 @@ suite("Kernel Environment Variables Service", () => {
 
 		if (shouldBeSet) {
 			assert.isOk(
-				vars!["PYTHONNOUSERSITE"],
+				vars?.["PYTHONNOUSERSITE"],
 				"PYTHONNOUSERSITE should be set",
 			);
 		} else {
 			assert.isUndefined(
-				vars!["PYTHONNOUSERSITE"],
+				vars?.["PYTHONNOUSERSITE"],
 				"PYTHONNOUSERSITE should not be set",
 			);
 		}

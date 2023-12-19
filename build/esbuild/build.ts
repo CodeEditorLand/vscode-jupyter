@@ -167,7 +167,7 @@ function style({
 					return {
 						errors,
 						warnings,
-						contents: outputFiles![0].text,
+						contents: outputFiles?.[0].text,
 						loader: "text",
 					};
 				},

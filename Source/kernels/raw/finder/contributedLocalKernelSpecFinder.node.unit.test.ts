@@ -21,7 +21,7 @@ import { ContributedLocalKernelSpecFinder } from "./contributedLocalKernelSpecFi
 import { ILocalKernelFinder } from "./localKernelSpecFinderBase.node";
 import { LocalKnownPathKernelSpecFinder } from "./localKnownPathKernelSpecFinder.node";
 
-suite(`Contributed Local Kernel Spec Finder`, () => {
+suite("Contributed Local Kernel Spec Finder", () => {
 	let finder: ContributedLocalKernelSpecFinder;
 	let disposables: IDisposable[] = [];
 	let nonPythonKernelFinder: LocalKnownPathKernelSpecFinder;

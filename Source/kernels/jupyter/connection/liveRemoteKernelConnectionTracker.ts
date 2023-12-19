@@ -110,7 +110,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 			return;
 		}
 		const uris = this.usedRemoteKernelServerIdsAndSessions[id][kernelId];
-		if (!Array.isArray(uris) || !uris.includes(resource.toString())) {
+		if (!(Array.isArray(uris) && uris.includes(resource.toString()))) {
 			return;
 		}
 		uris.splice(uris.indexOf(resource.toString()), 1);

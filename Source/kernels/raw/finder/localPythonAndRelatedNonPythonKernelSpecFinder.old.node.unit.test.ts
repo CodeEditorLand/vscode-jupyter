@@ -38,7 +38,7 @@ import { LocalKnownPathKernelSpecFinder } from "./localKnownPathKernelSpecFinder
 import { OldLocalPythonAndRelatedNonPythonKernelSpecFinder } from "./localPythonAndRelatedNonPythonKernelSpecFinder.old.node";
 import { ITrustedKernelPaths } from "./types";
 
-suite(`Local Python and related kernels`, async () => {
+suite("Local Python and related kernels", async () => {
 	let finder: OldLocalPythonAndRelatedNonPythonKernelSpecFinder;
 	let interpreterService: IInterpreterService;
 	let fs: IFileSystemNode;

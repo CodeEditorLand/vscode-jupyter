@@ -318,7 +318,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 			}
 		})()
 			.catch((ex) =>
-				traceError(`Failed to discover kernels in interpreters`, ex),
+				traceError("Failed to discover kernels in interpreters", ex),
 			)
 			.finally(() => {
 				if (cancelToken === this.refreshCancellation) {

@@ -185,7 +185,7 @@ export class LanguageServer implements Disposable {
 		try {
 			this.middleware.stopWatching(notebook);
 		} catch (ex) {
-			traceInfoIfCI(`Error shutting down the LS.`, ex);
+			traceInfoIfCI("Error shutting down the LS.", ex);
 		}
 	}
 
@@ -262,7 +262,7 @@ export class LanguageServer implements Disposable {
 			)._features;
 			const minusCommands = features.filter(
 				(f) =>
-					(f as any).registrationType?.method !=
+					(f as any).registrationType?.method !==
 					"workspace/executeCommand",
 			);
 			minusCommands.push(

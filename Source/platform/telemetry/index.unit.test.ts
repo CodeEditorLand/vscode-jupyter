@@ -207,7 +207,7 @@ suite("Telemetry", () => {
 		expect(Reporter.eventName).to.deep.equal([eventName]);
 		expect(Reporter.measures).to.deep.equal([measures]);
 		expect(Reporter.properties[0].stackTrace).to.be.length.greaterThan(1);
-		delete Reporter.properties[0].stackTrace;
+		Reporter.properties[0].stackTrace = undefined;
 		expect(Reporter.properties).to.deep.equal([expectedErrorProperties]);
 	});
 	test("Send Error Telemetry with stack trace", async () => {
@@ -255,7 +255,7 @@ suite("Telemetry", () => {
 		};
 
 		const stackTrace = Reporter.properties[0].stackTrace;
-		delete Reporter.properties[0].stackTrace;
+		Reporter.properties[0].stackTrace = undefined;
 
 		expect(Reporter.eventName).to.deep.equal([eventName]);
 		expect(Reporter.measures).to.deep.equal([measures]);

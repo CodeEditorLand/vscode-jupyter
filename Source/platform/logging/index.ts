@@ -387,7 +387,7 @@ function formatMessages(
 	call?: CallInfo,
 ): string {
 	call = normalizeCall(call!);
-	``;
+	("");
 	const messages = [info.message];
 	messages.push(`${call.kind} name = ${call.name}`.trim());
 	if (traced) {
@@ -456,21 +456,26 @@ export function logTo(
 	...args: Arguments
 ): void {
 	switch (logLevel) {
-		case LogLevel.Error:
+		case LogLevel.Error: {
 			traceError(message, ...args);
 			break;
-		case LogLevel.Warn:
+		}
+		case LogLevel.Warn: {
 			traceWarning(message, ...args);
 			break;
-		case LogLevel.Info:
+		}
+		case LogLevel.Info: {
 			traceInfo(message, ...args);
 			break;
-		case LogLevel.Debug:
+		}
+		case LogLevel.Debug: {
 			traceVerbose(message, ...args);
 			break;
-		case LogLevel.Trace:
+		}
+		case LogLevel.Trace: {
 			traceVerbose(message, ...args);
 			break;
+		}
 		default:
 			break;
 	}

@@ -463,7 +463,7 @@ export class DebuggerVariables
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			frameId: (variable as any).frameId,
 		});
-		if (results && results.result) {
+		if (results?.result) {
 			// Results should be the updated variable.
 			return {
 				...variable,
@@ -500,10 +500,10 @@ export class DebuggerVariables
 
 		const allowedVariables = variablesResponse.body.variables.filter(
 			(v) => {
-				if (!v.name || !v.type || !v.value) {
+				if (!(v.name && v.type && v.value)) {
 					return false;
 				}
-				if (exclusionList && exclusionList.includes(v.type)) {
+				if (exclusionList?.includes(v.type)) {
 					return false;
 				}
 				if (v.name.startsWith("_")) {
@@ -553,7 +553,7 @@ export class DebuggerVariables
 					});
 
 				//  Call scopes
-				if (stResponse && stResponse.stackFrames[0]) {
+				if (stResponse?.stackFrames[0]) {
 					const sf = stResponse.stackFrames[0];
 					const mode = this.debuggingManager.getDebugMode(doc);
 					let scopesResponse:
@@ -576,11 +576,7 @@ export class DebuggerVariables
 					} else {
 						// Only call scopes (and variables) if we are stopped on the notebook we are executing
 						const docURI = path.basename(doc.uri.toString());
-						if (
-							sf.source &&
-							sf.source.path &&
-							sf.source.path.includes(docURI)
-						) {
+						if (sf.source?.path?.includes(docURI)) {
 							scopesResponse = await session.customRequest(
 								"scopes",
 								{ frameId: sf.id },

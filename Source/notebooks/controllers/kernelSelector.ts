@@ -20,7 +20,7 @@ export async function selectKernel(
 		}) as Promise<boolean>;
 	}
 	traceError(
-		`Unable to select kernel as the Notebook document could not be identified`,
+		"Unable to select kernel as the Notebook document could not be identified",
 	);
 	return false;
 }

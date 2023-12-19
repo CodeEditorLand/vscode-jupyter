@@ -226,7 +226,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
 		const kernel = this.kernelProvider.get(document);
 		if (!kernel) {
-			traceInfo(`Interrupt requested & no kernel.`);
+			traceInfo("Interrupt requested & no kernel.");
 			return;
 		}
 		await this.wrapKernelMethod("interrupt", kernel);

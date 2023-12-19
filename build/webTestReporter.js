@@ -59,7 +59,7 @@ async function captureScreenShot(name, res) {
 }
 exports.startReportServer = async () =>
 	new Promise((resolve) => {
-		console.log(`Creating test server`);
+		console.log("Creating test server");
 		server = createServer((req, res) => {
 			res.setHeader("Access-Control-Allow-Origin", "*");
 			res.setHeader("Access-Control-Allow-Methods", "OPTIONS,POST,GET");
@@ -119,7 +119,7 @@ exports.startReportServer = async () =>
 			fs.writeFileSync(settingsFile, updatedSettingsJson);
 			resolve({
 				dispose: async () => {
-					console.error(`Disposing test server`);
+					console.error("Disposing test server");
 					fs.ensureDirSync(path.dirname(webTestSummaryJsonFile));
 					fs.writeFileSync(
 						webTestSummaryJsonFile,

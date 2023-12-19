@@ -177,7 +177,7 @@ PYTHON=${BINDIR}/python3\n\
 		});
 	});
 
-	suite(`mergeVariables()`, () => {
+	suite("mergeVariables()", () => {
 		test("Ensure variables are merged", async () => {
 			const vars1 = { ONE: "1", TWO: "TWO" };
 			const vars2 = { ONE: "ONE", THREE: "3" };
@@ -235,7 +235,7 @@ PYTHON=${BINDIR}/python3\n\
 		});
 	});
 
-	suite(`appendPath() `, () => {
+	suite("appendPath() ", () => {
 		test("Ensure appending PATH has no effect if an undefined value or empty string is provided and PATH does not exist in vars object", async () => {
 			const vars = { ONE: "1" };
 
@@ -261,7 +261,7 @@ PYTHON=${BINDIR}/python3\n\
 			expect(vars).to.have.property("ONE", "1", "Incorrect value");
 		});
 
-		test(`Ensure appending PATH has no effect if an empty string is provided and path does not exist in vars object`, async () => {
+		test("Ensure appending PATH has no effect if an empty string is provided and path does not exist in vars object", async () => {
 			const vars = { ONE: "1" };
 			const pathVariable = "paTh";
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -304,7 +304,7 @@ PYTHON=${BINDIR}/python3\n\
 			);
 		});
 
-		test(`Ensure PATH is appended irregardless of case`, async () => {
+		test("Ensure PATH is appended irregardless of case", async () => {
 			const vars = { ONE: "1" };
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(vars as any)["paTh"] = "PATH";
@@ -318,12 +318,12 @@ PYTHON=${BINDIR}/python3\n\
 			);
 			expect(vars).to.have.property("ONE", "1", "Incorrect value");
 			expect(vars).to.have.property(
-				`paTh`,
+				"paTh",
 				`PATH${path.delimiter}${pathToAppend}`,
 				"Incorrect value",
 			);
 		});
-		test(`Ensure PATH is not appended if already at the end`, async () => {
+		test("Ensure PATH is not appended if already at the end", async () => {
 			const defaultPath = `/usr/one${path.delimiter}/usr/three${path.delimiter}/usr/four${path.delimiter}/usr/five`;
 			const vars = {
 				ONE: "1",
@@ -334,12 +334,12 @@ PYTHON=${BINDIR}/python3\n\
 			variablesService.appendPath(vars, pathToAppend);
 
 			expect(vars).to.have.property(
-				`paTh`,
+				"paTh",
 				defaultPath,
 				"Incorrect value",
 			);
 		});
-		test(`Ensure PATH is appended even if path exists elsewhere in the PATH value`, async () => {
+		test("Ensure PATH is appended even if path exists elsewhere in the PATH value", async () => {
 			const defaultPath = `/usr/one${path.delimiter}/usr/three${path.delimiter}/usr/four${path.delimiter}/usr/five`;
 			const vars = {
 				ONE: "1",
@@ -350,12 +350,12 @@ PYTHON=${BINDIR}/python3\n\
 			variablesService.appendPath(vars, pathToAppend);
 
 			expect(vars).to.have.property(
-				`paTh`,
+				"paTh",
 				`${defaultPath}${path.delimiter}${pathToAppend}`,
 				"Incorrect value",
 			);
 		});
-		test(`Ensure PATH is not prepended if already at the start`, async () => {
+		test("Ensure PATH is not prepended if already at the start", async () => {
 			const defaultPath = `/usr/one${path.delimiter}/usr/three${path.delimiter}/usr/four${path.delimiter}/usr/five`;
 			const vars = {
 				ONE: "1",
@@ -366,12 +366,12 @@ PYTHON=${BINDIR}/python3\n\
 			variablesService.prependPath(vars, pathToPrepend);
 
 			expect(vars).to.have.property(
-				`paTh`,
+				"paTh",
 				defaultPath,
 				"Incorrect value",
 			);
 		});
-		test(`Ensure PATH is prepended even if path exists elsewhere in the PATH value`, async () => {
+		test("Ensure PATH is prepended even if path exists elsewhere in the PATH value", async () => {
 			const defaultPath = `/usr/one${path.delimiter}/usr/three${path.delimiter}/usr/four${path.delimiter}/usr/five`;
 			const vars = {
 				ONE: "1",
@@ -382,7 +382,7 @@ PYTHON=${BINDIR}/python3\n\
 			variablesService.prependPath(vars, pathToPrepend);
 
 			expect(vars).to.have.property(
-				`paTh`,
+				"paTh",
 				`${pathToPrepend}${path.delimiter}${defaultPath}`,
 				"Incorrect value",
 			);

@@ -71,7 +71,7 @@ suite("InstallationChannelManager - getInstallationChannel()", () => {
 			interpreter,
 		);
 		expect(channel).to.not.equal(undefined, "Channel should be set");
-		expect(channel!.name).to.equal("singleChannel");
+		expect(channel?.name).to.equal("singleChannel");
 	});
 
 	test("If no channels are returned by the resource, show no installer message and return", async () => {
@@ -174,7 +174,7 @@ suite("InstallationChannelManager - getInstallationChannels()", () => {
 	test("Return highest priority supported installers", async () => {
 		const moduleInstallers: IModuleInstaller[] = [];
 		// Setup 2 installers with priority 1, where one is supported and other is not
-		for (let i = 0; i < 2; i = i + 1) {
+		for (let i = 0; i < 2; i += 1) {
 			const moduleInstaller = TypeMoq.Mock.ofType<IModuleInstaller>();
 			moduleInstaller
 				.setup((m) => (m as any).then)
@@ -186,7 +186,7 @@ suite("InstallationChannelManager - getInstallationChannels()", () => {
 			moduleInstallers.push(moduleInstaller.object);
 		}
 		// Setup 3 installers with priority 2, where two are supported and other is not
-		for (let i = 2; i < 5; i = i + 1) {
+		for (let i = 2; i < 5; i += 1) {
 			const moduleInstaller = TypeMoq.Mock.ofType<IModuleInstaller>();
 			moduleInstaller
 				.setup((m) => (m as any).then)
@@ -198,7 +198,7 @@ suite("InstallationChannelManager - getInstallationChannels()", () => {
 			moduleInstallers.push(moduleInstaller.object);
 		}
 		// Setup 2 installers with priority 3, but none are supported
-		for (let i = 5; i < 7; i = i + 1) {
+		for (let i = 5; i < 7; i += 1) {
 			const moduleInstaller = TypeMoq.Mock.ofType<IModuleInstaller>();
 			moduleInstaller
 				.setup((m) => (m as any).then)
@@ -219,7 +219,7 @@ suite("InstallationChannelManager - getInstallationChannels()", () => {
 			await installChannelManager.getInstallationChannels(interpreter);
 		// Verify that highest supported priority is 2, so number of installers supported with that priority is 2
 		expect(channels.length).to.equal(2);
-		for (let i = 0; i < 2; i = i + 1) {
+		for (let i = 0; i < 2; i += 1) {
 			expect(channels[i].priority).to.equal(2);
 		}
 	});

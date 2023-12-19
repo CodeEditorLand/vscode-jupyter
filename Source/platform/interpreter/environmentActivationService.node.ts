@@ -141,7 +141,7 @@ export class EnvironmentActivationService
 				time: new StopWatch(),
 			});
 		}
-		const promise = this.activatedEnvVariablesCache.get(key)!.promise;
+		const promise = this.activatedEnvVariablesCache.get(key)?.promise;
 		if (token) {
 			return promise;
 		}
@@ -218,7 +218,7 @@ export class EnvironmentActivationService
 
 		return raceCancellation(
 			token,
-			this.cachedEnvVariables.get(key)!.promise,
+			this.cachedEnvVariables.get(key)?.promise,
 		);
 	}
 	private async getActivatedEnvironmentVariablesFromPythonImpl(
@@ -343,16 +343,16 @@ export class EnvironmentActivationService
 			}
 			const pathKey = customEnvVars
 				? Object.keys(customEnvVars).find(
-						(k) => k.toLowerCase() == "path",
+						(k) => k.toLowerCase() === "path",
 				  )
 				: undefined;
-			if (pathKey && customEnvVars![pathKey]) {
-				this.envVarsService.appendPath(env, customEnvVars![pathKey]!);
+			if (pathKey && customEnvVars?.[pathKey]) {
+				this.envVarsService.appendPath(env, customEnvVars?.[pathKey]!);
 			}
-			if (customEnvVars!.PYTHONPATH) {
+			if (customEnvVars?.PYTHONPATH) {
 				this.envVarsService.appendPythonPath(
 					env,
-					customEnvVars!.PYTHONPATH,
+					customEnvVars?.PYTHONPATH,
 				);
 			}
 

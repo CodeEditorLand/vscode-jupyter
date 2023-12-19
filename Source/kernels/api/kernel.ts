@@ -60,7 +60,7 @@ class KernelExecutionProgressIndicator {
 			kernel.kernelConnectionMetadata,
 		);
 		this.title = l10n.t(
-			`Executing code in {0} from {1}`,
+			"Executing code in {0} from {1}",
 			this.controllerDisplayName,
 			extensionDisplayName,
 		);
@@ -105,7 +105,7 @@ class KernelExecutionProgressIndicator {
 		this.shouldDisplayProgress = false;
 	}
 	private async showProgressImpl() {
-		if (!this.notebook || !this.shouldDisplayProgress) {
+		if (!(this.notebook && this.shouldDisplayProgress)) {
 			return;
 		}
 		if (

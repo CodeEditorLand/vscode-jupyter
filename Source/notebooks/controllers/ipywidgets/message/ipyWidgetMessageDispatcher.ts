@@ -155,42 +155,51 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				}
 				break;
 			}
-			case IPyWidgetMessages.IPyWidgets_Ready:
+			case IPyWidgetMessages.IPyWidgets_Ready: {
 				this.sendKernelOptions();
 				this.initialize();
 				break;
-			case IPyWidgetMessages.IPyWidgets_msg:
+			}
+			case IPyWidgetMessages.IPyWidgets_msg: {
 				this.sendRawPayloadToKernelSocket(message.payload);
 				break;
-			case IPyWidgetMessages.IPyWidgets_binary_msg:
+			}
+			case IPyWidgetMessages.IPyWidgets_binary_msg: {
 				this.sendRawPayloadToKernelSocket(
-					deserializeDataViews(message.payload)![0],
+					deserializeDataViews(message.payload)?.[0],
 				);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_msg_received:
+			case IPyWidgetMessages.IPyWidgets_msg_received: {
 				this.onKernelSocketResponse(message.payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_registerCommTarget:
+			case IPyWidgetMessages.IPyWidgets_registerCommTarget: {
 				this.registerCommTarget(message.payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_RegisterMessageHook:
+			case IPyWidgetMessages.IPyWidgets_RegisterMessageHook: {
 				this.registerMessageHook(message.payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_RemoveMessageHook:
+			case IPyWidgetMessages.IPyWidgets_RemoveMessageHook: {
 				this.possiblyRemoveMessageHook(message.payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_MessageHookResult:
+			case IPyWidgetMessages.IPyWidgets_MessageHookResult: {
 				this.handleMessageHookResponse(message.payload);
 				break;
+			}
 
-			case IPyWidgetMessages.IPyWidgets_iopub_msg_handled:
+			case IPyWidgetMessages.IPyWidgets_iopub_msg_handled: {
 				this.iopubMessageHandled(message.payload);
 				break;
+			}
 
 			default:
 				break;
@@ -262,8 +271,10 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			this.sendRestartKernel();
 		}
 		if (
-			!kernel.session?.kernel?.id ||
-			!KernelSocketMap.get(kernel.session?.kernel?.id)
+			!(
+				kernel.session?.kernel?.id &&
+				KernelSocketMap.get(kernel.session?.kernel?.id)
+			)
 		) {
 			// No kernel socket information, hence nothing much we can do.
 			return;
@@ -424,9 +435,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 
 			// Check for hints that would indicate whether ipywidgest are used in outputs.
 			if (
-				message &&
-				message.content &&
-				message.content.data &&
+				message?.content?.data &&
 				(message.content.data[WIDGET_MIMETYPE] ||
 					message.content.target_name ===
 						Identifiers.DefaultCommTarget)
@@ -495,11 +504,11 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 					});
 				}
 				if (msg.channel === "control") {
-					this.kernel.session.kernel!.sendControlMessage(
+					this.kernel.session.kernel?.sendControlMessage(
 						msg as unknown as KernelMessage.IControlMessage,
 					);
 				} else {
-					this.kernel.session.kernel!.sendShellMessage(
+					this.kernel.session.kernel?.sendShellMessage(
 						msg as unknown as KernelMessage.IShellMessage,
 					);
 				}

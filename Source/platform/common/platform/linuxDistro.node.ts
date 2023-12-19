@@ -122,7 +122,7 @@ export async function getDistroInfo(): Promise<DistroInfo> {
 			}
 		});
 	} catch (ex) {
-		traceError(`Failed to read distro info`, ex);
+		traceError("Failed to read distro info", ex);
 	}
 
 	return distro;

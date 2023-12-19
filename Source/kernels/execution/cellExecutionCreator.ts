@@ -133,7 +133,7 @@ export class CellExecutionCreator {
 	) {
 		let cellExecution: NotebookCellExecutionWrapper | undefined;
 		const key = cell.document;
-		cellExecution = this.get(cell);
+		cellExecution = CellExecutionCreator.get(cell);
 		if (cellExecution) {
 			// Cell execution may already exist, but its controller may be different
 			if (cellExecution.controllerId !== controller.id) {

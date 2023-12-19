@@ -291,7 +291,7 @@ class JupyterUriProviderWrapper
 		this.id = this.provider.id;
 
 		if (provider.getHandles) {
-			this.getHandles = async () => provider.getHandles!();
+			this.getHandles = async () => provider.getHandles?.();
 		}
 	}
 	public async getQuickPickEntryItems(
@@ -339,8 +339,10 @@ class JupyterUriProviderWrapper
 		}
 		const server = await this.provider.getServerUri(handle);
 		if (
-			!this.id.startsWith("_builtin") &&
-			!handlesForWhichWeHaveSentTelemetry.has(handle)
+			!(
+				this.id.startsWith("_builtin") ||
+				handlesForWhichWeHaveSentTelemetry.has(handle)
+			)
 		) {
 			handlesForWhichWeHaveSentTelemetry.add(handle);
 			// Need this info to try and remove some of the properties from the API.

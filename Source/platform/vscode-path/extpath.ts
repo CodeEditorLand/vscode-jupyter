@@ -31,7 +31,7 @@ export function toPosixPath(osPath: string) {
 	}
 	if (/^[a-zA-Z]:(\/|$)/.test(osPath)) {
 		// starts with a drive letter
-		osPath = "/" + osPath;
+		osPath = `/${osPath}`;
 	}
 	return osPath;
 }
@@ -126,7 +126,7 @@ export function isEqualOrParent(
 		return true;
 	}
 
-	if (!base || !parentCandidate) {
+	if (!(base && parentCandidate)) {
 		return false;
 	}
 

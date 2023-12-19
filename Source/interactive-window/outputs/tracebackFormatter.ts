@@ -46,7 +46,7 @@ export class InteractiveWindowTracebackFormatter
 		const useIPython8Format = traceback.some((traceFrame) =>
 			/^[Input|Cell|File].*?\n.*/.test(traceFrame),
 		);
-		if (!useIPython8Format && !storage) {
+		if (!(useIPython8Format || storage)) {
 			// nothing to modify for IPython7 if we don't have any code to look up (standalone Interactive Window)
 			return traceback;
 		}
@@ -60,7 +60,7 @@ export class InteractiveWindowTracebackFormatter
 			} else {
 				return this.modifyTracebackFrameIPython7(
 					traceFrame,
-					storage!.all,
+					storage?.all,
 				);
 			}
 		});
@@ -128,14 +128,14 @@ export class InteractiveWindowTracebackFormatter
 					LineNumberMatchRegex,
 					(_s, prefix, num, suffix) => {
 						const n = parseInt(num, 10);
-						const lineNumberOfFirstLineInCell = match!.hasCellMarker
-							? match!.line - 1
-							: match!.line;
+						const lineNumberOfFirstLineInCell = match?.hasCellMarker
+							? match?.line - 1
+							: match?.line;
 						const lineIndexOfFirstLineInCell =
 							lineNumberOfFirstLineInCell - 1;
 						const newLine =
 							lineIndexOfFirstLineInCell +
-							match!.lineOffsetRelativeToIndexOfFirstLineInCell +
+							match?.lineOffsetRelativeToIndexOfFirstLineInCell +
 							n;
 						return `${prefix}<a href='${matchUri?.toString()}?line=${
 							newLine - 1

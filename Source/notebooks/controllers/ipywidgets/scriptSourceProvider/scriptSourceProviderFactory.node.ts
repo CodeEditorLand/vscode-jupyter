@@ -51,7 +51,7 @@ export class ScriptSourceProviderFactory
 		);
 		switch (kernel.kernelConnectionMetadata.kind) {
 			case "connectToLiveRemoteKernel":
-			case "startUsingRemoteKernelSpec":
+			case "startUsingRemoteKernelSpec": {
 				scriptProviders.push(
 					new RemoteWidgetScriptSourceProvider(
 						kernel,
@@ -59,6 +59,7 @@ export class ScriptSourceProviderFactory
 					),
 				);
 				break;
+			}
 
 			default:
 				scriptProviders.push(

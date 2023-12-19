@@ -261,7 +261,7 @@ export class RemoteKernelFinderController
 						c.extensionId === serverUri.provider.extensionId &&
 						c.id === serverUri.provider.id,
 				);
-			if (!collectionProvider || !collectionProvider.serverProvider) {
+			if (!collectionProvider?.serverProvider) {
 				return;
 			}
 			const servers = await Promise.resolve(
@@ -334,7 +334,7 @@ export class RemoteKernelFinderController
 		providerHandles.forEach((providerHandle) => {
 			const serverId = generateIdFromRemoteProvider(providerHandle);
 			const serverFinder = this.serverFinderMapping.get(serverId);
-			serverFinder && serverFinder.dispose();
+			serverFinder?.dispose();
 			this.serverFinderMapping.delete(serverId);
 		});
 	}

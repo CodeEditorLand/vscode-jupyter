@@ -47,7 +47,7 @@ import { KernelConnector } from "./kernelConnector";
 import { IConnectionDisplayDataProvider } from "./types";
 import { VSCodeNotebookController } from "./vscodeNotebookController";
 
-suite(`Notebook Controller`, () => {
+suite("Notebook Controller", () => {
 	let controller: NotebookController;
 	let kernelConnection: KernelConnectionMetadata;
 	let context: IExtensionContext;

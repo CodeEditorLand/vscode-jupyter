@@ -242,7 +242,7 @@ export function generateCellsFromNotebookDocument(
 				removeEmptyEntries: false,
 			});
 			if (cell.metadata.interactiveWindowCellMarker !== undefined) {
-				code.unshift(cell.metadata.interactiveWindowCellMarker + "\n");
+				code.unshift(`${cell.metadata.interactiveWindowCellMarker}\n`);
 			}
 			const data = createJupyterCellFromVSCNotebookCell(cell);
 			data.source =

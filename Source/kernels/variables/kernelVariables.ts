@@ -434,8 +434,8 @@ export class KernelVariables implements IJupyterVariables {
 			);
 
 			// Should be a text/plain inside of it (at least IPython does this)
-			if (output && output.hasOwnProperty("text/plain")) {
-				const text = stripAnsi(output["text/plain"]!.toString());
+			if (output?.hasOwnProperty("text/plain")) {
+				const text = stripAnsi(output["text/plain"]?.toString());
 
 				// Parse into bits
 				const type = TypeRegex.exec(text);
@@ -464,10 +464,10 @@ export class KernelVariables implements IJupyterVariables {
 			}
 
 			// Otherwise look for the appropriate entries
-			if (output && output.type) {
+			if (output?.type) {
 				result.type = output.type.toString();
 			}
-			if (output && output.value) {
+			if (output?.value) {
 				result.value = output.value.toString();
 			}
 

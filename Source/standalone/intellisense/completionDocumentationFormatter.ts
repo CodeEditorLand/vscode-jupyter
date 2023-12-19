@@ -230,7 +230,7 @@ function convertPythonDocumentationToMarkdown(
 	const markdownString = markdownStringLines.join("  \n");
 
 	return codeBlockStarted
-		? new MarkdownString(markdownString + "  \n```")
+		? new MarkdownString(`${markdownString}  \n`\`\``)
 		: new MarkdownString(markdownString);
 }
 
@@ -357,7 +357,7 @@ function convertJuliaDocumentationToMarkdown(
 
 	const markdownString = markdownStringLines.join("  \n");
 	return codeBlockStarted
-		? new MarkdownString(markdownString + "  \n```")
+		? new MarkdownString(`${markdownString}  \n`\`\``)
 		: new MarkdownString(markdownString);
 }
 
@@ -436,6 +436,6 @@ function convertRDocumentationToMarkdown(
 
 	const markdownString = markdownStringLines.join("  \n");
 	return codeBlockStarted
-		? new MarkdownString(markdownString + "  \n```")
+		? new MarkdownString(`${markdownString}  \n`\`\``)
 		: new MarkdownString(markdownString);
 }

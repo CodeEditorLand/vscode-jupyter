@@ -52,8 +52,7 @@ export function generateInteractiveCode(
 export function isInteractiveInputTab(tab: unknown): tab is InteractiveTab {
 	const interactiveTab = tab as InteractiveTab;
 	return (
-		interactiveTab &&
-		interactiveTab.input &&
+		interactiveTab?.input &&
 		isUri(interactiveTab.input.uri) &&
 		isUri(interactiveTab.input.inputBoxUri)
 	);

@@ -169,8 +169,6 @@ export class JupyterExporter implements INotebookExporter {
 		// Use the active interpreter
 		const usableInterpreter =
 			await this.jupyterServerHelper.getUsableJupyterPython();
-		return usableInterpreter && usableInterpreter.version
-			? usableInterpreter.version.major
-			: 3;
+		return usableInterpreter?.version ? usableInterpreter.version.major : 3;
 	};
 }

@@ -62,17 +62,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
  * @class InterpreterJupyterNotebookCommand
  * @implements {IJupyterCommand}
  */
-export class InterpreterJupyterNotebookCommand extends InterpreterJupyterCommand {
-	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
-	constructor(
-		moduleName: string,
-		args: string[],
-		pythonExecutionFactory: IPythonExecutionFactory,
-		interpreter: PythonEnvironment,
-	) {
-		super(moduleName, args, pythonExecutionFactory, interpreter);
-	}
-}
+export class InterpreterJupyterNotebookCommand extends InterpreterJupyterCommand {}
 
 /**
  * This class is used to handle kernelspecs.
@@ -83,16 +73,6 @@ export class InterpreterJupyterNotebookCommand extends InterpreterJupyterCommand
  */
 // eslint-disable-next-line max-classes-per-file
 export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterCommand {
-	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
-	constructor(
-		moduleName: string,
-		args: string[],
-		pythonExecutionFactory: IPythonExecutionFactory,
-		interpreter: PythonEnvironment,
-	) {
-		super(moduleName, args, pythonExecutionFactory, interpreter);
-	}
-
 	/**
 	 * Kernelspec subcommand requires special treatment.
 	 * Its possible the sub command hasn't been registered (i.e. jupyter kernelspec command hasn't been installed).
@@ -127,14 +107,14 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 			exception = ex;
 		}
 
-		if (!output.stderr && !exception) {
+		if (!(output.stderr || exception)) {
 			return output;
 		}
 
 		const defaultAction = () => {
 			if (exception) {
 				traceError(
-					`Exception attempting to enumerate kernelspecs: `,
+					"Exception attempting to enumerate kernelspecs: ",
 					exception,
 				);
 				throw exception;

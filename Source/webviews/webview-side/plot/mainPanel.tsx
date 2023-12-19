@@ -118,17 +118,20 @@ export class MainPanel
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public handleMessage = (msg: string, payload?: any) => {
 		switch (msg) {
-			case PlotViewerMessages.SendPlot:
+			case PlotViewerMessages.SendPlot: {
 				this.addPlot(payload);
 				break;
+			}
 
-			case SharedMessages.UpdateSettings:
+			case SharedMessages.UpdateSettings: {
 				this.updateSettings(payload);
 				break;
+			}
 
-			case SharedMessages.LocInit:
+			case SharedMessages.LocInit: {
 				this.initializeLoc(payload);
 				break;
+			}
 
 			default:
 				break;
@@ -162,7 +165,7 @@ export class MainPanel
 	private onKeyDown = (event: KeyboardEvent) => {
 		if (!event.ctrlKey) {
 			switch (event.key) {
-				case "ArrowRight":
+				case "ArrowRight": {
 					if (
 						this.state.currentImage <
 						this.state.images.length - 1
@@ -172,14 +175,16 @@ export class MainPanel
 						});
 					}
 					break;
+				}
 
-				case "ArrowLeft":
+				case "ArrowLeft": {
 					if (this.state.currentImage > 0) {
 						this.setState({
 							currentImage: this.state.currentImage - 1,
 						});
 					}
 					break;
+				}
 
 				default:
 					break;
@@ -191,21 +196,25 @@ export class MainPanel
 			this.viewer.current
 		) {
 			switch (event.key) {
-				case "ArrowRight":
+				case "ArrowRight": {
 					this.viewer.current.move(PanKeyboardSize, 0);
 					break;
+				}
 
-				case "ArrowLeft":
+				case "ArrowLeft": {
 					this.viewer.current.move(-PanKeyboardSize, 0);
 					break;
+				}
 
-				case "ArrowUp":
+				case "ArrowUp": {
 					this.viewer.current.move(0, -PanKeyboardSize);
 					break;
+				}
 
-				case "ArrowDown":
+				case "ArrowDown": {
 					this.viewer.current.move(0, PanKeyboardSize);
 					break;
+				}
 
 				default:
 					break;
@@ -217,13 +226,15 @@ export class MainPanel
 			this.viewer.current
 		) {
 			switch (event.key) {
-				case "+":
+				case "+": {
 					this.viewer.current.zoom(1.5);
 					break;
+				}
 
-				case "-":
+				case "-": {
 					this.viewer.current.zoom(0.66666);
 					break;
+				}
 
 				default:
 					break;
@@ -388,7 +399,7 @@ export class MainPanel
 	private exportCurrent = async () => {
 		// In order to export, we need the png and the svg. Generate
 		// a png by drawing to a canvas and then turning the canvas into a dataurl.
-		if (this.container && this.container.current) {
+		if (this.container?.current) {
 			const doc = this.container.current.ownerDocument;
 			if (doc) {
 				const canvas = doc.createElement("canvas");

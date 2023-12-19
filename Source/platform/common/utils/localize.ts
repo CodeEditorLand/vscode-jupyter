@@ -498,7 +498,7 @@ export namespace DataScience {
 		`Select 'Existing JupyterHub Server...' from the Kernel Picker`,
 	);
 	export const useJupyterHubExtensionDetail = l10n.t(
-		`Use this option when connecting to JupyterHub servers`,
+		"Use this option when connecting to JupyterHub servers",
 	);
 	export const installJupyterHubDetail = l10n.t(
 		`Once installed, open the Kernel Picker and select 'Existing JupyterHub Server...'`,
@@ -975,16 +975,16 @@ export namespace DataScience {
 		l10n.t("{0} Cell {1}", filePath, lineNumber);
 
 	export const jupyterServerConsoleOutputChannel = l10n.t(
-		`Jupyter Server Console`,
+		"Jupyter Server Console",
 	);
 
 	export const kernelConsoleOutputChannel = (kernelName: string) =>
-		l10n.t(`{0} Kernel Console Output`, kernelName);
+		l10n.t("{0} Kernel Console Output", kernelName);
 	export const webNotSupported = l10n.t(
-		`Operation not supported in web version of Jupyter Extension.`,
+		"Operation not supported in web version of Jupyter Extension.",
 	);
 	export const failedToInstallPythonExtension = l10n.t(
-		`Failed to install the Python Extension.`,
+		"Failed to install the Python Extension.",
 	);
 	export const filesPossiblyOverridingPythonModulesMayHavePreventedKernelFromStarting =
 		(files: string) =>

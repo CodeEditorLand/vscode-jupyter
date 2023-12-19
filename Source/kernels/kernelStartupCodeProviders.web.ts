@@ -31,6 +31,6 @@ export class KernelStartupCodeProviders implements IStartupCodeProviders {
 			notebookViewType,
 			this.providers.get(notebookViewType) || [],
 		);
-		this.providers.get(notebookViewType)!.push(provider);
+		this.providers.get(notebookViewType)?.push(provider);
 	}
 }

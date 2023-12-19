@@ -68,8 +68,10 @@ export class ApiAccessService {
 			getVSCodeChannel() === "insiders"
 		) {
 			if (
-				!TrustedExtensionPublishers.has(publisherId) &&
-				!PublishersAllowedWithPrompts.has(publisherId)
+				!(
+					TrustedExtensionPublishers.has(publisherId) ||
+					PublishersAllowedWithPrompts.has(publisherId)
+				)
 			) {
 				traceWarning(
 					`Publisher ${publisherId} is allowed to access the Kernel API with a message.`,
@@ -90,8 +92,9 @@ export class ApiAccessService {
 					.then(noop, noop);
 			}
 			if (
-				!PublishersAllowedWithPrompts.has(publisherId) ||
-				!publisherId ||
+				!(
+					PublishersAllowedWithPrompts.has(publisherId) && publisherId
+				) ||
 				this.context.extensionMode === ExtensionMode.Test
 			) {
 				return { extensionId: info.extensionId, accessAllowed: true };

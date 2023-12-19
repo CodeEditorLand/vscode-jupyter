@@ -215,9 +215,7 @@ export class Image extends React.Component<IImageProps> {
 			const styles: React.CSSProperties = {
 				color: "var(--vscode-editor-foreground)",
 			};
-			return (
-				<div style={styles} className={pre + this.props.codicon}></div>
-			);
+			return <div style={styles} className={pre + this.props.codicon} />;
 		}
 
 		const key = ImageName[this.props.image].toString();
@@ -243,6 +241,6 @@ export class Codicon extends React.Component<ICodiconProps> {
 		const styles: React.CSSProperties = {
 			color: "var(--vscode-editor-foreground)",
 		};
-		return <div style={styles} className={pre + this.props.codicon}></div>;
+		return <div style={styles} className={pre + this.props.codicon} />;
 	}
 }

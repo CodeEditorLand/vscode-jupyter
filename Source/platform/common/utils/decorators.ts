@@ -126,8 +126,7 @@ export function trace(
 		descriptor.value = function (...args: any[]) {
 			const call = {
 				kind: "Class",
-				name:
-					target && target.constructor ? target.constructor.name : "",
+				name: target?.constructor ? target.constructor.name : "",
 				args,
 				methodName,
 				target,

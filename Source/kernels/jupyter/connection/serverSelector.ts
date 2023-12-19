@@ -65,9 +65,11 @@ export class JupyterServerSelector {
 		}
 		// No need to add the Uri for providers using the new API.
 		if (
-			![JVSC_EXTENSION_ID].includes(provider.extensionId) &&
-			!this.serverProviderRegistry.jupyterCollections.some(
-				(c) => c.extensionId === provider.extensionId,
+			!(
+				[JVSC_EXTENSION_ID].includes(provider.extensionId) ||
+				this.serverProviderRegistry.jupyterCollections.some(
+					(c) => c.extensionId === provider.extensionId,
+				)
 			)
 		) {
 			await this.serverUriStorage.add(provider);

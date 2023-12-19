@@ -111,7 +111,7 @@ async function cacheKernelInfo(
 		| KernelMessage.IInfoReply
 		| undefined,
 ) {
-	if (!info || !isRemoteConnection(kernelConnection)) {
+	if (!(info && isRemoteConnection(kernelConnection))) {
 		return;
 	}
 	const kernelInfos = storage

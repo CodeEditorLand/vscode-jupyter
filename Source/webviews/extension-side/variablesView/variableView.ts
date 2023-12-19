@@ -141,12 +141,14 @@ export class VariableView
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected override onMessage(message: string, payload: any) {
 		switch (message) {
-			case InteractiveWindowMessages.GetVariablesRequest:
+			case InteractiveWindowMessages.GetVariablesRequest: {
 				this.handleMessage(message, payload, this.requestVariables);
 				break;
-			case InteractiveWindowMessages.ShowDataViewer:
+			}
+			case InteractiveWindowMessages.ShowDataViewer: {
 				this.handleMessage(message, payload, this.showDataViewer);
 				break;
+			}
 			default:
 				break;
 		}
@@ -295,8 +297,7 @@ export class VariableView
 		const variableViewers = extensions.all
 			.filter(
 				(e) =>
-					e.packageJSON?.contributes?.jupyterVariableViewers &&
-					e.packageJSON?.contributes?.jupyterVariableViewers.length,
+					e.packageJSON?.contributes?.jupyterVariableViewers?.length,
 			)
 			.filter((e) => e.id !== JVSC_EXTENSION_ID)
 			.flatMap((e) => {

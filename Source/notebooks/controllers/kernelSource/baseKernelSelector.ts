@@ -191,10 +191,11 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			this.provider.onDidChangeStatus(() => {
 				timeout && clearTimeout(timeout);
 				switch (this.provider.status) {
-					case "discovering":
+					case "discovering": {
 						quickPick.busy = true;
 						break;
-					case "idle":
+					}
+					case "idle": {
 						timeout = setTimeout(
 							() => (quickPick.busy = false),
 							500,
@@ -205,6 +206,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 							),
 						);
 						break;
+					}
 				}
 			}, this),
 		);
@@ -312,8 +314,10 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		// Ensure the recommended items isn't duplicated in the list.
 		const connections = this.quickPickItems.filter(
 			(item) =>
-				!isKernelPickItem(item) ||
-				!recommendedConnections.has(item.connection.id),
+				!(
+					isKernelPickItem(item) &&
+					recommendedConnections.has(item.connection.id)
+				),
 		);
 		const currentActiveItem = quickPick.activeItems.length
 			? quickPick.activeItems[0]
@@ -402,7 +406,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			this.provider.kernels.map((kernel) => [kernel.id, kernel]),
 		);
 		this.recommendedItems.concat(this.quickPickItems).forEach((item) => {
-			if (!isKernelPickItem(item) || !kernels.has(item.connection.id)) {
+			if (!(isKernelPickItem(item) && kernels.has(item.connection.id))) {
 				return;
 			}
 			const kernel = kernels.get(item.connection.id);

@@ -40,7 +40,7 @@ export class CodespacesJupyterServerSelector {
 		provider: JupyterServerProviderHandle,
 	): Promise<void> {
 		if (
-			provider.extensionId.toLowerCase() !=
+			provider.extensionId.toLowerCase() !==
 			CodespaceExtensionId.toLowerCase()
 		) {
 			throw new Error("Deprecated API");

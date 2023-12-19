@@ -62,7 +62,7 @@ export class InteractiveWindowController {
 		if (this.kernel) {
 			return this.kernel.promise;
 		}
-		if (!this.controller || !this.metadata) {
+		if (!(this.controller && this.metadata)) {
 			throw new Error("Interactive Window kernel not selected");
 		}
 
@@ -89,7 +89,7 @@ export class InteractiveWindowController {
 						await this.setFileInKernel(kernel);
 					} catch (ex) {
 						traceError(
-							`Failed to run initialization after restarting`,
+							"Failed to run initialization after restarting",
 						);
 					} finally {
 						this.finishSysInfoMessage(
@@ -123,7 +123,7 @@ export class InteractiveWindowController {
 		if (this.kernel) {
 			return this.kernel.promise;
 		}
-		if (!this.controller || !this.metadata) {
+		if (!(this.controller && this.metadata)) {
 			throw new Error("Controller not selected");
 		}
 

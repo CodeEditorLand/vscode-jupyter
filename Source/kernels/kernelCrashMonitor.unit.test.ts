@@ -132,7 +132,7 @@ suite("Kernel Crash Monitor", () => {
 		const expectedErrorMessage = Buffer.from(
 			createOutputWithErrorMessageForDisplay(
 				DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell,
-			)?.items[0]!.data!,
+			)?.items[0]?.data!,
 		).toString();
 
 		when(kernel.status).thenReturn("dead");
@@ -171,7 +171,7 @@ suite("Kernel Crash Monitor", () => {
 		const expectedErrorMessage = Buffer.from(
 			createOutputWithErrorMessageForDisplay(
 				DataScience.kernelCrashedDueToCodeInCurrentOrPreviousCell,
-			)?.items[0]!.data!,
+			)?.items[0]?.data!,
 		).toString();
 
 		when(kernel.status).thenReturn("autorestarting");

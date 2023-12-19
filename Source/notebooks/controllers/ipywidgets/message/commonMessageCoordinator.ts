@@ -362,8 +362,12 @@ export class CommonMessageCoordinator {
 				);
 				window.showErrorMessage(errorMessage).then(noop, noop);
 			} else if (
-				!cdnsEnabled &&
-				!this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.has(key)
+				!(
+					cdnsEnabled ||
+					this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.has(
+						key,
+					)
+				)
 			) {
 				this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.add(key);
 				const moreInfo = Common.moreInfo;
@@ -380,14 +384,16 @@ export class CommonMessageCoordinator {
 					)
 					.then((selection) => {
 						switch (selection) {
-							case moreInfo:
+							case moreInfo: {
 								void env.openExternal(
 									Uri.parse("https://aka.ms/PVSCIPyWidgets"),
 								);
 								break;
-							case enableDownloads:
+							}
+							case enableDownloads: {
 								this.enableCDNForWidgets(webview).catch(noop);
 								break;
+							}
 							default:
 								break;
 						}

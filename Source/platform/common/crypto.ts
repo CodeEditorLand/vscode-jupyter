@@ -18,7 +18,7 @@ const computedHashes: Record<string, string> = {};
 let stopStoringHashes = false;
 
 let cryptoProvider: Crypto;
-declare var WorkerGlobalScope: Function | undefined;
+declare let WorkerGlobalScope: Function | undefined;
 // Web
 if (typeof window === "object") {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

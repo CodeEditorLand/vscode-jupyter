@@ -44,16 +44,16 @@ suite("ipywidget - Local Widget Script Source", () => {
 		when(scriptManager.getBaseUrl).thenReturn();
 
 		assert.isOk(scriptManager.getBaseUrl);
-		const baseUrl = await scriptSourceProvider.getBaseUrl!();
+		const baseUrl = await scriptSourceProvider.getBaseUrl?.();
 
 		assert.isUndefined(baseUrl);
 	});
 	test("Get baseurl", async () => {
 		const uri = Uri.file(__dirname);
-		when(scriptManager.getBaseUrl!()).thenResolve(uri);
+		when(scriptManager.getBaseUrl?.()).thenResolve(uri);
 
 		assert.isOk(scriptManager.getBaseUrl);
-		const baseUrl = await scriptSourceProvider.getBaseUrl!();
+		const baseUrl = await scriptSourceProvider.getBaseUrl?.();
 
 		assert.strictEqual(baseUrl?.toString(), asVSCodeUri(uri).toString());
 	});
@@ -103,7 +103,7 @@ suite("ipywidget - Local Widget Script Source", () => {
 			widget2: Uri.file("nbextensions/widget2/inex.js"),
 		});
 
-		const values = await scriptSourceProvider.getWidgetScriptSources!();
+		const values = await scriptSourceProvider.getWidgetScriptSources?.();
 		assert.deepEqual(values, [
 			{
 				moduleName: "widget1",
