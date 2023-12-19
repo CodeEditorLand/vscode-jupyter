@@ -1,4 +1,5 @@
 version: 2
+enable-beta-ecosystems: true
 
 updates:
     - package-ecosystem: "github-actions"
@@ -19,6 +20,12 @@ updates:
       versioning-strategy: increase
 
     - package-ecosystem: "npm"
+      directory: "/"
+      schedule:
+          interval: "daily"
+      versioning-strategy: increase
+
+    - package-ecosystem: "pip"
       directory: "/"
       schedule:
           interval: "daily"
