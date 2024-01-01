@@ -578,18 +578,9 @@ declare namespace AdazzleReactDataGrid {
 	export namespace ReactDataGrid {
 		// Useful types
 		export
-		export
-
-		// Various events
-		export
-		export
-		export
-		export
-		export
-		export
-		export
-
-		export namespace editors {
+		namespace; // Various events
+		editors;
+		{
 			class EditorBase<P = {}, S = {}> extends React.Component<
 				P & EditorBaseProps,
 				S

@@ -47,9 +47,12 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	) {
 		this.debuggerPackage = "debugpy";
 		this.enableDebuggerCode = `import debugpy;debugpy.listen(('localhost', 0))`;
-		this.waitForDebugClientCode = "import debugpy;debugpy.wait_for_client()";
-		this.tracingEnableCode = "from debugpy import trace_this_thread;trace_this_thread(True)";
-		this.tracingDisableCode = "from debugpy import trace_this_thread;trace_this_thread(False)";
+		this.waitForDebugClientCode =
+			"import debugpy;debugpy.wait_for_client()";
+		this.tracingEnableCode =
+			"from debugpy import trace_this_thread;trace_this_thread(True)";
+		this.tracingDisableCode =
+			"from debugpy import trace_this_thread;trace_this_thread(False)";
 	}
 	public async attach(kernel: IKernel): Promise<void> {
 		if (!kernel.session) {
