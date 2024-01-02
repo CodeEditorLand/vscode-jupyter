@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+'use strict';
+
 /*
 This file is only used when using webpack for bundling.
 We have a dummy file so that webpack doesn't fall over when trying to bundle pdfkit.
