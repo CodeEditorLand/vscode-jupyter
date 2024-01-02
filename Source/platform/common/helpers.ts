@@ -7,21 +7,18 @@
  * @param {SplitLinesOptions=} splitOptions - Options used for splitting the string.
  */
 export function splitLines(
-	value: string,
-	splitOptions: { trim: boolean; removeEmptyEntries?: boolean } = {
-		removeEmptyEntries: true,
-		trim: true,
-	},
+    value: string,
+    splitOptions: { trim: boolean; removeEmptyEntries?: boolean } = { removeEmptyEntries: true, trim: true }
 ): string[] {
-	value = value || "";
-	let lines = value.split(/\r?\n/g);
-	if (splitOptions?.trim) {
-		lines = lines.map((line) => line.trim());
-	}
-	if (splitOptions?.removeEmptyEntries) {
-		lines = lines.filter((line) => line.length > 0);
-	}
-	return lines;
+    value = value || '';
+    let lines = value.split(/\r?\n/g);
+    if (splitOptions && splitOptions.trim) {
+        lines = lines.map((line) => line.trim());
+    }
+    if (splitOptions && splitOptions.removeEmptyEntries) {
+        lines = lines.filter((line) => line.length > 0);
+    }
+    return lines;
 }
 
 /**
@@ -30,14 +27,10 @@ export function splitLines(
  * @param {String} value.
  */
 export function toCommandArgument(value: string): string {
-	if (!value) {
-		return value;
-	}
-	return value.indexOf(" ") >= 0 &&
-		!value.startsWith('"') &&
-		!value.endsWith('"')
-		? `"${value}"`
-		: value.toString();
+    if (!value) {
+        return value;
+    }
+    return value.indexOf(' ') >= 0 && !value.startsWith('"') && !value.endsWith('"') ? `"${value}"` : value.toString();
 }
 
 /**
@@ -45,10 +38,10 @@ export function toCommandArgument(value: string): string {
  * E.g. if an argument contains a space, then it will be enclosed within double quotes.
  */
 export function fileToCommandArgument(value: string): string {
-	if (!value) {
-		return value;
-	}
-	return toCommandArgument(value).replace(/\\/g, "/");
+    if (!value) {
+        return value;
+    }
+    return toCommandArgument(value).replace(/\\/g, '/');
 }
 
 /**
@@ -56,10 +49,10 @@ export function fileToCommandArgument(value: string): string {
  * Removes leading and trailing quotes from a string
  */
 export function trimQuotes(value: string): string {
-	if (!value) {
-		return value;
-	}
-	return value.replace(/(^['"])|(['"]$)/g, "");
+    if (!value) {
+        return value;
+    }
+    return value.replace(/(^['"])|(['"]$)/g, '');
 }
 
 /**
@@ -67,40 +60,33 @@ export function trimQuotes(value: string): string {
  * Tokens such as {0}, {1} will be replaced with corresponding positional arguments.
  */
 export function format(value: string, ...args: string[]) {
-	return value.replace(/{(\d+)}/g, (match, number) =>
-		args[number] === undefined ? match : args[number],
-	);
+    return value.replace(/{(\d+)}/g, (match, number) => (args[number] === undefined ? match : args[number]));
 }
 
-export function createPublicAPIProxy<T extends object>(
-	target: T,
-	membersToHide: (keyof T)[],
-): T {
-	const membersToHideList = membersToHide as (string | symbol)[];
-	return new Proxy(target, {
-		has(target, p) {
-			if (membersToHideList.includes(p)) {
-				return false;
-			}
-			return Reflect.has(target, p);
-		},
-		ownKeys(target) {
-			return Reflect.ownKeys(target).filter(
-				(key) => !membersToHideList.includes(key),
-			);
-		},
-		getOwnPropertyDescriptor(target, p) {
-			if (membersToHideList.includes(p)) {
-				return undefined;
-			}
-			return Reflect.getOwnPropertyDescriptor(target, p);
-		},
-	});
+export function createPublicAPIProxy<T extends object>(target: T, membersToHide: (keyof T)[]): T {
+    const membersToHideList = membersToHide as (string | symbol)[];
+    return new Proxy(target, {
+        has(target, p) {
+            if (membersToHideList.includes(p)) {
+                return false;
+            }
+            return Reflect.has(target, p);
+        },
+        ownKeys(target) {
+            return Reflect.ownKeys(target).filter((key) => !membersToHideList.includes(key));
+        },
+        getOwnPropertyDescriptor(target, p) {
+            if (membersToHideList.includes(p)) {
+                return undefined;
+            }
+            return Reflect.getOwnPropertyDescriptor(target, p);
+        }
+    });
 }
 
 export function stripCodicons(text: string | undefined) {
-	if (!text) {
-		return text || "";
-	}
-	return text.replace(/\$\([a-z0-9\-]+?\)/gi, "").trim();
+    if (!text) {
+        return text || '';
+    }
+    return text.replace(/\$\([a-z0-9\-]+?\)/gi, '').trim();
 }

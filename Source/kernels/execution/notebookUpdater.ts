@@ -1,15 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
-	NotebookDocument,
-	NotebookEditor,
-	WorkspaceEdit,
-	window,
-	workspace,
-} from "vscode";
-import { createDeferred, isPromise } from "../../platform/common/utils/async";
-import { noop } from "../../platform/common/utils/misc";
+import { NotebookDocument, NotebookEditor, workspace, WorkspaceEdit, window } from 'vscode';
+import { createDeferred, isPromise } from '../../platform/common/utils/async';
+import { noop } from '../../platform/common/utils/misc';
 
 /**
  * Use this class to perform updates on all cells.
@@ -28,40 +22,38 @@ import { noop } from "../../platform/common/utils/misc";
 const pendingCellUpdates = new WeakMap<NotebookDocument, Promise<unknown>>();
 
 export async function chainWithPendingUpdates(
-	document: NotebookDocument,
-	update: (edit: WorkspaceEdit) => void | Promise<void>,
+    document: NotebookDocument,
+    update: (edit: WorkspaceEdit) => void | Promise<void>
 ): Promise<boolean> {
-	const notebook = document;
-	if (document.isClosed) {
-		return true;
-	}
-	const pendingUpdates = pendingCellUpdates.has(notebook)
-		? pendingCellUpdates.get(notebook)!
-		: Promise.resolve();
-	const deferred = createDeferred<boolean>();
-	const aggregatedPromise = pendingUpdates
-		// We need to ensure the update operation gets invoked after previous updates have been completed.
-		// This way, the callback making references to cell metadata will have the latest information.
-		// Even if previous update fails, we should not fail this current update.
-		.finally(async () => {
-			const edit = new WorkspaceEdit();
-			const result = update(edit);
-			if (isPromise(result)) {
-				await result;
-			}
-			await workspace.applyEdit(edit).then(
-				(result) => deferred.resolve(result),
-				(ex) => deferred.reject(ex),
-			);
-		})
-		.catch(noop);
-	pendingCellUpdates.set(notebook, aggregatedPromise);
-	return deferred.promise;
+    const notebook = document;
+    if (document.isClosed) {
+        return true;
+    }
+    const pendingUpdates = pendingCellUpdates.has(notebook) ? pendingCellUpdates.get(notebook)! : Promise.resolve();
+    const deferred = createDeferred<boolean>();
+    const aggregatedPromise = pendingUpdates
+        // We need to ensure the update operation gets invoked after previous updates have been completed.
+        // This way, the callback making references to cell metadata will have the latest information.
+        // Even if previous update fails, we should not fail this current update.
+        .finally(async () => {
+            const edit = new WorkspaceEdit();
+            const result = update(edit);
+            if (isPromise(result)) {
+                await result;
+            }
+            await workspace.applyEdit(edit).then(
+                (result) => deferred.resolve(result),
+                (ex) => deferred.reject(ex)
+            );
+        })
+        .catch(noop);
+    pendingCellUpdates.set(notebook, aggregatedPromise);
+    return deferred.promise;
 }
 
 export function clearPendingChainedUpdatesForTests() {
-	const editor: NotebookEditor | undefined = window.activeNotebookEditor;
-	if (editor?.notebook) {
-		pendingCellUpdates.delete(editor.notebook);
-	}
+    const editor: NotebookEditor | undefined = window.activeNotebookEditor;
+    if (editor?.notebook) {
+        pendingCellUpdates.delete(editor.notebook);
+    }
 }

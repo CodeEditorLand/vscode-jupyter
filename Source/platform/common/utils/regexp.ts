@@ -19,30 +19,30 @@
  * end of the line.
  */
 export function verboseRegExp(pattern: string, flags?: string): RegExp {
-	pattern = pattern.replace(/(^| {2})# .*$/gm, "");
-	pattern = pattern.replace(/\s+?/g, "");
-	return RegExp(pattern, flags);
+    pattern = pattern.replace(/(^| {2})# .*$/gm, '');
+    pattern = pattern.replace(/\s+?/g, '');
+    return RegExp(pattern, flags);
 }
 
 const SpecialCharsRegEx = /[\.\+\?\^\$\{\}\(\)\|\[\]\\]/;
 
 export function buildDataViewerFilterRegex(filter: string): RegExp {
-	let flags = "";
+    let flags = '';
 
-	// Allow an = operator. It's exact match. Anchor at start and end
-	if (filter.startsWith("=")) {
-		filter = `^${filter.substr(1).trim()}$`;
-	} else if (!SpecialCharsRegEx.test(filter)) {
-		// If no special chars, then match everything that has
-		// this text in the middle. Default option
-		filter = `^.*${filter}.*$`;
+    // Allow an = operator. It's exact match. Anchor at start and end
+    if (filter.startsWith('=')) {
+        filter = `^${filter.substr(1).trim()}$`;
+    } else if (!SpecialCharsRegEx.test(filter)) {
+        // If no special chars, then match everything that has
+        // this text in the middle. Default option
+        filter = `^.*${filter}.*$`;
 
-		// This option is also case insensitive
-		flags = "i";
-	}
+        // This option is also case insensitive
+        flags = 'i';
+    }
 
-	// Otherwise let the user type a normal regex
-	return new RegExp(filter, flags);
+    // Otherwise let the user type a normal regex
+    return new RegExp(filter, flags);
 }
 
 /**
@@ -52,18 +52,18 @@ export function buildDataViewerFilterRegex(filter: string): RegExp {
  * @returns
  */
 export function stripAnsi(str: string) {
-	if (typeof str !== "string") {
-		throw new TypeError(`Expected a \`string\`, got \`${typeof str}\``);
-	}
+    if (typeof str !== 'string') {
+        throw new TypeError(`Expected a \`string\`, got \`${typeof str}\``);
+    }
 
-	const ansiRegex = require("ansi-regex");
+    var ansiRegex = require('ansi-regex');
 
-	// Special case ansiregex for running on test machines. Seems to not have a 'default'
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let ansiRegexFunc = ansiRegex as any;
-	if (ansiRegexFunc.default) {
-		ansiRegexFunc = ansiRegexFunc.default;
-	}
+    // Special case ansiregex for running on test machines. Seems to not have a 'default'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ansiRegexFunc = ansiRegex as any;
+    if (ansiRegexFunc.default) {
+        ansiRegexFunc = ansiRegexFunc.default;
+    }
 
-	return str.replace(ansiRegexFunc(), "");
+    return str.replace(ansiRegexFunc(), '');
 }

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DataScience } from "../common/utils/localize";
-import { BaseError } from "./types";
+import { DataScience } from '../common/utils/localize';
+import { BaseError } from './types';
 
 /**
  * Error thrown when the jupyter iopub datarate limit is exceeded.
@@ -14,7 +14,7 @@ import { BaseError } from "./types";
  * User is shown an notification asking them to increated their data rate limit
  */
 export class JupyterDataRateLimitError extends BaseError {
-	constructor() {
-		super("unknown", DataScience.jupyterDataRateExceeded);
-	}
+    constructor() {
+        super('unknown', DataScience.jupyterDataRateExceeded);
+    }
 }

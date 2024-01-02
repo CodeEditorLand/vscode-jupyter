@@ -1,22 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-export const IExtensionActivationManager = Symbol(
-	"IExtensionActivationManager",
-);
+export const IExtensionActivationManager = Symbol('IExtensionActivationManager');
 /**
  * Responsible for activation of extension.
  */
 export interface IExtensionActivationManager {
-	/**
-	 * Method invoked when extension activates (invoked once).
-	 */
-	activate(): void;
+    /**
+     * Method invoked when extension activates (invoked once).
+     */
+    activate(): void;
 }
 
-export const IExtensionSyncActivationService = Symbol(
-	"IExtensionSyncActivationService",
-);
+export const IExtensionSyncActivationService = Symbol('IExtensionSyncActivationService');
 /**
  * Classes implementing this interface will have their `activate` methods
  * invoked during the activation of the extension.
@@ -24,5 +20,5 @@ export const IExtensionSyncActivationService = Symbol(
  * the `extension.ts` file to invoke some code when extension gets activated.
  */
 export interface IExtensionSyncActivationService {
-	activate(): void;
+    activate(): void;
 }
