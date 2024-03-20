@@ -1,28 +1,34 @@
 {
-    "name": "@vscode/jupyter-extension",
-    "description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
-    "version": "0.0.0",
-    "author": {
-        "name": "Microsoft Corporation"
-    },
-    "keywords": [
-        "Jupyter",
-        "VSCode",
-        "API"
-    ],
-    "types": "api.d.ts",
-    "license": "MIT",
-    "homepage": "https://github.com/microsoft/vscode-jupyter",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Microsoft/vscode-jupyter"
-    },
-    "bugs": {
-        "url": "https://github.com/Microsoft/vscode-jupyter/issues"
-    },
-    "scripts": {
-        "buildStable": "npm run clean && node ./stable.js",
-        "buildProposed": "npm run clean && node ./proposed.js",
-        "clean": "node ./clean.js"
-    }
+	"name": "@vscode/jupyter-extension",
+	"version": "0.0.1",
+	"private": false,
+	"description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
+	"homepage": "https://github.com/CodeEditorLand/Foundation#readme",
+	"bugs": {
+		"url": "https://github.com/CodeEditorLand/Foundation/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CodeEditorLand/Foundation.git"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"author": {
+		"name": "Playform",
+		"email": "Hello@Playform.Cloud",
+		"url": "https://playform.cloud"
+	},
+	"type": "module",
+	"types": "api.d.ts",
+	"scripts": {
+		"buildProposed": "npm run clean && node ./proposed.js",
+		"buildStable": "npm run clean && node ./stable.js",
+		"clean": "node ./clean.js",
+		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'"
+	},
+	"devDependencies": {
+		"typescript-esbuild": "latest"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }
