@@ -1,15 +1,34 @@
 {
-	"description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
-	"devDependencies": {
-		"typescript-esbuild": "0.4.5"
-	},
 	"name": "@vscode/jupyter-extension",
+	"version": "0.0.1",
+	"private": false,
+	"description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
+	"homepage": "https://github.com/CodeEditorLand/Foundation#readme",
+	"bugs": {
+		"url": "https://github.com/CodeEditorLand/Foundation/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CodeEditorLand/Foundation.git"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"author": {
+		"name": "Playform",
+		"email": "Hello@Playform.Cloud",
+		"url": "https://playform.cloud"
+	},
+	"type": "module",
+	"types": "api.d.ts",
 	"scripts": {
 		"buildProposed": "npm run clean && node ./proposed.js",
 		"buildStable": "npm run clean && node ./stable.js",
 		"clean": "node ./clean.js",
 		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'"
 	},
-	"type": "module",
-	"types": "api.d.ts"
+	"devDependencies": {
+		"typescript-esbuild": "0.4.5"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }
