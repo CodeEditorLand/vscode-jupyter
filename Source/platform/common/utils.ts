@@ -457,14 +457,14 @@ type JupyterCellMetadata = Pick<nbformat.IRawCell, 'id' | 'metadata' | 'attachme
 
 export function getCellMetadata(cell: NotebookCell): JupyterCellMetadata {
     if (useCustomMetadata()) {
-        const metadata: JupyterCellMetadata = cell.metadata.custom || {};
+        const metadata: JupyterCellMetadata = JSON.parse(JSON.stringify(cell.metadata.custom || {})) || {};
         const cellMetadata = metadata as nbformat.IRawCell;
         // metadata property is never optional.
         cellMetadata.metadata = cellMetadata.metadata || {};
 
         return metadata;
     } else {
-        const metadata: JupyterCellMetadata = cell.metadata.metadata || {};
+        const metadata: JupyterCellMetadata = JSON.parse(JSON.stringify(cell.metadata || {})) || { metadata: {} };
         // metadata property is never optional.
         metadata.metadata = metadata.metadata || {};
         return metadata;
@@ -472,9 +472,14 @@ export function getCellMetadata(cell: NotebookCell): JupyterCellMetadata {
 }
 
 export function useCustomMetadata() {
-    const ext = extensions.getExtension<{ dropCustomMetadata: boolean }>('vscode.ipynb');
-    if (ext && typeof ext.exports.dropCustomMetadata === 'boolean') {
-        return ext.exports.dropCustomMetadata ? false : true;
+    try {
+        const ext = extensions.getExtension<{ dropCustomMetadata: boolean }>('vscode.ipynb');
+        if (ext && typeof ext.exports.dropCustomMetadata === 'boolean') {
+            return ext.exports.dropCustomMetadata ? false : true;
+        }
+    } catch {
+        // This happens in integration tests, in this case just return `true`.
+        return true;
     }
     try {
         // Means ipynb extension has not yet been activated.

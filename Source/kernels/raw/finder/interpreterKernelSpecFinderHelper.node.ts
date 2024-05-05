@@ -245,13 +245,13 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
                 (!jupyterKernelSpec.env || Object.keys(jupyterKernelSpec.env).length === 0) &&
                 isDefaultKernelSpec(jupyterKernelSpec)
             ) {
-                // traceVerbose(
-                //     `Hiding default KernelSpec '${jupyterKernelSpec.name}', ${getDisplayPath(
-                //         jupyterKernelSpec.argv[0]
-                //     )} for interpreter ${getDisplayPath(
-                //         jupyterKernelSpec.interpreterPath
-                //     )} (KernelSpec file ${getDisplayPath(jupyterKernelSpec.specFile)})`
-                // );
+                traceVerbose(
+                    `Hiding default KernelSpec '${jupyterKernelSpec.name}', ${getDisplayPath(
+                        jupyterKernelSpec.argv[0]
+                    )} for interpreter ${getDisplayPath(
+                        jupyterKernelSpec.interpreterPath
+                    )} (KernelSpec file ${getDisplayPath(jupyterKernelSpec.specFile)})`
+                );
                 return;
             }
             const kernelSpec = isKernelLaunchedViaLocalPythonIPyKernel(jupyterKernelSpec)
@@ -642,6 +642,13 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
                     ) {
                         return true;
                     }
+                    traceVerbose(
+                        `Kernel Spec for '${item.kernelSpec.display_name}' (${getDisplayPath(
+                            item.kernelSpec.specFile
+                        )}) is hidden. (isDefaultKernelSpec = ${isDefaultKernelSpec(item.kernelSpec)}, language = ${
+                            item.kernelSpec.language
+                        }, registrationInfo = ${registrationInfo})`
+                    );
                     return false;
                 })
                 .map(async (item) => {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import { NotebookCellOutput, NotebookCellOutputItem, NotebookCell, NotebookCellExecutionState } from 'vscode';
+import { NotebookCellOutput, NotebookCellOutputItem, NotebookCell, Position, Range } from 'vscode';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import type { KernelMessage } from '@jupyterlab/services';
 import fastDeepEqual from 'fast-deep-equal';
@@ -22,9 +22,10 @@ import {
     getKernelRegistrationInfo
 } from '../helpers';
 import { StopWatch } from '../../platform/common/utils/stopWatch';
-import { getExtensionSpecifcStack } from '../../platform/errors/errors';
+import { getExtensionSpecificStack } from '../../platform/errors/errors';
 import { getCachedEnvironment, getVersion } from '../../platform/interpreter/helpers';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../platform/common/utils/string';
+import type { NotebookCellExecutionState } from '../../platform/notebooks/cellExecutionStateService';
 
 export enum CellOutputMimeTypes {
     error = 'application/vnd.code.notebook.error',
@@ -110,7 +111,7 @@ export function traceCellMessage(cell: NotebookCell, message: string | (() => st
             `Cell Index:${cell.index}, of document ${uriPath.basename(
                 cell.notebook.uri
             )} with state:${NotebookCellStateTracker.getCellStatus(cell)}, exec: ${cell.executionSummary
-                ?.executionOrder}. ${messageToLog()}. called from ${getExtensionSpecifcStack()}`
+                ?.executionOrder}. ${messageToLog()}. called from ${getExtensionSpecificStack()}`
     );
 }
 
@@ -768,10 +769,39 @@ export async function endCellAndDisplayErrorsInCell(
 
     // Start execution if not already (Cell execution wrapper will ensure it won't start twice)
     const execution = CellExecutionCreator.getOrCreate(cell, controller);
+    const originalExecutionOrder = execution.executionOrder;
     if (!execution.started) {
-        execution.start(cell.executionSummary?.timing?.endTime);
-        execution.executionOrder = cell.executionSummary?.executionOrder;
+        execution.start(cell.executionSummary?.timing?.startTime);
+        execution.executionOrder = cell.executionSummary?.executionOrder || originalExecutionOrder;
     }
     await execution.appendOutput(output);
     execution.end(isCancelled ? undefined : false, cell.executionSummary?.timing?.endTime);
+}
+
+export function findErrorLocation(traceback: string[], cell: NotebookCell) {
+    const cellRegex = /Cell\s+(?:\u001b\[.+?m)?In\s*\[(?<executionCount>\d+)\],\s*line (?<lineNumber>\d+).*/;
+    // older versions of IPython ~8.3.0
+    const inputRegex =
+        /Input\s+?(?:\u001b\[.+?m)?In\s*\[(?<executionCount>\d+)\][^<]*<cell line:\s?(?<lineNumber>\d+)>.*/;
+    let lineNumber: number | undefined = undefined;
+    for (const line of traceback) {
+        const lineMatch = cellRegex.exec(line) ?? inputRegex.exec(line);
+        if (lineMatch && lineMatch.groups) {
+            lineNumber = parseInt(lineMatch.groups['lineNumber']);
+            break;
+        }
+    }
+
+    let range: Range | undefined = undefined;
+    if (lineNumber && lineNumber > 0 && lineNumber <= cell.document.lineCount) {
+        const line = cell.document.lineAt(lineNumber - 1);
+        const end = line.text.split('#')[0].trimEnd().length;
+
+        range = new Range(
+            new Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex),
+            new Position(line.lineNumber, end)
+        );
+    }
+
+    return range;
 }

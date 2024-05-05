@@ -34,7 +34,8 @@ import {
     traceCellMessage,
     cellOutputToVSCCellOutput,
     translateCellDisplayOutput,
-    CellOutputMimeTypes
+    CellOutputMimeTypes,
+    findErrorLocation
 } from './helpers';
 import { swallowExceptions } from '../../platform/common/utils/decorators';
 import { noop } from '../../platform/common/utils/misc';
@@ -43,7 +44,6 @@ import { handleTensorBoardDisplayDataOutput } from './executionHelpers';
 import { Identifiers, WIDGET_MIMETYPE } from '../../platform/common/constants';
 import { CellOutputDisplayIdTracker } from './cellDisplayIdTracker';
 import { createDeferred } from '../../platform/common/utils/async';
-import { CellFailureDiagnostics } from './cellFailureDiagnostics';
 
 // Helper interface for the set_next_input execute reply payload
 interface ISetNextInputPayload {
@@ -103,7 +103,6 @@ export class CellExecutionMessageHandler implements IDisposable {
      */
     private clearOutputOnNextUpdateToOutput?: boolean;
 
-    private failureDiagostics = new CellFailureDiagnostics();
     private execution?: NotebookCellExecution;
     private readonly _onErrorHandlingIOPubMessage = new EventEmitter<{
         error: Error;
@@ -450,8 +449,8 @@ export class CellExecutionMessageHandler implements IDisposable {
         this.previousResultsToRestore = { ...(this.cell.executionSummary || {}) };
         this.temporaryExecution = CellExecutionCreator.getOrCreate(this.cell, this.controller);
         this.temporaryExecution?.start();
-        if (this.previousResultsToRestore?.executionOrder && this.execution) {
-            this.execution.executionOrder = this.previousResultsToRestore.executionOrder;
+        if (this.previousResultsToRestore?.executionOrder && this.temporaryExecution) {
+            this.temporaryExecution.executionOrder = this.previousResultsToRestore.executionOrder;
         }
         return this.temporaryExecution;
     }
@@ -1074,14 +1073,16 @@ export class CellExecutionMessageHandler implements IDisposable {
             traceback
         };
 
-        const cellExecution = CellExecutionCreator.get(this.cell);
-        if (cellExecution && msg.content.ename !== 'KeyboardInterrupt') {
-            cellExecution.errorInfo = {
-                message: `${msg.content.ename}: ${msg.content.evalue}`,
-                location: this.failureDiagostics.parseStackTrace(traceback, this.cell).range,
-                uri: this.cell.document.uri,
-                stack: msg.content.traceback.join('\n')
-            };
+        if (this.cell.notebook.notebookType !== 'interactive') {
+            const cellExecution = CellExecutionCreator.get(this.cell);
+            if (cellExecution && msg.content.ename !== 'KeyboardInterrupt') {
+                cellExecution.errorInfo = {
+                    message: `${msg.content.ename}: ${msg.content.evalue}`,
+                    location: findErrorLocation(msg.content.traceback, this.cell),
+                    uri: this.cell.document.uri,
+                    stack: msg.content.traceback.join('\n')
+                };
+            }
         }
 
         this.addToCellData(output, msg);
