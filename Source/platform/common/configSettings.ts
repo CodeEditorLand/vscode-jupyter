@@ -11,15 +11,12 @@ import {
     WorkspaceConfiguration,
     workspace
 } from 'vscode';
-import { LogLevel } from '../logging/types';
 import { isTestExecution } from './constants';
 import {
     IExperiments,
-    ILoggingSettings,
     InteractiveWindowMode,
     InteractiveWindowViewColumn,
     IWatchableJupyterSettings,
-    LoggingLevelSettingType,
     Resource,
     WidgetCDNs
 } from './types';
@@ -41,7 +38,6 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 
     private static jupyterSettings: Map<string, JupyterSettings> = new Map<string, JupyterSettings>();
     public experiments!: IExperiments;
-    public logging: ILoggingSettings = { level: 'error' };
     public allowUnauthorizedRemoteConnection: boolean = false;
     public jupyterInterruptTimeout: number = 10_000;
     public jupyterLaunchTimeout: number = 60_000;
@@ -176,17 +172,6 @@ export class JupyterSettings implements IWatchableJupyterSettings {
     private update(jupyterConfig: WorkspaceConfiguration, pythonConfig: WorkspaceConfiguration | undefined) {
         const systemVariables = this.createSystemVariables(undefined);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const loggingSettings = systemVariables.resolveAny(jupyterConfig.get<any>('logging'))!;
-        if (loggingSettings) {
-            loggingSettings.level = convertSettingTypeToLogLevel(loggingSettings.level);
-            if (this.logging) {
-                Object.assign<ILoggingSettings, ILoggingSettings>(this.logging, loggingSettings);
-            } else {
-                this.logging = loggingSettings;
-            }
-        }
-
         const experiments = systemVariables.resolveAny(jupyterConfig.get<IExperiments>('experiments'))!;
         if (this.experiments) {
             Object.assign<IExperiments, IExperiments>(this.experiments, experiments);
@@ -282,28 +267,5 @@ export class JupyterSettings implements IWatchableJupyterSettings {
     private getSerializableKeys() {
         // Get the keys that are allowed.
         return Object.getOwnPropertyNames(this).filter((f) => !f.startsWith('_'));
-    }
-}
-
-function convertSettingTypeToLogLevel(setting: LoggingLevelSettingType | undefined): LogLevel | 'off' {
-    switch (setting) {
-        case 'info': {
-            return LogLevel.Info;
-        }
-        case 'warn': {
-            return LogLevel.Warn;
-        }
-        case 'off': {
-            return 'off';
-        }
-        case 'debug': {
-            return LogLevel.Debug;
-        }
-        case 'verbose': {
-            return LogLevel.Trace;
-        }
-        default: {
-            return LogLevel.Error;
-        }
     }
 }

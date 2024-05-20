@@ -45,7 +45,6 @@ export interface IRandom {
 
 export interface IJupyterSettings {
     readonly experiments: IExperiments;
-    readonly logging: ILoggingSettings;
     readonly allowUnauthorizedRemoteConnection: boolean;
     readonly jupyterInterruptTimeout: number;
     readonly jupyterLaunchTimeout: number;
@@ -105,12 +104,6 @@ export interface IJupyterSettings {
 export interface IWatchableJupyterSettings extends IJupyterSettings {
     readonly onDidChange: Event<void>;
     createSystemVariables(resource: Resource): ISystemVariables;
-}
-
-export type LoggingLevelSettingType = 'off' | 'error' | 'warn' | 'info' | 'debug' | 'verbose';
-
-export interface ILoggingSettings {
-    readonly level: LoggingLevelSettingType | 'off';
 }
 
 export interface IExperiments {

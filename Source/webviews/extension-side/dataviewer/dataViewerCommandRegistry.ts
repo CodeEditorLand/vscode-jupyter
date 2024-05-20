@@ -23,7 +23,7 @@ import { DataScience } from '../../../platform/common/utils/localize';
 import { noop } from '../../../platform/common/utils/misc';
 import { untildify } from '../../../platform/common/utils/platform';
 import { IInterpreterService } from '../../../platform/interpreter/contracts';
-import { traceError, traceInfo } from '../../../platform/logging';
+import { logger } from '../../../platform/logging';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../platform/telemetry/constants';
 import { IDataScienceErrorHandler } from '../../../kernels/errors/types';
@@ -33,6 +33,7 @@ import { PythonEnvironment } from '../../../platform/pythonEnvironments/info';
 import { IKernelProvider } from '../../../kernels/types';
 import { IInteractiveWindowProvider } from '../../../interactive-window/types';
 import { IShowDataViewerFromVariablePanel } from '../../../messageTypes';
+import { DataViewerDelegator } from './dataViewerDelegator';
 
 export const PromptAboutDeprecation = 'ds_prompt_about_deprecation';
 
@@ -60,7 +61,8 @@ export class DataViewerCommandRegistry implements IExtensionSyncActivationServic
         @inject(IKernelProvider) private readonly kernelProvider: IKernelProvider,
         @inject(IInteractiveWindowProvider) private interactiveWindowProvider: IInteractiveWindowProvider,
         @inject(IExperimentService) private readonly experimentService: IExperimentService,
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento
+        @inject(IMemento) @named(GLOBAL_MEMENTO) private readonly globalMemento: Memento,
+        @inject(DataViewerDelegator) private readonly dataViewerDelegator: DataViewerDelegator
     ) {
         this.dataViewerChecker = new DataViewerChecker(configService);
         if (!workspace.isTrusted) {
@@ -74,7 +76,8 @@ export class DataViewerCommandRegistry implements IExtensionSyncActivationServic
         if (!workspace.isTrusted) {
             return;
         }
-        this.registerCommand(Commands.ShowDataViewer, this.onVariablePanelShowDataViewerRequest);
+        this.registerCommand(Commands.ShowDataViewer, this.delegateDataViewer);
+        this.registerCommand(Commands.ShowJupyterDataViewer, this.showJupyterVariableView);
     }
     private registerCommand<
         E extends keyof ICommandNameArgumentTypeMapping,
@@ -84,8 +87,26 @@ export class DataViewerCommandRegistry implements IExtensionSyncActivationServic
         const disposable = commands.registerCommand(command, callback, this);
         this.disposables.push(disposable);
     }
-    private async onVariablePanelShowDataViewerRequest(request: IJupyterVariable | IShowDataViewerFromVariablePanel) {
-        const requestVariable = 'variable' in request ? request.variable : request;
+
+    private async delegateDataViewer(request: IJupyterVariable | IShowDataViewerFromVariablePanel) {
+        const variable = 'variable' in request ? await this.getVariableFromRequest(request) : request;
+        if (!variable) {
+            return;
+        }
+        return this.dataViewerDelegator.showContributedDataViewer(variable);
+    }
+
+    // get the information needed about the request from the debug variable view
+    private async getVariableFromRequest(request: IShowDataViewerFromVariablePanel) {
+        if (this.variableProvider) {
+            const variable = convertDebugProtocolVariableToIJupyterVariable(
+                request.variable as unknown as DebugProtocol.Variable
+            );
+            return this.variableProvider.getFullVariable(variable);
+        }
+    }
+
+    private async showJupyterVariableView(requestVariable: IJupyterVariable) {
         sendTelemetryEvent(EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_REQUEST);
 
         // DataViewerDeprecation
@@ -128,24 +149,20 @@ export class DataViewerCommandRegistry implements IExtensionSyncActivationServic
                     pythonEnv && (await this.dataViewerDependencyService.checkAndInstallMissingDependencies(pythonEnv));
                 }
 
-                const variable = convertDebugProtocolVariableToIJupyterVariable(
-                    requestVariable as unknown as DebugProtocol.Variable
-                );
-                const jupyterVariable = await this.variableProvider.getFullVariable(variable);
                 const jupyterVariableDataProvider = await this.jupyterVariableDataProviderFactory.create(
-                    jupyterVariable
+                    requestVariable
                 );
                 const dataFrameInfo = await jupyterVariableDataProvider.getDataFrameInfo();
                 const columnSize = dataFrameInfo?.columns?.length;
                 if (columnSize && (await this.dataViewerChecker.isRequestedColumnSizeAllowed(columnSize))) {
-                    const title: string = `${DataScience.dataExplorerTitle} - ${jupyterVariable.name}`;
+                    const title: string = `${DataScience.dataExplorerTitle} - ${requestVariable.name}`;
                     const dv = await this.dataViewerFactory.create(jupyterVariableDataProvider, title);
                     sendTelemetryEvent(EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS);
                     return dv;
                 }
             } catch (e) {
                 sendTelemetryEvent(EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_ERROR, undefined, undefined, e);
-                traceError(e);
+                logger.error(e);
                 this.errorHandler.handleError(e).then(noop, noop);
             }
         } else {
@@ -163,7 +180,7 @@ export class DataViewerCommandRegistry implements IExtensionSyncActivationServic
                     return await this.dataViewerFactory.create(jupyterVariableDataProvider, title);
                 }
             } catch (e) {
-                traceError(e);
+                logger.error(e);
                 sendTelemetryEvent(Telemetry.FailedShowDataViewer);
                 window.showErrorMessage(DataScience.showDataViewerFail).then(noop, noop);
             }
@@ -210,17 +227,17 @@ export class DataViewerCommandRegistry implements IExtensionSyncActivationServic
     ): Promise<PythonEnvironment | undefined> {
         if (!this.interpreterService) {
             // Interpreter service is optional
-            traceInfo('Interpreter Service missing when trying getDebugAdapterPython');
+            logger.info('Interpreter Service missing when trying getDebugAdapterPython');
             return;
         }
 
         // Check debugAdapterPython and pythonPath
         let pythonPath: string = '';
         if (debugConfiguration.debugAdapterPython !== undefined) {
-            traceInfo('Found debugAdapterPython on Debug Configuration to use');
+            logger.info('Found debugAdapterPython on Debug Configuration to use');
             pythonPath = debugConfiguration.debugAdapterPython;
         } else if (debugConfiguration.pythonPath) {
-            traceInfo('Found pythonPath on Debug Configuration to use');
+            logger.info('Found pythonPath on Debug Configuration to use');
             pythonPath = debugConfiguration.pythonPath;
         }
 

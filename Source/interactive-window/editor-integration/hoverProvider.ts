@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { IExtensionSyncActivationService } from '../../platform/activation/types';
 import { raceCancellation } from '../../platform/common/cancellation';
 import { Identifiers, InteractiveWindowView, PYTHON, Telemetry } from '../../platform/common/constants';
-import { traceError } from '../../platform/logging';
+import { logger } from '../../platform/logging';
 import { IDisposableRegistry } from '../../platform/common/types';
 import { Delayer, raceTimeout } from '../../platform/common/utils/async';
 import { StopWatch } from '../../platform/common/utils/stopWatch';
@@ -20,6 +20,7 @@ import {
     notebookCellExecutions,
     type NotebookCellExecutionStateChangeEvent
 } from '../../platform/notebooks/cellExecutionStateService';
+import { noop } from '../../platform/common/utils/misc';
 
 /**
  * Provides hover support in python files based on the state of a jupyter kernel. Files that are
@@ -41,7 +42,7 @@ export class HoverProvider implements IExtensionSyncActivationService, vscode.Ho
     public activate() {
         this.onDidChangeNotebookCellExecutionStateHandler =
             notebookCellExecutions.onDidChangeNotebookCellExecutionState(
-                (e) => this.delayer.trigger(() => this.onDidChangeNotebookCellExecutionState(e)),
+                (e) => this.delayer.trigger(() => this.onDidChangeNotebookCellExecutionState(e)).catch(noop),
                 this
             );
         this.kernelProvider.onDidRestartKernel(() => this.runFiles.clear(), this, this.disposables);
@@ -71,7 +72,7 @@ export class HoverProvider implements IExtensionSyncActivationService, vscode.Ho
             }
         } catch (exc) {
             // Don't let exceptions in a preExecute mess up normal operation
-            traceError(exc);
+            logger.error(exc);
         }
     }
 
