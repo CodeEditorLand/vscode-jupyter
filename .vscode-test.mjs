@@ -16,7 +16,7 @@ async function generateConfig() {
             : `${venvFolder}/bin/python`
         : '';
 
-    
+    /** @type {import('@vscode/test-cli').TestConfiguration} */
     let config = {
         label: 'Extension Test',
         files: ['out/**/*.vscode.test.js', 'out/**/*.vscode.common.test.js'],
