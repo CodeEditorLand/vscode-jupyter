@@ -1,3 +1,4 @@
+.DS_Store
 .huskyrc.json
 dist
 out
@@ -12,6 +13,7 @@ log.log
 .nyc_output
 .vscode-test
 __pycache__
+npm-debug.log
 **/.mypy_cache/**
 !yarn.lock
 coverage/
