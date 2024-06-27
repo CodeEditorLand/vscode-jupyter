@@ -57,7 +57,7 @@ jobs:
                 node-version: [18, 19, 20]
 
         steps:
-            - uses: actions/checkout@v4.1.6
+            - uses: actions/checkout@v4.1.7
 
             - uses: pnpm/action-setup@v4.0.0
               with:
@@ -82,15 +82,3 @@ jobs:
 
             - run: pnpm install
               working-directory: .
-
-            - uses: actions/setup-node@v4.0.2
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "pnpm"
-                  cache-dependency-path: ./src/test/vscode-notebook-perf/pnpm-lock.yaml
-
-            - run: pnpm install
-              working-directory: ./src/test/vscode-notebook-perf
-
-            - run: pnpm run test
-              working-directory: ./src/test/vscode-notebook-perf

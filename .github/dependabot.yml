@@ -24,9 +24,3 @@ updates:
       schedule:
           interval: "daily"
       versioning-strategy: increase
-
-    - package-ecosystem: "npm"
-      directory: "/src/test/vscode-notebook-perf"
-      schedule:
-          interval: "daily"
-      versioning-strategy: increase
