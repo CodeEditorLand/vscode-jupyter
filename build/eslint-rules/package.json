@@ -1,4 +1,4 @@
 {
-	"name": "eslint-plugin-local-rules",
-	"main": "index.js"
+	"main": "index.js",
+	"name": "eslint-plugin-local-rules"
 }
