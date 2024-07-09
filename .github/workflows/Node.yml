@@ -51,6 +51,7 @@ jobs:
             STNOUPGRADE: 1
             STRIPE_CLI_TELEMETRY_OPTOUT: 1
             TELEMETRY_DISABLED: 1
+            TERRAFORM_TELEMETRY: 0
 
         strategy:
             matrix:
@@ -82,3 +83,15 @@ jobs:
 
             - run: pnpm install
               working-directory: .
+
+            - uses: actions/setup-node@v4.0.2
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "pnpm"
+                  cache-dependency-path: ./src/test/vscode-notebook-perf/pnpm-lock.yaml
+
+            - run: pnpm install
+              working-directory: ./src/test/vscode-notebook-perf
+
+            - run: pnpm run test
+              working-directory: ./src/test/vscode-notebook-perf

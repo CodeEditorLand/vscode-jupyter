@@ -29,7 +29,7 @@ else if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGloba
 // Node
 else {
     // eslint-disable-next-line local-rules/node-imports
-    cryptoProvider = require('node:crypto').webcrypto;
+    cryptoProvider = require('crypto').webcrypto;
 }
 
 /**
