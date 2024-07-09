@@ -1,4 +1,9 @@
 name: 'Classifier: Trainer'
+
+permissions:
+  id-token: write
+  contents: read
+
 on:
   schedule:
     - cron: 0 0 6 * *
@@ -9,7 +14,13 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    environment: insider
     steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
       - name: Checkout Actions
         uses: actions/checkout@v4
         with:
@@ -39,4 +50,3 @@ jobs:
         uses: ./actions/classifier/train/upload-models
         with:
           blobContainerName: vscode-jupyter-models
-          blobStorageKey: ${{secrets.AZURE_BLOB_STORAGE_CONNECTION_STRING}}
