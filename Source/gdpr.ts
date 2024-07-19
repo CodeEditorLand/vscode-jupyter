@@ -1969,7 +1969,7 @@
      "testName": {"classification":"SystemMetaData","purpose":"PerformanceAndHealth","comment":"The name of the test.","owner":"amunger"},
      "testResult": {"classification":"SystemMetaData","purpose":"PerformanceAndHealth","comment":"Whether the test passed or failed.","owner":"amunger"},
      "perfWarmup": {"classification":"SystemMetaData","purpose":"PerformanceAndHealth","comment":"If the test was an initial run to warmup the product.","owner":"amunger"},
-     "commitHash": {"classification":"SystemMetaData","purpose":"PerformanceAndHealth","comment":"The git commit that the test was run against.","owner":"amunger"},
+     "commitHash": {"classification":"SystemMetaData","purpose":"PerformanceAndHealth","comment":"The git ecommit that the test was run against.","owner":"amunger"},
      "timedCheckpoints": {"classification":"SystemMetaData","purpose":"PerformanceAndHealth","comment":"Timings for segments of the test.","owner":"amunger"},
      "${include}": [
        "${F1}"
