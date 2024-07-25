@@ -4049,7 +4049,7 @@ export class IEventNamePropertyMapping {
          */
         perfWarmup?: 'true';
         /**
-         * The git commit that the test was run against.
+         * The git ecommit that the test was run against.
          */
         commitHash?: string;
         /**
