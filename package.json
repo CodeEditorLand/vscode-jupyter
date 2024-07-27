@@ -1,19 +1,62 @@
 {
-	"activationEvents": [
-		"onLanguage:python",
-		"onLanguage:jupyter",
-		"onNotebook:jupyter-notebook",
-		"onNotebook:interactive",
-		"onWebviewPanel:jupyter-variables",
-		"onWebviewPanel:jupyter"
-	],
+	"name": "jupyter",
+	"displayName": "Jupyter",
+	"description": "Jupyter notebook support, interactive programming and computing that supports Intellisense, debugging and more.",
+	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
+	"main": "./dist/extension.node.proxy.js",
 	"browser": "./dist/extension.web.bundle.js",
-	"capabilities": {
-		"untrustedWorkspaces": {
-			"description": "%capabilities.untrustedWorkspace.description%",
-			"supported": "limited"
-		},
-		"virtualWorkspaces": true
+	"scripts": {
+		"checkDependencies": "gulp checkDependencies",
+		"clean": "gulp clean",
+		"compile": "concurrently \"tsc -watch -p ./\" \"npx tsx build/esbuild/build.ts --watch\"",
+		"compile-no-watch": "concurrently npm:compile-out npm:esbuild-all",
+		"compile-out": "tsc -p ./",
+		"compile-release": "concurrently npm:compile-out npm:esbuild-release",
+		"compile-watch-all": "concurrently \"tsc -watch -p ./\" \"npx tsx build/esbuild/build.ts --watch-all\"",
+		"compile-web-test": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js",
+		"compile-web-test-watch": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js --stats-error-details --watch --progress",
+		"createNycFolder": "gulp createNycFolder",
+		"download-api": "npx vscode-dts dev",
+		"postdownload-api": "npx vscode-dts main",
+		"esbuild-all": "npx tsx build/esbuild/build.ts",
+		"esbuild-release": "npx tsx build/esbuild/build.ts --production",
+		"esbuild-watch": "npx tsx build/esbuild/build.ts --watch",
+		"generateTelemetry": "gulp generateTelemetry",
+		"launchWebExtension": "node ./build/launchWeb.js",
+		"openInBrowser": "vscode-test-web --extensionDevelopmentPath=. ./src/test/datascience",
+		"packagePreRelease": "gulp clean && gulp prePublishBundle && vsce package --pre-release -o ms-toolsai-jupyter-insiders.vsix",
+		"preprePublishBundle": "gulp clean",
+		"prePublishBundle": "concurrently npm:compile-release npm:updatePackageJsonForBundle",
+		"prePublishBundlePreRelease": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=true gulp prePublishBundle",
+		"prePublishBundleStable": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=false gulp prePublishBundle",
+		"preprePublishNonBundle": "gulp clean",
+		"prePublishNonBundle": "npm run compile-no-watch",
+		"preTestJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js",
+		"printTestResults": "gulp printTestResults",
+		"setup-precommit-hook": "husky install",
+		"startJupyterServer": "node build/preDebugWebTest.js",
+		"stopJupyterServer": "node build/postDebugWebTest.js",
+		"test:cover:report": "nyc report --reporter=text --reporter=html --reporter=text-summary --reporter=cobertura",
+		"test:unittests": "mocha --config ./build/.mocha.unittests.js.json ./out/**/*.unit.test.js",
+		"pretestExecPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@executionPerformance VSC_JUPYTER_PERF_TEST=1 VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
+		"testExecPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@executionPerformance VSC_JUPYTER_PERF_TEST=1 CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING= node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+		"testJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js && cross-env CODE_TESTS_WORKSPACE=src/test VSC_JUPYTER_CI_TEST_GREP='Language Server:' node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js && node ./out/test/languageServers/jedi/lspTeardown.node.js",
+		"testNativeNotebooksAndWebviews": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=webview-test node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+		"pretestNativeNotebooksInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
+		"testNativeNotebooksInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+		"testNativeNotebooksInVSCodeWithoutTestSuffix": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+		"pretestNativeNotebooksWithoutPythonInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
+		"testNativeNotebooksWithoutPythonInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=@nonPython VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+		"pretestPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@notebookPerformance VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true VSC_JUPYTER_PERF_TEST=1 VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
+		"testPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@notebookPerformance VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true VSC_JUPYTER_NOTEBOOK_PERF_TEST=true VSC_JUPYTER_PERF_TEST=1 CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
+		"testSmoke": "node ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
+		"testSmokeLogged": "cross-env VSC_JUPYTER_FORCE_LOGGING=true node --no-force-async-hooks-checks ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
+		"testWebExtension": "node ./build/launchWebTest.js",
+		"updatePackageJsonForBundle": "gulp updatePackageJsonForBundle",
+		"validateTelemetry": "gulp validateTelemetry",
+		"validateTranslationFiles": "gulp validateTranslationFiles",
+		"verifyUnhandledErrors": "gulp verifyUnhandledErrors",
+		"webpack": "webpack"
 	},
 	"contributes": {
 		"commands": [
@@ -1991,6 +2034,14 @@
 			}
 		]
 	},
+	"activationEvents": [
+		"onLanguage:python",
+		"onLanguage:jupyter",
+		"onNotebook:jupyter-notebook",
+		"onNotebook:interactive",
+		"onWebviewPanel:jupyter-variables",
+		"onWebviewPanel:jupyter"
+	],
 	"dependencies": {
 		"@c4312/evt": "0.1.1",
 		"@enonic/fnv-plus": "1.3.0",
@@ -2048,7 +2099,6 @@
 		"zeromq": "6.0.0-beta.16",
 		"zeromqold": "npm:zeromq@^6.0.0-beta.6"
 	},
-	"description": "Jupyter notebook support, interactive programming and computing that supports Intellisense, debugging and more.",
 	"devDependencies": {
 		"@actions/core": "1.9.1",
 		"@actions/github": "4.0.0",
@@ -2154,7 +2204,28 @@
 		"util": "0.12.4",
 		"uuid-to-hex": "1.1.1"
 	},
-	"displayName": "Jupyter",
+	"optionalDependencies": {
+		"canvas": "2.7.0",
+		"fsevents": "2.3.2"
+	},
+	"extensionPack": [
+		"ms-toolsai.jupyter-keymap",
+		"ms-toolsai.jupyter-renderers",
+		"ms-toolsai.vscode-jupyter-cell-tags",
+		"ms-toolsai.vscode-jupyter-slideshow"
+	],
+	"icon": "icon.png",
+	"galleryBanner": {
+		"color": "#ffffff",
+		"theme": "light"
+	},
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"description": "%capabilities.untrustedWorkspace.description%",
+			"supported": "limited"
+		},
+		"virtualWorkspaces": true
+	},
 	"enabledApiProposals": [
 		"notebookDeprecated",
 		"notebookMessaging",
@@ -2172,24 +2243,7 @@
 	"extensionKind": [
 		"workspace"
 	],
-	"extensionPack": [
-		"ms-toolsai.jupyter-keymap",
-		"ms-toolsai.jupyter-renderers",
-		"ms-toolsai.vscode-jupyter-slideshow",
-		"ms-toolsai.vscode-jupyter-cell-tags"
-	],
-	"galleryBanner": {
-		"color": "#ffffff",
-		"theme": "light"
-	},
-	"icon": "icon.png",
 	"l10n": "./l10n",
-	"main": "./dist/extension.node.proxy.js",
-	"name": "jupyter",
-	"optionalDependencies": {
-		"canvas": "2.7.0",
-		"fsevents": "2.3.2"
-	},
 	"overrides": {
 		"@jupyterlab/coreutils": {
 			"url-parse": "$url-parse"
@@ -2210,59 +2264,5 @@
 		"terser@<5.14.2": "5.14.2",
 		"validator@<13.7.0": "13.7.0",
 		"word-wrap@<1.2.5": "1.2.5"
-	},
-	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
-	"scripts": {
-		"checkDependencies": "gulp checkDependencies",
-		"clean": "gulp clean",
-		"compile": "concurrently \"tsc -watch -p ./\" \"npx tsx build/esbuild/build.ts --watch\"",
-		"compile-no-watch": "concurrently npm:compile-out npm:esbuild-all",
-		"compile-out": "tsc -p ./",
-		"compile-release": "concurrently npm:compile-out npm:esbuild-release",
-		"compile-watch-all": "concurrently \"tsc -watch -p ./\" \"npx tsx build/esbuild/build.ts --watch-all\"",
-		"compile-web-test": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js",
-		"compile-web-test-watch": "webpack --mode development --config ./build/webpack/webpack.extension.web.config.js --stats-error-details --watch --progress",
-		"createNycFolder": "gulp createNycFolder",
-		"download-api": "npx vscode-dts dev",
-		"esbuild-all": "npx tsx build/esbuild/build.ts",
-		"esbuild-release": "npx tsx build/esbuild/build.ts --production",
-		"esbuild-watch": "npx tsx build/esbuild/build.ts --watch",
-		"generateTelemetry": "gulp generateTelemetry",
-		"launchWebExtension": "node ./build/launchWeb.js",
-		"openInBrowser": "vscode-test-web --extensionDevelopmentPath=. ./src/test/datascience",
-		"packagePreRelease": "gulp clean && gulp prePublishBundle && vsce package --pre-release -o ms-toolsai-jupyter-insiders.vsix",
-		"postdownload-api": "npx vscode-dts main",
-		"prePublishBundle": "concurrently npm:compile-release npm:updatePackageJsonForBundle",
-		"prePublishBundlePreRelease": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=true gulp prePublishBundle",
-		"prePublishBundleStable": "cross-env IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION=false gulp prePublishBundle",
-		"prePublishNonBundle": "npm run compile-no-watch",
-		"preTestJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js",
-		"preprePublishBundle": "gulp clean",
-		"preprePublishNonBundle": "gulp clean",
-		"pretestExecPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@executionPerformance VSC_JUPYTER_PERF_TEST=1 VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
-		"pretestNativeNotebooksInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
-		"pretestNativeNotebooksWithoutPythonInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
-		"pretestPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@notebookPerformance VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true VSC_JUPYTER_PERF_TEST=1 VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
-		"printTestResults": "gulp printTestResults",
-		"setup-precommit-hook": "husky install",
-		"startJupyterServer": "node build/preDebugWebTest.js",
-		"stopJupyterServer": "node build/postDebugWebTest.js",
-		"test:cover:report": "nyc report --reporter=text --reporter=html --reporter=text-summary --reporter=cobertura",
-		"test:unittests": "mocha --config ./build/.mocha.unittests.js.json ./out/**/*.unit.test.js",
-		"testExecPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@executionPerformance VSC_JUPYTER_PERF_TEST=1 CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING= node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-		"testJediLSP": "node ./out/test/languageServers/jedi/lspSetup.js && cross-env CODE_TESTS_WORKSPACE=src/test VSC_JUPYTER_CI_TEST_GREP='Language Server:' node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js && node ./out/test/languageServers/jedi/lspTeardown.node.js",
-		"testNativeNotebooksAndWebviews": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=webview-test node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-		"testNativeNotebooksInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-		"testNativeNotebooksInVSCodeWithoutTestSuffix": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-		"testNativeNotebooksWithoutPythonInVSCode": "cross-env CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 VSC_JUPYTER_CI_TEST_GREP=@nonPython VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-		"testPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@notebookPerformance VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true VSC_JUPYTER_NOTEBOOK_PERF_TEST=true VSC_JUPYTER_PERF_TEST=1 CODE_TESTS_WORKSPACE=src/test/datascience VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders TEST_FILES_SUFFIX=*.vscode.test,*.vscode.common.test VSC_JUPYTER_FORCE_LOGGING=1 node ./out/test/testBootstrap.node.js ./out/test/standardTest.node.js",
-		"testSmoke": "node ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
-		"testSmokeLogged": "cross-env VSC_JUPYTER_FORCE_LOGGING=true node --no-force-async-hooks-checks ./out/test/testBootstrap.node.js ./out/test/smokeTest.node.js",
-		"testWebExtension": "node ./build/launchWebTest.js",
-		"updatePackageJsonForBundle": "gulp updatePackageJsonForBundle",
-		"validateTelemetry": "gulp validateTelemetry",
-		"validateTranslationFiles": "gulp validateTranslationFiles",
-		"verifyUnhandledErrors": "gulp verifyUnhandledErrors",
-		"webpack": "webpack"
 	}
 }
