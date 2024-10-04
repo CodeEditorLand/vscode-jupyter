@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-'use strict';
+"use strict";
 
 /*
 This file is only used when using webpack for bundling.

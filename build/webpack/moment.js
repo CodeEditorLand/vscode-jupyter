@@ -8,20 +8,20 @@
 // & we have checks on CI that ensures no other npm package or other code does not in-directly or directly use moment.
 
 export default function (dateTime) {
-    return {
-        formatNow: () => {
-            try {
-                return dateTime.toLocaleString();
-            } catch {
-                return `${dateTime}`;
-            }
-        },
-        format: () => {
-            try {
-                return dateTime.toLocaleTimeString();
-            } catch {
-                return `${dateTime}`;
-            }
-        }
-    };
+	return {
+		formatNow: () => {
+			try {
+				return dateTime.toLocaleString();
+			} catch {
+				return `${dateTime}`;
+			}
+		},
+		format: () => {
+			try {
+				return dateTime.toLocaleTimeString();
+			} catch {
+				return `${dateTime}`;
+			}
+		},
+	};
 }
