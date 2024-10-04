@@ -115,9 +115,7 @@ export class DataViewerDelegator {
 		}
 	}
 
-	private getMatchingExternalVariableViewers(
-		variable: IJupyterVariable,
-	): {
+	private getMatchingExternalVariableViewers(variable: IJupyterVariable): {
 		extension: Extension<unknown>;
 		jupyterVariableViewers: IVariableViewer;
 	}[] {

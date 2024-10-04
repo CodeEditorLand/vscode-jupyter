@@ -884,9 +884,7 @@ export class UserJupyterServerUriInput {
 		return deferred.promise;
 	}
 
-	public async parseUserUriAndGetValidationError(
-		value: string,
-	): Promise<
+	public async parseUserUriAndGetValidationError(value: string): Promise<
 		| { validationError: string }
 		| {
 				jupyterServerUri: IJupyterServerUri;
