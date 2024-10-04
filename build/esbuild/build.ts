@@ -10,7 +10,7 @@ import fs from 'fs-extra';
 import { getZeroMQPreBuildsFoldersToKeep, getBundleConfiguration, bundleConfiguration } from '../webpack/common';
 
 // These will not be in the main desktop bundle, but will be in the web bundle.
-// In desktop, we will bundle/copy each of these separately into the node_modules folder.
+// In desktop, we will bundle/copye each of these separately into the node_modules folder.
 const deskTopNodeModulesToExternalize = [
     'pdfkit/js/pdfkit.standalone',
     'crypto-js',
