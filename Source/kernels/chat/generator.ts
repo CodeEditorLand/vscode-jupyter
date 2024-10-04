@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-export const ChatMime = 'application/vnd.vscode.chat_message';
+export const ChatMime = "application/vnd.vscode.chat_message";
 
 export const chatStartupPythonCode = `
 def __VSCODE_inject_module():
@@ -57,20 +57,23 @@ del __VSCODE_inject_module
 `;
 
 const replacements: [toEscape: RegExp, replacement: string][] = [
-    [new RegExp('\\\\', 'g'), '\\\\'],
-    [new RegExp('"', 'g'), '\\"'],
-    [new RegExp("'", 'g'), `\'`],
-    [new RegExp('\\\b', 'g'), '\\b'],
-    [new RegExp('\\f', 'g'), '\\f'],
-    [new RegExp('\\n', 'g'), '\\n'],
-    [new RegExp('\\r', 'g'), '\\r'],
-    [new RegExp('\\t', 'g'), '\\t']
+	[new RegExp("\\\\", "g"), "\\\\"],
+	[new RegExp('"', "g"), '\\"'],
+	[new RegExp("'", "g"), `\'`],
+	[new RegExp("\\\b", "g"), "\\b"],
+	[new RegExp("\\f", "g"), "\\f"],
+	[new RegExp("\\n", "g"), "\\n"],
+	[new RegExp("\\r", "g"), "\\r"],
+	[new RegExp("\\t", "g"), "\\t"],
 ];
 
-export function generatePythonCodeToInvokeCallback(requestId: string, response?: string): string {
-    const escaped = escapeStringToEmbedInPythonCode(response);
-    const value = typeof escaped === 'string' ? `"${escaped}"` : 'None';
-    return `
+export function generatePythonCodeToInvokeCallback(
+	requestId: string,
+	response?: string,
+): string {
+	const escaped = escapeStringToEmbedInPythonCode(response);
+	const value = typeof escaped === "string" ? `"${escaped}"` : "None";
+	return `
 import vscode as __vscode
 try:
     __vscode.chat.__on_message('${requestId}', ${value})
@@ -79,12 +82,14 @@ finally:
 `;
 }
 
-export function escapeStringToEmbedInPythonCode(value: string | undefined): string | undefined {
-    if (typeof value !== 'string') {
-        return value;
-    }
-    for (const [toEscape, replacement] of replacements) {
-        value = value.replace(toEscape, replacement);
-    }
-    return value;
+export function escapeStringToEmbedInPythonCode(
+	value: string | undefined,
+): string | undefined {
+	if (typeof value !== "string") {
+		return value;
+	}
+	for (const [toEscape, replacement] of replacements) {
+		value = value.replace(toEscape, replacement);
+	}
+	return value;
 }

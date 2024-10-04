@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as path from '../../../vscode-path/path';
-import { EXTENSION_ROOT_DIR } from '../../../constants.node';
+import { EXTENSION_ROOT_DIR } from "../../../constants.node";
+import * as path from "../../../vscode-path/path";
 
 // It is simpler to hard-code it instead of using vscode.ExtensionContext.extensionPath.
-export const _SCRIPTS_DIR = path.join(EXTENSION_ROOT_DIR, 'pythonFiles');
+export const _SCRIPTS_DIR = path.join(EXTENSION_ROOT_DIR, "pythonFiles");
 const SCRIPTS_DIR = _SCRIPTS_DIR;
 
 // "scripts" contains everything relevant to the scripts found under
@@ -35,13 +35,13 @@ const SCRIPTS_DIR = _SCRIPTS_DIR;
 // normalizeSelection.py
 
 export function normalizeSelection(): [string[], (out: string) => string] {
-    const script = path.join(SCRIPTS_DIR, 'normalizeSelection.py');
-    const args = [script];
+	const script = path.join(SCRIPTS_DIR, "normalizeSelection.py");
+	const args = [script];
 
-    function parse(out: string) {
-        // The text will be used as-is.
-        return out;
-    }
+	function parse(out: string) {
+		// The text will be used as-is.
+		return out;
+	}
 
-    return [args, parse];
+	return [args, parse];
 }
