@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CharCode } from "./charCode";
-import { posix, sep } from "./path";
-import { startsWithIgnoreCase } from "./strings";
+import { CharCode } from './charCode';
+import { posix, sep } from './path';
+import { startsWithIgnoreCase } from './strings';
 
 export function isPathSeparator(code: number) {
-	return code === CharCode.Slash || code === CharCode.Backslash;
+    return code === CharCode.Slash || code === CharCode.Backslash;
 }
 
 /**
@@ -15,7 +15,7 @@ export function isPathSeparator(code: number) {
  * Using it on a Linux or MaxOS path might change it.
  */
 export function toSlashes(osPath: string) {
-	return osPath.replace(/[\\/]/g, posix.sep);
+    return osPath.replace(/[\\/]/g, posix.sep);
 }
 
 /**
@@ -26,14 +26,14 @@ export function toSlashes(osPath: string) {
  * Using it on a Linux or MaxOS path might change it.
  */
 export function toPosixPath(osPath: string) {
-	if (osPath.indexOf("/") === -1) {
-		osPath = toSlashes(osPath);
-	}
-	if (/^[a-zA-Z]:(\/|$)/.test(osPath)) {
-		// starts with a drive letter
-		osPath = "/" + osPath;
-	}
-	return osPath;
+    if (osPath.indexOf('/') === -1) {
+        osPath = toSlashes(osPath);
+    }
+    if (/^[a-zA-Z]:(\/|$)/.test(osPath)) {
+        // starts with a drive letter
+        osPath = '/' + osPath;
+    }
+    return osPath;
 }
 
 /**
@@ -42,73 +42,70 @@ export function toPosixPath(osPath: string) {
  * or `getRoot('\\server\shares\path') === \\server\shares\`
  */
 export function getRoot(path: string, sep: string = posix.sep): string {
-	if (!path) {
-		return "";
-	}
+    if (!path) {
+        return '';
+    }
 
-	const len = path.length;
-	const firstLetter = path.charCodeAt(0);
-	if (isPathSeparator(firstLetter)) {
-		if (isPathSeparator(path.charCodeAt(1))) {
-			// UNC candidate \\localhost\shares\ddd
-			//               ^^^^^^^^^^^^^^^^^^^
-			if (!isPathSeparator(path.charCodeAt(2))) {
-				let pos = 3;
-				const start = pos;
-				for (; pos < len; pos++) {
-					if (isPathSeparator(path.charCodeAt(pos))) {
-						break;
-					}
-				}
-				if (
-					start !== pos &&
-					!isPathSeparator(path.charCodeAt(pos + 1))
-				) {
-					pos += 1;
-					for (; pos < len; pos++) {
-						if (isPathSeparator(path.charCodeAt(pos))) {
-							return path
-								.slice(0, pos + 1) // consume this separator
-								.replace(/[\\/]/g, sep);
-						}
-					}
-				}
-			}
-		}
+    const len = path.length;
+    const firstLetter = path.charCodeAt(0);
+    if (isPathSeparator(firstLetter)) {
+        if (isPathSeparator(path.charCodeAt(1))) {
+            // UNC candidate \\localhost\shares\ddd
+            //               ^^^^^^^^^^^^^^^^^^^
+            if (!isPathSeparator(path.charCodeAt(2))) {
+                let pos = 3;
+                const start = pos;
+                for (; pos < len; pos++) {
+                    if (isPathSeparator(path.charCodeAt(pos))) {
+                        break;
+                    }
+                }
+                if (start !== pos && !isPathSeparator(path.charCodeAt(pos + 1))) {
+                    pos += 1;
+                    for (; pos < len; pos++) {
+                        if (isPathSeparator(path.charCodeAt(pos))) {
+                            return path
+                                .slice(0, pos + 1) // consume this separator
+                                .replace(/[\\/]/g, sep);
+                        }
+                    }
+                }
+            }
+        }
 
-		// /user/far
-		// ^
-		return sep;
-	} else if (isWindowsDriveLetter(firstLetter)) {
-		// check for windows drive letter c:\ or c:
+        // /user/far
+        // ^
+        return sep;
+    } else if (isWindowsDriveLetter(firstLetter)) {
+        // check for windows drive letter c:\ or c:
 
-		if (path.charCodeAt(1) === CharCode.Colon) {
-			if (isPathSeparator(path.charCodeAt(2))) {
-				// C:\fff
-				// ^^^
-				return path.slice(0, 2) + sep;
-			} else {
-				// C:
-				// ^^
-				return path.slice(0, 2);
-			}
-		}
-	}
+        if (path.charCodeAt(1) === CharCode.Colon) {
+            if (isPathSeparator(path.charCodeAt(2))) {
+                // C:\fff
+                // ^^^
+                return path.slice(0, 2) + sep;
+            } else {
+                // C:
+                // ^^
+                return path.slice(0, 2);
+            }
+        }
+    }
 
-	// check for URI
-	// scheme://authority/path
-	// ^^^^^^^^^^^^^^^^^^^
-	let pos = path.indexOf("://");
-	if (pos !== -1) {
-		pos += 3; // 3 -> "://".length
-		for (; pos < len; pos++) {
-			if (isPathSeparator(path.charCodeAt(pos))) {
-				return path.slice(0, pos + 1); // consume this separator
-			}
-		}
-	}
+    // check for URI
+    // scheme://authority/path
+    // ^^^^^^^^^^^^^^^^^^^
+    let pos = path.indexOf('://');
+    if (pos !== -1) {
+        pos += 3; // 3 -> "://".length
+        for (; pos < len; pos++) {
+            if (isPathSeparator(path.charCodeAt(pos))) {
+                return path.slice(0, pos + 1); // consume this separator
+            }
+        }
+    }
 
-	return "";
+    return '';
 }
 
 /**
@@ -116,52 +113,44 @@ export function getRoot(path: string, sep: string = posix.sep): string {
  * you are in a context without services, consider to pass down the `extUri` from the
  * outside, or use `extUriBiasedIgnorePathCase` if you know what you are doing.
  */
-export function isEqualOrParent(
-	base: string,
-	parentCandidate: string,
-	ignoreCase?: boolean,
-	separator = sep,
-): boolean {
-	if (base === parentCandidate) {
-		return true;
-	}
+export function isEqualOrParent(base: string, parentCandidate: string, ignoreCase?: boolean, separator = sep): boolean {
+    if (base === parentCandidate) {
+        return true;
+    }
 
-	if (!base || !parentCandidate) {
-		return false;
-	}
+    if (!base || !parentCandidate) {
+        return false;
+    }
 
-	if (parentCandidate.length > base.length) {
-		return false;
-	}
+    if (parentCandidate.length > base.length) {
+        return false;
+    }
 
-	if (ignoreCase) {
-		const beginsWith = startsWithIgnoreCase(base, parentCandidate);
-		if (!beginsWith) {
-			return false;
-		}
+    if (ignoreCase) {
+        const beginsWith = startsWithIgnoreCase(base, parentCandidate);
+        if (!beginsWith) {
+            return false;
+        }
 
-		if (parentCandidate.length === base.length) {
-			return true; // same path, different casing
-		}
+        if (parentCandidate.length === base.length) {
+            return true; // same path, different casing
+        }
 
-		let sepOffset = parentCandidate.length;
-		if (parentCandidate.charAt(parentCandidate.length - 1) === separator) {
-			sepOffset--; // adjust the expected sep offset in case our candidate already ends in separator character
-		}
+        let sepOffset = parentCandidate.length;
+        if (parentCandidate.charAt(parentCandidate.length - 1) === separator) {
+            sepOffset--; // adjust the expected sep offset in case our candidate already ends in separator character
+        }
 
-		return base.charAt(sepOffset) === separator;
-	}
+        return base.charAt(sepOffset) === separator;
+    }
 
-	if (parentCandidate.charAt(parentCandidate.length - 1) !== separator) {
-		parentCandidate += separator;
-	}
+    if (parentCandidate.charAt(parentCandidate.length - 1) !== separator) {
+        parentCandidate += separator;
+    }
 
-	return base.indexOf(parentCandidate) === 0;
+    return base.indexOf(parentCandidate) === 0;
 }
 
 export function isWindowsDriveLetter(char0: number): boolean {
-	return (
-		(char0 >= CharCode.A && char0 <= CharCode.Z) ||
-		(char0 >= CharCode.a && char0 <= CharCode.z)
-	);
+    return (char0 >= CharCode.A && char0 <= CharCode.Z) || (char0 >= CharCode.a && char0 <= CharCode.z);
 }

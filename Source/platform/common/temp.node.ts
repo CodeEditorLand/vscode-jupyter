@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as fs from "fs-extra";
-import { Uri } from "vscode";
-
-import { logger } from "../logging";
-import { getCurrentTempDirName, TEMP_DIR_PREFIX } from "./temp";
-import type { IExtensionContext } from "./types";
-import { noop } from "./utils/misc";
+import * as fs from 'fs-extra';
+import { Uri } from 'vscode';
+import type { IExtensionContext } from './types';
+import { noop } from './utils/misc';
+import { getCurrentTempDirName, TEMP_DIR_PREFIX } from './temp';
+import { logger } from '../logging';
 
 // WARNING: Do not move this into `temp.ts` as this is specific to node extension.
 // using native fs is faster than using vscode.workspace.fs.
@@ -35,23 +34,15 @@ import { noop } from "./utils/misc";
  * @param context
  */
 export async function deleteOldTempDirs(context: IExtensionContext) {
-	const dirs = await fs
-		.readdir(context.globalStorageUri.fsPath)
-		.catch(() => []);
-	const currentTempDir = getCurrentTempDirName(context);
-	await Promise.all(
-		dirs
-			.filter(
-				(dir) =>
-					dir.startsWith(TEMP_DIR_PREFIX) && dir !== currentTempDir,
-			)
-			.map((dir) => {
-				const dirToDelete = Uri.joinPath(
-					context.globalStorageUri,
-					dir,
-				).fsPath;
-				logger.info(`Deleting old temp dir ${dirToDelete}`);
-				return fs.remove(dirToDelete);
-			}),
-	).catch(noop);
+    const dirs = await fs.readdir(context.globalStorageUri.fsPath).catch(() => []);
+    const currentTempDir = getCurrentTempDirName(context);
+    await Promise.all(
+        dirs
+            .filter((dir) => dir.startsWith(TEMP_DIR_PREFIX) && dir !== currentTempDir)
+            .map((dir) => {
+                const dirToDelete = Uri.joinPath(context.globalStorageUri, dir).fsPath;
+                logger.info(`Deleting old temp dir ${dirToDelete}`);
+                return fs.remove(dirToDelete);
+            })
+    ).catch(noop);
 }

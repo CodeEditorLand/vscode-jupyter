@@ -11,5 +11,5 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 if ((Reflect as any).metadata === undefined) {
-	require("reflect-metadata");
+    require('reflect-metadata');
 }

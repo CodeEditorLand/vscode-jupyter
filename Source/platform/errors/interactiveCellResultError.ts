@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { NotebookCell } from "vscode";
+import { NotebookCell } from 'vscode';
 
 /**
  * Error thrown when running cells in the interactive window.
@@ -14,7 +14,7 @@ import { NotebookCell } from "vscode";
  *
  */
 export class InteractiveCellResultError extends Error {
-	constructor(public readonly cell: NotebookCell) {
-		super("Cell failed to execute");
-	}
+    constructor(public readonly cell: NotebookCell) {
+        super('Cell failed to execute');
+    }
 }

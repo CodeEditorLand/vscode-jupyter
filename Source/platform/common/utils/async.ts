@@ -3,98 +3,80 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IDisposable } from "../types";
-import { noop } from "./misc";
-import { MicrotaskDelay } from "./symbols";
+import type { IDisposable } from '../types';
+import { noop } from './misc';
+import { MicrotaskDelay } from './symbols';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PromiseFunction = (...any: any[]) => Promise<any>;
 
 export async function sleep(timeout: number): Promise<number> {
-	return new Promise<number>((resolve) => {
-		setTimeout(() => resolve(timeout), timeout);
-	});
+    return new Promise<number>((resolve) => {
+        setTimeout(() => resolve(timeout), timeout);
+    });
 }
 
 export async function waitForCondition(
-	condition: () => Promise<boolean>,
-	timeout: number,
-	interval: number,
+    condition: () => Promise<boolean>,
+    timeout: number,
+    interval: number
 ): Promise<boolean> {
-	// Set a timer that will resolve with null
-	return new Promise<boolean>((resolve) => {
-		let finish: (result: boolean) => void;
-		const timer = setTimeout(() => finish(false), timeout);
-		const intervalId = setInterval(() => {
-			condition()
-				.then((r) => {
-					if (r) {
-						finish(true);
-					}
-				})
-				.catch((_e) => finish(false));
-		}, interval);
-		finish = (result: boolean) => {
-			clearTimeout(timer);
-			clearInterval(intervalId);
-			resolve(result);
-		};
-	});
+    // Set a timer that will resolve with null
+    return new Promise<boolean>((resolve) => {
+        let finish: (result: boolean) => void;
+        const timer = setTimeout(() => finish(false), timeout);
+        const intervalId = setInterval(() => {
+            condition()
+                .then((r) => {
+                    if (r) {
+                        finish(true);
+                    }
+                })
+                .catch((_e) => finish(false));
+        }, interval);
+        finish = (result: boolean) => {
+            clearTimeout(timer);
+            clearInterval(intervalId);
+            resolve(result);
+        };
+    });
 }
 
-export function raceTimeout<T>(
-	timeout: number,
-	...promises: Promise<T>[]
-): Promise<T | undefined>;
-export function raceTimeout<T>(
-	timeout: number,
-	defaultValue: T,
-	...promises: Promise<T>[]
-): Promise<T>;
-export function raceTimeout<T>(
-	timeout: number,
-	defaultValue: T,
-	...promises: Promise<T>[]
-): Promise<T> {
-	const resolveValue = isPromiseLike(defaultValue) ? undefined : defaultValue;
-	if (isPromiseLike(defaultValue)) {
-		promises.push(defaultValue as unknown as Promise<T>);
-	}
+export function raceTimeout<T>(timeout: number, ...promises: Promise<T>[]): Promise<T | undefined>;
+export function raceTimeout<T>(timeout: number, defaultValue: T, ...promises: Promise<T>[]): Promise<T>;
+export function raceTimeout<T>(timeout: number, defaultValue: T, ...promises: Promise<T>[]): Promise<T> {
+    const resolveValue = isPromiseLike(defaultValue) ? undefined : defaultValue;
+    if (isPromiseLike(defaultValue)) {
+        promises.push(defaultValue as unknown as Promise<T>);
+    }
 
-	let promiseResolve: ((value: T) => void) | undefined = undefined;
+    let promiseResolve: ((value: T) => void) | undefined = undefined;
 
-	const timer = setTimeout(
-		() => promiseResolve?.(resolveValue as unknown as T),
-		timeout,
-	);
+    const timer = setTimeout(() => promiseResolve?.(resolveValue as unknown as T), timeout);
 
-	return Promise.race([
-		Promise.race(promises).finally(() => clearTimeout(timer)),
-		new Promise<T>((resolve) => (promiseResolve = resolve)),
-	]);
+    return Promise.race([
+        Promise.race(promises).finally(() => clearTimeout(timer)),
+        new Promise<T>((resolve) => (promiseResolve = resolve))
+    ]);
 }
 
-export function raceTimeoutError<T>(
-	timeout: number,
-	error: Error,
-	...promises: Promise<T>[]
-): Promise<T> {
-	let promiseReject: ((value: unknown) => void) | undefined = undefined;
-	const timer = setTimeout(() => promiseReject?.(error), timeout);
+export function raceTimeoutError<T>(timeout: number, error: Error, ...promises: Promise<T>[]): Promise<T> {
+    let promiseReject: ((value: unknown) => void) | undefined = undefined;
+    const timer = setTimeout(() => promiseReject?.(error), timeout);
 
-	return Promise.race([
-		Promise.race(promises).finally(() => clearTimeout(timer)),
-		new Promise<T>((_, reject) => (promiseReject = reject)),
-	]);
+    return Promise.race([
+        Promise.race(promises).finally(() => clearTimeout(timer)),
+        new Promise<T>((_, reject) => (promiseReject = reject))
+    ]);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isPromise<T>(v: any): v is Promise<T> {
-	return typeof v?.then === "function" && typeof v?.catch === "function";
+    return typeof v?.then === 'function' && typeof v?.catch === 'function';
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isPromiseLike<T>(v: any): v is PromiseLike<T> {
-	return typeof v?.then === "function";
+    return typeof v?.then === 'function';
 }
 
 //======================
@@ -102,115 +84,112 @@ export function isPromiseLike<T>(v: any): v is PromiseLike<T> {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface Deferred<T> {
-	readonly promise: Promise<T>;
-	readonly resolved: boolean;
-	readonly rejected: boolean;
-	readonly completed: boolean;
-	readonly value?: T;
-	resolve(value?: T | PromiseLike<T>): void;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	reject(reason?: any): void;
+    readonly promise: Promise<T>;
+    readonly resolved: boolean;
+    readonly rejected: boolean;
+    readonly completed: boolean;
+    readonly value?: T;
+    resolve(value?: T | PromiseLike<T>): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    reject(reason?: any): void;
 }
 
 class DeferredImpl<T> implements Deferred<T> {
-	private _resolve!: (value: T | PromiseLike<T>) => void;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private _reject!: (reason?: any) => void;
-	private _resolved: boolean = false;
-	private _rejected: boolean = false;
-	private _promise: Promise<T>;
-	private _value: T | undefined;
-	public get value() {
-		return this._value;
-	}
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	constructor(private scope: any = null) {
-		// eslint-disable-next-line
-		this._promise = new Promise<T>((res, rej) => {
-			this._resolve = res;
-			this._reject = rej;
-		});
-	}
-	public resolve(value?: T | PromiseLike<T>) {
-		this._value = value as T | undefined;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		this._resolve.apply(this.scope ? this.scope : this, arguments as any);
-		this._resolved = true;
-	}
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public reject(_reason?: any) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		this._reject.apply(this.scope ? this.scope : this, arguments as any);
-		this._rejected = true;
-	}
-	get promise(): Promise<T> {
-		return this._promise;
-	}
-	get resolved(): boolean {
-		return this._resolved;
-	}
-	get rejected(): boolean {
-		return this._rejected;
-	}
-	get completed(): boolean {
-		return this._rejected || this._resolved;
-	}
+    private _resolve!: (value: T | PromiseLike<T>) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private _reject!: (reason?: any) => void;
+    private _resolved: boolean = false;
+    private _rejected: boolean = false;
+    private _promise: Promise<T>;
+    private _value: T | undefined;
+    public get value() {
+        return this._value;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(private scope: any = null) {
+        // eslint-disable-next-line
+        this._promise = new Promise<T>((res, rej) => {
+            this._resolve = res;
+            this._reject = rej;
+        });
+    }
+    public resolve(value?: T | PromiseLike<T>) {
+        this._value = value as T | undefined;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this._resolve.apply(this.scope ? this.scope : this, arguments as any);
+        this._resolved = true;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public reject(_reason?: any) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this._reject.apply(this.scope ? this.scope : this, arguments as any);
+        this._rejected = true;
+    }
+    get promise(): Promise<T> {
+        return this._promise;
+    }
+    get resolved(): boolean {
+        return this._resolved;
+    }
+    get rejected(): boolean {
+        return this._rejected;
+    }
+    get completed(): boolean {
+        return this._rejected || this._resolved;
+    }
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDeferred<T>(scope: any = null): Deferred<T> {
-	return new DeferredImpl<T>(scope);
+    return new DeferredImpl<T>(scope);
 }
 
 export function createDeferredFromPromise<T>(promise: Promise<T>): Deferred<T> {
-	const deferred = createDeferred<T>();
-	promise
-		.then(deferred.resolve.bind(deferred))
-		.catch(deferred.reject.bind(deferred));
-	return deferred;
+    const deferred = createDeferred<T>();
+    promise.then(deferred.resolve.bind(deferred)).catch(deferred.reject.bind(deferred));
+    return deferred;
 }
 
 /**
  * Provides the ability to chain promises.
  */
 export class PromiseChain {
-	private currentPromise: Promise<void | undefined> =
-		Promise.resolve(undefined);
-	/**
-	 * Chain the provided promise after all previous promises have successfully completed.
-	 * If the previously chained promises have failed, then this call will fail.
-	 */
-	public async chain<T>(promise: () => Promise<T>): Promise<T> {
-		const deferred = createDeferred<T>();
-		const previousPromise = this.currentPromise;
-		this.currentPromise = this.currentPromise.then(async () => {
-			try {
-				const result = await promise();
-				deferred.resolve(result);
-			} catch (ex) {
-				deferred.reject(ex);
-				throw ex;
-			}
-		});
-		// Wait for previous promises to complete.
-		await previousPromise;
-		return deferred.promise;
-	}
-	/**
-	 * Chain the provided promise after all previous promises have completed (ignoring errors in previous promises).
-	 */
-	public chainFinally<T>(promise: () => Promise<T>): Promise<T> {
-		const deferred = createDeferred<T>();
-		this.currentPromise = this.currentPromise.finally(() =>
-			promise()
-				.then((result) => deferred.resolve(result))
-				.catch((ex) => deferred.reject(ex)),
-		);
-		return deferred.promise;
-	}
+    private currentPromise: Promise<void | undefined> = Promise.resolve(undefined);
+    /**
+     * Chain the provided promise after all previous promises have successfully completed.
+     * If the previously chained promises have failed, then this call will fail.
+     */
+    public async chain<T>(promise: () => Promise<T>): Promise<T> {
+        const deferred = createDeferred<T>();
+        const previousPromise = this.currentPromise;
+        this.currentPromise = this.currentPromise.then(async () => {
+            try {
+                const result = await promise();
+                deferred.resolve(result);
+            } catch (ex) {
+                deferred.reject(ex);
+                throw ex;
+            }
+        });
+        // Wait for previous promises to complete.
+        await previousPromise;
+        return deferred.promise;
+    }
+    /**
+     * Chain the provided promise after all previous promises have completed (ignoring errors in previous promises).
+     */
+    public chainFinally<T>(promise: () => Promise<T>): Promise<T> {
+        const deferred = createDeferred<T>();
+        this.currentPromise = this.currentPromise.finally(() =>
+            promise()
+                .then((result) => deferred.resolve(result))
+                .catch((ex) => deferred.reject(ex))
+        );
+        return deferred.promise;
+    }
 }
 
 export interface ITask<T> {
-	(): T;
+    (): T;
 }
 
 /**
@@ -240,107 +219,105 @@ export interface ITask<T> {
  * 		}
  */
 export class Throttler implements IDisposable {
-	private activePromise: Promise<any> | null;
-	private queuedPromise: Promise<any> | null;
-	private queuedPromiseFactory: ITask<Promise<any>> | null;
+    private activePromise: Promise<any> | null;
+    private queuedPromise: Promise<any> | null;
+    private queuedPromiseFactory: ITask<Promise<any>> | null;
 
-	private isDisposed = false;
+    private isDisposed = false;
 
-	constructor() {
-		this.activePromise = null;
-		this.queuedPromise = null;
-		this.queuedPromiseFactory = null;
-	}
+    constructor() {
+        this.activePromise = null;
+        this.queuedPromise = null;
+        this.queuedPromiseFactory = null;
+    }
 
-	queue<T>(promiseFactory: ITask<Promise<T>>): Promise<T> {
-		if (this.isDisposed) {
-			return Promise.reject(new Error("Throttler is disposed"));
-		}
+    queue<T>(promiseFactory: ITask<Promise<T>>): Promise<T> {
+        if (this.isDisposed) {
+            return Promise.reject(new Error('Throttler is disposed'));
+        }
 
-		if (this.activePromise) {
-			this.queuedPromiseFactory = promiseFactory;
+        if (this.activePromise) {
+            this.queuedPromiseFactory = promiseFactory;
 
-			if (!this.queuedPromise) {
-				const onComplete = () => {
-					this.queuedPromise = null;
+            if (!this.queuedPromise) {
+                const onComplete = () => {
+                    this.queuedPromise = null;
 
-					if (this.isDisposed) {
-						return;
-					}
+                    if (this.isDisposed) {
+                        return;
+                    }
 
-					const result = this.queue(this.queuedPromiseFactory!);
-					this.queuedPromiseFactory = null;
+                    const result = this.queue(this.queuedPromiseFactory!);
+                    this.queuedPromiseFactory = null;
 
-					return result;
-				};
+                    return result;
+                };
 
-				this.queuedPromise = new Promise((resolve) => {
-					void this.activePromise!.then(onComplete, onComplete).then(
-						resolve,
-					);
-				});
-			}
+                this.queuedPromise = new Promise((resolve) => {
+                    void this.activePromise!.then(onComplete, onComplete).then(resolve);
+                });
+            }
 
-			return new Promise((resolve, reject) => {
-				this.queuedPromise!.then(resolve, reject);
-			});
-		}
+            return new Promise((resolve, reject) => {
+                this.queuedPromise!.then(resolve, reject);
+            });
+        }
 
-		this.activePromise = promiseFactory();
+        this.activePromise = promiseFactory();
 
-		return new Promise((resolve, reject) => {
-			this.activePromise!.then(
-				(result: T) => {
-					this.activePromise = null;
-					resolve(result);
-				},
-				(err: unknown) => {
-					this.activePromise = null;
-					reject(err);
-				},
-			);
-		});
-	}
+        return new Promise((resolve, reject) => {
+            this.activePromise!.then(
+                (result: T) => {
+                    this.activePromise = null;
+                    resolve(result);
+                },
+                (err: unknown) => {
+                    this.activePromise = null;
+                    reject(err);
+                }
+            );
+        });
+    }
 
-	dispose(): void {
-		this.isDisposed = true;
-	}
+    dispose(): void {
+        this.isDisposed = true;
+    }
 }
 
 interface IScheduledLater extends IDisposable {
-	isTriggered(): boolean;
+    isTriggered(): boolean;
 }
 
 const timeoutDeferred = (timeout: number, fn: () => void): IScheduledLater => {
-	let scheduled = true;
-	const handle = setTimeout(() => {
-		scheduled = false;
-		fn();
-	}, timeout);
-	return {
-		isTriggered: () => scheduled,
-		dispose: () => {
-			clearTimeout(handle);
-			scheduled = false;
-		},
-	};
+    let scheduled = true;
+    const handle = setTimeout(() => {
+        scheduled = false;
+        fn();
+    }, timeout);
+    return {
+        isTriggered: () => scheduled,
+        dispose: () => {
+            clearTimeout(handle);
+            scheduled = false;
+        }
+    };
 };
 
 const microtaskDeferred = (fn: () => void): IScheduledLater => {
-	let scheduled = true;
-	queueMicrotask(() => {
-		if (scheduled) {
-			scheduled = false;
-			fn();
-		}
-	});
+    let scheduled = true;
+    queueMicrotask(() => {
+        if (scheduled) {
+            scheduled = false;
+            fn();
+        }
+    });
 
-	return {
-		isTriggered: () => scheduled,
-		dispose: () => {
-			scheduled = false;
-		},
-	};
+    return {
+        isTriggered: () => scheduled,
+        dispose: () => {
+            scheduled = false;
+        }
+    };
 };
 
 /**
@@ -367,78 +344,72 @@ const microtaskDeferred = (fn: () => void): IScheduledLater => {
  * 		}
  */
 export class Delayer<T> implements IDisposable {
-	private deferred: IScheduledLater | null;
-	private completionPromise: Promise<any> | null;
-	private doResolve: ((value?: any | Promise<any>) => void) | null;
-	private doReject: ((err: any) => void) | null;
-	private task: ITask<T | Promise<T>> | null;
+    private deferred: IScheduledLater | null;
+    private completionPromise: Promise<any> | null;
+    private doResolve: ((value?: any | Promise<any>) => void) | null;
+    private doReject: ((err: any) => void) | null;
+    private task: ITask<T | Promise<T>> | null;
 
-	constructor(public defaultDelay: number | typeof MicrotaskDelay) {
-		this.deferred = null;
-		this.completionPromise = null;
-		this.doResolve = null;
-		this.doReject = null;
-		this.task = null;
-	}
+    constructor(public defaultDelay: number | typeof MicrotaskDelay) {
+        this.deferred = null;
+        this.completionPromise = null;
+        this.doResolve = null;
+        this.doReject = null;
+        this.task = null;
+    }
 
-	trigger(
-		task: ITask<T | Promise<T>>,
-		delay = this.defaultDelay,
-	): Promise<T> {
-		this.task = task;
-		this.cancelTimeout();
+    trigger(task: ITask<T | Promise<T>>, delay = this.defaultDelay): Promise<T> {
+        this.task = task;
+        this.cancelTimeout();
 
-		if (!this.completionPromise) {
-			this.completionPromise = new Promise((resolve, reject) => {
-				this.doResolve = resolve;
-				this.doReject = reject;
-			}).then(() => {
-				this.completionPromise = null;
-				this.doResolve = null;
-				if (this.task) {
-					const task = this.task;
-					this.task = null;
-					return task();
-				}
-				return undefined;
-			});
-			void this.completionPromise.catch(noop);
-		}
+        if (!this.completionPromise) {
+            this.completionPromise = new Promise((resolve, reject) => {
+                this.doResolve = resolve;
+                this.doReject = reject;
+            }).then(() => {
+                this.completionPromise = null;
+                this.doResolve = null;
+                if (this.task) {
+                    const task = this.task;
+                    this.task = null;
+                    return task();
+                }
+                return undefined;
+            });
+            void this.completionPromise.catch(noop);
+        }
 
-		const fn = () => {
-			this.deferred = null;
-			this.doResolve?.(null);
-		};
+        const fn = () => {
+            this.deferred = null;
+            this.doResolve?.(null);
+        };
 
-		this.deferred =
-			delay === MicrotaskDelay
-				? microtaskDeferred(fn)
-				: timeoutDeferred(delay, fn);
+        this.deferred = delay === MicrotaskDelay ? microtaskDeferred(fn) : timeoutDeferred(delay, fn);
 
-		return this.completionPromise;
-	}
+        return this.completionPromise;
+    }
 
-	isTriggered(): boolean {
-		return !!this.deferred?.isTriggered();
-	}
+    isTriggered(): boolean {
+        return !!this.deferred?.isTriggered();
+    }
 
-	cancel(): void {
-		this.cancelTimeout();
+    cancel(): void {
+        this.cancelTimeout();
 
-		if (this.completionPromise) {
-			this.doReject?.(new Error("Canceled"));
-			this.completionPromise = null;
-		}
-	}
+        if (this.completionPromise) {
+            this.doReject?.(new Error('Canceled'));
+            this.completionPromise = null;
+        }
+    }
 
-	private cancelTimeout(): void {
-		this.deferred?.dispose();
-		this.deferred = null;
-	}
+    private cancelTimeout(): void {
+        this.deferred?.dispose();
+        this.deferred = null;
+    }
 
-	dispose(): void {
-		this.cancel();
-	}
+    dispose(): void {
+        this.cancel();
+    }
 }
 
 /**
@@ -451,31 +422,28 @@ export class Delayer<T> implements IDisposable {
  * do one more trip to deliver the letters that have accumulated while he was out.
  */
 export class ThrottledDelayer<T> {
-	private delayer: Delayer<Promise<T>>;
-	private throttler: Throttler;
+    private delayer: Delayer<Promise<T>>;
+    private throttler: Throttler;
 
-	constructor(defaultDelay: number) {
-		this.delayer = new Delayer(defaultDelay);
-		this.throttler = new Throttler();
-	}
+    constructor(defaultDelay: number) {
+        this.delayer = new Delayer(defaultDelay);
+        this.throttler = new Throttler();
+    }
 
-	trigger(promiseFactory: ITask<Promise<T>>, delay?: number): Promise<T> {
-		return this.delayer.trigger(
-			() => this.throttler.queue(promiseFactory),
-			delay,
-		) as unknown as Promise<T>;
-	}
+    trigger(promiseFactory: ITask<Promise<T>>, delay?: number): Promise<T> {
+        return this.delayer.trigger(() => this.throttler.queue(promiseFactory), delay) as unknown as Promise<T>;
+    }
 
-	isTriggered(): boolean {
-		return this.delayer.isTriggered();
-	}
+    isTriggered(): boolean {
+        return this.delayer.isTriggered();
+    }
 
-	cancel(): void {
-		this.delayer.cancel();
-	}
+    cancel(): void {
+        this.delayer.cancel();
+    }
 
-	dispose(): void {
-		this.delayer.dispose();
-		this.throttler.dispose();
-	}
+    dispose(): void {
+        this.delayer.dispose();
+        this.throttler.dispose();
+    }
 }
