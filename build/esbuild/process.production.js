@@ -5,9 +5,9 @@
 // We cannot use the esbuild CLI to inject these, because some code checks for the existence of process.env.XYZ
 // And its not possible in CLI to have an undefined define value for these.
 export var process = {
-	platform: "web",
-	cwd: () => "",
-	env: {
-		NODE_ENV: "production",
-	},
+    platform: 'web',
+    cwd: () => '',
+    env: {
+        NODE_ENV: 'production'
+    }
 };
