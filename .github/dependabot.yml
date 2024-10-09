@@ -1,25 +1,32 @@
 version: 2
+enable-beta-ecosystems: true
+
 updates:
-  - package-ecosystem: 'github-actions'
-    directory: /
-    schedule:
-      interval: daily
-    labels:
-      - 'skip news'
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+          interval: "daily"
 
-  - package-ecosystem: 'pip'
-    directory: /
-    schedule:
-      interval: daily
+    - package-ecosystem: "npm"
+      directory: "/api"
+      schedule:
+          interval: "daily"
+      versioning-strategy: increase
 
-  - package-ecosystem: 'pip'
-    directory: /news
-    schedule:
-      interval: monthly
-    labels:
-      - 'skip news'
-  # Activate when we feel ready to keep up with frequency.
-  # - package-ecosystem: 'npm'
-  #   directory: /
-  #   schedule:
-  #     interval: daily
+    - package-ecosystem: "npm"
+      directory: "/build/eslint-rules"
+      schedule:
+          interval: "daily"
+      versioning-strategy: increase
+
+    - package-ecosystem: "npm"
+      directory: "/"
+      schedule:
+          interval: "daily"
+      versioning-strategy: increase
+
+    - package-ecosystem: "npm"
+      directory: "/src/test/vscode-notebook-perf"
+      schedule:
+          interval: "daily"
+      versioning-strategy: increase
