@@ -2138,7 +2138,7 @@
 		"postcss": "8.4.47",
 		"postcss-import": "16.1.0",
 		"postcss-loader": "8.1.1",
-		"postcss-preset-env": "10.0.6",
+		"postcss-preset-env": "10.0.7",
 		"relative": "3.0.2",
 		"rimraf": "6.0.1",
 		"screenshot-desktop": "1.15.0",
