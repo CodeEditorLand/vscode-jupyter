@@ -2100,7 +2100,7 @@
 		"@types/uuid": "10.0.0",
 		"@types/uuid-to-hex": "1.1.2",
 		"@types/ws": "8.5.12",
-		"acorn": "8.12.1",
+		"acorn": "8.13.0",
 		"buffer": "6.0.3",
 		"bufferutil": "4.0.8",
 		"chai": "5.1.1",
