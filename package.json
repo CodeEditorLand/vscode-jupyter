@@ -2125,7 +2125,7 @@
 		"glob-parent": "6.0.2",
 		"json2csv": "5.0.7",
 		"jsonschema": "1.4.1",
-		"keyv": "5.1.0",
+		"keyv": "5.1.2",
 		"less": "4.2.0",
 		"less-loader": "12.2.0",
 		"less-plugin-inline-urls": "1.2.0",
