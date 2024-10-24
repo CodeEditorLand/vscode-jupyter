@@ -2023,7 +2023,7 @@
 		"fs-extra": "11.2.0",
 		"glob": "11.0.0",
 		"iconv-lite": "0.6.3",
-		"inversify": "6.0.2",
+		"inversify": "6.0.3",
 		"isomorphic-ws": "5.0.0",
 		"jquery": "3.7.1",
 		"jsonc-parser": "3.3.1",
@@ -2054,8 +2054,8 @@
 		"url-parse": "1.5.10",
 		"uuid": "10.0.0",
 		"ws": "8.18.0",
-		"zeromq": "6.1.0",
-		"zeromqold": "npm:zeromq@^6.1.0"
+		"zeromq": "6.1.1",
+		"zeromqold": "npm:zeromq@^6.1.1"
 	},
 	"description": "Jupyter notebook support, interactive programming and computing that supports Intellisense, debugging and more.",
 	"devDependencies": {
@@ -2103,7 +2103,7 @@
 		"acorn": "8.13.0",
 		"buffer": "6.0.3",
 		"bufferutil": "4.0.8",
-		"chai": "5.1.1",
+		"chai": "5.1.2",
 		"chai-arrays": "2.2.0",
 		"chai-as-promised": "8.0.0",
 		"chai-exclude": "3.0.0",
@@ -2139,7 +2139,7 @@
 		"postcss": "8.4.47",
 		"postcss-import": "16.1.0",
 		"postcss-loader": "8.1.1",
-		"postcss-preset-env": "10.0.7",
+		"postcss-preset-env": "10.0.8",
 		"relative": "3.0.2",
 		"rimraf": "6.0.1",
 		"screenshot-desktop": "1.15.0",
