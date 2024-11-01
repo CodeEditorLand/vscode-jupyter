@@ -2139,7 +2139,7 @@
 		"postcss": "^8.4.47",
 		"postcss-import": "^16.1.0",
 		"postcss-loader": "^8.1.1",
-		"postcss-preset-env": "^10.0.8",
+		"postcss-preset-env": "^10.0.9",
 		"relative": "^3.0.2",
 		"rimraf": "^6.0.1",
 		"screenshot-desktop": "^1.15.0",
@@ -2156,7 +2156,7 @@
 		"tsx": "^4.19.2",
 		"typemoq": "^2.1.0",
 		"unicode-properties": "^1.4.1",
-		"utf-8-validate": "^6.0.4",
+		"utf-8-validate": "^6.0.5",
 		"util": "^0.12.5",
 		"uuid-to-hex": "^1.1.1"
 	},
