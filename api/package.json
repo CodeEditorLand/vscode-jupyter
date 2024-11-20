@@ -1,10 +1,10 @@
 {
-	"name": "@vscode/jupyter-extension",
 	"description": "Contains the type definitions for the API exposed by the Jupyter Extension for VS Code",
-	"types": "api.d.ts",
+	"name": "@vscode/jupyter-extension",
 	"scripts": {
 		"buildProposed": "npm run clean && node ./proposed.js",
 		"buildStable": "npm run clean && node ./stable.js",
 		"clean": "node ./clean.js"
-	}
+	},
+	"types": "api.d.ts"
 }
