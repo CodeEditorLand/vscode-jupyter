@@ -37,6 +37,7 @@ export class RemoteIPyWidgetScriptManager
 	private widgetEntryPointsPromise?: Promise<
 		{ uri: Uri; widgetFolderName: string }[]
 	>;
+
 	constructor(
 		kernel: IKernel,
 		private readonly context: IExtensionContext,
@@ -44,6 +45,7 @@ export class RemoteIPyWidgetScriptManager
 		private readonly connection: JupyterConnection,
 	) {
 		super(kernel);
+
 		if (
 			kernel.kernelConnectionMetadata.kind !==
 				"connectToLiveRemoteKernel" &&
@@ -65,6 +67,7 @@ export class RemoteIPyWidgetScriptManager
 	}
 	protected override onKernelRestarted(): void {
 		this.widgetEntryPointsPromise = undefined;
+
 		super.onKernelRestarted();
 	}
 	protected async getWidgetEntryPoints() {
@@ -93,8 +96,10 @@ export class RemoteIPyWidgetScriptManager
 		}
 
 		const code = await this.getCodeToExecute();
+
 		if (!this.kernel.session?.kernel) {
 			logger.ci("No Kernel session to get list of widget entry points");
+
 			return [];
 		}
 		const promises: Promise<nbformat.IOutput[]>[] = [];
@@ -122,17 +127,21 @@ export class RemoteIPyWidgetScriptManager
 		promises.forEach((promise) => promise.catch(noop));
 
 		const outputs = await Promise.race(promises);
+
 		if (outputs.length === 0) {
 			logger.ci(
 				"Unable to get widget entry points, no outputs after running the code",
 			);
+
 			return [];
 		}
 		const output = outputs[0] as nbformat.IStream;
+
 		if (output.output_type !== "stream" || output.name !== "stdout") {
 			logger.ci(
 				"Unable to get widget entry points, no stream/stdout outputs after running the code",
 			);
+
 			return [];
 		}
 		try {
@@ -149,6 +158,7 @@ export class RemoteIPyWidgetScriptManager
 						.replace(/\\\\/g, "/")
 						.replace(/\\/g, "/"),
 				);
+
 			return items.map((item) => ({
 				uri: Uri.joinPath(
 					Uri.parse(this.kernelConnection.baseUrl),
@@ -162,13 +172,16 @@ export class RemoteIPyWidgetScriptManager
 				`Failed to parse output to get list of IPyWidgets, output is ${output.text}`,
 				ex,
 			);
+
 			return [];
 		}
 	}
 	protected async getWidgetScriptSource(script: Uri): Promise<string> {
 		const httpClientResponse =
 			this.getWidgetScriptSourceUsingHttpClient(script);
+
 		const fetchResponse = this.getWidgetScriptSourceUsingFetch(script);
+
 		const promise = httpClientResponse.catch(() => fetchResponse);
 		// If we fail to download using both mechanisms, then log an error.
 		promise.catch((ex) => {
@@ -183,14 +196,18 @@ export class RemoteIPyWidgetScriptManager
 				ex,
 			);
 		});
+
 		return promise;
 	}
 	private async getWidgetScriptSourceUsingHttpClient(
 		script: Uri,
 	): Promise<string> {
 		const uri = script.toString(true);
+
 		const httpClient = new HttpClient();
+
 		const response = await httpClient.downloadFile(uri);
+
 		if (response.status === 200) {
 			return response.text();
 		} else {
@@ -205,10 +222,13 @@ export class RemoteIPyWidgetScriptManager
 		const connection = await this.connection.createConnectionInfo(
 			this.kernelConnection.serverProviderHandle,
 		);
+
 		const uri = script.toString(true);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const httpClient = new HttpClient(connection.settings.fetch as any);
+
 		const response = await httpClient.downloadFile(uri);
+
 		if (response.status === 200) {
 			return response.text();
 		} else {

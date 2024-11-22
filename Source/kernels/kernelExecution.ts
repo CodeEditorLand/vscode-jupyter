@@ -61,6 +61,7 @@ import {
  */
 export class NotebookKernelExecution implements INotebookKernelExecution {
 	private readonly disposables: IDisposable[] = [];
+
 	get executionCount(): number {
 		return this._visibleExecutionCount;
 	}
@@ -134,10 +135,12 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	}
 	private hookupIOPubHandler() {
 		const session = this.kernel.session;
+
 		if (!session || this.hookedSesions.has(session)) {
 			return;
 		}
 		this.hookedSesions.add(session);
+
 		const handler = (_: unknown, msg: IMessage) => {
 			if (
 				msg.header.msg_type !== "update_display_data" &&
@@ -148,7 +151,9 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			const iopubMsg = msg as
 				| KernelMessage.IUpdateDisplayDataMsg
 				| KernelMessage.IDisplayDataMsg;
+
 			const displayId = iopubMsg.content.transient?.display_id;
+
 			if (
 				!displayId ||
 				!isDisplayIdTrackedForAnExtension(session, displayId)
@@ -182,6 +187,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			cell,
 			`NotebookKernelExecution.resumeCellExecution (start), ${getDisplayPath(cell.notebook.uri)}`,
 		);
+
 		if (cell.kind == NotebookCellKind.Markup) {
 			return;
 		}
@@ -190,12 +196,15 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			this.kernel.resourceUri,
 			Telemetry.ResumeCellExecution,
 		);
+
 		const sessionPromise = this.kernel.start(new DisplayOptions(false));
+
 		const executionQueue = this.getOrCreateCellExecutionQueue(
 			cell.notebook,
 			sessionPromise,
 		);
 		executionQueue.resumeCell(cell, info);
+
 		const success = await executionQueue
 			.waitForCompletion(cell)
 			.then(() => true)
@@ -217,7 +226,9 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			cell,
 			`NotebookKernelExecution.executeCell (1), ${getDisplayPath(cell.notebook.uri)}`,
 		);
+
 		const stopWatch = new StopWatch();
+
 		if (cell.kind == NotebookCellKind.Markup) {
 			return;
 		}
@@ -235,12 +246,15 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			cell,
 			`NotebookKernelExecution.executeCell (3), ${getDisplayPath(cell.notebook.uri)}`,
 		);
+
 		const executionQueue = this.getOrCreateCellExecutionQueue(
 			cell.notebook,
 			sessionPromise,
 		);
 		executionQueue.queueCell(cell, codeOverride);
+
 		let success = true;
+
 		try {
 			traceCellMessage(
 				cell,
@@ -249,6 +263,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			await executionQueue.waitForCompletion(cell);
 		} catch (ex) {
 			success = false;
+
 			throw ex;
 		} finally {
 			traceCellMessage(
@@ -288,6 +303,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 		);
 
 		let result: ICodeExecution;
+
 		if (extensionId === JVSC_EXTENSION_ID) {
 			// No need to queue code execution for JVSC, as it will be executed immediately.
 			// Only 3rd party code needs to be queued (as we need to give user code preference over 3rd party ext code)
@@ -302,6 +318,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			);
 		}
 		let completed = false;
+
 		const disposables: IDisposable[] = [];
 		result.result
 			.finally(() => {
@@ -310,6 +327,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 					logger.debug(
 						`Execution of code ${result.executionId} completed in ${stopWatch.elapsedTime}ms`,
 					);
+
 				if (extensionId !== JVSC_EXTENSION_ID) {
 					sendKernelTelemetryEvent(
 						this.kernel.resourceUri,
@@ -321,8 +339,11 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 				dispose(disposables);
 			})
 			.catch(noop);
+
 		const done = createDeferredFromPromise(result.result);
+
 		const outputs: NotebookCellOutput[] = [];
+
 		let outputsReceived = createDeferred<void>();
 		disposables.push(result.onRequestSent(() => events.started.fire()));
 		disposables.push(
@@ -351,14 +372,18 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			this,
 			disposables,
 		);
+
 		while (true) {
 			await Promise.race([outputsReceived.promise, done.promise]);
+
 			if (completed) {
 				outputsReceived = createDeferred<void>();
 			}
 			const session = this.kernel.session;
+
 			while (outputs.length) {
 				const output = outputs.shift()!;
+
 				if (session) {
 					trackDisplayDataForExtension(extensionId, session, output);
 				}
@@ -371,6 +396,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	}
 	executeHidden(code: string): Promise<IOutput[]> {
 		const sessionPromise = this.kernel.start();
+
 		return sessionPromise.then((session) =>
 			session.kernel
 				? executeSilently(session.kernel, code)
@@ -379,6 +405,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	}
 	private async onWillInterrupt() {
 		const executionQueue = this.documentExecutions.get(this.notebook);
+
 		if (
 			!executionQueue &&
 			this.kernel.kernelConnectionMetadata.kind !==
@@ -398,6 +425,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 	}
 	private async onWillCancel() {
 		const executionQueue = this.documentExecutions.get(this.notebook);
+
 		if (executionQueue) {
 			await executionQueue.cancel(true);
 		}
@@ -456,6 +484,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 					logger.debug(
 						`Cancel executions after closing notebook ${getDisplayPath(e.uri)}`,
 					);
+
 					if (
 						!newCellExecutionQueue.failed ||
 						!newCellExecutionQueue.isEmpty
@@ -468,6 +497,7 @@ export class NotebookKernelExecution implements INotebookKernelExecution {
 			this.disposables,
 		);
 		this.documentExecutions.set(document, newCellExecutionQueue);
+
 		return newCellExecutionQueue;
 	}
 }

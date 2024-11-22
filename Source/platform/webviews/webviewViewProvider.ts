@@ -31,6 +31,7 @@ class WebviewView extends Webview implements IWebviewView {
 		return this._onDidChangeVisibility.event;
 	}
 	private readonly _onDidChangeVisibility = new EventEmitter<void>();
+
 	constructor(
 		fs: IFileSystem,
 		disposableRegistry: IDisposableRegistry,

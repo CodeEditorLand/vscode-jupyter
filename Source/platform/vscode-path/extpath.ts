@@ -47,14 +47,18 @@ export function getRoot(path: string, sep: string = posix.sep): string {
 	}
 
 	const len = path.length;
+
 	const firstLetter = path.charCodeAt(0);
+
 	if (isPathSeparator(firstLetter)) {
 		if (isPathSeparator(path.charCodeAt(1))) {
 			// UNC candidate \\localhost\shares\ddd
 			//               ^^^^^^^^^^^^^^^^^^^
 			if (!isPathSeparator(path.charCodeAt(2))) {
 				let pos = 3;
+
 				const start = pos;
+
 				for (; pos < len; pos++) {
 					if (isPathSeparator(path.charCodeAt(pos))) {
 						break;
@@ -65,6 +69,7 @@ export function getRoot(path: string, sep: string = posix.sep): string {
 					!isPathSeparator(path.charCodeAt(pos + 1))
 				) {
 					pos += 1;
+
 					for (; pos < len; pos++) {
 						if (isPathSeparator(path.charCodeAt(pos))) {
 							return path
@@ -99,6 +104,7 @@ export function getRoot(path: string, sep: string = posix.sep): string {
 	// scheme://authority/path
 	// ^^^^^^^^^^^^^^^^^^^
 	let pos = path.indexOf("://");
+
 	if (pos !== -1) {
 		pos += 3; // 3 -> "://".length
 		for (; pos < len; pos++) {
@@ -136,6 +142,7 @@ export function isEqualOrParent(
 
 	if (ignoreCase) {
 		const beginsWith = startsWithIgnoreCase(base, parentCandidate);
+
 		if (!beginsWith) {
 			return false;
 		}
@@ -145,6 +152,7 @@ export function isEqualOrParent(
 		}
 
 		let sepOffset = parentCandidate.length;
+
 		if (parentCandidate.charAt(parentCandidate.length - 1) === separator) {
 			sepOffset--; // adjust the expected sep offset in case our candidate already ends in separator character
 		}

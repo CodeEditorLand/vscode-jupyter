@@ -30,6 +30,7 @@ import {
 export class PythonExecutionFactory implements IPythonExecutionFactory {
 	private readonly disposables: IDisposableRegistry;
 	private readonly fileSystem: IFileSystem;
+
 	constructor(
 		@inject(IServiceContainer) private serviceContainer: IServiceContainer,
 		@inject(IEnvironmentActivationService)
@@ -73,7 +74,9 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 				options.resource,
 				options.interpreter,
 			);
+
 		const hasEnvVars = envVars && Object.keys(envVars).length > 0;
+
 		if (!hasEnvVars) {
 			return this.create({
 				resource: options.resource,
@@ -106,6 +109,7 @@ function createPythonService(
 	],
 ): IPythonExecutionService {
 	let env = createPythonEnv(interpreter, procService, fs);
+
 	if (conda) {
 		const [condaPath, condaInfo] = conda;
 		env = createCondaEnv(
@@ -117,6 +121,7 @@ function createPythonService(
 		);
 	}
 	const procs = createPythonProcessService(procService, env);
+
 	return {
 		isModuleInstalled: (m) => env.isModuleInstalled(m),
 		execObservable: (a, o) => procs.execObservable(a, o),

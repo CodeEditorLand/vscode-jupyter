@@ -62,6 +62,7 @@ export function postActionToExtension(
 		messageDirection: "outgoing",
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} as any as BaseReduxActionPayload<any>;
+
 	const action = {
 		type: CommonActionType.PostOutgoingMessage,
 		payload: { payload: newPayload, type: message },
@@ -74,6 +75,8 @@ export function unwrapPostableAction(action: Redux.AnyAction): {
 } {
 	// Unwrap the payload that was created in `createPostableAction`.
 	const type = action.type;
+
 	const payload: BaseReduxActionPayload<{}> | undefined = action.payload;
+
 	return { type, payload };
 }

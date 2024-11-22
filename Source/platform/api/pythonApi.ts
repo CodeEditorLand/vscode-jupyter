@@ -75,6 +75,7 @@ export function deserializePythonEnvironment(
 
 		// Cleanup stuff that shouldn't be there.
 		delete result.path;
+
 		return result;
 	}
 }
@@ -82,7 +83,9 @@ export function pythonEnvToJupyterEnv(
 	env: Environment,
 ): PythonEnvironment | undefined {
 	let uri: Uri;
+
 	let id = env.id;
+
 	if (!env.executable.uri) {
 		if (getEnvironmentType(env) === EnvironmentType.Conda) {
 			uri =
@@ -100,6 +103,7 @@ export function pythonEnvToJupyterEnv(
 			logger.warn(
 				`Python environment ${getDisplayPath(env.id)} excluded as Uri is undefined`,
 			);
+
 			return;
 		}
 	} else {
@@ -121,6 +125,7 @@ export function serializePythonEnvironment(
 		});
 		// Cleanup stuff that shouldn't be there.
 		delete (result as any).uri;
+
 		return result;
 	}
 }
@@ -155,6 +160,7 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 	) {
 		const previouslyInstalled =
 			this.extensionChecker.isPythonExtensionInstalled;
+
 		if (!previouslyInstalled) {
 			extensions.onDidChange(
 				async () => {
@@ -171,12 +177,15 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 
 	public getApi(): Promise<PythonApi> {
 		this.init().catch(noop);
+
 		return this.api.promise;
 	}
 	public async getNewApi(): Promise<PythonExtensionApi | undefined> {
 		await this.init();
+
 		const extension =
 			extensions.getExtension<PythonExtensionApi>(PythonExtension);
+
 		if (extension?.packageJSON?.version) {
 			this._pythonExtensionVersion = new SemVer(
 				extension?.packageJSON?.version,
@@ -207,6 +216,7 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 		const pythonExtension = extensions.getExtension<{
 			jupyter: { registerHooks(): void };
 		}>(PythonExtension);
+
 		if (!pythonExtension) {
 			await this.extensionChecker.showPythonExtensionInstallRequiredPrompt();
 		} else {
@@ -221,12 +231,15 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 		const pythonExtension = extensions.getExtension<{
 			jupyter: { registerHooks(): void };
 		}>(PythonExtension);
+
 		if (!pythonExtension) {
 			return;
 		}
 		let activated = false;
+
 		if (!pythonExtension.isActive) {
 			const tracker = trackPythonExtensionActivation();
+
 			try {
 				const promise = pythonExtension.activate();
 				promise.then(
@@ -238,6 +251,7 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 			} catch (ex) {
 				logger.error(`Failed activating the python extension: `, ex);
 				this.api.reject(new PythonExtensionActicationFailedError(ex));
+
 				return;
 			}
 		}
@@ -245,6 +259,7 @@ export class OldPythonApiProvider implements IPythonApiProvider {
 			return;
 		}
 		this.hooksRegistered = true;
+
 		if (activated) {
 			this.didActivatePython.fire();
 		}
@@ -270,6 +285,7 @@ export class PythonExtensionChecker implements IPythonExtensionChecker {
 	 * Used only for testing
 	 */
 	public static promptDisplayed?: boolean;
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
@@ -318,11 +334,13 @@ export class PythonExtensionChecker implements IPythonExtensionChecker {
 		sendTelemetryEvent(Telemetry.PythonExtensionNotInstalled, undefined, {
 			action: "displayed",
 		});
+
 		const answer = await window.showInformationMessage(
 			localize.DataScience.pythonExtensionRequired,
 			{ modal: true },
 			yes,
 		);
+
 		if (answer === yes) {
 			sendTelemetryEvent(
 				Telemetry.PythonExtensionNotInstalled,
@@ -394,6 +412,7 @@ export class InterpreterService implements IInterpreterService {
 	public readonly onDidChangeStatus = this._onDidChangeStatus.event;
 	private refreshPromises = new PromiseMonitor();
 	private readonly onResumeEnvDetection = new EventEmitter<void>();
+
 	constructor(
 		@inject(IPythonApiProvider)
 		private readonly apiProvider: IPythonApiProvider,
@@ -447,21 +466,25 @@ export class InterpreterService implements IInterpreterService {
 							(e) => e.id === id || e.path === id,
 						)
 					: id;
+
 			return api.environments.resolveEnvironment(env || id);
 		});
 	}
 	public get onDidChangeInterpreter(): Event<PythonEnvironment | undefined> {
 		this.hookupOnDidChangeInterpreterEvent();
+
 		return this.didChangeInterpreter.event;
 	}
 
 	public get onDidChangeInterpreters(): Event<PythonEnvironment[]> {
 		this.hookupOnDidChangeInterpreterEvent();
+
 		return this.didChangeInterpreters.event;
 	}
 	public async refreshInterpreters(forceRefresh: boolean = false) {
 		const promise = (async () => {
 			const api = await this.getApi();
+
 			if (!api) {
 				return;
 			}
@@ -507,12 +530,15 @@ export class InterpreterService implements IInterpreterService {
 					: undefined) || workspace.workspaceFolders[0].uri;
 		}
 		const workspaceId = getWorkspaceFolderIdentifier(resource);
+
 		const promise = this.getApi().then(async (api) => {
 			if (!api) {
 				return;
 			}
 			const envPath = api.environments.getActiveEnvironmentPath(resource);
+
 			const env = await api.environments.resolveEnvironment(envPath);
+
 			return this.trackResolvedEnvironment(env);
 		});
 
@@ -534,6 +560,7 @@ export class InterpreterService implements IInterpreterService {
 					ex,
 				);
 			});
+
 		if (
 			isCI ||
 			[ExtensionMode.Development, ExtensionMode.Test].includes(
@@ -544,10 +571,12 @@ export class InterpreterService implements IInterpreterService {
 				.then((item) => {
 					// Reduce excessive logging.
 					const key = `${getDisplayPath(resource)}'-${getDisplayPath(item?.id)}`;
+
 					if (this.lastLoggedResourceAndInterpreterId === key) {
 						return;
 					}
 					this.lastLoggedResourceAndInterpreterId = key;
+
 					const version = getCachedVersion(item);
 					logger.trace(
 						`Active Interpreter ${resource ? `for '${getDisplayPath(resource)}' ` : ""}is ${getDisplayPath(
@@ -562,6 +591,7 @@ export class InterpreterService implements IInterpreterService {
 		return promise;
 	}
 	private readonly pythonEnvHashes = new Map<string, string>();
+
 	getInterpreterHash(id: string) {
 		return this.pythonEnvHashes.get(id);
 	}
@@ -578,6 +608,7 @@ export class InterpreterService implements IInterpreterService {
 		}
 
 		this.hookupOnDidChangeInterpreterEvent();
+
 		try {
 			return await this.getApi().then(async (api) => {
 				if (!api || token?.isCancellationRequested) {
@@ -597,22 +628,26 @@ export class InterpreterService implements IInterpreterService {
 									Uri.file(pythonPath.path),
 								);
 				});
+
 				const pythonPathForLogging = isUri(pythonPath)
 					? getDisplayPath(pythonPath)
 					: typeof pythonPath === "string"
 						? pythonPath
 						: getDisplayPath(Uri.file(pythonPath.path));
+
 				if (matchedPythonEnv) {
 					const env =
 						await api.environments.resolveEnvironment(
 							matchedPythonEnv,
 						);
+
 					const resolved = this.trackResolvedEnvironment(env);
 					logger.ci(
 						`Interpreter details for ${pythonPathForLogging} from Python is ${JSON.stringify(
 							env,
 						)} and our mapping is ${JSON.stringify(resolved)}`,
 					);
+
 					return resolved;
 				}
 				const key = pythonPathForLogging;
@@ -634,6 +669,7 @@ export class InterpreterService implements IInterpreterService {
 							? pythonPath
 							: pythonPath.path,
 				);
+
 				return this.trackResolvedEnvironment(env);
 			});
 		} catch (ex) {
@@ -656,6 +692,7 @@ export class InterpreterService implements IInterpreterService {
 	private trackResolvedEnvironment(env: ResolvedEnvironment | undefined) {
 		if (env) {
 			const resolved = resolvedPythonEnvToJupyterEnv(env);
+
 			if (!resolved) {
 				return;
 			}
@@ -666,6 +703,7 @@ export class InterpreterService implements IInterpreterService {
 				.catch(noop);
 
 			this.triggerEventIfAllowed("interpretersChangeEvent", resolved);
+
 			return resolved;
 		}
 	}
@@ -699,13 +737,16 @@ export class InterpreterService implements IInterpreterService {
 			this.didChangeInterpreter.fire(interpreter),
 		);
 		this.pendingInterpreterChangeEventTriggers.clear();
+
 		const interpreters = Array.from(
 			this.pendingInterpretersChangeEventTriggers.values(),
 		);
+
 		if (interpreters.length) {
 			const nonEmptyInterpreterList = interpreters.filter(
 				(item) => !!item,
 			) as PythonEnvironment[];
+
 			if (
 				nonEmptyInterpreterList.length !== interpreters.length &&
 				nonEmptyInterpreterList.length === 0
@@ -779,11 +820,13 @@ export class InterpreterService implements IInterpreterService {
 								this._onDidRemoveInterpreter.fire({
 									id: e.env.id,
 								});
+
 								return;
 							}
 							const info = resolvedPythonEnvToJupyterEnv(
 								getCachedEnvironment(e.env),
 							);
+
 							if (info) {
 								this.triggerEventIfAllowed(
 									"interpreterChangeEvent",

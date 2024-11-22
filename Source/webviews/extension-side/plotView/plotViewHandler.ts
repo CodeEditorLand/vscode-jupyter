@@ -10,6 +10,7 @@ import { logger } from "../../../platform/logging";
 import { IPlotViewerProvider } from "../plotting/types";
 
 const svgMimeType = "image/svg+xml";
+
 const pngMimeType = "image/png";
 
 @injectable()
@@ -24,7 +25,9 @@ export class PlotViewHandler {
 			return;
 		}
 		const outputItem = getOutputItem(notebook, outputId, svgMimeType);
+
 		let svgString: string | undefined;
+
 		if (!outputItem) {
 			// Didn't find svg, see if we have png we can convert
 			const pngOutput = getOutputItem(notebook, outputId, pngMimeType);
@@ -64,7 +67,9 @@ function getOutputItem(
 // Wrap our PNG data into an SVG element so what we can display it in the current plot viewer
 function convertPngToSvg(pngOutput: NotebookCellOutputItem): string {
 	const imageBuffer = pngOutput.data;
+
 	const imageData = uint8ArrayToBase64(imageBuffer);
+
 	const dims = getPngDimensions(imageBuffer);
 
 	// Of note here, we want the dims on the SVG element, and the image at 100% this is due to how the SVG control
@@ -89,6 +94,7 @@ export function getPngDimensions(buffer: Uint8Array): {
 	// The dimensions of a PNG are the first 8 bytes (width then height) of the IHDR chunk. The
 	// IHDR chunk starts at offset 8.
 	const view = new DataView(new Uint8Array(buffer).buffer);
+
 	return {
 		width: view.getUint32(16, false),
 		height: view.getUint32(20, false),

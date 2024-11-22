@@ -50,6 +50,7 @@ export class EnvironmentVariablesService
 		}
 		Object.keys(source).forEach((setting) => {
 			const lowerCase = setting.toLowerCase();
+
 			if (lowerCase == "pythonpath" || lowerCase == "path") {
 				// PATH can be path, Path, or PATH on the same OS depending
 				// upon the source so check all cases.
@@ -71,6 +72,7 @@ export class EnvironmentVariablesService
 		const sourcePathKey = Object.keys(source).find(
 			(k) => k.toLowerCase() === "path",
 		);
+
 		const targetPathKey =
 			Object.keys(target).find((k) => k.toLowerCase() === "path") ||
 			sourcePathKey;
@@ -108,6 +110,7 @@ export class EnvironmentVariablesService
 			)
 			.map((item) => item.trim())
 			.join(path.delimiter);
+
 		if (valueToAppendOrPrepend.length === 0) {
 			return vars;
 		}
@@ -115,14 +118,18 @@ export class EnvironmentVariablesService
 		// It's been shown that the 'path' variable can have multiple casing even on the same platform
 		// depending upon where the environment variable comes from (kernelspec might have 'PATH' whereas windows might use 'Path')
 		const variableNameLower = variableName.toLowerCase();
+
 		const matchingKey = vars
 			? Object.keys(vars).find(
 					(k) => k.toLowerCase() == variableNameLower,
 				)
 			: undefined;
+
 		const existingValue =
 			vars && matchingKey ? vars[matchingKey] : undefined;
+
 		const setKey = matchingKey || variableName;
+
 		if (
 			existingValue &&
 			typeof existingValue === "string" &&
@@ -151,7 +158,9 @@ export class EnvironmentVariablesService
 
 		// WINDOWS  can have PATH and Path, update both
 		const windowsPaths = ["Path", "PATH"];
+
 		const otherWindowPath = windowsPaths.find((p) => p !== setKey);
+
 		if (
 			os.platform() === "win32" &&
 			otherWindowPath &&
@@ -159,7 +168,9 @@ export class EnvironmentVariablesService
 			typeof vars[otherWindowPath] === "string"
 		) {
 			const existingValue = vars[otherWindowPath];
+
 			const setKey = otherWindowPath;
+
 			if (
 				existingValue &&
 				typeof existingValue === "string" &&
@@ -195,17 +206,20 @@ export function parseEnvFile(
 	baseVars?: EnvironmentVariables,
 ): EnvironmentVariables {
 	const globalVars = baseVars ? baseVars : {};
+
 	const vars: EnvironmentVariables = {};
 	lines
 		.toString()
 		.split("\n")
 		.forEach((line, _idx) => {
 			const [name, value] = parseEnvLine(line);
+
 			if (name === "") {
 				return;
 			}
 			vars[name] = substituteEnvVars(value, vars, globalVars);
 		});
+
 	return vars;
 }
 
@@ -215,12 +229,15 @@ function parseEnvLine(line: string): [string, string] {
 	// We don't use dotenv here because it loses ordering, which is
 	// significant for substitution.
 	const match = line.match(/^\s*([a-zA-Z]\w*)\s*=\s*(.*?)?\s*$/);
+
 	if (!match) {
 		return ["", ""];
 	}
 
 	const name = match[1];
+
 	let value = match[2];
+
 	if (value && value !== "") {
 		if (value[0] === "'" && value[value.length - 1] === "'") {
 			value = value.substring(1, value.length - 1);
@@ -248,6 +265,7 @@ function substituteEnvVars(
 	//   https://github.com/motdotla/dotenv-expand/blob/master/lib/main.js
 
 	let invalid = false;
+
 	let replacement = value;
 	replacement = replacement.replace(
 		SUBST_REGEX,
@@ -257,11 +275,13 @@ function substituteEnvVars(
 			}
 			if ((bogus && bogus !== "") || !substName || substName === "") {
 				invalid = true;
+
 				return match;
 			}
 			return localVars[substName] || globalVars[substName] || missing;
 		},
 	);
+
 	if (!invalid && replacement !== value) {
 		value = replacement;
 		sendTelemetryEvent(EventName.ENVFILE_VARIABLE_SUBSTITUTION);

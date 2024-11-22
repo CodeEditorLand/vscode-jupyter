@@ -27,6 +27,7 @@ export class IPyWidgetScriptManagerFactory
 	implements IIPyWidgetScriptManagerFactory
 {
 	private readonly managers = new WeakMap<IKernel, IIPyWidgetScriptManager>();
+
 	constructor(
 		@inject(INbExtensionsPathProvider)
 		private readonly nbExtensionsPathProvider: INbExtensionsPathProvider,

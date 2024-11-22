@@ -48,6 +48,7 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
         );
         disposableRegistry.push(this.debugService.onDidChangeActiveDebugSession(this.onChangeDebugSession.bind(this)));
         disposableRegistry.push(vscode.workspace.onDidCloseTextDocument(this.onDidCloseTextDocument.bind(this)));
+
         if (this.debugLocationTracker) {
             disposableRegistry.push(this.debugLocationTracker.updated(this.onDebugLocationUpdated.bind(this)));
         }
@@ -93,6 +94,7 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
 
     private onDidCloseTextDocument(e: vscode.TextDocument) {
         const index = this.activeCodeWatchers.findIndex((item) => item.uri && item.uri.toString() === e.uri.toString());
+
         if (index >= 0) {
             const codewatcher = this.activeCodeWatchers.splice(index, 1);
             codewatcher[0].dispose();
@@ -101,12 +103,14 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
 
     private getCodeLensTimed(document: vscode.TextDocument): vscode.CodeLens[] {
         const stopWatch = new StopWatch();
+
         const codeLenses = this.getCodeLens(document);
         this.totalExecutionTimeInMs += stopWatch.elapsedTime;
         this.totalGetCodeLensCalls += 1;
 
         // Don't provide any code lenses if we have not enabled data science
         const settings = this.configuration.getSettings(document.uri);
+
         if (!settings.enableCellCodeLens) {
             return [];
         }
@@ -123,6 +127,7 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
 
             // Debug locations only work on local paths, so check against fsPath here.
             let uri: vscode.Uri | undefined;
+
             try {
                 // When dealing with Jupyter debugger protocol, the paths are stringified Uris.
                 uri = debugLocation ? vscode.Uri.parse(debugLocation.fileName) : undefined;
@@ -138,6 +143,7 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
                 const activeLenses = lenses.filter((lens) => {
                     // -1 for difference between file system one based and debugger zero based
                     const pos = new vscode.Position(debugLocation.lineNumber - 1, debugLocation.column - 1);
+
                     return lens.range.contains(pos);
                 });
 
@@ -171,25 +177,31 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
     private getCodeLens(document: vscode.TextDocument): vscode.CodeLens[] {
         // See if we already have a watcher for this file and version
         const codeWatcher: ICodeWatcher | undefined = this.matchWatcher(document.uri);
+
         if (codeWatcher) {
             return codeWatcher.getCodeLenses();
         }
 
         logger.debug(`Creating a new watcher for document ${document.uri}`);
+
         const newCodeWatcher = this.createNewCodeWatcher(document);
+
         return newCodeWatcher.getCodeLenses();
     }
 
     private matchWatcher(uri: vscode.Uri): ICodeWatcher | undefined {
         const index = this.activeCodeWatchers.findIndex((item) => item.uri && item.uri.toString() == uri.toString());
+
         if (index >= 0) {
             return this.activeCodeWatchers[index];
         }
 
         // Create a new watcher for this file if we can find a matching document
         const possibleDocuments = vscode.workspace.textDocuments.filter((d) => d.uri.toString() === uri.toString());
+
         if (possibleDocuments && possibleDocuments.length > 0) {
             logger.debug(`creating new code watcher with matching document ${uri}`);
+
             return this.createNewCodeWatcher(possibleDocuments[0]);
         }
 
@@ -201,6 +213,7 @@ export class DataScienceCodeLensProvider implements IDataScienceCodeLensProvider
         newCodeWatcher.setDocument(document);
         newCodeWatcher.codeLensUpdated(this.onWatcherUpdated.bind(this));
         this.activeCodeWatchers.push(newCodeWatcher);
+
         return newCodeWatcher;
     }
 

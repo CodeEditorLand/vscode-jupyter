@@ -50,6 +50,7 @@ import { ExportDialog } from '../../notebooks/export/exportDialog';
 @injectable()
 export class CommandRegistry implements IDisposable, IExtensionSyncActivationService {
     private readonly statusProvider: StatusProvider;
+
     constructor(
         @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
         @inject(INotebookExporter) @optional() private jupyterExporter: INotebookExporter | undefined,
@@ -69,6 +70,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
         @inject(IFileConverter) private fileConverter: IFileConverter
     ) {
         this.statusProvider = new StatusProvider();
+
         if (!workspace.isTrusted) {
             workspace.onDidGrantWorkspaceTrust(this.registerCommandsIfTrusted, this, this.disposables);
         }
@@ -131,6 +133,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
                         return this.exportFile(file);
                     } else {
                         const activeEditor = window.activeTextEditor;
+
                         if (activeEditor && activeEditor.document.languageId === PYTHON_LANGUAGE) {
                             return this.exportFile(activeEditor.document.uri);
                         }
@@ -148,6 +151,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
                         return this.exportFileAndOutput(file);
                     } else {
                         const activeEditor = window.activeTextEditor;
+
                         if (activeEditor && activeEditor.document.languageId === PYTHON_LANGUAGE) {
                             return this.exportFileAndOutput(activeEditor.document.uri);
                         }
@@ -218,6 +222,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     private getCodeWatcher(file: Uri | undefined): ICodeWatcher | undefined {
         if (file && this.dataScienceCodeLensProvider) {
             const possibleDocuments = workspace.textDocuments.filter((d) => urlPath.isEqual(d.uri, file));
+
             if (possibleDocuments && possibleDocuments.length === 1) {
                 return this.dataScienceCodeLensProvider.getCodeWatcher(possibleDocuments[0]);
             } else if (possibleDocuments && possibleDocuments.length > 1) {
@@ -240,6 +245,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runAllCells(file: Uri | undefined): Promise<void> {
         let codeWatcher = this.getCodeWatcher(file);
+
         if (!codeWatcher) {
             codeWatcher = this.getCurrentCodeWatcher();
         }
@@ -252,6 +258,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runFileInteractive(file: Uri): Promise<void> {
         let codeWatcher = this.getCodeWatcher(file);
+
         if (!codeWatcher) {
             codeWatcher = this.getCurrentCodeWatcher();
         }
@@ -264,6 +271,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async debugFileInteractive(file: Uri): Promise<void> {
         let codeWatcher = this.getCodeWatcher(file);
+
         if (!codeWatcher) {
             codeWatcher = this.getCurrentCodeWatcher();
         }
@@ -284,6 +292,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
         endChar: number
     ): Promise<void> {
         const codeWatcher = this.getCodeWatcher(file);
+
         if (codeWatcher) {
             return codeWatcher.runCell(new Range(startLine, startChar, endLine, endChar));
         }
@@ -311,6 +320,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runToLine(): Promise<void> {
         const activeCodeWatcher = this.getCurrentCodeWatcher();
+
         const textEditor = window.activeTextEditor;
 
         if (activeCodeWatcher && textEditor && textEditor.selection) {
@@ -320,6 +330,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runFromLine(): Promise<void> {
         const activeCodeWatcher = this.getCurrentCodeWatcher();
+
         const textEditor = window.activeTextEditor;
 
         if (activeCodeWatcher && textEditor && textEditor.selection) {
@@ -329,6 +340,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runCurrentCell(): Promise<void> {
         const activeCodeWatcher = this.getCurrentCodeWatcher();
+
         if (activeCodeWatcher) {
             return activeCodeWatcher.runCurrentCell();
         } else {
@@ -338,6 +350,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runCurrentCellAndAdvance(): Promise<void> {
         const activeCodeWatcher = this.getCurrentCodeWatcher();
+
         if (activeCodeWatcher) {
             return activeCodeWatcher.runCurrentCellAndAdvance();
         } else {
@@ -347,6 +360,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runSelectionOrLine(textOrUri: string | undefined | Uri): Promise<void> {
         const activeCodeWatcher = this.getCurrentCodeWatcher();
+
         if (activeCodeWatcher) {
             return activeCodeWatcher.runSelectionOrLine(
                 window.activeTextEditor,
@@ -388,8 +402,10 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
         if (this.debugService?.activeDebugSession && this.interactiveWindowProvider) {
             // Attempt to get the interactive window for this file
             const iw = this.interactiveWindowProvider.get(uri);
+
             if (iw && iw.notebookDocument) {
                 const kernel = this.kernelProvider.get(iw.notebookDocument);
+
                 if (kernel) {
                     logger.debug(`Interrupt kernel due to debug stop of IW ${uri.toString()}`);
                     // If we have a matching iw, then stop current execution
@@ -476,8 +492,10 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runAllCellsAboveFromCursor(): Promise<void> {
         const currentCodeLens = this.getCurrentCodeLens();
+
         if (currentCodeLens) {
             const activeCodeWatcher = this.getCurrentCodeWatcher();
+
             if (activeCodeWatcher) {
                 return activeCodeWatcher.runAllCellsAbove(
                     currentCodeLens.range.start.line,
@@ -491,8 +509,10 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async runCellAndAllBelowFromCursor(): Promise<void> {
         const currentCodeLens = this.getCurrentCodeLens();
+
         if (currentCodeLens) {
             const activeCodeWatcher = this.getCurrentCodeWatcher();
+
             if (activeCodeWatcher) {
                 return activeCodeWatcher.runCellAndAllBelow(
                     currentCodeLens.range.start.line,
@@ -506,8 +526,10 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private async debugCurrentCellFromCursor(): Promise<void> {
         const currentCodeLens = this.getCurrentCodeLens();
+
         if (currentCodeLens) {
             const activeCodeWatcher = this.getCurrentCodeWatcher();
+
             if (activeCodeWatcher) {
                 return activeCodeWatcher.debugCurrentCell();
             }
@@ -527,7 +549,9 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private getCurrentCodeLens(): CodeLens | undefined {
         const activeEditor = window.activeTextEditor;
+
         const activeCodeWatcher = this.getCurrentCodeWatcher();
+
         if (activeEditor && activeCodeWatcher) {
             // Find the cell that matches
             return activeCodeWatcher.getCodeLenses().find((c: CodeLens) => {
@@ -544,6 +568,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     // Get our matching code watcher for the active document
     private getCurrentCodeWatcher(): ICodeWatcher | undefined {
         const activeEditor = window.activeTextEditor;
+
         if (!activeEditor || !activeEditor.document || !this.dataScienceCodeLensProvider) {
             return undefined;
         }
@@ -574,8 +599,10 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     /* eslint-disable @typescript-eslint/no-explicit-any */
     private async listenForErrors(promise: () => Promise<any>): Promise<any> {
         let result: any;
+
         try {
             result = await promise();
+
             return result;
         } catch (err) {
             logger.error('listenForErrors', err as any);
@@ -587,14 +614,17 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     @captureUsageTelemetry(Telemetry.ExportPythonFileInteractive)
     private async exportFile(file: Uri): Promise<void> {
         const filePath = getFilePath(file);
+
         if (filePath && filePath.length > 0 && this.jupyterExporter) {
             // If the current file is the active editor, then generate cells from the document.
             const activeEditor = window.activeTextEditor;
+
             if (activeEditor && this.fileSystem.arePathsSame(activeEditor.document.uri, file)) {
                 const cells = generateCellsFromDocument(
                     activeEditor.document,
                     this.configuration.getSettings(activeEditor.document.uri)
                 );
+
                 if (cells) {
                     // Bring up the export dialog box
                     const uri = await new ExportDialog().showDialog(ExportFormat.ipynb, file);
@@ -611,10 +641,12 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
                     // When all done, show a notice that it completed.
                     if (uri && filePath) {
                         const openQuestion1 = DataScience.exportOpenQuestion1;
+
                         const selection = await window.showInformationMessage(
                             DataScience.exportDialogComplete(getDisplayPath(file)),
                             openQuestion1
                         );
+
                         if (selection === openQuestion1) {
                             await openAndShowNotebook(uri);
                         }
@@ -627,6 +659,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     @captureUsageTelemetry(Telemetry.ExportPythonFileAndOutputInteractive)
     private async exportFileAndOutput(file: Uri): Promise<Uri | undefined> {
         const filePath = getFilePath(file);
+
         if (
             filePath &&
             filePath.length > 0 &&
@@ -636,6 +669,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
         ) {
             // If the current file is the active editor, then generate cells from the document.
             const activeEditor = window.activeTextEditor;
+
             if (
                 activeEditor &&
                 activeEditor.document &&
@@ -645,9 +679,11 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
                     activeEditor.document,
                     this.configuration.getSettings(activeEditor.document.uri)
                 );
+
                 if (cells) {
                     // Bring up the export dialog box
                     const uri = await new ExportDialog().showDialog(ExportFormat.ipynb, file);
+
                     if (!uri) {
                         return;
                     }
@@ -664,6 +700,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
                     // Next open this notebook & execute it.
                     await workspace.openNotebookDocument(uri).then((document) => window.showNotebookDocument(document));
                     await commands.executeCommand('notebook.execute');
+
                     return uri;
                 }
             }
@@ -679,6 +716,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     private async expandAllCells(uri?: Uri) {
         const interactiveWindow = this.interactiveWindowProvider.getInteractiveWindowWithNotebook(uri);
         logger.info(`Expanding all cells in interactive window with uri ${interactiveWindow?.notebookUri}`);
+
         if (interactiveWindow) {
             await interactiveWindow.expandAllCells();
         }
@@ -687,6 +725,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     private async collapseAllCells(uri?: Uri) {
         const interactiveWindow = this.interactiveWindowProvider.getInteractiveWindowWithNotebook(uri);
         logger.info(`Collapsing all cells in interactive window with uri ${interactiveWindow?.notebookUri}`);
+
         if (interactiveWindow) {
             await interactiveWindow.collapseAllCells();
         }
@@ -694,6 +733,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private exportCells() {
         const interactiveWindow = this.interactiveWindowProvider?.activeWindow;
+
         if (interactiveWindow) {
             interactiveWindow.export();
         }
@@ -701,6 +741,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private exportAs(uri?: Uri) {
         const interactiveWindow = this.interactiveWindowProvider.getInteractiveWindowWithNotebook(uri);
+
         if (interactiveWindow) {
             interactiveWindow.exportAs();
         }
@@ -708,6 +749,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
     private export(uri?: Uri) {
         const interactiveWindow = this.interactiveWindowProvider.getInteractiveWindowWithNotebook(uri);
+
         if (interactiveWindow) {
             interactiveWindow.export();
         }
@@ -724,12 +766,14 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
         canceled?: () => void
     ): Promise<T> {
         const message = formatMessage(file || '');
+
         return this.statusProvider.waitWithStatus(promise, message, undefined, canceled);
     }
 
     @captureUsageTelemetry(Telemetry.ImportNotebook, { scope: 'command' })
     private async importNotebook(): Promise<void> {
         const filtersKey = DataScience.importDialogFilter;
+
         const filtersObject: { [name: string]: string[] } = {};
         filtersObject[filtersKey] = ['ipynb'];
 
@@ -753,6 +797,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     @captureUsageTelemetry(Telemetry.ImportNotebook, { scope: 'file' })
     private async importNotebookOnFile(file: Uri): Promise<void> {
         const filepath = getFilePath(file);
+
         if (filepath && filepath.length > 0) {
             await this.waitForStatus(
                 async () => {
@@ -775,6 +820,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
             for (let i = 0; i < possibles.length; i += 1) {
                 if (await possibles[i].hasCell(id)) {
                     possibles[i].scrollToCell(id);
+
                     break;
                 }
             }
@@ -792,12 +838,14 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
 
         // Look for the matching notebook document to add cells to
         const document = workspace.notebookDocuments.find((document) => document.uri.toString() === uri.toString());
+
         if (!document) {
             return;
         }
 
         // Remove the cells from the matching notebook document
         const edit = new WorkspaceEdit();
+
         const nbEdit = NotebookEdit.deleteCells(new NotebookRange(0, document.cellCount));
         edit.set(document.uri, [nbEdit]);
         await workspace.applyEdit(edit);
@@ -806,6 +854,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     private async goToCodeInInteractiveWindow(context?: NotebookCell) {
         if (context && context.metadata?.interactive) {
             const uri = Uri.parse(context.metadata.interactive.uristring);
+
             const line = context.metadata.interactive.lineIndex;
 
             const editor = await window.showTextDocument(uri, { viewColumn: ViewColumn.One });
@@ -821,6 +870,7 @@ export class CommandRegistry implements IDisposable, IExtensionSyncActivationSer
     private async copyCellInInteractiveWindow(context?: NotebookCell) {
         if (context) {
             const settings = this.configuration.getSettings(context.notebook.uri);
+
             const source = [
                 // Prepend cell marker to code
                 context.metadata.interactiveWindowCellMarker ?? settings.defaultCellMarker,

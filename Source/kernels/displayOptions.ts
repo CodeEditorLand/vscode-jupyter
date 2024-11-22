@@ -16,6 +16,7 @@ export class DisplayOptions implements IDisplayOptions {
 	public set disableUI(value: boolean) {
 		const fireEvent = this._disableUI !== value;
 		this._disableUI = value;
+
 		if (fireEvent) {
 			this._event.fire();
 		}

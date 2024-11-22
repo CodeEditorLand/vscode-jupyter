@@ -20,6 +20,7 @@ export class SystemVariables extends AbstractSystemVariables {
 
 	constructor(file: Uri | undefined, rootFolder: string | undefined) {
 		super();
+
 		const workspaceFolder = file
 			? workspace.getWorkspaceFolder(file)
 			: undefined;
@@ -27,6 +28,7 @@ export class SystemVariables extends AbstractSystemVariables {
 			? workspaceFolder.uri.path
 			: rootFolder || "";
 		this._filePath = file ? file.path : undefined;
+
 		if (window.activeTextEditor) {
 			this._lineNumber =
 				window.activeTextEditor.selection.anchor.line + 1;

@@ -22,6 +22,7 @@ export class DesktopWorkspaceInterpreterTracker
 {
 	private readonly workspaceInterpreters = new Map<string, undefined | Uri>();
 	private trackingInterpreters?: boolean;
+
 	constructor(
 		@inject(IPythonExtensionChecker)
 		private readonly pythonExtensionChecker: IPythonExtensionChecker,
@@ -46,7 +47,9 @@ export class DesktopWorkspaceInterpreterTracker
 			return false;
 		}
 		const key = getWorkspaceFolderIdentifier(resource);
+
 		const activeInterpreterPath = this.workspaceInterpreters.get(key);
+
 		if (!activeInterpreterPath) {
 			return false;
 		}
@@ -75,6 +78,7 @@ export class DesktopWorkspaceInterpreterTracker
 						try {
 							const workspaceId =
 								getWorkspaceFolderIdentifier(item);
+
 							const interpreter =
 								await this.interpreterService.getActiveInterpreter(
 									item,

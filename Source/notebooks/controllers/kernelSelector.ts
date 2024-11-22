@@ -15,6 +15,7 @@ export async function selectKernel(
 	notebookEditorProvider: INotebookEditorProvider | undefined,
 ): Promise<boolean> {
 	const notebookEditor = notebookEditorProvider?.findNotebookEditor(resource);
+
 	if (notebookEditor) {
 		return commands.executeCommand("notebook.selectKernel", {
 			notebookEditor,
@@ -23,5 +24,6 @@ export async function selectKernel(
 	logger.error(
 		`Unable to select kernel as the Notebook document could not be identified`,
 	);
+
 	return false;
 }

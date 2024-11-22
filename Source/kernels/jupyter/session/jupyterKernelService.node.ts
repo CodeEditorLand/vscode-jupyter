@@ -82,12 +82,14 @@ export class JupyterKernelService implements IJupyterKernelService {
 					ignoreCache: true,
 					cannotChangeKernels,
 				});
+
 			switch (result) {
 				case KernelInterpreterDependencyResponse.cancel:
 				case KernelInterpreterDependencyResponse.selectDifferentKernel:
 				case KernelInterpreterDependencyResponse.failed:
 				case KernelInterpreterDependencyResponse.uiHidden:
 					throw new JupyterKernelDependencyError(result, kernel);
+
 				default:
 					break;
 			}
@@ -173,11 +175,13 @@ export class JupyterKernelService implements IJupyterKernelService {
 			logger.info(
 				`Kernel spec file for ${kernel.id} already exists ${getDisplayPath(kernelSpecFilePath)}`,
 			);
+
 			return kernelSpecFilePath.fsPath;
 		}
 
 		// If it doesn't exist, see if we had an original spec file that's different.
 		const contents = { ...kernel.kernelSpec };
+
 		if (
 			kernel.kernelSpec.specFile &&
 			!arePathsSame(
@@ -224,6 +228,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 			kernelSpecFilePath,
 			JSON.stringify(contents, undefined, 4),
 		);
+
 		if (cancelToken.isCancellationRequested) {
 			return;
 		}
@@ -232,9 +237,12 @@ export class JupyterKernelService implements IJupyterKernelService {
 		const originalSpecFile =
 			contents.metadata?.vscode?.originalSpecFile ||
 			contents.metadata?.originalSpecFile;
+
 		if (originalSpecFile) {
 			const originalSpecDir = path.dirname(originalSpecFile);
+
 			const newSpecDir = path.dirname(kernelSpecFilePath.fsPath);
+
 			const otherFiles = await this.fs.searchLocal(
 				"*.*[^json]",
 				originalSpecDir,
@@ -242,6 +250,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 			await Promise.all(
 				otherFiles.map(async (f) => {
 					const oldPath = path.join(originalSpecDir, f);
+
 					const newPath = path.join(newSpecDir, f);
 					await this.fs.copy(Uri.file(oldPath), Uri.file(newPath));
 				}),
@@ -257,10 +266,14 @@ export class JupyterKernelService implements IJupyterKernelService {
 		cancelToken?: CancellationToken,
 	) {
 		const interpreter: PythonEnvironment = kernelConnection.interpreter!;
+
 		const kernel: IJupyterKernelSpec = kernelConnection.kernelSpec;
+
 		const kernelSpecRootPath =
 			await this.jupyterPaths.getKernelSpecTempRegistrationFolder();
+
 		const specedKernel = kernel as JupyterKernelSpec;
+
 		if (specFile && kernelSpecRootPath) {
 			// Spec file may not be the same as the original spec file path.
 			const kernelSpecFilePath =
@@ -278,14 +291,17 @@ export class JupyterKernelService implements IJupyterKernelService {
 				logger.warn(
 					`Spec file for ${kernelConnection.id} does not exist ${kernelSpecFilePath} hence not updating env vars.`,
 				);
+
 				return;
 			}
 			const uri = Uri.file(kernelSpecFilePath);
+
 			try {
 				// Read spec from the file.
 				let specModel: ReadWrite<KernelSpec.ISpecModel> = JSON.parse(
 					await this.fs.readFile(uri),
 				);
+
 				if (cancelToken?.isCancellationRequested) {
 					return;
 				}
@@ -353,6 +369,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 					} with environment variables for ${getDisplayPath(uri)}`,
 					ex,
 				);
+
 				throw ex;
 			}
 		} else {

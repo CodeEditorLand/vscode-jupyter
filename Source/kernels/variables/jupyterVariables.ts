@@ -24,6 +24,7 @@ import {
 @injectable()
 export class JupyterVariables implements IJupyterVariables {
 	private refreshEventEmitter = new EventEmitter<void>();
+
 	constructor(
 		@inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
 		@inject(IJupyterVariables)

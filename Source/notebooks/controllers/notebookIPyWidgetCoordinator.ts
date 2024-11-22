@@ -84,6 +84,7 @@ class NotebookCommunication implements IWebviewCommunication, IDisposable {
 		this.eventHandlerListening = true;
 		// Immediately after the event handler is added, send the pending messages.
 		setTimeout(() => this.sendPendingMessages(), 0);
+
 		return this._onDidReceiveMessage.event;
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,6 +97,7 @@ class NotebookCommunication implements IWebviewCommunication, IDisposable {
 	private sendPendingMessages() {
 		if (this.pendingMessages.length) {
 			let message = this.pendingMessages.shift();
+
 			while (message) {
 				this._onDidReceiveMessage.fire(message);
 				message = this.pendingMessages.shift();
@@ -130,6 +132,7 @@ export class NotebookIPyWidgetCoordinator
 		NotebookDocument,
 		NotebookEditor[]
 	>();
+
 	constructor(
 		@inject(IServiceContainer)
 		private readonly serviceContainer: IServiceContainer,
@@ -161,6 +164,7 @@ export class NotebookIPyWidgetCoordinator
 	}) {
 		// Dispose previous message coordinators.
 		const previousCoordinators = this.messageCoordinators.get(e.notebook);
+
 		if (previousCoordinators) {
 			this.messageCoordinators.delete(e.notebook);
 			window.visibleNotebookEditors
@@ -168,8 +172,10 @@ export class NotebookIPyWidgetCoordinator
 				.forEach((editor) => {
 					const comms = this.notebookCommunications.get(editor);
 					this.notebookCommunications.delete(editor);
+
 					if (comms && comms.controller !== e.controller.controller) {
 						this.notebookCommunications.delete(editor);
+
 						if (comms) {
 							comms.dispose();
 						}
@@ -193,12 +199,14 @@ export class NotebookIPyWidgetCoordinator
 			return;
 		}
 		const notebook = editor.notebook;
+
 		if (!controller) {
 			logger.trace(
 				`No controller, hence notebook communications cannot be initialized for editor ${getDisplayPath(
 					editor.notebook.uri,
 				)}`,
 			);
+
 			return;
 		}
 		if (this.notebookCommunications.has(editor)) {
@@ -210,6 +218,7 @@ export class NotebookIPyWidgetCoordinator
 		// Create a handler for this notebook if we don't already have one. Since there's one of the notebookMessageCoordinator's for the
 		// entire VS code session, we have a map of notebook document to message coordinator
 		let coordinator = this.messageCoordinators.get(notebook);
+
 		if (!coordinator) {
 			coordinator = new CommonMessageCoordinator(
 				notebook,

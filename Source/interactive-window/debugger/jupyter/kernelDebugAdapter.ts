@@ -53,11 +53,13 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			platformService,
 			debugService,
 		);
+
 		if (debugLocationTrackerFactory) {
 			this.debugLocationTracker =
 				debugLocationTrackerFactory.createDebugAdapterTracker(
 					session,
 				) as DebugAdapterTracker;
+
 			if (this.debugLocationTracker.onWillStartSession) {
 				this.debugLocationTracker.onWillStartSession();
 			}
@@ -88,6 +90,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		logger.ci(
 			`KernelDebugAdapter::handleMessage ${JSON.stringify(message, undefined, " ")}`,
 		);
+
 		if (
 			message.type === "request" &&
 			this.debugLocationTracker?.onWillReceiveMessage
@@ -106,7 +109,9 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	// Dump content of given cell into a tmp file and return path to file.
 	protected async dumpCell(index: number): Promise<void> {
 		const cell = this.notebookDocument.cellAt(index);
+
 		const metadata = getInteractiveCellMetadata(cell);
+
 		if (!metadata) {
 			throw new Error("Not an interactive window cell");
 		}
@@ -114,6 +119,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			const code = (
 				metadata.generatedCode?.code || cell.document.getText()
 			).replace(/\r\n/g, "\n");
+
 			const response = await this.session.customRequest("dumpCell", {
 				code,
 			});
@@ -131,6 +137,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			// Jupyter will strip out any leading whitespace.
 			// Take that into account.
 			let numberOfStrippedLines = 0;
+
 			if (
 				metadata.generatedCode &&
 				!metadata.generatedCode.hasCellMarker
@@ -171,6 +178,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		source?: DebugProtocol.Source,
 	) {
 		source = location?.source ?? source;
+
 		if (!source || !source.path) {
 			return;
 		}
@@ -179,12 +187,14 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		const cell = this.cellToDebugFileSortedInReverseOrderByLineNumber.find(
 			(item) => item.debugFilePath === source!.path,
 		);
+
 		if (!cell) {
 			return;
 		}
 
 		source.name = path.basename(cell.interactiveWindow.path);
 		source.path = cell.interactiveWindow.toString();
+
 		if (typeof location?.endLine === "number") {
 			location.endLine = location.endLine + (cell.lineOffset || 0);
 		}
@@ -203,6 +213,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	) {
 		const startLine = location.line;
 		source = location?.source ?? source;
+
 		if (!source || !source.path || typeof startLine !== "number") {
 			return;
 		}
@@ -211,6 +222,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		const cell = this.cellToDebugFileSortedInReverseOrderByLineNumber.find(
 			(item) => startLine >= item.metadata.interactive.lineIndex + 1,
 		);
+
 		if (!cell || cell.interactiveWindow.path !== source.path) {
 			return;
 		}
@@ -241,14 +253,18 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			}
 
 			let currentCellLine: number | undefined;
+
 			let currentCellBps: DebugProtocol.SourceBreakpoint[] = [];
+
 			const setBreakpointsResponses: Promise<DebugProtocol.SetBreakpointsResponse>[] =
 				[];
+
 			const sendIfNeeded = () => {
 				if (currentCellBps.length) {
 					const clonedRequest: DebugProtocol.SetBreakpointsRequest =
 						JSON.parse(JSON.stringify(request));
 					clonedRequest.arguments.breakpoints = currentCellBps;
+
 					setBreakpointsResponses.push(
 						super.sendRequestToJupyterSession(
 							clonedRequest,
@@ -279,6 +295,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					currentCellBps.push(bp);
 				} else {
 					const fakeBreakpoint = { ...bp, ...{ verified: true } };
+
 					setBreakpointsResponses.push(
 						Promise.resolve({
 							body: { breakpoints: [fakeBreakpoint] },
@@ -289,6 +306,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			sendIfNeeded();
 
 			const responses = await Promise.all(setBreakpointsResponses);
+
 			const newResponse: DebugProtocol.SetBreakpointsResponse =
 				JSON.parse(JSON.stringify(responses[0]));
 			responses.slice(1).forEach((response) => {
@@ -302,6 +320,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			newResponse.type = "response";
 			newResponse.success = true;
 			newResponse.request_seq = request.seq;
+
 			return newResponse;
 		}
 

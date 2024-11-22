@@ -20,6 +20,7 @@ export interface IFileConverter {
 		defaultFileName?: string,
 		candidateInterpreter?: PythonEnvironment,
 	): Promise<undefined>;
+
 	importIpynb(source: Uri): Promise<void>;
 }
 
@@ -46,6 +47,7 @@ export interface IExport {
 export const IExportUtil = Symbol("IExportUtil");
 export interface IExportUtil {
 	getContent(document: NotebookDocument): Promise<string>;
+
 	getTargetFile(
 		format: ExportFormat,
 		source: Uri,

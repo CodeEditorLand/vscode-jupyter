@@ -13,6 +13,7 @@ export function registerPythonApi(
 		return;
 	}
 	registered = true;
+
 	const apiProvider =
 		serviceContainer.get<IPythonApiProvider>(IPythonApiProvider);
 	apiProvider.setApi(pythonApi);

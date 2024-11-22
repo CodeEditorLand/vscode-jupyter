@@ -37,12 +37,17 @@ export async function extractRequireConfigFromWidgetEntry(
 ) {
 	// Look for `require.config(` or `window["require"].config` or `window['requirejs'].config`
 	let patternsToLookFor = [...REQUIRE_PATTERNS];
+
 	const widgetFolderNameHash =
 		await getTelemetrySafeHashedString(widgetFolderName);
+
 	let indexOfRequireConfig = 0;
+
 	let patternUsedToRegisterRequireConfig: string | undefined;
+
 	while (indexOfRequireConfig <= 0 && patternsToLookFor.length) {
 		patternUsedToRegisterRequireConfig = patternsToLookFor.pop();
+
 		if (!patternUsedToRegisterRequireConfig) {
 			break;
 		}
@@ -56,8 +61,10 @@ export async function extractRequireConfigFromWidgetEntry(
 		let patternsToLookFor = [...REQUIRE_PATTERNS].map((pattern) =>
 			pattern.substring(0, pattern.length - 2),
 		);
+
 		while (indexOfRequireConfig <= 0 && patternsToLookFor.length) {
 			patternUsedToRegisterRequireConfig = patternsToLookFor.pop();
+
 			if (!patternUsedToRegisterRequireConfig) {
 				break;
 			}
@@ -74,11 +81,13 @@ export async function extractRequireConfigFromWidgetEntry(
 			patternUsedToRegisterRequireConfig,
 			failure: "couldNotLocateRequireConfigStart",
 		});
+
 		return;
 	}
 
 	// Find the end bracket for the require config call.
 	const endBracket = contents.indexOf(")", indexOfRequireConfig);
+
 	if (endBracket <= 0 || !patternUsedToRegisterRequireConfig) {
 		sendTelemetryEvent(Telemetry.IPyWidgetExtensionJsInfo, undefined, {
 			widgetFolderNameHash,
@@ -86,9 +95,11 @@ export async function extractRequireConfigFromWidgetEntry(
 			patternUsedToRegisterRequireConfig,
 			failure: "couldNotLocateRequireConfigEnd",
 		});
+
 		return;
 	}
 	const startBracket = contents.indexOf("{", indexOfRequireConfig);
+
 	let configStr = contents.substring(startBracket, endBracket);
 	// the config entry is js, and not json.
 	// We cannot eval as thats dangerous, and we cannot use JSON.parse either as it not JSON.
@@ -123,6 +134,7 @@ export async function extractRequireConfigFromWidgetEntry(
 		const key = trimQuotes(
 			parts[0].replace(/\\r/g, "").replace(/\\n/g, "").trim(),
 		).trim();
+
 		const value = trimQuotes(
 			mapping
 				.substring(mapping.indexOf(":") + 1)
@@ -142,6 +154,7 @@ export async function extractRequireConfigFromWidgetEntry(
 			patternUsedToRegisterRequireConfig,
 			failure: "noRequireConfigEntries",
 		});
+
 		return;
 	}
 	sendTelemetryEvent(
@@ -164,6 +177,7 @@ export abstract class BaseIPyWidgetScriptManager
 {
 	protected readonly disposables: IDisposable[] = [];
 	private widgetModuleMappings?: Promise<Record<string, Uri> | undefined>;
+
 	constructor(protected readonly kernel: IKernel) {
 		// If user installs new python packages, & they restart the kernel, then look for changes to nbextensions folder once again.
 		// No need to look for changes in nbextensions folder if its not restarted.
@@ -209,10 +223,12 @@ export abstract class BaseIPyWidgetScriptManager
 				widgetFolderName,
 				contents,
 			);
+
 			if (!config) {
 				let message = `Failed to extract require.config from widget for ${widgetFolderName} from ${getDisplayPath(
 					script,
 				)}`;
+
 				if (isCI) {
 					message += `with contents ${contents}`;
 				}
@@ -230,10 +246,12 @@ export abstract class BaseIPyWidgetScriptManager
 		Record<string, Uri> | undefined
 	> {
 		const stopWatch = new StopWatch();
+
 		const [entryPoints, baseUrl] = await Promise.all([
 			this.getWidgetEntryPoints(),
 			this.getNbExtensionsParentPath(),
 		]);
+
 		if (!baseUrl) {
 			return;
 		}
@@ -246,6 +264,7 @@ export abstract class BaseIPyWidgetScriptManager
 				),
 			),
 		);
+
 		const config = widgetConfigs.reduce(
 			(prev, curr) => Object.assign(prev || {}, curr),
 			{},
@@ -266,6 +285,7 @@ export abstract class BaseIPyWidgetScriptManager
 					: "remote",
 			},
 		);
+
 		return config && Object.keys(config).length ? config : undefined;
 	}
 }

@@ -60,6 +60,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
         CompletionItem,
         { documentRef: WeakRef<TextDocument>; position: Position; originalCompletionItem: CompletionItem }
     >();
+
     async provideCompletionItems(
         document: TextDocument,
         position: Position,
@@ -76,6 +77,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             return [];
         }
         this.pendingCompletionRequest.set(document, { position, version });
+
         const disposable = new Disposable(() => {
             if (
                 this.pendingCompletionRequest.get(document)?.position.isEqual(position) &&
@@ -84,6 +86,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
                 this.pendingCompletionRequest.delete(document);
             }
         });
+
         try {
             // Request completions from other language providers.
             // Do this early, as we know kernel completions will take longer.
@@ -102,6 +105,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             // Wait for 50ms, as we do not want to flood the kernel with too many messages.
             // if after 50ms, the token isn't cancelled, then send the request.
             await sleep(50);
+
             if (token.isCancellationRequested) {
                 return [];
             }
@@ -110,6 +114,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
                 new RequestTimedoutError(),
                 this.provideCompletionItemsFromKernel(document, position, token, context)
             );
+
             if (token.isCancellationRequested || !completions || !completions.length) {
                 return [];
             }
@@ -118,6 +123,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             // Adding delays here could just slow things down in VS Code.
             // NOTE: We have already waited for 50ms earlier.
             let otherCompletions = await raceTimeout(0, completionsFromOtherSourcesPromise.promise);
+
             if (
                 isPythonKernelConnection(this.kernel.kernelConnectionMetadata) &&
                 !completionsFromOtherSourcesPromise.completed &&
@@ -140,6 +146,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
                     .map((item) => [item, `.${item}`])
                     .flat()
             );
+
             return completions.filter(
                 (item) => !existingCompletionItems.has(typeof item.label === 'string' ? item.label : item.label.label)
             );
@@ -165,12 +172,14 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             return [];
         }
         const stopWatch = new StopWatch();
+
         const measures: TelemetryMeasures<Telemetry.KernelCodeCompletion> = {
             duration: 0,
             timesExceededTimeout: 0,
             requestDuration: 0,
             completionItems: 0
         };
+
         const properties: TelemetryProperties<Telemetry.KernelCodeCompletion> = {
             kernelId: this.kernelId,
             kernelConnectionType: this.kernel.kernelConnectionMetadata.kind,
@@ -188,9 +197,11 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             return [];
         }
         const code = document.getText();
+
         const cursor_pos = document.offsetAt(position);
 
         properties.requestSent = true;
+
         const kernelCompletions = await raceCancellation(token, this.getKernelCompletion(code, cursor_pos, token));
         logger.debug(`Jupyter completion time: ${stopWatch.elapsedTime}`);
         properties.cancelled = token.isCancellationRequested;
@@ -204,6 +215,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
 
         if (kernelCompletions?.content?.status !== 'ok' || (kernelCompletions?.content?.matches?.length ?? 0) === 0) {
             sendCompletionTelemetry(this.kernel, measures, properties);
+
             return [];
         }
         const result: INotebookCompletion = {
@@ -228,8 +240,11 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             documentRef: new WeakRef(document),
             position: document.positionAt(result.cursor.start)
         };
+
         const range = new Range(document.positionAt(result.cursor.start), document.positionAt(result.cursor.end));
+
         let items: CompletionItem[] = [];
+
         if (
             Array.isArray(experimentMatches) &&
             experimentMatches.length >= result.matches.length &&
@@ -238,6 +253,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             // This works for Julia and Python kernels, haven't tested others.
             items = kernelCompletions.content.matches.map((label, index) => {
                 const item = experimentMatches[index];
+
                 const type = item.type ? mapJupyterKind.get(item.type) : CompletionItemKind.Field;
 
                 const completionItem = new CompletionItem(label, type);
@@ -249,6 +265,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
                 }
                 completionItem.insertText = item.text;
                 completionItem.sortText = generateSortString(index);
+
                 if (
                     isPythonKernelConnection(this.kernel.kernelConnectionMetadata) &&
                     (label.startsWith('%') || label.startsWith('!'))
@@ -263,6 +280,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
                     ...dataToStore,
                     originalCompletionItem: JSON.parse(JSON.stringify(completionItem)) // Used to resolve completion items.
                 });
+
                 return completionItem;
             });
         } else {
@@ -271,6 +289,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
 
                 completionItem.range = range;
                 completionItem.sortText = generateSortString(index);
+
                 if (
                     isPythonKernelConnection(this.kernel.kernelConnectionMetadata) &&
                     (label.startsWith('%') || label.startsWith('!'))
@@ -284,6 +303,7 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
                     ...dataToStore,
                     originalCompletionItem: completionItem
                 });
+
                 return completionItem;
             });
         }
@@ -304,11 +324,14 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
             return item;
         }
         const info = this.previousCompletionItems.get(item);
+
         if (!info) {
             return item;
         }
         const { documentRef, position, originalCompletionItem } = info;
+
         const document = documentRef.deref();
+
         if (!document) {
             return item;
         }
@@ -344,16 +367,19 @@ class NotebookCellSpecificKernelCompletionProvider implements CompletionItemProv
         const codeToExecute = `return get_ipython().kernel.do_complete("${escapeStringToEmbedInPythonCode(
             code
         )}", ${cursor_pos})`;
+
         const content = await execCodeInBackgroundThread<ICompleteReplyMsg['content']>(
             this.kernel,
             [codeToExecute],
             token
         );
+
         return { content } as ICompleteReplyMsg;
     }
 }
 
 const lastSentCompletionTimes = new WeakMap<IKernel, StopWatch>();
+
 const lastTelemetryExceedingMaxTimeout = new WeakMap<
     IKernel,
     {
@@ -369,11 +395,14 @@ function sendCompletionTelemetry(
     properties: TelemetryProperties<Telemetry.KernelCodeCompletion>
 ) {
     let lastSentCompletionTime = lastSentCompletionTimes.get(kernel);
+
     let timesExceededTimeout = lastTelemetryExceedingMaxTimeout.get(kernel)?.count || 0;
+
     if (measures.duration >= Settings.IntellisenseTimeout) {
         lastTelemetryExceedingMaxTimeout.set(kernel, { count: timesExceededTimeout + 1, measures, properties });
     }
     measures.timesExceededTimeout = timesExceededTimeout;
+
     if (!lastSentCompletionTime) {
         sendTelemetryEvent(Telemetry.KernelCodeCompletion, measures, properties);
         lastSentCompletionTime = new StopWatch();
@@ -405,6 +434,7 @@ class KernelSpecificCompletionProvider extends DisposableBase implements Complet
                     if (!isKernelCompletionEnabled(this.kernel.notebook.uri)) {
                         this.completionProvider?.dispose();
                         this.completionProvider = undefined;
+
                         return;
                     } else if (!this.completionProvider) {
                         this.registerCompletionProvider();
@@ -426,8 +456,10 @@ class KernelSpecificCompletionProvider extends DisposableBase implements Complet
         }
 
         const triggerCharacters = getCompletionTriggerCharacter(this.kernel);
+
         if (triggerCharacters.length === 0) {
             logHowToEnableKernelCompletion(this.kernel);
+
             return;
         }
 
@@ -444,6 +476,7 @@ class KernelSpecificCompletionProvider extends DisposableBase implements Complet
             this,
             ...triggerCharacters
         );
+
         return;
     }
     override dispose() {
@@ -460,19 +493,23 @@ class KernelSpecificCompletionProvider extends DisposableBase implements Complet
             return [];
         }
         let provider = this.cellCompletionProviders.get(document);
+
         if (!provider) {
             const kernelId = await getTelemetrySafeHashedString(this.kernel.kernelConnectionMetadata.id);
             provider = new NotebookCellSpecificKernelCompletionProvider(kernelId, this.kernel, this.monacoLanguage);
             this.cellCompletionProviders.set(document, provider);
         }
         provider.allowStringFilterForPython = this.allowStringFilterForPython;
+
         return provider.provideCompletionItems(document, position, token, _context).then((items) => {
             items.forEach((item) => this.completionItemsSent.set(item, provider!));
+
             return items;
         });
     }
     async resolveCompletionItem(item: CompletionItem, token: CancellationToken): Promise<CompletionItem> {
         const provider = this.completionItemsSent.get(item);
+
         return provider ? provider.resolveCompletionItem(item, token) : item;
     }
 }
@@ -483,6 +520,7 @@ class KernelSpecificCompletionProvider extends DisposableBase implements Complet
 @injectable()
 export class KernelCompletionProvider extends DisposableBase implements IExtensionSyncActivationService {
     public readonly kernelCompletionProviders = new WeakMap<IKernel, KernelSpecificCompletionProvider>();
+
     constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
         super();
         disposables.push(this);
@@ -505,6 +543,7 @@ export class KernelCompletionProvider extends DisposableBase implements IExtensi
                 }
 
                 const language = getKernelLanguageAsMonacoLanguage(e);
+
                 if (!language) {
                     return;
                 }
@@ -513,6 +552,7 @@ export class KernelCompletionProvider extends DisposableBase implements IExtensi
                 }
                 const notebookProvider =
                     ServiceContainer.instance.get<INotebookEditorProvider>(INotebookEditorProvider);
+
                 const completionProvider = this._register(new KernelSpecificCompletionProvider(e, notebookProvider));
                 this.kernelCompletionProviders.set(e, completionProvider);
             })
@@ -530,18 +570,26 @@ function getKernelLanguageAsMonacoLanguage(kernel: IKernel) {
 }
 function getKernelLanguage(kernel: IKernel) {
     let kernelSpecLanguage: string | undefined = '';
+
     switch (kernel.kernelConnectionMetadata.kind) {
         case 'connectToLiveRemoteKernel':
             kernelSpecLanguage = kernel.kernelConnectionMetadata.kernelModel.language;
+
             break;
+
         case 'startUsingRemoteKernelSpec':
             kernelSpecLanguage = kernel.kernelConnectionMetadata.kernelSpec.language;
+
             break;
+
         case 'startUsingLocalKernelSpec':
             kernelSpecLanguage = kernel.kernelConnectionMetadata.kernelSpec.language;
+
             break;
+
         default:
             kernelSpecLanguage = kernel.kernelConnectionMetadata.kernelSpec.language;
+
             break;
     }
 
@@ -562,6 +610,7 @@ function getCompletionTriggerCharacter(kernel: IKernel) {
         return [];
     }
     const kernelLanguage = getKernelLanguage(kernel);
+
     const monacoLanguage = getKernelLanguageAsMonacoLanguage(kernel);
     // Always use the kernel language first, then the monaco language.
     // Thats because kernel language could be something like `bash`
@@ -581,7 +630,9 @@ function getCompletionTriggerCharacter(kernel: IKernel) {
 
 function logHowToEnableKernelCompletion(kernel: IKernel) {
     const kernelLanguage = getKernelLanguage(kernel);
+
     const monacoLanguage = getKernelLanguageAsMonacoLanguage(kernel);
+
     if (kernelLanguage.toLowerCase() === monacoLanguage.toLowerCase()) {
         logger.warn(
             l10n.t(
@@ -604,11 +655,17 @@ function logHowToEnableKernelCompletion(kernel: IKernel) {
 
 function positionInsideString(line: string, position: Position) {
     const indexDoubleQuote = line.indexOf('"');
+
     const indexSingleQuote = line.indexOf("'");
+
     const lastIndexDoubleQuote = line.lastIndexOf('"');
+
     const lastIndexSingleQuote = line.lastIndexOf("'");
+
     const index = indexDoubleQuote >= 0 ? indexDoubleQuote : indexSingleQuote;
+
     const lastIndex = lastIndexDoubleQuote >= 0 ? lastIndexDoubleQuote : lastIndexSingleQuote;
+
     return index >= 0 && position.character > index && position.character <= lastIndex;
 }
 
@@ -623,18 +680,26 @@ export function generatePythonCompletions(
         position.character === 0
             ? undefined
             : new Range(position.line, position.character - 1, position.line, position.character);
+
     const charBeforeCursor = charBeforeCursorPosition ? cell.getText(charBeforeCursorPosition) : undefined;
+
     const isPreviousCharTriggerCharacter = charBeforeCursor === '.';
+
     const wordRange = cell.getWordRangeAtPosition(
         isPreviousCharTriggerCharacter || triggerCharacter === '.'
             ? new Position(position.line, position.character - 1)
             : position
     );
+
     const wordRangeWithTriggerCharacter =
         wordRange && charBeforeCursorPosition ? wordRange.union(charBeforeCursorPosition) : undefined;
+
     const line = cell.lineAt(position.line).text;
+
     const word = wordRangeWithTriggerCharacter ? cell.getText(wordRangeWithTriggerCharacter) : line;
+
     const wordDot = word.endsWith('.') || isPreviousCharTriggerCharacter;
+
     const insideString =
         allowStringFilter &&
         (triggerCharacter == "'" || triggerCharacter == '"' || positionInsideString(line, position));
@@ -647,7 +712,9 @@ export function generatePythonCompletions(
     const result = completions
         .map((r, i) => {
             let itemText = typeof r.label === 'string' ? r.label : r.label.label;
+
             let label = typeof r.label === 'string' ? r.label : r.label.label;
+
             if (label.startsWith('%') || label.startsWith('!')) {
                 return {
                     ...r,
@@ -660,8 +727,11 @@ export function generatePythonCompletions(
             }
 
             const wordIndex = word ? label.indexOf(word) : -1;
+
             let newLabel: string | undefined = undefined;
+
             let newText: string | undefined = undefined;
+
             let newRange: Range | { inserting: Range; replacing: Range } | undefined = undefined;
 
             // Two cases for filtering. We're at the '.', then the word we have is the beginning of the string.
@@ -669,6 +739,7 @@ export function generatePythonCompletions(
             if (word && wordDot && label.includes(word)) {
                 newLabel = label.substring(label.indexOf(word) + (wordDot ? word.length : 0));
                 newText = label.substring(label.indexOf(word) + word.length);
+
                 const changeInCharacters =
                     (typeof r.label === 'string' ? r.label.length : r.label.label.length) - newText.length;
                 newRange =
@@ -684,6 +755,7 @@ export function generatePythonCompletions(
             if (!newText && wordIndex > 0) {
                 newLabel = label.substring(label.indexOf(word) + (wordDot ? word.length : 0));
                 newText = label.substring(label.indexOf(word) + word.length);
+
                 const changeInCharacters =
                     (typeof r.label === 'string' ? r.label.length : r.label.label.length) - newText.length;
                 newRange =
@@ -715,6 +787,7 @@ export function generatePythonCompletions(
             // Sometimes we have items with spaces, and Jupyter escapes spaces with `\ `
             if (itemText.includes(' ')) {
                 itemText = itemText.replace(/\\ /g, ' ');
+
                 if (typeof r.label === 'string') {
                     r.label = r.label.replace(/\\ /g, ' ');
                 } else {

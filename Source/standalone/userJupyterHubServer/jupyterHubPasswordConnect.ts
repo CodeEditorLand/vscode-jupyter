@@ -61,6 +61,7 @@ export class JupyterHubPasswordConnect {
 				logger.trace(
 					`JupyterHub version is ${json && json.version} for url ${url}`,
 				);
+
 				return json && json.version;
 			} catch {
 				//
@@ -70,6 +71,7 @@ export class JupyterHubPasswordConnect {
 			logger.debug(
 				`Error in detecting whether url is isJupyterHub: ${ex}`,
 			);
+
 			return false;
 		}
 	}
@@ -114,13 +116,16 @@ export class JupyterHubPasswordConnect {
 			if (e.message.indexOf("reason: self signed certificate") >= 0) {
 				// Ask user to change setting and possibly try again.
 				const enableOption: string = DataScience.jupyterSelfCertEnable;
+
 				const closeOption: string = DataScience.jupyterSelfCertClose;
+
 				const value = await window.showErrorMessage(
 					DataScience.jupyterSelfCertFail(e.message),
 					{ modal: true },
 					enableOption,
 					closeOption,
 				);
+
 				if (value === enableOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
 					await this.configService.updateSetting(
@@ -129,6 +134,7 @@ export class JupyterHubPasswordConnect {
 						undefined,
 						ConfigurationTarget.Workspace,
 					);
+
 					return this.requestCreator.getFetchMethod()(
 						url,
 						this.addAllowUnauthorized(url, true, options),
@@ -144,6 +150,7 @@ export class JupyterHubPasswordConnect {
 
 function addTrailingSlash(url: string): string {
 	let newUrl = url;
+
 	if (newUrl[newUrl.length - 1] !== "/") {
 		newUrl = `${newUrl}/`;
 	}

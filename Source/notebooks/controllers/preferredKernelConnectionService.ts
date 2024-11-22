@@ -45,6 +45,7 @@ import { getLanguageOfNotebookDocument } from "../languages/helpers";
  */
 export class PreferredKernelConnectionService {
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(private readonly jupyterConnection: JupyterConnection) {}
 	public dispose() {
 		dispose(this.disposables);
@@ -80,6 +81,7 @@ export class PreferredKernelConnectionService {
 						item.kind === "connectToLiveRemoteKernel" &&
 						item.id === preferredRemoteKernelId,
 				) as LiveRemoteKernelConnectionMetadata;
+
 			if (liveKernelMatchingIdFromCurrentKernels) {
 				return liveKernelMatchingIdFromCurrentKernels;
 			}
@@ -99,6 +101,7 @@ export class PreferredKernelConnectionService {
 								item.kind === "connectToLiveRemoteKernel" &&
 								item.id === preferredRemoteKernelId,
 						) as LiveRemoteKernelConnectionMetadata;
+
 						if (kernel) {
 							resolve(kernel);
 						}
@@ -113,6 +116,7 @@ export class PreferredKernelConnectionService {
 					this.disposables,
 				),
 			);
+
 			if (liveKernelMatchingId) {
 				return liveKernelMatchingId;
 			}
@@ -124,8 +128,10 @@ export class PreferredKernelConnectionService {
 				return;
 			}
 		};
+
 		if (preferredRemoteKernelId) {
 			const kernel = await findLiveKernelConnection();
+
 			if (kernel || findExactMatch) {
 				return kernel;
 			}
@@ -137,13 +143,16 @@ export class PreferredKernelConnectionService {
 				| RemoteKernelConnectionMetadata
 				| undefined
 		)?.serverProviderHandle;
+
 		if (serverId) {
 			const connection =
 				await this.jupyterConnection.createConnectionInfo(serverId);
+
 			const sessionOptions = getRemoteSessionOptions(
 				connection,
 				notebook.uri,
 			);
+
 			const matchingSession =
 				sessionOptions &&
 				kernelFinder.kernels.find(
@@ -154,6 +163,7 @@ export class PreferredKernelConnectionService {
 						item.kernelModel.model.path === sessionOptions.path &&
 						item.kernelModel.model.name === sessionOptions.name,
 				);
+
 			if (matchingSession) {
 				return matchingSession as RemoteKernelConnectionMetadata;
 			}
@@ -189,7 +199,9 @@ export class PreferredKernelConnectionService {
 		| undefined
 	> {
 		const metadata = getNotebookMetadata(notebook);
+
 		const kernelSpecName = metadata?.kernelspec?.name;
+
 		const findMatchBasedOnKernelNameOrLanguage = () => {
 			const kernelsMatchingKernelName = kernelSpecName
 				? (kernelFinder.kernels.filter(
@@ -202,11 +214,13 @@ export class PreferredKernelConnectionService {
 						| RemoteKernelSpecConnectionMetadata
 					)[])
 				: [];
+
 			if (kernelsMatchingKernelName.length || findExactMatch) {
 				return kernelsMatchingKernelName;
 			}
 
 			const language = getLanguageOfNotebookDocument(notebook);
+
 			if (!language) {
 				return;
 			}
@@ -226,6 +240,7 @@ export class PreferredKernelConnectionService {
 		};
 
 		const found = findMatchBasedOnKernelNameOrLanguage();
+
 		if (Array.isArray(found) && found.length) {
 			if (findExactMatch && found.length > 1) {
 				// Too many matches.
@@ -240,6 +255,7 @@ export class PreferredKernelConnectionService {
 		}
 
 		const disposables: IDisposable[] = [];
+
 		return new Promise<
 			| LocalKernelSpecConnectionMetadata
 			| RemoteKernelSpecConnectionMetadata
@@ -252,6 +268,7 @@ export class PreferredKernelConnectionService {
 						return resolve(undefined);
 					}
 					const found = findMatchBasedOnKernelNameOrLanguage();
+
 					if (Array.isArray(found) && found.length) {
 						if (findExactMatch && found.length > 1) {
 							// Too many matches.
@@ -302,6 +319,7 @@ export class PreferredKernelConnectionService {
 
 		// 1. Check if we have a .conda or .venv virtual env in the local workspace folder.
 		const localEnv = findPythonEnvClosesToNotebook(notebook, kernelFinder);
+
 		if (localEnv) {
 			return localEnv;
 		}
@@ -310,6 +328,7 @@ export class PreferredKernelConnectionService {
 		const activeInterpreter = await interpreterService.getActiveInterpreter(
 			notebook.uri,
 		);
+
 		if (!activeInterpreter) {
 			return;
 		}
@@ -324,6 +343,7 @@ export class PreferredKernelConnectionService {
 		};
 		// 3. Fall back to the active interpreter.
 		const activeInterpreterKernel = findMatchingActiveInterpreterKernel();
+
 		if (activeInterpreterKernel) {
 			return activeInterpreterKernel;
 		}
@@ -367,10 +387,12 @@ function findPythonEnvClosesToNotebook(
 		(workspace.workspaceFolders?.length === 1
 			? workspace.workspaceFolders[0].uri
 			: undefined);
+
 	const localEnvNextToNbFile = findLocalPythonEnv(
 		path.dirname(notebook.uri),
 		kernelFinder,
 	);
+
 	if (localEnvNextToNbFile) {
 		return localEnvNextToNbFile;
 	}
@@ -401,6 +423,7 @@ function findLocalPythonEnv(
 			getEnvironmentType(e.interpreter) === EnvironmentType.Venv &&
 			getPythonEnvironmentName(e.interpreter)?.toLowerCase() === ".venv",
 	);
+
 	if (venv) {
 		return venv;
 	}
@@ -409,6 +432,7 @@ function findLocalPythonEnv(
 			getEnvironmentType(e.interpreter) === EnvironmentType.Conda &&
 			getPythonEnvironmentName(e.interpreter)?.toLowerCase() === ".venv",
 	);
+
 	if (conda) {
 		return conda;
 	}
@@ -416,6 +440,7 @@ function findLocalPythonEnv(
 		(e) =>
 			getPythonEnvironmentName(e.interpreter)?.toLowerCase() === ".venv",
 	);
+
 	if (anyVenv) {
 		return anyVenv;
 	}

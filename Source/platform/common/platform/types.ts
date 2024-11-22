@@ -48,7 +48,9 @@ export interface IFileSystem {
 	readFile(uri: vscode.Uri): Promise<string>;
 	stat(uri: vscode.Uri): Promise<vscode.FileStat>;
 	writeFile(uri: vscode.Uri, text: string | Uint8Array): Promise<void>;
+
 	getFiles(dir: vscode.Uri): Promise<vscode.Uri[]>;
 	exists(uri: vscode.Uri, fileType?: vscode.FileType): Promise<boolean>;
+
 	getFileHash(filename: vscode.Uri): Promise<string>;
 }

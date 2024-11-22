@@ -15,12 +15,14 @@ export const sliceRegEx =
  */
 export function preselectedSliceExpression(shape: number[]) {
 	let numDimensionsToPreselect = shape.length - 2;
+
 	return (
 		"[" +
 		shape
 			.map(() => {
 				if (numDimensionsToPreselect > 0) {
 					numDimensionsToPreselect -= 1;
+
 					return "0";
 				}
 				return ":";
@@ -42,15 +44,19 @@ export function validateSliceExpression(
 		let hasOutOfRangeIndex:
 			| { shapeIndex: number; value: number }
 			| undefined;
+
 		const parsedExpression = sliceExpression
 			.substring(1, sliceExpression.length - 1)
 			.split(",")
 			.map((shapeEl, shapeIndex) => {
 				// Validate IndexErrors
 				const match = sliceRegEx.exec(shapeEl);
+
 				if (match?.groups?.Start && !match.groups.Stop) {
 					const value = parseInt(match.groups.Start);
+
 					const numberOfElementsAlongAxis = shape[shapeIndex];
+
 					if (
 						(value >= 0 && value >= numberOfElementsAlongAxis) ||
 						// Python allows negative index values
@@ -64,10 +70,12 @@ export function validateSliceExpression(
 
 		if (hasOutOfRangeIndex) {
 			const { shapeIndex, value } = hasOutOfRangeIndex;
+
 			const localized = getLocString(
 				"sliceIndexError",
 				"Index {0} out of range for axis {1} with {2} elements",
 			);
+
 			return format(
 				localized,
 				value.toString(),
@@ -82,6 +90,7 @@ export function validateSliceExpression(
 				"sliceMismatchedAxesError",
 				"Expected {0} axes, got {1} in slice expression",
 			);
+
 			return format(
 				localized,
 				shape.length.toString(),

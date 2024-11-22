@@ -52,6 +52,7 @@ export class LocalNotebookKernelSourceSelector
 {
 	private localDisposables: IDisposable[] = [];
 	private cancellationTokenSource: CancellationTokenSource | undefined;
+
 	constructor(
 		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
 		@inject(IMultiStepInputFactory)
@@ -77,12 +78,16 @@ export class LocalNotebookKernelSourceSelector
 		this.cancellationTokenSource?.dispose();
 
 		this.cancellationTokenSource = new CancellationTokenSource();
+
 		const multiStep = this.multiStepFactory.create<MultiStepResult>();
+
 		const state: MultiStepResult = { disposables: [], notebook };
+
 		const kernelFinder = this.kernelFinder.registered.find(
 			(finder) =>
 				finder.id === ContributedKernelFinderKind.LocalKernelSpec,
 		)!;
+
 		try {
 			const result = await multiStep.run(
 				this.selectKernelFromKernelFinder.bind(
@@ -94,6 +99,7 @@ export class LocalNotebookKernelSourceSelector
 				),
 				state,
 			);
+
 			if (
 				result === InputFlowAction.cancel ||
 				state.selection?.type === "userPerformedSomeOtherAction"
@@ -102,6 +108,7 @@ export class LocalNotebookKernelSourceSelector
 			}
 			if (this.cancellationTokenSource.token.isCancellationRequested) {
 				dispose(state.disposables);
+
 				return;
 			}
 
@@ -128,6 +135,7 @@ export class LocalNotebookKernelSourceSelector
 			this.jupyterConnection,
 		);
 		state.disposables.push(provider);
+
 		return this.selectKernel(provider, token, multiStep, state);
 	}
 	/**
@@ -144,6 +152,7 @@ export class LocalNotebookKernelSourceSelector
 		}
 		const selector = new BaseKernelSelector(provider, token);
 		state.disposables.push(selector);
+
 		const quickPickFactory: CreateAndSelectItemFromQuickPick = (
 			options,
 		) => {
@@ -156,6 +165,7 @@ export class LocalNotebookKernelSourceSelector
 				activeItem: undefined,
 				ignoreFocusOut: false,
 			});
+
 			return {
 				quickPick,
 				selection: selection as Promise<
@@ -163,7 +173,9 @@ export class LocalNotebookKernelSourceSelector
 				>,
 			};
 		};
+
 		const result = await selector.selectKernel(quickPickFactory);
+
 		if (result?.selection === "controller") {
 			state.selection = {
 				type: "connection",

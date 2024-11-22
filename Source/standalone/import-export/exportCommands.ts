@@ -40,6 +40,7 @@ interface IExportQuickPickItem extends QuickPickItem {
  */
 export class ExportCommands implements IDisposable {
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		private fileConverter: IFileConverter,
 		private readonly fs: IFileSystem,
@@ -115,6 +116,7 @@ export class ExportCommands implements IDisposable {
 		const notebookUri = isUri(context)
 			? context
 			: context?.notebookEditor?.notebookUri;
+
 		const document = notebookUri
 			? workspace.notebookDocuments.find((item) =>
 					this.fs.arePathsSame(item.uri, notebookUri),
@@ -123,12 +125,15 @@ export class ExportCommands implements IDisposable {
 
 		if (document) {
 			let preferredInterpreter: PythonEnvironment | undefined;
+
 			const pythonEnvFinder = this.kernelFinder.registered.find(
 				(item) =>
 					item.kind ===
 					ContributedKernelFinderKind.LocalPythonEnvironment,
 			);
+
 			const token = new CancellationTokenSource();
+
 			try {
 				preferredInterpreter = pythonEnvFinder
 					? await this.preferredKernel
@@ -145,6 +150,7 @@ export class ExportCommands implements IDisposable {
 			const interpreter =
 				this.controllerRegistration.getSelected(document)?.connection
 					.interpreter || preferredInterpreter;
+
 			return this.export(document, undefined, undefined, interpreter);
 		} else {
 			return this.export(undefined, undefined, undefined, undefined);
@@ -164,10 +170,12 @@ export class ExportCommands implements IDisposable {
 				window.activeNotebookEditor?.notebook ||
 				this.interactiveProvider?.getActiveOrAssociatedInteractiveWindow()
 					?.notebookDocument;
+
 			if (!sourceDocument) {
 				logger.info(
 					"Export called without a valid exportable document active",
 				);
+
 				return;
 			}
 
@@ -176,6 +184,7 @@ export class ExportCommands implements IDisposable {
 				interpreter ||
 				this.controllerRegistration.getSelected(sourceDocument)
 					?.connection.interpreter;
+
 			if (exportMethod) {
 				sendTelemetryEvent(
 					Telemetry.ExportNotebookAsCommand,
@@ -200,6 +209,7 @@ export class ExportCommands implements IDisposable {
 				defaultFileName,
 				interpreter,
 			).then((item) => item);
+
 			if (pickedItem !== undefined) {
 				pickedItem.handler();
 			} else {

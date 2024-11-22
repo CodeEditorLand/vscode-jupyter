@@ -20,12 +20,14 @@ export function pythonEnvironmentQuickPick(
 	quickPick: BaseProviderBasedQuickPick<Environment>,
 ) {
 	const label = getPythonEnvDisplayName(item);
+
 	const icon =
 		item.id === quickPick.recommended?.id
 			? "$(star-full) "
 			: isCondaEnvironmentWithoutPython(item)
 				? "$(warning) "
 				: "";
+
 	const quickPickItem: QuickPickItem = { label: `${icon}${label}` };
 	quickPickItem.description = getDisplayPath(
 		item.executable.uri || item.path,
@@ -35,6 +37,7 @@ export function pythonEnvironmentQuickPick(
 	quickPickItem.tooltip = isCondaEnvironmentWithoutPython(item)
 		? DataScience.pythonCondaKernelsWithoutPython
 		: "";
+
 	return quickPickItem;
 }
 export function getPythonEnvironmentCategory(item: Environment): {
@@ -49,16 +52,21 @@ export function getPythonEnvironmentCategory(item: Environment): {
 						sortKey: "Z",
 					}
 				: { label: DataScience.kernelCategoryForConda };
+
 		case EnvironmentType.Pipenv:
 			return { label: DataScience.kernelCategoryForPipEnv };
+
 		case EnvironmentType.Poetry:
 			return { label: DataScience.kernelCategoryForPoetry };
+
 		case EnvironmentType.Pyenv:
 			return { label: DataScience.kernelCategoryForPyEnv };
+
 		case EnvironmentType.Venv:
 		case EnvironmentType.VirtualEnv:
 		case EnvironmentType.VirtualEnvWrapper:
 			return { label: DataScience.kernelCategoryForVirtual };
+
 		default:
 			return { label: DataScience.kernelCategoryForGlobal };
 	}

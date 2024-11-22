@@ -24,6 +24,7 @@ export class PythonEnvFilterSettingMigration
 			workspace.getConfiguration("jupyter", undefined),
 			ConfigurationTarget.Global,
 		);
+
 		if (workspaceFolders.length === 0) {
 			await this.migrateWorkspaceFilters(
 				workspace.getConfiguration("jupyter", undefined),
@@ -60,20 +61,27 @@ export class PythonEnvFilterSettingMigration
 			jupyterWorkspaceConfig.inspect<OldInterpreterFilter[]>(
 				"kernels.filter",
 			);
+
 		let filters: OldInterpreterFilter[] = [];
+
 		switch (configurationTarget) {
 			case ConfigurationTarget.Global:
 				filters = result?.globalValue || [];
+
 				break;
+
 			case ConfigurationTarget.Workspace:
 				filters = result?.workspaceValue || [];
+
 				break;
+
 			default:
 				filters = result?.workspaceFolderValue || [];
 		}
 		const interpreterPaths = filters
 			.filter((item) => item.type === "pythonEnvironment")
 			.map((item) => item.path);
+
 		if (filters.length) {
 			await jupyterWorkspaceConfig.update(
 				"kernels.filter",

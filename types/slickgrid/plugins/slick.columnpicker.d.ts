@@ -15,6 +15,7 @@ declare namespace Slick {
 				grid: Slick.Grid<T>,
 				options: SlickColumnPickerOptions,
 			);
+
 			getAllColumns(): Slick.Column<T>[];
 			destroy(): void;
 		}

@@ -38,32 +38,38 @@ export interface IJupyterVariable {
 export const IJupyterVariables = Symbol("IJupyterVariables");
 export interface IJupyterVariables {
 	readonly refreshRequired: Event<void>;
+
 	getAllVariableDiscriptions(
 		kernel: IKernel,
 		parent: IVariableDescription | undefined,
 		startIndex: number,
 		token: CancellationToken,
 	): Promise<IVariableDescription[]>;
+
 	getVariables(
 		request: IJupyterVariablesRequest,
 		kernel?: IKernel,
 	): Promise<IJupyterVariablesResponse>;
+
 	getFullVariable(
 		variable: IJupyterVariable,
 		kernel?: IKernel,
 		cancelToken?: CancellationToken,
 	): Promise<IJupyterVariable>;
+
 	getVariableValueSummary(
 		variable: IJupyterVariable,
 		kernel: IKernel,
 		cancelToken?: CancellationToken,
 	): Promise<string | undefined>;
+
 	getDataFrameInfo(
 		targetVariable: IJupyterVariable,
 		kernel?: IKernel,
 		sliceExpression?: string,
 		isRefresh?: boolean,
 	): Promise<IJupyterVariable>;
+
 	getDataFrameRows(
 		targetVariable: IJupyterVariable,
 		start: number,
@@ -71,6 +77,7 @@ export interface IJupyterVariables {
 		kernel?: IKernel,
 		sliceExpression?: string,
 	): Promise<{ data: Record<string, unknown>[] }>;
+
 	getMatchingVariable(
 		name: string,
 		kernel?: IKernel,
@@ -138,31 +145,37 @@ export interface IKernelVariableRequester {
 		startIndex: number,
 		token: CancellationToken,
 	): Promise<IVariableDescription[]>;
+
 	getVariableNamesAndTypesFromKernel(
 		kernel: IKernel,
 		token?: CancellationToken,
 	): Promise<IJupyterVariable[]>;
+
 	getFullVariable(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
 		token?: CancellationToken,
 	): Promise<IJupyterVariable>;
+
 	getDataFrameRows(
 		start: number,
 		end: number,
 		kernel: IKernel,
 		expression: string,
 	): Promise<{ data: Record<string, unknown>[] }>;
+
 	getVariableProperties(
 		word: string,
 		cancelToken: CancellationToken | undefined,
 		matchingVariable: IJupyterVariable | undefined,
 	): Promise<{ [attributeName: string]: string }>;
+
 	getVariableValueSummary(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,
 		token: CancellationToken,
 	): Promise<string | undefined>;
+
 	getDataFrameInfo(
 		targetVariable: IJupyterVariable,
 		kernel: IKernel,

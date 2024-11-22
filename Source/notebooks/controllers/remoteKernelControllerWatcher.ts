@@ -27,6 +27,7 @@ export class RemoteKernelControllerWatcher
 {
 	private readonly handledServerProviderChanges =
 		new WeakSet<JupyterServerProvider>();
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
@@ -80,6 +81,7 @@ export class RemoteKernelControllerWatcher
 		}
 		const tokenSource = new CancellationTokenSource();
 		this.disposables.push(tokenSource);
+
 		try {
 			const currentServers = await Promise.resolve(
 				collection.serverProvider.provideJupyterServers(
@@ -120,6 +122,7 @@ export class RemoteKernelControllerWatcher
 
 		this.controllers.registered.forEach((controller) => {
 			const connection = controller.connection;
+
 			if (
 				isLocalConnection(connection) ||
 				connection.serverProviderHandle.extensionId !== extensionId ||
@@ -144,6 +147,7 @@ export class RemoteKernelControllerWatcher
 	) {
 		this.controllers.registered.forEach((controller) => {
 			const connection = controller.connection;
+
 			if (
 				isLocalConnection(connection) ||
 				connection.serverProviderHandle.extensionId !== extensionId ||

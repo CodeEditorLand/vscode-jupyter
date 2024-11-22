@@ -21,6 +21,7 @@
 export function verboseRegExp(pattern: string, flags?: string): RegExp {
 	pattern = pattern.replace(/(^| {2})# .*$/gm, "");
 	pattern = pattern.replace(/\s+?/g, "");
+
 	return RegExp(pattern, flags);
 }
 
@@ -61,6 +62,7 @@ export function stripAnsi(str: string) {
 	// Special case ansiregex for running on test machines. Seems to not have a 'default'
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let ansiRegexFunc = ansiRegex as any;
+
 	if (ansiRegexFunc.default) {
 		ansiRegexFunc = ansiRegexFunc.default;
 	}

@@ -28,6 +28,7 @@ export class RendererCommunication
 	implements IExtensionSyncActivationService, IDisposable
 {
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IPlotSaveHandler)
 		private readonly plotSaveHandler: IPlotSaveHandler,
@@ -43,6 +44,7 @@ export class RendererCommunication
 	}
 	public async activateImpl() {
 		const ext = extensions.getExtension(RendererExtension);
+
 		if (!ext) {
 			return;
 		}
@@ -59,6 +61,7 @@ export class RendererCommunication
 			({ editor, message }) => {
 				const document =
 					editor.notebook || window.activeNotebookEditor?.notebook;
+
 				if (!document) {
 					return;
 				}

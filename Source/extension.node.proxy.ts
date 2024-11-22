@@ -17,6 +17,7 @@ export async function activate(
 		context.extensionMode === ExtensionMode.Test
 			? "../out/extension.node"
 			: "./extension.node";
+
 	try {
 		realEntryPoint = eval("require")(entryPoint); // CodeQL [SM04509] Usage of eval in this context is safe (we do not want bundlers to import code when it sees `require`).
 		return realEntryPoint.activate(context);

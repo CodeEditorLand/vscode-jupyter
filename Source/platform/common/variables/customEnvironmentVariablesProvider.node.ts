@@ -44,6 +44,7 @@ export class CustomEnvironmentVariablesProvider
 	private disposables: Disposable[] = [];
 	private changeEventEmitter = new EventEmitter<Uri | undefined>();
 	private pythonEnvVarChangeEventHooked?: boolean;
+
 	constructor(
 		@inject(IEnvironmentVariablesService)
 		private envVarsService: IEnvironmentVariablesService,
@@ -93,6 +94,7 @@ export class CustomEnvironmentVariablesProvider
 			logger.debug(
 				`Cached data exists getEnvironmentVariables, ${resource ? resource.fsPath : "<No Resource>"}`,
 			);
+
 			return cacheStoreIndexedByWorkspaceFolder.data!;
 		}
 		const promise = this._getEnvironmentVariables(resource, purpose, token);
@@ -103,6 +105,7 @@ export class CustomEnvironmentVariablesProvider
 				}
 			})
 			.catch(noop);
+
 		return promise;
 	}
 	public async getCustomEnvironmentVariables(
@@ -115,11 +118,14 @@ export class CustomEnvironmentVariablesProvider
 			: workspace.workspaceFolders?.length
 				? workspace.workspaceFolders[0].uri
 				: undefined;
+
 		const workspaceFolderUri = this.getWorkspaceFolderUri(resource);
+
 		if (!workspaceFolderUri) {
 			logger.ci(
 				`No workspace folder found for ${resource ? resource.fsPath : "<No Resource>"}`,
 			);
+
 			return;
 		}
 
@@ -128,6 +134,7 @@ export class CustomEnvironmentVariablesProvider
 			this.extensionChecker.isPythonExtensionInstalled
 		) {
 			const api = await this.pythonApi.getNewApi();
+
 			if (api && !token?.isCancellationRequested) {
 				if (!this.pythonEnvVarChangeEventHooked) {
 					this.pythonEnvVarChangeEventHooked = true;
@@ -161,6 +168,7 @@ export class CustomEnvironmentVariablesProvider
 					resource ? resource.fsPath : "<No Resource>"
 				}`,
 			);
+
 			return cacheStoreIndexedByWorkspaceFolder.data!;
 		}
 		if (token?.isCancellationRequested) {
@@ -179,10 +187,12 @@ export class CustomEnvironmentVariablesProvider
 				}
 			})
 			.catch(noop);
+
 		return promise;
 	}
 	public createFileWatcher(envFile: string, workspaceFolderUri?: Uri) {
 		const key = this.getCacheKeyForMergedVars(workspaceFolderUri);
+
 		if (this.fileWatchers.has(key)) {
 			return;
 		}
@@ -190,12 +200,14 @@ export class CustomEnvironmentVariablesProvider
 			Uri.file(path.dirname(envFile)),
 			path.basename(envFile),
 		);
+
 		const envFileWatcher = workspace.createFileSystemWatcher(
 			pattern,
 			false,
 			false,
 			false,
 		);
+
 		if (envFileWatcher) {
 			this.disposables.push(envFileWatcher);
 			this.fileWatchers.add(key);
@@ -231,6 +243,7 @@ export class CustomEnvironmentVariablesProvider
 			purpose,
 			token,
 		);
+
 		if (token?.isCancellationRequested) {
 			return {};
 		}
@@ -249,12 +262,14 @@ export class CustomEnvironmentVariablesProvider
 		this.envVarsService.mergeVariables(process.env, mergedVars); // Copy current proc vars into new obj.
 		this.envVarsService.mergeVariables(customEnvVars!, mergedVars); // Copy custom vars over into obj.
 		this.envVarsService.mergePaths(process.env, mergedVars);
+
 		if (process.env.PYTHONPATH) {
 			mergedVars.PYTHONPATH = process.env.PYTHONPATH;
 		}
 		let pathKey = customEnvVars
 			? Object.keys(customEnvVars).find((k) => k.toLowerCase() == "path")
 			: undefined;
+
 		if (pathKey && customEnvVars![pathKey]) {
 			this.envVarsService.appendPath(
 				mergedVars!,
@@ -271,8 +286,10 @@ export class CustomEnvironmentVariablesProvider
 	}
 	private getWorkspaceFolderUri(resource?: Uri): Uri | undefined {
 		const workspaceFolders = workspace.workspaceFolders || [];
+
 		const defaultWorkspaceFolderUri =
 			workspaceFolders.length === 1 ? workspaceFolders[0].uri : undefined;
+
 		if (!resource) {
 			return defaultWorkspaceFolderUri;
 		}

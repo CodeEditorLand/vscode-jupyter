@@ -23,6 +23,7 @@ export type Output<T extends string | Buffer> = {
 
 export interface ObservableOutput<T> {
 	onDidChange: Event<T>;
+
 	done: Promise<void>;
 }
 
@@ -37,6 +38,7 @@ export type SpawnOptions = ChildProcessSpawnOptions & {
 	encoding?: string;
 	token?: CancellationToken;
 	mergeStdOutErr?: boolean;
+
 	throwOnStdErr?: boolean;
 };
 

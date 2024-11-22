@@ -24,12 +24,19 @@ export namespace Range {
 
 	export function intersects(range: Range, otherRange: Range): boolean {
 		let resultStartLineNumber = range.start.line;
+
 		let resultStartColumn = range.start.character;
+
 		let resultEndLineNumber = range.end.line;
+
 		let resultEndColumn = range.end.character;
+
 		const otherStartLineNumber = otherRange.start.line;
+
 		const otherStartColumn = otherRange.start.character;
+
 		const otherEndLineNumber = otherRange.end.line;
+
 		const otherEndColumn = otherRange.end.character;
 
 		if (resultStartLineNumber < otherStartLineNumber) {
@@ -83,6 +90,7 @@ export interface LocationWithReferenceKind extends vscode.Location {
 
 export function cellIndexesToRanges(indexes: number[]): vscode.NotebookRange[] {
 	indexes.sort((a, b) => a - b);
+
 	const first = indexes.shift();
 
 	if (first === undefined) {
@@ -136,18 +144,22 @@ export function findNotebookAndCell(
 		vscode.workspace.textDocuments.find(
 			(doc) => doc.uri.toString() === cell?.document.uri.toString(),
 		) ?? vscode.window.activeTextEditor?.document;
+
 	if (!doc) {
 		return;
 	}
 
 	const notebook = findNotebook(doc);
+
 	if (!notebook) {
 		return;
 	}
 	const cells = notebook.getCells();
+
 	const currentCell = cells.find(
 		(cell) => cell.document.uri.toString() === doc.uri.toString(),
 	);
+
 	if (!currentCell) {
 		return;
 	}

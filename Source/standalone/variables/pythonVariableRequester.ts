@@ -97,6 +97,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				isDebugging: false,
 				variableName: expression,
 			});
+
 		const results = await safeExecuteSilently(
 			kernel,
 			{ code, cleanupCode, initializeCode },
@@ -133,6 +134,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				startIndex: start,
 				endIndex: end,
 			});
+
 		const results = await safeExecuteSilently(
 			kernel,
 			{ code, cleanupCode, initializeCode },
@@ -143,6 +145,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				telemetryName: Telemetry.PythonVariableFetchingCodeFailure,
 			},
 		);
+
 		if (results.length === 0) {
 			return { data: [] };
 		}
@@ -157,6 +160,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		matchingVariable: IJupyterVariable | undefined,
 	): Promise<{ [attributeName: string]: string }> {
 		let result: { [attributeName: string]: string } = {};
+
 		if (matchingVariable && matchingVariable.value) {
 			result[`${word}`] = matchingVariable.value;
 		}
@@ -183,6 +187,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			logger.warn(
 				`Exception when getting variable summary for variable "${targetVariable.name}": ${ex.message}`,
 			);
+
 			return undefined;
 		}
 	}
@@ -204,6 +209,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 					startIndex,
 				}
 			: undefined;
+
 		const code =
 			await this.varScriptGenerator.generateCodeToGetAllVariableDescriptions(
 				options,
@@ -226,6 +232,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			return content;
 		} catch (ex) {
 			logger.error(ex);
+
 			return [];
 		}
 	}
@@ -240,6 +247,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				await this.varScriptGenerator.generateCodeToGetVariableTypes({
 					isDebugging: false,
 				});
+
 			const results = await safeExecuteSilently(
 				kernel,
 				{ code, cleanupCode, initializeCode },
@@ -261,6 +269,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			}[];
 
 			const vars = [];
+
 			for (const variable of variables) {
 				const v: IJupyterVariable = {
 					...variable,
@@ -271,6 +280,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 					count: 0,
 					truncated: true,
 				};
+
 				vars.push(v);
 			}
 			return vars;
@@ -290,6 +300,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				isDebugging: false,
 				variableName: targetVariable.name,
 			});
+
 		const results = await safeExecuteSilently(
 			kernel,
 			{ code, cleanupCode, initializeCode },
@@ -311,6 +322,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		// Verify that we have the correct cell type and outputs
 		if (outputs.length > 0) {
 			const codeCellOutput = outputs[0] as nbformat.IOutput;
+
 			if (
 				codeCellOutput &&
 				codeCellOutput.output_type === "stream" &&
@@ -327,6 +339,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 							resultString,
 						);
 					logger.error(error);
+
 					throw new Error(error);
 				}
 			}
@@ -335,6 +348,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 				codeCellOutput.output_type === "execute_result"
 			) {
 				const data = codeCellOutput.data;
+
 				if (data && data.hasOwnProperty("text/plain")) {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					return (data as any)["text/plain"];
@@ -354,10 +368,13 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			) {
 				const traceback: string[] =
 					codeCellOutput.traceback as string[];
+
 				const stripped = traceback.map(stripAnsi).join("\r\n");
+
 				const error =
 					DataScience.jupyterGetVariablesExecutionError(stripped);
 				logger.error(error);
+
 				throw new Error(error);
 			}
 		}
@@ -368,6 +385,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 	// Pull our text result out of the Jupyter cell
 	private deserializeJupyterResult<T>(outputs: nbformat.IOutput[]): T {
 		const text = this.extractJupyterResultText(outputs);
+
 		return JSON.parse(text) as T;
 	}
 }

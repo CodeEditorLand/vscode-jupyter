@@ -38,6 +38,7 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
     private isJupyterKernelSelected: ContextKey;
     private hasNativeNotebookOrInteractiveWindowOpen: ContextKey;
     private kernelSourceContext: ContextKey<string>;
+
     constructor(
         @inject(IInteractiveWindowProvider)
         @optional()
@@ -145,11 +146,14 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
             activeEditor && activeEditor.notebook.notebookType === JupyterNotebookView
                 ? this.kernelProvider.get(activeEditor.notebook)
                 : undefined;
+
         if (kernel) {
             const executionService = this.kernelProvider.getKernelExecution(kernel);
+
             const canStart =
                 kernel.status !== 'unknown' || executionService.executionCount > 0 || kernel.startedAtLeastOnce;
             this.canRestartNotebookKernelContext.set(!!canStart).catch(noop);
+
             const canInterrupt = kernel.status === 'busy';
             this.canInterruptNotebookKernelContext.set(!!canInterrupt).catch(noop);
         } else {
@@ -162,10 +166,12 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
     private async updateKernelSourceContext(kernel: IKernel | undefined) {
         if (!kernel || !isRemoteConnection(kernel.kernelConnectionMetadata)) {
             this.kernelSourceContext.set('').catch(noop);
+
             return;
         }
 
         const connection = kernel.kernelConnectionMetadata;
+
         const provider = await this.jupyterUriProviderRegistration.jupyterCollections.find(
             (c) =>
                 c.extensionId === connection.serverProviderHandle.extensionId &&
@@ -174,6 +180,7 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
 
         if (!provider) {
             this.kernelSourceContext.set('').catch(noop);
+
             return;
         }
 
@@ -183,6 +190,7 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
         const document =
             window.activeNotebookEditor?.notebook ||
             this.interactiveProvider?.getActiveOrAssociatedInteractiveWindow()?.notebookDocument;
+
         if (document && isJupyterNotebook(document) && this.controllers.getSelected(document)) {
             this.isJupyterKernelSelected.set(true).catch(noop);
             this.updateNativeNotebookInteractiveWindowOpenContext(document, true);
@@ -192,10 +200,13 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
     }
     private updateContextOfActiveInteractiveWindowKernel() {
         const notebook = this.interactiveProvider?.getActiveOrAssociatedInteractiveWindow()?.notebookDocument;
+
         const kernel = notebook ? this.kernelProvider.get(notebook) : undefined;
+
         if (kernel) {
             const canStart = kernel.status !== 'unknown';
             this.canRestartInteractiveWindowKernelContext.set(!!canStart).catch(noop);
+
             const canInterrupt = kernel.status === 'busy';
             this.canInterruptInteractiveWindowKernelContext.set(!!canInterrupt).catch(noop);
         } else {
@@ -206,6 +217,7 @@ export class ActiveEditorContextService implements IExtensionSyncActivationServi
     }
     private onDidKernelStatusChange({ kernel }: { kernel: IKernel }) {
         const notebook = kernel.notebook;
+
         if (notebook.notebookType === InteractiveWindowView) {
             this.updateContextOfActiveInteractiveWindowKernel();
         } else if (

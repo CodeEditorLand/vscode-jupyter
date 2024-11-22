@@ -39,8 +39,10 @@ export class GeneratedCodeStorage implements IGeneratedCodeStore {
 
 		// Figure out where to put the item in the list
 		let inserted = false;
+
 		for (let i = 0; i < list.length && !inserted; i += 1) {
 			const pos = list[i];
+
 			if (info.line >= pos.line && info.line <= pos.endLine) {
 				// Stick right here. This is either the same cell or a cell that overwrote where
 				// we were.

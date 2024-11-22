@@ -89,6 +89,7 @@ export function getMessageForLibrariesNotInstalled(
 	switch (names.length) {
 		case 0:
 			return "";
+
 		case 1:
 			return interpreterName
 				? DataScience.libraryRequiredToLaunchJupyterNotInstalledInterpreter(
@@ -98,8 +99,10 @@ export function getMessageForLibrariesNotInstalled(
 				: DataScience.libraryRequiredToLaunchJupyterNotInstalled(
 						names[0],
 					);
+
 		default: {
 			const lastItem = names.pop();
+
 			return interpreterName
 				? DataScience.librariesRequiredToLaunchJupyterNotInstalledInterpreter(
 						interpreterName,
@@ -131,6 +134,7 @@ export class JupyterInterpreterDependencyService {
 	 * @memberof JupyterInterpreterDependencyService
 	 */
 	private readonly dependenciesInstalledInInterpreter = new Set<string>();
+
 	constructor(
 		@inject(IInstaller) private readonly installer: IInstaller,
 		@inject(IJupyterCommandFactory)
@@ -152,6 +156,7 @@ export class JupyterInterpreterDependencyService {
 		_error?: JupyterInstallError,
 	): Promise<JupyterInterpreterDependencyResponse> {
 		const tokenSource = new CancellationTokenSource();
+
 		try {
 			// If we're dealing with a non-conda environment & pip isn't installed, we can't install anything.
 			// Hence prompt to install pip as well.
@@ -165,6 +170,7 @@ export class JupyterInterpreterDependencyService {
 					this.getDependenciesNotInstalled(interpreter, undefined),
 					pipInstalledInNonCondaEnvPromise,
 				]);
+
 			if (missingProducts.length === 0) {
 				return JupyterInterpreterDependencyResponse.ok;
 			}
@@ -180,6 +186,7 @@ export class JupyterInterpreterDependencyService {
 				moduleName: ProductNames.get(Product.jupyter)!,
 				pythonEnvType: getEnvironmentType(interpreter),
 			});
+
 			const selection = await window.showErrorMessage(
 				message,
 				{ modal: true },
@@ -204,6 +211,7 @@ export class JupyterInterpreterDependencyService {
 					sortProductsInOrderForInstallation(productsToInstall);
 
 					let productToInstall = productsToInstall.shift();
+
 					while (productToInstall) {
 						// Always pass a cancellation token to `install`, to ensure it waits until the module is installed.
 						const response = await raceCancellation(
@@ -217,8 +225,10 @@ export class JupyterInterpreterDependencyService {
 								pipInstalledInNonCondaEnv === false,
 							),
 						);
+
 						if (response === InstallerResponse.Installed) {
 							productToInstall = productsToInstall.shift();
+
 							continue;
 						} else {
 							return JupyterInterpreterDependencyResponse.cancel;
@@ -232,6 +242,7 @@ export class JupyterInterpreterDependencyService {
 
 				case DataScience.selectDifferentJupyterInterpreter: {
 					sendTelemetryEvent(Telemetry.UserDidNotInstallJupyter);
+
 					return JupyterInterpreterDependencyResponse.selectAnotherInterpreter;
 				}
 
@@ -240,11 +251,13 @@ export class JupyterInterpreterDependencyService {
 						Uri.parse(HelpLinks.PythonInteractiveHelpLink),
 					);
 					sendTelemetryEvent(Telemetry.UserDidNotInstallJupyter);
+
 					return JupyterInterpreterDependencyResponse.cancel;
 				}
 
 				default:
 					sendTelemetryEvent(Telemetry.UserDidNotInstallJupyter);
+
 					return JupyterInterpreterDependencyResponse.cancel;
 			}
 		} finally {
@@ -281,6 +294,7 @@ export class JupyterInterpreterDependencyService {
 	): Promise<Product[]> {
 		// If we know that all modules were available at one point in time, then use that cache.
 		const key = getComparisonKey(interpreter.uri);
+
 		if (this.dependenciesInstalledInInterpreter.has(key)) {
 			return [];
 		}
@@ -316,6 +330,7 @@ export class JupyterInterpreterDependencyService {
 			interpreter,
 			token,
 		).then((installed) => (installed ? [] : [Product.kernelspec]));
+
 		if (products.length === 0) {
 			this.dependenciesInstalledInInterpreter.add(key);
 		}
@@ -341,11 +356,13 @@ export class JupyterInterpreterDependencyService {
 			interpreter,
 			false,
 		);
+
 		return command
 			.exec(["--version"], { throwOnStdErr: true })
 			.then(() => true)
 			.catch((e) => {
 				logger.error(`Kernel spec not found: `, e);
+
 				return false;
 			});
 	}
@@ -377,6 +394,7 @@ export class JupyterInterpreterDependencyService {
 			{ modal: true },
 			DataScience.selectDifferentJupyterInterpreter,
 		);
+
 		return selectionFromError ===
 			DataScience.selectDifferentJupyterInterpreter
 			? JupyterInterpreterDependencyResponse.selectAnotherInterpreter

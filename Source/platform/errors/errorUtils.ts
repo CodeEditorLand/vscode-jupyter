@@ -47,13 +47,16 @@ export function getTelemetrySafeErrorMessageFromPythonTraceback(
 		.split("\n")
 		.filter((item) => item.trim().length)
 		.reverse();
+
 	if (reversedLines.length === 0) {
 		return;
 	}
 	const lastLine = reversedLines[0];
+
 	const message = lastLine.match(pythonErrorMessageRegExp)
 		? lastLine
 		: undefined;
+
 	const parts = (message || "").split(":");
 	// Only get the error type.
 	return parts.length && parts[0].endsWith("Error") ? parts[0] : undefined;
@@ -65,6 +68,7 @@ export function getTelemetrySafeErrorMessageFromPythonTraceback(
  */
 export function getErrorMessageFromPythonTraceback(traceback: string = "") {
 	const lines = getLastTwoLinesFromPythonTracebackWithErrorMessage(traceback);
+
 	return lines ? lines[1] : undefined;
 }
 
@@ -85,6 +89,7 @@ export function getLastTwoLinesFromPythonTracebackWithErrorMessage(
 		.map((item) => item.trim())
 		.filter((item) => item.trim().length)
 		.reverse();
+
 	if (reversedLines.length === 0) {
 		return;
 	}
@@ -111,6 +116,7 @@ export function getLastFrameFromPythonTraceback(
 	const fixedTraceback: string = Array.isArray(traceback)
 		? traceback[0]
 		: traceback;
+
 	const lastFrame = fixedTraceback
 		.split("\n")
 		.map((item) => item.trim().toLowerCase())
@@ -123,17 +129,23 @@ export function getLastFrameFromPythonTraceback(
 				line.includes(".py") &&
 				line.includes(".py"),
 		);
+
 	if (!lastFrame) {
 		return;
 	}
 	const file = lastFrame.substring(0, lastFrame.lastIndexOf(".py")) + ".py";
+
 	const parts = file.replace(/\\/g, "/").split("/");
+
 	const indexOfSitePackages = parts.indexOf("site-packages");
+
 	let packageName =
 		indexOfSitePackages >= 0 && parts.length > indexOfSitePackages + 1
 			? parts[indexOfSitePackages + 1]
 			: "";
+
 	const reversedParts = parts.reverse();
+
 	if (reversedParts.length < 2) {
 		return;
 	}
@@ -322,9 +334,12 @@ export function analyzeKernelErrors(
 		error instanceof BaseError
 			? error.stdErr || error.stack || ""
 			: error.toString();
+
 	const lastTwolinesOfError =
 		getLastTwoLinesFromPythonTracebackWithErrorMessage(stdErrOrStackTrace);
+
 	const stdErr = stdErrOrStackTrace.toLowerCase();
+
 	if (error instanceof SessionDisposedError) {
 		return {
 			reason: KernelFailureReason.sessionDisposed,
@@ -380,6 +395,7 @@ export function analyzeKernelErrors(
 			lastTwolinesOfError[0].toLowerCase().startsWith("import")
 				? lastTwolinesOfError[0].substring("import".length).trim()
 				: undefined;
+
 		return {
 			reason: KernelFailureReason.dllLoadFailure,
 			moduleName,
@@ -442,6 +458,7 @@ export function analyzeKernelErrors(
 	{
 		// zmq errors.
 		const tags: string[] = [];
+
 		if (
 			stdErr.includes("ImportError: cannot import name".toLowerCase()) &&
 			stdErr.includes(
@@ -487,6 +504,7 @@ export function analyzeKernelErrors(
 		const info = extractModuleAndFileFromImportError(
 			lastTwolinesOfError[1],
 		);
+
 		if (info && pythonSysPrefix) {
 			// First check if we're overriding any built in modules.
 			const error = isBuiltInModuleOverwritten(
@@ -495,6 +513,7 @@ export function analyzeKernelErrors(
 				workspaceFolders,
 				pythonSysPrefix,
 			);
+
 			if (error) {
 				return error;
 			}
@@ -521,12 +540,15 @@ export function analyzeKernelErrors(
 	// This happens when ipykernel is not installed and we attempt to run without checking for ipykernel.
 	// '/home/don/samples/pySamples/sample/.venv/bin/python: No module named ipykernel_launcher\n'
 	const noModule = "No module named".toLowerCase();
+
 	const isNotAPackage = `is not a package`.toLowerCase();
+
 	if (stdErr.includes(noModule) && !isNotAPackage) {
 		const line = splitLines(stdErrOrStackTrace)
 			.map((line) => line.trim())
 			.filter((line) => line.length)
 			.find((line) => line.toLowerCase().includes(noModule));
+
 		const moduleName = line
 			? line
 					.substring(
@@ -534,6 +556,7 @@ export function analyzeKernelErrors(
 					)
 					.trim()
 			: "";
+
 		if (line) {
 			return {
 				reason: KernelFailureReason.moduleNotFoundFailure,
@@ -551,6 +574,7 @@ export function analyzeKernelErrors(
 			.map((line) => line.trim())
 			.filter((line) => line.length)
 			.find((line) => line.toLowerCase().includes(noModule));
+
 		let moduleName = line
 			? line
 					.substring(
@@ -558,8 +582,11 @@ export function analyzeKernelErrors(
 					)
 					.trim()
 			: "";
+
 		let fileName = "";
+
 		let folderName = "";
+
 		if (moduleName.split("'").length > 2) {
 			fileName = moduleName.split("'").slice(-2)[0] || "";
 			fileName = fileName ? `${fileName}.py` : "";
@@ -571,6 +598,7 @@ export function analyzeKernelErrors(
 				(file) => path.basename(file).toLowerCase() === "__init__.py",
 			)
 			.map((file) => path.basename(path.dirname(file)));
+
 		if (
 			moduleName &&
 			fileName &&
@@ -634,6 +662,7 @@ export function analyzeKernelErrors(
 		// If we have files that could cause the kernel to die, then display an error message
 		// informing the user about that.
 		const fileName = path.basename(filesInCwd[0]);
+
 		return {
 			reason: KernelFailureReason.overridingBuiltinModules,
 			fileName,
@@ -653,6 +682,7 @@ export function analyzeKernelErrors(
 		const info = extractModuleAndFileFromImportError(
 			lastTwolinesOfError[1],
 		);
+
 		if (info) {
 			return {
 				reason: KernelFailureReason.moduleNotFoundFailure,
@@ -674,8 +704,11 @@ export function analyzeKernelErrors(
 		// https://github.com/microsoft/vscode-jupyter/issues/8295
 		const errorMessageDueToOutdatedTraitlets =
 			"AttributeError: 'Namespace' object has no attribute '_flags'";
+
 		const telemetrySafeTags = ["jupyter.startup.failure"];
+
 		let link: string | undefined;
+
 		let reason = KernelFailureReason.jupyterStartFailure;
 		// Some times the error message is either in the message or the stderr.
 		let pythonError = splitLines(error.message, {
@@ -692,6 +725,7 @@ export function analyzeKernelErrors(
 			})
 				.reverse()
 				.find((item) => item.toLowerCase().includes("error: "));
+
 		if (stdErr.includes(errorMessageDueToOutdatedTraitlets.toLowerCase())) {
 			reason = KernelFailureReason.jupyterStartFailureOutdatedTraitlets;
 			errorMessage =
@@ -724,10 +758,15 @@ export function analyzeKernelErrors(
 
 function extractModuleAndFileFromImportError(errorLine: string) {
 	errorLine = errorLine.replace(/"/g, "'");
+
 	const matches = errorLine.match(/'[^\\']*(\\'[^\\']*)*'/g);
+
 	const fileMatches = errorLine.match(/\((.*?)\)/g);
+
 	let moduleName: string | undefined;
+
 	let fileName: string | undefined;
+
 	if (matches && matches[0].length > 2) {
 		moduleName = matches[0];
 		moduleName = moduleName.substring(1, moduleName.length - 1);
@@ -795,7 +834,9 @@ export function createOutputWithErrorMessageForDisplay(errorMessage: string) {
 	}
 	// If we have markdown links to run a command, turn that into a link.
 	const regex = /\[([^\[\]]*)\]\((.*?)\)/gm;
+
 	let matches: RegExpExecArray | undefined | null;
+
 	while ((matches = regex.exec(errorMessage)) !== null) {
 		if (matches.length === 3) {
 			errorMessage = errorMessage.replace(
@@ -811,6 +852,7 @@ export function createOutputWithErrorMessageForDisplay(errorMessage: string) {
 	})
 		.map((line) => `\u001b[1;31m${line}`)
 		.join("\n");
+
 	return new NotebookCellOutput([
 		NotebookCellOutputItem.error({
 			message: "",

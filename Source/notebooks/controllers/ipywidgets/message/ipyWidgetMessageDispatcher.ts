@@ -49,6 +49,7 @@ export function registerCommTargetFor3rdPartyExtensions(
 	targetName: string,
 ) {
 	const targets = kernelCommTargets.get(kernel);
+
 	if (targets) {
 		targets.targets.add(targetName);
 		targets.registerCommTarget(targetName);
@@ -137,6 +138,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	}
 	public dispose() {
 		this.disposed = true;
+
 		while (this.disposables.length) {
 			const disposable = this.disposables.shift();
 			disposable?.dispose(); // NOSONAR
@@ -148,6 +150,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			case IPyWidgetMessages.IPyWidgets_logMessage: {
 				const payload: IInteractiveWindowMapping[IPyWidgetMessages.IPyWidgets_logMessage] =
 					message.payload;
+
 				if (payload.category === "error") {
 					logger.error(`Widget Error: ${payload.message}`);
 				} else {
@@ -158,38 +161,49 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			case IPyWidgetMessages.IPyWidgets_Ready:
 				this.sendKernelOptions();
 				this.initialize();
+
 				break;
+
 			case IPyWidgetMessages.IPyWidgets_msg:
 				this.sendRawPayloadToKernelSocket(message.payload);
+
 				break;
+
 			case IPyWidgetMessages.IPyWidgets_binary_msg:
 				this.sendRawPayloadToKernelSocket(
 					deserializeDataViews(message.payload)![0],
 				);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_msg_received:
 				this.onKernelSocketResponse(message.payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_registerCommTarget:
 				this.registerCommTarget(message.payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_RegisterMessageHook:
 				this.registerMessageHook(message.payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_RemoveMessageHook:
 				this.possiblyRemoveMessageHook(message.payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_MessageHookResult:
 				this.handleMessageHookResponse(message.payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_iopub_msg_handled:
 				this.iopubMessageHandled(message.payload);
+
 				break;
 
 			default:
@@ -215,6 +229,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 
 		// If we have any pending targets, register them now
 		const kernel = this.getKernel();
+
 		if (kernel) {
 			this.subscribeToKernelSocket(kernel);
 			this.registerCommTargets(kernel);
@@ -252,9 +267,11 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 		const oldSocket = oldKernelId
 			? KernelSocketMap.get(oldKernelId)
 			: undefined;
+
 		const handlers = oldSocket
 			? this.kernelSocketHandlers.get(oldSocket)
 			: undefined;
+
 		if (handlers?.receiveHook) {
 			oldSocket?.removeReceiveHook(handlers.receiveHook); // NOSONAR
 		}
@@ -295,14 +312,19 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 		}
 
 		this.kernelWasConnectedAtLeastOnce = true;
+
 		const kernelId = kernel.session.kernel?.id;
+
 		const newSocket = kernelId ? KernelSocketMap.get(kernelId) : undefined;
+
 		const protocol = newSocket?.protocol || "";
+
 		if (newSocket) {
 			const onKernelSocketMessage = this.onKernelSocketMessage.bind(
 				this,
 				protocol,
 			);
+
 			const mirrorSend = this.mirrorSend.bind(this, protocol);
 			newSocket.addReceiveHook(onKernelSocketMessage); // NOSONAR
 			newSocket.addSendHook(mirrorSend); // NOSONAR
@@ -322,6 +344,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	 */
 	private sendKernelOptions(protocol: string = "") {
 		const kernel = this.kernel?.session?.kernel;
+
 		if (!kernel) {
 			return;
 		}
@@ -357,6 +380,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 					: (this.deserialize(
 							data,
 						) as KernelMessage.IExecuteRequestMsg);
+
 			if (
 				msg.channel === "shell" &&
 				msg.header.msg_type === "execute_request"
@@ -380,6 +404,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 					protocol,
 				) as KernelMessage.IExecuteRequestMsg;
 				// const msg =  this.deserialize(data) as KernelMessage.IExecuteRequestMsg;
+
 				if (
 					msg.channel === "shell" &&
 					msg.header.msg_type === "execute_request"
@@ -418,6 +443,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			id: msg.header.msg_id,
 			msg,
 		});
+
 		return promise.promise;
 	}
 
@@ -449,6 +475,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 		// Hooks expect serialized data as this normally comes from a WebSocket
 
 		const msgUuid = uuid();
+
 		const promise = createDeferred<void>();
 		this.waitingMessageIds.set(msgUuid, {
 			startTime: Date.now(),
@@ -464,6 +491,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			}
 		} else {
 			const dataToSend = serializeDataViews([data as any]);
+
 			const deSerialized = deserializeDataViews(dataToSend);
 			console.error(dataToSend, deSerialized);
 			this.raisePostMessage(IPyWidgetMessages.IPyWidgets_binary_msg, {
@@ -481,8 +509,10 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			data.includes("comm_open") ||
 			data.includes("comm_close") ||
 			data.includes("comm_msg");
+
 		if (mustDeserialize) {
 			const message = this.deserialize(data as any, protocol) as any;
+
 			if (!shouldMessageBeMirroredWithRenderer(message)) {
 				return;
 			}
@@ -504,6 +534,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				message.content?.data?.state?._model_module ===
 					"@jupyter-widgets/output" &&
 				message.content?.data?.state?._model_name === "OutputModel";
+
 			const isIPYWidgetOutputModelClose =
 				message.header?.msg_type === "comm_close" &&
 				this.outputWidgetIds.has(message.content?.comm_id);
@@ -525,6 +556,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 	}
 	private onKernelSocketResponse(payload: { id: string }) {
 		const pending = this.waitingMessageIds.get(payload.id);
+
 		if (pending) {
 			this.waitingMessageIds.delete(payload.id);
 			pending.resultPromise.resolve();
@@ -577,6 +609,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 				this.pendingMessages.shift();
 			} catch (ex) {
 				logger.error("Failed to send message to Kernel", ex);
+
 				return;
 			}
 		}
@@ -587,7 +620,9 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 			const targetNames = Array.from([
 				...this.pendingTargetNames.values(),
 			]);
+
 			const targetName = targetNames.shift();
+
 			if (!targetName) {
 				continue;
 			}
@@ -709,9 +744,11 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 		msg: KernelMessage.IIOPubMessage,
 	): Promise<boolean> {
 		const promise = createDeferred<boolean>();
+
 		const requestId = uuid();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const parentId = (msg.parent_header as any).msg_id;
+
 		if (this.messageHooks.has(parentId)) {
 			this.messageHookRequests.set(requestId, promise);
 			this.raisePostMessage(
@@ -740,6 +777,7 @@ export class IPyWidgetMessageDispatcher implements IIPyWidgetMessageDispatcher {
 		result: boolean;
 	}) {
 		const promise = this.messageHookRequests.get(args.requestId);
+
 		if (promise) {
 			this.messageHookRequests.delete(args.requestId);
 

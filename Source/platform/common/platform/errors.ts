@@ -30,10 +30,15 @@ interface INodeJSError extends IError {
 
 namespace vscErrors {
 	const FILE_NOT_FOUND = vscode.FileSystemError.FileNotFound().name;
+
 	const FILE_EXISTS = vscode.FileSystemError.FileExists().name;
+
 	const IS_DIR = vscode.FileSystemError.FileIsADirectory().name;
+
 	const NOT_DIR = vscode.FileSystemError.FileNotADirectory().name;
+
 	const NO_PERM = vscode.FileSystemError.NoPermissions().name;
+
 	const known = [
 		// (order does not matter)
 		FILE_NOT_FOUND,
@@ -42,6 +47,7 @@ namespace vscErrors {
 		NOT_DIR,
 		NO_PERM,
 	];
+
 	function errorMatches(
 		err: Error,
 		expectedName: string,
@@ -69,6 +75,7 @@ interface ISystemError extends INodeJSError {
 
 function isSystemError(err: Error, expectedCode: string): boolean | undefined {
 	const code = (err as ISystemError).code;
+
 	if (!code) {
 		return undefined;
 	}
@@ -78,6 +85,7 @@ function isSystemError(err: Error, expectedCode: string): boolean | undefined {
 // Return true if the given error is ENOENT.
 export function isFileNotFoundError(err: Error): boolean | undefined {
 	const matched = vscErrors.isFileNotFound(err);
+
 	if (matched !== undefined) {
 		return matched;
 	}

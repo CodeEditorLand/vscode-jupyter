@@ -132,6 +132,7 @@ export interface ICommandNameArgumentTypeMapping {
 		| [
 				{
 					ranges: { start: number; end: number }[];
+
 					document?: Uri;
 					autoReveal?: boolean;
 				},
@@ -170,6 +171,7 @@ export interface ICommandNameArgumentTypeMapping {
 	["notebook.cell.collapseCellInput"]: [
 		{
 			ranges: { start: number; end: number }[];
+
 			document?: Uri;
 			autoReveal?: boolean;
 		},
@@ -177,6 +179,7 @@ export interface ICommandNameArgumentTypeMapping {
 	["notebook.cell.expandCellInput"]: [
 		{
 			ranges: { start: number; end: number }[];
+
 			document?: Uri;
 			autoReveal?: boolean;
 		},

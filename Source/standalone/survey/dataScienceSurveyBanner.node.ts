@@ -75,13 +75,16 @@ export class DataScienceSurveyBanner
 					return this.isEnabledInternal(type);
 				}
 				break;
+
 			case BannerType.ExperimentNotebookSurvey:
 				if (getVSCodeChannel() === "stable") {
 					return this.isEnabledInternal(type);
 				}
 				break;
+
 			default:
 				logger.error("Invalid Banner Type");
+
 				return false;
 		}
 		return false;
@@ -109,6 +112,7 @@ export class DataScienceSurveyBanner
 	private static surveyDelay = false;
 	private readonly NotebookExecutionThreshold = 250; // Cell executions before showing survey
 	private onDidChangeNotebookCellExecutionStateHandler?: IDisposable;
+
 	constructor(
 		@inject(IPersistentStateFactory)
 		private persistentState: IPersistentStateFactory,
@@ -145,24 +149,29 @@ export class DataScienceSurveyBanner
 	public async showBanner(type: BannerType): Promise<void> {
 		const show = this.shouldShowBanner(type);
 		this.onDidChangeNotebookCellExecutionStateHandler?.dispose();
+
 		if (!show) {
 			return;
 		}
 		// Disable for the current session.
 		this.disabledInCurrentSession = true;
+
 		const response = await window.showInformationMessage(
 			this.getBannerMessage(type),
 			...this.bannerLabels,
 		);
+
 		switch (response) {
 			case this.bannerLabels[DSSurveyLabelIndex.Yes]: {
 				await this.launchSurvey(type);
 				await this.disable(DSSurveyLabelIndex.Yes, type);
+
 				break;
 			}
 			// Treat clicking on x as equivalent to clicking No
 			default: {
 				await this.disable(DSSurveyLabelIndex.No, type);
+
 				break;
 			}
 		}
@@ -216,12 +225,15 @@ export class DataScienceSurveyBanner
 				return this.getPersistentState(
 					InsidersNotebookSurveyStateKeys.ExecutionCount,
 				);
+
 			case BannerType.ExperimentNotebookSurvey:
 				return this.getPersistentState(
 					ExperimentNotebookSurveyStateKeys.ExecutionCount,
 				);
+
 			default:
 				logger.error("Invalid Banner type");
+
 				return -1;
 		}
 	}
@@ -231,6 +243,7 @@ export class DataScienceSurveyBanner
 			val,
 			0,
 		);
+
 		return state.value;
 	}
 
@@ -258,6 +271,7 @@ export class DataScienceSurveyBanner
 	private async updateStateAndShowBanner(val: string, banner: BannerType) {
 		if (!this.shouldShowBanner(banner)) {
 			this.onDidChangeNotebookCellExecutionStateHandler?.dispose();
+
 			return;
 		}
 		const state = this.persistentState.createGlobalPersistentState<number>(
@@ -274,8 +288,10 @@ export class DataScienceSurveyBanner
 			case BannerType.ExperimentNotebookSurvey:
 				return localize.InsidersNativeNotebooksSurveyBanner
 					.bannerMessage;
+
 			default:
 				logger.error("Invalid Banner type");
+
 				return "";
 		}
 	}
@@ -284,10 +300,13 @@ export class DataScienceSurveyBanner
 		switch (type) {
 			case BannerType.InsidersNotebookSurvey:
 				return "https://aka.ms/vscjupyternb";
+
 			case BannerType.ExperimentNotebookSurvey:
 				return "https://aka.ms/vscnbexp";
+
 			default:
 				logger.error("Invalid Banner type");
+
 				return "";
 		}
 	}

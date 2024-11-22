@@ -31,6 +31,7 @@ export class DebugService implements IDebugService {
 		logger.ci(
 			`Getting active debug session, ${debug.activeDebugSession?.name}`,
 		);
+
 		return debug.activeDebugSession;
 	}
 	public get breakpoints(): readonly Breakpoint[] {

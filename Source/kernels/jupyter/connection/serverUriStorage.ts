@@ -72,6 +72,7 @@ export class JupyterServerUriStorage
 	private _all: IJupyterServerUriEntry[] = [];
 	public get all() {
 		this.updateStore();
+
 		return this._all;
 	}
 	constructor(
@@ -107,8 +108,10 @@ export class JupyterServerUriStorage
 	}
 	private updateStore(): IJupyterServerUriEntry[] {
 		this.hookupStorageEvents();
+
 		const previous = this._all;
 		this._all = this.newStorage.getAll();
+
 		if (
 			previous.length !== this._all.length ||
 			JSON.stringify(this._all) !== JSON.stringify(previous)
@@ -129,6 +132,7 @@ export class JupyterServerUriStorage
 	): Promise<void> {
 		this.hookupStorageEvents();
 		logger.ci(`setUri: ${jupyterHandle.id}.${jupyterHandle.handle}`);
+
 		const entry: IJupyterServerUriEntry = {
 			time: options?.time ?? Date.now(),
 			displayName: "",
@@ -168,6 +172,7 @@ class NewStorage {
 
 	private updatePromise = Promise.resolve();
 	private readonly mementoKey: string;
+
 	constructor(private readonly memento: Memento) {
 		// Ensure the key is unique per machine,
 		// this way when memento is transferred across machines it will not corrupt the memento on that machine.
@@ -182,6 +187,7 @@ class NewStorage {
 		return (this.updatePromise = this.updatePromise
 			.then(async () => {
 				const all = this.getAll();
+
 				const existingEntry = all.find(
 					(entry) =>
 						generateIdFromRemoteProvider(entry.provider) ===
@@ -213,6 +219,7 @@ class NewStorage {
 							};
 						}),
 				);
+
 				const removedItems = newList.splice(
 					Settings.JupyterServerUriListMax,
 				);
@@ -248,6 +255,7 @@ class NewStorage {
 				entry.provider.id === server.id &&
 				entry.provider.handle === server.handle,
 		);
+
 		const entry: IJupyterServerUriEntry = {
 			provider: server,
 			time: Date.now(),
@@ -259,8 +267,10 @@ class NewStorage {
 		await (this.updatePromise = this.updatePromise
 			.then(async () => {
 				let removedTriggered = false;
+
 				try {
 					const all = this.getAll();
+
 					if (all.length === 0) {
 						return;
 					}
@@ -269,6 +279,7 @@ class NewStorage {
 							f.provider.id !== server.id ||
 							f.provider.handle !== server.handle,
 					);
+
 					const removedItems = all.filter(
 						(f) =>
 							f.provider.id === server.id &&
@@ -313,10 +324,12 @@ class NewStorage {
 	}
 	public getAll(): IJupyterServerUriEntry[] {
 		const data = this.memento.get<StorageMRUItem[]>(this.mementoKey, []);
+
 		const entries: IJupyterServerUriEntry[] = [];
 
 		data.forEach(async (item) => {
 			const uri = generateIdFromRemoteProvider(item.serverHandle);
+
 			const server: IJupyterServerUriEntry = {
 				time: item.time,
 				displayName: item.displayName || uri,
@@ -324,11 +337,13 @@ class NewStorage {
 			};
 			entries.push(server);
 		});
+
 		return entries;
 	}
 	public async clear(): Promise<void> {
 		const all = this.getAll();
 		await this.memento.update(this.mementoKey, []);
+
 		if (all.length) {
 			this._onDidRemoveUris.fire(all.map((e) => e.provider));
 		}

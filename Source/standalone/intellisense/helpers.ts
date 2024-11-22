@@ -12,6 +12,8 @@ export function generateSortString(index: number) {
 		return `A${String.fromCharCode(65 + index)}`;
 	}
 	const firstChar = String.fromCharCode(65 + Math.ceil(index / 25));
+
 	const secondChar = String.fromCharCode(65 + (index % 25));
+
 	return `${firstChar}${secondChar}`;
 }

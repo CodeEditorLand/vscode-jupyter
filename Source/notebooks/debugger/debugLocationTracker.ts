@@ -106,6 +106,7 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 	private isStopEvent(message: DebugProtocol.ProtocolMessage) {
 		if (message.type === "event") {
 			const eventMessage = message as DebugProtocol.Event;
+
 			if (eventMessage.event === "stopped") {
 				return true;
 			}
@@ -117,11 +118,13 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 	private isContinueEvent(message: DebugProtocol.ProtocolMessage): boolean {
 		if (message.type === "event") {
 			const eventMessage = message as DebugProtocol.Event;
+
 			if (eventMessage.event === "continue") {
 				return true;
 			}
 		} else if (message.type === "response") {
 			const responseMessage = message as DebugProtocol.Response;
+
 			if (responseMessage.command === "continue") {
 				return true;
 			}

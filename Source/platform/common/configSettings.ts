@@ -124,11 +124,13 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 	): JupyterSettings {
 		const workspaceFolderUri =
 			JupyterSettings.getSettingsUriAndTarget(resource).uri;
+
 		const workspaceFolderKey = workspaceFolderUri
 			? workspaceFolderUri.path
 			: "";
 
 		let settings = JupyterSettings.jupyterSettings.get(workspaceFolderKey);
+
 		if (!settings) {
 			settings = new JupyterSettings(
 				workspaceFolderUri,
@@ -140,6 +142,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 			// Update to a node system variables if anybody every asks for a node one after
 			// asking for a web one.
 			settings._systemVariablesCtor = systemVariablesCtor;
+
 			settings._type = type;
 		}
 		return settings;
@@ -152,6 +155,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		const workspaceFolder = resource
 			? workspace.getWorkspaceFolder(resource)
 			: undefined;
+
 		let workspaceFolderUri: Uri | undefined = workspaceFolder
 			? workspaceFolder.uri
 			: undefined;
@@ -167,6 +171,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		const target = workspaceFolderUri
 			? ConfigurationTarget.WorkspaceFolder
 			: ConfigurationTarget.Global;
+
 		return { uri: workspaceFolderUri, target };
 	}
 
@@ -195,9 +200,11 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const result: any = {};
+
 		const allowedKeys = this.getSerializableKeys();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		allowedKeys.forEach((k) => (result[k] = (<any>this)[k]));
+
 		return result;
 	}
 
@@ -210,6 +217,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		const experiments = systemVariables.resolveAny(
 			jupyterConfig.get<IExperiments>("experiments"),
 		)!;
+
 		if (this.experiments) {
 			Object.assign<IExperiments, IExperiments>(
 				this.experiments,
@@ -234,12 +242,15 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 				newKey && config.get(newKey) !== undefined
 					? config.get(newKey)
 					: config.get(k);
+
 			const val = systemVariables.resolveAny(configValue);
+
 			if (val !== undefined) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(<any>this)[k] = val;
 			}
 		};
+
 		const keys = this.getSerializableKeys().filter(
 			(f) =>
 				f !== "experiments" &&
@@ -259,12 +270,15 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		const workspaceKeys = (workspace.workspaceFolders || []).map(
 			(workspaceFolder) => workspaceFolder.uri.path,
 		);
+
 		const activatedWkspcKeys = Array.from(
 			JupyterSettings.jupyterSettings.keys(),
 		);
+
 		const activatedWkspcFoldersRemoved = activatedWkspcKeys.filter(
 			(item) => workspaceKeys.indexOf(item) < 0,
 		);
+
 		if (activatedWkspcFoldersRemoved.length > 0) {
 			for (const folder of activatedWkspcFoldersRemoved) {
 				JupyterSettings.jupyterSettings.delete(folder);
@@ -278,6 +292,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 				"jupyter",
 				this._workspaceRoot,
 			);
+
 			const pythonConfig = workspace.getConfiguration(
 				"python",
 				this._workspaceRoot,
@@ -311,10 +326,12 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 			"jupyter",
 			this._workspaceRoot,
 		);
+
 		const pythonConfig = workspace.getConfiguration(
 			"python",
 			this._workspaceRoot,
 		);
+
 		if (initialConfig) {
 			this.update(initialConfig, pythonConfig);
 			this.migrateSettings(initialConfig).catch(noop);

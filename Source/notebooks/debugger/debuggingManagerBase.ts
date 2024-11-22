@@ -70,6 +70,7 @@ export abstract class DebuggingManagerBase
 			// track closing of notebooks documents
 			workspace.onDidCloseNotebookDocument(async (document) => {
 				const dbg = this.notebookToDebugger.get(document);
+
 				if (dbg) {
 					await debug.stopDebugging(dbg.session);
 					this.onDidStopDebugging(document);
@@ -102,6 +103,7 @@ export abstract class DebuggingManagerBase
 		notebook: NotebookDocument,
 	): DebugSession | undefined {
 		const dbg = this.notebookToDebugger.get(notebook);
+
 		if (dbg) {
 			return dbg.session;
 		}
@@ -148,11 +150,13 @@ export abstract class DebuggingManagerBase
 	protected async endSession(session: DebugSession) {
 		logger.info(`Ending debug session ${session.id}`);
 		this._doneDebugging.fire();
+
 		for (const [doc, dbg] of this.notebookToDebugger.entries()) {
 			if (dbg && session.id === dbg.session.id) {
 				this.notebookToDebugger.delete(doc);
 				this.notebookToDebugAdapter.delete(doc);
 				this.onDidStopDebugging(doc);
+
 				break;
 			}
 		}
@@ -172,7 +176,9 @@ export abstract class DebuggingManagerBase
 		doc: NotebookDocument,
 	): Promise<IKernel | undefined> {
 		const controller = this.controllerRegistration.getSelected(doc);
+
 		let kernel = this.kernelProvider.get(doc);
+
 		if (
 			controller &&
 			(!kernel || (kernel && kernel.status === "unknown"))
@@ -195,6 +201,7 @@ export abstract class DebuggingManagerBase
 
 	private findEditorForCell(cell: NotebookCell): NotebookEditor | undefined {
 		const notebookUri = cell.notebook.uri.toString();
+
 		return window.visibleNotebookEditors.find(
 			(e) => e.notebook.uri.toString() === notebookUri,
 		);
@@ -205,21 +212,26 @@ export abstract class DebuggingManagerBase
 		allowSelectKernel: boolean = true,
 	): Promise<IpykernelCheckResult> {
 		const editor = this.findEditorForCell(cell);
+
 		if (!editor) {
 			window
 				.showErrorMessage(DataScience.noNotebookToDebug)
 				.then(noop, noop);
+
 			return IpykernelCheckResult.Unknown;
 		}
 
 		const ipykernelResult = await this.checkForIpykernel6(editor.notebook);
+
 		switch (ipykernelResult) {
 			case IpykernelCheckResult.NotInstalled:
 				// User would have been notified about this, nothing more to do.
 				break;
+
 			case IpykernelCheckResult.Outdated:
 			case IpykernelCheckResult.Unknown: {
 				this.promptInstallIpykernel6().then(noop, noop);
+
 				break;
 			}
 			case IpykernelCheckResult.ControllerNotSelected: {
@@ -227,6 +239,7 @@ export abstract class DebuggingManagerBase
 					await commands.executeCommand("notebook.selectKernel", {
 						notebookEditor: editor,
 					});
+
 					return await this.checkIpykernelAndPrompt(cell, false);
 				}
 			}
@@ -240,8 +253,10 @@ export abstract class DebuggingManagerBase
 	): Promise<IpykernelCheckResult> {
 		try {
 			let kernel = this.kernelProvider.get(doc);
+
 			if (!kernel) {
 				const controller = this.controllerRegistration.getSelected(doc);
+
 				if (!controller) {
 					return IpykernelCheckResult.ControllerNotSelected;
 				}
@@ -253,6 +268,7 @@ export abstract class DebuggingManagerBase
 			}
 			// if this is a remote kernel, and the kernelspec has the right metadata, then no need to check the ipykernel version
 			const connection = kernel.kernelConnectionMetadata;
+
 			if (isRemoteConnection(connection)) {
 				if (
 					connection.kind === "startUsingRemoteKernelSpec" &&
@@ -268,6 +284,7 @@ export abstract class DebuggingManagerBase
 				}
 			}
 			const execution = this.kernelProvider.getKernelExecution(kernel);
+
 			const result = await isUsingIpykernel6OrLater(execution);
 			sendTelemetryEvent(DebuggingTelemetry.ipykernel6Status, undefined, {
 				status:
@@ -275,6 +292,7 @@ export abstract class DebuggingManagerBase
 						? "installed"
 						: "notInstalled",
 			});
+
 			return result;
 		} catch (ex) {
 			logger.error("Debugging: Could not check for ipykernel 6", ex);

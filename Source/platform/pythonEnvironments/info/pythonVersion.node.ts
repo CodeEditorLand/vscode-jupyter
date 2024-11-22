@@ -42,9 +42,11 @@ export function parsePythonVersion(raw: string): PythonVersion | undefined {
 		versionParts.pop();
 	}
 	const numberParts = `${versionParts[0]}.${versionParts[1]}.${versionParts[2]}`;
+
 	const rawVersion =
 		versionParts.length === 4
 			? `${numberParts}-${versionParts[3]}`
 			: numberParts;
+
 	return new SemVer(rawVersion);
 }

@@ -25,6 +25,7 @@ export class DataViewerDelegator {
 			// jupyterVariableViewers
 			const variableViewers =
 				this.getMatchingExternalVariableViewers(variable);
+
 			if (variableViewers.length === 0) {
 				// No data frame viewer extensions, show notifications
 				return window
@@ -54,11 +55,13 @@ export class DataViewerDelegator {
 						},
 					)}`,
 				);
+
 				return commands.executeCommand(command, variable);
 			} else {
 				const thirdPartyViewers = variableViewers.filter(
 					(d) => d.extension.id !== JVSC_EXTENSION_ID,
 				);
+
 				if (thirdPartyViewers.length === 1) {
 					const command =
 						thirdPartyViewers[0].jupyterVariableViewers.command;
@@ -70,6 +73,7 @@ export class DataViewerDelegator {
 							},
 						)}`,
 					);
+
 					return commands.executeCommand(command, variable);
 				}
 				// show quick pick
@@ -88,6 +92,7 @@ export class DataViewerDelegator {
 				});
 				quickPick.onDidAccept(async () => {
 					const item = quickPick.selectedItems[0];
+
 					if (item) {
 						quickPick.hide();
 						logger.info(
@@ -98,6 +103,7 @@ export class DataViewerDelegator {
 								},
 							)}`,
 						);
+
 						return commands.executeCommand(item.command, variable);
 					}
 				});
@@ -122,6 +128,7 @@ export class DataViewerDelegator {
 		jupyterVariableViewers: IVariableViewer;
 	}[] {
 		const variableViewers = this.getVariableViewers();
+
 		return variableViewers
 			.filter(
 				(d) =>
@@ -143,6 +150,7 @@ export class DataViewerDelegator {
 			)
 			.map((e) => {
 				const contributes = e.packageJSON?.contributes;
+
 				if (contributes?.jupyterVariableViewers) {
 					return contributes.jupyterVariableViewers.map(
 						(jupyterVariableViewers: IVariableViewer) => ({

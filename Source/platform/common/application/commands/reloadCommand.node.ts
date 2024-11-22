@@ -27,6 +27,7 @@ export class ReloadVSCodeCommandHandler
 			message,
 			Common.reload,
 		);
+
 		if (item === Common.reload) {
 			commands
 				.executeCommand("workbench.action.reloadWindow")

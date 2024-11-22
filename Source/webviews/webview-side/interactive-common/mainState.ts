@@ -22,6 +22,7 @@ export type IMainState = {
 	skipDefault?: boolean;
 	testMode?: boolean;
 	codeTheme: string;
+
 	settings?: IJupyterExtraSettings;
 	focusPending: number;
 	loaded: boolean;

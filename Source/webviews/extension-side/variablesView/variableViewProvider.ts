@@ -42,6 +42,7 @@ export class VariableViewProvider implements IVariableViewProvider {
 
 		// If not wait until created and then return
 		this.activeVariableViewPromise = createDeferred<VariableView>();
+
 		return this.activeVariableViewPromise.promise;
 	}
 	private activeVariableViewPromise?: Deferred<VariableView>;

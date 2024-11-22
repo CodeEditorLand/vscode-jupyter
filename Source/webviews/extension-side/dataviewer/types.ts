@@ -18,21 +18,33 @@ export const ColumnWarningSize = 1000; // Anything over this takes too long to l
 
 export namespace DataViewerRowStates {
 	export const Fetching = "fetching";
+
 	export const Skipped = "skipped";
 }
 
 export namespace DataViewerMessages {
 	export const Started = SharedMessages.Started;
+
 	export const UpdateSettings = SharedMessages.UpdateSettings;
+
 	export const InitializeData = "init";
+
 	export const GetAllRowsRequest = "get_all_rows_request";
+
 	export const GetAllRowsResponse = "get_all_rows_response";
+
 	export const GetRowsRequest = "get_rows_request";
+
 	export const GetRowsResponse = "get_rows_response";
+
 	export const CompletedData = "complete";
+
 	export const GetSliceRequest = "get_slice_request";
+
 	export const RefreshDataViewer = "refresh_data_viewer";
+
 	export const SliceEnablementStateChanged = "slice_enablement_state_changed";
+
 	export const DeprecationWarningClicked = "deprecation_warning_clicked";
 }
 
@@ -89,11 +101,14 @@ export interface IDataFrameInfo {
 
 export interface IDataViewerDataProvider {
 	dispose(): void;
+
 	getDataFrameInfo(
 		sliceExpression?: string,
 		isRefresh?: boolean,
 	): Promise<IDataFrameInfo>;
+
 	getAllRows(sliceExpression?: string): Promise<IRowsResponse>;
+
 	getRows(
 		start: number,
 		end: number,
@@ -137,6 +152,7 @@ export const IJupyterVariableDataProvider = Symbol(
 );
 export interface IJupyterVariableDataProvider extends IDataViewerDataProvider {
 	readonly kernel: IKernel | undefined;
+
 	setDependencies(variable: IJupyterVariable, kernel?: IKernel): void;
 }
 

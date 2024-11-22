@@ -29,6 +29,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 	private readonly cachedModules = new Set<string>();
 	private pendingUpdate = Promise.resolve();
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IMemento) @named(GLOBAL_MEMENTO) private cache: Memento,
 		@inject(IPlatformService) private platform: IPlatformService,
@@ -68,7 +69,9 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 			// Just as xml.py could end up overriding the built in xml module, so can xml/__init__.py.
 			this.fs.searchLocal("*/__init__.py", cwd.fsPath, true),
 		]);
+
 		const problematicFiles: { uri: Uri; type: "file" | "__init__" }[] = [];
+
 		const filePromises = Promise.all(
 			files
 				.map((file) => Uri.joinPath(cwd, file))
@@ -78,6 +81,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 					}
 				}),
 		);
+
 		const initFilePromises = Promise.all(
 			initFile
 				.map((file) => Uri.joinPath(cwd, file))
@@ -88,6 +92,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 				}),
 		);
 		await Promise.all([filePromises, initFilePromises]);
+
 		return problematicFiles;
 	}
 	public async isReserved(uri: Uri): Promise<boolean> {
@@ -97,9 +102,11 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 		}
 
 		await this.pendingUpdate;
+
 		const filePath = this.platform.isWindows
 			? uri.fsPath.toLowerCase()
 			: uri.fsPath;
+
 		if (
 			Array.from(this.ignoredFiles).some((item) => {
 				if (
@@ -120,17 +127,22 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 			baseName === "__init__"
 				? path.basename(path.dirname(uri)).toLowerCase()
 				: baseName;
+
 		return this.cachedModules.has(possibleModule);
 	}
 	public async addToIgnoreList(uri: Uri) {
 		await this.pendingUpdate;
+
 		const jupyterConfig = workspace.getConfiguration("jupyter");
+
 		const filePath = this.platform.isWindows
 			? uri.fsPath.toLowerCase()
 			: uri.fsPath;
 		this.initializeIgnoreList();
+
 		const originalSizeOfList = this.ignoredFiles.size;
 		this.ignoredFiles.add(filePath);
+
 		if (originalSizeOfList === this.ignoredFiles.size) {
 			return;
 		}
@@ -141,10 +153,12 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 				ConfigurationTarget.Global,
 			),
 		);
+
 		return this.pendingUpdate;
 	}
 	private initializeIgnoreList() {
 		const jupyterConfig = workspace.getConfiguration("jupyter");
+
 		let listInSettings = jupyterConfig.get(
 			ignoreListSettingName,
 			[],

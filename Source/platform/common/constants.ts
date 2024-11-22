@@ -40,15 +40,19 @@ export * from "../constants";
 
 export namespace HelpLinks {
 	export const PythonInteractiveHelpLink = "https://aka.ms/pyaiinstall";
+
 	export const JupyterDataRateHelpLink = "https://aka.ms/AA5ggm0"; // This redirects here: https://jupyter-notebook.readthedocs.io/en/stable/config.html
 }
 
 export namespace Settings {
 	export const JupyterServerRemoteLaunchNameSeparator = "\n";
+
 	export const JupyterServerRemoteLaunchService = JVSC_EXTENSION_ID;
+
 	export const JupyterServerUriListMax = 10;
 	// If this timeout expires, ignore the completion request sent to Jupyter.
 	export var IntellisenseTimeout = 2_000;
+
 	export const IntellisenseResolveTimeout = 5_000;
 }
 
@@ -82,24 +86,39 @@ export function setUnitTestExecution(enabled: boolean) {
 export namespace Identifiers {
 	export const GeneratedThemeName = "ipython-theme"; // This needs to be all lower class and a valid class name.
 	export const MatplotLibDefaultParams = "_VSCode_defaultMatplotlib_Params";
+
 	export const MatplotLibFigureFormats = "_VSCode_matplotLib_FigureFormats";
+
 	export const DefaultCodeCellMarker = "# %%";
+
 	export const DefaultCommTarget = "jupyter.widget";
+
 	export const ALL_VARIABLES = "ALL_VARIABLES";
+
 	export const KERNEL_VARIABLES = "KERNEL_VARIABLES";
+
 	export const DEBUGGER_VARIABLES = "DEBUGGER_VARIABLES";
+
 	export const PYTHON_VARIABLES_REQUESTER = "PYTHON_VARIABLES_REQUESTER";
+
 	export const MULTIPLEXING_DEBUGSERVICE = "MULTIPLEXING_DEBUGSERVICE";
+
 	export const RUN_BY_LINE_DEBUGSERVICE = "RUN_BY_LINE_DEBUGSERVICE";
+
 	export const REMOTE_URI = "https://remote/";
+
 	export const REMOTE_URI_ID_PARAM = "id";
+
 	export const REMOTE_URI_HANDLE_PARAM = "uriHandle";
+
 	export const REMOTE_URI_EXTENSION_ID_PARAM = "extensionId";
 }
 
 export namespace CodeSnippets {
 	export const ImportIPython = "{0}\nfrom IPython import get_ipython\n\n{1}";
+
 	export const MatplotLibInit = `import matplotlib\n%matplotlib inline\n${Identifiers.MatplotLibDefaultParams} = dict(matplotlib.rcParams)\n`;
+
 	export const DisableJedi = "%config Completer.use_jedi = False";
 }
 
@@ -173,100 +192,179 @@ export enum CommandSource {
 
 export namespace Commands {
 	export const RunAllCells = "jupyter.runallcells";
+
 	export const RunAllCellsAbove = "jupyter.runallcellsabove";
+
 	export const RunCellAndAllBelow = "jupyter.runcellandallbelow";
+
 	export const RunAllCellsAbovePalette = "jupyter.runallcellsabove.palette";
+
 	export const RunCellAndAllBelowPalette =
 		"jupyter.runcurrentcellandallbelow.palette";
+
 	export const RunToLine = "jupyter.runtoline";
+
 	export const RunFromLine = "jupyter.runfromline";
+
 	export const RunCell = "jupyter.runcell";
+
 	export const RunCurrentCell = "jupyter.runcurrentcell";
+
 	export const RunCurrentCellAdvance = "jupyter.runcurrentcelladvance";
+
 	export const CreateNewInteractive = "jupyter.createnewinteractive";
+
 	export const ImportNotebook = "jupyter.importnotebook";
+
 	export const ImportNotebookFile = "jupyter.importnotebookfile";
+
 	export const ExportFileAsNotebook = "jupyter.exportfileasnotebook";
+
 	export const ExportFileAndOutputAsNotebook =
 		"jupyter.exportfileandoutputasnotebook";
+
 	export const InterruptKernel = "jupyter.interruptkernel";
+
 	export const RestartKernel = "jupyter.restartkernel";
+
 	export const RestartKernelAndRunAllCells =
 		"jupyter.restartkernelandrunallcells";
+
 	export const RestartKernelAndRunUpToSelectedCell =
 		"jupyter.restartkernelandrunuptoselectedcell";
+
 	export const NotebookEditorRemoveAllCells =
 		"jupyter.notebookeditor.removeallcells";
+
 	export const NotebookEditorRunAllCells =
 		"jupyter.notebookeditor.runallcells";
+
 	export const NotebookEditorRunSelectedCell =
 		"jupyter.notebookeditor.runselectedcell";
+
 	export const NotebookEditorAddCellBelow =
 		"jupyter.notebookeditor.addcellbelow";
+
 	export const ExpandAllCells = "jupyter.expandallcells";
+
 	export const CollapseAllCells = "jupyter.collapseallcells";
+
 	export const ExportOutputAsNotebook = "jupyter.exportoutputasnotebook";
+
 	export const ExecSelectionInInteractiveWindow =
 		"jupyter.execSelectionInteractive";
+
 	export const RunFileInInteractiveWindows = "jupyter.runFileInteractive";
+
 	export const DebugFileInInteractiveWindows = "jupyter.debugFileInteractive";
+
 	export const AddCellBelow = "jupyter.addcellbelow";
+
 	export const DebugCurrentCellPalette = "jupyter.debugcurrentcell.palette";
+
 	export const DebugCell = "jupyter.debugcell";
+
 	export const DebugStepOver = "jupyter.debugstepover";
+
 	export const DebugContinue = "jupyter.debugcontinue";
+
 	export const DebugStop = "jupyter.debugstop";
+
 	export const RunCurrentCellAndAddBelow =
 		"jupyter.runcurrentcellandaddbelow";
+
 	export const InsertCellBelowPosition = "jupyter.insertCellBelowPosition";
+
 	export const InsertCellBelow = "jupyter.insertCellBelow";
+
 	export const InsertCellAbove = "jupyter.insertCellAbove";
+
 	export const DeleteCells = "jupyter.deleteCells";
+
 	export const SelectCell = "jupyter.selectCell";
+
 	export const SelectCellContents = "jupyter.selectCellContents";
+
 	export const ExtendSelectionByCellAbove =
 		"jupyter.extendSelectionByCellAbove";
+
 	export const ExtendSelectionByCellBelow =
 		"jupyter.extendSelectionByCellBelow";
+
 	export const MoveCellsUp = "jupyter.moveCellsUp";
+
 	export const MoveCellsDown = "jupyter.moveCellsDown";
+
 	export const ChangeCellToMarkdown = "jupyter.changeCellToMarkdown";
+
 	export const ChangeCellToCode = "jupyter.changeCellToCode";
+
 	export const GotoNextCellInFile = "jupyter.gotoNextCellInFile";
+
 	export const GotoPrevCellInFile = "jupyter.gotoPrevCellInFile";
+
 	export const ScrollToCell = "jupyter.scrolltocell";
+
 	export const CreateNewNotebook = "jupyter.createnewnotebook";
+
 	export const ViewJupyterOutput = "jupyter.viewOutput";
+
 	export const ExportAsPythonScript = "jupyter.exportAsPythonScript";
+
 	export const ExportToHTML = "jupyter.exportToHTML";
+
 	export const ExportToPDF = "jupyter.exportToPDF";
+
 	export const Export = "jupyter.export";
+
 	export const NativeNotebookExport = "jupyter.notebookeditor.export";
+
 	export const LatestExtension = "jupyter.latestExtension";
+
 	export const EnableLoadingWidgetsFrom3rdPartySource =
 		"jupyter.enableLoadingWidgetScriptsFromThirdPartySource";
+
 	export const ShowDataViewer = "jupyter.showDataViewer";
+
 	export const ShowJupyterDataViewer = "jupyter.showJupyterDataViewer";
+
 	export const RefreshDataViewer = "jupyter.refreshDataViewer";
+
 	export const ClearSavedJupyterUris = "jupyter.clearSavedJupyterUris";
+
 	export const OpenVariableView = "jupyter.openVariableView";
+
 	export const OpenOutlineView = "jupyter.openOutlineView";
+
 	export const InteractiveClearAll = "jupyter.interactive.clearAllCells";
+
 	export const InteractiveGoToCode = "jupyter.interactive.goToCode";
+
 	export const InteractiveCopyCell = "jupyter.interactive.copyCell";
+
 	export const InteractiveExportAsNotebook =
 		"jupyter.interactive.exportasnotebook";
+
 	export const InteractiveExportAs = "jupyter.interactive.exportas";
+
 	export const RunByLine = "jupyter.runByLine";
+
 	export const RunAndDebugCell = "jupyter.runAndDebugCell";
+
 	export const RunByLineNext = "jupyter.runByLineNext";
+
 	export const RunByLineStop = "jupyter.runByLineStop";
+
 	export const ReplayPylanceLog = "jupyter.replayPylanceLog";
+
 	export const ReplayPylanceLogStep = "jupyter.replayPylanceLogStep";
+
 	export const InstallPythonExtensionViaKernelPicker =
 		"jupyter.installPythonExtensionViaKernelPicker";
+
 	export const InstallPythonViaKernelPicker =
 		"jupyter.installPythonViaKernelPicker";
+
 	export const ContinueEditSessionInCodespace =
 		"jupyter.continueEditSessionInCodespace";
 }
@@ -294,51 +392,81 @@ export namespace CodeLensCommands {
 
 export namespace EditorContexts {
 	export const HasCodeCells = "jupyter.hascodecells";
+
 	export const IsInteractiveActive = "jupyter.isinteractiveactive";
+
 	export const OwnsSelection = "jupyter.ownsSelection";
+
 	export const HaveNativeCells = "jupyter.havenativecells";
+
 	export const HaveNative = "jupyter.havenative";
+
 	export const IsNativeActive = "jupyter.isnativeactive";
+
 	export const IsInteractiveOrNativeActive =
 		"jupyter.isinteractiveornativeactive";
+
 	export const IsPythonOrNativeActive = "jupyter.ispythonornativeactive";
+
 	export const IsPythonOrInteractiveActive =
 		"jupyter.ispythonorinteractiveeactive";
+
 	export const IsPythonOrInteractiveOrNativeActive =
 		"jupyter.ispythonorinteractiveornativeeactive";
+
 	export const CanRestartNotebookKernel =
 		"jupyter.notebookeditor.canrestartNotebookkernel";
+
 	export const CanInterruptNotebookKernel =
 		"jupyter.notebookeditor.canInterruptNotebookKernel";
+
 	export const CanRestartInteractiveWindowKernel =
 		"jupyter.interactive.canRestartNotebookKernel";
+
 	export const CanInterruptInteractiveWindowKernel =
 		"jupyter.interactive.canInterruptNotebookKernel";
+
 	export const RunByLineCells = "jupyter.notebookeditor.runByLineCells";
+
 	export const RunByLineDocuments =
 		"jupyter.notebookeditor.runByLineDocuments";
+
 	export const DebugDocuments = "jupyter.notebookeditor.debugDocuments";
+
 	export const IsPythonNotebook = "jupyter.ispythonnotebook";
+
 	export const IsJupyterKernelSelected = "jupyter.kernel.isjupyter";
+
 	export const IsDataViewerActive = "jupyter.dataViewerActive";
+
 	export const HasNativeNotebookOrInteractiveWindowOpen =
 		"jupyter.hasNativeNotebookOrInteractiveWindowOpen";
+
 	export const ZmqAvailable = "jupyter.zmqavailable";
+
 	export const ReplayLogLoaded = "jupyter.replayLogLoaded";
+
 	export const KernelSource = "jupyter.kernelSource";
 }
 
 export namespace RegExpValues {
 	export const PythonCellMarker =
 		/^(#\s*%%|#\s*\<codecell\>|#\s*In\[\d*?\]|#\s*In\[ \])/;
+
 	export const PythonMarkdownCellMarker =
 		/^(#\s*%%\s*\[markdown\]|#\s*\<markdowncell\>)/;
+
 	export const UrlPatternRegEx =
 		"(?<PREFIX>https?:\\/\\/)((\\(.+\\s+or\\s+(?<IP>.+)\\))|(?<LOCAL>[^\\s]+))(?<REST>:.+)";
+
 	export const HttpPattern = /https?:\/\//;
+
 	export const ShapeSplitterRegEx = /.*,\s*(\d+).*/;
+
 	export const SvgHeightRegex = /(\<svg.*height=\")(.*?)\"/;
+
 	export const SvgWidthRegex = /(\<svg.*width=\")(.*?)\"/;
+
 	export const SvgSizeTagRegex = /\<svg.*tag=\"sizeTag=\{(.*),\s*(.*)\}\"/;
 }
 

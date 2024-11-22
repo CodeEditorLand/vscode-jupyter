@@ -25,12 +25,14 @@ class StatusItem implements Disposable {
 	public dispose = () => {
 		if (!this.disposed) {
 			this.disposed = true;
+
 			if (this.timeout) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				clearTimeout(this.timeout as any);
 				this.timeout = undefined;
 			}
 			this.disposeCallback();
+
 			if (!this.deferred.completed) {
 				this.deferred.resolve();
 			}
@@ -100,7 +102,9 @@ export class StatusProvider {
 	): Promise<T> {
 		// Create a status item and wait for our promise to either finish or reject
 		const status = this.set(message, timeout, cancel);
+
 		let result: T;
+
 		try {
 			result = await promise();
 		} finally {

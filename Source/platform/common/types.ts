@@ -219,6 +219,7 @@ export type DeprecatedFeatureInfo = {
 	message: string;
 	moreInfoUrl: string;
 	commands?: CommandIds[];
+
 	setting?: DeprecatedSettingAndValue;
 };
 
@@ -275,6 +276,7 @@ export const IExperimentService = Symbol("IExperimentService");
 export interface IExperimentService {
 	activate(): Promise<void>;
 	inExperiment(experimentName: Experiments): boolean;
+
 	getExperimentValue<T extends boolean | number | string>(
 		experimentName: Experiments,
 	): Promise<T | undefined>;
@@ -330,10 +332,12 @@ export type ParentOptions = {
 export interface IVariableScriptGenerator {
 	generateCodeToGetVariableInfo(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 	}): Promise<ScriptCode>;
 	generateCodeToGetVariableProperties(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 		stringifiedAttributeNameList: string;
 	}): Promise<ScriptCode>;
@@ -351,10 +355,12 @@ export const IDataFrameScriptGenerator = Symbol("IDataFrameScriptGenerator");
 export interface IDataFrameScriptGenerator {
 	generateCodeToGetDataFrameInfo(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 	}): Promise<ScriptCode>;
 	generateCodeToGetDataFrameRows(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 		startIndex: number;
 		endIndex: number;

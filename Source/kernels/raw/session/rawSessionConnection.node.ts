@@ -86,6 +86,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 		};
 	}
 	private isTerminating?: boolean;
+
 	get status(): KernelMessage.Status {
 		if (this.isDisposed) {
 			return "dead";

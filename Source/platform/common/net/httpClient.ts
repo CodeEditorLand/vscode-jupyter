@@ -12,10 +12,12 @@ import { IHttpClient } from "../types";
  */
 export class HttpClient implements IHttpClient {
 	private readonly requestOptions: RequestInit = {};
+
 	constructor(
 		private readonly fetchImplementation: typeof fetch.fetch = fetch.fetch,
 	) {
 		const proxy = workspace.getConfiguration("http").get("proxy", "");
+
 		if (proxy) {
 			this.requestOptions = { headers: { proxy } };
 		}
@@ -30,11 +32,13 @@ export class HttpClient implements IHttpClient {
 		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		try {
 			const response = await this.downloadFile(uri);
+
 			return response.status === 200;
 		} catch (ex) {
 			logger.debug(
 				`HttpClient - Failure checking for file ${uri}: ${ex}`,
 			);
+
 			return false;
 		}
 	}

@@ -24,8 +24,11 @@ export class DataViewerChecker {
 			(await this.shouldAskForLargeData(owningResource))
 		) {
 			const message = DataScience.tooManyColumnsMessage;
+
 			const yes = DataScience.tooManyColumnsYes;
+
 			const no = DataScience.tooManyColumnsNo;
+
 			const dontAskAgain = DataScience.tooManyColumnsDontAskAgain;
 
 			const result = await window.showWarningMessage(
@@ -34,6 +37,7 @@ export class DataViewerChecker {
 				no,
 				dontAskAgain,
 			);
+
 			if (result === dontAskAgain) {
 				await this.disableAskForLargeData();
 			}
@@ -48,6 +52,7 @@ export class DataViewerChecker {
 		const settings = owningResource
 			? this.configuration.getSettings(owningResource)
 			: this.configuration.getSettings();
+
 		return settings && settings.askForLargeDataFrames === true;
 	}
 
@@ -57,6 +62,7 @@ export class DataViewerChecker {
 		const settings = owningResource
 			? this.configuration.getSettings(owningResource)
 			: this.configuration.getSettings();
+
 		if (settings) {
 			settings.askForLargeDataFrames = false;
 			this.configuration

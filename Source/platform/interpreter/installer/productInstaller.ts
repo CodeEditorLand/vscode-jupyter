@@ -39,5 +39,6 @@ export async function isModulePresentInEnvironmentCache(
 	interpreter: PythonEnvironment,
 ) {
 	const key = `${await getInterpreterHash(interpreter)}#${ProductNames.get(product)}`;
+
 	return memento.get<boolean>(key, false);
 }

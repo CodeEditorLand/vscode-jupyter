@@ -42,10 +42,12 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
         const kernels = new Set<IKernel>();
         workspace.notebookDocuments.forEach((item) => {
             const kernel = this.get(item);
+
             if (kernel) {
                 kernels.add(kernel);
             }
         });
+
         return Array.from(kernels);
     }
     constructor(
@@ -83,6 +85,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
             const notebook = workspace.notebookDocuments.find(
                 (item) => item.uri.toString() === uriOrNotebook.toString()
             );
+
             return notebook ? this.get(notebook) : undefined;
         } else if (typeof uriOrNotebook === 'string') {
             return this.kernelsById.get(uriOrNotebook)?.kernel;
@@ -105,6 +108,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
 
     public async dispose() {
         logger.ci(`Disposing all kernels from kernel provider`);
+
         const items = Array.from(this.pendingDisposables.values());
         this.pendingDisposables.clear();
         await Promise.all(items);
@@ -140,6 +144,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
     }
     protected disposeOldKernel(notebook: NotebookDocument, reason: 'notebookClosed' | 'createNewKernel') {
         const kernelToDispose = this.kernelsByNotebook.get(notebook);
+
         if (kernelToDispose) {
             logger.debug(
                 `Disposing kernel associated with ${getDisplayPath(notebook.uri)}, isClosed=${
@@ -160,6 +165,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
     protected handleServerRemoval(servers: JupyterServerProviderHandle[]) {
         workspace.notebookDocuments.forEach((document) => {
             const kernel = this.kernelsByNotebook.get(document);
+
             if (kernel) {
                 const metadata = kernel.options.metadata;
 
@@ -169,6 +175,7 @@ export abstract class BaseCoreKernelProvider implements IKernelProvider {
                             server.id === metadata.serverProviderHandle.id &&
                             server.handle === metadata.serverProviderHandle.handle
                     );
+
                     if (matchingRemovedServer) {
                         // it should be removed
                         this.kernelsByNotebook.delete(document);
@@ -252,6 +259,7 @@ export abstract class BaseThirdPartyKernelProvider implements IThirdPartyKernelP
 
     public async dispose() {
         logger.ci(`Disposing all kernels from kernel provider`);
+
         const items = Array.from(this.pendingDisposables.values());
         this.pendingDisposables.clear();
         await Promise.all(items);
@@ -286,6 +294,7 @@ export abstract class BaseThirdPartyKernelProvider implements IThirdPartyKernelP
     }
     protected disposeOldKernel(uri: Uri) {
         const kernelToDispose = this.kernelsByUri.get(uri.toString());
+
         if (kernelToDispose) {
             logger.ci(`Disposing kernel associated with ${getDisplayPath(uri)}`);
             this.kernelsById.delete(kernelToDispose.kernel.id);

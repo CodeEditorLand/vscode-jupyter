@@ -25,6 +25,7 @@ export class RemoteWidgetScriptSourceProvider
 	public static validUrls = new Map<string, boolean>();
 	private readonly kernelConnection: RemoteKernelConnectionMetadata;
 	private readonly scriptManager: IIPyWidgetScriptManager;
+
 	constructor(
 		kernel: IKernel,
 		scriptManagerFactory: IIPyWidgetScriptManagerFactory,
@@ -53,15 +54,18 @@ export class RemoteWidgetScriptSourceProvider
 		moduleName: string,
 	): Promise<Readonly<WidgetScriptSource>> {
 		const sources = await this.getWidgetScriptSources();
+
 		const found = sources.find(
 			(item) =>
 				item.moduleName.toLowerCase() === moduleName.toLowerCase(),
 		);
+
 		if (!found && moduleName.includes("/")) {
 			// Possible moduleName already contains the path to the script.
 			// E.g. in the case of the turtle widget, the module name is `nbextensions/mobilechelonianjs/turtlewidget`
 			// and all that's required is to load this script from <jupyter baseUrl><moduleName>, which gives us something like `http://xyz:port/nbextensions/mobilechelonianjs/turtlewidget`
 			const baseUrl = await this.getBaseUrl();
+
 			return {
 				moduleName,
 				scriptUri: `${baseUrl.toString()}${moduleName}`,
@@ -75,6 +79,7 @@ export class RemoteWidgetScriptSourceProvider
 	> {
 		const widgetModuleMappings =
 			await this.scriptManager.getWidgetModuleMappings();
+
 		if (widgetModuleMappings && Object.keys(widgetModuleMappings).length) {
 			const sources = await Promise.all(
 				Object.keys(widgetModuleMappings).map(async (moduleName) => {
@@ -85,6 +90,7 @@ export class RemoteWidgetScriptSourceProvider
 					};
 				}),
 			);
+
 			return sources;
 		}
 		return [];

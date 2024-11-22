@@ -25,11 +25,13 @@ export function parsePosition(raw: string | number): Position {
 	}
 
 	const parts = raw.split(":");
+
 	if (parts.length > 2) {
 		throw new Error(`invalid position ${raw}`);
 	}
 
 	let line = 0;
+
 	if (parts[0] !== "") {
 		if (!/^\d+$/.test(parts[0])) {
 			throw new Error(`invalid position ${raw}`);
@@ -37,6 +39,7 @@ export function parsePosition(raw: string | number): Position {
 		line = +parts[0];
 	}
 	let col = 0;
+
 	if (parts.length === 2 && parts[1] !== "") {
 		if (!/^\d+$/.test(parts[1])) {
 			throw new Error(`invalid position ${raw}`);

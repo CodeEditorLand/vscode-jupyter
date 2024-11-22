@@ -83,9 +83,11 @@ function sortOutputItemsBasedOnDisplayOrder(
 			}
 			return compareWith.startsWith(value);
 		};
+
 		let indexOfMimeTypeA = orderOfMimeTypes.findIndex((mime) =>
 			isMimeTypeMatch(mime, outputItemA.mime),
 		);
+
 		let indexOfMimeTypeB = orderOfMimeTypes.findIndex((mime) =>
 			isMimeTypeMatch(mime, outputItemB.mime),
 		);
@@ -100,6 +102,7 @@ function sortOutputItemsBasedOnDisplayOrder(
 		}
 		indexOfMimeTypeA = indexOfMimeTypeA == -1 ? 100 : indexOfMimeTypeA;
 		indexOfMimeTypeB = indexOfMimeTypeB == -1 ? 100 : indexOfMimeTypeB;
+
 		return indexOfMimeTypeA - indexOfMimeTypeB;
 	});
 }
@@ -136,6 +139,7 @@ export class NotebookCellStateTracker {
 		const stopWatch =
 			NotebookCellStateTracker.cellStates.get(cell)?.start ||
 			new StopWatch();
+
 		const previousState =
 			NotebookCellStateTracker.cellStates.get(cell)?.stateTransition ||
 			[];
@@ -206,7 +210,9 @@ export function cellOutputToVSCCellOutput(
      *
      */
 	const fn = cellOutputMappers.get(output.output_type as nbformat.OutputType);
+
 	let result: NotebookCellOutput;
+
 	if (fn) {
 		result = fn(output);
 	} else {
@@ -224,6 +230,7 @@ function getOutputMetadata(output: nbformat.IOutput): CellOutputMetadata {
 	const metadata: CellOutputMetadata = {
 		outputType: output.output_type,
 	};
+
 	if (output.transient) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		metadata.transient = output.transient as any;
@@ -237,6 +244,7 @@ function getOutputMetadata(output: nbformat.IOutput): CellOutputMetadata {
 			metadata.metadata = output.metadata
 				? JSON.parse(JSON.stringify(output.metadata))
 				: {};
+
 			break;
 		}
 		default:
@@ -287,6 +295,7 @@ function translateDisplayDataOutput(
 		metadata.__displayOpenPlotIcon = true;
 	}
 	const items: NotebookCellOutputItem[] = [];
+
 	if (output.data) {
 		// eslint-disable-next-line no-restricted-syntax
 		for (const key in output.data) {
@@ -302,10 +311,12 @@ function translateDisplayDataOutput(
 
 function translateStreamOutput(output: nbformat.IStream): NotebookCellOutput {
 	const value = concatMultilineString(output.text);
+
 	const factoryFn =
 		output.name === "stderr"
 			? NotebookCellOutputItem.stderr
 			: NotebookCellOutputItem.stdout;
+
 	return new NotebookCellOutput(
 		[factoryFn(value)],
 		getOutputMetadata(output),
@@ -383,7 +394,9 @@ export function translateCellErrorOutput(
 	}
 	const originalError: undefined | nbformat.IError =
 		output.metadata?.originalError;
+
 	const value: Error = JSON.parse(new TextDecoder().decode(firstItem.data));
+
 	return {
 		output_type: "error",
 		ename: value.name,
@@ -398,6 +411,7 @@ export function translateCellErrorOutput(
 	};
 }
 const textDecoder = new TextDecoder();
+
 const textMimeTypes = [
 	"text/plain",
 	"text/markdown",
@@ -411,9 +425,11 @@ function convertOutputMimeToJupyterOutput(mime: string, value: Uint8Array) {
 	try {
 		if (mime === CellOutputMimeTypes.error) {
 			const stringValue = textDecoder.decode(value);
+
 			return JSON.parse(stringValue);
 		} else if (mime.startsWith("text/") || textMimeTypes.includes(mime)) {
 			const stringValue = textDecoder.decode(value);
+
 			return splitMultilineString(stringValue);
 		} else if (mime.startsWith("image/") && mime !== "image/svg+xml") {
 			// Images in Jupyter are stored in base64 encoded format.
@@ -424,6 +440,7 @@ function convertOutputMimeToJupyterOutput(mime: string, value: Uint8Array) {
 			mime.toLowerCase().endsWith("+json")
 		) {
 			const stringValue = textDecoder.decode(value);
+
 			try {
 				// Holoviews mimetype isn't a json.
 				// Lets try to parse it as json & if it fails, treat it as a string.
@@ -436,11 +453,13 @@ function convertOutputMimeToJupyterOutput(mime: string, value: Uint8Array) {
 			}
 		} else if (mime.toLowerCase().includes("json")) {
 			const stringValue = textDecoder.decode(value);
+
 			return stringValue.length > 0
 				? JSON.parse(stringValue)
 				: stringValue;
 		} else {
 			const stringValue = textDecoder.decode(value);
+
 			return stringValue;
 		}
 	} catch (ex) {
@@ -448,6 +467,7 @@ function convertOutputMimeToJupyterOutput(mime: string, value: Uint8Array) {
 			`Failed to convert ${mime} output from a buffer ${typeof value}, ${value}`,
 			ex,
 		);
+
 		return "";
 	}
 }
@@ -466,6 +486,7 @@ function convertJupyterOutputToBuffer(
 			const stringValue = Array.isArray(value)
 				? concatMultilineString(value)
 				: value;
+
 			return NotebookCellOutputItem.text(stringValue, mime);
 		} else if (
 			mime.startsWith("image/") &&
@@ -484,6 +505,7 @@ function convertJupyterOutputToBuffer(
 		} else {
 			// For everything else, treat the data as strings (or multi-line strings).
 			value = Array.isArray(value) ? concatMultilineString(value) : value;
+
 			return NotebookCellOutputItem.text(value as string, mime);
 		}
 	} catch (ex) {
@@ -491,6 +513,7 @@ function convertJupyterOutputToBuffer(
 			`Failed to convert ${mime} output to a buffer ${typeof value}, ${value}`,
 			ex,
 		);
+
 		return NotebookCellOutputItem.text("");
 	}
 }
@@ -538,17 +561,21 @@ export function translateCellDisplayOutput(
 	output: NotebookCellOutput,
 ): JupyterOutput {
 	const customMetadata = output.metadata as CellOutputMetadata | undefined;
+
 	let result: JupyterOutput;
 	// Possible some other extension added some output (do best effort to translate & save in ipynb).
 	// In which case metadata might not contain `outputType`.
 	const outputType = customMetadata?.outputType as nbformat.OutputType;
+
 	switch (outputType) {
 		case "error": {
 			result = translateCellErrorOutput(output);
+
 			break;
 		}
 		case "stream": {
 			result = convertStreamOutput(output);
+
 			break;
 		}
 		case "display_data": {
@@ -560,10 +587,12 @@ export function translateCellDisplayOutput(
 						curr.mime,
 						curr.data as Uint8Array,
 					);
+
 					return prev;
 				}, {}),
 				metadata: customMetadata?.metadata || {}, // This can never be undefined.
 			};
+
 			break;
 		}
 		case "execute_result": {
@@ -575,6 +604,7 @@ export function translateCellDisplayOutput(
 						curr.mime,
 						curr.data as Uint8Array,
 					);
+
 					return prev;
 				}, {}),
 				metadata: customMetadata?.metadata || {}, // This can never be undefined.
@@ -583,6 +613,7 @@ export function translateCellDisplayOutput(
 						? customMetadata?.executionCount
 						: null, // This can never be undefined, only a number or `null`.
 			};
+
 			break;
 		}
 		case "update_display_data": {
@@ -594,10 +625,12 @@ export function translateCellDisplayOutput(
 						curr.mime,
 						curr.data as Uint8Array,
 					);
+
 					return prev;
 				}, {}),
 				metadata: customMetadata?.metadata || {}, // This can never be undefined.
 			};
+
 			break;
 		}
 		default: {
@@ -606,6 +639,7 @@ export function translateCellDisplayOutput(
 				output.items.every(
 					(item) => item.mime === CellOutputMimeTypes.error,
 				);
+
 			const isStream = output.items.every(
 				(item) =>
 					item.mime === CellOutputMimeTypes.stderr ||
@@ -634,6 +668,7 @@ export function translateCellDisplayOutput(
 				| nbformat.IUnrecognizedOutput
 				| nbformat.IDisplayData
 				| nbformat.IStream;
+
 			if (outputType === "stream") {
 				// If saving as `stream` ensure the mandatory properties are set.
 				unknownOutput = convertStreamOutput(output);
@@ -660,10 +695,12 @@ export function translateCellDisplayOutput(
 						curr.mime,
 						curr.data as Uint8Array,
 					);
+
 					return prev;
 				}, {});
 			}
 			result = unknownOutput;
+
 			break;
 		}
 	}
@@ -689,6 +726,7 @@ function translateErrorOutput(output?: nbformat.IError): NotebookCellOutput {
 		evalue: "",
 		traceback: [],
 	};
+
 	return new NotebookCellOutput(
 		[
 			NotebookCellOutputItem.error({
@@ -740,7 +778,9 @@ export async function updateNotebookMetadataWithSelectedKernel(
 	kernelInfo?: Partial<KernelMessage.IInfoReplyMsg["content"]>,
 ) {
 	let changed = false;
+
 	let kernelId: string | undefined;
+
 	if (!metadata) {
 		return { changed, kernelId };
 	}
@@ -751,17 +791,24 @@ export async function updateNotebookMetadataWithSelectedKernel(
 	}
 
 	let language: string | undefined;
+
 	switch (kernelConnection?.kind) {
 		case "connectToLiveRemoteKernel":
 			language = kernelConnection.kernelModel.language;
+
 			break;
+
 		case "startUsingRemoteKernelSpec":
 		case "startUsingLocalKernelSpec":
 			language = kernelConnection.kernelSpec.language;
+
 			break;
+
 		case "startUsingPythonInterpreter":
 			language = PYTHON_LANGUAGE;
+
 			break;
+
 		default:
 			break;
 	}
@@ -784,13 +831,17 @@ export async function updateNotebookMetadataWithSelectedKernel(
 	} else {
 		// Get our kernel_info and language_info from the current notebook
 		const isPythonConnection = isPythonKernelConnection(kernelConnection);
+
 		const interpreter = isPythonConnection
 			? getInterpreterFromKernelConnectionMetadata(kernelConnection)
 			: undefined;
+
 		const versionInfo = await getVersion(interpreter);
+
 		const version = versionInfo
 			? `${versionInfo.major}.${versionInfo.minor}.${versionInfo.micro}`
 			: "";
+
 		if (
 			interpreter &&
 			versionInfo &&
@@ -820,9 +871,11 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			: kernelConnection && "kernelSpec" in kernelConnection
 				? kernelConnection.kernelSpec
 				: undefined;
+
 	if (kernelConnection?.kind === "startUsingPythonInterpreter") {
 		// Store interpreter name, we expect the kernel finder will find the corresponding interpreter based on this name.
 		const kernelSpec = kernelConnection.kernelSpec;
+
 		let displayName =
 			kernelSpec.display_name ||
 			getCachedEnvironment(kernelConnection.interpreter)?.environment
@@ -832,11 +885,14 @@ export async function updateNotebookMetadataWithSelectedKernel(
 		// If kernel spec is generated by us, then always store `python3` in the notebook (so that its portable).
 		// However if we've created a kernelspec that points to a real kernelspec in a Python environment, then use the name of that spec.
 		let name = "";
+
 		switch (getKernelRegistrationInfo(kernelSpec)) {
 			case "registeredByOldVersionOfExt":
 			case "registeredByNewVersionOfExt":
 				name = "python3";
+
 				break;
+
 			case "registeredByNewVersionOfExtForCustomKernelSpec": {
 				const originalNameFromOriginalSpecFile = kernelSpec.metadata
 					?.vscode?.originalSpecFile
@@ -851,10 +907,12 @@ export async function updateNotebookMetadataWithSelectedKernel(
 				displayName =
 					kernelSpec.metadata?.vscode?.originalDisplayName ||
 					displayName;
+
 				break;
 			}
 			default:
 				name = kernelSpec.name;
+
 				break;
 		}
 
@@ -868,6 +926,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 				language: PYTHON_LANGUAGE,
 				display_name: displayName,
 			};
+
 			if ("vscode" in metadata) {
 				delete metadata["vscode"];
 			}
@@ -897,6 +956,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 				kernelSpecOrModel.name ||
 				"",
 		};
+
 		if (kernelSpecOrModel.language) {
 			metadata.kernelspec.language = kernelSpecOrModel.language;
 		}
@@ -917,13 +977,16 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			kernelSpecOrModel.name ||
 			kernelSpecOrModel.display_name ||
 			"";
+
 		const displayName =
 			kernelSpecOrModel.metadata?.vscode?.originalDisplayName ||
 			kernelSpecOrModel.display_name ||
 			kernelSpecOrModel.name ||
 			"";
+
 		const language =
 			kernelSpecOrModel.language || kernelSpecOrModel.language || "";
+
 		if (
 			metadata.kernelspec.name !== name ||
 			metadata.kernelspec.language !== language ||
@@ -954,8 +1017,10 @@ export async function endCellAndDisplayErrorsInCell(
 	isCancelled: boolean,
 ) {
 	const output = createOutputWithErrorMessageForDisplay(errorMessage);
+
 	if (!output) {
 		const execution = CellExecutionCreator.get(cell);
+
 		if (isCancelled && execution?.started) {
 			execution.end(
 				isCancelled ? undefined : false,
@@ -971,7 +1036,9 @@ export async function endCellAndDisplayErrorsInCell(
 
 	// Start execution if not already (Cell execution wrapper will ensure it won't start twice)
 	const execution = CellExecutionCreator.getOrCreate(cell, controller);
+
 	const originalExecutionOrder = execution.executionOrder;
+
 	if (!execution.started) {
 		execution.start(cell.executionSummary?.timing?.startTime);
 		execution.executionOrder =
@@ -990,18 +1057,24 @@ export function findErrorLocation(traceback: string[], cell: NotebookCell) {
 	// older versions of IPython ~8.3.0
 	const inputRegex =
 		/Input\s+?(?:\u001b\[.+?m)?In\s*\[(?<executionCount>\d+)\][^<]*<cell line:\s?(?<lineNumber>\d+)>.*/;
+
 	let lineNumber: number | undefined = undefined;
+
 	for (const line of traceback) {
 		const lineMatch = cellRegex.exec(line) ?? inputRegex.exec(line);
+
 		if (lineMatch && lineMatch.groups) {
 			lineNumber = parseInt(lineMatch.groups["lineNumber"]);
+
 			break;
 		}
 	}
 
 	let range: Range | undefined = undefined;
+
 	if (lineNumber && lineNumber > 0 && lineNumber <= cell.document.lineCount) {
 		const line = cell.document.lineAt(lineNumber - 1);
+
 		const end = line.text.split("#")[0].trimEnd().length;
 
 		range = new Range(

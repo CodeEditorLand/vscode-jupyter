@@ -26,6 +26,7 @@ export function getDisposableTracker(): IDisposable[] | undefined {
 
 export function trackDisposable<T extends IDisposable>(x: T): T {
 	disposableTracker?.push(x);
+
 	return x;
 }
 
@@ -62,6 +63,7 @@ export function dispose<T extends IDisposable>(
 		return Array.isArray(arg) ? [] : arg;
 	} else if (arg) {
 		arg.dispose();
+
 		return arg;
 	}
 }
@@ -82,6 +84,7 @@ function toDisposable(fn: () => void): IDisposable {
 	const self = trackDisposable({
 		dispose: once(() => fn()),
 	});
+
 	return self;
 }
 
@@ -224,6 +227,7 @@ export abstract class ObservableDisposable extends DisposableBase {
 
 export function disposeOnReturn(fn: (store: DisposableStore) => void): void {
 	const store = new DisposableStore();
+
 	try {
 		fn(store);
 	} finally {
@@ -308,6 +312,7 @@ export class RefCountedDisposable {
 
 	acquire() {
 		this._counter++;
+
 		return this;
 	}
 
@@ -341,6 +346,7 @@ export abstract class ReferenceCollection<T> {
 		}
 
 		const { object } = reference;
+
 		const dispose = once(() => {
 			if (reference && --reference.counter === 0) {
 				this.destroyReferencedObject(key, reference.object);

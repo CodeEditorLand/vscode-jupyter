@@ -38,6 +38,7 @@ function isTelemetrySupported(): boolean {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const vsc = require("vscode");
+
 		if (vsc === undefined) {
 			return false;
 		}
@@ -55,6 +56,7 @@ export function isTelemetryDisabled(): boolean {
 	const settings = workspace
 		.getConfiguration("telemetry")
 		.inspect<boolean>("enableTelemetry")!;
+
 	return settings.globalValue === false ? true : false;
 }
 
@@ -68,6 +70,7 @@ export function onDidChangeTelemetryEnablement(
 		const settings = workspace
 			.getConfiguration("telemetry")
 			.inspect<boolean>("enableTelemetry")!;
+
 		const enabled = settings.globalValue === false ? true : false;
 		handler(enabled);
 	});
@@ -109,6 +112,7 @@ export function getTelemetryReporter(): TelemetryReporter {
 	}
 	const TelemetryReporrerClass = require("@vscode/extension-telemetry")
 		.default as typeof TelemetryReporter;
+
 	return (telemetryReporter = new TelemetryReporrerClass(AppinsightsKey));
 }
 
@@ -131,6 +135,7 @@ function sanitizeProperties(eventName: string, data: Record<string, any>) {
 			logger.error(`Failed to serialize ${prop} for ${eventName}`, ex);
 		}
 	});
+
 	return customProperties;
 }
 
@@ -211,7 +216,9 @@ function sendTelemetryEventInternal<
 	ex?: Error,
 ) {
 	const reporter = getTelemetryReporter();
+
 	let customProperties: Record<string, string> = {};
+
 	let eventNameSent = eventName as string;
 
 	if (ex) {
@@ -241,6 +248,7 @@ function sendTelemetryEventInternal<
 
 		// Add shared properties to telemetry props (we may overwrite existing ones).
 		Object.assign(customProperties, sharedProperties);
+
 		if (isPerfMeasurementOnCI(eventNameSent)) {
 			reporter.sendDangerousTelemetryEvent(
 				eventNameSent,
@@ -263,6 +271,7 @@ type TypedMethodDescriptor<T> = (
 	propertyKey: string | symbol,
 	descriptor: TypedPropertyDescriptor<T>,
 ) => TypedPropertyDescriptor<T> | void;
+
 const timesSeenThisEventWithSameProperties = new Set<string>();
 export type PickTypeNumberProps<T, Value> = {
 	[P in keyof T as T[P] extends Value ? P : never]: T[P];
@@ -306,7 +315,9 @@ export function capturePerfTelemetry<
 
 			// Determine if this is the first time we're sending this telemetry event for this same (class/method).
 			const stopWatch = new StopWatch();
+
 			const key = `${eventName.toString()}${JSON.stringify(props)}`;
+
 			const firstTime = !timesSeenThisEventWithSameProperties.has(key);
 			timesSeenThisEventWithSameProperties.add(key);
 
@@ -324,6 +335,7 @@ export function capturePerfTelemetry<
 				(result as Promise<void>)
 					.then((data) => {
 						const propsToSend = { ...props };
+
 						if (firstTime) {
 							(propsToSend as any)["firstTime"] = firstTime;
 						}
@@ -334,6 +346,7 @@ export function capturePerfTelemetry<
 								: undefined,
 							propsToSend as typeof properties,
 						);
+
 						return data;
 					})
 					// eslint-disable-next-line @typescript-eslint/promise-function-async

@@ -65,6 +65,7 @@ export class IPyWidgetScriptSource {
 	>();
 	private readonly uriConverter: ILocalResourceUriConverter;
 	private readonly uriTranslationRequests = new ResourceMap<Deferred<Uri>>();
+
 	constructor(
 		private readonly document: NotebookDocument,
 		private readonly kernelProvider: IKernelProvider,
@@ -86,6 +87,7 @@ export class IPyWidgetScriptSource {
 						InteractiveWindowMessages.ConvertUriForUseInWebViewRequest,
 					payload: resource,
 				});
+
 				return this.uriTranslationRequests.get(resource)!.promise;
 			},
 		);
@@ -117,6 +119,7 @@ export class IPyWidgetScriptSource {
 		) {
 			const response: undefined | { request: Uri; response: Uri } =
 				payload;
+
 			if (response && this.uriTranslationRequests.has(response.request)) {
 				this.uriTranslationRequests
 					.get(response.request)!
@@ -282,10 +285,12 @@ export class IPyWidgetScriptSource {
 				moduleVersion,
 				requestId,
 			});
+
 			return;
 		}
 
 		let widgetSource: WidgetScriptSource = { moduleName, requestId };
+
 		try {
 			logger.trace(
 				`${ConsoleForegroundColors.Green}Fetch Script for ${moduleName}`,
@@ -320,8 +325,10 @@ export class IPyWidgetScriptSource {
 		const pendingModuleNames = Array.from(
 			this.pendingModuleRequests.keys(),
 		);
+
 		while (pendingModuleNames.length) {
 			const moduleName = pendingModuleNames.shift();
+
 			if (moduleName) {
 				const { moduleVersion, requestId } =
 					this.pendingModuleRequests.get(moduleName)!;

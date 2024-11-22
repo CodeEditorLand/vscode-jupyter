@@ -22,13 +22,16 @@ export function getJupyterOutputChannel(
 		"log",
 	);
 	disposables.push(jupyterServerOutputChannel);
+
 	const handler: ProxyHandler<IOutputChannel> = {
 		get(target: IOutputChannel, propKey: keyof IOutputChannel) {
 			const method = target[propKey];
+
 			if (typeof method === "function") {
 				if (propKey === "append") {
 					return (...args: Parameters<IOutputChannel["append"]>) => {
 						jupyterServerOutputChannel.append(...args);
+
 						formatMessageAndLog(...args);
 					};
 				}
@@ -37,6 +40,7 @@ export function getJupyterOutputChannel(
 						...args: Parameters<IOutputChannel["appendLine"]>
 					) => {
 						jupyterServerOutputChannel.appendLine(...args);
+
 						formatMessageAndLog(...args);
 					};
 				}
@@ -44,6 +48,7 @@ export function getJupyterOutputChannel(
 			return method;
 		},
 	};
+
 	return new Proxy(jupyterServerOutputChannel, handler);
 }
 

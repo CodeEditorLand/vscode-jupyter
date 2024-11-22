@@ -33,17 +33,20 @@ const dummyStreamObj: nbformat.IStream = {
 	name: "stdout",
 	text: "",
 };
+
 const dummyErrorObj: nbformat.IError = {
 	output_type: "error",
 	ename: "",
 	evalue: "",
 	traceback: [""],
 };
+
 const dummyDisplayObj: nbformat.IDisplayData = {
 	output_type: "display_data",
 	data: {},
 	metadata: {},
 };
+
 const dummyExecuteResultObj: nbformat.IExecuteResult = {
 	output_type: "execute_result",
 	execution_count: 0,
@@ -69,17 +72,21 @@ export function getResourceType(uri?: Uri): "notebook" | "interactive" {
 
 function fixupOutput(output: nbformat.IOutput): nbformat.IOutput {
 	let allowedKeys: Set<string>;
+
 	switch (output.output_type) {
 		case "stream":
 		case "error":
 		case "execute_result":
 		case "display_data":
 			allowedKeys = AllowedCellOutputKeys[output.output_type];
+
 			break;
+
 		default:
 			return output;
 	}
 	const result = { ...output };
+
 	for (const k of Object.keys(output)) {
 		if (!allowedKeys.has(k)) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,6 +124,7 @@ export function pruneCell(cell: nbformat.ICell): nbformat.ICell {
 
 export function translateKernelLanguageToMonaco(language: string): string {
 	language = language.toLowerCase();
+
 	if (language.length === 2 && language.endsWith("#")) {
 		return `${language.substring(0, 1)}sharp`;
 	}
@@ -235,8 +243,10 @@ export function getAssociatedJupyterNotebook(
 export function concatMultilineString(str: nbformat.MultilineString): string {
 	if (Array.isArray(str)) {
 		let result = "";
+
 		for (let i = 0; i < str.length; i += 1) {
 			const s = str[i];
+
 			if (i < str.length - 1 && !s.endsWith("\n")) {
 				result = result.concat(`${s}\n`);
 			} else {
@@ -256,9 +266,11 @@ export function splitMultilineString(
 		return source as string[];
 	}
 	const str = source.toString();
+
 	if (str.length > 0) {
 		// Each line should be a separate entry, but end with a \n if not last entry
 		const arr = str.split("\n");
+
 		return arr
 			.map((s, i) => {
 				if (i < arr.length - 1) {
@@ -276,11 +288,13 @@ export function splitMultilineString(
 // Remove characters that are overridden by backspace characters
 function fixBackspace(txt: string) {
 	let tmp = txt;
+
 	do {
 		txt = tmp;
 		// Cancel out anything-but-newline followed by backspace
 		tmp = txt.replace(/[^\n]\x08/gm, "");
 	} while (tmp.length < txt.length);
+
 	return txt;
 }
 
@@ -291,6 +305,7 @@ function fixCarriageReturn(txt: string) {
 	txt = txt.replace(/\r+\n/gm, "\n"); // \r followed by \n --> newline
 	while (txt.search(/\r[^$]/g) > -1) {
 		var base = txt.match(/^(.*)\r+/m)![1];
+
 		var insert = txt.match(/\r+(.*)$/m)![1];
 		insert = insert + base.slice(insert.length, base.length);
 		txt = txt.replace(/\r+.*$/m, "\r").replace(/^.*\r/m, insert);
@@ -304,6 +319,7 @@ export function formatStreamText(str: string): string {
 }
 
 const SingleQuoteMultiline = "'''";
+
 const DoubleQuoteMultiline = '"""';
 
 // eslint-disable-next-line complexity
@@ -314,8 +330,11 @@ export function parseForComments(
 ) {
 	// Check for either multiline or single line comments
 	let insideMultilineComment: string | undefined;
+
 	let insideMultilineQuote: string | undefined;
+
 	let pos = 0;
+
 	for (const l of lines) {
 		const trim = l.trim();
 		// Multiline is triple quotes of either kind
@@ -324,6 +343,7 @@ export function parseForComments(
 			: trim.startsWith(DoubleQuoteMultiline)
 				? DoubleQuoteMultiline
 				: undefined;
+
 		const isMultilineQuote = trim.includes(SingleQuoteMultiline)
 			? SingleQuoteMultiline
 			: trim.includes(DoubleQuoteMultiline)
@@ -348,6 +368,7 @@ export function parseForComments(
 		} else if (isMultilineQuote && !isMultilineComment) {
 			// Make sure doesn't begin and end on the same line.
 			const beginQuote = trim.indexOf(isMultilineQuote);
+
 			const endQuote = trim.lastIndexOf(isMultilineQuote);
 			insideMultilineQuote =
 				endQuote !== beginQuote ? undefined : isMultilineQuote;
@@ -388,6 +409,7 @@ export function stripComments(str: string): string {
 		},
 		(s) => (result = result.concat(`${s}\n`)),
 	);
+
 	return result;
 }
 
@@ -398,6 +420,7 @@ export function appendLineFeed(
 ) {
 	return arr.map((s: string, i: number) => {
 		const out = modifier ? modifier(s) : s;
+
 		return i === arr.length - 1 ? `${out}` : `${out}${eol}`;
 	});
 }
@@ -411,6 +434,7 @@ function extractComments(lines: string[]): string[] {
 			// Do nothing
 		},
 	);
+
 	return result;
 }
 
@@ -423,15 +447,18 @@ export function generateMarkdownFromCodeLines(lines: string[]) {
 
 export function removeLinesFromFrontAndBackNoConcat(lines: string[]): string[] {
 	let lastNonEmptyLine = lines.length;
+
 	let firstNonEmptyLine = -1;
 	lines.forEach((l, i) => {
 		if (l.trim()) {
 			lastNonEmptyLine = i;
+
 			if (firstNonEmptyLine < 0) {
 				firstNonEmptyLine = i;
 			}
 		}
 	});
+
 	return firstNonEmptyLine >= 0
 		? lines.slice(firstNonEmptyLine, lastNonEmptyLine + 1)
 		: [];
@@ -441,16 +468,21 @@ export function removeLinesFromFrontAndBack(code: string | string[]): string {
 	const lines = Array.isArray(code)
 		? code
 		: splitLines(code, { trim: false, removeEmptyEntries: false });
+
 	return removeLinesFromFrontAndBackNoConcat(lines).join("\n");
 }
 
 // For the given string parse it out to a SemVer or return undefined
 export function parseSemVer(versionString: string): SemVer | undefined {
 	const versionMatch = /^\s*(\d+)\.(\d+)\.(.+)\s*$/.exec(versionString);
+
 	if (versionMatch && versionMatch.length > 2) {
 		const major = parseInt(versionMatch[1], 10);
+
 		const minor = parseInt(versionMatch[2], 10);
+
 		const build = parseInt(versionMatch[3], 10);
+
 		return parse(`${major}.${minor}.${build}`, true) ?? undefined;
 	}
 }
@@ -470,6 +502,7 @@ export function getCellMetadata(cell: NotebookCell): JupyterCellMetadata {
 	) || { metadata: {} };
 	// metadata property is never optional.
 	metadata.metadata = metadata.metadata || {};
+
 	return metadata;
 }
 
@@ -500,6 +533,7 @@ function doSortObjectPropertiesRecursively(obj: any): any {
 					sortedObj[prop] = sortObjectPropertiesRecursively(
 						obj[prop],
 					);
+
 					return sortedObj;
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				}, {}) as any

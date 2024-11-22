@@ -24,7 +24,10 @@ export async function getExecutablePath(
 	exec: ExecFunc,
 ): Promise<Uri> {
 	const [args, parse] = getPythonExecutableCommand();
+
 	const info = copyPythonExecInfo(python, args);
+
 	const result = await exec(info.command, info.args);
+
 	return Uri.file(parse(result.stdout));
 }

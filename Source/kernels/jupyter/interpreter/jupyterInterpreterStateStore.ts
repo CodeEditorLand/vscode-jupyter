@@ -17,6 +17,7 @@ import {
 import { noop } from "../../../platform/common/utils/misc";
 
 const key = "INTERPRETER_PATH_SELECTED_FOR_JUPYTER_SERVER";
+
 const keySelected = "INTERPRETER_PATH_WAS_SELECTED_FOR_JUPYTER_SERVER";
 /**
  * Keeps track of whether the user ever selected an interpreter to be used as the global jupyter interpreter.
@@ -28,6 +29,7 @@ const keySelected = "INTERPRETER_PATH_WAS_SELECTED_FOR_JUPYTER_SERVER";
 @injectable()
 export class JupyterInterpreterStateStore {
 	private _interpreterPath?: Uri;
+
 	constructor(
 		@inject(IMemento)
 		@named(GLOBAL_MEMENTO)
@@ -51,6 +53,7 @@ export class JupyterInterpreterStateStore {
 			return this._interpreterPath;
 		}
 		const memento = this.memento.get<string | undefined>(key, undefined);
+
 		if (memento) {
 			return Uri.parse(memento);
 		}
@@ -67,6 +70,7 @@ export class MigrateJupyterInterpreterStateService
 	implements IExtensionSyncActivationService
 {
 	private settingsMigrated?: boolean;
+
 	constructor(
 		@inject(IPythonApiProvider) private readonly api: IPythonApiProvider,
 		@inject(IMemento)
@@ -100,7 +104,9 @@ export class MigrateJupyterInterpreterStateService
 			return;
 		}
 		this.settingsMigrated = true;
+
 		const api = await this.api.getApi();
+
 		const data = api.getInterpreterPathSelectedForJupyterServer();
 		await this.memento.update(key, data);
 		await this.memento.update(keySelected, true);

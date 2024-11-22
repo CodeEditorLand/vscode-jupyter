@@ -59,6 +59,7 @@ export class CellOutputDisplayIdTracker
 						CellOutputDisplayIdTracker.cellToDisplayIdMapping.get(
 							change.cell,
 						);
+
 					if (displayIdToDelete) {
 						CellOutputDisplayIdTracker.cellToDisplayIdMapping.delete(
 							change.cell,
@@ -85,6 +86,7 @@ export class CellOutputDisplayIdTracker
 			CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument.get(
 				cell.notebook,
 			);
+
 		if (!mapOfDisplayIdToOutput) {
 			mapOfDisplayIdToOutput = new Map<
 				string,
@@ -123,11 +125,13 @@ export class CellOutputDisplayIdTracker
 			CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument.get(
 				notebook,
 			);
+
 		if (!mapOfDisplayIdToOutput) {
 			return;
 		}
 		// Check if the cell still exists.
 		const mapping = mapOfDisplayIdToOutput.get(displayId);
+
 		return mapping?.cell.document.isClosed ? undefined : mapping;
 	}
 }

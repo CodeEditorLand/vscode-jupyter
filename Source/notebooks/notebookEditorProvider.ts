@@ -29,12 +29,14 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 
 	findNotebookEditor(resource: Resource) {
 		const key = resource ? getComparisonKey(resource, true) : "false";
+
 		const notebook =
 			getResourceType(resource) === "notebook"
 				? workspace.notebookDocuments.find(
 						(item) => getComparisonKey(item.uri, true) === key,
 					)
 				: undefined;
+
 		const targetNotebookEditor =
 			notebook && window.activeNotebookEditor?.notebook === notebook
 				? window.activeNotebookEditor
@@ -63,6 +65,7 @@ export class NotebookEditorProvider implements INotebookEditorProvider {
 
 	findAssociatedNotebookDocument(uri: Uri) {
 		const ignoreCase = getOSType() === OSType.Windows;
+
 		let notebook = workspace.notebookDocuments.find((n) => {
 			// Use the path part of the URI. It should match the path for the notebook
 			return ignoreCase

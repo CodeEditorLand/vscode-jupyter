@@ -70,6 +70,7 @@ import { registerChangeHandler, requestApiAccess } from "./apiAccess";
 
 class NotebookExecutionReferenceCollection extends ReferenceCollection<NotebookExecution> {
 	private existingExecutions?: NotebookExecution;
+
 	constructor(
 		private readonly controller: NotebookController,
 		private readonly notebook: NotebookDocument,
@@ -129,6 +130,7 @@ class KernelExecutionProgressIndicator {
 		Set<string>
 	>();
 	private executionRefCountedDisposableFactory?: NotebookExecutionReferenceCollection;
+
 	constructor(
 		private readonly extensionId: string,
 		private readonly kernel: IKernel,
@@ -140,6 +142,7 @@ class KernelExecutionProgressIndicator {
 					kernel.notebook,
 				)
 			: undefined;
+
 		const extensionDisplayName =
 			extensions.getExtension(extensionId)?.packageJSON?.displayName ||
 			extensionId;
@@ -168,6 +171,7 @@ class KernelExecutionProgressIndicator {
 	show() {
 		const execution =
 			this.executionRefCountedDisposableFactory?.acquire("");
+
 		if (this.deferred && !this.deferred.completed) {
 			const oldDeferred = this.deferred;
 			this.deferred = createDeferred<void>();
@@ -186,6 +190,7 @@ class KernelExecutionProgressIndicator {
 		// Clearly some extensions can take a while, see here https://github.com/microsoft/vscode-jupyter/issues/15613
 		// More than 1s is too long,
 		await sleep(1_000);
+
 		if (
 			!this.deferred ||
 			this.deferred.completed ||
@@ -206,10 +211,12 @@ class KernelExecutionProgressIndicator {
 			this.kernel,
 			notifiedExtensions,
 		);
+
 		if (notifiedExtensions.has(this.extensionId)) {
 			return;
 		}
 		notifiedExtensions.add(this.extensionId);
+
 		if (!this.notebook || !this.shouldDisplayProgress) {
 			return;
 		}
@@ -229,6 +236,7 @@ class KernelExecutionProgressIndicator {
 	}
 	private async waitUntilCompleted() {
 		let deferred = this.deferred;
+
 		while (deferred && !deferred.completed) {
 			await deferred.promise;
 			// Possible the deferred was replaced.
@@ -278,6 +286,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 	private readonly progress: KernelExecutionProgressIndicator;
 	private readonly _api: Kernel;
 	public readonly language: string;
+
 	get status(): KernelStatus {
 		return this.kernel.status;
 	}
@@ -294,6 +303,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		return this._onDidReceiveDisplayUpdate.event;
 	}
 	private accessAllowed?: Promise<boolean>;
+
 	constructor(
 		private readonly extensionId: string,
 		private readonly kernel: IKernel,
@@ -322,7 +332,9 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		this._register(
 			execution.onDidReceiveDisplayUpdate((output) => {
 				const session = this.kernel.session;
+
 				const metadata = getNotebookCellOutputMetadata(output);
+
 				if (
 					metadata?.outputType === "display_data" &&
 					metadata?.transient?.display_id &&
@@ -387,6 +399,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		ServiceContainer.instance
 			.get<IDisposableRegistry>(IDisposableRegistry)
 			.push(wrapper);
+
 		return wrapper._api;
 	}
 
@@ -401,6 +414,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			);
 		}
 		const accessAllowed = await this.accessAllowed;
+
 		if (!accessAllowed) {
 			throw new KernelAPIAccessRevoked();
 		}
@@ -409,12 +423,14 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 	private async doCheckAccess() {
 		// Check and prompt for access only if we know we have a kernel.
 		const access = await requestApiAccess(this.extensionId);
+
 		const accessAllowed = access.accessAllowed;
 		sendTelemetryEvent(Telemetry.NewJupyterKernelsApiUsage, undefined, {
 			extensionId: this.extensionId,
 			pemUsed: "getKernel",
 			accessAllowed,
 		});
+
 		return accessAllowed;
 	}
 
@@ -423,6 +439,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		token: CancellationToken,
 	): AsyncGenerator<Output, void, unknown> {
 		await this.checkAccess();
+
 		for await (const output of this.executeCodeInternal(
 			code,
 			undefined,
@@ -440,7 +457,9 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		token: CancellationToken,
 	): AsyncGenerator<Output, void, unknown> {
 		await this.checkAccess();
+
 		const allowedList = ["ms-vscode.dscopilot-agent", JVSC_EXTENSION_ID];
+
 		if (!allowedList.includes(this.extensionId.toLowerCase())) {
 			throw new Error(
 				`Proposed API is not supported for extension ${this.extensionId}`,
@@ -466,6 +485,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		token: CancellationToken,
 	): AsyncGenerator<Output, void, unknown> {
 		let completed = false;
+
 		const measures = {
 			executionCount: this.execution.executionCount,
 			requestSentAfter: 0,
@@ -473,6 +493,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			cancelledAfter: 0,
 			duration: 0,
 		};
+
 		const properties = {
 			kernelId: "",
 			extensionId: this.extensionId,
@@ -484,7 +505,9 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			mimeTypes: "",
 			failed: false,
 		};
+
 		const stopwatch = new StopWatch();
+
 		const mimeTypes = new Set<string>();
 		sendApiTelemetry(
 			this.extensionId,
@@ -496,11 +519,13 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		if (this.kernel.disposed) {
 			properties.failed = true;
 			sendApiExecTelemetry(this.kernel, measures, properties).catch(noop);
+
 			throw new Error("Kernel is disposed");
 		}
 		if (!this.kernel.session?.kernel) {
 			properties.failed = true;
 			sendApiExecTelemetry(this.kernel, measures, properties).catch(noop);
+
 			if (
 				this.kernel.status === "dead" ||
 				this.kernel.status === "terminating"
@@ -523,6 +548,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 				);
 			},
 		});
+
 		const kernelExecution = ServiceContainer.instance
 			.get<IKernelProvider>(IKernelProvider)
 			.getKernelExecution(this.kernel);
@@ -536,6 +562,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			() => {
 				properties.requestSent = true;
 				measures.requestSentAfter = stopwatch.elapsedTime;
+
 				if (
 					!token.isCancellationRequested &&
 					this.extensionId !== JVSC_EXTENSION_ID
@@ -586,6 +613,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 					output,
 				);
 				output.items.forEach((output) => mimeTypes.add(output.mime));
+
 				if (handlers && hasChatOutput(output)) {
 					for await (const chatOutput of this.handleChatOutput(
 						output,
@@ -620,21 +648,29 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		token: CancellationToken,
 	): AsyncGenerator<Output, void, unknown> {
 		const chatOutput = output.items.find((i) => i.mime === ChatMime);
+
 		if (!chatOutput) {
 			return;
 		}
 		type Metadata = {
 			id: string;
+
 			function: string;
 			dataIsNone: boolean;
 		};
+
 		const metadata: Metadata = (output.metadata || {})["metadata"];
+
 		const functionId = metadata.function;
+
 		const id = metadata.id;
+
 		const data = metadata.dataIsNone
 			? undefined
 			: new TextDecoder().decode(chatOutput.data);
+
 		const handler = handlers[functionId];
+
 		if (!handler) {
 			throw new Error(`Chat Function ${functionId} not found`);
 		}
@@ -642,6 +678,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 
 		// Send the result back to the chat window.
 		const code = generatePythonCodeToInvokeCallback(id, result);
+
 		for await (const output of kernelExecution.executeCode(
 			code,
 			this.extensionId,
@@ -649,6 +686,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			token,
 		)) {
 			output.items.forEach((output) => mimeTypes.add(output.mime));
+
 			if (hasChatOutput(output)) {
 				for await (const chatOutput of this.handleChatOutput(
 					output,
@@ -719,9 +757,11 @@ export function createKernelApiForExtension(
 ) {
 	const kernelProvider =
 		ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
+
 	const controller = ServiceContainer.instance
 		.get<IControllerRegistration>(IControllerRegistration)
 		.getSelected(kernel.notebook)?.controller;
+
 	return WrappedKernelPerExtension.createApiKernel(
 		extensionId,
 		kernel,

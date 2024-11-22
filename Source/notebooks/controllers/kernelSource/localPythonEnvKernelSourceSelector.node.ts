@@ -100,6 +100,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 	}
 	private previousCancellationTokens: CancellationTokenSource[] = [];
 	private tempDirForKernelSpecs?: Promise<Uri>;
+
 	constructor(
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 		@inject(IPythonApiProvider)
@@ -125,6 +126,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				this,
 			),
 		);
+
 		if (this.checker.isPythonExtensionInstalled) {
 			this.getKernelSpecsDir().catch(noop);
 			this.hookupPythonApi().catch(noop);
@@ -143,7 +145,9 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		notebook: NotebookDocument,
 	): Promise<PythonKernelConnectionMetadata | undefined> {
 		const cancellationTokenSource = new CancellationTokenSource();
+
 		const disposables: IDisposable[] = [cancellationTokenSource];
+
 		try {
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			const selector = new LocalPythonKernelSelector(
@@ -151,7 +155,9 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				cancellationTokenSource.token,
 			);
 			disposables.push(selector);
+
 			const kernel = await selector.selectKernel();
+
 			if (kernel instanceof Error) {
 				if (
 					kernel instanceof InputFlowAction &&
@@ -163,6 +169,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			}
 			// Ensure this is added to the list of kernels.
 			this.addUpdateKernel(kernel);
+
 			return kernel;
 		} finally {
 			dispose(disposables);
@@ -175,11 +182,15 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			ServiceContainer.instance.get<IInterpreterService>(
 				IInterpreterService,
 			);
+
 		const jupyterPaths =
 			ServiceContainer.instance.get<JupyterPaths>(JupyterPaths);
+
 		const interpreter = await interpreters.getInterpreterDetails(env.path);
+
 		if (!interpreter) {
 			logger.warn(`Python Env ${getDisplayPath(env.id)} not found}`);
+
 			return;
 		}
 		if (
@@ -189,6 +200,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			logger.warn(
 				`Python Env hidden via filter: ${getDisplayPath(interpreter.id)}`,
 			);
+
 			return;
 		}
 
@@ -196,20 +208,25 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			interpreter,
 			await jupyterPaths.getKernelSpecTempRegistrationFolder(),
 		);
+
 		const kernelConnection = PythonKernelConnectionMetadata.create({
 			kernelSpec: spec,
 			interpreter: interpreter,
 			id: getKernelId(spec, interpreter),
 		});
+
 		const existingConnection = this._kernels.get(kernelConnection.id);
+
 		if (existingConnection) {
 			return existingConnection;
 		}
 		this.addUpdateKernel(kernelConnection);
+
 		return kernelConnection;
 	}
 	private addUpdateKernel(kernel: PythonKernelConnectionMetadata) {
 		const existing = this._kernels.get(kernel.id);
+
 		if (existing) {
 			existing.updateInterpreter(kernel.interpreter);
 			this._kernels.set(kernel.id, Object.assign(existing, kernel));
@@ -255,7 +272,9 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			return;
 		}
 		this.apiHooked = true;
+
 		const api = await this.pythonApi.getNewApi();
+
 		if (!api) {
 			return;
 		}
@@ -266,6 +285,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			api.environments.onDidChangeEnvironments((e) => {
 				if (e.type === "remove") {
 					const kernel = this._kernels.get(e.env.id);
+
 					if (kernel) {
 						this._kernels.delete(e.env.id);
 						this._onDidChangeKernels.fire({ removed: [kernel] });
@@ -278,6 +298,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 	}
 	private async buildDummyEnvironment(e: Environment) {
 		const interpreter = pythonEnvToJupyterEnv(e);
+
 		if (
 			!interpreter ||
 			this.filter.isPythonEnvironmentExcluded(interpreter)
@@ -288,6 +309,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			interpreter,
 			await this.getKernelSpecsDir(),
 		);
+
 		const result = PythonKernelConnectionMetadata.create({
 			kernelSpec: spec,
 			interpreter: interpreter,
@@ -295,6 +317,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		});
 
 		const existingInterpreterInfo = this._kernels.get(e.id);
+
 		if (!existingInterpreterInfo) {
 			this._kernels.set(e.id, result);
 			this._onDidChangeKernels.fire({});

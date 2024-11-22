@@ -81,6 +81,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 	private readonly discoveredKernelSpecFiles = new Set<string>();
 	private previousRefresh?: Promise<void>;
 	private readonly globalPythonKernelSpecFinder: GlobalPythonKernelSpecFinder;
+
 	constructor(
 		@inject(IInterpreterService)
 		private interpreterService: IInterpreterService,
@@ -118,11 +119,13 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 				// In the past Python extension triggered this even incorrectly
 				// Lets wait a few seconds and see if the env still exists
 				await sleep(1_000);
+
 				if (getCachedEnvironment(e)) {
 					return;
 				}
 
 				logger.debug(`Interpreter removed ${e.id}`);
+
 				const deletedKernels: LocalKernelConnectionMetadata[] = [];
 				this._kernels.forEach((k) => {
 					if (k.interpreter?.id === e.id) {
@@ -133,6 +136,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 						this._kernels.delete(k.id);
 					}
 				});
+
 				if (deletedKernels.length) {
 					logger.debug(
 						`Local Python connection deleted ${deletedKernels.map(
@@ -171,8 +175,10 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 						// Only refresh if we know there are new global Python kernels that we haven't already seen before.
 						const lastKnownPythonKernels =
 							this.lastKnownGlobalPythonKernelSpecs;
+
 						const newPythonKernels =
 							this.listGlobalPythonKernelSpecsIncludingThoseRegisteredByUs();
+
 						if (
 							lastKnownPythonKernels.length !==
 								newPythonKernels.length ||
@@ -221,8 +227,10 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 		}
 		this.refreshCancellation?.cancel();
 		this.refreshCancellation?.dispose();
+
 		const cancelToken = (this.refreshCancellation =
 			new CancellationTokenSource());
+
 		const promise = (async () => {
 			await this.listKernelsImplementation(
 				cancelToken.token,
@@ -230,6 +238,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 			).catch((ex) =>
 				logger.error("Failure in listKernelsImplementation", ex),
 			);
+
 			if (cancelToken.token.isCancellationRequested) {
 				return;
 			}
@@ -242,7 +251,9 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 						(item) =>
 							!this._kernelsExcludingCachedItems.has(item.id),
 					);
+
 				const deletedKernels: LocalKernelConnectionMetadata[] = [];
+
 				if (kernelConnectionsFoundOnlyInCache.length) {
 					logger.warn(
 						`Kernels ${kernelConnectionsFoundOnlyInCache
@@ -268,6 +279,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 					getCachedEnvironments().map((i) => i.id),
 				);
 				// const validInterpreterIds = new Set(this.interpreterService.resolvedEnvironments.map((i) => i.id));
+
 				const kernelsThatPointToInvalidValidInterpreters = Array.from(
 					this._kernels.values(),
 				).filter((item) => {
@@ -279,6 +291,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 					}
 					return false;
 				});
+
 				if (kernelsThatPointToInvalidValidInterpreters.length) {
 					logger.warn(
 						`The following kernels use interpreters that are no longer valid or not recognized by Python extension, Kernels ${kernelsThatPointToInvalidValidInterpreters
@@ -328,14 +341,17 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 
 		this.previousRefresh = promise;
 		this.promiseMonitor.push(promise);
+
 		return promise;
 	}
 	private async updateCache() {
 		this._onDidChangeKernels.fire();
+
 		const kernels = Array.from(this._kernels.values());
 		this.updateCachePromise = this.updateCachePromise.finally(() =>
 			this.writeToMementoCache(kernels, localPythonKernelsCacheKey()),
 		);
+
 		return this.updateCachePromise;
 	}
 
@@ -346,9 +362,11 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 		const interpreters = this.extensionChecker.isPythonExtensionInstalled
 			? getCachedEnvironments()
 			: [];
+
 		const interpreterPromise = Promise.all(
 			interpreters.map(async (interpreter) => {
 				let finder = this.interpreterKernelSpecs.get(interpreter.id);
+
 				if (!finder) {
 					finder = new InterpreterSpecificKernelSpecsFinder(
 						resolvedPythonEnvToJupyterEnv(interpreter)!,
@@ -365,6 +383,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 								this._kernels.delete(item.id),
 							);
 							void this.appendNewKernels(e.added);
+
 							if (!e.added.length && e.removed.length) {
 								void this.updateCache();
 							}
@@ -402,6 +421,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 		kernels.forEach((kernel) => {
 			if (isLocalConnection(kernel) && kernel.kernelSpec.specFile) {
 				this._kernelsExcludingCachedItems.set(kernel.id, kernel);
+
 				if (this._kernels.has(kernel.id)) {
 					// We probably have an old outdated item in the dict, update that with the latest.
 					// E.g. its possible this item was previously loaded from cache.
@@ -433,6 +453,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 					? true
 					: !getKernelRegistrationInfo(item.kernelSpec),
 			);
+
 		return pythonKernelSpecs;
 	}
 	private listGlobalPythonKernelSpecsIncludingThoseRegisteredByUs() {

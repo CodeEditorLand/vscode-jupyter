@@ -50,6 +50,7 @@ export class ApiAccessService {
 		Promise<{ extensionId: string; accessAllowed: boolean }>
 	>();
 	private promiseChain = new PromiseChain();
+
 	constructor(
 		@inject(IMemento) @named(GLOBAL_MEMENTO) private globalState: Memento,
 		@inject(IExtensionContext) private context: IExtensionContext,
@@ -62,6 +63,7 @@ export class ApiAccessService {
 			!info.extensionId || info.extensionId === unknownExtensionId
 				? ""
 				: info.extensionId.split(".")[0] || "";
+
 		if (
 			this.context.extensionMode === ExtensionMode.Test ||
 			!publisherId ||
@@ -74,9 +76,11 @@ export class ApiAccessService {
 				logger.warn(
 					`Publisher ${publisherId} is allowed to access the Kernel API with a message.`,
 				);
+
 				const displayName =
 					extensions.getExtension(info.extensionId)?.packageJSON
 						?.displayName || "";
+
 				const extensionDisplay =
 					displayName && info.extensionId
 						? `${displayName} (${info.extensionId})`
@@ -114,19 +118,23 @@ export class ApiAccessService {
 			logger.error(
 				`Publisher ${publisherId} is not allowed to access the Kernel API.`,
 			);
+
 			return { extensionId: info.extensionId, accessAllowed: false };
 		}
 		const extensionPermissions = this.globalState.get<
 			ApiExtensionInfo | undefined
 		>(API_ACCESS_GLOBAL_KEY);
+
 		const extensionPermission = extensionPermissions?.find(
 			(item) => item.extensionId === info.extensionId,
 		);
+
 		if (extensionPermission) {
 			sendTelemetryEvent(Telemetry.JupyterKernelApiAccess, undefined, {
 				extensionId: info.extensionId,
 				allowed: extensionPermission.allowed,
 			});
+
 			return {
 				extensionId: info.extensionId,
 				accessAllowed: extensionPermission.allowed === "yes",
@@ -141,12 +149,14 @@ export class ApiAccessService {
 				`${info.displayName} (${info.extensionId})`,
 				Common.bannerLabelYes,
 			);
+
 			const selection = await window.showInformationMessage(
 				msg,
 				{ modal: true },
 				Common.bannerLabelYes,
 				Common.bannerLabelNo,
 			);
+
 			const allow = selection === Common.bannerLabelYes;
 			this.promiseChain
 				.chainFinally(async () => {
@@ -163,6 +173,7 @@ export class ApiAccessService {
 						allowed: allow ? "yes" : "no",
 						extensionId: info.extensionId,
 					});
+
 					return this.globalState.update(
 						API_ACCESS_GLOBAL_KEY,
 						extensionPermissions,
@@ -173,10 +184,12 @@ export class ApiAccessService {
 				extensionId: info.extensionId,
 				allowed: allow ? "yes" : "no",
 			});
+
 			return { extensionId: info.extensionId, accessAllowed: allow };
 		})();
 
 		this.extensionAccess.set(info.extensionId, promise);
+
 		return promise;
 	}
 }

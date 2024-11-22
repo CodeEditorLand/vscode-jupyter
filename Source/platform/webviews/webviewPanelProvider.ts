@@ -40,6 +40,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 
 	public async show(preserveFocus: boolean) {
 		await this.loadPromise;
+
 		if (!this.panel) {
 			return;
 		}
@@ -75,6 +76,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 
 	public setTitle(newTitle: string) {
 		this.panelOptions.title = newTitle;
+
 		if (this.panel) {
 			this.panel.title = newTitle;
 		}
@@ -142,6 +144,7 @@ export class WebviewPanelProvider implements IWebviewPanelProvider {
 		const additionalRootPaths = [
 			Uri.file(path.join(this.context.extensionPath, "temp")),
 		];
+
 		if (Array.isArray(options.additionalPaths)) {
 			additionalRootPaths.push(...options.additionalPaths);
 		}

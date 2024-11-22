@@ -169,6 +169,7 @@ export class KernelProcess
 	private readonly _kernelConnectionMetadata: Readonly<
 		LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata
 	>;
+
 	constructor(
 		private readonly processExecutionFactory: IProcessServiceFactory,
 		private readonly _connection: IKernelConnection,
@@ -201,6 +202,7 @@ export class KernelProcess
 			!this.interrupter
 		) {
 			logger.info("Interrupting kernel via SIGINT");
+
 			if (this._process.pid) {
 				kill(this._process.pid, "SIGINT");
 			}
@@ -212,6 +214,7 @@ export class KernelProcess
 			isPythonKernelConnection(this._kernelConnectionMetadata)
 		) {
 			logger.info("Interrupting kernel via custom event (Win32)");
+
 			return this.interrupter.interrupt();
 		} else {
 			logger.error("No process to interrupt in KernleProcess.ts");
@@ -228,25 +231,34 @@ export class KernelProcess
 			throw new Error("Kernel has already been launched.");
 		}
 		this.launchedOnce = true;
+
 		const tracker = getNotebookTelemetryTracker(this.resource);
+
 		const connectionTracker = tracker?.updateConnection();
 		// Update our connection arguments in the kernel spec
 		await this.updateConnectionArgs();
 		connectionTracker?.stop();
 		Cancellation.throwIfCanceled(cancelToken);
+
 		const spawnTracker = tracker?.spawn();
+
 		const exeObs = await this.launchAsObservable(
 			workingDirectory,
 			cancelToken,
 		);
 		spawnTracker?.stop();
+
 		const proc = exeObs.proc;
+
 		if (cancelToken.isCancellationRequested) {
 			throw new CancellationError();
 		}
 		logger.debug(`Kernel process ${proc?.pid}.`);
+
 		let stderr = "";
+
 		let providedExitCode: number | null;
+
 		const deferred = createDeferred();
 		deferred.promise.catch(noop);
 
@@ -254,16 +266,19 @@ export class KernelProcess
 			const pid = proc.pid;
 			proc.on("exit", (exitCode) => {
 				exitCode = exitCode || providedExitCode;
+
 				if (this.isDisposed) {
 					logger.debug(
 						`KernelProcess Exited ${pid}, Exit Code - ${exitCode}`,
 					);
+
 					return;
 				}
 				logger.debug(
 					`KernelProcess Exited ${pid}, Exit Code - ${exitCode}`,
 					stderr,
 				);
+
 				if (!this.exitEventFired) {
 					this.exitEvent.fire({
 						exitCode: exitCode || undefined,
@@ -286,6 +301,7 @@ export class KernelProcess
 					);
 				}
 			});
+
 			let sawKernelConnectionFile = false;
 			proc.stdout?.on("data", (data: Buffer | string) => {
 				let output = (data || "").toString();
@@ -295,6 +311,7 @@ export class KernelProcess
 					!sawKernelConnectionFile
 				) {
 					output = stripUnwantedMessages(output);
+
 					if (output.includes(kernelOutputWithConnectionFile)) {
 						output = output.trimStart();
 					}
@@ -313,6 +330,7 @@ export class KernelProcess
 				// But only useful if daemon doesn't start for any reason.
 				const output = stripUnwantedMessages((data || "").toString());
 				stderr += output;
+
 				if (
 					output.trim().length &&
 					// Exclude these warning messages, as users get confused about these when sharing logs.
@@ -337,6 +355,7 @@ export class KernelProcess
 		exeObs.out.done.catch((error) => {
 			if (this.isDisposed) {
 				logger.warn("Kernel died", error, stderr);
+
 				return;
 			}
 			logger.error("Kernel died", error, stderr);
@@ -347,6 +366,7 @@ export class KernelProcess
 		const portUsageTracker = getNotebookTelemetryTracker(
 			this.resource,
 		)?.portUsage();
+
 		try {
 			if (deferred.rejected) {
 				await deferred.promise;
@@ -411,11 +431,13 @@ export class KernelProcess
 			);
 		} catch (e) {
 			const stdErrToLog = (stderr || "").trim();
+
 			if (
 				!cancelToken?.isCancellationRequested &&
 				!isCancellationError(e)
 			) {
 				logger.error("Disposing kernel process due to an error", e);
+
 				if (
 					e &&
 					e instanceof Error &&
@@ -449,6 +471,7 @@ export class KernelProcess
 					errorMessage,
 					stderr + "\n" + stderr + "\n",
 				);
+
 				throw new KernelDiedError(
 					DataScience.kernelDied(errorMessage),
 					// Include what ever we have as the stderr.
@@ -477,6 +500,7 @@ export class KernelProcess
 				1_000, // Wait for a max of 1s, we don't want to delay killing the kernel process.
 				this.killChildProcesses(this._process?.pid).catch(noop),
 			);
+
 			try {
 				this.interrupter?.dispose();
 				this._process?.kill(); // NOSONAR
@@ -511,6 +535,7 @@ export class KernelProcess
 		try {
 			if (this.platform.isWindows) {
 				const windir = process.env["WINDIR"] || "C:\\Windows";
+
 				const TASK_KILL = path.join(windir, "System32", "taskkill.exe");
 				await new ProcessService().exec(TASK_KILL, [
 					"/F",
@@ -597,6 +622,7 @@ export class KernelProcess
 		}
 
 		const runtimeDir = await this.jupyterPaths.getRuntimeDir();
+
 		const connectionFileName = `kernel-v3${crypto.randomBytes(20).toString("hex")}.json`;
 		this.connectionFile = Uri.joinPath(runtimeDir, connectionFileName);
 
@@ -628,6 +654,7 @@ export class KernelProcess
 			)
 				? `"${this.connectionFile.fsPath}"` // Quoted for spaces in file paths.
 				: this.connectionFile.fsPath;
+
 			if (
 				this.launchKernelSpec.argv[indexOfConnectionFile].includes(
 					"--connection-file",
@@ -695,12 +722,14 @@ export class KernelProcess
 				this.connection.hb_port
 			}, ${this.connection.iopub_port}, ${this.connection.shell_port}, ${this.connection.stdin_port}`,
 		);
+
 		if (
 			this.isPythonKernel &&
 			this.extensionChecker.isPythonExtensionInstalled &&
 			this._kernelConnectionMetadata.interpreter
 		) {
 			const tracker = getNotebookTelemetryTracker(this.resource);
+
 			const [pythonEnvVars, envVars, win32InterruptHandle] = [
 				tracker?.pythonEnvVars(),
 				tracker?.envVars(),
@@ -708,11 +737,13 @@ export class KernelProcess
 					? tracker?.interruptHandle()
 					: undefined,
 			];
+
 			const executionServicePromise =
 				this.pythonExecFactory.createActivatedEnvironment({
 					resource: this.resource,
 					interpreter: this._kernelConnectionMetadata.interpreter,
 				});
+
 			const handlePromise =
 				os.platform() === "win32"
 					? this.getWin32InterruptHandle().finally(() =>
@@ -738,6 +769,7 @@ export class KernelProcess
 			// On windows, in order to support interrupt, we have to set an environment variable pointing to a WIN32 event handle
 			if (os.platform() === "win32" && handlePromise) {
 				env = env || process.env;
+
 				try {
 					const handle = await handlePromise;
 
@@ -772,6 +804,7 @@ export class KernelProcess
 			logger.info(
 				`Launching Raw Kernel ${this.launchKernelSpec.display_name} # ${executable}`,
 			);
+
 			const [executionService, env] = await Promise.all([
 				this.processExecutionFactory.create(this.resource, cancelToken),
 				// If we have an interpreter always use that, its possible we are launching a kernel that is associated with a Python environment
@@ -799,6 +832,7 @@ export class KernelProcess
 		}
 		this._process = exeObs.proc;
 		this._pid = exeObs.proc.pid;
+
 		return exeObs;
 	}
 
@@ -822,6 +856,7 @@ function stripUnwantedMessages(output: string) {
 	///         .../site-packages/traitlets/traitlets.py:2157: FutureWarning: Supporting extra quotes around Bytes is deprecated in traitlets 5.0. Use '841dde17-f6aa-4ea7-9c02-b3bb414b28b3' instead of 'b"841dde17-f6aa-4ea7-9c02-b3bb414b28b3"'.
 	//          warn(
 	let lines = splitLines(output, { trim: true, removeEmptyEntries: true });
+
 	if (
 		(lines.some((line) =>
 			line.includes(

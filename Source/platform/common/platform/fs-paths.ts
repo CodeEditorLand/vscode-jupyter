@@ -17,6 +17,7 @@ function getHomeDir() {
 }
 export function getFilePath(file: Uri | undefined) {
 	const isWindows = getOSType() === OSType.Windows;
+
 	if (file) {
 		const fsPath = uriPath.originalFSPath(file);
 
@@ -43,7 +44,9 @@ export function getDisplayPath(
 	homePathUri?: Uri,
 ) {
 	homePathUri = homePathUri || getHomeDir();
+
 	let fileUri: Uri | undefined = undefined;
+
 	if (typeof filename && typeof filename === "string") {
 		fileUri = Uri.file(filename);
 	}
@@ -51,6 +54,7 @@ export function getDisplayPath(
 		fileUri = filename;
 	}
 	const relativeToHome = getDisplayPathImpl(fileUri, undefined, homePathUri);
+
 	const workspaceFolderThatOwnsTheFile = workspaceFolders.find(
 		(w) => fileUri && uriPath.isEqualOrParent(fileUri, w.uri, true),
 	);
@@ -92,8 +96,10 @@ function getDisplayPathImpl(
 	homePath: Uri | undefined,
 ): string {
 	const isWindows = getOSType() === OSType.Windows;
+
 	if (file && cwd && uriPath.isEqualOrParent(file, cwd, true)) {
 		const relativePath = uriPath.relativePath(cwd, file);
+
 		if (relativePath) {
 			// On windows relative path will still use forwardslash because uriPath.relativePath is a URI path
 			return isWindows ? relativePath.replace(/\//g, "\\") : relativePath;
@@ -102,11 +108,13 @@ function getDisplayPathImpl(
 
 	if (file && homePath && uriPath.isEqualOrParent(file, homePath, true)) {
 		let relativePath = uriPath.relativePath(homePath, file);
+
 		if (relativePath) {
 			// On windows relative path will still use forwardslash because uriPath.relativePath is a URI path
 			relativePath = isWindows
 				? relativePath.replace(/\//g, "\\")
 				: relativePath;
+
 			return `~${path.sep}${relativePath}`;
 		}
 	}

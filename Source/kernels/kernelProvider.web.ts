@@ -51,6 +51,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
 
     public getOrCreate(notebook: NotebookDocument, options: KernelOptions): IKernel {
         const existingKernelInfo = this.getInternal(notebook);
+
         if (existingKernelInfo && existingKernelInfo.options.metadata.id === options.metadata.id) {
             return existingKernelInfo.kernel;
         }
@@ -64,11 +65,14 @@ export class KernelProvider extends BaseCoreKernelProvider {
         this.disposeOldKernel(notebook, 'createNewKernel');
 
         const resourceUri = notebook?.notebookType === InteractiveWindowView ? options.resourceUri : notebook.uri;
+
         const settings = createKernelSettings(this.configService, resourceUri);
+
         const notebookType =
             notebook.uri.path.endsWith('.interactive') || options.resourceUri?.path.endsWith('.interactive')
                 ? InteractiveWindowView
                 : JupyterNotebookView;
+
         const kernel = new Kernel(
             resourceUri,
             notebook,
@@ -93,6 +97,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
         this.storeKernel(notebook, options, kernel);
 
         this.deleteMappingIfKernelIsDisposed(kernel);
+
         return kernel;
     }
 }
@@ -112,17 +117,21 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 
     public getOrCreate(uri: Uri, options: ThirdPartyKernelOptions): IThirdPartyKernel {
         const existingKernelInfo = this.getInternal(uri);
+
         if (existingKernelInfo && existingKernelInfo.options.metadata.id === options.metadata.id) {
             return existingKernelInfo.kernel;
         }
         this.disposeOldKernel(uri);
 
         const resourceUri = uri;
+
         const settings = createKernelSettings(this.configService, resourceUri);
+
         const notebookType =
             uri.path.endsWith('.interactive') || options.resourceUri?.path.endsWith('.interactive')
                 ? InteractiveWindowView
                 : JupyterNotebookView;
+
         const kernel = new ThirdPartyKernel(
             uri,
             resourceUri,
@@ -146,6 +155,7 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
         this.storeKernel(uri, options, kernel);
 
         this.deleteMappingIfKernelIsDisposed(uri, kernel);
+
         return kernel;
     }
 }

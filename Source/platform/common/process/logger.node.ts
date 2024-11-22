@@ -17,6 +17,7 @@ export function logProcess(
 ) {
 	const argsList = args.reduce((accumulator, current, index) => {
 		let formattedArg = toCommandArgument(current);
+
 		if (
 			(current.startsWith('"') && current.endsWith('"')) ||
 			(current.startsWith("'") &&
@@ -30,6 +31,7 @@ export function logProcess(
 	}, "");
 
 	const message = [`Process Execution: ${getDisplayPath(file)} ${argsList}`];
+
 	if (options && options.cwd) {
 		message.push(
 			`    > ${Logging.currentWorkingDirectory} ${getDisplayPath(options.cwd.toString())}`,

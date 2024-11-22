@@ -92,7 +92,9 @@ export class LastCellExecutionTracker
 		}
 
 		const file = await this.getStorageFile();
+
 		let store: Record<string, StorageExecutionInfo> = {};
+
 		try {
 			const data = await this.fs.readFile(file);
 			store = JSON.parse(data.toString()) as Record<
@@ -117,9 +119,11 @@ export class LastCellExecutionTracker
 		this.executedCells.delete(cell);
 
 		const disposables: IDisposable[] = [];
+
 		const anyMessageHandler = (_: unknown, msg: IAnyMessageArgs) => {
 			if (msg.direction === "send") {
 				const request = msg.msg as KernelMessage.IExecuteRequestMsg;
+
 				if (
 					request.header.msg_type === "execute_request" &&
 					request.metadata &&
@@ -138,13 +142,16 @@ export class LastCellExecutionTracker
 				}
 			} else if (msg.direction === "recv") {
 				const ioPub = msg.msg as KernelMessage.IIOPubMessage;
+
 				const info = this.executedCells.get(cell);
+
 				if (
 					info?.msg_id &&
 					getParentHeaderMsgId(ioPub) === info.msg_id
 				) {
 					if (!info.startTime) {
 						info.startTime = new Date().getTime();
+
 						try {
 							// Time from the kernel is more accurate.
 							info.startTime = new Date(
@@ -176,6 +183,7 @@ export class LastCellExecutionTracker
 
 		const hookUpSession = () => {
 			const session = kernel.session;
+
 			if (!session) {
 				return;
 			}
@@ -188,6 +196,7 @@ export class LastCellExecutionTracker
 			});
 		};
 		kernel.onStarted(() => hookUpSession(), disposables);
+
 		if (kernel.session) {
 			hookUpSession();
 		}
@@ -205,6 +214,7 @@ export class LastCellExecutionTracker
 
 		this.chainedPromises = this.chainedPromises.finally(async () => {
 			let store: Record<string, StorageExecutionInfo> = {};
+
 			try {
 				const data = await this.getStorageFile().then(() =>
 					this.fs.readFile(this.storageFile),
@@ -218,6 +228,7 @@ export class LastCellExecutionTracker
 				return;
 			}
 			const notebookId = cell.notebook.uri.toString();
+
 			if (store[notebookId].cellIndex === cell.index) {
 				delete store[notebookId];
 				this.staleState = store;
@@ -233,8 +244,10 @@ export class LastCellExecutionTracker
 			this.ensureStorageExistsPromise ||
 			(async () => {
 				await this.fs.createDirectory(this.context.globalStorageUri);
+
 				return this.storageFile;
 			})();
+
 		return this.ensureStorageExistsPromise;
 	}
 	private trackLastExecution(
@@ -264,6 +277,7 @@ export class LastCellExecutionTracker
 		};
 		this.chainedPromises = this.chainedPromises.finally(async () => {
 			let store: Record<string, StorageExecutionInfo> = {};
+
 			try {
 				const data = await this.getStorageFile().then(() =>
 					this.fs.readFile(this.storageFile),
@@ -288,7 +302,9 @@ export class LastCellExecutionTracker
 		}
 		this.chainedPromises = this.chainedPromises.finally(async () => {
 			await this.getStorageFile();
+
 			let store: Record<string, StorageExecutionInfo> = {};
+
 			try {
 				const data = await this.fs.readFile(this.storageFile);
 				store = JSON.parse(data.toString()) as Record<
@@ -299,11 +315,13 @@ export class LastCellExecutionTracker
 				// Ignore, as this indicates the file does not exist.
 			}
 			let removed = false;
+
 			const removedServerIds = new Set(
 				removedServers.map((s) => generateIdFromRemoteProvider(s)),
 			);
 			Object.keys(store).forEach((key) => {
 				const data = store[key];
+
 				if (
 					removedServerIds.has(data.serverId) || // No longer a valid server
 					Date.now() - data.startTime > MAX_TRACKING_TIME // If its too old, then remove it.
@@ -326,6 +344,7 @@ export class LastCellExecutionTracker
 	private removeOldItems(store: Record<string, StorageExecutionInfo>) {
 		Object.keys(store).forEach((key) => {
 			const data = store[key];
+
 			if (data && Date.now() - data.startTime > MAX_TRACKING_TIME) {
 				delete store[key];
 			}

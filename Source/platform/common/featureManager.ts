@@ -59,6 +59,7 @@ export class FeatureManager implements IFeaturesManager {
 	private _onDidChangeFeatures = new EventEmitter<void>();
 	readonly onDidChangeFeatures = this._onDidChangeFeatures.event;
 	private _features: IFeatureSet = {};
+
 	get features(): IFeatureSet {
 		return this._features;
 	}
@@ -69,6 +70,7 @@ export class FeatureManager implements IFeaturesManager {
 	}
 
 	private disposables: Disposable[] = [];
+
 	constructor(
 		@inject(IPersistentStateFactory)
 		private persistentStateFactory: IPersistentStateFactory,
@@ -119,26 +121,32 @@ export class FeatureManager implements IFeaturesManager {
 				deprecatedInfo.doNotDisplayPromptStateKey,
 				true,
 			);
+
 		if (!notificationPromptEnabled.value) {
 			return;
 		}
 		const moreInfo = "Learn more";
+
 		const doNotShowAgain = "Never show again";
+
 		const option = await window.showInformationMessage(
 			deprecatedInfo.message,
 			moreInfo,
 			doNotShowAgain,
 		);
+
 		if (!option) {
 			return;
 		}
 		switch (option) {
 			case moreInfo: {
 				openInBrowser(deprecatedInfo.moreInfoUrl);
+
 				break;
 			}
 			case doNotShowAgain: {
 				await notificationPromptEnabled.updateValue(false);
+
 				break;
 			}
 			default: {
@@ -152,6 +160,7 @@ export class FeatureManager implements IFeaturesManager {
 		deprecatedInfo: DeprecatedFeatureInfo,
 	) {
 		let notify = false;
+
 		if (
 			Array.isArray(workspace.workspaceFolders) &&
 			workspace.workspaceFolders.length > 0
@@ -187,6 +196,7 @@ export class FeatureManager implements IFeaturesManager {
 			return false;
 		}
 		const configValue = pythonConfig.get(deprecatedSetting.setting);
+
 		if (
 			!Array.isArray(deprecatedSetting.values) ||
 			deprecatedSetting.values.length === 0

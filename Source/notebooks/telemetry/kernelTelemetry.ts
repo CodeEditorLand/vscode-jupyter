@@ -17,17 +17,24 @@ export function sendKernelListTelemetry(kernels: KernelConnectionMetadata[]) {
 		switch (item.kind) {
 			case "connectToLiveRemoteKernel":
 				counters.kernelLiveCount += 1;
+
 				break;
+
 			case "startUsingRemoteKernelSpec":
 				counters.localKernelSpecCount += 1;
 				counters.kernelSpecCount += 1;
+
 				break;
+
 			case "startUsingLocalKernelSpec":
 				counters.remoteKernelSpecCount += 1;
 				counters.kernelSpecCount += 1;
+
 				break;
+
 			case "startUsingPythonInterpreter": {
 				counters.kernelInterpreterCount += 1;
+
 				break;
 			}
 			default:

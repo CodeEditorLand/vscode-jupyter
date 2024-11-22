@@ -41,22 +41,26 @@ export async function sendTelemetryForPythonKernelExecutable(
 		return;
 	}
 	const stopWatch = new StopWatch();
+
 	try {
 		const outputs = await executeSilently(
 			session.kernel,
 			"import sys as _VSCODE_sys\nprint(_VSCODE_sys.executable); del _VSCODE_sys",
 		);
+
 		if (outputs.length === 0) {
 			return;
 		}
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const output: nbformat.IStream = outputs[0] as any;
+
 		if (output.name !== "stdout" && output.output_type !== "stream") {
 			return;
 		}
 		const sysExecutable = concatMultilineString(output.text)
 			.trim()
 			.toLowerCase();
+
 		const match = areInterpreterPathsSame(
 			kernelConnection.interpreter.uri,
 			Uri.file(sysExecutable),
@@ -90,6 +94,7 @@ function isKernelLaunchedViaLocalPythonProcess(
 	const kernelSpec = connection
 		? connection.kernelSpec
 		: (kernel as IJupyterKernelSpec);
+
 	return isLikelyAPythonExecutable(kernelSpec.argv[0]); // This covers cases like python.exe, python3, python3.10;
 }
 
@@ -116,6 +121,7 @@ export function isKernelLaunchedViaLocalPythonIPyKernel(
 	const kernelSpec = connection
 		? connection.kernelSpec
 		: (kernel as IJupyterKernelSpec);
+
 	if (
 		kernelSpec.language &&
 		kernelSpec.language.toLowerCase() !== PYTHON_LANGUAGE
@@ -126,6 +132,7 @@ export function isKernelLaunchedViaLocalPythonIPyKernel(
 		return false;
 	}
 	const moduleIndex = kernelSpec.argv.indexOf("-m");
+
 	if (moduleIndex === -1) {
 		return false;
 	}
@@ -133,6 +140,7 @@ export function isKernelLaunchedViaLocalPythonIPyKernel(
 		kernelSpec.argv.length - 1 >= moduleIndex
 			? kernelSpec.argv[moduleIndex + 1].toLowerCase()
 			: undefined;
+
 	if (!moduleName) {
 		return false;
 	}
@@ -145,6 +153,7 @@ export function isKernelLaunchedViaLocalPythonIPyKernel(
 
 export function isLikelyAPythonExecutable(executable: string) {
 	executable = path.basename(executable).trim().toLowerCase();
+
 	return (
 		executable === "python" ||
 		executable === "python3" ||

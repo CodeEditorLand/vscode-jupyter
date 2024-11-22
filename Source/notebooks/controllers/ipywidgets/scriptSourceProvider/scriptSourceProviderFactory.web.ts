@@ -60,6 +60,7 @@ export class ScriptSourceProviderFactory
 						this.widgetScriptManagerFactory,
 					),
 				);
+
 				break;
 		}
 

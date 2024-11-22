@@ -42,6 +42,7 @@ const deskTopNodeModulesToExternalize = [
 	"@jupyterlab/services/lib/kernel/default",
 	"vscode-jsonrpc", // Used by a few modules, might as well pull this out, instead of duplicating it in separate bundles.
 ];
+
 const commonExternals = [
 	"log4js",
 	"vscode",
@@ -55,14 +56,21 @@ const commonExternals = [
 	"@opentelemetry/instrumentation",
 	"@azure/functions-core",
 ];
+
 const webExternals = commonExternals.concat("os").concat(commonExternals);
+
 const desktopExternals = commonExternals.concat(
 	deskTopNodeModulesToExternalize,
 );
+
 const bundleConfig = getBundleConfiguration();
+
 const isDevbuild = !process.argv.includes("--production");
+
 const watchAll = process.argv.includes("--watch-all");
+
 const isWatchMode = watchAll || process.argv.includes("--watch");
+
 const extensionFolder = path.join(__dirname, "..", "..");
 
 interface StylePluginOptions {
@@ -98,6 +106,7 @@ function style({
 		name: "style",
 		setup({ onResolve, onLoad }) {
 			const cwd = process.cwd();
+
 			const opt: BuildOptions = {
 				logLevel: "silent",
 				bundle: true,
@@ -108,8 +117,11 @@ function style({
 
 			onResolve({ filter: /\.css$/, namespace: "file" }, (args) => {
 				const absPath = path.join(args.resolveDir, args.path);
+
 				const relPath = path.relative(cwd, absPath);
+
 				const resolved = fs.existsSync(absPath) ? relPath : args.path;
+
 				return { path: resolved, namespace: "style-stub" };
 			});
 
@@ -158,8 +170,10 @@ function style({
 							options.loader[key] = loader[key];
 						}
 					});
+
 					const { errors, warnings, outputFiles } =
 						await esbuild.build(options);
+
 					return {
 						errors,
 						warnings,
@@ -179,6 +193,7 @@ function createConfig(
 	watch: boolean,
 ): SameShape<BuildOptions, BuildOptions> {
 	const inject: string[] = [];
+
 	if (target === "web") {
 		inject.push(
 			path.join(
@@ -191,15 +206,18 @@ function createConfig(
 		inject.push(path.join(__dirname, "jquery.js"));
 	}
 	const external = target === "web" ? webExternals : commonExternals;
+
 	if (source.toLowerCase().endsWith("extension.node.ts")) {
 		external.push(...desktopExternals);
 	}
 	const isPreRelease =
 		isDevbuild ||
 		process.env.IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION === "true";
+
 	const releaseVersionScriptFile = isPreRelease
 		? "release.pre-release.js"
 		: "release.stable.js";
+
 	const alias = {
 		moment: path.join(extensionFolder, "build", "webpack", "moment.js"),
 		"vscode-jupyter-release-version": path.join(
@@ -207,6 +225,7 @@ function createConfig(
 			releaseVersionScriptFile,
 		),
 	};
+
 	if (target === "desktop") {
 		alias["jsonc-parser"] = path.join(
 			extensionFolder,
@@ -259,11 +278,14 @@ async function build(
 		const result = await esbuild.build(
 			createConfig(source, outfile, options.target, options.watch),
 		);
+
 		const size = fs.statSync(outfile).size;
+
 		const relativePath = `./${path.relative(extensionFolder, outfile)}`;
 		console.log(
 			`asset ${green(relativePath)} size: ${(size / 1024).toFixed()} KiB`,
 		);
+
 		if (isDevbuild && result.metafile) {
 			const metafile = `${outfile}.esbuild.meta.json`;
 			await fs.writeFile(metafile, JSON.stringify(result.metafile));
@@ -490,6 +512,7 @@ async function buildAll() {
 
 				.map(async (module) => {
 					const fullPath = require.resolve(module);
+
 					return build(
 						fullPath,
 						path.join(
@@ -528,6 +551,7 @@ async function copyJQuery() {
 	const source = require
 		.resolve("jquery")
 		.replace("jquery.js", "jquery.min.js");
+
 	const target = path.join(
 		extensionFolder,
 		"dist",
@@ -536,6 +560,7 @@ async function copyJQuery() {
 		"out",
 		"jquery.min.js",
 	);
+
 	const license = require
 		.resolve("jquery")
 		.replace(path.join("out", "jquery.js"), "LICENSE.txt");
@@ -561,6 +586,7 @@ async function copyAminya() {
 		"node_modules",
 		"@aminya/node-gyp-build",
 	);
+
 	const target = path.join(
 		extensionFolder,
 		"dist",
@@ -573,6 +599,7 @@ async function copyAminya() {
 }
 async function copyZeroMQ() {
 	const source = path.join(extensionFolder, "node_modules", "zeromq");
+
 	const target = path.join(extensionFolder, "dist", "node_modules", "zeromq");
 	await fs.ensureDir(target);
 	await fs.copy(source, target, {
@@ -582,6 +609,7 @@ async function copyZeroMQ() {
 }
 async function copyZeroMQOld() {
 	const source = path.join(extensionFolder, "node_modules", "zeromqold");
+
 	const target = path.join(
 		extensionFolder,
 		"dist",
@@ -597,6 +625,7 @@ async function copyZeroMQOld() {
 }
 async function copyNodeGypBuild() {
 	const source = path.join(extensionFolder, "node_modules", "node-gyp-build");
+
 	const target = path.join(
 		extensionFolder,
 		"dist",
@@ -609,6 +638,7 @@ async function copyNodeGypBuild() {
 }
 async function buildVSCodeJsonRPC() {
 	const source = path.join(extensionFolder, "node_modules", "vscode-jsonrpc");
+
 	const target = path.join(
 		extensionFolder,
 		"dist",
@@ -617,7 +647,9 @@ async function buildVSCodeJsonRPC() {
 		"index.js",
 	);
 	await fs.ensureDir(path.dirname(target));
+
 	const fullPath = require.resolve(source);
+
 	const contents = `
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
@@ -627,6 +659,7 @@ async function buildVSCodeJsonRPC() {
 
 module.exports = require('./index');`;
 	await fs.writeFile(path.join(path.dirname(target), "node.js"), contents);
+
 	return build(fullPath, target, {
 		target: "desktop",
 		watch: false,
@@ -635,10 +668,12 @@ module.exports = require('./index');`;
 
 function shouldCopyFileFromZmqFolder(resourcePath) {
 	const parentFolder = path.dirname(resourcePath);
+
 	if (fs.statSync(resourcePath).isDirectory()) {
 		return true;
 	}
 	// return true;
+
 	const filename = path.basename(resourcePath);
 	// Ensure the code is platform agnostic.
 	resourcePath = (resourcePath || "")
@@ -653,6 +688,7 @@ function shouldCopyFileFromZmqFolder(resourcePath) {
 		"node_modules",
 		"vendor",
 	];
+
 	if (
 		foldersToIgnore.some((folder) =>
 			resourcePath
@@ -686,6 +722,7 @@ function shouldCopyFileFromZmqFolder(resourcePath) {
 		return false;
 	}
 	const preBuildsFoldersToCopy = getZeroMQPreBuildsFoldersToKeep();
+
 	if (preBuildsFoldersToCopy.length === 0) {
 		// Copy everything from all prebuilds folder.
 		return true;

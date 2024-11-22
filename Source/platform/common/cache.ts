@@ -63,6 +63,7 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 					this.globalState.update(key, undefined).then(noop, noop),
 				),
 		);
+
 		const workspaceStateKeysToRemove = this.workspaceState
 			.keys()
 			.filter(
@@ -96,6 +97,7 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 
 	async getUriAccountKey(): Promise<string> {
 		const rootFolder = getRootFolder();
+
 		if (rootFolder) {
 			// Folder situation
 			return this.crypto.createHash(getFilePath(rootFolder), "SHA-512");

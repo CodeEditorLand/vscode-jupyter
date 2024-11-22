@@ -49,6 +49,7 @@ export function registerTypes(
 		IRawNotebookSupportedService,
 		RawNotebookSupportedService,
 	);
+
 	setSharedProperty(
 		"isInsiderExtension",
 		isPreReleaseVersion() ? "true" : "false",
@@ -56,15 +57,18 @@ export function registerTypes(
 
 	const isPythonExtensionInstalled =
 		serviceManager.get<IPythonExtensionChecker>(IPythonExtensionChecker);
+
 	setSharedProperty(
 		"isPythonExtensionInstalled",
 		isPythonExtensionInstalled.isPythonExtensionInstalled
 			? "true"
 			: "false",
 	);
+
 	const rawService = serviceManager.get<IRawNotebookSupportedService>(
 		IRawNotebookSupportedService,
 	);
+
 	setSharedProperty(
 		"rawKernelSupported",
 		rawService.isSupported ? "true" : "false",

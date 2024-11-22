@@ -69,6 +69,7 @@ export class JupyterImporter implements INotebookImporter {
 			// nbconvert 5 and 6 use a different base template file
 			// Create and select the correct one
 			let template: string | undefined;
+
 			if (nbConvertVersion.major >= 6) {
 				if (!this.template6Promise) {
 					this.template6Promise = this.createTemplateFile(true);
@@ -89,6 +90,7 @@ export class JupyterImporter implements INotebookImporter {
 					interpreter,
 					template,
 				);
+
 			if (fileOutput.includes("get_ipython()")) {
 				fileOutput = this.addIPythonImport(fileOutput);
 			}
@@ -106,6 +108,7 @@ export class JupyterImporter implements INotebookImporter {
 		const comments = DataScience.instructionComments(
 			this.defaultCellMarker,
 		);
+
 		return comments.concat(pythonOutput);
 	};
 

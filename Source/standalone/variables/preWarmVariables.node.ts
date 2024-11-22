@@ -64,6 +64,7 @@ export class PreWarmActivatedJupyterEnvironmentVariables
 		}
 		const interpreter =
 			await this.jupyterInterpreterService.getSelectedInterpreter();
+
 		if (!interpreter) {
 			return;
 		}

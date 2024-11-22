@@ -99,6 +99,7 @@ declare module "./api" {
 		minor: number;
 		patch: number;
 	};
+
 	export interface PythonEnvironment {
 		id: string;
 		uri: Uri;
@@ -239,6 +240,7 @@ declare module "./api" {
 		| RemoteKernelSpecConnectionMetadata
 		| PythonKernelConnectionMetadata
 		| LiveRemoteKernelConnectionMetadata;
+
 	export type ActiveKernel = LiveRemoteKernelConnectionMetadata;
 	//#endregion
 

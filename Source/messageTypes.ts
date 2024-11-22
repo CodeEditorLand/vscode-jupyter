@@ -144,11 +144,16 @@ export type LocalizedMessages = {
 	sliceSubmitButton: string;
 	sliceDropdownAxisLabel: string;
 	sliceDropdownIndexLabel: string;
+
 	variableExplorerNameColumn: string;
+
 	variableExplorerTypeColumn: string;
+
 	variableExplorerCountColumn: string;
+
 	variableExplorerValueColumn: string;
 	collapseVariableExplorerLabel: string;
+
 	variableLoadingValue: string;
 	showDataExplorerTooltip: string;
 	noRowsInVariableExplorer: string;
@@ -158,6 +163,7 @@ export type LocalizedMessages = {
 	panPlot: string;
 	zoomInPlot: string;
 	zoomOutPlot: string;
+
 	exportPlot: string;
 	deletePlot: string;
 	selectedImageListLabel: string;

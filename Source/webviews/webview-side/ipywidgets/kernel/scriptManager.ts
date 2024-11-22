@@ -110,6 +110,7 @@ export class ScriptManager extends EventEmitter {
 					type === IPyWidgetMessages.IPyWidgets_BaseUrlResponse
 				) {
 					const baseUrl = payload as string;
+
 					if (baseUrl) {
 						this.baseUrl = baseUrl;
 						// Required by Jupyter Notebook widgets.
@@ -125,6 +126,7 @@ export class ScriptManager extends EventEmitter {
 					logMessage(
 						`Received IPyWidgets_kernelOptions in ScriptManager`,
 					);
+
 					if (
 						this.previousKernelOptions &&
 						!fastDeepEqual(this.previousKernelOptions, payload)
@@ -220,8 +222,11 @@ export class ScriptManager extends EventEmitter {
 	): Promise<void> {
 		// eslint-disable-next-line no-console
 		logMessage(`Fetch IPyWidget source for ${moduleName}`);
+
 		const isOnline = await this.isOnline.promise;
+
 		let request = this.widgetSourceRequests.get(moduleName);
+
 		const requestId = `${moduleName}:${moduleVersion}:${Date.now().toString()}`;
 
 		if (
@@ -303,7 +308,9 @@ export class ScriptManager extends EventEmitter {
 
 		try {
 			await request.deferred.promise;
+
 			const widgetSource = this.registeredWidgetSources.get(moduleName);
+
 			if (widgetSource) {
 				warnAboutWidgetVersionsThatAreNotSupported(
 					widgetSource,
@@ -367,6 +374,7 @@ export class ScriptManager extends EventEmitter {
 		logMessage(
 			`Received IPyWidget scripts ${JSON.stringify(sources || [])}`,
 		);
+
 		if (!Array.isArray(sources) || sources.length === 0) {
 			return;
 		}
@@ -378,6 +386,7 @@ export class ScriptManager extends EventEmitter {
 			const currentRegistration = this.registeredWidgetSources.get(
 				source.moduleName,
 			);
+
 			if (
 				!currentRegistration ||
 				(currentRegistration.source &&
@@ -391,6 +400,7 @@ export class ScriptManager extends EventEmitter {
 			// We have fetched the script sources for all of these modules.
 			// In some cases we might not have the source, meaning we don't have it or couldn't find it.
 			let request = this.widgetSourceRequests.get(source.moduleName);
+
 			if (!request) {
 				request = {
 					deferred: createDeferred(),
@@ -417,6 +427,7 @@ export class ScriptManager extends EventEmitter {
 	private registerScriptSourceInRequirejs(source?: WidgetScriptSource) {
 		if (!source) {
 			logMessage("No widget script source");
+
 			return;
 		}
 		this.registerScriptSourcesInRequirejs([source]);
@@ -430,6 +441,7 @@ export class ScriptManager extends EventEmitter {
 		timedout: boolean = false,
 	) {
 		this.widgetModulesFailedToLoad.add(moduleName);
+
 		const isOnline = await isCDNReachable();
 		this.emit("onWidgetLoadError", {
 			className,

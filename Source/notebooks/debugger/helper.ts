@@ -24,9 +24,11 @@ export async function isUsingIpykernel6OrLater(
 	execution: INotebookKernelExecution,
 ): Promise<IpykernelCheckResult> {
 	const delimiter = `5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d`;
+
 	const code = `import builtins
 import ipykernel
 builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
+
 	const output = await execution.executeHidden(code);
 
 	const versionRegex: RegExp = /^(\d+)\.\d+\.\d+$/;
@@ -36,6 +38,7 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 		if (line.output_type !== "stream") continue;
 
 		let lineText = line.text?.toString().trim() ?? "";
+
 		if (!lineText.includes(delimiter)) {
 			continue;
 		}
@@ -43,8 +46,10 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 			.split(delimiter)[1]
 			.trim()
 			.match(versionRegex);
+
 		if (matches) {
 			const majorVersion: string = matches[1];
+
 			if (Number(majorVersion) >= 6) {
 				return IpykernelCheckResult.Ok;
 			}
@@ -59,6 +64,7 @@ export function assertIsDebugConfig(
 	thing: unknown,
 ): asserts thing is INotebookDebugConfig {
 	const config = thing as INotebookDebugConfig;
+
 	if (
 		typeof config.__notebookUri === "undefined" ||
 		typeof config.__mode === "undefined" ||
@@ -75,6 +81,7 @@ export function assertIsInteractiveWindowDebugConfig(
 	thing: unknown,
 ): asserts thing is IInteractiveWindowDebugConfig {
 	assertIsDebugConfig(thing);
+
 	if (thing.__mode !== KernelDebugMode.InteractiveWindow) {
 		throw new Error("Invalid launch configuration");
 	}
@@ -94,35 +101,48 @@ export function getMessageSourceAndHookIt(
 	switch (msg.type) {
 		case "event":
 			const event = msg as DebugProtocol.Event;
+
 			switch (event.event) {
 				case "output":
 					sourceHook((event as DebugProtocol.OutputEvent).body);
+
 					break;
+
 				case "loadedSource":
 					sourceHook((event as DebugProtocol.LoadedSourceEvent).body);
+
 					break;
+
 				case "breakpoint":
 					sourceHook(
 						(event as DebugProtocol.BreakpointEvent).body
 							.breakpoint,
 					);
+
 					break;
+
 				default:
 					break;
 			}
 			break;
+
 		case "request":
 			const request = msg as DebugProtocol.Request;
+
 			switch (request.command) {
 				case "setBreakpoints":
 					const args =
 						request.arguments as DebugProtocol.SetBreakpointsArguments;
+
 					const breakpoints = args.breakpoints;
+
 					if (breakpoints && breakpoints.length) {
 						const originalLine = breakpoints[0].line;
+
 						breakpoints.forEach((bp) => {
 							sourceHook(bp, { ...args.source });
 						});
+
 						const objForSource = {
 							source: args.source,
 							line: originalLine,
@@ -131,28 +151,37 @@ export function getMessageSourceAndHookIt(
 						args.source = objForSource.source;
 					}
 					break;
+
 				case "breakpointLocations":
 					// TODO this technically would have to be mapped to two different sources, in reality, I don't think that will happen in vscode
 					sourceHook(
 						request.arguments as DebugProtocol.BreakpointLocationsArguments,
 					);
+
 					break;
+
 				case "source":
 					sourceHook(
 						request.arguments as DebugProtocol.SourceArguments,
 					);
+
 					break;
+
 				case "gotoTargets":
 					sourceHook(
 						request.arguments as DebugProtocol.GotoTargetsArguments,
 					);
+
 					break;
+
 				default:
 					break;
 			}
 			break;
+
 		case "response":
 			const response = msg as DebugProtocol.Response;
+
 			if (response.success && response.body) {
 				switch (response.command) {
 					case "stackTrace":
@@ -161,7 +190,9 @@ export function getMessageSourceAndHookIt(
 						).body.stackFrames.forEach((frame) => {
 							sourceHook(frame);
 						});
+
 						break;
+
 					case "loadedSources":
 						(
 							response as DebugProtocol.LoadedSourcesResponse
@@ -170,28 +201,36 @@ export function getMessageSourceAndHookIt(
 							sourceHook(fakeObj);
 							source.path = fakeObj.source.path;
 						});
+
 						break;
+
 					case "scopes":
 						(
 							response as DebugProtocol.ScopesResponse
 						).body.scopes.forEach((scope) => {
 							sourceHook(scope);
 						});
+
 						break;
+
 					case "setFunctionBreakpoints":
 						(
 							response as DebugProtocol.SetFunctionBreakpointsResponse
 						).body.breakpoints.forEach((bp) => {
 							sourceHook(bp);
 						});
+
 						break;
+
 					case "setBreakpoints":
 						(
 							response as DebugProtocol.SetBreakpointsResponse
 						).body.breakpoints.forEach((bp) => {
 							sourceHook(bp);
 						});
+
 						break;
+
 					default:
 						break;
 				}
@@ -214,6 +253,7 @@ export function shortNameMatchesLongName(
 			.replace(/~\d+\\\\/g, "[^\\\\]+\\\\"),
 		"i",
 	);
+
 	return r.test(longNamePath);
 }
 

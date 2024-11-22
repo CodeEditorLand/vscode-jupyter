@@ -17,6 +17,7 @@ import { ExportFormat } from "./types";
  */
 export class ExportFileOpener {
 	private readonly fs: IFileSystem;
+
 	constructor() {
 		this.fs = ServiceContainer.instance.get<IFileSystem>(IFileSystem);
 	}
@@ -54,6 +55,7 @@ export class ExportFileOpener {
 		} else {
 			const contents = await this.fs.readFile(uri);
 			await this.fs.delete(uri);
+
 			const doc = await workspace.openTextDocument({
 				language: PYTHON_LANGUAGE,
 				content: contents,
@@ -75,7 +77,9 @@ export class ExportFileOpener {
 		openDirectly: boolean,
 	): Promise<boolean> {
 		const yes = localize.DataScience.openExportFileYes;
+
 		const no = localize.DataScience.openExportFileNo;
+
 		const items = [yes, no];
 
 		const selected = await window

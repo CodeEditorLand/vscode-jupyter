@@ -35,6 +35,7 @@ export function buildApi(
 	context: IExtensionContext,
 ): IExtensionApi {
 	const extensions = serviceContainer.get<IExtensions>(IExtensions);
+
 	const api: IExtensionApi = {
 		// 'ready' will propagate the exception, but we must log it here first.
 		ready: getReady(ready),

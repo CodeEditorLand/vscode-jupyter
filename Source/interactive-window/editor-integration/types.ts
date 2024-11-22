@@ -21,8 +21,11 @@ export const ICodeWatcher = Symbol('ICodeWatcher');
 export interface ICodeWatcher extends IDisposable {
     readonly uri: Uri | undefined;
     codeLensUpdated: Event<void>;
+
     setDocument(document: TextDocument): void;
+
     getVersion(): number;
+
     getCodeLenses(): CodeLens[];
     runAllCells(): Promise<void>;
     runCell(range: Range): Promise<void>;
@@ -59,13 +62,16 @@ export const ICodeLensFactory = Symbol('ICodeLensFactory');
 export interface ICodeLensFactory {
     updateRequired: Event<void>;
     createCodeLenses(document: TextDocument): CodeLens[];
+
     getCellRanges(document: TextDocument): ICellRange[];
+
     getPerfMeasures(): CodeLensPerfMeasures;
 }
 
 export const ICellRangeCache = Symbol('ICellRangeCache');
 export interface ICellRangeCache extends IDisposable {
     clear(): void;
+
     getCellRanges(document: TextDocument): ICellRange[];
 }
 
@@ -101,6 +107,7 @@ export const IGeneratedCodeStore = Symbol('IGeneratedCodeStore');
 export interface IGeneratedCodeStore {
     clear(): void;
     readonly all: IFileGeneratedCodes[];
+
     getFileGeneratedCode(fileUri: Uri): IGeneratedCode[];
     store(fileUri: Uri, info: IGeneratedCode): void;
 }
@@ -108,6 +115,7 @@ export interface IGeneratedCodeStore {
 export const IGeneratedCodeStorageFactory = Symbol('IGeneratedCodeStorageFactory');
 export interface IGeneratedCodeStorageFactory {
     getOrCreate(notebook: NotebookDocument): IGeneratedCodeStore;
+
     get(options: { notebook: NotebookDocument } | { fileUri: Uri }): IGeneratedCodeStore | undefined;
 }
 export type InteractiveCellMetadata = {
@@ -134,5 +142,6 @@ export interface IInteractiveWindowCodeGenerator extends IDisposable {
 export const ICodeGeneratorFactory = Symbol('ICodeGeneratorFactory');
 export interface ICodeGeneratorFactory {
     getOrCreate(notebook: NotebookDocument): IInteractiveWindowCodeGenerator;
+
     get(notebook: NotebookDocument): IInteractiveWindowCodeGenerator | undefined;
 }

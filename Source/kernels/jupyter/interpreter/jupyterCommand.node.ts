@@ -47,8 +47,11 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 		options: SpawnOptions,
 	): Promise<ExecutionResult<string>> {
 		const newOptions = { ...options };
+
 		const launcher = await this.pythonLauncher;
+
 		const newArgs = [...this.args, ...args];
+
 		const moduleName = newArgs[1];
 		newArgs.shift(); // Remove '-m'
 		newArgs.shift(); // Remove module name
@@ -121,7 +124,9 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 		options: SpawnOptions,
 	): Promise<ExecutionResult<string>> {
 		let exception: Error | undefined;
+
 		let output: ExecutionResult<string> = { stdout: "" };
+
 		try {
 			output = await super.exec(args, options);
 		} catch (ex) {
@@ -138,6 +143,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 					`Exception attempting to enumerate kernelspecs: `,
 					exception,
 				);
+
 				throw exception;
 			}
 			return output;
@@ -145,6 +151,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 
 		// We're only interested in `python -m jupyter kernelspec`
 		const interpreter = await this.interpreter();
+
 		if (
 			!interpreter ||
 			this.moduleName.toLowerCase() !== "jupyter" ||
@@ -159,10 +166,12 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 			if (args.join(" ").toLowerCase() === "list --json") {
 				// Try getting kernels using python script, if that fails (even if there's output in stderr) rethrow original exception.
 				output = await this.getKernelSpecList(interpreter, options);
+
 				return output;
 			} else if (args.join(" ").toLowerCase() === "--version") {
 				// Try getting kernelspec version using python script, if that fails (even if there's output in stderr) rethrow original exception.
 				output = await this.getKernelSpecVersion(interpreter, options);
+
 				return output;
 			}
 		} catch (innerEx) {
@@ -183,6 +192,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 			await this.pythonExecutionFactory.createActivatedEnvironment({
 				interpreter,
 			});
+
 		return activatedEnv.exec(
 			[
 				path.join(
@@ -204,6 +214,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 			await this.pythonExecutionFactory.createActivatedEnvironment({
 				interpreter,
 			});
+
 		return activatedEnv.exec(
 			[
 				path.join(

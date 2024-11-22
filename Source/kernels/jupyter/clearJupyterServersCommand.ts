@@ -49,6 +49,7 @@ export class ClearJupyterServersCommand
 									return;
 								}
 								const token = new CancellationTokenSource();
+
 								const servers = await Promise.resolve(
 									provider.serverProvider.provideJupyterServers(
 										token.token,

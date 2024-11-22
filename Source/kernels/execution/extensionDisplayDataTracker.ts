@@ -7,6 +7,7 @@ import { IKernelSession } from "../types";
 import { getNotebookCellOutputMetadata } from "./helpers";
 
 type Extension = string;
+
 const displayIdsByExtension = new WeakMap<
 	IKernelSession,
 	Map<Extension, string[]>
@@ -21,13 +22,16 @@ export function trackDisplayDataForExtension(
 	output: NotebookCellOutput,
 ) {
 	const metadata = getNotebookCellOutputMetadata(output);
+
 	const displayId = metadata?.transient?.display_id;
+
 	if (output.metadata?.outputType !== "display_data" || !displayId) {
 		return;
 	}
 	const extensionMap =
 		displayIdsByExtension.get(kernel) || new Map<Extension, string[]>();
 	displayIdsByExtension.set(kernel, extensionMap);
+
 	const displayIds = extensionMap.get(extension) || [];
 	extensionMap.set(extension, displayIds);
 	displayIds.push(displayId);
@@ -43,6 +47,7 @@ export function isDisplayIdTrackedForAnExtension(
 ) {
 	const extensionMap =
 		displayIdsByExtension.get(kernel) || new Map<Extension, string[]>();
+
 	for (const displayIds of extensionMap.values()) {
 		if (displayIds.includes(displayId)) {
 			return true;
@@ -57,7 +62,9 @@ export function isDisplayIdTrackedForExtension(
 ) {
 	const extensionMap =
 		displayIdsByExtension.get(kernel) || new Map<Extension, string[]>();
+
 	const displayIds = extensionMap.get(extension) || [];
+
 	return displayIds.includes(displayId);
 }
 
@@ -67,8 +74,10 @@ export function unTrackDisplayDataForExtension(
 ) {
 	const extensionMap =
 		displayIdsByExtension.get(kernel) || new Map<Extension, string[]>();
+
 	for (const displayIds of extensionMap.values()) {
 		const index = displayIds.indexOf(displayId);
+
 		if (index >= 0) {
 			displayIds.splice(index, 1);
 		}

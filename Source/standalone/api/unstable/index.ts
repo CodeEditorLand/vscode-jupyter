@@ -51,12 +51,14 @@ export function registerRemoteServerProvider(
 	serviceContainer: IServiceContainer,
 ): IDisposable {
 	const extensions = serviceContainer.get<IExtensions>(IExtensions);
+
 	const extensionId = provider.id.startsWith("_builtin")
 		? JVSC_EXTENSION_ID
 		: extensions.determineExtensionFromCallStack().extensionId;
 	logger.error(
 		`The API registerRemoteServerProvider has being deprecated and will be removed soon, please use createJupyterServerCollection (extension ${extensionId}).`,
 	);
+
 	if (extensionId.toLowerCase() != CodespaceExtensionId.toLowerCase()) {
 		throw new Error("Deprecated API");
 	}
@@ -64,8 +66,10 @@ export function registerRemoteServerProvider(
 		clientExtId: extensionId,
 		pemUsed: "registerRemoteServerProvider",
 	});
+
 	const { serverProvider, commandProvider } =
 		jupyterServerUriToCollection(provider);
+
 	const collection = createJupyterServerCollection(
 		provider.id,
 		provider.displayName || provider.detail || provider.id,
@@ -73,6 +77,7 @@ export function registerRemoteServerProvider(
 		extensionId,
 		serviceContainer,
 	);
+
 	if (commandProvider) {
 		collection.commandProvider = commandProvider;
 	}
@@ -87,6 +92,7 @@ export function getReady(ready: Promise<unknown>): Promise<void> {
 		.then(() => noop())
 		.catch((ex) => {
 			logger.error("Failure during activation.", ex);
+
 			return Promise.reject(ex);
 		});
 }
@@ -96,10 +102,12 @@ export function getKernelService(serviceContainer: IServiceContainer) {
 		clientExtId: extensions.determineExtensionFromCallStack().extensionId,
 		pemUsed: "registerRemoteServerProvider",
 	});
+
 	const kernelServiceFactory =
 		serviceContainer.get<IExportedKernelServiceFactory>(
 			IExportedKernelServiceFactory,
 		);
+
 	return kernelServiceFactory.getService();
 }
 export async function addRemoteJupyterServer(
@@ -111,8 +119,10 @@ export async function addRemoteJupyterServer(
 	logger.error(
 		"The API addRemoteJupyterServer has being deprecated and will be removed soon, please use createJupyterServerCollection.",
 	);
+
 	const extensionId =
 		extensions.determineExtensionFromCallStack().extensionId;
+
 	if (extensionId.toLowerCase() != CodespaceExtensionId.toLowerCase()) {
 		throw new Error("Deprecated API");
 	}
@@ -127,6 +137,7 @@ export async function addRemoteJupyterServer(
 
 	const controllerRegistration =
 		serviceContainer.get<IControllerRegistration>(IControllerRegistration);
+
 	const controllerCreatedPromise =
 		waitForNotebookControllersCreationForServer(
 			{ id: providerId, handle },
@@ -146,22 +157,27 @@ export async function openNotebook(
 		clientExtId: extensions.determineExtensionFromCallStack().extensionId,
 		pemUsed: "openNotebook",
 	});
+
 	const controllers = serviceContainer.get<IControllerRegistration>(
 		IControllerRegistration,
 	);
+
 	const kernelId =
 		typeof kernelOrPythonEnvId === "string"
 			? kernelOrPythonEnvId
 			: undefined;
+
 	const pythonEnv =
 		typeof kernelOrPythonEnvId === "string"
 			? undefined
 			: kernelOrPythonEnvId;
+
 	let id =
 		kernelId &&
 		controllers.all.find(
 			(controller) => controller.id === kernelOrPythonEnvId,
 		)?.id;
+
 	if (!id && pythonEnv && !isWeb()) {
 		// Look for a python environment with this id.
 		id = controllers.all.find(
@@ -169,12 +185,14 @@ export async function openNotebook(
 				controller.kind === "startUsingPythonInterpreter" &&
 				controller.interpreter.id === pythonEnv.id,
 		)?.id;
+
 		if (!id) {
 			// Controller has not yet been created.
 			const selector =
 				serviceContainer.get<ILocalPythonNotebookKernelSourceSelector>(
 					ILocalPythonNotebookKernelSourceSelector,
 				);
+
 			const connection = await selector.getKernelConnection(pythonEnv);
 			id =
 				connection &&
@@ -198,5 +216,6 @@ export async function openNotebook(
 		id,
 		extension: JVSC_EXTENSION_ID,
 	});
+
 	return notebookEditor.notebook;
 }

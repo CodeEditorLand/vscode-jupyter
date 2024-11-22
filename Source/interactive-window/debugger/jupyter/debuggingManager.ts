@@ -94,6 +94,7 @@ export class InteractiveWindowDebuggingManager
 		logger.ci(`Starting debugging IW`);
 
 		const ipykernelResult = await this.checkIpykernelAndPrompt(cell);
+
 		if (ipykernelResult === IpykernelCheckResult.Ok) {
 			await this.startDebuggingCell(notebook, cell);
 		}
@@ -104,6 +105,7 @@ export class InteractiveWindowDebuggingManager
 		cell: NotebookCell,
 	) {
 		const settings = this.configService.getSettings(doc.uri);
+
 		const config: IInteractiveWindowDebugConfig = {
 			type: pythonIWKernelDebugAdapter,
 			name: path.basename(doc.uri.toString()),
@@ -114,11 +116,15 @@ export class InteractiveWindowDebuggingManager
 			__mode: KernelDebugMode.InteractiveWindow,
 			__cellIndex: cell.index,
 		};
+
 		const opts: DebugSessionOptions = { suppressSaveBeforeStart: true };
 		await this.startDebuggingConfig(config, opts);
+
 		const dbgr = this.notebookToDebugger.get(doc);
+
 		if (!dbgr) {
 			logger.error("Debugger not found, could not start debugging.");
+
 			return;
 		}
 		await (dbgr as IWDebugger).ready;
@@ -133,10 +139,12 @@ export class InteractiveWindowDebuggingManager
 		const notebook = workspace.notebookDocuments.find(
 			(doc) => doc.uri.toString() === config.__notebookUri,
 		);
+
 		if (!notebook || typeof config.__cellIndex !== "number") {
 			logger.error(
 				"Invalid debug session for debugging of IW using Jupyter Protocol",
 			);
+
 			return;
 		}
 
@@ -144,6 +152,7 @@ export class InteractiveWindowDebuggingManager
 			logger.info(
 				`Cannot start debugging. Already debugging this notebook`,
 			);
+
 			return;
 		}
 
@@ -151,13 +160,16 @@ export class InteractiveWindowDebuggingManager
 			logger.info(
 				`Cannot start debugging. Already debugging this notebook document. Toolbar should update`,
 			);
+
 			return;
 		}
 
 		const dbgr = new IWDebugger(notebook, config, session);
 		this.notebookToDebugger.set(notebook, dbgr);
+
 		try {
 			this.notebookInProgress.add(notebook);
+
 			return await this.doCreateDebugAdapterDescriptor(
 				config,
 				session,
@@ -176,10 +188,12 @@ export class InteractiveWindowDebuggingManager
 		dbgr: IWDebugger,
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const kernel = await this.ensureKernelIsRunning(notebook);
+
 		if (!kernel?.session) {
 			window
 				.showInformationMessage(DataScience.kernelWasNotStarted)
 				.then(noop, noop);
+
 			return;
 		}
 		const adapter = new KernelDebugAdapter(
@@ -197,6 +211,7 @@ export class InteractiveWindowDebuggingManager
 		);
 
 		const cell = notebook.cellAt(config.__cellIndex);
+
 		const controller = new DebugCellController(
 			adapter,
 			cell,
@@ -213,6 +228,7 @@ export class InteractiveWindowDebuggingManager
 			);
 
 		this.trackDebugAdapter(notebook, adapter);
+
 		return new DebugAdapterInlineImplementation(adapter);
 	}
 
@@ -223,6 +239,7 @@ export class InteractiveWindowDebuggingManager
 	): Promise<void> {
 		// Make sure that we have an active debugging session at this point
 		let debugSession = this.getDebugSession(notebookEditor.notebook);
+
 		if (debugSession) {
 			logger.ci(`Sending debug request for source map`);
 			await Promise.all(

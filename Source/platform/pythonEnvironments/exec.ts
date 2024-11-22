@@ -29,6 +29,7 @@ export function buildPythonExecInfo(
 ): PythonExecInfo {
 	if (Array.isArray(python)) {
 		const args = python.slice(1);
+
 		if (pythonArgs) {
 			args.push(...pythonArgs);
 		}
@@ -65,6 +66,7 @@ export function copyPythonExecInfo(
 		python: [...orig.python],
 		pythonExecutable: orig.pythonExecutable,
 	};
+
 	if (extraPythonArgs) {
 		info.args.push(...extraPythonArgs);
 	}

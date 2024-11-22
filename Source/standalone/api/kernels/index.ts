@@ -12,11 +12,13 @@ import { initializeInteractiveOrNotebookTelemetryBasedOnUserAction } from '../..
 import { IDisposableRegistry } from '../../../platform/common/types';
 
 const kernelCache = new WeakMap<IKernel, Kernel>();
+
 let _onDidStart: EventEmitter<{ uri: Uri; kernel: Kernel }> | undefined = undefined;
 
 function getWrappedKernel(kernel: IKernel, extensionId: string) {
     let wrappedKernel = kernelCache.get(kernel) || createKernelApiForExtension(extensionId, kernel);
     kernelCache.set(kernel, wrappedKernel);
+
     return wrappedKernel;
 }
 
@@ -26,7 +28,9 @@ export function getKernelsApi(extensionId: string): Kernels {
             let accessAllowed: boolean | undefined = undefined;
 
             const kernelProvider = ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
+
             const notebook = workspace.notebookDocuments.find((item) => item.uri.toString() === uri.toString());
+
             const kernel = kernelProvider.get(notebook || uri);
             // We are only interested in returning kernels that have been started by the user.
             // Returning started kernels is not sufficient as we also pre-warm kernels (i.e. we start kernels even though the user may not have executed any code).
@@ -36,6 +40,7 @@ export function getKernelsApi(extensionId: string): Kernels {
                     pemUsed: 'getKernel',
                     accessAllowed
                 });
+
                 return;
             }
             if (extensionId !== JVSC_EXTENSION_ID) {
@@ -54,6 +59,7 @@ export function getKernelsApi(extensionId: string): Kernels {
             // We can cache the event emitter for subsequent calls.
             if (!_onDidStart) {
                 const kernelProvider = ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
+
                 const disposableRegistry = ServiceContainer.instance.get<IDisposableRegistry>(IDisposableRegistry);
                 _onDidStart = new EventEmitter<{ uri: Uri; kernel: Kernel }>();
 

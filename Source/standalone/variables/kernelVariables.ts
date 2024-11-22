@@ -37,10 +37,15 @@ import { stripAnsi } from "../../platform/common/utils/regexp";
 // Regexes for parsing data from Python kernel. Not sure yet if other
 // kernels will add the ansi encoding.
 const TypeRegex = /Type:\s*(\w+)/;
+
 const ValueRegex = /Value:\s*(.*)/;
+
 const StringFormRegex = /String form:\s*([\s\S]+?)\n/;
+
 const DocStringRegex = /Docstring:\s*(.*)/;
+
 const CountRegex = /Length:\s+(.*)/;
+
 const ShapeRegex = /^\s+\[(\d+) rows x (\d+) columns\]/m;
 
 const DataViewableTypes: Set<string> = new Set<string>([
@@ -55,6 +60,7 @@ const DataViewableTypes: Set<string> = new Set<string>([
 ]);
 interface INotebookState {
 	currentExecutionCount: number;
+
 	variables: IJupyterVariable[];
 }
 
@@ -94,7 +100,9 @@ export class KernelVariables implements IJupyterVariables {
 		const languageId =
 			getKernelConnectionLanguage(kernel.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
+
 		const variableRequester = this.variableRequesters.get(languageId);
+
 		if (variableRequester) {
 			return variableRequester.getAllVariableDiscriptions(
 				kernel,
@@ -121,8 +129,10 @@ export class KernelVariables implements IJupyterVariables {
 	): Promise<IJupyterVariable | undefined> {
 		// See if in the cache
 		const cache = this.cachedVariables.get(kernel.uri.toString());
+
 		if (cache) {
 			let match = cache.variables.find((v) => v.name === name);
+
 			if (match && !match.value) {
 				match = await this.getVariableValueFromKernel(
 					match,
@@ -137,8 +147,10 @@ export class KernelVariables implements IJupyterVariables {
 				kernel,
 				token,
 			);
+
 			if (variables) {
 				const matchName = variables.find((v) => v.name === name);
+
 				if (matchName) {
 					return this.getVariableValueFromKernel(
 						{
@@ -172,6 +184,7 @@ export class KernelVariables implements IJupyterVariables {
 		const languageId =
 			getKernelConnectionLanguage(kernel?.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
+
 		const variableRequester = this.variableRequesters.get(languageId);
 
 		if (variableRequester) {
@@ -198,7 +211,9 @@ export class KernelVariables implements IJupyterVariables {
 		const languageId =
 			getKernelConnectionLanguage(kernel?.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
+
 		const variableRequester = this.variableRequesters.get(languageId);
+
 		if (variableRequester) {
 			if (isRefresh) {
 				targetVariable = await this.getFullVariable(
@@ -208,6 +223,7 @@ export class KernelVariables implements IJupyterVariables {
 			}
 
 			let expression = targetVariable.name;
+
 			if (sliceExpression) {
 				expression = `${targetVariable.name}${sliceExpression}`;
 			}
@@ -230,9 +246,12 @@ export class KernelVariables implements IJupyterVariables {
 		const language =
 			getKernelConnectionLanguage(kernel?.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
+
 		const variableRequester = this.variableRequesters.get(language);
+
 		if (variableRequester) {
 			let expression = targetVariable.name;
+
 			if (sliceExpression) {
 				expression = `${targetVariable.name}${sliceExpression}`;
 			}
@@ -254,7 +273,9 @@ export class KernelVariables implements IJupyterVariables {
 		const languageId =
 			getKernelConnectionLanguage(kernel?.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
+
 		const variableRequester = this.variableRequesters.get(languageId);
+
 		if (variableRequester) {
 			return variableRequester.getFullVariable(
 				targetVariable,
@@ -271,10 +292,13 @@ export class KernelVariables implements IJupyterVariables {
 	): Promise<IJupyterVariablesResponse> {
 		// See if we already have the name list
 		let list = this.cachedVariables.get(kernel.uri.toString());
+
 		const hasExecutingCells =
 			this.kernelProvider.getKernelExecution(kernel).pendingCells.length >
 			0;
+
 		const execution = this.kernelProvider.getKernelExecution(kernel);
+
 		if (
 			!list ||
 			(!hasExecutingCells &&
@@ -321,13 +345,16 @@ export class KernelVariables implements IJupyterVariables {
 		// Use the list of names to fetch the page of data
 		if (list) {
 			type SortableColumn = "name" | "type";
+
 			const sortColumn = request.sortColumn as SortableColumn;
+
 			const comparer = (
 				a: IJupyterVariable,
 				b: IJupyterVariable,
 			): number => {
 				// In case it is undefined or null
 				const aColumn = a[sortColumn] ? a[sortColumn] : "";
+
 				const bColumn = b[sortColumn] ? b[sortColumn] : "";
 
 				if (request.sortAscending) {
@@ -343,6 +370,7 @@ export class KernelVariables implements IJupyterVariables {
 			list.variables.sort(comparer);
 
 			const startPos = request.startIndex ? request.startIndex : 0;
+
 			const chunkSize = request.pageSize ? request.pageSize : 100;
 			result.pageStartIndex = startPos;
 
@@ -358,6 +386,7 @@ export class KernelVariables implements IJupyterVariables {
 				) {
 					// Remove from the list before fetching the full value
 					list.variables.splice(i, 1);
+
 					continue;
 				}
 
@@ -394,11 +423,13 @@ export class KernelVariables implements IJupyterVariables {
 			kernel,
 			cancelToken,
 		);
+
 		const languageId =
 			getKernelConnectionLanguage(kernel.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
 
 		const variableRequester = this.variableRequesters.get(languageId);
+
 		if (variableRequester) {
 			return variableRequester.getVariableProperties(
 				word,
@@ -418,7 +449,9 @@ export class KernelVariables implements IJupyterVariables {
 		const languageId =
 			getKernelConnectionLanguage(kernel.kernelConnectionMetadata) ||
 			PYTHON_LANGUAGE;
+
 		const variableRequester = this.variableRequesters.get(languageId);
+
 		if (variableRequester) {
 			return variableRequester.getVariableNamesAndTypesFromKernel(
 				kernel,
@@ -477,6 +510,7 @@ export class KernelVariables implements IJupyterVariables {
 		token?: CancellationToken,
 	): Promise<IJupyterVariable> {
 		let result = { ...targetVariable };
+
 		if (!kernel.disposed && kernel.session?.kernel) {
 			const output = await this.inspect(
 				kernel.session.kernel,
@@ -491,8 +525,11 @@ export class KernelVariables implements IJupyterVariables {
 
 				// Parse into bits
 				const type = TypeRegex.exec(text);
+
 				const count = CountRegex.exec(text);
+
 				const shape = ShapeRegex.exec(text);
+
 				if (type) {
 					result.type = type[1];
 				}

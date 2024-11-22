@@ -112,6 +112,7 @@ export class NotebookCellLanguageService
 			return;
 		}
 		const language = getLanguageOfNotebookDocument(doc);
+
 		if (language && language !== this.lastSavedNotebookCellLanguage) {
 			await this.globalMemento.update(
 				LastSavedNotebookCellLanguage,

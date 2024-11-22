@@ -21,6 +21,7 @@ export namespace CommonEffects {
 		// Read in the loc strings
 		const locJSON: LocalizedMessages = JSON.parse(arg.payload.data);
 		storeLocStrings(locJSON);
+
 		return arg.prevState;
 	}
 

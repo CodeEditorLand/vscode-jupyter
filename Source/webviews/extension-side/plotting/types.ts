@@ -8,10 +8,15 @@ import { IDisposable } from "../../../platform/common/types";
 
 export namespace PlotViewerMessages {
 	export const Started = SharedMessages.Started;
+
 	export const UpdateSettings = SharedMessages.UpdateSettings;
+
 	export const SendPlot = "send_plot";
+
 	export const CopyPlot = "copy_plot";
+
 	export const ExportPlot = "export_plot";
+
 	export const RemovePlot = "remove_plot";
 }
 

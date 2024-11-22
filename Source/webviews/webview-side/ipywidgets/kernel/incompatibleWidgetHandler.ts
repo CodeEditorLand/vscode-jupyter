@@ -6,6 +6,7 @@ import * as semver from "semver";
 import { WidgetScriptSource } from "../../../../notebooks/controllers/ipywidgets/types";
 
 const supportedVersionOfQgrid = "1.1.1";
+
 const qgridModuleName = "qgrid";
 
 /**

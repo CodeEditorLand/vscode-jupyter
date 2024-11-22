@@ -15,6 +15,7 @@ export class TrustedKernelPaths implements ITrustedKernelPaths {
 	private readonly programData = process.env["PROGRAMDATA"]
 		? Uri.file(path.normalize(process.env["PROGRAMDATA"]))
 		: undefined;
+
 	constructor(
 		@inject(IPlatformService) private readonly platform: IPlatformService,
 	) {}
@@ -25,6 +26,7 @@ export class TrustedKernelPaths implements ITrustedKernelPaths {
 	}
 	public isTrusted(kernelPath: Uri): boolean {
 		const trusted = this.isTrustedImpl(kernelPath);
+
 		if (!trusted && !TrustedKernelPaths.IsKernelSpecHidden.completed) {
 			TrustedKernelPaths.IsKernelSpecHidden.resolve(true);
 		}

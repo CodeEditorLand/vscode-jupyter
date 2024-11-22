@@ -50,7 +50,9 @@ export class ProgressReporter implements IProgressReporter {
 		cancellable = false,
 	): IDisposable & { token: CancellationToken } {
 		const cancellation = new CancellationTokenSource();
+
 		const deferred = createDeferred();
+
 		const options = {
 			location: ProgressLocation.Notification,
 			cancellable: cancellable,
@@ -121,6 +123,7 @@ export class ProgressReporter implements IProgressReporter {
 			return;
 		}
 		const message = getUserMessageForAction(this.currentAction);
+
 		if (message) {
 			this.progressReporters.forEach((item) => item.report({ message }));
 		}

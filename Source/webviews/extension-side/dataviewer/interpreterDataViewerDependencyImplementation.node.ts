@@ -41,12 +41,14 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 			resource: undefined,
 			interpreter,
 		});
+
 		const result = await launcher.exec(
 			["-c", interpreterGetPandasVersion],
 			{
 				token,
 			},
 		);
+
 		const output = result.stdout;
 
 		if (!output?.includes(separator)) {
@@ -54,10 +56,13 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 				DataScience.failedToGetVersionOfPandas,
 				`Output is ${output}`,
 			);
+
 			return "";
 		}
 		const items = splitLines(output.trim());
+
 		const indexOfSeparator = items.indexOf(separator);
+
 		return indexOfSeparator >= 0 ? items[indexOfSeparator - 1] : "";
 	}
 
@@ -85,6 +90,7 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 				tokenSource,
 			),
 		);
+
 		if (response === InstallerResponse.Installed) {
 			sendTelemetryEvent(Telemetry.UserInstalledPandas);
 		}

@@ -54,6 +54,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
 
     public getOrCreate(notebook: NotebookDocument, options: KernelOptions): IKernel {
         const existingKernelInfo = this.getInternal(notebook);
+
         if (existingKernelInfo && existingKernelInfo.options.metadata.id === options.metadata.id) {
             return existingKernelInfo.kernel;
         }
@@ -67,8 +68,11 @@ export class KernelProvider extends BaseCoreKernelProvider {
         this.disposeOldKernel(notebook, 'createNewKernel');
 
         const replKernel = this.replTracker.isForReplEditor(notebook);
+
         const resourceUri = replKernel ? options.resourceUri : notebook.uri;
+
         const settings = createKernelSettings(this.configService, resourceUri);
+
         const startupCodeProviders = this.startupCodeProviders.getProviders(
             replKernel ? InteractiveWindowView : JupyterNotebookView
         );
@@ -109,6 +113,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
         this.asyncDisposables.push(kernel);
         this.storeKernel(notebook, options, kernel);
         this.deleteMappingIfKernelIsDisposed(kernel);
+
         return kernel;
     }
 }
@@ -128,14 +133,18 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 
     public getOrCreate(uri: Uri, options: ThirdPartyKernelOptions): IThirdPartyKernel {
         const existingKernelInfo = this.getInternal(uri);
+
         if (existingKernelInfo && existingKernelInfo.options.metadata.id === options.metadata.id) {
             return existingKernelInfo.kernel;
         }
         this.disposeOldKernel(uri);
 
         const resourceUri = uri;
+
         const settings = createKernelSettings(this.configService, resourceUri);
+
         const notebookType = resourceUri.path.endsWith('.interactive') ? InteractiveWindowView : JupyterNotebookView;
+
         const kernel: IThirdPartyKernel = new ThirdPartyKernel(
             uri,
             resourceUri,
@@ -169,6 +178,7 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
         this.asyncDisposables.push(kernel);
         this.storeKernel(uri, options, kernel);
         this.deleteMappingIfKernelIsDisposed(uri, kernel);
+
         return kernel;
     }
 }

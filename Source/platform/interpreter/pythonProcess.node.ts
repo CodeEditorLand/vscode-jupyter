@@ -21,7 +21,9 @@ class PythonProcessService {
 		private readonly deps: {
 			// from PythonEnvironment:
 			isModuleInstalled(moduleName: string): Promise<boolean>;
+
 			getExecutionInfo(pythonArgs?: string[]): PythonExecInfo;
+
 			getExecutionObservableInfo(pythonArgs?: string[]): PythonExecInfo;
 			// from ProcessService:
 			exec(
@@ -42,7 +44,9 @@ class PythonProcessService {
 		options: SpawnOptions,
 	): ObservableExecutionResult<string> {
 		const opts: SpawnOptions = { ...options };
+
 		const executable = this.deps.getExecutionObservableInfo(args);
+
 		return this.deps.execObservable(
 			executable.command,
 			executable.args,
@@ -56,12 +60,15 @@ class PythonProcessService {
 		options: SpawnOptions,
 	): ObservableExecutionResult<string> {
 		const args = internalPython.execModule(moduleName, moduleArgs);
+
 		const opts: SpawnOptions = { ...options };
+
 		const executable = this.deps.getExecutionObservableInfo(args);
 		// We should never set token for long running processes.
 		// We don't want the process to die when the token is cancelled.
 		const spawnOptions = { ...options };
 		spawnOptions.token = undefined;
+
 		return this.deps.execObservable(
 			executable.command,
 			executable.args,
@@ -74,7 +81,9 @@ class PythonProcessService {
 		options: SpawnOptions,
 	): Promise<ExecutionResult<string>> {
 		const opts: SpawnOptions = { ...options };
+
 		const executable = this.deps.getExecutionInfo(args);
+
 		return this.deps.exec(executable.command, executable.args, opts);
 	}
 
@@ -84,8 +93,11 @@ class PythonProcessService {
 		options: SpawnOptions,
 	): Promise<ExecutionResult<string>> {
 		const args = internalPython.execModule(moduleName, moduleArgs);
+
 		const opts: SpawnOptions = { ...options };
+
 		const executable = this.deps.getExecutionInfo(args);
+
 		const result = await this.deps.exec(
 			executable.command,
 			executable.args,
@@ -101,6 +113,7 @@ class PythonProcessService {
 			)
 		) {
 			const isInstalled = await this.deps.isModuleInstalled(moduleName);
+
 			if (!isInstalled) {
 				throw new ModuleNotInstalledError(moduleName);
 			}
@@ -115,6 +128,7 @@ export function createPythonProcessService(
 	// from PythonEnvironment:
 	env: {
 		getExecutionInfo(pythonArgs?: string[]): PythonExecInfo;
+
 		getExecutionObservableInfo(pythonArgs?: string[]): PythonExecInfo;
 		isModuleInstalled(moduleName: string): Promise<boolean>;
 	},
@@ -131,5 +145,6 @@ export function createPythonProcessService(
 		execObservable: (f: string, a: string[], o: SpawnOptions) =>
 			procs.execObservable(f, a, o),
 	};
+
 	return new PythonProcessService(deps);
 }

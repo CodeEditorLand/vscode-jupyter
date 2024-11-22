@@ -62,6 +62,7 @@ export class DataViewerCommandRegistry
 	implements IExtensionSyncActivationService
 {
 	private dataViewerChecker: DataViewerChecker;
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
@@ -105,6 +106,7 @@ export class DataViewerCommandRegistry
 		private readonly dataViewerDelegator: DataViewerDelegator,
 	) {
 		this.dataViewerChecker = new DataViewerChecker(configService);
+
 		if (!workspace.isTrusted) {
 			workspace.onDidGrantWorkspaceTrust(
 				this.registerCommandsIfTrusted,
@@ -142,12 +144,14 @@ export class DataViewerCommandRegistry
 			"variable" in request
 				? await this.getVariableFromRequest(request)
 				: request;
+
 		if (!variable) {
 			logger.error("Variable info could not be retreived");
 			sendTelemetryEvent(Telemetry.FailedShowDataViewer, undefined, {
 				reason: "no variable info",
 				fromVariableView: false,
 			});
+
 			return;
 		}
 		return this.dataViewerDelegator.showContributedDataViewer(
@@ -164,15 +168,18 @@ export class DataViewerCommandRegistry
 			const variable = convertDebugProtocolVariableToIJupyterVariable(
 				request.variable as unknown as DebugProtocol.Variable,
 			);
+
 			try {
 				const result =
 					await this.variableProvider.getFullVariable(variable);
+
 				return result;
 			} catch (e) {
 				logger.warn(
 					"Full variable info could not be retreived, will attempt with partial info.",
 					e,
 				);
+
 				return variable;
 			}
 		}
@@ -188,6 +195,7 @@ export class DataViewerCommandRegistry
 		const deprecateDataViewer = this.experimentService.inExperiment(
 			Experiments.DataViewerDeprecation,
 		);
+
 		if (
 			!this.globalMemento.get(PromptAboutDeprecation) &&
 			deprecateDataViewer
@@ -244,9 +252,12 @@ export class DataViewerCommandRegistry
 					await this.jupyterVariableDataProviderFactory.create(
 						requestVariable,
 					);
+
 				const dataFrameInfo =
 					await jupyterVariableDataProvider.getDataFrameInfo();
+
 				const columnSize = dataFrameInfo?.columns?.length;
+
 				if (
 					columnSize &&
 					(await this.dataViewerChecker.isRequestedColumnSizeAllowed(
@@ -254,6 +265,7 @@ export class DataViewerCommandRegistry
 					))
 				) {
 					const title: string = `${DataScience.dataExplorerTitle} - ${requestVariable.name}`;
+
 					const dv = await this.dataViewerFactory.create(
 						jupyterVariableDataProvider,
 						title,
@@ -261,6 +273,7 @@ export class DataViewerCommandRegistry
 					sendTelemetryEvent(
 						EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS,
 					);
+
 					return dv;
 				}
 			} catch (e) {
@@ -290,6 +303,7 @@ export class DataViewerCommandRegistry
 						);
 
 					const title: string = `${DataScience.dataExplorerTitle} - ${requestVariable.name}`;
+
 					return await this.dataViewerFactory.create(
 						jupyterVariableDataProvider,
 						title,
@@ -307,6 +321,7 @@ export class DataViewerCommandRegistry
 
 	private getActiveKernel() {
 		const activeNotebook = window.activeNotebookEditor?.notebook;
+
 		const activeJupyterNotebookKernel =
 			activeNotebook?.notebookType == JupyterNotebookView
 				? this.kernelProvider.get(activeNotebook)
@@ -316,6 +331,7 @@ export class DataViewerCommandRegistry
 			return activeJupyterNotebookKernel;
 		}
 		const interactiveWindowDoc = this.getActiveInteractiveWindowDocument();
+
 		const activeInteractiveWindowKernel = interactiveWindowDoc
 			? this.kernelProvider.get(interactiveWindowDoc)
 			: undefined;
@@ -324,6 +340,7 @@ export class DataViewerCommandRegistry
 			return activeInteractiveWindowKernel;
 		}
 		const activeDataViewer = this.dataViewerFactory?.activeViewer;
+
 		return activeDataViewer
 			? this.kernelProvider.kernels.find(
 					(item) => item === activeDataViewer.kernel,
@@ -334,6 +351,7 @@ export class DataViewerCommandRegistry
 	private getActiveInteractiveWindowDocument() {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getActiveOrAssociatedInteractiveWindow();
+
 		if (!interactiveWindow) {
 			return;
 		}
@@ -354,11 +372,13 @@ export class DataViewerCommandRegistry
 			logger.info(
 				"Interpreter Service missing when trying getDebugAdapterPython",
 			);
+
 			return;
 		}
 
 		// Check debugAdapterPython and pythonPath
 		let pythonPath: string = "";
+
 		if (debugConfiguration.debugAdapterPython !== undefined) {
 			logger.info(
 				"Found debugAdapterPython on Debug Configuration to use",
@@ -371,6 +391,7 @@ export class DataViewerCommandRegistry
 
 		if (pythonPath) {
 			let untildePath = pythonPath;
+
 			if (untildePath.startsWith("~") && this.platformService.homeDir) {
 				untildePath = untildify(
 					untildePath,

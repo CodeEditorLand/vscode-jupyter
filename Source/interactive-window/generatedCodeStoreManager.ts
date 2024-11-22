@@ -23,6 +23,7 @@ export class GeneratedCodeStorageManager
 	implements IExtensionSyncActivationService
 {
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IKernelProvider)
 		private readonly kernelProvider: IKernelProvider,
@@ -63,6 +64,7 @@ export class GeneratedCodeStorageManager
 	}
 	private onDidCreateKernel(kernel: IKernel) {
 		const notebook = kernel.notebook;
+
 		if (
 			kernel.creator !== "jupyterExtension" ||
 			this.replTracker.isForReplEditor(notebook)

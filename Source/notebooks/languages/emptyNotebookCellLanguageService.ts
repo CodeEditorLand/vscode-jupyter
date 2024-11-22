@@ -49,6 +49,7 @@ export class EmptyNotebookCellLanguageService
 		controller: IVSCodeNotebookController;
 	}) {
 		const document = event.notebook;
+
 		const connection = event.controller.connection;
 		// We're only interested in our Jupyter Notebooks & our kernels.
 		if (!isJupyterNotebook(document)) {
@@ -57,6 +58,7 @@ export class EmptyNotebookCellLanguageService
 		const editor = window.visibleNotebookEditors.find(
 			(item) => item.notebook === document,
 		);
+
 		if (!editor) {
 			return;
 		}
@@ -68,6 +70,7 @@ export class EmptyNotebookCellLanguageService
 					cell.kind === NotebookCellKind.Code &&
 					cell.document.getText().trim().length === 0,
 			);
+
 		const codeCells = document
 			.getCells()
 			.filter((cell) => cell.kind === NotebookCellKind.Code).length;
@@ -80,25 +83,31 @@ export class EmptyNotebookCellLanguageService
 		}
 
 		let language: string | undefined;
+
 		const kernelKind = connection.kind;
+
 		switch (connection.kind) {
 			case "connectToLiveRemoteKernel": {
 				language = connection.kernelModel.language;
+
 				break;
 			}
 			case "startUsingRemoteKernelSpec":
 			case "startUsingLocalKernelSpec": {
 				language = connection.kernelSpec.language;
+
 				break;
 			}
 			case "startUsingPythonInterpreter": {
 				language = PYTHON_LANGUAGE;
+
 				break;
 			}
 			default: {
 				logger.error(
 					`Unsupported kernel kind encountered ${kernelKind}`,
 				);
+
 				return;
 			}
 		}

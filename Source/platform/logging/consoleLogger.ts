@@ -12,9 +12,11 @@ function formatMessage(
 	...data: Arguments
 ): string {
 	const isDataEmpty = [...data].length === 0;
+
 	const formattedMessage = isDataEmpty
 		? format(message)
 		: format(message, ...data);
+
 	return level
 		? `${level} ${getTimeForLogging()}: ${formattedMessage}`
 		: formattedMessage;

@@ -160,6 +160,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 		this.hasShutdown = false;
 		this.isRestarting = true;
 		this.restartToken = new CancellationTokenSource();
+
 		try {
 			this.statusChanged.emit("restarting");
 			await this.start(this.restartToken.token);
@@ -169,9 +170,12 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 	}
 	public async start(token: CancellationToken): Promise<void> {
 		const disposables: IDisposable[] = [];
+
 		const postStartToken = wrapCancellationTokens(token);
 		disposables.push(postStartToken);
+
 		let kernelExitedError: KernelProcessExitedError | undefined = undefined;
+
 		try {
 			const oldKernelProcess = this.kernelProcess;
 			this.kernelProcess = undefined;
@@ -197,10 +201,12 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 							token,
 						),
 				));
+
 			if (token.isCancellationRequested) {
 				throw new CancellationError();
 			}
 			this.hookupKernelProcessExitHandler(kernelProcess);
+
 			const result = newRawKernel(
 				this.kernelProcess,
 				this.clientId,
@@ -226,6 +232,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 				this,
 				disposables,
 			);
+
 			const timeout = setTimeout(
 				() => postStartToken.cancel(),
 				this.launchTimeout,
@@ -238,6 +245,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 					const tracker = getNotebookTelemetryTracker(
 						this.resource,
 					)?.kernelReady();
+
 					return postStartKernel(
 						postStartToken.token,
 						this.launchTimeout,
@@ -247,6 +255,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 					).finally(() => tracker?.stop());
 				},
 			);
+
 			if (kernelExitedError) {
 				throw kernelExitedError;
 			}
@@ -271,6 +280,7 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 						),
 					),
 			]);
+
 			if (kernelExitedError) {
 				throw kernelExitedError;
 			}
@@ -395,14 +405,17 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			const kernelSpec = JSON.parse(
 				JSON.stringify(this.kernelConnectionMetadata.kernelSpec),
 			) as any;
+
 			const resources =
 				"resources" in kernelSpec ? kernelSpec.resources : {};
+
 			return {
 				...kernelSpec,
 				resources,
 			};
 		}
 		logger.error("Fetching kernel spec from raw kernel using JLab API");
+
 		return this.realKernel!.spec;
 	}
 	public sendShellMessage<T extends KernelMessage.ShellMessageType>(
@@ -450,8 +463,10 @@ export class RawKernelConnection implements Kernel.IKernelConnection {
 			"message"
 		) {
 			logger.info(`Interrupting kernel with a shell message`);
+
 			const jupyterLab =
 				require("@jupyterlab/services") as typeof import("@jupyterlab/services");
+
 			const msg = jupyterLab.KernelMessage.createMessage({
 				msgType: "interrupt_request" as any,
 				channel: "shell",
@@ -659,6 +674,7 @@ async function postStartKernel(
 		);
 	} catch (ex) {
 		logger.error("Failed waiting for Raw Session to be ready", ex);
+
 		if (isCancellationError(ex) || token.isCancellationRequested) {
 			throw new CancellationError();
 		}
@@ -679,14 +695,18 @@ async function postStartKernel(
 	// Lets try this and see (hence the telemetry to see the cost of this check).
 	// We know 10s is way too slow, see https://github.com/microsoft/vscode-jupyter/issues/8917
 	const gotIoPubMessage = createDeferred<boolean>();
+
 	const kernelInfoRequestHandled = createDeferred<boolean>();
+
 	const iopubHandler = () => gotIoPubMessage.resolve(true);
 	gotIoPubMessage.promise.catch(noop);
 	kernelInfoRequestHandled.promise.catch(noop);
 	kernel.iopubMessage.connect(iopubHandler);
+
 	const sendKernelInfoRequestOnControlChannel = () => {
 		const jupyterLab =
 			require("@jupyterlab/services") as typeof import("@jupyterlab/services");
+
 		const msg = jupyterLab.KernelMessage.createMessage({
 			msgType: "kernel_info_request",
 			// Cast to Shell, js code only allows sending kernel info request on shell channel
@@ -702,17 +722,22 @@ async function postStartKernel(
 			.done.then(() => kernelInfoRequestHandled.resolve(true))
 			.catch(noop);
 	};
+
 	const sendKernelInfoRequestOnShellChannel = () => {
 		kernel
 			.requestKernelInfo()
 			.then(() => kernelInfoRequestHandled.resolve(true))
 			.catch(noop);
 	};
+
 	try {
 		const stopWatch = new StopWatch();
+
 		let attempts = 0;
+
 		while (stopWatch.elapsedTime < launchTimeout * 1000) {
 			attempts += 1;
+
 			try {
 				logger.debug("Sending request for kernelInfo");
 				// In jupyter_server/services/kernels/connection/channels.py,
@@ -731,6 +756,7 @@ async function postStartKernel(
 				);
 			} catch (ex) {
 				logger.error("Failed to request kernel info", ex);
+
 				throw ex;
 			}
 
@@ -739,9 +765,11 @@ async function postStartKernel(
 				kernelInfoRequestHandled.completed
 			) {
 				logger.trace(`Got response for requestKernelInfo`);
+
 				break;
 			} else {
 				logger.trace(`Did not get a response for requestKernelInfo`);
+
 				continue;
 			}
 		}
@@ -816,6 +844,7 @@ function newRawKernel(
 	// Dummy websocket we give to the underlying real kernel
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let socketInstance: IKernelSocket & IWebSocketLike & IDisposable;
+
 	class RawSocketWrapper extends RawSocket {
 		constructor() {
 			super(kernelProcess.connection, jupyterLabSerialize.serialize);
@@ -852,6 +881,7 @@ function newRawKernel(
 		username,
 		model,
 	});
+
 	if (
 		workspace
 			.getConfiguration("jupyter")
@@ -883,6 +913,7 @@ async function waitForReady(
 	);
 	// When our kernel connects and gets a status message it triggers the ready promise
 	const deferred = createDeferred<"connected">();
+
 	const handler = (_: unknown, status: Kernel.ConnectionStatus) => {
 		if (status == "connected") {
 			logger.trace("Raw session connected");
@@ -892,6 +923,7 @@ async function waitForReady(
 		}
 	};
 	kernel.connectionStatusChanged.connect(handler);
+
 	if (kernel.connectionStatus === "connected") {
 		logger.trace("Raw session connected");
 		deferred.resolve(kernel.connectionStatus);

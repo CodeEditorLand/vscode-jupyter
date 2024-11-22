@@ -23,7 +23,9 @@ type CachedKernelInfo = {
 	// Time when this was stored in mememto.
 	age: number;
 };
+
 const KEY = "KERNEL_INFO";
+
 const CACHE_EXPIRY_IN_MS = 1000 * 60 * 60 * 24 * 2;
 
 export async function getKernelInfo(
@@ -47,6 +49,7 @@ export async function getKernelInfo(
 		protocol_version: "",
 		status: "ok",
 	};
+
 	if (!session.kernel) {
 		return;
 	}
@@ -86,6 +89,7 @@ export async function getKernelInfo(
 			workspaceMemento,
 			kernelConnectionMetadata,
 		);
+
 		if (cachedInfo) {
 			promises.push(Promise.resolve(cachedInfo));
 		} else {
@@ -93,6 +97,7 @@ export async function getKernelInfo(
 		}
 	}
 	const content = await Promise.race(promises);
+
 	if (content === defaultResponse) {
 		logger.warn(
 			"Failed to Kernel info in a timely manner, defaulting to empty info!",

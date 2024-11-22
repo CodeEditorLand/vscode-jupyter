@@ -57,6 +57,7 @@ export class ExportInterpreterFinder {
 			} else {
 				// Give the user a chance to install nbconvert into the selected jupyter interpreter
 				await this.dependencyManager.installMissingDependencies();
+
 				if (
 					await this.checkNotebookInterpreter(
 						selectedJupyterInterpreter,

@@ -26,6 +26,7 @@ export class InstallPythonControllerCommands
 	implements IExtensionSyncActivationService
 {
 	private installedOnceBefore?: boolean;
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
@@ -65,9 +66,11 @@ export class InstallPythonControllerCommands
 		sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, {
 			action: "displayed",
 		});
+
 		const buttons = this.installedOnceBefore
 			? [Common.install, Common.reload]
 			: [Common.install];
+
 		const selection = await window.showErrorMessage(
 			DataScience.pythonNotInstalled,
 			{ modal: true },
@@ -118,6 +121,7 @@ export class InstallPythonControllerCommands
 			const reporter = this.progressReporter.createProgressIndicator(
 				DataScience.installingPythonExtension,
 			);
+
 			try {
 				await this.extensionChecker.directlyInstallPythonExtension();
 
@@ -125,6 +129,7 @@ export class InstallPythonControllerCommands
 				// Note extensions.installExtension seems to return "mostly" after the install is done, but at that
 				// point we don't see it installed via the checker and don't have the API so wait for it here
 				const hooked = "hooked";
+
 				const hookResult = await raceTimeout(
 					60_000,
 					"timeout",

@@ -79,7 +79,9 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 		options: KernelSessionCreationOptions,
 	): Promise<IJupyterKernelSession> {
 		const disposables: IDisposable[] = [];
+
 		let progressReporter: IDisposable | undefined;
+
 		const createProgressReporter = () => {
 			if (options.ui.disableUI || progressReporter) {
 				return;
@@ -93,6 +95,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			);
 			disposables.push(progressReporter);
 		};
+
 		if (options.ui.disableUI) {
 			options.ui.onDidChangeDisableUI(
 				createProgressReporter,
@@ -106,9 +109,11 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 
 		// Check to see if we support ipykernel or not
 		const disposablesIfAnyErrors: IDisposable[] = [];
+
 		const idleTimeout = this.configService.getSettings(
 			options.resource,
 		).jupyterLaunchTimeout;
+
 		try {
 			connection = isRemoteConnection(options.kernelConnection)
 				? await raceCancellationError(
@@ -150,6 +155,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 				idleTimeout,
 				connection,
 			});
+
 			if (options.token.isCancellationRequested) {
 				// Even if this is a remote kernel, we should shut this down as it's not needed.
 				await session.shutdown().catch(noop);
@@ -167,7 +173,9 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 				this.kernelService,
 				options.creator,
 			);
+
 			const disposed = session.disposed;
+
 			const onDidDisposeSession = () => {
 				sessionManager.dispose();
 				disposed.disconnect(onDidDisposeSession);
@@ -179,8 +187,10 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 						.finally(() => wrapperSession.dispose()),
 			});
 			session.disposed.connect(onDidDisposeSession);
+
 			const disposable = wrapperSession.onDidDispose(onDidDisposeSession);
 			this.asyncDisposables.push(disposable);
+
 			return wrapperSession;
 		} catch (ex) {
 			dispose(disposablesIfAnyErrors);
@@ -233,6 +243,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 				"Failed to fetch running kernels from remote server, connection may be outdated or remote server may be unreachable",
 				ex,
 			);
+
 			throw new RemoteJupyterServerConnectionError(
 				options.kernelConnection.baseUrl,
 				options.kernelConnection.serverProviderHandle,
@@ -283,6 +294,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			throw new CancellationError();
 		}
 		let session: Session.ISessionConnection;
+
 		try {
 			// Don't immediately assume this kernel is valid. Try creating a session with it first.
 			if (
@@ -337,6 +349,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			// Don't swallow known exceptions.
 			if (exc instanceof BaseError) {
 				log("Failed to change kernel, re-throwing", exc);
+
 				throw exc;
 			} else {
 				log("Failed to change kernel", exc);
@@ -361,6 +374,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 			options.connection,
 			options.resource,
 		);
+
 		let sessionPath = remoteSessionOptions?.path;
 
 		// If kernelName is empty this can cause problems for servers that don't
@@ -379,6 +393,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 		// If its empty Jupyter will default to the relative path of the notebook.
 
 		let sessionName: string;
+
 		if (remoteSessionOptions?.name) {
 			sessionName = remoteSessionOptions.name;
 		} else {
@@ -417,6 +432,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 					},
 				}),
 			);
+
 			if (!session.kernel) {
 				throw new JupyterSessionStartError(
 					new Error(`No kernel created`),
@@ -428,6 +444,7 @@ export class JupyterKernelSessionFactory implements IKernelSessionFactory {
 					session?.kernel?.id || "",
 				),
 			);
+
 			return session;
 		} catch (ex) {
 			if (ex instanceof JupyterSessionStartError) {
@@ -445,6 +462,7 @@ function getRemoteIPynbSuffix(): string {
 function generateBackingIPyNbFileName(resource: Resource) {
 	// Generate a more descriptive name
 	const suffix = `${getRemoteIPynbSuffix()}${uuid()}.ipynb`;
+
 	return resource
 		? `${urlPath.basename(resource, ".ipynb")}${suffix}`
 		: `${DataScience.defaultNotebookName}${suffix}`;

@@ -70,6 +70,7 @@ declare module "./api" {
 		readonly displayName?: string;
 		readonly detail?: string;
 		onDidChangeHandles?: Event<void>;
+
 		getQuickPickEntryItems?():
 			| Promise<
 					(QuickPickItem & {

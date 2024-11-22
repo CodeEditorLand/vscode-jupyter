@@ -40,6 +40,7 @@ export class HoverProvider
 	private stopWatch = new StopWatch();
 	private delayer = new Delayer<void>(300);
 	private onDidChangeNotebookCellExecutionStateHandler: vscode.Disposable;
+
 	constructor(
 		@inject(IJupyterVariables)
 		@named(Identifiers.KERNEL_VARIABLES)
@@ -73,6 +74,7 @@ export class HoverProvider
 	public dispose() {
 		this.delayer.dispose();
 		this.onDidChangeNotebookCellExecutionStateHandler.dispose();
+
 		if (this.hoverProviderRegistration) {
 			this.hoverProviderRegistration.dispose();
 		}
@@ -85,7 +87,9 @@ export class HoverProvider
 				return;
 			}
 			const size = this.runFiles.size;
+
 			const metadata = getInteractiveCellMetadata(e.cell);
+
 			if (metadata !== undefined) {
 				this.runFiles.add(metadata.interactive.uristring);
 			}
@@ -107,6 +111,7 @@ export class HoverProvider
 		token: vscode.CancellationToken,
 	): Promise<vscode.Hover | undefined> {
 		this.stopWatch.reset();
+
 		const result = await raceTimeout(
 			300,
 			this.getVariableHover(document, position, token),
@@ -118,6 +123,7 @@ export class HoverProvider
 				isResultNull: !!result,
 			},
 		);
+
 		return result;
 	}
 
@@ -135,11 +141,14 @@ export class HoverProvider
 	): Promise<vscode.Hover | undefined> {
 		// Make sure to fail as soon as the cancel token is signaled
 		const range = document.getWordRangeAtPosition(position);
+
 		if (range) {
 			const word = document.getText(range);
+
 			if (word) {
 				// See if we have any matching notebooks
 				const notebooks = this.getMatchingKernels(document);
+
 				if (notebooks.length) {
 					// Just use the first one to reply if more than one.
 					const attributes = await raceCancellation(
@@ -155,7 +164,9 @@ export class HoverProvider
 							),
 						),
 					);
+
 					const entries = Object.entries(attributes || {});
+
 					if (entries.length > 0) {
 						const asMarkdown =
 							entries.reduce(
@@ -163,9 +174,11 @@ export class HoverProvider
 									accum + `${entry[0]}: ${entry[1]}\n`,
 								"```\n",
 							) + "```";
+
 						const result = {
 							contents: [new vscode.MarkdownString(asMarkdown)],
 						};
+
 						return result;
 					}
 				}
@@ -179,6 +192,7 @@ export class HoverProvider
 		let notebookUri = this.interactiveProvider.get(
 			document.uri,
 		)?.notebookUri;
+
 		if (!notebookUri) {
 			return [];
 		}
@@ -187,10 +201,12 @@ export class HoverProvider
 			.filter((item) => notebookUri?.toString() === item.uri.toString())
 			.forEach((item) => {
 				const kernel = this.kernelProvider.get(item);
+
 				if (kernel) {
 					kernels.add(kernel);
 				}
 			});
+
 		return Array.from(kernels);
 	}
 }

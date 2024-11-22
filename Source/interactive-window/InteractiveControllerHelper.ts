@@ -78,6 +78,7 @@ export class InteractiveControllerHelper
 				preferredConnection,
 				viewType,
 			);
+
 			if (controller) {
 				return controller;
 			}
@@ -89,9 +90,11 @@ export class InteractiveControllerHelper
 				this.workspaceMemento.get<KernelConnectionMetadata>(
 					MostRecentKernelSelectedKey,
 				);
+
 			const controller = metadata
 				? this.controllerRegistration.get(metadata, viewType)
 				: undefined;
+
 			if (controller) {
 				return controller;
 			}
@@ -161,6 +164,7 @@ export class InteractiveControllerHelper
 		const found = this.controllerRegistration.registered.find(
 			(item) => item.id === kernel.controller.id,
 		);
+
 		if (!found) {
 			throw Error(
 				`Controller ${kernel.controller.id} not found or not yet created`,
@@ -204,16 +208,20 @@ async function createActiveInterpreterController(
 	registration: IControllerRegistration,
 ): Promise<IVSCodeNotebookController | undefined> {
 	const pythonInterpreter = await interpreters.getActiveInterpreter(resource);
+
 	if (pythonInterpreter) {
 		// Ensure that the controller corresponding to the active interpreter
 		// has been successfully created
 		const spec = await createInterpreterKernelSpec(pythonInterpreter);
+
 		const metadata = PythonKernelConnectionMetadata.create({
 			kernelSpec: spec,
 			interpreter: pythonInterpreter,
 			id: getKernelId(spec, pythonInterpreter),
 		});
+
 		const controllers = registration.addOrUpdate(metadata, [viewType]);
+
 		const controller = controllers[0]; // Should only create one because only one view type
 		registration.trackActiveInterpreterControllers(controllers);
 		logger.ci(
@@ -221,6 +229,7 @@ async function createActiveInterpreterController(
 				controller.id
 			} created for View ${viewType} with resource ${getDisplayPath(resource)}`,
 		);
+
 		return controller;
 	}
 }
@@ -231,5 +240,6 @@ async function isActiveInterpreter(
 	interpreters: IInterpreterService,
 ) {
 	const activeInterpreter = await interpreters.getActiveInterpreter(resource);
+
 	return activeInterpreter?.id === metadata.interpreter?.id;
 }

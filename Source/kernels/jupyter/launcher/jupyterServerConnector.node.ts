@@ -16,6 +16,7 @@ import { IJupyterServerProvider } from "../types";
 @injectable()
 export class JupyterServerConnector implements IJupyterServerConnector {
 	private readonly startupUi = new DisplayOptions(true);
+
 	constructor(
 		@inject(IJupyterServerProvider)
 		private readonly jupyterServerProvider: IJupyterServerProvider,
@@ -36,12 +37,14 @@ export class JupyterServerConnector implements IJupyterServerConnector {
 			}
 		});
 		options.ui = this.startupUi;
+
 		if (this.extensionChecker.isPythonExtensionInstalled) {
 			return this.jupyterServerProvider
 				.getOrStartServer(options)
 				.finally(() => handler.dispose());
 		} else {
 			handler.dispose();
+
 			if (!this.startupUi.disableUI) {
 				await this.extensionChecker.showPythonExtensionInstallRequiredPrompt();
 			}

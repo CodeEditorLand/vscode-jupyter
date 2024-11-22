@@ -23,6 +23,7 @@ import { JupyterInterpreterService } from "./jupyterInterpreterService.node";
 @injectable()
 export class Activation implements IExtensionSyncActivationService {
 	private notebookOpened = false;
+
 	constructor(
 		@inject(JupyterInterpreterService)
 		private readonly jupyterInterpreterService: JupyterInterpreterService,

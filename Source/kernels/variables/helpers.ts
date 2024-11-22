@@ -42,8 +42,11 @@ export type DataFrameSplitFormat = {
 
 export function parseDataFrame(df: DataFrameSplitFormat) {
 	const rowIndexValues = df.index;
+
 	const columns = df.columns;
+
 	const rowData = df.data;
+
 	const data = rowData.map((row, index) => {
 		const rowData: Record<string, unknown> = {
 			index: rowIndexValues[index],
@@ -51,7 +54,9 @@ export function parseDataFrame(df: DataFrameSplitFormat) {
 		columns.forEach((column, columnIndex) => {
 			rowData[column] = row[columnIndex];
 		});
+
 		return rowData;
 	});
+
 	return { data };
 }

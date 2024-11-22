@@ -35,6 +35,7 @@ import { LocalKernelSpecFinderBase } from "./localKernelSpecFinderBase.node";
 
 function localKernelSpecsCacheKey() {
 	const LocalKernelSpecsCacheKey = "LOCAL_KERNEL_SPECS_CACHE_KEY_V_2023_2";
+
 	return `${LocalKernelSpecsCacheKey}:${env.appHost}:${env.remoteName || ""}`;
 }
 
@@ -52,6 +53,7 @@ export class LocalKnownPathKernelSpecFinder
 		string,
 		LocalKernelSpecConnectionMetadata
 	>();
+
 	constructor(
 		@inject(IFileSystemNode) fs: IFileSystemNode,
 		@inject(JupyterPaths) jupyterPaths: JupyterPaths,
@@ -87,6 +89,7 @@ export class LocalKnownPathKernelSpecFinder
 	}
 	private async refreshData() {
 		const cancellation = new CancellationTokenSource();
+
 		try {
 			await this.listKernelSpecs(cancellation.token);
 		} finally {
@@ -105,21 +108,26 @@ export class LocalKnownPathKernelSpecFinder
 	): Promise<LocalKernelSpecConnectionMetadata[]> {
 		const fn = async () => {
 			const newKernelSpecs = await this.findKernelSpecs(cancelToken);
+
 			if (cancelToken.isCancellationRequested) {
 				return [];
 			}
 			const oldSortedKernels = Array.from(this._kernels.values()).sort(
 				(a, b) => a.id.localeCompare(b.id),
 			);
+
 			const newSortedKernels = newKernelSpecs.sort((a, b) =>
 				a.id.localeCompare(b.id),
 			);
+
 			const newKernelIds = new Set(newKernelSpecs.map((k) => k.id));
+
 			const deletedKernels = oldSortedKernels.filter(
 				(k) => !newKernelIds.has(k.id),
 			);
 
 			newKernelSpecs.forEach((k) => this._kernels.set(k.id, k));
+
 			if (deletedKernels.length) {
 				logger.debug(
 					`Local kernel spec connection deleted ${deletedKernels.map((item) => `${item.kind}:'${item.id}'`)}`,
@@ -139,8 +147,10 @@ export class LocalKnownPathKernelSpecFinder
 			}
 			return newKernelSpecs;
 		};
+
 		const promise = fn();
 		this.promiseMonitor.push(promise);
+
 		return promise;
 	}
 	private async findKernelSpecs(
@@ -149,6 +159,7 @@ export class LocalKnownPathKernelSpecFinder
 		// Find all the possible places to look for this resource
 		const paths =
 			await this.jupyterPaths.getKernelSpecRootPaths(cancelToken);
+
 		if (cancelToken.isCancellationRequested) {
 			return [];
 		}
@@ -160,6 +171,7 @@ export class LocalKnownPathKernelSpecFinder
 				),
 			),
 		);
+
 		if (cancelToken.isCancellationRequested) {
 			return [];
 		}
@@ -171,6 +183,7 @@ export class LocalKnownPathKernelSpecFinder
 		// There was also an old bug where the same item would be registered more than once. Eliminate these dupes
 		// too.
 		const unique: LocalKernelSpecConnectionMetadata[] = [];
+
 		const byDisplayName = new Map<string, IJupyterKernelSpec>();
 
 		await Promise.all(
@@ -182,10 +195,12 @@ export class LocalKnownPathKernelSpecFinder
 							kernelSpecFile,
 							cancelToken,
 						);
+
 					if (!kernelSpec || cancelToken.isCancellationRequested) {
 						return;
 					}
 					sendKernelSpecTelemetry(kernelSpec, "local");
+
 					if (kernelSpec.metadata?.originalSpecFile) {
 						if (
 							originalSpecFiles.has(
@@ -205,17 +220,20 @@ export class LocalKnownPathKernelSpecFinder
 						originalSpecFiles.add(kernelSpec.specFile);
 					}
 					const existing = byDisplayName.get(kernelSpec.display_name);
+
 					const item = LocalKernelSpecConnectionMetadata.create({
 						kernelSpec,
 						interpreter: undefined,
 						id: getKernelId(kernelSpec),
 					});
+
 					if (
 						existing &&
 						existing.executable !== kernelSpec.executable
 					) {
 						// This item is a dupe but has a different path to start the exe
 						unique.push(item);
+
 						if (
 							!areObjectsWithUrisTheSame(
 								item,
@@ -229,6 +247,7 @@ export class LocalKnownPathKernelSpecFinder
 					} else if (!existing) {
 						unique.push(item);
 						byDisplayName.set(kernelSpec.display_name, kernelSpec);
+
 						if (
 							!areObjectsWithUrisTheSame(
 								item,
@@ -249,6 +268,7 @@ export class LocalKnownPathKernelSpecFinder
 						`Failed to load kernelSpec for ${kernelSpecFile}`,
 						ex,
 					);
+
 					return;
 				}
 			}),

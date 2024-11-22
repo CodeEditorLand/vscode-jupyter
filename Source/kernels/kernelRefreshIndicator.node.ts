@@ -25,6 +25,7 @@ import { IKernelFinder } from "./types";
 export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	private refreshedOnceBefore: boolean = false;
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 		@inject(IPythonExtensionChecker)
@@ -63,10 +64,12 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 		const displayProgress = () => {
 			const id = Date.now().toString();
 			logger.debug(`Start refreshing Kernel Picker (${id})`);
+
 			const taskNb =
 				notebooks.createNotebookControllerDetectionTask(
 					JupyterNotebookView,
 				);
+
 			const taskIW = notebooks.createNotebookControllerDetectionTask(
 				InteractiveWindowView,
 			);
@@ -85,6 +88,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				this.disposables,
 			);
 		};
+
 		if (this.kernelFinder.status === "discovering") {
 			return displayProgress();
 		}
@@ -109,6 +113,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			return;
 		}
 		this.refreshedOnceBefore = true;
+
 		let refreshedInterpreters = false;
 		window.onDidChangeActiveNotebookEditor(
 			(e) => {
@@ -138,7 +143,9 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 		);
 
 		let kernelProgress: DisposableStore | undefined;
+
 		let id: string = "";
+
 		const createProgressIndicator = () => {
 			if (kernelProgress && !kernelProgress.isDisposed) {
 				return kernelProgress;
@@ -154,6 +161,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 				),
 			);
 			this.disposables.push(kernelProgress);
+
 			return kernelProgress;
 		};
 

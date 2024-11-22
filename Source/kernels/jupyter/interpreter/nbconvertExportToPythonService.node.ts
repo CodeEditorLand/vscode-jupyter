@@ -57,6 +57,7 @@ export class NbConvertExportToPythonService {
 				// converted something. If it's zero size then just raise an error
 				if (output.stdout === "") {
 					logger.error("nbconvert zero size output");
+
 					throw new Error(output.stderr);
 				} else {
 					return output.stdout;

@@ -28,6 +28,7 @@ export async function populateTelemetryWithErrorInfo(
 		!FetchError &&
 		error?.name === "TypeError" &&
 		error?.message === "Failed to fetch";
+
 	const errorType = isBrowserFetchError ? TypeError : FetchError;
 
 	// In the web we might receive other errors besides `TypeError: Failed to fetch`.
@@ -41,6 +42,7 @@ export async function populateTelemetryWithErrorInfo(
 	}
 
 	props.stackTrace = serializeStackTrace(error);
+
 	if (typeof error === "string") {
 		// Helps us determine that we are rejecting with errors in some places, in which case we aren't getting meaningful errors/data.
 		props.failureSubCategory = "errorisstring";
@@ -49,11 +51,14 @@ export async function populateTelemetryWithErrorInfo(
 	const stdErr = (error as BaseError).stdErr
 		? (error as BaseError).stdErr
 		: error.stack || "";
+
 	if (!stdErr) {
 		return;
 	}
 	props.failureSubCategory = props.failureSubCategory || getErrorTags(stdErr);
+
 	const info = getLastFrameFromPythonTraceback(stdErr);
+
 	if (!info) {
 		return;
 	}
@@ -88,10 +93,13 @@ export function parseStack(ex: Error) {
 function serializeStackTrace(ex: Error): string {
 	// We aren't showing the error message (ex.message) since it might contain PII.
 	let trace = "";
+
 	for (const frame of parseStack(ex)) {
 		const filename = frame.getFileName();
+
 		if (filename) {
 			const lineno = frame.getLineNumber();
+
 			const colno = frame.getColumnNumber();
 			trace += `\n\tat ${getCallSite(frame)} ${filename}:${lineno}:${colno}`;
 		} else {
@@ -105,6 +113,7 @@ function serializeStackTrace(ex: Error): string {
 
 function getCallSite(frame: stackTrace.StackFrame) {
 	const parts: string[] = [];
+
 	if (
 		typeof frame.getTypeName() === "string" &&
 		frame.getTypeName().length > 0
@@ -136,6 +145,7 @@ function isErrorType<T>(error: Error, expectedType: Constructor<T>) {
 	// we should log the error and return false.
 	if (!expectedType) {
 		console.error("Error type is not defined", error);
+
 		return false;
 	}
 	if (error instanceof expectedType) {

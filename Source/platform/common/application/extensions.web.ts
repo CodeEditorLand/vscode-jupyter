@@ -20,15 +20,18 @@ export class Extensions implements IExtensions {
 		displayName: string;
 	} {
 		stack = stack || new Error().stack;
+
 		if (stack) {
 			const jupyterExtRoot = extensions
 				.getExtension(JVSC_EXTENSION_ID)!
 				.extensionUri.toString()
 				.toLowerCase();
+
 			const frames = stack
 				.split("\n")
 				.map((f) => {
 					const result = /\((.*)\)/.exec(f);
+
 					if (result) {
 						return result[1];
 					}
@@ -41,6 +44,7 @@ export class Extensions implements IExtensions {
 				) as string[];
 			parseStack(new Error("Ex")).forEach((item) => {
 				const fileName = item.getFileName();
+
 				if (
 					fileName &&
 					!fileName.toLowerCase().startsWith(jupyterExtRoot)
@@ -48,12 +52,14 @@ export class Extensions implements IExtensions {
 					frames.push(fileName);
 				}
 			});
+
 			for (const frame of frames) {
 				const matchingExt = extensions.all.find(
 					(ext) =>
 						ext.id !== JVSC_EXTENSION_ID &&
 						frame.startsWith(ext.extensionUri.toString()),
 				);
+
 				if (matchingExt) {
 					return {
 						extensionId: matchingExt.id,

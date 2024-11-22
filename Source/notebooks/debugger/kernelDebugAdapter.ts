@@ -17,10 +17,12 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	// Dump content of given cell into a tmp file and return path to file.
 	protected override async dumpCell(index: number): Promise<void> {
 		const cell = this.notebookDocument.cellAt(index);
+
 		try {
 			const response = await this.session.customRequest("dumpCell", {
 				code: cell.document.getText().replace(/\r\n/g, "\n"),
 			});
+
 			const norm = path.normalize(
 				(response as IDumpCellResponse).sourcePath,
 			);
@@ -36,8 +38,10 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		endLine?: number;
 	}): void {
 		const source = location.source;
+
 		if (source && source.path) {
 			const mapping = this.cellToFile.get(source.path);
+
 			if (mapping) {
 				source.path = mapping;
 			}

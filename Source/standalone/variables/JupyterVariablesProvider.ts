@@ -54,7 +54,9 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		}
 
 		const notebookUri = kernel.notebook.uri.toString();
+
 		const kernelWasRunning = this.runningKernels.has(notebookUri);
+
 		if (kernel.status === "idle" && !kernelWasRunning) {
 			this.runningKernels.add(notebookUri);
 		} else if (
@@ -73,7 +75,9 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		start: number,
 	) {
 		let parentKey = "";
+
 		const parentDescription = parent as IVariableDescription;
+
 		if (parentDescription) {
 			parentKey = `${parentDescription.name}.${parentDescription.propertyChain.join(".")}[[${start}`;
 		}
@@ -92,6 +96,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		}
 
 		const kernel = this.kernelProvider.get(notebook);
+
 		if (
 			!kernel ||
 			kernel.status === "dead" ||
@@ -108,6 +113,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 			parent,
 			start,
 		);
+
 		let results = this.variableResultCache.getResults(
 			executionCount,
 			cacheKey,
@@ -115,6 +121,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 
 		if (parent) {
 			const parentDescription = parent as IVariableDescription;
+
 			if (!results && parentDescription.getChildren) {
 				const variables = await parentDescription.getChildren(
 					start,
@@ -194,6 +201,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		token: CancellationToken,
 	): AsyncIterable<IRichVariableResult> {
 		const kernel = this.kernelProvider.get(notebook);
+
 		const results = this.provideVariables(
 			notebook,
 			parent,
@@ -201,6 +209,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 			start,
 			token,
 		);
+
 		for await (const result of results) {
 			if (
 				kernel &&
@@ -211,10 +220,12 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 					notebook.uri.toString(),
 					result.variable,
 				);
+
 				const executionCount =
 					this.kernelProvider.getKernelExecution(
 						kernel,
 					).executionCount;
+
 				let summary = this.variableSummaryCache.getResults(
 					executionCount,
 					cacheKey,
@@ -267,13 +278,16 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		kernel: IKernel,
 	): VariablesResult {
 		const indexedChildrenCount = result.count ?? 0;
+
 		const hasNamedChildren = !!result.hasNamedChildren;
+
 		const variable = {
 			getChildren: (start: number, token: CancellationToken) =>
 				this.getChildren(variable, start, kernel, token),
 			expression: createExpression(result.root, result.propertyChain),
 			...result,
 		} as Variable;
+
 		return { variable, hasNamedChildren, indexedChildrenCount };
 	}
 
@@ -284,6 +298,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		token: CancellationToken,
 	): Promise<IVariableDescription[]> {
 		const parent = variable as IVariableDescription;
+
 		return await this.variables.getAllVariableDiscriptions(
 			kernel,
 			parent,
@@ -298,6 +313,7 @@ function createExpression(
 	propertyChain: (string | number)[],
 ): string {
 	let expression = root;
+
 	for (const property of propertyChain) {
 		if (typeof property === "string") {
 			expression += `.${property}`;

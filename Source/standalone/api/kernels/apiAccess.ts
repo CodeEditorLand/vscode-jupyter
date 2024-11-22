@@ -28,7 +28,9 @@ const extensionApiAccess = new Map<
 	string,
 	ReturnType<typeof requestKernelAccessImpl>
 >();
+
 const extensionsTriedAccessingApi = new Set<string>();
+
 const onDidChange = new EventEmitter<void>();
 trackDisposable(onDidChange);
 
@@ -54,6 +56,7 @@ export async function requestApiAccess(
 		return { accessAllowed: true };
 	}
 	let apiAccess = extensionApiAccess.get(extensionId);
+
 	if (!apiAccess) {
 		apiAccess = requestKernelAccessImpl(extensionId);
 		extensionApiAccess.set(extensionId, apiAccess);
@@ -76,6 +79,7 @@ async function requestKernelAccessImpl(
 	extensionId: string,
 ): Promise<{ result: "allowed" | "denied" | "learnMore" | "cancelled" }> {
 	const accessInfo = await getAccessForExtensionsFromStore();
+
 	if (accessInfo.get(extensionId) === true) {
 		return { result: "allowed" };
 	}
@@ -83,18 +87,23 @@ async function requestKernelAccessImpl(
 		logger.warn(
 			`Kernel API access already revoked for extension ${extensionId}`,
 		);
+
 		return { result: "denied" };
 	}
 	const displayName =
 		extensions.getExtension(extensionId)?.packageJSON?.displayName;
+
 	if (!displayName) {
 		logger.error(
 			`Kernel API access revoked, as extension ${extensionId} does not exist!`,
 		);
+
 		return { result: "denied" };
 	}
 	const allow = l10n.t("Allow");
+
 	const deny = l10n.t("Deny");
+
 	const result = await window.showInformationMessage(
 		l10n.t(
 			"Do you want to grant Kernel access to the extension {0} ({1})?",
@@ -125,12 +134,15 @@ async function requestKernelAccessImpl(
 	switch (result) {
 		case allow:
 			return { result: "allowed" };
+
 		case Common.learnMore:
 			return { result: "learnMore" };
+
 		case deny: {
 			logger.error(
 				`Kernel API access revoked for extension ${extensionId}`,
 			);
+
 			return { result: "denied" };
 		}
 		default:
@@ -140,6 +152,7 @@ async function requestKernelAccessImpl(
 
 export async function getExtensionAccessListForManagement() {
 	const extensionsWithoutAccess = new Set<string>();
+
 	const [extensions] = await Promise.all([
 		getAccessForExtensionsFromStore().then(
 			(accessInfo) => new Map(accessInfo),
@@ -158,10 +171,12 @@ export async function getExtensionAccessListForManagement() {
 	extensionsTriedAccessingApi.forEach((extensionId) =>
 		extensions.set(extensionId, extensions.get(extensionId) === true),
 	);
+
 	return extensions;
 }
 
 const apiAccessSecretKey = "API.Access";
+
 let cachedAccessInfo: Map<string, boolean> | undefined;
 
 async function getAccessForExtensionsFromStore(
@@ -169,6 +184,7 @@ async function getAccessForExtensionsFromStore(
 ): Promise<Map<string, boolean>> {
 	const context =
 		ServiceContainer.instance.get<IExtensionContext>(IExtensionContext);
+
 	if (context.extensionMode === ExtensionMode.Test) {
 		// In our tests always allow access.
 		return new Map<string, boolean>();
@@ -192,17 +208,21 @@ async function getAccessForExtensionsFromStore(
 		return cachedAccessInfo;
 	}
 	let json: string | undefined = "";
+
 	try {
 		json = await context.secrets.get(apiAccessSecretKey);
+
 		if (!json || json.length === 0) {
 			return new Map<string, boolean>();
 		}
 		cachedAccessInfo = new Map<string, boolean>(
 			Object.entries(JSON.parse(json)),
 		);
+
 		return cachedAccessInfo;
 	} catch (ex) {
 		logger.error(`Failed to parse API access information ${json}`, ex);
+
 		return new Map<string, boolean>();
 	}
 }
@@ -227,8 +247,10 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 		cachedAccessInfo = new Map(
 			extensionIds.map((extensionId) => [extensionId, true]),
 		);
+
 		const context =
 			ServiceContainer.instance.get<IExtensionContext>(IExtensionContext);
+
 		if (context.extensionMode === ExtensionMode.Test) {
 			return;
 		}
@@ -254,14 +276,17 @@ async function updateIndividualExtensionAccessInStore(
 	return (updatePromise = updatePromise.then(async () => {
 		const context =
 			ServiceContainer.instance.get<IExtensionContext>(IExtensionContext);
+
 		if (context.extensionMode === ExtensionMode.Test) {
 			return;
 		}
 		const apiAccess = await getAccessForExtensionsFromStore(true);
+
 		if (accessAllowed === apiAccess.get(extensionId)) {
 			return;
 		}
 		apiAccess.set(extensionId, accessAllowed);
+
 		try {
 			await context.secrets.store(
 				apiAccessSecretKey,

@@ -24,6 +24,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		pat: string,
 		options?: { cwd: string; dot?: boolean },
 	) => Promise<string[]>;
+
 	constructor() {
 		super();
 		this.globFiles = promisify(glob);
@@ -38,12 +39,15 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 	): Promise<TemporaryFile> {
 		const suffix =
 			typeof options === "string" ? options : options.fileExtension;
+
 		const prefix =
 			options && typeof options === "object" ? options.prefix : undefined;
+
 		const opts: tmp.FileOptions = {
 			postfix: suffix,
 			prefix,
 		};
+
 		return new Promise<TemporaryFile>((resolve, reject) => {
 			tmp.file(opts, (err, filename, _fd, cleanUp) => {
 				if (err) {
@@ -64,6 +68,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 	): Promise<string[]> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let options: any;
+
 		if (cwd) {
 			options = { ...options, cwd };
 		}
@@ -72,6 +77,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		}
 
 		const found = await this.globFiles(globPattern, options);
+
 		return Array.isArray(found) ? found : [];
 	}
 
@@ -80,13 +86,16 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		text: string | Buffer,
 	): Promise<void> {
 		await fs.ensureDir(path.dirname(filename));
+
 		return fs.writeFile(filename, text);
 	}
 
 	override async readFile(uri: Uri): Promise<string> {
 		if (isLocalFile(uri)) {
 			const result = await fs.readFile(getFilePath(uri));
+
 			const data = Buffer.from(result);
+
 			return data.toString(ENCODING);
 		} else {
 			return super.readFile(uri);
@@ -97,6 +106,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		if (isLocalFile(uri)) {
 			if (await this.exists(uri)) {
 				const stat = await this.stat(uri);
+
 				if (stat.type === FileType.Directory) {
 					await new Promise((resolve) =>
 						fs.rm(
@@ -138,6 +148,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		if (isLocalFile(uri)) {
 			const filename = getFilePath(uri);
 			await fs.ensureDir(path.dirname(filename));
+
 			return fs.writeFile(
 				filename,
 				typeof text === "string" ? Buffer.from(text) : text,

@@ -80,6 +80,7 @@ export class JupyterInterpreterSubCommandExecutionService
 	): Promise<boolean> {
 		const interpreter =
 			await this.jupyterInterpreter.getSelectedInterpreter(token);
+
 		if (!interpreter) {
 			return false;
 		}
@@ -93,10 +94,12 @@ export class JupyterInterpreterSubCommandExecutionService
 	): Promise<string> {
 		let interpreter =
 			await this.jupyterInterpreter.getSelectedInterpreter(token);
+
 		if (!interpreter) {
 			// Use current interpreter.
 			interpreter =
 				await this.interpreterService.getActiveInterpreter(undefined);
+
 			if (!interpreter) {
 				// Unlikely scenario, user hasn't selected python, python extension will fall over.
 				// Get user to select something.
@@ -108,6 +111,7 @@ export class JupyterInterpreterSubCommandExecutionService
 				interpreter,
 				token,
 			);
+
 		if (productsNotInstalled.length === 0) {
 			return "";
 		}
@@ -145,6 +149,7 @@ export class JupyterInterpreterSubCommandExecutionService
 				notebookArgs.join(" "),
 			),
 		);
+
 		const executionService =
 			await this.pythonExecutionFactory.createActivatedEnvironment({
 				interpreter: interpreter,
@@ -153,11 +158,13 @@ export class JupyterInterpreterSubCommandExecutionService
 		// We don't want the process to die when the token is cancelled.
 		const spawnOptions = { ...options };
 		spawnOptions.token = undefined;
+
 		const envVars =
 			(await this.activationHelper.getActivatedEnvironmentVariables(
 				undefined,
 				interpreter,
 			)) || process.env;
+
 		const jupyterDataPaths = (
 			process.env["JUPYTER_PATH"] ||
 			envVars["JUPYTER_PATH"] ||
@@ -180,9 +187,11 @@ export class JupyterInterpreterSubCommandExecutionService
 		logger.trace(
 			`Start Jupyter Notebook with PYTHONPATH=${envVars["PYTHONPATH"] || ""}`,
 		);
+
 		const pathVariables = Object.keys(envVars).filter(
 			(key) => key.toLowerCase() === "path",
 		);
+
 		if (pathVariables.length) {
 			const pathValues = pathVariables
 				.map(
@@ -208,6 +217,7 @@ export class JupyterInterpreterSubCommandExecutionService
 	): Promise<JupyterServerInfo[] | undefined> {
 		const interpreter =
 			await this.getSelectedInterpreterAndThrowIfNotAvailable(token);
+
 		const daemon =
 			await this.pythonExecutionFactory.createActivatedEnvironment({
 				interpreter: interpreter,
@@ -215,15 +225,18 @@ export class JupyterInterpreterSubCommandExecutionService
 
 		// We have a small python file here that we will execute to get the server info from all running Jupyter instances
 		const newOptions: SpawnOptions = { mergeStdOutErr: true, token: token };
+
 		const file = path.join(
 			EXTENSION_ROOT_DIR,
 			"pythonFiles",
 			"vscode_datascience_helpers",
 			"getServerInfo.py",
 		);
+
 		const serverInfoString = await daemon.exec([file], newOptions);
 
 		let serverInfos: JupyterServerInfo[];
+
 		try {
 			// Parse out our results, return undefined if we can't suss it out
 			serverInfos = JSON.parse(
@@ -234,6 +247,7 @@ export class JupyterInterpreterSubCommandExecutionService
 				"Failed to parse JSON when getting server info out from getServerInfo.py",
 				err,
 			);
+
 			return;
 		}
 		return serverInfos;
@@ -250,9 +264,11 @@ export class JupyterInterpreterSubCommandExecutionService
 	): Promise<PythonEnvironment> {
 		const interpreter =
 			await this.jupyterInterpreter.getSelectedInterpreter(token);
+
 		if (!interpreter) {
 			const reason =
 				await this.getReasonForJupyterNotebookNotBeingSupported();
+
 			throw new JupyterInstallError(reason);
 		}
 		return interpreter;

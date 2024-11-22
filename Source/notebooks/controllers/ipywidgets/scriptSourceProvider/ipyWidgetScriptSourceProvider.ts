@@ -41,9 +41,11 @@ export class IPyWidgetScriptSourceProvider
 	private readonly scriptProviders: IWidgetScriptSourceProvider[];
 	private get configuredScriptSources(): readonly WidgetCDNs[] {
 		const settings = this.configurationSettings.getSettings(undefined);
+
 		return settings.widgetScriptSources;
 	}
 	private static trackedWidgetModuleNames = new Set<string>();
+
 	constructor(
 		private readonly kernel: IKernel,
 		private readonly localResourceUriConverter: ILocalResourceUriConverter,
@@ -62,6 +64,7 @@ export class IPyWidgetScriptSourceProvider
 	}
 	public async getBaseUrl() {
 		const provider = this.scriptProviders.find((item) => item.getBaseUrl);
+
 		if (!provider) {
 			return;
 		}
@@ -77,6 +80,7 @@ export class IPyWidgetScriptSourceProvider
 				}
 			}),
 		);
+
 		return sources;
 	}
 	/**
@@ -90,9 +94,12 @@ export class IPyWidgetScriptSourceProvider
 
 		// Get script sources in order, if one works, then get out.
 		const scriptSourceProviders = this.scriptProviders.slice();
+
 		let found: WidgetScriptSource = { moduleName };
+
 		while (scriptSourceProviders.length) {
 			const scriptProvider = scriptSourceProviders.shift();
+
 			if (!scriptProvider) {
 				continue;
 			}
@@ -104,6 +111,7 @@ export class IPyWidgetScriptSourceProvider
 			// If we found the script source, then use that.
 			if (source.scriptUri) {
 				found = source;
+
 				break;
 			} else {
 				logger.warn(
@@ -117,6 +125,7 @@ export class IPyWidgetScriptSourceProvider
 			"",
 			found.source,
 		).catch(noop);
+
 		if (!found.scriptUri) {
 			logger.error(
 				`Script source for Widget ${moduleName}@${moduleVersion} not found in ${this.scriptProviders
@@ -138,13 +147,16 @@ export class IPyWidgetScriptSourceProvider
 		source?: "cdn" | "local" | "remote",
 	) {
 		const key = `${moduleName}.${moduleName}@${moduleVersion}`;
+
 		if (IPyWidgetScriptSourceProvider.trackedWidgetModuleNames.has(key)) {
 			return;
 		}
 		IPyWidgetScriptSourceProvider.trackedWidgetModuleNames.add(key);
+
 		const isJupyterWidget = moduleName
 			.toLowerCase()
 			.startsWith("@jupyter-widgets");
+
 		const isOnCDN =
 			source === "cdn" ||
 			isJupyterWidget ||
@@ -191,6 +203,7 @@ export class IPyWidgetScriptSourceProvider
 	}
 	private hookKernelEvents() {
 		const kernelConnection = this.kernel.session?.kernel;
+
 		if (!kernelConnection) {
 			return;
 		}
@@ -210,6 +223,7 @@ export class IPyWidgetScriptSourceProvider
 			const commOpen = msg.msg as unknown as
 				| ICommOpenMsg<"iopub">
 				| ICommOpenMsg<"shell">;
+
 			const data = commOpen.content.data as {
 				state?: {
 					_model_module?: string;
@@ -217,6 +231,7 @@ export class IPyWidgetScriptSourceProvider
 					_model_name?: string;
 				};
 			};
+
 			if (data.state?._model_module && data.state._model_name) {
 				this.sendTelemetryForWidgetModule(
 					data.state?._model_module,

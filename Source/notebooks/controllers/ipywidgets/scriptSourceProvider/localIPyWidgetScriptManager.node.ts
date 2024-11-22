@@ -39,6 +39,7 @@ export class LocalIPyWidgetScriptManager
 	static nbExtensionsCopiedKernelConnectionList =
 		new Set<KernelConnectionId>();
 	private nbExtensionsParentPath?: Promise<Uri | undefined>;
+
 	constructor(
 		kernel: IKernel,
 		private readonly fs: IFileSystemNode,
@@ -61,6 +62,7 @@ export class LocalIPyWidgetScriptManager
 		// Possible there are new versions of nbExtensions that are not yet copied.
 		// E.g. user installs a package and restarts the kernel.
 		this.overwriteExistingFiles = true;
+
 		super.onKernelRestarted();
 	}
 	protected async getNbExtensionsParentPath(): Promise<Uri | undefined> {
@@ -78,15 +80,18 @@ export class LocalIPyWidgetScriptManager
 				await this.nbExtensionsPathProvider.getNbExtensionsParentPath(
 					this.kernel,
 				);
+
 			if (!this.sourceNbExtensionsPath) {
 				logger.warn(
 					`No nbextensions folder found for kernel ${this.kernel.kernelConnectionMetadata.id}`,
 				);
+
 				return;
 			}
 			const kernelHash = await getTelemetrySafeHashedString(
 				this.kernel.kernelConnectionMetadata.id,
 			);
+
 			const baseUrl = Uri.joinPath(
 				this.context.extensionUri,
 				"temp",
@@ -96,6 +101,7 @@ export class LocalIPyWidgetScriptManager
 			);
 
 			const targetNbExtensions = Uri.joinPath(baseUrl, "nbextensions");
+
 			const [jupyterDataDirectories] = await Promise.all([
 				this.jupyterPaths.getDataDirs({
 					resource: this.kernel.resourceUri,
@@ -104,6 +110,7 @@ export class LocalIPyWidgetScriptManager
 				}),
 				this.fs.createDirectory(targetNbExtensions),
 			]);
+
 			const nbExtensionFolders = jupyterDataDirectories.map((dataDir) =>
 				Uri.joinPath(dataDir, "nbextensions"),
 			);
@@ -111,6 +118,7 @@ export class LocalIPyWidgetScriptManager
 			// Hence when copying, copy the lowest priority nbextensions folder first.
 			// This way contents get overwritten with contents of highest priority (thereby adhering to the priority).
 			nbExtensionFolders.reverse();
+
 			for (const nbExtensionFolder of nbExtensionFolders) {
 				if (await this.fs.exists(nbExtensionFolder)) {
 					await this.fs.copy(nbExtensionFolder, targetNbExtensions, {
@@ -126,6 +134,7 @@ export class LocalIPyWidgetScriptManager
 			sendTelemetryEvent(Telemetry.IPyWidgetNbExtensionCopyTime, {
 				duration: stopWatch.elapsedTime,
 			});
+
 			return baseUrl;
 		} catch (ex) {
 			sendTelemetryEvent(
@@ -134,6 +143,7 @@ export class LocalIPyWidgetScriptManager
 				undefined,
 				ex,
 			);
+
 			throw ex;
 		}
 	}
@@ -141,6 +151,7 @@ export class LocalIPyWidgetScriptManager
 		{ uri: Uri; widgetFolderName: string }[]
 	> {
 		const nbExtensionsParentPath = await this.getNbExtensionsParentPath();
+
 		if (!nbExtensionsParentPath) {
 			return [];
 		}
@@ -150,11 +161,13 @@ export class LocalIPyWidgetScriptManager
 			nbExtensionsParentPath,
 			"nbextensions",
 		);
+
 		const extensions = await this.fs.searchLocal(
 			"**/extension.js",
 			nbExtensionsFolder.fsPath,
 			true,
 		);
+
 		return extensions.map((entry) => ({
 			uri: Uri.joinPath(nbExtensionsFolder, entry),
 			widgetFolderName: path.dirname(entry),

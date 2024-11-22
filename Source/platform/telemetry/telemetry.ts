@@ -24,6 +24,7 @@ export const pythonEnvironmentsByHash = new Map<string, PythonEnvironment>();
 type InterpreterPackageProvider = (
 	interpreter: PythonEnvironment,
 ) => Promise<Map<string, string>>;
+
 let _interpreterPackageProvider: InterpreterPackageProvider | undefined;
 export function initializeGlobals(
 	interpreterPackageProvider: InterpreterPackageProvider,
@@ -45,12 +46,14 @@ export function updatePythonPackages(
 	}
 	// Getting package information is async, hence update property to indicate that a promise is pending.
 	const deferred = createDeferred<void>();
+
 	getPythonEnvironmentPackages({
 		interpreterHash: currentData.pythonEnvironmentPath,
 	})
 		.then((packages) => {
 			currentData.pythonEnvironmentPackages =
 				packages || currentData.pythonEnvironmentPackages;
+
 			if (clonedCurrentData) {
 				clonedCurrentData.pythonEnvironmentPackages =
 					packages || clonedCurrentData.pythonEnvironmentPackages;
@@ -69,9 +72,11 @@ async function getPythonEnvironmentPackages(
 ) {
 	if (!_interpreterPackageProvider) {
 		logger.error(`Python package provider is not initialized.`);
+
 		return "{}";
 	}
 	let interpreter: PythonEnvironment | undefined;
+
 	if ("interpreter" in options) {
 		interpreter = options.interpreter;
 	} else {
@@ -81,6 +86,7 @@ async function getPythonEnvironmentPackages(
 		return "{}";
 	}
 	const packages = await _interpreterPackageProvider(interpreter);
+
 	if (!packages || packages.size === 0) {
 		return "{}";
 	}
@@ -101,7 +107,9 @@ export async function getContextualPropsForTelemetry(
 		return {};
 	}
 	const data = trackedInfo.get(getComparisonKey(resource));
+
 	const resourceType = getResourceType(resource);
+
 	if (!data && resourceType) {
 		return {
 			resourceType,
@@ -121,5 +129,6 @@ export async function getContextualPropsForTelemetry(
 	// 1. Data we track against the Uri.
 	// 2. Data that is returned & sent via telemetry now
 	updatePythonPackages(data[0], clonedData);
+
 	return clonedData;
 }

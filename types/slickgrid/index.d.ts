@@ -697,9 +697,11 @@ declare namespace Slick {
 		addNewRowCssClass?: string;
 		alwaysAllowHorizontalScroll?: boolean;
 		alwaysShowVerticalScroll?: boolean;
+
 		asyncPostRenderCleanupDelay?: number;
 		createFooterRow?: boolean;
 		createPreHeaderPanel?: boolean;
+
 		doPaging?: boolean;
 		editorCellNavOnLRKeys?: boolean;
 		emulatePagingWhenScrolling?: boolean;
@@ -1646,8 +1648,11 @@ declare namespace Slick {
 
 	export module Formatters {
 		var PercentComplete: Formatter<Slick.SlickData>;
+
 		var PercentCompleteBar: Formatter<Slick.SlickData>;
+
 		var YesNo: Formatter<Slick.SlickData>;
+
 		var Checkmark: Formatter<Slick.SlickData>;
 	}
 
@@ -1754,6 +1759,7 @@ declare namespace Slick {
 
 		export interface GroupingOptions<T> {
 			getter?: ((item?: T) => any) | string;
+
 			formatter?: (item?: T) => string;
 			comparer?: (a: Group<T>, b: Group<T>) => number;
 			predefinedValues?: any[]; // todo

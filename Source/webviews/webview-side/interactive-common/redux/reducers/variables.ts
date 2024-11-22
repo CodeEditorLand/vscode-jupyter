@@ -36,6 +36,7 @@ export type IVariableState = {
 	visible: boolean;
 	sortColumn: string;
 	sortAscending: boolean;
+
 	variables: IJupyterVariable[];
 	pageSize: number;
 	containerHeight: number;
@@ -73,6 +74,7 @@ function handleRequest(
 		pageSize: arg.payload.data.pageSize,
 		refreshCount: arg.payload.data.refreshCount,
 	});
+
 	return {
 		...arg.prevState,
 		sortColumn: arg.payload.data.sortColumn,
@@ -121,7 +123,9 @@ function handleSort(
 	arg: VariableReducerArg<ISortVariablesRequest>,
 ): IVariableState {
 	const sortColumn = arg.payload.data.sortColumn;
+
 	const sortAscending = arg.payload.data.sortAscending;
+
 	const result = handleRequest({
 		...arg,
 		payload: {
@@ -136,6 +140,7 @@ function handleSort(
 			},
 		},
 	});
+
 	return {
 		...result,
 	};
@@ -143,6 +148,7 @@ function handleSort(
 
 function handleIsWebUpdate(arg: VariableReducerArg<string>): IVariableState {
 	const settings = JSON.parse(arg.payload.data) as IJupyterExtraSettings;
+
 	return {
 		...arg.prevState,
 		isWeb: settings.extraSettings.isWeb,
@@ -154,7 +160,9 @@ function handleVariableExplorerHeightResponse(
 ): IVariableState {
 	if (arg.payload.data) {
 		const containerHeight = arg.payload.data.containerHeight;
+
 		const gridHeight = arg.payload.data.gridHeight;
+
 		if (containerHeight && gridHeight) {
 			return {
 				...arg.prevState,
@@ -189,6 +197,7 @@ function setVariableExplorerHeight(
 	arg: VariableReducerArg<IVariableExplorerHeight>,
 ): IVariableState {
 	const containerHeight = arg.payload.data.containerHeight;
+
 	const gridHeight = arg.payload.data.gridHeight;
 
 	if (containerHeight && gridHeight) {
@@ -200,6 +209,7 @@ function setVariableExplorerHeight(
 				gridHeight,
 			},
 		);
+
 		return {
 			...arg.prevState,
 			containerHeight: containerHeight,
@@ -253,6 +263,7 @@ function handleResponse(
 			0,
 			arg.prevState.variables.length - response.totalCount,
 		);
+
 		if (removeCount) {
 			variables.splice(response.pageStartIndex, removeCount);
 		}
@@ -288,6 +299,7 @@ function handleRestarted(arg: VariableReducerArg): IVariableState {
 			},
 		},
 	});
+
 	return {
 		...result,
 		currentExecutionCount: -1,

@@ -61,6 +61,7 @@ export class VariableView
 			"webview-side",
 			"viewers",
 		);
+
 		super(
 			configuration,
 			(c, d) => new VariableViewMessageListener(c, d),
@@ -125,10 +126,14 @@ export class VariableView
 		switch (message) {
 			case InteractiveWindowMessages.GetVariablesRequest:
 				this.handleMessage(message, payload, this.requestVariables);
+
 				break;
+
 			case InteractiveWindowMessages.ShowDataViewer:
 				this.handleMessage(message, payload, this.showDataViewer);
+
 				break;
+
 			default:
 				break;
 		}
@@ -153,7 +158,9 @@ export class VariableView
 	// Variable view visibility has changed. Update our context key for command enable / disable
 	private handleVisibilityChanged() {
 		const context = new ContextKey("jupyter.variableViewVisible");
+
 		let visible = false;
+
 		if (this.webviewView) {
 			visible = this.webviewView.visible;
 		}
@@ -189,6 +196,7 @@ export class VariableView
 		request.variable.fileName =
 			request.variable.fileName ??
 			this.notebookWatcher.activeKernel?.notebook.uri;
+
 		return this.dataViewerDelegator.showContributedDataViewer(
 			request.variable,
 			true,
@@ -215,6 +223,7 @@ export class VariableView
 		args: IJupyterVariablesRequest,
 	): Promise<void> {
 		const activeNotebook = this.notebookWatcher.activeKernel;
+
 		if (activeNotebook) {
 			const response = await this.variables.getVariables(
 				args,

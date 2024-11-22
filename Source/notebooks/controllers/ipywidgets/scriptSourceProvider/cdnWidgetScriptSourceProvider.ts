@@ -29,6 +29,7 @@ import { IWidgetScriptSourceProvider, WidgetScriptSource } from "../types";
 
 // Source borrowed from https://github.com/jupyter-widgets/ipywidgets/blob/54941b7a4b54036d089652d91b39f937bde6b6cd/packages/html-manager/src/libembed-amd.ts#L33
 const unpgkUrl = "https://unpkg.com/";
+
 const jsdelivrUrl = "https://cdn.jsdelivr.net/npm/";
 
 export const GlobalStateKeyToTrackIfUserConfiguredCDNAtLeastOnce =
@@ -44,10 +45,12 @@ function moduleNameToCDNUrl(
 	moduleVersion: string,
 ) {
 	let packageName = moduleName;
+
 	let fileName = "index"; // default filename
 	// if a '/' is present, like 'foo/bar', packageName is changed to 'foo', and path to 'bar'
 	// We first find the first '/'
 	let index = moduleName.indexOf("/");
+
 	if (index !== -1 && moduleName[0] === "@") {
 		// if we have a namespace, it's a different story
 		// @foo/bar/baz should translate to @foo/bar and baz
@@ -75,8 +78,10 @@ function getCDNPrefix(cdn?: WidgetCDNs): string | undefined {
 	switch (cdn) {
 		case "unpkg.com":
 			return unpgkUrl;
+
 		case "jsdelivr.com":
 			return jsdelivrUrl;
+
 		default:
 			break;
 	}
@@ -96,9 +101,11 @@ export class CDNWidgetScriptSourceProvider
 	private readonly notifiedUserAboutWidgetScriptNotFound = new Set<string>();
 	private get cdnProviders(): readonly WidgetCDNs[] {
 		const settings = this.configurationSettings.getSettings(undefined);
+
 		return settings.widgetScriptSources;
 	}
 	private configurationPromise?: Deferred<void>;
+
 	constructor(
 		@inject(IMemento)
 		@named(GLOBAL_MEMENTO)
@@ -114,6 +121,7 @@ export class CDNWidgetScriptSourceProvider
 	 */
 	public async isOnCDN(moduleName: string): Promise<boolean> {
 		const key = `MODULE_VERSION_ON_CDN_${moduleName}`;
+
 		if (this.isOnCDNCache.has(key)) {
 			return this.isOnCDNCache.get(key)!;
 		}
@@ -122,9 +130,11 @@ export class CDNWidgetScriptSourceProvider
 		}
 		const promise = (async () => {
 			const httpClient = new HttpClient();
+
 			const unpkgPromise = createDeferredFromPromise(
 				httpClient.exists(`${unpgkUrl}${moduleName}`),
 			);
+
 			const jsDeliverPromise = createDeferredFromPromise(
 				httpClient.exists(`${jsdelivrUrl}${moduleName}`),
 			);
@@ -132,10 +142,12 @@ export class CDNWidgetScriptSourceProvider
 				unpkgPromise.promise,
 				jsDeliverPromise.promise,
 			]);
+
 			if (unpkgPromise.value || jsDeliverPromise.value) {
 				return true;
 			}
 			await Promise.all([unpkgPromise.promise, jsDeliverPromise.promise]);
+
 			return unpkgPromise.value || jsDeliverPromise.value ? true : false;
 		})();
 		// Keep this in cache.
@@ -147,6 +159,7 @@ export class CDNWidgetScriptSourceProvider
 			})
 			.then(noop, noop);
 		this.isOnCDNCache.set(key, promise);
+
 		return promise;
 	}
 	public async getWidgetScriptSource(
@@ -158,6 +171,7 @@ export class CDNWidgetScriptSourceProvider
 		if (isWebViewOnline === false) {
 			logger.ci(`Webview is offline, cannot use CDN for ${moduleName}`);
 			this.warnIfNoAccessToInternetFromWebView(moduleName).catch(noop);
+
 			return {
 				moduleName,
 			};
@@ -170,12 +184,14 @@ export class CDNWidgetScriptSourceProvider
 			)
 		) {
 			logger.ci(`No CDN providers and user configured CDN`);
+
 			return {
 				moduleName,
 			};
 		}
 		// First see if we already have it downloaded.
 		const key = this.getModuleKey(moduleName, moduleVersion);
+
 		if (!this.cache.get(key)) {
 			this.cache.set(
 				key,
@@ -193,6 +209,7 @@ export class CDNWidgetScriptSourceProvider
 		cdn: WidgetCDNs,
 	): Promise<string | undefined> {
 		const cdnBaseUrl = getCDNPrefix(cdn);
+
 		if (cdnBaseUrl) {
 			return moduleNameToCDNUrl(cdnBaseUrl, moduleName, moduleVersion);
 		}
@@ -212,6 +229,7 @@ export class CDNWidgetScriptSourceProvider
 			}Searching for Widget Script ${moduleName}#${moduleVersion} using cdns ${this.cdnProviders.join(" ")}`,
 		);
 		await this.configureWidgets();
+
 		if (this.cdnProviders.length === 0) {
 			return { moduleName };
 		}
@@ -221,11 +239,14 @@ export class CDNWidgetScriptSourceProvider
 				this.getValidUri(moduleName, moduleVersion, cdn),
 			),
 		);
+
 		const scriptUri = uris.find((u) => u);
+
 		if (scriptUri) {
 			logger.trace(
 				`${ConsoleForegroundColors.Green}Widget Script ${moduleName}#${moduleVersion} found at URI: ${scriptUri}`,
 			);
+
 			return { moduleName, scriptUri, source: "cdn" };
 		}
 
@@ -233,6 +254,7 @@ export class CDNWidgetScriptSourceProvider
 			`Widget Script ${moduleName}#${moduleVersion} was not found on on any cdn`,
 		);
 		this.handleWidgetSourceNotFound(moduleName, moduleVersion).catch(noop);
+
 		return { moduleName };
 	}
 
@@ -248,7 +270,9 @@ export class CDNWidgetScriptSourceProvider
 				moduleVersion,
 				cdn,
 			);
+
 			const httpClient = new HttpClient();
+
 			if (downloadUrl && (await httpClient.exists(downloadUrl))) {
 				return downloadUrl;
 			}
@@ -256,6 +280,7 @@ export class CDNWidgetScriptSourceProvider
 			logger.trace(
 				`Failed downloading ${moduleName}:${moduleVersion} from ${cdn}`,
 			);
+
 			return undefined;
 		}
 	}
@@ -276,6 +301,7 @@ export class CDNWidgetScriptSourceProvider
 			return;
 		}
 		this.notifiedUserAboutWidgetScriptNotFound.add(moduleName);
+
 		const selection = await window.showWarningMessage(
 			DataScience.cdnWidgetScriptNotAccessibleWarningMessage(
 				moduleName,
@@ -285,16 +311,19 @@ export class CDNWidgetScriptSourceProvider
 			Common.doNotShowAgain,
 			Common.moreInfo,
 		);
+
 		switch (selection) {
 			case Common.doNotShowAgain:
 				return this.globalMemento.update(
 					GlobalStateKeyToNeverWarnAboutNoNetworkAccess,
 					true,
 				);
+
 			case Common.moreInfo:
 				return env.openExternal(
 					Uri.parse("https://aka.ms/PVSCIPyWidgets"),
 				);
+
 			default:
 				noop();
 		}
@@ -319,6 +348,7 @@ export class CDNWidgetScriptSourceProvider
 		}
 		this.configurationPromise = createDeferred();
 		sendTelemetryEvent(Telemetry.IPyWidgetPromptToUseCDN);
+
 		const selection = await window.showInformationMessage(
 			DataScience.useCDNForWidgetsNoInformation,
 			{ modal: true },
@@ -332,6 +362,7 @@ export class CDNWidgetScriptSourceProvider
 			| "cancel"
 			| "dismissed"
 			| "doNotShowAgain" = "dismissed";
+
 		switch (selection) {
 			case Common.ok: {
 				selectionForTelemetry = "ok";
@@ -343,6 +374,7 @@ export class CDNWidgetScriptSourceProvider
 						true,
 					),
 				]);
+
 				break;
 			}
 			case Common.doNotShowAgain: {
@@ -355,17 +387,20 @@ export class CDNWidgetScriptSourceProvider
 						true,
 					),
 				]);
+
 				break;
 			}
 			case Common.moreInfo: {
 				void env.openExternal(
 					Uri.parse("https://aka.ms/PVSCIPyWidgets"),
 				);
+
 				break;
 			}
 			default:
 				selectionForTelemetry =
 					selection === Common.cancel ? "cancel" : "dismissed";
+
 				break;
 		}
 
@@ -405,6 +440,7 @@ export class CDNWidgetScriptSourceProvider
 			return;
 		}
 		this.notifiedUserAboutWidgetScriptNotFound.add(moduleName);
+
 		const selection = await window.showWarningMessage(
 			DataScience.widgetScriptNotFoundOnCDNWidgetMightNotWork(
 				moduleName,
@@ -415,16 +451,19 @@ export class CDNWidgetScriptSourceProvider
 			Common.doNotShowAgain,
 			Common.reportThisIssue,
 		);
+
 		switch (selection) {
 			case Common.doNotShowAgain:
 				return this.globalMemento.update(
 					GlobalStateKeyToNeverWarnAboutScriptsNotFoundOnCDN,
 					true,
 				);
+
 			case Common.reportThisIssue:
 				return env.openExternal(
 					Uri.parse("https://aka.ms/CreatePVSCDataScienceIssue"),
 				);
+
 			default:
 				noop();
 		}

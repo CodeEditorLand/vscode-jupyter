@@ -38,8 +38,11 @@ type CellUri = string;
 type CellVersion = number;
 
 const pipMessage = DataScience.percentPipCondaInstallInsteadOfBang('pip');
+
 const condaMessage = DataScience.percentPipCondaInstallInsteadOfBang('conda');
+
 const matplotlibMessage = DataScience.matplotlibWidgetInsteadOfOther;
+
 const diagnosticSource = 'Jupyter';
 
 /**
@@ -53,6 +56,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
     private readonly disposables: IDisposable[] = [];
     private readonly notebooksProcessed = new WeakMap<NotebookDocument, Map<CellUri, CellVersion>>();
     private readonly cellsToProcess = new Set<NotebookCell>();
+
     constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
         this.problems = languages.createDiagnosticCollection(diagnosticSource);
         this.disposables.push(this.problems);
@@ -68,10 +72,12 @@ export class NotebookCellBangInstallDiagnosticsProvider
         workspace.onDidChangeTextDocument(
             (e) => {
                 const notebook = getAssociatedJupyterNotebook(e.document);
+
                 if (!notebook) {
                     return;
                 }
                 const cell = notebook.getCells().find((c) => c.document === e.document);
+
                 if (cell) {
                     this.analyzeNotebookCell(cell);
                 }
@@ -82,8 +88,10 @@ export class NotebookCellBangInstallDiagnosticsProvider
         workspace.onDidCloseNotebookDocument(
             (e) => {
                 this.problems.delete(e.uri);
+
                 const cells = this.notebooksProcessed.get(e);
                 this.notebooksProcessed.delete(e);
+
                 if (!cells) {
                     return;
                 }
@@ -94,6 +102,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
         );
 
         workspace.onDidOpenNotebookDocument((e) => this.analyzeNotebook(e), this, this.disposables);
+
         const delayer = new Delayer<void>(300);
         this.disposables.push(delayer);
         workspace.onDidChangeNotebookDocument(
@@ -116,18 +125,22 @@ export class NotebookCellBangInstallDiagnosticsProvider
     }
     public provideHover(document: TextDocument, position: Position, _token: CancellationToken) {
         const notebook = getAssociatedJupyterNotebook(document);
+
         if (notebook?.notebookType !== JupyterNotebookView) {
             return;
         }
         const diagnostics = this.problems.get(document.uri);
+
         if (!diagnostics) {
             return;
         }
         const diagnostic = diagnostics.find((d) => d.message === pipMessage || d.message === condaMessage);
+
         if (!diagnostic || !diagnostic.range.contains(position)) {
             return;
         }
         const installer = diagnostic.message === pipMessage ? 'pip' : 'conda';
+
         return new Hover(
             DataScience.pipCondaInstallHoverWarning(installer, 'https://aka.ms/jupyterCellMagicBangInstall'),
             diagnostic.range
@@ -148,9 +161,12 @@ export class NotebookCellBangInstallDiagnosticsProvider
             switch (d.message) {
                 case pipMessage:
                     codeActions.push(this.createReplaceCodeAction(document, 'pip', d));
+
                     break;
+
                 case condaMessage:
                     codeActions.push(this.createReplaceCodeAction(document, 'conda', d));
+
                     break;
 
                 case matplotlibMessage:
@@ -161,18 +177,21 @@ export class NotebookCellBangInstallDiagnosticsProvider
                             d
                         )
                     );
+
                     break;
 
                 default:
                     break;
             }
         });
+
         return codeActions;
     }
     private createReplaceCodeAction(document: TextDocument, type: 'pip' | 'conda', d: Diagnostic) {
         const codeAction = new CodeAction(DataScience.replacePipCondaInstallCodeAction(type), CodeActionKind.QuickFix);
         codeAction.isPreferred = true;
         codeAction.diagnostics = [d];
+
         const edit = new WorkspaceEdit();
         edit.replace(
             document.uri,
@@ -180,6 +199,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
             '%'
         );
         codeAction.edit = edit;
+
         return codeAction;
     }
     private createGotoWikiAction(_document: TextDocument, uri: Uri, d: Diagnostic) {
@@ -191,6 +211,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
             command: 'vscode.open',
             arguments: [uri]
         };
+
         return codeAction;
     }
     private analyzeNotebook(notebook: NotebookDocument): void {
@@ -210,6 +231,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
             return;
         }
         const cell = this.cellsToProcess.values().next().value;
+
         if (cell) {
             this.cellsToProcess.delete(cell);
             this.analyzeNotebookCell(cell);
@@ -232,6 +254,7 @@ export class NotebookCellBangInstallDiagnosticsProvider
         }
 
         this.problems.delete(cell.document.uri);
+
         const cellsUrisWithProblems = this.notebooksProcessed.get(cell.notebook) || new Map<CellUri, CellVersion>();
         cellsUrisWithProblems.set(cell.document.uri.toString(), cell.document.version);
         this.notebooksProcessed.set(cell.notebook, cellsUrisWithProblems);
@@ -239,10 +262,14 @@ export class NotebookCellBangInstallDiagnosticsProvider
         // For perf reasons, process just the first 50 lines.
         for (let i = 0; i < Math.min(cell.document.lineCount, 50); i++) {
             const line = cell.document.lineAt(i);
+
             const text = line.text;
+
             if (text.trim().startsWith('!pip install')) {
                 const startPos = text.indexOf('!');
+
                 const endPos = text.indexOf('l');
+
                 const range = new Range(line.lineNumber, startPos, line.lineNumber, endPos + 2);
                 this.problems.set(cell.document.uri, [
                     {
@@ -254,7 +281,9 @@ export class NotebookCellBangInstallDiagnosticsProvider
                 ]);
             } else if (text.trim().startsWith('!conda install')) {
                 const startPos = text.indexOf('!');
+
                 const endPos = text.indexOf('l');
+
                 const range = new Range(line.lineNumber, startPos, line.lineNumber, endPos + 2);
                 this.problems.set(cell.document.uri, [
                     {
@@ -270,7 +299,9 @@ export class NotebookCellBangInstallDiagnosticsProvider
                 !text.trim().endsWith('inline')
             ) {
                 const startPos = text.indexOf('%');
+
                 const endPos = text.length;
+
                 const range = new Range(line.lineNumber, startPos, line.lineNumber, endPos);
                 this.problems.set(cell.document.uri, [
                     {

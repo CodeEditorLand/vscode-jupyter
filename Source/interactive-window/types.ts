@@ -61,12 +61,15 @@ export interface IInteractiveControllerHelper {
         notebook: NotebookDocument;
         controller: IVSCodeNotebookController;
     }>;
+
     getInitialController(
         resource: Resource,
         viewType: IwViewType,
         connection?: KernelConnectionMetadata
     ): Promise<IVSCodeNotebookController | undefined>;
+
     getSelectedController(notebookDocument: NotebookDocument): IVSCodeNotebookController | undefined;
+
     getRegisteredController(metadata: KernelConnectionMetadata): IVSCodeNotebookController | undefined;
     createKernel(
         metadata: KernelConnectionMetadata,
@@ -97,7 +100,9 @@ export interface IInteractiveWindow extends IInteractiveBase {
     expandAllCells(): Promise<void>;
     collapseAllCells(): Promise<void>;
     scrollToCell(id: string): void;
+
     exportAs(): void;
+
     export(): void;
 }
 

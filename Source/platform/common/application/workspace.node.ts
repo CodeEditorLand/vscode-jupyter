@@ -25,6 +25,7 @@ export async function computeWorkingDirectory(
 		resource && resource.scheme === "file"
 			? await fs.pathExists(resource.fsPath)
 			: false;
+
 	const dirExists =
 		resource && resource.scheme === "file"
 			? await fs.pathExists(path.dirname(resource.fsPath))

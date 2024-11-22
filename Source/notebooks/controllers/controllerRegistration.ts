@@ -74,6 +74,7 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
         selected: boolean;
     }>();
     private selectedControllers = new WeakMap<NotebookDocument, IVSCodeNotebookController>();
+
     constructor(
         @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
         @inject(PythonEnvironmentFilter) private readonly pythonEnvFilter: PythonEnvironmentFilter,
@@ -247,6 +248,7 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
         types: ('jupyter-notebook' | 'interactive')[]
     ): IVSCodeNotebookController[] {
         const { added, existing } = this.addImpl(metadata, types, true);
+
         return added.concat(existing);
     }
     addImpl(
@@ -255,8 +257,10 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
         triggerChangeEvent: boolean
     ): { added: IVSCodeNotebookController[]; existing: IVSCodeNotebookController[] } {
         const added: IVSCodeNotebookController[] = [];
+
         const existing: IVSCodeNotebookController[] = [];
         logger.ci(`Create Controller for ${metadata.kind} and id '${metadata.id}' for view ${types.join(', ')}`);
+
         try {
             // Create notebook selector
             types
@@ -271,6 +275,7 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
                 .filter(([id]) => {
                     // See if we already created this controller or not
                     const controller = this.registeredControllers.get(id);
+
                     if (controller) {
                         // If we already have this controller, its possible the Python version information has changed.
                         // E.g. we had a cached kernlespec, and since then the user updated their version of python,
@@ -283,9 +288,11 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
                         logger.ci(
                             `Found existing controller '${controller.id}', not creating a new one just updating it`
                         );
+
                         return false;
                     }
                     logger.ci(`Existing controller not found for '${id}', hence creating a new one`);
+
                     return true;
                 })
                 .forEach(([id, viewType]) => {
@@ -342,6 +349,7 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
                         controllerDisposables
                     );
                 });
+
             if (triggerChangeEvent && added.length) {
                 this.changeEmitter.fire({ added: added, removed: [] });
             }
@@ -350,6 +358,7 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
                 // This can happen in the tests, and these get bubbled upto VSC and are logged as unhandled exceptions.
                 // Hence swallow cancellation errors.
                 logger.warn(`Cancel creation of notebook controller for ${metadata.id}`, ex);
+
                 return { added, existing };
             }
             logger.error(`Failed to create notebook controller for ${metadata.id}`, ex);
@@ -361,6 +370,7 @@ export class ControllerRegistration implements IControllerRegistration, IExtensi
         notebookType: 'jupyter-notebook' | 'interactive'
     ): IVSCodeNotebookController | undefined {
         const id = this.getControllerId(metadata, notebookType);
+
         return this.registeredControllers.get(id);
     }
 

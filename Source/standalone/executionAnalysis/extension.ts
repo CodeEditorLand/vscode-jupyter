@@ -13,11 +13,13 @@ export async function activate(
 	const optInto = vscode.workspace
 		.getConfiguration("jupyter")
 		.get<boolean>("executionAnalysis.enabled");
+
 	if (!optInto) {
 		return;
 	}
 
 	const referencesProvider = await activatePylance();
+
 	if (!referencesProvider) {
 		return;
 	}
@@ -30,6 +32,7 @@ export async function activate(
 			"jupyter.selectDependentCells",
 			async (cell: vscode.NotebookCell | undefined) => {
 				const matched = findNotebookAndCell(cell);
+
 				if (!matched) {
 					return;
 				}
@@ -48,6 +51,7 @@ export async function activate(
 			"jupyter.runPrecedentCells",
 			async (cell: vscode.NotebookCell | undefined) => {
 				const matched = findNotebookAndCell(cell);
+
 				if (!matched) {
 					return;
 				}
@@ -63,6 +67,7 @@ export async function activate(
 			"jupyter.runDependentCells",
 			async (cell: vscode.NotebookCell | undefined) => {
 				const matched = findNotebookAndCell(cell);
+
 				if (!matched) {
 					return;
 				}
@@ -78,6 +83,7 @@ export async function activate(
 			"jupyter.selectPrecedentCells",
 			async (cell: vscode.NotebookCell | undefined) => {
 				const matched = findNotebookAndCell(cell);
+
 				if (!matched) {
 					return;
 				}
@@ -96,6 +102,7 @@ export async function activate(
 			"jupyter.debugCellSymbols",
 			async () => {
 				const notebookEditor = vscode.window.activeNotebookEditor;
+
 				if (notebookEditor) {
 					await symbolsManager.debugSymbols(notebookEditor.notebook);
 				}

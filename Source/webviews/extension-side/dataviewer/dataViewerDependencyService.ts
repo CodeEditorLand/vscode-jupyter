@@ -15,6 +15,7 @@ export class DataViewerDependencyService
 	implements IDataViewerDependencyService
 {
 	private withKernel: IDataViewerDependencyService;
+
 	constructor() {
 		this.withKernel = new KernelDataViewerDependencyImplementation();
 	}

@@ -223,6 +223,7 @@ export abstract class BaseJupyterSessionConnection<
 	}
 	private onStatusChanged(_: unknown, value: Kernel.Status) {
 		this.statusChanged.emit(value);
+
 		const status = this.status;
 		logger.ci(`Server Status = ${status}`);
 	}

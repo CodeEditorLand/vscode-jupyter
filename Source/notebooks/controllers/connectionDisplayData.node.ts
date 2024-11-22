@@ -36,6 +36,7 @@ export class ConnectionDisplayDataProvider
 	implements IConnectionDisplayDataProvider
 {
 	private readonly details = new Map<string, ConnectionDisplayData>();
+
 	constructor(
 		@inject(IPlatformService) private readonly platform: IPlatformService,
 		@inject(IJupyterServerProviderRegistry)
@@ -51,18 +52,22 @@ export class ConnectionDisplayDataProvider
 	): IConnectionDisplayData {
 		if (!this.details.get(connection.id)) {
 			const label = getDisplayNameOrNameOfKernelConnection(connection);
+
 			let description = getKernelConnectionDisplayPath(
 				connection,
 				this.platform,
 			);
+
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
 			}
 			const category = getKernelConnectionCategorySync(connection);
+
 			const descriptionProvider =
 				connection.kind === "connectToLiveRemoteKernel"
 					? () => getRemoteKernelSessionInformation(connection)
 					: undefined;
+
 			const newDetails = new ConnectionDisplayData(
 				label,
 				description,
@@ -83,25 +88,32 @@ export class ConnectionDisplayDataProvider
 					const changedEnv = e.find(
 						(env) => env.id === connection.interpreter?.id,
 					);
+
 					const interpreter = resolvedPythonEnvToJupyterEnv(
 						getCachedEnvironments().find(
 							(env) => env.id === changedEnv?.id,
 						),
 					);
+
 					if (
 						connection.kind === "startUsingPythonInterpreter" &&
 						interpreter
 					) {
 						connection.updateInterpreter(interpreter);
+
 						const newLabel =
 							getDisplayNameOrNameOfKernelConnection(connection);
+
 						const newDescription = getKernelConnectionDisplayPath(
 							connection,
 							this.platform,
 						);
+
 						const newCategory =
 							getKernelConnectionCategorySync(connection);
+
 						let changed = false;
+
 						if (newLabel !== newDetails.label) {
 							newDetails.label = newLabel;
 							changed = true;
@@ -138,6 +150,7 @@ export class ConnectionDisplayDataProvider
 				this.jupyterUriProviderRegistration,
 				DataScience.kernelDefaultRemoteDisplayName,
 			);
+
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;
 				details.triggerChange();
@@ -145,6 +158,7 @@ export class ConnectionDisplayDataProvider
 		}
 
 		const kind = getKernelConnectionCategory(connection);
+
 		if (details.category !== kind) {
 			details.category = kind;
 			details.triggerChange();

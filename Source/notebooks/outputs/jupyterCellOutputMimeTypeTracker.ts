@@ -120,6 +120,7 @@ export class CellOutputMimeTypeTracker
 	) {
 		// No need to send duplicate telemetry or waste CPU cycles on an unneeded hash.
 		const key = `${mimeType}-${when}`;
+
 		if (this.sentMimeTypes.has(key)) {
 			return;
 		}

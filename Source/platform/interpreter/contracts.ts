@@ -30,6 +30,7 @@ export interface IInterpreterService {
 	 * Without this, we will never know about Python envs
 	 */
 	initialize(): void;
+
 	getActiveInterpreter(
 		resource?: Uri,
 	): Promise<PythonEnvironment | undefined>;
@@ -47,6 +48,7 @@ export interface IInterpreterService {
 			| InterpreterId,
 		token?: CancellationToken,
 	): Promise<undefined | PythonEnvironment>;
+
 	getInterpreterHash(id: string): string | undefined;
 	// #endregion
 }

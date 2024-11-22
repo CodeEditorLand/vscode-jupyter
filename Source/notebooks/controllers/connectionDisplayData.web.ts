@@ -29,6 +29,7 @@ export class ConnectionDisplayDataProvider
 	implements IConnectionDisplayDataProvider
 {
 	private readonly details = new Map<string, ConnectionDisplayData>();
+
 	constructor(
 		@inject(IPlatformService) private readonly platform: IPlatformService,
 		@inject(IJupyterServerProviderRegistry)
@@ -42,10 +43,12 @@ export class ConnectionDisplayDataProvider
 	): IConnectionDisplayData {
 		if (!this.details.get(connection.id)) {
 			const label = getDisplayNameOrNameOfKernelConnection(connection);
+
 			let description = getKernelConnectionDisplayPath(
 				connection,
 				this.platform,
 			);
+
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
 			}
@@ -53,7 +56,9 @@ export class ConnectionDisplayDataProvider
 				connection.kind === "connectToLiveRemoteKernel"
 					? () => getRemoteKernelSessionInformation(connection)
 					: undefined;
+
 			const category = getKernelConnectionCategorySync(connection);
+
 			const newDetails = new ConnectionDisplayData(
 				label,
 				description,
@@ -77,6 +82,7 @@ export class ConnectionDisplayDataProvider
 				this.jupyterUriProviderRegistration,
 				DataScience.kernelDefaultRemoteDisplayName,
 			);
+
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;
 				details.triggerChange();
@@ -84,6 +90,7 @@ export class ConnectionDisplayDataProvider
 		}
 
 		const kind = getKernelConnectionCategory(connection);
+
 		if (details.category !== kind) {
 			details.category = kind;
 			details.triggerChange();

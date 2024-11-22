@@ -30,6 +30,7 @@ export class RemoteJupyterServerMruUpdate
 		IKernel,
 		Delayer<void>
 	>();
+
 	constructor(
 		@inject(IJupyterServerUriStorage)
 		private readonly serverStorage: IJupyterServerUriStorage,
@@ -55,10 +56,12 @@ export class RemoteJupyterServerMruUpdate
 		e: NotebookCellExecutionStateChangeEvent,
 	) {
 		const kernel = this.kernelProvider.get(e.cell.notebook);
+
 		if (!kernel) {
 			return;
 		}
 		const connection = kernel.kernelConnectionMetadata;
+
 		if (!isRemoteConnection(connection)) {
 			return;
 		}

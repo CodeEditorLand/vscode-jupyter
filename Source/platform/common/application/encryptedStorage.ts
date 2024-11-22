@@ -33,6 +33,7 @@ export class EncryptedStorage implements IEncryptedStorage {
 			this.extensionContext.extensionMode !== ExtensionMode.Production
 		) {
 			this.testingState.set(`${service}#${key}`, value || "");
+
 			return;
 		}
 
@@ -65,11 +66,13 @@ export class EncryptedStorage implements IEncryptedStorage {
 			const val = await this.extensionContext.secrets.get(
 				`${service}.${key}`,
 			);
+
 			return val;
 		} catch (e) {
 			// If we get an error trying to get a secret, it might be corrupted. So we delete it.
 			try {
 				await this.extensionContext.secrets.delete(`${service}.${key}`);
+
 				return;
 			} catch (e) {
 				logger.error(e);

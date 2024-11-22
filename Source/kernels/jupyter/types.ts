@@ -61,9 +61,11 @@ export interface IJupyterServerHelper {
 		resource: Resource,
 		cancelToken?: CancellationToken,
 	): Promise<IJupyterConnection>;
+
 	getUsableJupyterPython(
 		cancelToken?: CancellationToken,
 	): Promise<PythonEnvironment | undefined>;
+
 	getJupyterServerError(): Promise<string>;
 	refreshCommands(): Promise<void>;
 }
@@ -95,6 +97,7 @@ export interface INotebookExporter {
 		cells: NotebookCellData[],
 		kernelSpec?: nbformat.IKernelspecMetadata,
 	): Promise<string | undefined>;
+
 	exportToFile(
 		cells: NotebookCellData[],
 		file: string,
@@ -126,6 +129,7 @@ export interface INbConvertInterpreterDependencyChecker {
 		interpreter: PythonEnvironment,
 		_token?: CancellationToken,
 	): Promise<boolean>;
+
 	getNbConvertVersion(
 		interpreter: PythonEnvironment,
 		_token?: CancellationToken,
@@ -242,10 +246,12 @@ export interface IJupyterRequestCreator {
 		allowUnauthorized?: boolean,
 		getAuthHeader?: () => any,
 	): ClassType<Request>;
+
 	getFetchMethod(): (
 		input: RequestInfo,
 		init?: RequestInit,
 	) => Promise<Response>;
+
 	getHeadersCtor(): ClassType<Headers>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	getWebsocketCtor(
@@ -256,6 +262,7 @@ export interface IJupyterRequestCreator {
 	wrapWebSocketCtor(
 		websocketCtor: ClassType<WebSocketIsomorphic>,
 	): ClassType<WebSocketIsomorphic>;
+
 	getRequestInit(): RequestInit;
 }
 

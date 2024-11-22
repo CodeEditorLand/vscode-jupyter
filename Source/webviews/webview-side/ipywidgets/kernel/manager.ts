@@ -61,6 +61,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 	 */
 	private modelIdsToBeDisplayed = new Map<string, Deferred<void>>();
 	private offlineModelIds = new Set<string>();
+
 	constructor(
 		private readonly widgetContainer: HTMLElement,
 		private readonly postOffice: PostOffice,
@@ -74,6 +75,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
 			IPyWidgetMessages.IPyWidgets_Ready,
 		);
+
 		setLogger((category: "error" | "verbose", message: string) => {
 			this.postOffice.sendMessage<IInteractiveWindowMapping>(
 				IPyWidgetMessages.IPyWidgets_logMessage,
@@ -82,10 +84,12 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 					message,
 				},
 			);
+
 			if (category === "error") {
 				console.error(message);
 			}
 		});
+
 		if (widgetState) {
 			this.initializeKernelAndWidgetManager(
 				{
@@ -157,13 +161,16 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		}
 
 		await this.manager.restoreWidgets(notebook, options);
+
 		const state = notebook.metadata.get(
 			"widgets",
 		) as NotebookMetadata["widgets"];
+
 		const widgetState =
 			state && state[WIDGET_STATE_MIMETYPE]
 				? state[WIDGET_STATE_MIMETYPE]
 				: undefined;
+
 		if (widgetState) {
 			const deferred = createDeferred<void>();
 			deferred.resolve();
@@ -200,6 +207,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 
 		if (!data || data.version_major !== 2) {
 			console.warn("Widget data not available to render an ipywidget");
+
 			return undefined;
 		}
 
@@ -220,8 +228,10 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		await this.modelIdsToBeDisplayed.get(modelId)!.promise;
 
 		const modelPromise = this.manager.get_model(data.model_id);
+
 		if (!modelPromise) {
 			console.warn("Widget model not available to render an ipywidget");
+
 			return undefined;
 		}
 
@@ -230,6 +240,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		// That 3rd party library may not be available and may have to be downloaded.
 		// Hence the promise to wait until it has been created.
 		const model = await modelPromise;
+
 		if (this.widgetState && this.offlineModelIds.has(modelId)) {
 			model.comm_live = false; // For widgets state in notebooks, there is no live kernel.
 		}
@@ -319,9 +330,12 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const data = displayMsg.content.data[WIDGET_MIMETYPE] as any;
+
 			const modelId = data.model_id;
 			logMessage(`Received display data message ${modelId}`);
+
 			let deferred = this.modelIdsToBeDisplayed.get(modelId);
+
 			if (!deferred) {
 				deferred = createDeferred();
 				this.modelIdsToBeDisplayed.set(modelId, deferred);
@@ -330,6 +344,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 				throw new Error("DS IPyWidgetManager not initialized");
 			}
 			const modelPromise = this.manager.get_model(data.model_id);
+
 			if (modelPromise) {
 				modelPromise
 					.then((_m) => deferred?.resolve())

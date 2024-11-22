@@ -60,6 +60,7 @@ export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 		// Create the data explorer
 		const dataExplorer =
 			this.serviceContainer.get<IDataViewer>(IDataViewer);
+
 		try {
 			// Then load the data.
 			this.knownViewers.add(dataExplorer);

@@ -38,6 +38,7 @@ export async function deleteOldTempDirs(context: IExtensionContext) {
 	const dirs = await fs
 		.readdir(context.globalStorageUri.fsPath)
 		.catch(() => []);
+
 	const currentTempDir = getCurrentTempDirName(context);
 	await Promise.all(
 		dirs
@@ -51,6 +52,7 @@ export async function deleteOldTempDirs(context: IExtensionContext) {
 					dir,
 				).fsPath;
 				logger.info(`Deleting old temp dir ${dirToDelete}`);
+
 				return fs.remove(dirToDelete);
 			}),
 	).catch(noop);

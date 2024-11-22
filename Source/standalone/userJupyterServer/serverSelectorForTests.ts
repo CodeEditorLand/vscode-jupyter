@@ -34,6 +34,7 @@ export class JupyterServerSelectorCommand
 	public readonly extensionId: string = JVSC_EXTENSION_ID;
 	public readonly id = TestingKernelPickerProviderId;
 	public readonly displayName = "Jupyter Server for Testing";
+
 	constructor(
 		@inject(IJupyterServerProviderRegistry)
 		private readonly uriProviderRegistration: IJupyterServerProviderRegistry,
@@ -43,6 +44,7 @@ export class JupyterServerSelectorCommand
 		super();
 	}
 	public readonly onDidChangeServers = this._onDidChangeHandles.event;
+
 	async provideJupyterServers(
 		_token: CancellationToken,
 	): Promise<JupyterServer[]> {
@@ -73,13 +75,19 @@ export class JupyterServerSelectorCommand
 	}
 	private async selectJupyterUri(source: Uri): Promise<void> {
 		logger.info(`Setting Jupyter Server URI to remote: ${source}`);
+
 		const uri = source.toString(true);
+
 		const url = new URL(uri);
+
 		const baseUrl = Uri.parse(
 			`${url.protocol}//${url.host}${url.pathname === "/lab" ? "" : url.pathname}`,
 		);
+
 		const token = url.searchParams.get("token") ?? "";
+
 		const handle = await computeHash(source.toString(true), "SHA-1");
+
 		const serverUri: JupyterServer = {
 			label: this.displayName,
 			id: handle,

@@ -50,6 +50,7 @@ export class ScriptSourceProviderFactory
 				this.configurationSettings,
 			),
 		);
+
 		switch (kernel.kernelConnectionMetadata.kind) {
 			case "connectToLiveRemoteKernel":
 			case "startUsingRemoteKernelSpec":
@@ -59,6 +60,7 @@ export class ScriptSourceProviderFactory
 						this.widgetScriptManagerFactory,
 					),
 				);
+
 				break;
 
 			default:

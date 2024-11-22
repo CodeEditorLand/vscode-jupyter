@@ -19,6 +19,7 @@ import { IJupyterLabWidgetManagerCtor, INotebookModel } from "./types";
 class WidgetManagerComponent {
 	private readonly widgetManager: WidgetManager;
 	private readonly scriptManager: ScriptManager;
+
 	constructor(
 		private postOffice: PostOffice,
 		JupyterLabWidgetManager: IJupyterLabWidgetManagerCtor,
@@ -106,6 +107,7 @@ class WidgetManagerComponent {
 }
 
 const outputDisposables = new Map<string, { dispose(): void }>();
+
 const renderedWidgets = new Map<
 	string,
 	{ container: HTMLElement; widget?: { dispose: Function }; modelId?: string }
@@ -143,6 +145,7 @@ export async function renderOutput(
 			`Error: render output ${outputItem.id} failed ${ex.toString()}`,
 			"error",
 		);
+
 		throw ex;
 	}
 }
@@ -173,6 +176,7 @@ function renderIPyWidget(
 	logger(
 		`Rendering IPyWidget ${outputId} with model ${model.model_id} in ${container.id}`,
 	);
+
 	if (
 		renderedWidgets.has(outputId) &&
 		renderedWidgets.get(outputId)?.container === container &&
@@ -181,6 +185,7 @@ function renderIPyWidget(
 		return logger("already rendering");
 	}
 	let timeout = 0;
+
 	if (renderedWidgets.has(outputId)) {
 		// If we're rendering another widget in the same output,
 		// then disposing the previous widget and its related state takes a few ms.
@@ -191,6 +196,7 @@ function renderIPyWidget(
 		logger(
 			"Widget was already rendering for another container, dispose that widget so we can re-render it",
 		);
+
 		try {
 			renderedWidgets.get(outputId)?.widget?.dispose();
 		} catch {
@@ -209,6 +215,7 @@ function renderIPyWidget(
 		.then(() => {
 			const output = document.createElement("div");
 			output.className = "cell-output cell-output";
+
 			if (typeof model._vsc_test_cellIndex === "number") {
 				container.className += ` vsc-test-cell-index-${model._vsc_test_cellIndex}`;
 			}
@@ -229,6 +236,7 @@ function renderIPyWidget(
 							"Widget container changed, hence disposing the widget",
 						);
 						w?.dispose();
+
 						return;
 					}
 					if (renderedWidgets.has(outputId)) {
@@ -247,6 +255,7 @@ function renderIPyWidget(
 						stackOfWidgetsRenderStatusByOutputId.find(
 							(item) => item.outputId === outputId,
 						);
+
 					if (statusInfo) {
 						statusInfo.success = true;
 					}
@@ -274,13 +283,16 @@ async function getWidgetManager(): Promise<WidgetManager> {
 		) {
 			function initializeInstance() {
 				const wm = WidgetManager.instance;
+
 				if (wm) {
 					const oldDispose = wm.dispose.bind(wm);
 					wm.dispose = () => {
 						// eslint-disable-next-line , @typescript-eslint/no-explicit-any
 						widgetManagerPromise = undefined;
+
 						return oldDispose();
 					};
+
 					if (resolve) {
 						resolve(wm);
 						resolve = undefined;
@@ -308,6 +320,7 @@ async function createWidgetView(
 ) {
 	try {
 		const wm = await getWidgetManager();
+
 		return await wm?.renderWidget(widgetData, element);
 	} catch (ex) {
 		// eslint-disable-next-line no-console
@@ -331,11 +344,15 @@ async function restoreWidgets(widgetState: NotebookMetadata["widgets"]) {
 			}
 			setTimeout(tryAgain, 1_000);
 		};
+
 		setTimeout(tryAgain, 1_000);
 	});
+
 	try {
 		initializeWidgetManager(widgetState);
+
 		const wm = await getWidgetManager();
+
 		const model: INotebookModel = {
 			metadata: {
 				get: (_: unknown) => {
@@ -343,6 +360,7 @@ async function restoreWidgets(widgetState: NotebookMetadata["widgets"]) {
 				},
 			},
 		};
+
 		return await wm?.restoreWidgets(model, {
 			loadKernel: false,
 			loadNotebook: true,
@@ -363,11 +381,13 @@ function initialize(
 ) {
 	if (initialized) {
 		logErrorMessage(`Error: WidgetManager already initialized`);
+
 		return;
 	}
 	try {
 		// Setup the widget manager
 		const postOffice = new PostOffice(context);
+
 		const mgr = new WidgetManagerComponent(
 			postOffice,
 			JupyterLabWidgetManager,
@@ -408,6 +428,7 @@ function initializeWidgetManager(widgetState?: NotebookMetadata["widgets"]) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const JupyterLabWidgetManager = (window as any).vscIPyWidgets
 		.WidgetManager as IJupyterLabWidgetManagerCtor;
+
 	if (!JupyterLabWidgetManager) {
 		throw new Error(
 			"JupyterLabWidgetManager not defined. Please include/check ipywidgets.js file",
@@ -435,6 +456,7 @@ export function activate(context: KernelMessagingApi) {
 				return;
 			}
 			ipyWidgetVersionResponseHandled = true;
+
 			try {
 				const version = e.payload;
 				logMessage(`Loading IPyWidget Version ${version}`);
@@ -447,8 +469,10 @@ export function activate(context: KernelMessagingApi) {
 						}
 						setTimeout(checkIfLoaded, 500);
 					};
+
 					setTimeout(checkIfLoaded, 500);
 				});
+
 				const widgets8Promise = new Promise<void>((resolve) => {
 					const checkIfLoaded = () => {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -457,9 +481,11 @@ export function activate(context: KernelMessagingApi) {
 						}
 						setTimeout(checkIfLoaded, 500);
 					};
+
 					setTimeout(checkIfLoaded, 500);
 				});
 				await Promise.all([widgets7Promise, widgets8Promise]);
+
 				const unloadWidgets8 = () => {
 					try {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -468,6 +494,7 @@ export function activate(context: KernelMessagingApi) {
 						//
 					}
 				};
+
 				const unloadWidgets7 = () => {
 					try {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -476,6 +503,7 @@ export function activate(context: KernelMessagingApi) {
 						//
 					}
 				};
+
 				if (version === 7) {
 					unloadWidgets8();
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -507,15 +535,18 @@ function hookWindowFunctions(context: KernelMessagingApi) {
 				type: IPyWidgetMessages.IPyWidgets_Window_Alert,
 				message: message.toString(),
 			});
+
 			throw new Error("window.alert not supported in VS Code Renderers");
 		};
 		window.open = (url: string | undefined | URL) => {
 			console.log("window.open", url);
+
 			if (url) {
 				context.postKernelMessage?.({
 					type: IPyWidgetMessages.IPyWidgets_Window_Open,
 					url: url.toString(),
 				});
+
 				throw new Error(
 					"window.open not supported in VS Code Renderers",
 				);

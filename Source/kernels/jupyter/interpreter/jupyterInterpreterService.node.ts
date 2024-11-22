@@ -113,6 +113,7 @@ export class JupyterInterpreterService {
 	public async selectInterpreter(): Promise<PythonEnvironment | undefined> {
 		const interpreter =
 			await this.jupyterInterpreterSelector.selectPythonInterpreter();
+
 		if (!interpreter) {
 			return;
 		}
@@ -122,13 +123,16 @@ export class JupyterInterpreterService {
 				interpreter,
 				undefined,
 			);
+
 		switch (result) {
 			case JupyterInterpreterDependencyResponse.ok: {
 				await this.setAsSelectedInterpreter(interpreter);
+
 				return interpreter;
 			}
 			case JupyterInterpreterDependencyResponse.cancel:
 				return;
+
 			default:
 				return this.selectInterpreter();
 		}
@@ -141,11 +145,14 @@ export class JupyterInterpreterService {
 		err?: JupyterInstallError,
 	): Promise<JupyterInterpreterDependencyResponse> {
 		const jupyterInterpreter = await this.getSelectedInterpreter();
+
 		let interpreter = jupyterInterpreter;
+
 		if (!interpreter) {
 			// Use current interpreter.
 			interpreter =
 				await this.interpreterService.getActiveInterpreter(undefined);
+
 			if (!interpreter) {
 				if (err) {
 					const selection = await window.showErrorMessage(
@@ -153,6 +160,7 @@ export class JupyterInterpreterService {
 						{ modal: true },
 						DataScience.selectDifferentJupyterInterpreter,
 					);
+
 					if (
 						selection !==
 						DataScience.selectDifferentJupyterInterpreter
@@ -164,6 +172,7 @@ export class JupyterInterpreterService {
 				// Unlikely scenario, user hasn't selected python, python extension will fall over.
 				// Get user to select something.
 				await this.selectInterpreter();
+
 				return JupyterInterpreterDependencyResponse.selectAnotherInterpreter;
 			}
 		}
@@ -173,11 +182,13 @@ export class JupyterInterpreterService {
 				interpreter,
 				err,
 			);
+
 		if (
 			response ===
 			JupyterInterpreterDependencyResponse.selectAnotherInterpreter
 		) {
 			interpreter = await this.selectInterpreter();
+
 			return interpreter
 				? JupyterInterpreterDependencyResponse.ok
 				: JupyterInterpreterDependencyResponse.cancel;
@@ -223,6 +234,7 @@ export class JupyterInterpreterService {
 				token,
 				this.interpreterService.getInterpreterDetails(pythonPath),
 			);
+
 			if (interpreter) {
 				// Then check that dependencies are installed
 				if (
@@ -265,6 +277,7 @@ export class JupyterInterpreterService {
 		if (!interpreter) {
 			const currentInterpreter =
 				await this.interpreterService.getActiveInterpreter(undefined);
+
 			if (currentInterpreter) {
 				// If the current active interpreter has everything installed already just use that
 				if (

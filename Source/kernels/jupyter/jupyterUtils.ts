@@ -39,6 +39,7 @@ export function expandWorkingDir(
 ): string {
 	if (workingDir) {
 		const variables = settings.createSystemVariables(launchingFile);
+
 		return variables.resolve(workingDir);
 	}
 
@@ -56,13 +57,16 @@ export async function handleSelfCertsError(
 ): Promise<boolean> {
 	// On a self cert error, warn the user and ask if they want to change the setting
 	const enableOption: string = DataScience.jupyterSelfCertEnable;
+
 	const closeOption: string = DataScience.jupyterSelfCertClose;
+
 	const value = await window.showErrorMessage(
 		DataScience.jupyterSelfCertFail(message),
 		{ modal: true },
 		enableOption,
 		closeOption,
 	);
+
 	if (value === enableOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
 		await config.updateSetting(
@@ -71,6 +75,7 @@ export async function handleSelfCertsError(
 			undefined,
 			ConfigurationTarget.Workspace,
 		);
+
 		return true;
 	} else if (value === closeOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
@@ -84,13 +89,16 @@ export async function handleExpiredCertsError(
 ): Promise<boolean> {
 	// On a self cert error, warn the user and ask if they want to change the setting
 	const enableOption: string = DataScience.jupyterSelfCertEnable;
+
 	const closeOption: string = DataScience.jupyterSelfCertClose;
+
 	const value = await window.showErrorMessage(
 		DataScience.jupyterExpiredCertFail(message),
 		{ modal: true },
 		enableOption,
 		closeOption,
 	);
+
 	if (value === enableOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
 		await config.updateSetting(
@@ -99,6 +107,7 @@ export async function handleExpiredCertsError(
 			undefined,
 			ConfigurationTarget.Workspace,
 		);
+
 		return true;
 	} else if (value === closeOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
@@ -116,8 +125,11 @@ export function createJupyterConnectionInfo(
 	toDispose?: IDisposable,
 ): IJupyterConnection {
 	const baseUrl = serverUri.baseUrl;
+
 	const token = serverUri.token;
+
 	const hostName = new URL(serverUri.baseUrl).hostname;
+
 	let authHeader =
 		serverUri.authorizationHeader &&
 		Object.keys(serverUri?.authorizationHeader ?? {}).length > 0
@@ -152,6 +164,7 @@ export function createJupyterConnectionInfo(
 	let requestInit: any = requestCreator.getRequestInit();
 
 	const isTokenEmpty = token === "" || token === "null";
+
 	if (!isTokenEmpty || getAuthHeader) {
 		serverSettings = { ...serverSettings, token, appendToken: true };
 	}
@@ -211,11 +224,13 @@ export function createJupyterConnectionInfo(
 		getAuthHeader,
 		settings: ServerConnection.makeSettings(serverSettings),
 	};
+
 	return connection;
 }
 
 export async function computeServerId(provider: JupyterServerProviderHandle) {
 	const uri = generateIdFromRemoteProvider(provider);
+
 	return computeHash(uri, "SHA-256");
 }
 
@@ -259,12 +274,15 @@ export function extractJupyterServerHandleAndId(
 
 		// Id has to be there too.
 		const id = url.searchParams.get(Identifiers.REMOTE_URI_ID_PARAM);
+
 		const uriHandle = url.searchParams.get(
 			Identifiers.REMOTE_URI_HANDLE_PARAM,
 		);
+
 		const extensionId =
 			url.searchParams.get(Identifiers.REMOTE_URI_EXTENSION_ID_PARAM) ||
 			getOwnerExtensionOfProviderHandle(id || "");
+
 		if (id && uriHandle) {
 			if (!extensionId) {
 				throw new FailedToDetermineExtensionId(
@@ -295,9 +313,11 @@ function getSafeUrlForLogging(uri: string) {
 	} else {
 		try {
 			const url: URL = new URL(uri);
+
 			const isLocalHost =
 				url.hostname.toLocaleLowerCase() === "localhost" ||
 				url.hostname === "127.0.0.1";
+
 			return `${url.protocol}//${isLocalHost ? url.hostname : "<REMOTE SERVER>"}:${url.port}`;
 		} catch {
 			return uri;

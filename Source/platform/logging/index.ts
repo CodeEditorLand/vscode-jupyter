@@ -18,6 +18,7 @@ import { Arguments, ILogger, TraceDecoratorType, TraceOptions } from "./types";
 import { argsToLogString, returnValueToLogString } from "./util";
 
 let homeAsLowerCase = "";
+
 const DEFAULT_OPTS: TraceOptions =
 	TraceOptions.Arguments | TraceOptions.ReturnValue;
 
@@ -33,6 +34,7 @@ export type TraceInfo =
 	| undefined;
 
 let loggers: ILogger[] = [];
+
 let globalLoggingLevel: LogLevel = LogLevel.Info;
 export const logger: ILogger = {
 	error: (message: string, ...data: Arguments) => logError(message, ...data),
@@ -65,6 +67,7 @@ export function initializeLoggers(options: {
 			}
 		}),
 	);
+
 	const standardOutputChannel = window.createOutputChannel(
 		OutputChannelNames.jupyter,
 		"log",
@@ -89,6 +92,7 @@ export function initializeLoggers(options: {
 
 export function registerLogger(logger: ILogger): Disposable {
 	loggers.push(logger);
+
 	return {
 		dispose: () => {
 			loggers = loggers.filter((l) => l !== logger);
@@ -108,6 +112,7 @@ function getLoggingLevelFromConfig() {
 			.get<{
 				level: LoggingLevelSettingType;
 			}>("logging", { level: "Info" });
+
 		switch (level) {
 			case "debug":
 			case "Debug": {
@@ -137,6 +142,7 @@ function getLoggingLevelFromConfig() {
 		}
 	} catch (ex) {
 		console.error("Failed to get logging level from configuration", ex);
+
 		return LogLevel.Info;
 	}
 }
@@ -147,6 +153,7 @@ export function setHomeDirectory(homeDir: string) {
 function formatErrors(...args: Arguments) {
 	// Format the error message, if showing verbose then include all of the error stack & other details.
 	const formatError = globalLoggingLevel <= LogLevel.Debug ? false : true;
+
 	if (!formatError) {
 		return args;
 	}
@@ -159,6 +166,7 @@ function formatErrors(...args: Arguments) {
 			return arg;
 		}
 		const info: string[] = [`${arg.name}: ${arg.message}`.trim()];
+
 		if (
 			"kernelConnectionMetadata" in arg &&
 			arg.kernelConnectionMetadata &&
@@ -166,6 +174,7 @@ function formatErrors(...args: Arguments) {
 			"id" in arg.kernelConnectionMetadata
 		) {
 			info.push(`Kernel Id = ${arg.kernelConnectionMetadata.id}`);
+
 			if (
 				"interpreter" in arg.kernelConnectionMetadata &&
 				arg.kernelConnectionMetadata.interpreter &&
@@ -180,7 +189,9 @@ function formatErrors(...args: Arguments) {
 		}
 		if (arg.stack) {
 			const stack = splitLines(arg.stack);
+
 			const firstStackLine = stack.find((l) => l.indexOf("at ") === 0);
+
 			if (stack.length === 1) {
 				//
 			} else if (stack.length === 1) {
@@ -205,6 +216,7 @@ function formatErrors(...args: Arguments) {
 			.forEach((key) =>
 				info.push(`${key} = ${String((arg as any)[key]).trim()}`),
 			);
+
 		return info
 			.filter((l) => l.trim().length)
 			.map((l, i) => (i === 0 ? l : `    > ${l}`))
@@ -249,9 +261,13 @@ function logInfoIfCI(arg1: any, ...args: Arguments): void {
 		if (typeof arg1 === "function") {
 			const fn: () => string | [message: string, ...args: string[]] =
 				arg1;
+
 			const result = fn();
+
 			let message = "";
+
 			let rest: string[] = [];
+
 			if (typeof result === "string") {
 				message = result;
 			} else {
@@ -303,6 +319,7 @@ type ParameterLogInformation =
 	| { parameterIndex: number; ignore: true };
 type MethodName = string | symbol;
 type ClassInstance = Object;
+
 const formattedParameters = new WeakMap<
 	ClassInstance,
 	Map<MethodName, ParameterLogInformation[]>
@@ -321,6 +338,7 @@ export function logValue<T>(property: keyof T) {
 			);
 		}
 		let parameterInfos = formattedParameters.get(target);
+
 		if (!parameterInfos) {
 			formattedParameters.set(
 				target,
@@ -354,6 +372,7 @@ export function ignoreLogging() {
 			);
 		}
 		let parameterInfos = formattedParameters.get(target);
+
 		if (!parameterInfos) {
 			formattedParameters.set(
 				target,
@@ -388,6 +407,7 @@ type LogInfo = {
 
 function normalizeCall(call: CallInfo): CallInfo {
 	let { kind, name, args } = call;
+
 	if (!kind || kind === "") {
 		kind = "Function";
 	}
@@ -412,6 +432,7 @@ function isUri(resource?: Uri | any): resource is Uri {
 		return false;
 	}
 	const uri = resource as Uri;
+
 	return typeof uri.path === "string" && typeof uri.scheme === "string";
 }
 
@@ -420,6 +441,7 @@ function removeUserPaths(value: string) {
 	const indexOfStart = homeAsLowerCase
 		? value.toLowerCase().indexOf(homeAsLowerCase)
 		: -1;
+
 	return indexOfStart === -1
 		? value
 		: `~${value.substring(indexOfStart + homeAsLowerCase.length)}`;
@@ -439,9 +461,11 @@ function formatArgument(
 		return arg;
 	}
 	const parameterInfos = formattedParameters.get(target)?.get(method);
+
 	const info = parameterInfos?.find(
 		(info) => info.parameterIndex === parameterIndex,
 	);
+
 	if (!info) {
 		return typeof arg === "string" ? removeUserPaths(arg) : arg;
 	}
@@ -450,6 +474,7 @@ function formatArgument(
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let valueToLog: any = arg;
+
 	if ("propertyOfParameterToLog" in info && info.propertyOfParameterToLog) {
 		valueToLog = arg[info.propertyOfParameterToLog];
 	}
@@ -464,8 +489,10 @@ function formatMessages(
 ): string {
 	call = normalizeCall(call!);
 	``;
+
 	const messages = [info.message];
 	messages.push(`${call.kind} name = ${call.name}`.trim());
+
 	if (traced) {
 		messages.push(`completed in ${traced.elapsed}ms`);
 		messages.push(
@@ -507,6 +534,7 @@ function formatMessages(
 
 function logResult(info: LogInfo, traced: TraceInfo, call?: CallInfo) {
 	const formatted = formatMessages(info, traced, call);
+
 	if (!traced) {
 		if (info.level && info.level !== LogLevel.Error) {
 			logTo(info.level, formatted);
@@ -529,17 +557,25 @@ function logTo(logLevel: LogLevel, message: string, ...args: Arguments): void {
 	switch (logLevel) {
 		case LogLevel.Error:
 			logger.error(message, ...args);
+
 			break;
+
 		case LogLevel.Warning:
 			logWarning(message, ...args);
+
 			break;
+
 		case LogLevel.Info:
 			logger.info(message, ...args);
+
 			break;
+
 		case LogLevel.Debug:
 		case LogLevel.Trace:
 			logger.debug(message, ...args);
+
 			break;
+
 		default:
 			break;
 	}

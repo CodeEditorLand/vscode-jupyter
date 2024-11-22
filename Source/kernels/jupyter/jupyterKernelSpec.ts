@@ -23,6 +23,7 @@ export class JupyterKernelSpec implements IJupyterKernelSpec {
 	public metadata?: Record<string, any> & {
 		interpreter?: Partial<PythonEnvironment_PythonApi>;
 	};
+
 	constructor(
 		specModel: KernelSpec.ISpecModel,
 		public readonly specFile?: string,

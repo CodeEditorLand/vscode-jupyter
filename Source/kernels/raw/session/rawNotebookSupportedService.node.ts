@@ -13,6 +13,7 @@ export class RawNotebookSupportedService
 	implements IRawNotebookSupportedService
 {
 	private _isSupported?: boolean;
+
 	constructor(
 		@inject(IConfigurationService)
 		private readonly configuration: IConfigurationService,

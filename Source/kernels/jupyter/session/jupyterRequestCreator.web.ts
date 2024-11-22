@@ -29,6 +29,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 				if (getAuthHeaders) {
 					const authorizationHeader = getAuthHeaders();
+
 					const keys = Object.keys(authorizationHeader);
 					keys.forEach((k) =>
 						origHeaders.append(
@@ -73,9 +74,11 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				protocols?: string | string[] | undefined,
 			) {
 				super(url, protocols);
+
 				let timer: NodeJS.Timeout | undefined = undefined;
 				// Parse the url for the kernel id
 				const parsed = /.*\/kernels\/(.*)\/.*/.exec(url);
+
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
@@ -121,6 +124,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 								target: this,
 							};
 							originalMessageHandler(event);
+
 							return true;
 						},
 						"message",
@@ -150,9 +154,11 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				protocols?: string | string[] | undefined,
 			) {
 				super(url, protocols);
+
 				let timer: NodeJS.Timeout | undefined = undefined;
 				// Parse the url for the kernel id
 				const parsed = /.*\/kernels\/(.*)\/.*/.exec(url);
+
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
@@ -196,6 +202,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 								target: this,
 							};
 							originalMessageHandler(event);
+
 							return true;
 						},
 						"message",

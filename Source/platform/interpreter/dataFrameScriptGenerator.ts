@@ -9,6 +9,7 @@ import { IDataFrameScriptGenerator, IExtensionContext } from "../common/types";
 import { joinPath } from "../vscode-path/resources";
 
 const DataFrameFunc = "_VSCODE_getDataFrame";
+
 const cleanupCode = dedent`
                             try:
                                 del _VSCODE_getDataFrame
@@ -27,11 +28,15 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 	) {}
 	public async generateCodeToGetDataFrameInfo(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 	}) {
 		const initializeCode = await this.getContentsOfDataFrameScript();
+
 		const isDebugging = options.isDebugging ? "True" : "False";
+
 		const code = `${DataFrameFunc}("info", ${isDebugging}, ${options.variableName})`;
+
 		if (options.isDebugging) {
 			// When debugging, the code is evaluated in the debugger, so we need to initialize the script.
 			// We cannot send complex code to the debugger, it has to be a simple expression that produces a value.
@@ -49,13 +54,17 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 	}
 	public async generateCodeToGetDataFrameRows(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 		startIndex: number;
 		endIndex: number;
 	}) {
 		const initializeCode = await this.getContentsOfDataFrameScript();
+
 		const isDebugging = options.isDebugging ? "True" : "False";
+
 		const code = `${DataFrameFunc}("rows", ${isDebugging}, ${options.variableName}, ${options.startIndex}, ${options.endIndex})`;
+
 		if (options.isDebugging) {
 			return {
 				initializeCode,
@@ -81,8 +90,10 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 			"dataframes",
 			"vscodeDataFrame.py",
 		);
+
 		const contents = await this.fs.readFile(scriptPath);
 		DataFrameScriptGenerator.contentsOfDataFrameScript = contents;
+
 		return contents;
 	}
 }

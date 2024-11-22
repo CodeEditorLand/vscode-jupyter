@@ -70,22 +70,27 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		}
 
 		const show = await this.shouldShowBanner();
+
 		if (!show) {
 			return;
 		}
 
 		sendTelemetryEvent(Telemetry.ShiftEnterBannerShown);
+
 		const response = await window.showInformationMessage(
 			this.bannerMessage,
 			...this.bannerLabels,
 		);
+
 		switch (response) {
 			case this.bannerLabels[InteractiveShiftEnterLabelIndex.Yes]: {
 				await this.enableInteractiveShiftEnter();
+
 				break;
 			}
 			case this.bannerLabels[InteractiveShiftEnterLabelIndex.No]: {
 				await this.disableInteractiveShiftEnter();
+
 				break;
 			}
 			default: {
@@ -97,6 +102,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 
 	public async shouldShowBanner(): Promise<boolean> {
 		const settings = this.configuration.getSettings();
+
 		return Promise.resolve(
 			this.isEnabled() &&
 				!this.disabledInCurrentSession &&

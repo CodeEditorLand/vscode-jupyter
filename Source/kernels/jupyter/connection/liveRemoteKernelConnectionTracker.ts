@@ -43,6 +43,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 {
 	private usedRemoteKernelServerIdsAndSessions: UriSessionUsedByResources =
 		{};
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
@@ -69,6 +70,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 		const id = generateIdFromRemoteProvider(
 			connection.serverProviderHandle,
 		);
+
 		return (
 			id in this.usedRemoteKernelServerIdsAndSessions &&
 			typeof connection.kernelModel.id === "string" &&
@@ -86,7 +88,9 @@ export class LiveRemoteKernelConnectionUsageTracker
 			this.usedRemoteKernelServerIdsAndSessions[id] || {};
 		this.usedRemoteKernelServerIdsAndSessions[id][kernelId] =
 			this.usedRemoteKernelServerIdsAndSessions[id][kernelId] || [];
+
 		const uris = this.usedRemoteKernelServerIdsAndSessions[id][kernelId];
+
 		if (uris.includes(resource.toString())) {
 			return;
 		}
@@ -104,6 +108,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 		kernelId: string,
 	) {
 		const id = generateIdFromRemoteProvider(serverId);
+
 		if (!(id in this.usedRemoteKernelServerIdsAndSessions)) {
 			return;
 		}
@@ -111,10 +116,12 @@ export class LiveRemoteKernelConnectionUsageTracker
 			return;
 		}
 		const uris = this.usedRemoteKernelServerIdsAndSessions[id][kernelId];
+
 		if (!Array.isArray(uris) || !uris.includes(resource.toString())) {
 			return;
 		}
 		uris.splice(uris.indexOf(resource.toString()), 1);
+
 		if (uris.length === 0) {
 			delete this.usedRemoteKernelServerIdsAndSessions[id][kernelId];
 		}

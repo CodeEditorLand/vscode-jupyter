@@ -52,6 +52,7 @@ export function combineReducers<S, M>(
 ): Reducer<S, QueuableAction<M>> {
 	return (currentState: S = defaultState, action: QueuableAction<M>) => {
 		const func = map[action.type];
+
 		if (typeof func === "function") {
 			// Call the reducer, giving it
 			// - current state
@@ -80,6 +81,7 @@ export function combineReducers<S, M>(
 export function createQueueableActionMiddleware(): Middleware {
 	return (store) => (next) => (action) => {
 		let pendingActions: Action[] = [];
+
 		let complete = false;
 
 		function flush() {

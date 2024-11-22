@@ -20,6 +20,7 @@ export class GlobalPythonExecutablePathService {
 	private readonly userSitePaths = new ResourceMap<
 		Promise<Uri | undefined>
 	>();
+
 	constructor(
 		@inject(IProcessServiceFactory)
 		private readonly processFactory: IProcessServiceFactory,
@@ -35,6 +36,7 @@ export class GlobalPythonExecutablePathService {
 		environment: Environment,
 	): Promise<Uri | undefined> {
 		const executable = environment.executable.uri;
+
 		if (
 			getEnvironmentType(environment) !== EnvironmentType.Unknown ||
 			!executable
@@ -81,13 +83,16 @@ export class GlobalPythonExecutablePathService {
 		executable: Uri,
 	): Promise<Uri | undefined> {
 		const processService = await this.processFactory.create(undefined);
+
 		const delimiter = "USER_BASE_VALUE";
+
 		const valueToUse = this.platform.isWindows ? "USER_SITE" : "USER_BASE";
 		// Add delimiters as sometimes, the python runtime can spit out warning/information messages as well.
 		const { stdout } = await processService.exec(executable.fsPath, [
 			"-c",
 			`import site;print("${delimiter}");print(site.${valueToUse});print("${delimiter}");`,
 		]);
+
 		if (stdout.includes(delimiter)) {
 			const output = stdout
 				.substring(
@@ -95,8 +100,11 @@ export class GlobalPythonExecutablePathService {
 					stdout.lastIndexOf(delimiter),
 				)
 				.trim();
+
 			const outputPath = Uri.file(output);
+
 			let sitePath: Uri | undefined;
+
 			if (this.platform.isWindows) {
 				sitePath = Uri.joinPath(path.dirname(outputPath), "Scripts");
 			} else {
@@ -110,6 +118,7 @@ export class GlobalPythonExecutablePathService {
 			logger.trace(
 				`USER_SITE for ${getDisplayPath(executable)} is ${sitePath.fsPath}`,
 			);
+
 			return sitePath;
 		} else {
 			throw new Error(

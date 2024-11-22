@@ -53,21 +53,26 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 			await this.preferredRemoteKernelIdProvider.getPreferredRemoteKernelId(
 				notebook,
 			);
+
 		if (!preferredRemote) {
 			return;
 		}
 		const findAndSelectRemoteController = () => {
 			const active = this.controllerRegistration.getSelected(notebook);
+
 			const matching = this.controllerRegistration.registered.find(
 				(l) => l.id === preferredRemote,
 			);
+
 			if (matching && active?.id !== matching.id) {
 				// This controller is the one we want, but it's not currently set.
 				this.switchKernel(notebook, matching.connection).catch(noop);
+
 				return true;
 			}
 			return false;
 		};
+
 		if (findAndSelectRemoteController()) {
 			return;
 		}
@@ -109,12 +114,15 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 			id: kernel.id,
 			extension: JVSC_EXTENSION_ID,
 		});
+
 		const success = await waitForCondition(
 			async () => {
 				if (window.activeNotebookEditor?.notebook === n) {
 					const selected = this.controllerRegistration.getSelected(n);
+
 					if (selected?.connection.id === kernel.id) {
 						selected.restoreConnection(n).catch(noop);
+
 						return true;
 					}
 				}
@@ -123,6 +131,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 			2000,
 			100,
 		);
+
 		if (success) {
 			logger.debug(
 				`Successfully switched remote kernel for ${getDisplayPath(n.uri)} to ${kernel.id}`,

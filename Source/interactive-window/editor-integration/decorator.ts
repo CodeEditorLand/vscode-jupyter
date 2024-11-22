@@ -124,6 +124,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
     private update(editor: vscode.TextEditor | undefined) {
         // Don't look through all visible editors unless we have to i.e. the active editor has changed
         const editorsToCheck = editor === undefined ? window.visibleTextEditors : [editor];
+
         for (const editor of editorsToCheck) {
             if (
                 editor &&
@@ -137,11 +138,13 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
                 this.extensionChecker.isPythonExtensionInstalled
             ) {
                 const settings = this.configuration.getSettings(editor.document.uri);
+
                 if (this.cellDecorationEnabled(settings)) {
                     // Find all of the cells
                     const cells = this.cellRangeCache.getCellRanges(editor.document);
                     // Find the range for our active cell.
                     const currentRange = cells.map((c) => c.range).filter((r) => r.contains(editor.selection.anchor));
+
                     const rangeTop =
                         currentRange.length > 0 ? [new vscode.Range(currentRange[0].start, currentRange[0].start)] : [];
                     // no need to decorate the bottom if we're decorating all cells
@@ -149,14 +152,18 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
                         settings.decorateCells !== 'allCells' && currentRange.length > 0
                             ? [new vscode.Range(currentRange[0].end, currentRange[0].end)]
                             : [];
+
                     const nonCurrentCells: vscode.Range[] = [];
+
                     if (settings.decorateCells === 'allCells')
                         cells.forEach((cell) => {
                             const cellTop = cell.range.start;
+
                             if (cellTop !== currentRange[0].start) {
                                 nonCurrentCells.push(new vscode.Range(cellTop, cellTop));
                             }
                         });
+
                     if (window.activeTextEditor === editor) {
                         editor.setDecorations(this.currentCellTop, rangeTop);
                         editor.setDecorations(this.currentCellBottom, rangeBottom);

@@ -17,6 +17,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	private readonly restartProgress = new WeakMap<IKernel, IDisposable>();
 	private readonly interruptProgress = new WeakMap<IKernel, IDisposable>();
+
 	constructor(
 		@inject(IKernelProvider)
 		private readonly kernelProvider: IKernelProvider,
@@ -48,6 +49,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 			"willRestart",
 			async () => {
 				this.restartProgress.get(kernel)?.dispose();
+
 				const progress = KernelProgressReporter.createProgressReporter(
 					kernel.resourceUri,
 					DataScience.restartingKernelStatus(
@@ -75,6 +77,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 				// Generally interrupts completely fairly quickly, in < 1s
 				// Hence no point displaying a notification just to hide that immediately after its displayed
 				const disposable = new DisposableStore();
+
 				const timeout = setTimeout(() => {
 					if (disposable.isDisposed) {
 						return;

@@ -26,6 +26,7 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	}
 	private _postMessageEmitter = new EventEmitter<IPyWidgetMessage>();
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		private readonly baseMulticaster: IPyWidgetMessageDispatcher,
 		private oldMessages: ReadonlyArray<IPyWidgetMessage>,
@@ -94,6 +95,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 	>();
 	private disposed = false;
 	private disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 		@inject(IKernelProvider)
@@ -110,12 +112,14 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 
 	public dispose() {
 		this.disposed = true;
+
 		while (this.disposables.length) {
 			this.disposables.shift()?.dispose(); // NOSONAR
 		}
 	}
 	public create(document: NotebookDocument): IIPyWidgetMessageDispatcher {
 		let baseDispatcher = this.messageDispatchers.get(document);
+
 		if (!baseDispatcher) {
 			baseDispatcher = new IPyWidgetMessageDispatcher(
 				this.kernelProvider,
@@ -137,6 +141,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		// If there are no old messages, even then return a new instance of the class.
 		// This way, the reference to that will be controlled by calling code.
 		let messages: ReadonlyArray<IPyWidgetMessage> = [];
+
 		if (document && this.messagesPerNotebook.get(document)) {
 			messages = this.messagesPerNotebook.get(document) || [];
 		}
@@ -145,6 +150,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			messages,
 		);
 		this.disposables.push(dispatcher);
+
 		return dispatcher;
 	}
 	private trackDisposingOfKernels(kernel: IKernel) {
@@ -152,6 +158,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			return;
 		}
 		const notebook = kernel.notebook;
+
 		const item = this.messageDispatchers.get(notebook);
 		this.messageDispatchers.delete(notebook);
 		item?.dispose(); // NOSONAR
@@ -171,6 +178,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			document,
 			this.messagesPerNotebook.get(document) || [],
 		);
+
 		if (
 			message.message === IPyWidgetMessages.IPyWidgets_kernelOptions ||
 			message.message === IPyWidgetMessages.IPyWidgets_registerCommTarget

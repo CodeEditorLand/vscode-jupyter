@@ -6,5 +6,6 @@ export function getJupyterConnectionDisplayName(
 	baseUrl: string,
 ): string {
 	const tokenString = token.length > 0 ? `?token=${token}` : "";
+
 	return `${baseUrl}${tokenString}`;
 }

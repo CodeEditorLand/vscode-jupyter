@@ -27,6 +27,7 @@ export class KernelApi implements IExtensionSyncActivationService {
 			ServiceContainer.instance.get<IDisposableRegistry>(
 				IDisposableRegistry,
 			);
+
 		const disposableStore = new DisposableStore();
 		disposables.push(disposableStore);
 		disposables.push(
@@ -39,10 +40,12 @@ export class KernelApi implements IExtensionSyncActivationService {
 
 async function manageKernelAccess(toDispose: DisposableStore) {
 	const accessInfo = await getExtensionAccessListForManagement();
+
 	const quickPickItems: (QuickPickItem & { extensionId: string })[] = [];
 	Array.from(accessInfo.entries()).forEach(([extensionId]) => {
 		const displayName =
 			extensions.getExtension(extensionId)?.packageJSON?.displayName;
+
 		if (!displayName) {
 			return;
 		}
@@ -52,12 +55,14 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 			extensionId,
 		});
 	});
+
 	let disposables: IDisposable[] = [];
 	toDispose.add({
 		dispose: () => {
 			disposables = dispose(disposables);
 		},
 	});
+
 	const quickPick = window.createQuickPick<
 		QuickPickItem & { extensionId: string }
 	>();
@@ -71,6 +76,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	);
 	quickPick.canSelectMany = true;
 	quickPick.ignoreFocusOut = false;
+
 	let accepted = false;
 	disposables.push(quickPick);
 	quickPick.show();
@@ -80,6 +86,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 		),
 		toPromise(quickPick.onDidHide, undefined, disposables),
 	]);
+
 	if (!accepted) {
 		return;
 	}

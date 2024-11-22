@@ -26,27 +26,34 @@ export class ExportDialog {
 	): Promise<Uri | undefined> {
 		// map each export method to a set of file extensions
 		let fileExtensions: { [name: string]: string[] } = {};
+
 		let extension: string | undefined;
+
 		switch (format) {
 			case ExportFormat.python:
 				fileExtensions = PythonExtensions;
 				extension = ".py";
+
 				break;
 
 			case ExportFormat.pdf:
 				extension = ".pdf";
 				fileExtensions = PDFExtensions;
+
 				break;
 
 			case ExportFormat.html:
 				extension = ".html";
 				fileExtensions = HTMLExtensions;
+
 				break;
 
 			case ExportFormat.ipynb:
 				extension = ".ipynb";
+
 				const filtersKey = localize.DataScience.exportDialogFilter;
 				fileExtensions[filtersKey] = ["ipynb"];
+
 				break;
 
 			default:
@@ -87,6 +94,7 @@ export class ExportDialog {
 				ServiceContainer.instance.get<IWorkspaceService>(
 					IWorkspaceService,
 				);
+
 			return Uri.file(
 				path.join(
 					await workspaceService.computeWorkingDirectory(source),
@@ -97,6 +105,7 @@ export class ExportDialog {
 
 		// Otherwise split off the end of the path and combine it with the target file name
 		const newPath = path.join(path.dirname(source.path), targetFileName);
+
 		return Uri.parse(`${source.scheme}://${newPath}`).with({
 			authority: source.authority,
 		});

@@ -48,6 +48,7 @@ async function getConnectionIdHash(connection: KernelConnectionMetadata) {
         const normalizedPath = getNormalizedInterpreterPath(connection.interpreter.uri).fsPath;
         // Connection ids can contain Python paths in them.
         const normalizedId = connection.id.replace(interpreterPath, normalizedPath);
+
         return getTelemetrySafeHashedString(normalizedId);
     }
     return getTelemetrySafeHashedString(connection.id);
@@ -62,6 +63,7 @@ export class BaseKernelConnectionMetadata {
             | ReadWrite<PythonKernelConnectionMetadata>
     ) {
         const clone = Object.assign(json, {});
+
         if (clone.interpreter) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             clone.interpreter = deserializePythonEnvironment(clone.interpreter as any, '')!;
@@ -70,15 +72,19 @@ export class BaseKernelConnectionMetadata {
             case 'startUsingLocalKernelSpec':
                 // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 return LocalKernelSpecConnectionMetadata.create(clone as LocalKernelSpecConnectionMetadata);
+
             case 'connectToLiveRemoteKernel':
                 // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 return LiveRemoteKernelConnectionMetadata.create(clone as LiveRemoteKernelConnectionMetadata);
+
             case 'startUsingRemoteKernelSpec':
                 // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 return RemoteKernelSpecConnectionMetadata.create(clone as RemoteKernelSpecConnectionMetadata);
+
             case 'startUsingPythonInterpreter':
                 // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 return PythonKernelConnectionMetadata.create(clone as PythonKernelConnectionMetadata);
+
             default:
                 throw new Error(`Invalid object to be deserialized into a connection, kind = ${clone.kind}`);
         }
@@ -534,6 +540,7 @@ export interface IKernelProvider extends IBaseKernelProvider<IKernel> {
      * WARNING: If called with different options for same Notebook, old kernel associated with the Uri will be disposed.
      */
     getOrCreate(notebook: NotebookDocument, options: KernelOptions): IKernel;
+
     getKernelExecution(kernel: IKernel): INotebookKernelExecution;
 }
 
@@ -564,11 +571,13 @@ export interface IJupyterConnection extends Disposable {
     readonly providerId: string;
     readonly serverProviderHandle: JupyterServerProviderHandle;
     readonly hostName: string;
+
     settings: ServerConnection.ISettings;
     /**
      * Directory where the notebook server was started.
      */
     readonly rootDirectory: Uri;
+
     getAuthHeader?(): Record<string, string>;
 }
 
@@ -890,6 +899,7 @@ export interface IStartupCodeProviders {
  */
 export interface IStartupCodeProvider {
     priority: StartupCodePriority;
+
     getCode(kernel: IBaseKernel): Promise<string[]>;
 }
 
@@ -912,18 +922,27 @@ function sendKernelTelemetry(kernel: KernelConnectionMetadata) {
         return;
     }
     capturedTelemetry.add(kernel.id);
+
     const kernelSpec = 'kernelSpec' in kernel ? kernel.kernelSpec : undefined;
+
     const language =
         kernelSpec?.language || (kernel.kind === 'startUsingPythonInterpreter' ? PYTHON_LANGUAGE : undefined);
+
     let argv0 = '';
+
     let argv = '';
+
     const interpreter = 'interpreter' in kernel ? kernel.interpreter : undefined;
+
     const separator = `<#>`;
+
     let isArgv0SameAsInterpreter: undefined | boolean = undefined;
+
     if (kernelSpec && Array.isArray(kernelSpec.argv) && kernelSpec.argv.length > 0) {
         argv0 = kernelSpec.argv[0];
         // eslint-disable-next-line local-rules/dont-use-fspath
         isArgv0SameAsInterpreter = argv0.toLowerCase() === interpreter?.uri?.fsPath?.toLowerCase();
+
         if (path.basename(argv0) !== argv0) {
             argv0 = `<P>${path.basename(argv0)}`;
         }
@@ -941,13 +960,17 @@ function sendKernelTelemetry(kernel: KernelConnectionMetadata) {
         'kernelSpec' in kernel && kernel.kernelSpec.specFile
             ? getTelemetrySafeHashedString(kernel.kernelSpec.specFile)
             : Promise.resolve('');
+
     const kernelIdHash = getTelemetrySafeHashedString(kernel.id);
+
     const serverIdHashPromise = isRemoteConnection(kernel)
         ? getTelemetrySafeHashedString(generateIdFromRemoteProvider(kernel.serverProviderHandle))
         : Promise.resolve('');
+
     const providerExtensionId = isRemoteConnection(kernel)
         ? kernel.serverProviderHandle.extensionId
         : JVSC_EXTENSION_ID;
+
     const baseUrlHashPromise = isRemoteConnection(kernel)
         ? getTelemetrySafeHashedString(kernel.baseUrl.toLowerCase())
         : Promise.resolve('');

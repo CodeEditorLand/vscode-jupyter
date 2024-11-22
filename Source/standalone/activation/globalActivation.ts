@@ -23,6 +23,7 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 	public isDisposed: boolean = false;
 	private changeHandler: IDisposable | undefined;
 	private startTime: number = Date.now();
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private disposableRegistry: IDisposableRegistry,

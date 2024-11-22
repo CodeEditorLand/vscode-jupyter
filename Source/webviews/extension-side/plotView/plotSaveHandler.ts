@@ -38,6 +38,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 			return;
 		}
 		const output = getOutputItem(notebook, outputId, mimeType);
+
 		if (!output) {
 			return logger.error(
 				`No plot to save ${getDisplayPath(notebook.uri)}, id: ${outputId} for ${mimeType}`,
@@ -50,6 +51,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 		}
 
 		const saveLocation = await this.getSaveTarget(output, mimeType);
+
 		if (!saveLocation) {
 			return;
 		}
@@ -62,6 +64,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 	private getSaveTarget(output: NotebookCellOutput, mimeType: string) {
 		const imageExtension =
 			imageExtensionForMimeType[mimeType.toLowerCase()];
+
 		const filters: Record<string, string[]> = {};
 		// If we have an SVG, then we can export to PDF.
 		if (
@@ -80,10 +83,13 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 			(workspace.workspaceFolders?.length || 0) > 0
 				? workspace.workspaceFolders![0].uri
 				: undefined;
+
 		const fileName = `output`;
+
 		const defaultUri = workspaceUri
 			? Uri.joinPath(workspaceUri, fileName)
 			: Uri.file(fileName);
+
 		return window.showSaveDialog({
 			defaultUri,
 			saveLabel: DataScience.exportPlotTitle,
@@ -92,9 +98,11 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 	}
 	private async saveAsImage(output: NotebookCellOutput, target: Uri) {
 		const extension = path.extname(target.path).substring(1);
+
 		const correspondingMimeType = Object.keys(
 			imageExtensionForMimeType,
 		).find((mime) => imageExtensionForMimeType[mime] === extension);
+
 		const data = output.items.find(
 			(item) => item.mime === correspondingMimeType,
 		);

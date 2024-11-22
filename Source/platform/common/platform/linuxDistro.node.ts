@@ -94,6 +94,7 @@ export async function getDistroInfo(): Promise<DistroInfo> {
 		id: "",
 		version_id: "",
 	};
+
 	if (os.platform() === "darwin" || os.platform() === "win32") {
 		return distro;
 	}
@@ -102,15 +103,18 @@ export async function getDistroInfo(): Promise<DistroInfo> {
 
 		splitLines(contents).forEach((line) => {
 			const isId = line.toUpperCase().trim().startsWith("ID=");
+
 			const isVersion = line
 				.toUpperCase()
 				.trim()
 				.startsWith("VERSION_ID=");
+
 			if (isId || isVersion) {
 				const value = line
 					.substring(line.indexOf("=") + 1)
 					.replace(/"/g, "")
 					.toUpperCase();
+
 				if (isId) {
 					distro.id = knownDistros
 						.filter((known) => value.includes(known.toUpperCase()))

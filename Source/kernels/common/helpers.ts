@@ -30,7 +30,9 @@ export async function waitForIdleOnSession(
 		resource,
 		DataScience.waitingForJupyterSessionToBeIdle,
 	);
+
 	const disposables: IDisposable[] = [];
+
 	if (progress) {
 		disposables.push(progress);
 	}
@@ -46,11 +48,13 @@ export async function waitForIdleOnSession(
 			undefined,
 			disposables,
 		);
+
 		const handler = (
 			_session: Kernel.IKernelConnection,
 			status: KernelMessage.Status,
 		) => {
 			logger.trace(`Got status ${status} in waitForIdleOnSession`);
+
 			if (status == "idle") {
 				kernelStatus.resolve(status);
 			}
@@ -63,11 +67,13 @@ export async function waitForIdleOnSession(
 				),
 			),
 		);
+
 		if (session.kernel.status == "idle") {
 			kernelStatus.resolve(session.kernel.status);
 		}
 		// Check for possibility that kernel has died.
 		const sessionDisposed = createDeferred<string>();
+
 		const sessionDisposedHandler = () => sessionDisposed.resolve("");
 		session.disposed.connect(sessionDisposedHandler, sessionDisposed);
 		disposables.push(
@@ -82,16 +88,19 @@ export async function waitForIdleOnSession(
 		);
 		sessionDisposed.promise.catch(noop);
 		kernelStatus.promise.catch(noop);
+
 		const result = await raceTimeout(
 			timeout,
 			"",
 			kernelStatus.promise,
 			sessionDisposed.promise,
 		);
+
 		if (session.isDisposed) {
 			logger.error(
 				"Session disposed while waiting for session to be idle.",
 			);
+
 			throw new JupyterInvalidKernelError(kernelConnectionMetadata);
 		}
 
@@ -105,9 +114,11 @@ export async function waitForIdleOnSession(
 		logger.error(
 			`Shutting down after failing to wait for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
 		);
+
 		throw new JupyterWaitForIdleError(kernelConnectionMetadata);
 	} catch (ex) {
 		logger.ci(`Error waiting for idle`, ex);
+
 		throw ex;
 	} finally {
 		dispose(disposables);

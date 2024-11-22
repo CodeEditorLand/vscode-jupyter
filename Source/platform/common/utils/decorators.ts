@@ -15,6 +15,7 @@ import { noop } from "./misc";
 import { StopWatch } from "./stopWatch";
 
 type PromiseFunctionWithAnyArgs = (...any: any) => Promise<any>;
+
 const cacheStoreForMethods = getGlobalCacheStore();
 export function cache(expiryDurationMs: number) {
 	return function (
@@ -23,19 +24,24 @@ export function cache(expiryDurationMs: number) {
 		descriptor: TypedPropertyDescriptor<PromiseFunctionWithAnyArgs>,
 	) {
 		const originalMethod = descriptor.value!;
+
 		const className =
 			"constructor" in target && target.constructor.name
 				? target.constructor.name
 				: "";
+
 		const keyPrefix = `Cache_Method_Output_${className}.${propertyName}`;
 		descriptor.value = async function (...args: any) {
 			if (isTestExecution()) {
 				return originalMethod.apply(this, args) as Promise<any>;
 			}
 			const key = getCacheKeyFromFunctionArgs(keyPrefix, args);
+
 			const cachedItem = cacheStoreForMethods.get(key);
+
 			if (cachedItem && !cachedItem.expired) {
 				logger.debug(`Cached data exists ${key}`);
+
 				return Promise.resolve(cachedItem.data);
 			}
 			const promise = originalMethod.apply(this, args) as Promise<any>;
@@ -47,6 +53,7 @@ export function cache(expiryDurationMs: number) {
 					),
 				)
 				.catch(noop);
+
 			return promise;
 		};
 	};
@@ -67,6 +74,7 @@ export function swallowExceptions(scopeName?: string) {
 		descriptor: TypedPropertyDescriptor<any>,
 	) {
 		const originalMethod = descriptor.value!;
+
 		const errorMessage = `Jupyter Extension (Error in ${scopeName || propertyName}, method:${propertyName}):`;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any,
 		descriptor.value = function (...args: any[]) {
@@ -117,6 +125,7 @@ function tracing<T>(
 	logBeforeCall?: boolean,
 ): T {
 	const timer = new StopWatch();
+
 	try {
 		if (logBeforeCall) {
 			log(undefined);
@@ -130,6 +139,7 @@ function tracing<T>(
 			(result as Promise<void>)
 				.then((data) => {
 					log({ elapsed: timer.elapsedTime, returnValue: data });
+
 					return data;
 				})
 				.catch((ex) => {
@@ -144,6 +154,7 @@ function tracing<T>(
 		return result;
 	} catch (ex) {
 		log({ elapsed: timer.elapsedTime, err: ex });
+
 		throw ex;
 	}
 }
@@ -171,6 +182,7 @@ export function trace(
 			};
 			// eslint-disable-next-line @typescript-eslint/no-this-alias, no-invalid-this
 			const scope = this;
+
 			return tracing(
 				// "log()"
 				(t) => log(call, t),
@@ -216,12 +228,14 @@ export function chainable() {
 		descriptor: TypedPropertyDescriptor<PromiseFunction>,
 	) {
 		const originalMethod = descriptor.value!;
+
 		const chainedKey = `chainedPromiseFor_${propertyKey}`;
 
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any
 		descriptor.value = async function (...args: any[]) {
 			// Check for promise in the object.
 			let currentValue = (this as any)[chainedKey] as Promise<any>;
+
 			if (currentValue) {
 				currentValue = currentValue.then(() =>
 					originalMethod.apply(this, args),
@@ -238,10 +252,12 @@ export function chainable() {
 				.then((r) => r)
 				.catch((e) => {
 					(this as any)[chainedKey] = undefined;
+
 					throw e;
 				});
 			// Handle the exception to prevent node from warning about unhandled exceptions.
 			promise.catch(noop);
+
 			return promise;
 		};
 

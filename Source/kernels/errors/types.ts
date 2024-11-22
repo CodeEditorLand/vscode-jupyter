@@ -45,6 +45,7 @@ export interface IDataScienceErrorHandler {
 
 export abstract class BaseKernelError extends BaseError {
 	public override stdErr?: string;
+
 	constructor(
 		category: ErrorCategory,
 		message: string,

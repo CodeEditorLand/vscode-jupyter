@@ -30,6 +30,7 @@ export class PlatformService implements IPlatformService {
 	}
 	public readonly osType: OSType = getOSType();
 	public version?: SemVer;
+
 	constructor() {
 		if (this.osType === OSType.Unknown) {
 		}
@@ -51,6 +52,7 @@ export class PlatformService implements IPlatformService {
 				// Using os.release() we get the darwin release #.
 				try {
 					const ver = coerce(os.release());
+
 					if (ver) {
 						return (this.version = ver);
 					}

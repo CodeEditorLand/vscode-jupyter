@@ -63,15 +63,18 @@ export class PythonEnvironmentQuickPickItemProvider
 			this,
 			this.disposables,
 		);
+
 		const initializeApi = () => {
 			const apiPromise = api.getNewApi();
 			this.promiseMonitor.push(apiPromise);
 			apiPromise
 				.then((api?: PythonExtension) => {
 					this.api = api;
+
 					if (!api) {
 						this.status = "idle";
 						this._onDidChangeStatus.fire();
+
 						return;
 					}
 					this._onDidChange.fire();
@@ -83,6 +86,7 @@ export class PythonEnvironmentQuickPickItemProvider
 				})
 				.catch((ex) => logger.error("Failed to get python api", ex));
 		};
+
 		if (extensionChecker.isPythonExtensionInstalled) {
 			initializeApi();
 		} else {
@@ -128,9 +132,11 @@ export class PythonEnvironmentQuickPickItemProvider
 				switch (propKey) {
 					case "items":
 						return target.items.filter(filter);
+
 					case "dispose":
 						// Dispose can only be called on the original instance (prevent anyone else calling this).
 						return noop;
+
 					default:
 						return target[propKey];
 				}

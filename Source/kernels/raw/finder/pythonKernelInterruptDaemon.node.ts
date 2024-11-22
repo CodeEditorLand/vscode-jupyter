@@ -40,6 +40,7 @@ function isBestPythonInterpreterForAnInterruptDaemon(interpreter: {
 	// to delete that environment folder as the files are in use).
 	// At least this way user will  not have to exit vscode completely to delete such files/folders.
 	const interpreterType = getEnvironmentType(interpreter);
+
 	if (
 		isSupportedPythonVersion(interpreter) &&
 		(interpreterType === EnvironmentType.Unknown ||
@@ -52,7 +53,9 @@ function isBestPythonInterpreterForAnInterruptDaemon(interpreter: {
 }
 function isSupportedPythonVersion(interpreter: { id: string }) {
 	let major = getCachedVersion(interpreter)?.major ?? 3;
+
 	let minor = getCachedVersion(interpreter)?.minor ?? 6;
+
 	if (
 		major >= 3 &&
 		// Even thought 3.6 is no longer supported, we know this works well enough for what we want.
@@ -86,6 +89,7 @@ export class PythonKernelInterruptDaemon {
 		{ command: Command; deferred: Deferred<unknown> }
 	>();
 	private requestCounter: number = 0;
+
 	constructor(
 		@inject(IPythonExecutionFactory)
 		private readonly pythonExecutionFactory: IPythonExecutionFactory,
@@ -104,6 +108,7 @@ export class PythonKernelInterruptDaemon {
 			);
 		} catch (ex) {
 			logger.error(`Failed to create interrupter, trying again`, ex);
+
 			return this.createInterrupterImpl(pythonEnvironment, resource);
 		}
 	}
@@ -116,8 +121,10 @@ export class PythonKernelInterruptDaemon {
 			pythonEnvironment,
 			resource,
 		)) as number;
+
 		if (!interruptHandle) {
 			logger.error(`Unable to initialize interrupt handle`);
+
 			throw new Error(`Unable to initialize interrupt handle`);
 		}
 
@@ -157,6 +164,7 @@ export class PythonKernelInterruptDaemon {
 		}
 
 		const interpreters = getCachedEnvironments();
+
 		if (interpreters.length === 0) {
 			return interpreter;
 		}
@@ -179,17 +187,21 @@ export class PythonKernelInterruptDaemon {
 		}
 		const promise = (async () => {
 			const interpreter = await this.getInterpreter(pythonEnvironment);
+
 			const executionService =
 				await this.pythonExecutionFactory.createActivatedEnvironment({
 					interpreter,
 					resource,
 				});
+
 			const dsFolder = Uri.joinPath(
 				this.context.extensionUri,
 				"pythonFiles",
 				"vscode_datascience_helpers",
 			);
+
 			const file = Uri.joinPath(dsFolder, "kernel_interrupt_daemon.py");
+
 			const proc = executionService.execObservable(
 				[file.fsPath, "--ppid", process.pid.toString()],
 				{
@@ -199,10 +211,12 @@ export class PythonKernelInterruptDaemon {
 
 			await new Promise<void>((resolve, reject) => {
 				let started = false;
+
 				const subscription = proc.out.onDidChange((out) => {
 					logger.ci(
 						`Output from interrupt daemon started = ${started}, output (${out.source}) = ${out.out} ('END)`,
 					);
+
 					if (
 						out.source === "stdout" &&
 						out.out.trim().includes("DAEMON_STARTED:") &&
@@ -226,6 +240,7 @@ export class PythonKernelInterruptDaemon {
 							.forEach((output) => {
 								try {
 									const parts = output.split(":");
+
 									const id = parseInt(
 										parts[
 											parts.indexOf(
@@ -234,7 +249,9 @@ export class PythonKernelInterruptDaemon {
 										],
 										10,
 									);
+
 									const deferred = this.messages.get(id);
+
 									if (deferred) {
 										logger.error(
 											`Failed to initialize interrupt daemon for ${id}, ${out.out}`,
@@ -267,9 +284,11 @@ export class PythonKernelInterruptDaemon {
 								try {
 									const [command, id, response] =
 										output.split(":");
+
 									const deferred = this.messages.get(
 										parseInt(id, 10),
 									);
+
 									if (deferred) {
 										logger.trace(
 											`Got a response of ${response} for ${command}:${id}`,
@@ -292,6 +311,7 @@ export class PythonKernelInterruptDaemon {
 						logger.warn(
 							`Error output in interrupt daemon response ${out.out} ('END')`,
 						);
+
 						if (!started) {
 							return reject(
 								new Error(
@@ -301,12 +321,15 @@ export class PythonKernelInterruptDaemon {
 						}
 						try {
 							const id = out.out.split(":")[2];
+
 							const deferred = this.messages.get(
 								parseInt(id, 10),
 							);
+
 							if (deferred) {
 								deferred.deferred.reject(new Error(out.out));
 								this.messages.delete(parseInt(id, 10));
+
 								return;
 							}
 						} catch (ex) {
@@ -336,6 +359,7 @@ export class PythonKernelInterruptDaemon {
 				logger.ci("Interrupt daemon exited");
 				this.startupPromise = undefined;
 			});
+
 			return proc;
 		})();
 		promise.catch((ex) =>
@@ -345,6 +369,7 @@ export class PythonKernelInterruptDaemon {
 			),
 		);
 		this.startupPromise = promise;
+
 		return promise;
 	}
 	private async sendCommand(
@@ -353,29 +378,36 @@ export class PythonKernelInterruptDaemon {
 		resource: Resource,
 	): Promise<unknown> {
 		const deferred = createDeferred<unknown>();
+
 		const id = this.requestCounter++;
 		this.messages.set(id, { command, deferred });
+
 		const messageToSend =
 			command.command === "INITIALIZE_INTERRUPT"
 				? `${command.command}:${id}`
 				: `${command.command}:${id}:${command.handle}`;
+
 		const { proc } = await this.initializeInterrupter(
 			pythonEnvironment,
 			resource,
 		);
+
 		if (!proc || !proc.stdin) {
 			// An impossible scenario, but types in node.js requires this, and we need to check to keep the compiler happy
 			logger.error("No process or stdin");
+
 			throw new Error("No process or stdin");
 		}
 		proc.stdin.write(`${messageToSend}${EOL}`);
 		logger.ci(
 			`Sending Interrupt Request id=${id}, Command ${command.command} for ${pythonEnvironment.id}`,
 		);
+
 		const response = await deferred.promise;
 		logger.ci(
 			`Got Interrupt Response id=${id}, Command ${command.command} for ${pythonEnvironment.id}`,
 		);
+
 		if (command.command === "INITIALIZE_INTERRUPT") {
 			return parseInt(response as string, 10);
 		}

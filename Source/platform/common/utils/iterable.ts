@@ -12,6 +12,7 @@ export namespace Iterable {
 	}
 
 	const _empty: Iterable<any> = Object.freeze([]);
+
 	export function empty<T = any>(): Iterable<T> {
 		return _empty;
 	}
@@ -60,10 +61,12 @@ export namespace Iterable {
 		iterable: Iterable<T>,
 		predicate: (t: T) => t is R,
 	): R | undefined;
+
 	export function find<T>(
 		iterable: Iterable<T>,
 		predicate: (t: T) => boolean,
 	): T | undefined;
+
 	export function find<T>(
 		iterable: Iterable<T>,
 		predicate: (t: T) => boolean,
@@ -81,10 +84,12 @@ export namespace Iterable {
 		iterable: Iterable<T>,
 		predicate: (t: T) => t is R,
 	): Iterable<R>;
+
 	export function filter<T>(
 		iterable: Iterable<T>,
 		predicate: (t: T) => boolean,
 	): Iterable<T>;
+
 	export function* filter<T>(
 		iterable: Iterable<T>,
 		predicate: (t: T) => boolean,
@@ -101,6 +106,7 @@ export namespace Iterable {
 		fn: (t: T, index: number) => R,
 	): Iterable<R> {
 		let index = 0;
+
 		for (const element of iterable) {
 			yield fn(element, index++);
 		}
@@ -120,6 +126,7 @@ export namespace Iterable {
 		initialValue: R,
 	): R {
 		let value = initialValue;
+
 		for (const element of iterable) {
 			value = reducer(value, element);
 		}

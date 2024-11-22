@@ -98,6 +98,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 	}
 	clearOutput(cell?: NotebookCell): Thenable<void> {
 		this.startIfNecessary();
+
 		return this._impl.clearOutput(cell);
 	}
 	replaceOutput(
@@ -105,6 +106,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 		cell?: NotebookCell,
 	): Thenable<void> {
 		this.startIfNecessary();
+
 		return this._impl.replaceOutput(out, cell);
 	}
 	appendOutput(
@@ -112,6 +114,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 		cell?: NotebookCell,
 	): Thenable<void> {
 		this.startIfNecessary();
+
 		return this._impl.appendOutput(out, cell);
 	}
 	replaceOutputItems(
@@ -119,6 +122,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 		output: NotebookCellOutput,
 	): Thenable<void> {
 		this.startIfNecessary();
+
 		return this._impl.replaceOutputItems(items, output);
 	}
 	appendOutputItems(
@@ -126,6 +130,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 		output: NotebookCellOutput,
 	): Thenable<void> {
 		this.startIfNecessary();
+
 		return this._impl.appendOutputItems(items, output);
 	}
 }
@@ -144,8 +149,10 @@ export class CellExecutionCreator {
 		clearOutputOnStartWithTime = false,
 	) {
 		let cellExecution: NotebookCellExecutionWrapper | undefined;
+
 		const key = cell.document;
 		cellExecution = this.get(cell);
+
 		if (!cellExecution) {
 			cellExecution = CellExecutionCreator.create(
 				key,
@@ -178,6 +185,7 @@ export class CellExecutionCreator {
 	}
 	static get(cell: NotebookCell) {
 		const key = cell.document;
+
 		return CellExecutionCreator._map.get(key);
 	}
 
@@ -196,6 +204,7 @@ export class CellExecutionCreator {
 			clearOutputOnStartWithTime,
 		);
 		CellExecutionCreator._map.set(key, result);
+
 		return result;
 	}
 }

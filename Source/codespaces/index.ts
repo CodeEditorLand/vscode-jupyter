@@ -39,6 +39,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 		string,
 		{ serverUri: IJupyterServerUri; server: JupyterServer }
 	>();
+
 	const serverUriToServer = (
 		handle: string,
 		serverUri: IJupyterServerUri,
@@ -59,6 +60,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 		}
 		return serverMap.get(handle)!.server;
 	};
+
 	const onDidChangeServers = new EventEmitter<void>();
 
 	const serverProvider: JupyterServerProvider = {
@@ -66,6 +68,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 			const handles = provider.getHandles
 				? await raceCancellationError(token, provider.getHandles())
 				: [];
+
 			if (!handles || handles.length === 0) {
 				return [];
 			}
@@ -94,9 +97,11 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 		string,
 		QuickPickItem & { default?: boolean | undefined }
 	>();
+
 	const commandProvider: JupyterServerCommandProvider = {
 		async handleCommand(command, token) {
 			const quickPickItem = quickPickMap.get(command.label);
+
 			if (!quickPickItem || !provider.handleQuickPick) {
 				return;
 			}
@@ -104,6 +109,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 				token,
 				provider.handleQuickPick(quickPickItem, true),
 			);
+
 			if (handle === "back") {
 				return;
 			}
@@ -111,6 +117,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 				throw new CancellationError();
 			}
 			const server = await provider.getServerUri(handle);
+
 			return serverUriToServer(handle, server);
 		},
 		async provideCommands(_value, token) {
@@ -121,6 +128,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 				token,
 				Promise.resolve(provider.getQuickPickEntryItems()),
 			);
+
 			return items.map((item) => {
 				const command: JupyterServerCommand = {
 					label: stripCodicons(item.label),
@@ -128,6 +136,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 					description: stripCodicons(item.description),
 				};
 				quickPickMap.set(command.label, item);
+
 				return command;
 			});
 		},
@@ -141,9 +150,11 @@ export class JupyterServerCollectionImpl
 	implements JupyterServerCollection
 {
 	private _commandProvider?: JupyterServerCommandProvider;
+
 	documentation?: Uri | undefined;
 	private _onDidChangeProvider = new EventEmitter<void>();
 	onDidChangeProvider = this._onDidChangeProvider.event;
+
 	set commandProvider(value: JupyterServerCommandProvider | undefined) {
 		this._commandProvider = value;
 		this._onDidChangeProvider.fire();
@@ -189,6 +200,7 @@ export class JupyterServerProviderRegistry
 		id: string,
 	): Promise<JupyterServerCollection | undefined> {
 		await this.loadExtension(extensionId, id).catch(noop);
+
 		return this.jupyterCollections.find(
 			(c) => c.extensionId === extensionId && c.id === id,
 		);
@@ -198,6 +210,7 @@ export class JupyterServerProviderRegistry
 			return;
 		}
 		const ext = extensions.getExtension(extensionId);
+
 		if (!ext) {
 			throw new Error(
 				`Extension '${extensionId}' that provides Jupyter Server '${providerId}' not found`,
@@ -215,6 +228,7 @@ export class JupyterServerProviderRegistry
 		serverProvider: JupyterServerProvider,
 	): JupyterServerCollection {
 		const extId = `${extensionId}#${id}`;
+
 		if (this._collections.has(extId)) {
 			// When testing we might have a duplicate as we call the registration API in ctor of a test.
 			if (extensionId !== JVSC_EXTENSION_ID) {

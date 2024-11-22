@@ -36,6 +36,7 @@ function getRemoteIPynbSuffix(): string {
 function generateBackingIPyNbFileName(resource: Resource) {
 	// Generate a more descriptive name
 	const suffix = `${getRemoteIPynbSuffix()}${uuid()}.ipynb`;
+
 	return resource
 		? `${urlPath.basename(resource, ".ipynb")}${suffix}`
 		: `${DataScience.defaultNotebookName}${suffix}`;
@@ -73,6 +74,7 @@ export class ExportBase implements IExportBase {
 		_token: CancellationToken,
 	): Promise<void> {
 		const kernel = this.kernelProvider.get(sourceDocument);
+
 		if (!kernel) {
 			// trace error
 			return;
@@ -85,7 +87,9 @@ export class ExportBase implements IExportBase {
 		}
 
 		const kernelConnectionMetadata = kernel.kernelConnectionMetadata;
+
 		const resource = kernel.resourceUri;
+
 		if (!isRemoteConnection(kernelConnectionMetadata)) {
 			return;
 		}
@@ -93,12 +97,16 @@ export class ExportBase implements IExportBase {
 			return;
 		}
 		const kernelConnection = kernel.session.kernel;
+
 		const connection = await this.jupyterConnection.createConnectionInfo(
 			kernelConnectionMetadata.serverProviderHandle,
 		);
+
 		const serverSettings = connection.settings;
+
 		const jupyter =
 			require("@jupyterlab/services") as typeof import("@jupyterlab/services");
+
 		const contentsManager = new jupyter.ContentsManager({ serverSettings });
 
 		let contents = await this.exportUtil.getContent(sourceDocument);
@@ -108,12 +116,17 @@ export class ExportBase implements IExportBase {
 		switch (format) {
 			case ExportFormat.html:
 				fileExt = ".html";
+
 				break;
+
 			case ExportFormat.pdf:
 				fileExt = ".pdf";
+
 				break;
+
 			case ExportFormat.python:
 				fileExt = ".py";
+
 				break;
 		}
 
@@ -133,13 +146,16 @@ export class ExportBase implements IExportBase {
 			.catch(noop);
 
 		let tempTarget: string | undefined;
+
 		try {
 			const pwd = await this.getCWD(kernel);
+
 			const tempFile = await contentsManager.newUntitled({
 				type: "file",
 				ext: fileExt,
 			});
 			tempTarget = tempFile.path;
+
 			const filePath = `${pwd}/${backingFile.filePath}`;
 
 			const outputs = await executeSilently(
@@ -148,6 +164,7 @@ export class ExportBase implements IExportBase {
 			);
 
 			const text = this.parseStreamOutput(outputs);
+
 			if (this.isExportFailed(text)) {
 				throw new Error(text || `Failed to export to ${format}`);
 			} else if (text) {
@@ -161,10 +178,12 @@ export class ExportBase implements IExportBase {
 					format: "base64",
 					content: true,
 				});
+
 				const bytes = this.b64toBlob(
 					content.content,
 					"application/pdf",
 				);
+
 				const buffer = await bytes.arrayBuffer();
 				await this.fs.writeFile(target!, new Uint8Array(buffer));
 			} else {
@@ -203,6 +222,7 @@ export class ExportBase implements IExportBase {
 		try {
 			// Create a temporary notebook for this session. Each needs a unique name (otherwise we get the same session every time)
 			backingFile = await contentsManager.newUntitled(backingFileOptions);
+
 			const backingFileDir = path.dirname(backingFile.path);
 			backingFile = await contentsManager.rename(
 				backingFile.path,
@@ -216,6 +236,7 @@ export class ExportBase implements IExportBase {
 
 		if (backingFile) {
 			const filePath = backingFile.path;
+
 			return {
 				filePath,
 				dispose: () => contentsManager.delete(filePath),
@@ -232,15 +253,19 @@ export class ExportBase implements IExportBase {
 			format: format,
 			content: true,
 		});
+
 		return data;
 	}
 
 	private b64toBlob(b64Data: string, contentType: string | undefined) {
 		contentType = contentType || "";
+
 		const sliceSize = 512;
 		b64Data = b64Data.replace(/^[^,]+,/, "");
 		b64Data = b64Data.replace(/\s/g, "");
+
 		const byteCharacters = atob(b64Data);
+
 		let byteArrays = [];
 
 		for (
@@ -251,6 +276,7 @@ export class ExportBase implements IExportBase {
 			const slice = byteCharacters.slice(offset, offset + sliceSize);
 
 			let byteNumbers = new Array(slice.length);
+
 			for (let i = 0; i < slice.length; i++) {
 				byteNumbers[i] = slice.charCodeAt(i);
 			}
@@ -260,6 +286,7 @@ export class ExportBase implements IExportBase {
 		}
 
 		const blob = new Blob(byteArrays, { type: contentType });
+
 		return blob;
 	}
 
@@ -278,11 +305,13 @@ export class ExportBase implements IExportBase {
 
 		const output: nbformat.IStream =
 			outputs[0] as unknown as nbformat.IStream;
+
 		if (output.name !== "stdout" && output.output_type !== "stream") {
 			return;
 		}
 
 		const text = concatMultilineString(output.text).trim();
+
 		return text;
 	}
 
@@ -294,12 +323,14 @@ export class ExportBase implements IExportBase {
 			kernel.session.kernel,
 			`import os;os.getcwd();`,
 		);
+
 		if (outputs.length === 0) {
 			return;
 		}
 
 		const output: nbformat.IExecuteResult =
 			outputs[0] as unknown as nbformat.IExecuteResult;
+
 		if (output.output_type !== "execute_result") {
 			return undefined;
 		}

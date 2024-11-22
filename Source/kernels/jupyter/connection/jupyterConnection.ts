@@ -51,6 +51,7 @@ export class JupyterConnection {
 
 	public async createConnectionInfo(serverId: JupyterServerProviderHandle) {
 		const server = await this.getJupyterServerUri(serverId);
+
 		if (!server) {
 			throw new Error(
 				`Unable to get resolved server information for ${serverId.extensionId}:${serverId.id}:${serverId.handle}`,
@@ -82,8 +83,10 @@ export class JupyterConnection {
 		doNotDisplayUnActionableMessages?: boolean,
 	): Promise<void> {
 		let sessionManager: JupyterLabHelper | undefined = undefined;
+
 		if (!serverUri) {
 			const server = await this.getJupyterServerUri(provider);
+
 			if (server) {
 				serverUri = {
 					baseUrl:
@@ -110,6 +113,7 @@ export class JupyterConnection {
 			this.configService,
 			Uri.file(""),
 		);
+
 		try {
 			// Attempt to list the running kernels. It will return empty if there are none, but will
 			// throw if can't connect.
@@ -125,6 +129,7 @@ export class JupyterConnection {
 					this.configService,
 					err.message,
 				);
+
 				if (!handled) {
 					throw err;
 				}
@@ -135,6 +140,7 @@ export class JupyterConnection {
 					this.configService,
 					err.message,
 				);
+
 				if (!handled) {
 					throw err;
 				}
@@ -153,6 +159,7 @@ export class JupyterConnection {
 			}
 		} finally {
 			connection.dispose();
+
 			if (sessionManager) {
 				sessionManager.dispose();
 			}
@@ -161,6 +168,7 @@ export class JupyterConnection {
 
 	private async getJupyterServerUri(provider: JupyterServerProviderHandle) {
 		const token = new CancellationTokenSource();
+
 		try {
 			const collection =
 				this.jupyterPickerRegistration.jupyterCollections.find(
@@ -172,15 +180,18 @@ export class JupyterConnection {
 					provider.extensionId,
 					provider.id,
 				));
+
 			if (!collection) {
 				return;
 			}
 			const servers = await Promise.resolve(
 				collection.serverProvider.provideJupyterServers(token.token),
 			);
+
 			let server: JupyterServer | null | undefined = servers?.find(
 				(c) => c.id === provider.handle,
 			);
+
 			if (!server && servers?.length === 0) {
 				try {
 					// Perhaps a server was returned as part of resolving a default command.
@@ -208,6 +219,7 @@ export class JupyterConnection {
 					token.token,
 				),
 			);
+
 			if (!resolvedServer?.connectionInformation) {
 				return;
 			}
@@ -217,6 +229,7 @@ export class JupyterConnection {
 			);
 			serverInfo.connectionInformation =
 				resolvedServer.connectionInformation;
+
 			return serverInfo;
 		} catch (ex) {
 			if (ex instanceof BaseError) {

@@ -68,6 +68,7 @@ export class KernelSourceCommandHandler
 		{ disposables: IDisposable[]; provider: JupyterServerCollection }
 	>();
 	private kernelSpecsSourceRegistered = false;
+
 	constructor(
 		@inject(IControllerRegistration)
 		private readonly controllerRegistration: IControllerRegistration,
@@ -125,6 +126,7 @@ export class KernelSourceCommandHandler
 			);
 
 			let kernelSpecActions: NotebookKernelSourceAction[] = [];
+
 			const kernelSpecActionChangeEmitter = new EventEmitter<void>();
 			this.localDisposables.push(
 				notebooks.registerKernelSourceActionProvider(
@@ -211,6 +213,7 @@ export class KernelSourceCommandHandler
 				this,
 			),
 		);
+
 		const uriRegistration =
 			ServiceContainer.instance.get<IJupyterServerProviderRegistry>(
 				IJupyterServerProviderRegistry,
@@ -227,13 +230,16 @@ export class KernelSourceCommandHandler
 			ServiceContainer.instance.get<IJupyterServerProviderRegistry>(
 				IJupyterServerProviderRegistry,
 			);
+
 		const existingItems = new Set<string>();
 		uriRegistration.jupyterCollections.map((collection) => {
 			const id = `${collection.extensionId}:${collection.id}`;
+
 			if (collection.id === TestingKernelPickerProviderId) {
 				return;
 			}
 			existingItems.add(id);
+
 			if (this.providerMappings.has(id)) {
 				return;
 			}
@@ -263,6 +269,7 @@ export class KernelSourceCommandHandler
 					},
 				},
 			);
+
 			const providerItemIW = notebooks.registerKernelSourceActionProvider(
 				InteractiveWindowView,
 				{
@@ -310,6 +317,7 @@ export class KernelSourceCommandHandler
 		notebook?: NotebookDocument,
 	) {
 		notebook = notebook || window.activeNotebookEditor?.notebook;
+
 		if (!notebook) {
 			return;
 		}
@@ -318,14 +326,18 @@ export class KernelSourceCommandHandler
 				ServiceContainer.instance.get<ILocalPythonNotebookKernelSourceSelector>(
 					ILocalPythonNotebookKernelSourceSelector,
 				);
+
 			const kernel = await selector.selectLocalKernel(notebook);
+
 			return this.getSelectedController(notebook, kernel);
 		} else {
 			const selector =
 				ServiceContainer.instance.get<ILocalNotebookKernelSourceSelector>(
 					ILocalNotebookKernelSourceSelector,
 				);
+
 			const kernel = await selector.selectLocalKernel(notebook);
+
 			return this.getSelectedController(notebook, kernel);
 		}
 	}
@@ -335,6 +347,7 @@ export class KernelSourceCommandHandler
 		notebook?: NotebookDocument,
 	) {
 		notebook = notebook || window.activeNotebookEditor?.notebook;
+
 		if (!notebook && window.activeTextEditor) {
 			// find associated notebook document for the active text editor
 			notebook = this.notebookEditorProvider.findNotebookEditor(
@@ -345,7 +358,9 @@ export class KernelSourceCommandHandler
 			return;
 		}
 		const id = `${extensionId}:${providerId}`;
+
 		const provider = this.providerMappings.get(id)?.provider;
+
 		if (!provider) {
 			return;
 		}
@@ -353,7 +368,9 @@ export class KernelSourceCommandHandler
 			ServiceContainer.instance.get<IRemoteNotebookKernelSourceSelector>(
 				IRemoteNotebookKernelSourceSelector,
 			);
+
 		const kernel = await selector.selectRemoteKernel(notebook, provider);
+
 		return this.getSelectedController(notebook, kernel);
 	}
 	private async getSelectedController(
@@ -368,10 +385,12 @@ export class KernelSourceCommandHandler
 				| typeof JupyterNotebookView
 				| typeof InteractiveWindowView,
 		]);
+
 		if (!Array.isArray(controllers) || controllers.length === 0) {
 			logger.warn(
 				`No controller created for selected kernel connection ${kernel.kind}:${kernel.id}`,
 			);
+
 			return;
 		}
 		initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
@@ -396,6 +415,7 @@ export class KernelSourceCommandHandler
 
 		const controller = controllers[0];
 		await this.onControllerSelected(notebook, controller);
+
 		return controller.controller.id;
 	}
 	private async onControllerSelected(
@@ -403,6 +423,7 @@ export class KernelSourceCommandHandler
 		controller: IVSCodeNotebookController,
 	) {
 		onDidManuallySelectKernel(notebook);
+
 		if (
 			isLocalConnection(controller.connection) &&
 			isPythonKernelConnection(controller.connection) &&
@@ -412,9 +433,11 @@ export class KernelSourceCommandHandler
 			!isWebExtension()
 		) {
 			const disposables: IDisposable[] = [];
+
 			try {
 				const token = new CancellationTokenSource();
 				disposables.push(token);
+
 				const ui = new DisplayOptions(false);
 				disposables.push(ui);
 				await this.kernelDependency.installMissingDependencies({

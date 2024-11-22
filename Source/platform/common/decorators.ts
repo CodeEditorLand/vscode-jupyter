@@ -8,6 +8,7 @@ function createDecorator(
 ): Function {
 	return (_target: any, key: string, descriptor: any) => {
 		let fnKey: string | null = null;
+
 		let fn: Function | null = null;
 
 		if (typeof descriptor.value === "function") {
@@ -28,6 +29,7 @@ function createDecorator(
 
 export function memoize(_target: any, key: string, descriptor: any) {
 	let fnKey: string | null = null;
+
 	let fn: Function | null = null;
 
 	if (typeof descriptor.value === "function") {
@@ -74,6 +76,7 @@ export function debounce<T>(
 ): Function {
 	return createDecorator((fn, key) => {
 		const timerKey = `$debounce$${key}`;
+
 		const resultKey = `$debounce$result$${key}`;
 
 		return function (this: any, ...args: any[]) {
@@ -107,8 +110,11 @@ export function throttle<T>(
 ): Function {
 	return createDecorator((fn, key) => {
 		const timerKey = `$throttle$timer$${key}`;
+
 		const resultKey = `$throttle$result$${key}`;
+
 		const lastRunKey = `$throttle$lastRun$${key}`;
+
 		const pendingKey = `$throttle$pending$${key}`;
 
 		return function (this: any, ...args: any[]) {
@@ -130,6 +136,7 @@ export function throttle<T>(
 			}
 
 			const nextTime = this[lastRunKey] + delay;
+
 			if (nextTime <= Date.now()) {
 				this[lastRunKey] = Date.now();
 				fn.apply(this, [this[resultKey]]);

@@ -58,6 +58,7 @@ const PortFormatString = `kernelLauncherPortStart_{0}.tmp`;
 export class KernelLauncher implements IKernelLauncher {
 	private static startPortPromise = KernelLauncher.computeStartPort();
 	private portChain: Promise<number[]> | undefined;
+
 	constructor(
 		@inject(IProcessServiceFactory)
 		private processExecutionFactory: IProcessServiceFactory,
@@ -83,7 +84,9 @@ export class KernelLauncher implements IKernelLauncher {
 		if (isTestExecution()) {
 			// Since multiple instances of a test may be running, write our best guess to a shared file
 			let portStart = 9_000;
+
 			let result = 0;
+
 			while (result === 0 && portStart < 65_000) {
 				try {
 					// Try creating a file with the port in the name
@@ -125,8 +128,11 @@ export class KernelLauncher implements IKernelLauncher {
 			this.pythonExecFactory,
 			cancelToken,
 		).catch(noop);
+
 		const stopWatch = new StopWatch();
+
 		const tracker = getNotebookTelemetryTracker(resource)?.getConnection();
+
 		const connection = await raceCancellationError(
 			cancelToken,
 			this.getKernelConnection(kernelConnectionMetadata),
@@ -134,7 +140,9 @@ export class KernelLauncher implements IKernelLauncher {
 		tracker?.stop();
 		// Create a new output channel for this kernel
 		const baseName = resource ? path.basename(resource.fsPath) : "";
+
 		const jupyterSettings = this.configService.getSettings(resource);
+
 		const outputChannel =
 			jupyterSettings.logKernelOutputSeparately ||
 			jupyterSettings.development
@@ -144,6 +152,7 @@ export class KernelLauncher implements IKernelLauncher {
 					)
 				: undefined;
 		outputChannel?.clear();
+
 		const portAttributeProvider = ignorePortForwarding(
 			connection.control_port,
 			connection.hb_port,
@@ -177,6 +186,7 @@ export class KernelLauncher implements IKernelLauncher {
 			this,
 			this.disposables,
 		);
+
 		try {
 			await raceCancellationError(
 				cancelToken,
@@ -185,6 +195,7 @@ export class KernelLauncher implements IKernelLauncher {
 		} catch (ex) {
 			await kernelProcess.dispose();
 			Cancellation.throwIfCanceled(cancelToken);
+
 			throw ex;
 		}
 
@@ -215,6 +226,7 @@ export class KernelLauncher implements IKernelLauncher {
 		// Double check for cancel
 		if (cancelToken?.isCancellationRequested) {
 			await kernelProcess.dispose();
+
 			throw new CancellationError();
 		}
 		/* No need to send telemetry for kernel launch failures, that's sent elsewhere */
@@ -232,18 +244,23 @@ export class KernelLauncher implements IKernelLauncher {
 			await this.portChain;
 		}
 		this.portChain = this.getConnectionPorts();
+
 		return this.portChain;
 	}
 
 	static async findNextFreePort(port: number): Promise<number[]> {
 		// Then get the next set starting at that point
 		const getPorts = promisify((await import("portfinder")).getPorts);
+
 		const ports = await getPorts(5, { host: "127.0.0.1", port });
+
 		if (ports.some((item) => UsedPorts.has(item))) {
 			const maxPort = Math.max(...UsedPorts, ...ports);
+
 			return KernelLauncher.findNextFreePort(maxPort);
 		}
 		ports.forEach((item) => UsedPorts.add(item));
+
 		return ports;
 	}
 
@@ -261,6 +278,7 @@ export class KernelLauncher implements IKernelLauncher {
 			| PythonKernelConnectionMetadata,
 	): Promise<IKernelConnection> {
 		const ports = await this.chainGetConnectionPorts();
+
 		return {
 			key: uuid(),
 			signature_scheme: "hmac-sha256",
@@ -290,6 +308,7 @@ async function logIPyKernelPath(
 	token: CancellationToken,
 ) {
 	const interpreter = kernelConnectionMetadata.interpreter;
+
 	if (
 		!isLocalConnection(kernelConnectionMetadata) ||
 		!isPythonKernelConnection(kernelConnectionMetadata) ||
@@ -301,6 +320,7 @@ async function logIPyKernelPath(
 		interpreter,
 		resource,
 	});
+
 	const output = await service.exec(
 		[
 			"-c",
@@ -308,16 +328,19 @@ async function logIPyKernelPath(
 		],
 		{ token },
 	);
+
 	if (token.isCancellationRequested) {
 		return;
 	}
 	const displayInterpreterPath = getDisplayPath(interpreter.uri);
+
 	if (output.stdout) {
 		const outputs = output.stdout
 			.trim()
 			.split("5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d")
 			.map((s) => s.trim())
 			.filter((s) => s.length > 0);
+
 		if (outputs.length === 2) {
 			logger.trace(
 				`ipykernel version & path ${outputs[0]}, ${getDisplayPathFromLocalFile(

@@ -51,6 +51,7 @@ export class ConfigMigration {
 
 	public async migrateSettings() {
 		const migratedSettings: Thenable<void>[] = [];
+
 		for (let prop of Object.keys(ConfigMigration.migratedSettings)) {
 			migratedSettings.push(
 				...this.migrateSetting(
@@ -60,6 +61,7 @@ export class ConfigMigration {
 			);
 		}
 		migratedSettings.push(this.migrateIntellisenseSettings());
+
 		try {
 			await Promise.all(migratedSettings);
 		} catch (e) {
@@ -69,10 +71,14 @@ export class ConfigMigration {
 
 	private async migrateIntellisenseSettings() {
 		const oldSetting = "pythonCompletionTriggerCharacters";
+
 		const newSetting = "completionTriggerCharacters";
+
 		const oldDetails = this.jupyterConfig.inspect(oldSetting);
+
 		const newDetails =
 			this.jupyterConfig.inspect<Record<string, string[]>>(newSetting);
+
 		try {
 			if (
 				oldDetails?.globalValue === oldDetails?.defaultValue ||
@@ -107,11 +113,14 @@ export class ConfigMigration {
 
 	private migrateSetting(oldSetting: string, newSetting: string) {
 		const oldDetails = this.jupyterConfig.inspect(oldSetting);
+
 		const newDetails = this.jupyterConfig.inspect(newSetting);
 
 		const migratedSettings: Thenable<void>[] = [];
+
 		if (oldDetails?.workspaceValue !== undefined) {
 			let promise: Thenable<void> = Promise.resolve();
+
 			if (newDetails?.workspaceValue === undefined) {
 				promise = this.jupyterConfig.update(
 					newSetting,
@@ -133,6 +142,7 @@ export class ConfigMigration {
 		}
 		if (oldDetails?.workspaceFolderValue !== undefined) {
 			let promise: Thenable<void> = Promise.resolve();
+
 			if (newDetails?.workspaceFolderValue === undefined) {
 				promise = this.jupyterConfig.update(
 					newSetting,
@@ -154,6 +164,7 @@ export class ConfigMigration {
 		}
 		if (oldDetails?.globalValue !== undefined) {
 			let promise: Thenable<void> = Promise.resolve();
+
 			if (newDetails?.globalValue === undefined) {
 				promise = this.jupyterConfig.update(
 					newSetting,

@@ -23,6 +23,7 @@ export class NbExtensionsPathProvider implements INbExtensionsPathProvider {
 				const sysPrefix = await getSysPrefix(
 					kernel.kernelConnectionMetadata.interpreter,
 				);
+
 				if (!sysPrefix) {
 					return;
 				}

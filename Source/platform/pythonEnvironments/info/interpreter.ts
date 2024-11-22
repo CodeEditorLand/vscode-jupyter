@@ -13,6 +13,7 @@ export function getInterpreterHash(
 	interpreter: PythonEnvironment | { uri: Uri },
 ) {
 	const interpreterPath = getNormalizedInterpreterPath(interpreter.uri);
+
 	return getTelemetrySafeHashedString(interpreterPath.path);
 }
 /**
@@ -33,11 +34,13 @@ export function areInterpreterPathsSame(
 		ostype,
 		ostype == OSType.Windows || forceLowerCase,
 	);
+
 	const norm2 = getNormalizedInterpreterPath(
 		path2,
 		ostype,
 		ostype == OSType.Windows || forceLowerCase,
 	);
+
 	return norm1 === norm2 || uriPath.isEqual(norm1, norm2, true);
 }
 /**
@@ -53,6 +56,7 @@ export function getNormalizedInterpreterPath(
 	forceLowerCase: boolean = false,
 ) {
 	let fsPath = getFilePath(path);
+
 	if (forceLowerCase) {
 		fsPath = fsPath.toLowerCase();
 	}

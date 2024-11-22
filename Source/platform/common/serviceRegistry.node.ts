@@ -94,5 +94,6 @@ export function registerTypes(serviceManager: IServiceManager) {
 	);
 	registerPlatformTypes(serviceManager);
 	processRegisterTypes(serviceManager);
+
 	variableRegisterTypes(serviceManager);
 }

@@ -21,6 +21,7 @@ import { ExportCommands } from "./exportCommands";
 @injectable()
 export class CommandRegistry implements IExtensionSyncActivationService {
 	private exportCommand?: ExportCommands;
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
@@ -45,6 +46,7 @@ export class CommandRegistry implements IExtensionSyncActivationService {
 			new PreferredKernelConnectionService(jupyterConnection),
 			kernelFinder,
 		);
+
 		if (!workspace.isTrusted) {
 			workspace.onDidGrantWorkspaceTrust(
 				this.registerCommandsIfTrusted,

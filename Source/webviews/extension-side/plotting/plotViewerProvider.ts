@@ -16,6 +16,7 @@ export class PlotViewerProvider implements IPlotViewerProvider, IDisposable {
 	private currentViewer: IPlotViewer | undefined;
 	private currentViewerClosed: IDisposable | undefined;
 	private imageList: string[] = [];
+
 	constructor(
 		@inject(IServiceContainer) private serviceContainer: IServiceContainer,
 		@inject(IDisposableRegistry) asyncRegistry: IDisposableRegistry,
@@ -33,6 +34,7 @@ export class PlotViewerProvider implements IPlotViewerProvider, IDisposable {
 		this.imageList.push(imageHtml);
 		// If the viewer closed, send it all of the old images
 		const imagesToSend = this.currentViewer ? [imageHtml] : this.imageList;
+
 		const viewer = await this.getOrCreate();
 		await Promise.all(imagesToSend.map(viewer.addPlot));
 	}

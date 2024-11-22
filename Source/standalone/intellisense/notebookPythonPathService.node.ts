@@ -117,19 +117,23 @@ export class NotebookPythonPathService
 	): Promise<string | undefined> {
 		const notebook =
 			this.notebookEditorProvider.findAssociatedNotebookDocument(uri);
+
 		if (!notebook) {
 			return undefined;
 		}
 
 		const controller = this.controllerRegistration.getSelected(notebook);
+
 		if (controller && isRemoteConnection(controller.connection)) {
 			// Empty string is special, means do not use any interpreter at all.
 			// Could be a server started for local machine, github codespaces, azml, 3rd party api, etc
 			const kernel = this.kernelProvider.get(notebook);
+
 			if (!kernel) {
 				return;
 			}
 			const disposables: Disposable[] = [];
+
 			if (!kernel.startedAtLeastOnce) {
 				const kernelStarted = new Promise((resolve) =>
 					kernel!.onStarted(resolve, undefined, disposables),
@@ -140,6 +144,7 @@ export class NotebookPythonPathService
 				return;
 			}
 			const execution = this.kernelProvider.getKernelExecution(kernel);
+
 			const code = `
 import os as _VSCODE_os
 import sys as _VSCODE_sys
@@ -150,12 +155,15 @@ if _VSCODE_os.path.exists("${__filename}"):
 
 del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 `;
+
 			const outputs =
 				(await execution.executeHidden(code).catch(noop)) || [];
+
 			const output = outputs.find(
 				(item) =>
 					item.output_type === "stream" && item.name === "stdout",
 			);
+
 			if (
 				!output ||
 				!(output.text || "").toString().includes("EXECUTABLE")
@@ -164,10 +172,13 @@ del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 			}
 			let text = (output.text || "").toString();
 			text = text.substring(text.indexOf("EXECUTABLE"));
+
 			const items = text
 				.split("EXECUTABLE")
 				.filter((x) => x.trim().length);
+
 			const executable = items.length ? items[0].trim() : "";
+
 			if (!executable || !(await fs.pathExists(executable))) {
 				return;
 			}
@@ -187,6 +198,7 @@ del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 			logger.debug(
 				`No interpreter for Pylance for Notebook URI "${getDisplayPath(notebook.uri)}"`,
 			);
+
 			return "";
 		}
 		logger.debug(
@@ -194,6 +206,7 @@ del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 				interpreter.uri,
 			)}`,
 		);
+
 		return getFilePath(interpreter.uri);
 	}
 }

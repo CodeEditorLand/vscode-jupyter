@@ -24,6 +24,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 	}
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(this);
+
 		if (!isWebExtension()) {
 			workspace.onDidChangeConfiguration(
 				(e) => {
@@ -47,9 +48,12 @@ export class PythonEnvironmentFilter implements IDisposable {
 			return false;
 		}
 		const hiddenList = this.getExcludedPythonEnvironments();
+
 		const hidden = isPythonEnvInListOfHiddenEnvs(interpreter, hiddenList);
+
 		const interpreterUri =
 			"uri" in interpreter ? interpreter.uri : interpreter.executable.uri;
+
 		if (hidden) {
 			sendTelemetryEvent(Telemetry.JupyterKernelHiddenViaFilter);
 			logger.debug(
@@ -77,6 +81,7 @@ export class PythonEnvironmentFilter implements IDisposable {
 					.get<string[]>("kernels.excludePythonEnvironments", []),
 			);
 		});
+
 		return filters;
 	}
 }
@@ -89,8 +94,10 @@ export function isPythonEnvInListOfHiddenEnvs(
 		"uri" in interpreter
 			? interpreter.envPath
 			: interpreter.environment?.folderUri;
+
 	const interpreterUri =
 		"uri" in interpreter ? interpreter.uri : interpreter.executable.uri;
+
 	if (!interpreterUri && !envFolderUri) {
 		return false;
 	}
@@ -106,6 +113,7 @@ export function isPythonEnvInListOfHiddenEnvs(
 			.toLowerCase()
 			.replace(/\\/g, "/");
 		item = item.trim().toLowerCase().replace(/\\/g, "/");
+
 		if (item.length === 0 || displayPath.length === 0) {
 			return false;
 		}
@@ -116,6 +124,7 @@ export function isPythonEnvInListOfHiddenEnvs(
 		const interpreterPath = interpreterUri
 			? interpreterUri.fsPath.toLowerCase().replace(/\\/g, "/")
 			: "";
+
 		if (
 			item === displayInterpreterPath ||
 			displayPath === displayInterpreterPath ||
@@ -128,9 +137,11 @@ export function isPythonEnvInListOfHiddenEnvs(
 		const displayEnvPath = getDisplayPath(envFolderUri || "")
 			.toLowerCase()
 			.replace(/\\/g, "/");
+
 		const envPath = getDisplayPath(envFolderUri || "")
 			.toLowerCase()
 			.replace(/\\/g, "/");
+
 		if (
 			item === displayEnvPath ||
 			displayPath === displayEnvPath ||

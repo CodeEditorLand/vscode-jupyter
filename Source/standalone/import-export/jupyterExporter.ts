@@ -47,6 +47,7 @@ export class JupyterExporter implements INotebookExporter {
 
 		try {
 			await this.fileSystem.writeFile(Uri.file(file), contents || "");
+
 			if (!showOpenPrompt) {
 				return;
 			}
@@ -103,8 +104,10 @@ export class JupyterExporter implements INotebookExporter {
 		type IPynbApi = {
 			exportNotebook: (notebook: NotebookData) => string;
 		};
+
 		const ipynbMain =
 			extensions.getExtension<IPynbApi>("vscode.ipynb")?.exports;
+
 		if (!ipynbMain) {
 			throw new Error("vscode.ipynb extension not found");
 		}
@@ -114,6 +117,7 @@ export class JupyterExporter implements INotebookExporter {
 			nbformat: defaultNotebookFormat.major,
 			nbformat_minor: defaultNotebookFormat.minor,
 		};
+
 		return ipynbMain.exportNotebook(notebook);
 	}
 	private extractPythonMainVersion = async (): Promise<number> => {
@@ -123,7 +127,9 @@ export class JupyterExporter implements INotebookExporter {
 		// Use the active interpreter
 		const usableInterpreter =
 			await this.jupyterServerHelper.getUsableJupyterPython();
+
 		const version = await getVersion(usableInterpreter);
+
 		return (usableInterpreter && version && version.major) || 3;
 	};
 }

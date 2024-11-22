@@ -7,6 +7,7 @@ export function handleLinkClick(
 ) {
 	// If this is an anchor element, forward the click as Jupyter does.
 	let anchor = ev.target as HTMLAnchorElement;
+
 	if (anchor && anchor.href) {
 		// Href may be redirected to an inner anchor
 		if (
@@ -14,6 +15,7 @@ export function handleLinkClick(
 			anchor.href.startsWith(anchor.baseURI)
 		) {
 			const inner = anchor.getElementsByTagName("a");
+
 			if (inner && inner.length > 0) {
 				anchor = inner[0];
 			}
@@ -39,6 +41,7 @@ export function handleLinkClick(
 			xhr.responseType = "blob";
 			xhr.onload = () => {
 				const blob = xhr.response;
+
 				const reader = new FileReader();
 				reader.readAsDataURL(blob);
 				reader.onload = () => {

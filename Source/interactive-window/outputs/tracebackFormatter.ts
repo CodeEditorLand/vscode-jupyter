@@ -50,9 +50,11 @@ export class InteractiveWindowTracebackFormatter
 			return traceback;
 		}
 		const storage = this.storageFactory.get({ notebook: cell.notebook });
+
 		const useIPython8Format = traceback.some((traceFrame) =>
 			/^[Input|Cell|File].*?\n.*/.test(traceFrame),
 		);
+
 		if (!useIPython8Format && !storage) {
 			// nothing to modify for IPython7 if we don't have any code to look up (standalone Interactive Window)
 			return traceback;
@@ -61,6 +63,7 @@ export class InteractiveWindowTracebackFormatter
 		const settings = this.configurationService.getSettings(
 			cell.document.uri,
 		);
+
 		const linkifyLineNumbers = settings?.formatStackTraces ?? false;
 
 		return traceback.map((traceFrame) => {
@@ -102,6 +105,7 @@ export class InteractiveWindowTracebackFormatter
 			/(;32m[ ->]*?)(\d+)(.*)\n/g,
 			(_s, prefix, num, suffix) => {
 				suffix = suffix.replace(/\u001b\[3\d+m/g, "\u001b[39m");
+
 				return `${prefix}${num}${suffix}\n`;
 			},
 		);
@@ -109,13 +113,17 @@ export class InteractiveWindowTracebackFormatter
 		logger.ci(`Trace frame to match: ${traceFrame}`);
 
 		let executionCount: number | undefined;
+
 		let location: string | undefined;
 
 		const cellRegex =
 			/Cell\s+(?:\u001b\[.+?m)?In\s*\[(?<executionCount>\d+)\],\s*line (?<lineNumber>\d+).*/;
+
 		const inputRegex =
 			/Input\s+?(?:\u001b\[.+?m)?In\s*\[(?<executionCount>\d+)\].*line: (?<lineNumber>\d).*/;
+
 		const inputMatch = inputRegex.exec(traceFrame);
+
 		const cellMatch = cellRegex.exec(traceFrame);
 
 		if (
@@ -137,36 +145,44 @@ export class InteractiveWindowTracebackFormatter
 		if (generatedCodes && executionCount) {
 			// Find the cell that matches the execution count in group 1
 			let matchUri: Uri | undefined;
+
 			let match: IGeneratedCode | undefined;
 			// eslint-disable-next-line no-restricted-syntax
 			for (let entry of generatedCodes) {
 				match = entry.generatedCodes.find(
 					(h) => h.executionCount === executionCount,
 				);
+
 				if (match) {
 					matchUri = entry.uri;
+
 					break;
 				}
 			}
 			if (match && matchUri) {
 				// We have a match, replace source lines first
 				let result = traceFrame;
+
 				if (linkifyLineNumbers) {
 					result = result.replace(
 						LineNumberMatchRegex,
 						(_s, prefix, num, suffix) => {
 							const n = parseInt(num, 10);
+
 							const lineNumberOfFirstLineInCell = match!
 								.hasCellMarker
 								? match!.line - 1
 								: match!.line;
+
 							const lineIndexOfFirstLineInCell =
 								lineNumberOfFirstLineInCell - 1;
+
 							const newLine =
 								lineIndexOfFirstLineInCell +
 								match!
 									.lineOffsetRelativeToIndexOfFirstLineInCell +
 								n;
+
 							return `${prefix}<a href='${matchUri?.toString()}?line=${newLine - 1}'>${newLine}</a>${suffix}`;
 						},
 					);
@@ -184,18 +200,21 @@ export class InteractiveWindowTracebackFormatter
 			const fileMatch = /^File.*?\[\d;32m(.*):\d+.*\u001b.*\n/.exec(
 				traceFrame,
 			);
+
 			if (fileMatch && fileMatch.length > 1) {
 				// We need to untilde the file path here for the link to work in VS Code
 				const detildePath = untildify(
 					fileMatch[1],
 					getFilePath(this.platformService.homeDir),
 				);
+
 				const fileUri = Uri.file(detildePath);
 				// We have a match, replace source lines with hrefs
 				return traceFrame.replace(
 					LineNumberMatchRegex,
 					(_s, prefix, num, suffix) => {
 						const n = parseInt(num, 10);
+
 						return `${prefix}<a href='${fileUri?.toString()}?line=${n - 1}'>${n}</a>${suffix}`;
 					},
 				);
@@ -211,8 +230,11 @@ export class InteractiveWindowTracebackFormatter
 		const allUris = allGeneratedCodes.map((item) => item.uri);
 		allUris.forEach((uri) => {
 			const filePath = getFilePath(uri);
+
 			const displayPath = getDisplayPath(uri);
+
 			const storage = this.storageFactory.get({ fileUri: uri });
+
 			if (!storage) {
 				return;
 			}
@@ -229,7 +251,9 @@ export class InteractiveWindowTracebackFormatter
 			) {
 				// We have a match, pull out the source lines
 				let sourceLines = "";
+
 				const regex = /(;32m[ ->]*?)(\d+)(.*)/g;
+
 				for (
 					let l = regex.exec(traceFrame);
 					l && l.length > 3;
@@ -244,12 +268,15 @@ export class InteractiveWindowTracebackFormatter
 					storage.getFileGeneratedCode(uri),
 					sourceLines,
 				);
+
 				if (offset !== undefined) {
 					traceFrame = traceFrame.replace(
 						LineNumberMatchRegex,
 						(_s, prefix, num, suffix) => {
 							const n = parseInt(num, 10);
+
 							const newLine = offset + n - 1;
+
 							return `${prefix}<a href='${uri.toString()}?line=${newLine}'>${newLine + 1}</a>${suffix}`;
 						},
 					);
@@ -261,12 +288,15 @@ export class InteractiveWindowTracebackFormatter
 					storage.getFileGeneratedCode(uri),
 					traceFrame,
 				);
+
 				if (offset) {
 					return traceFrame.replace(
 						LineNumberMatchRegex,
 						(_s, prefix, num, suffix) => {
 							const n = parseInt(num, 10);
+
 							const newLine = offset + n - 1;
+
 							return `${prefix}<a href='${uri.toString()}?line=${newLine}'>${newLine + 1}</a>${suffix}`;
 						},
 					);
@@ -285,6 +315,7 @@ export class InteractiveWindowTracebackFormatter
 			// (although with right side trimmed as that's what a stack trace does)
 			for (const hash of generatedCodes) {
 				const index = hash.trimmedRightCode.indexOf(codeLines);
+
 				if (index >= 0) {
 					// Jupyter isn't counting blank lines at the top so use our
 					// first non blank line

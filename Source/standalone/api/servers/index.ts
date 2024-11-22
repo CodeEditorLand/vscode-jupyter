@@ -25,9 +25,11 @@ export function createJupyterServerCollection(
 		clientExtId: extensionId,
 		pemUsed: "createJupyterServerCollection",
 	});
+
 	const registration = serviceContainer.get<IJupyterServerProviderRegistry>(
 		IJupyterServerProviderRegistry,
 	);
+
 	const collection = registration.createJupyterServerCollection(
 		extensionId,
 		id,

@@ -102,6 +102,7 @@ export class DataViewer
 			"webview-side",
 			"viewers",
 		);
+
 		super(
 			configuration,
 			provider,
@@ -140,6 +141,7 @@ export class DataViewer
 				this.maybeSendSliceDataDimensionalityTelemetry(
 					dataFrameInfo.shape.length,
 				);
+
 				const slice = preselectedSliceExpression(dataFrameInfo.shape);
 				dataFrameInfo = await this.getDataFrameInfo(slice);
 			}
@@ -240,19 +242,23 @@ export class DataViewer
 		switch (message) {
 			case DataViewerMessages.GetAllRowsRequest:
 				this.getAllRows(payload as string).catch(noop);
+
 				break;
 
 			case DataViewerMessages.GetRowsRequest:
 				this.getRowChunk(payload as IGetRowsRequest).catch(noop);
+
 				break;
 
 			case DataViewerMessages.GetSliceRequest:
 				this.getSlice(payload as IGetSliceRequest).catch(noop);
+
 				break;
 
 			case DataViewerMessages.RefreshDataViewer:
 				this.refreshData().catch(noop);
 				void sendTelemetryEvent(Telemetry.RefreshDataViewer);
+
 				break;
 
 			case DataViewerMessages.SliceEnablementStateChanged:
@@ -265,6 +271,7 @@ export class DataViewer
 							: CheckboxState.Unchecked,
 					},
 				);
+
 				break;
 
 			case DataViewerMessages.DeprecationWarningClicked:
@@ -274,6 +281,7 @@ export class DataViewer
 						"@tag:jupyterVariableViewers",
 					)
 					.then(noop, noop);
+
 				break;
 
 			default:
@@ -302,6 +310,7 @@ export class DataViewer
 
 	private async prepDataFrameInfo(): Promise<IDataFrameInfo> {
 		this.rowsTimer = new StopWatch();
+
 		const output = await this.getDataFrameInfo();
 
 		// Log telemetry about number of rows
@@ -327,6 +336,7 @@ export class DataViewer
 				const allRows =
 					await this.dataProvider.getAllRows(sliceExpression);
 				this.pendingRowsCount = 0;
+
 				return this.postMessage(
 					DataViewerMessages.GetAllRowsResponse,
 					allRows,
@@ -339,6 +349,7 @@ export class DataViewer
 		return this.wrapRequest(async () => {
 			if (this.dataProvider) {
 				const payload = await this.getDataFrameInfo(request.slice);
+
 				if (payload.shape?.length) {
 					this.maybeSendSliceDataDimensionalityTelemetry(
 						payload.shape.length,
@@ -349,6 +360,7 @@ export class DataViewer
 					undefined,
 					{ source: request.source },
 				);
+
 				return this.postMessage(
 					DataViewerMessages.InitializeData,
 					payload,
@@ -363,6 +375,7 @@ export class DataViewer
 				const dataFrameInfo = await this.getDataFrameInfo(
 					request.sliceExpression,
 				);
+
 				const rows = await this.dataProvider.getRows(
 					request.start,
 					Math.min(
@@ -375,6 +388,7 @@ export class DataViewer
 					0,
 					this.pendingRowsCount - rows.length,
 				);
+
 				return this.postMessage(DataViewerMessages.GetRowsResponse, {
 					rows,
 					start: request.start,
@@ -390,6 +404,7 @@ export class DataViewer
 		} catch (e) {
 			if (e instanceof JupyterDataRateLimitError) {
 				logger.error(e.message);
+
 				const actionTitle =
 					localize.DataScience.pythonInteractiveHelpLink;
 				window

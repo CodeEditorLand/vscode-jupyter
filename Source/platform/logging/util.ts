@@ -35,8 +35,10 @@ export function argsToLogString(args: Arguments): string {
 	try {
 		const argStrings = args.map((item, index) => {
 			const valueString = valueToLogString(item, "argument");
+
 			return `Arg ${index + 1}: ${valueString}`;
 		});
+
 		return argStrings.join(", ");
 	} catch {
 		return "";
@@ -47,13 +49,19 @@ export function argsToLogString(args: Arguments): string {
 // suitable to be used in a log message.
 export function returnValueToLogString(returnValue: unknown): string {
 	const valueString = valueToLogString(returnValue, "Return value");
+
 	return `Return Value: ${valueString}`;
 }
 export function getTimeForLogging(): string {
 	const date = new Date();
+
 	const hours = String(date.getHours()).padStart(2, "0");
+
 	const minutes = String(date.getMinutes()).padStart(2, "0");
+
 	const seconds = String(date.getSeconds()).padStart(2, "0");
+
 	const millis = String(date.getMilliseconds()).padStart(3, "0");
+
 	return `${hours}:${minutes}:${seconds}.${millis}`;
 }

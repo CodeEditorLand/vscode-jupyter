@@ -132,13 +132,16 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	private _options: KernelSocketOptions;
 	// Messages that are awaiting extension messages to be fully handled
 	private awaitingExtensionMessage: Map<string, Deferred<void>>;
+
 	constructor(
 		options: KernelSocketOptions,
 		private postOffice: PostOffice,
 	) {
 		// Dummy websocket we give to the underlying real kernel
 		let proxySocketInstance: any;
+
 		const protocol = options.protocol;
+
 		class ProxyWebSocket {
 			public onopen?: ((this: ProxyWebSocket) => any) | null;
 			public onmessage?:
@@ -146,6 +149,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 				| null;
 			public sendEnabled: boolean = true;
 			public readonly protocol: string = protocol;
+
 			constructor() {
 				proxySocketInstance = this;
 			}
@@ -347,6 +351,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			IPyWidgetMessages.IPyWidgets_registerCommTarget,
 			targetName,
 		);
+
 		return this.realKernel.registerCommTarget(targetName, callback);
 	}
 	public removeCommTarget(
@@ -360,6 +365,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	}
 	public dispose(): void {
 		this.postOffice.removeHandler(this);
+
 		return this.realKernel.dispose();
 	}
 	public handleMessage(type: string, payload?: any): boolean {
@@ -368,6 +374,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		switch (type) {
 			case IPyWidgetMessages.IPyWidgets_MessageHookCall:
 				this.sendHookResult(payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_msg:
@@ -379,6 +386,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 					});
 				}
 				this.sendResponse(payload.id);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_binary_msg:
@@ -391,18 +399,22 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 					});
 				}
 				this.sendResponse(payload.id);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_mirror_execute:
 				this.handleMirrorExecute(payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_ExtensionOperationHandled:
 				this.extensionOperationFinished(payload);
+
 				break;
 
 			case IPyWidgetMessages.IPyWidgets_registerCommTarget:
 				this.realKernel.registerCommTarget(payload, noop);
+
 				break;
 
 			default:
@@ -476,6 +488,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 	// Called when the extension has finished an operation that we are waiting for in message processing
 	private extensionOperationFinished(payload: any) {
 		//const key = payload.id + payload.type;
+
 		const key = `${payload.id}${payload.type}`;
 
 		const waitPromise = this.awaitingExtensionMessage.get(key);
@@ -510,8 +523,10 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			this.realKernel.requestKernelInfo.bind(this.realKernel);
 		this.realKernel.requestKernelInfo = () => {
 			this.realKernel.requestKernelInfo = originalRequestKernelInfo;
+
 			return Promise.resolve() as any;
 		};
+
 		if (this.websocket) {
 			this.websocket.onopen({ target: this.websocket });
 		}
@@ -528,10 +543,12 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 			const hook = this.messageHooks.get(
 				(msg.parent_header as any).msg_id,
 			);
+
 			if (hook) {
 				// When the kernel calls the hook, save the result for this message. The other side will ask for it
 				const result = hook(msg);
 				this.hookResults.set(msg.header.msg_id, result);
+
 				if ((result as any).then) {
 					return (result as any).then((r: boolean) => {
 						return r;
@@ -553,6 +570,7 @@ class ProxyKernel implements IMessageHandler, Kernel.IKernelConnection {
 		msg: KernelMessage.IIOPubMessage;
 	}) {
 		const result = this.hookResults.get(args.msg.header.msg_id);
+
 		if (result !== undefined) {
 			this.hookResults.delete(args.msg.header.msg_id);
 
@@ -682,5 +700,6 @@ export function create(
 	const result = new ProxyKernel(options, postOffice);
 	// Make sure to handle all the missed messages
 	pendingMessages.forEach((m) => result.handleMessage(m.message, m.payload));
+
 	return result;
 }

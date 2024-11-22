@@ -76,6 +76,7 @@ export const UserJupyterServerUriListKeyV2 =
 	"user-jupyter-server-uri-list-version2";
 export const UserJupyterServerUriListMementoKey =
 	"_builtin.jupyterServerUrlProvider.uriList";
+
 const GlobalStateUserAllowsInsecureConnections =
 	"DataScienceAllowInsecureConnections";
 
@@ -106,6 +107,7 @@ export class UserJupyterServerUrlProvider
 	private secureConnectionValidator: SecureConnectionValidator;
 	private jupyterServerUriInput: UserJupyterServerUriInput;
 	private jupyterServerUriDisplayName: UserJupyterServerDisplayName;
+
 	constructor(
 		@inject(IConfigurationService) configService: IConfigurationService,
 		@inject(JupyterConnection)
@@ -198,6 +200,7 @@ export class UserJupyterServerUrlProvider
 		_token: CancellationToken,
 	) {
 		const serverInfo = await this.getServerUri(server.id);
+
 		return {
 			...server,
 			connectionInformation: {
@@ -223,12 +226,15 @@ export class UserJupyterServerUrlProvider
 				token.dispose();
 			}),
 		);
+
 		try {
 			const url = "url" in command ? command.url : undefined;
+
 			const handleOrBack = await this.captureRemoteJupyterUrl(
 				token.token,
 				url,
 			);
+
 			if (!handleOrBack || handleOrBack === InputFlowAction.cancel) {
 				throw new CancellationError();
 			}
@@ -236,7 +242,9 @@ export class UserJupyterServerUrlProvider
 				return undefined;
 			}
 			const servers = await this.provideJupyterServers(token.token);
+
 			const server = servers.find((s) => s.id === handleOrBack);
+
 			if (!server) {
 				throw new Error(`Server ${handleOrBack} not found`);
 			}
@@ -246,6 +254,7 @@ export class UserJupyterServerUrlProvider
 				throw ex;
 			}
 			logger.error(`Failed to select a Jupyter Server`, ex);
+
 			return;
 		} finally {
 			token.cancel();
@@ -260,8 +269,10 @@ export class UserJupyterServerUrlProvider
 		_token: CancellationToken,
 	): Promise<JupyterServerCommand[]> {
 		let url = "";
+
 		try {
 			value = (value || "").trim();
+
 			if (
 				["http:", "https:"].includes(
 					new URL(value.trim()).protocol.toLowerCase(),
@@ -274,6 +285,7 @@ export class UserJupyterServerUrlProvider
 		}
 		if (url) {
 			const label = DataScience.connectToToTheJupyterServer(url);
+
 			return [{ label, url } as JupyterServerCommand];
 		}
 		return [
@@ -287,7 +299,9 @@ export class UserJupyterServerUrlProvider
 		_token: CancellationToken,
 	): Promise<JupyterServer[]> {
 		await this.initializeServers();
+
 		const servers = await this.newStorage.getServers(false);
+
 		return servers.map((s) => {
 			return {
 				id: s.handle,
@@ -316,6 +330,7 @@ export class UserJupyterServerUrlProvider
 				(ex) => deferred.reject(ex),
 			)
 			.catch(noop);
+
 		return this._cachedServerInfoInitialized;
 	}
 	private recommendInstallingJupyterHubExtension() {
@@ -379,25 +394,36 @@ export class UserJupyterServerUrlProvider
 			| "Get Display Name";
 
 		const disposables: Disposable[] = [];
+
 		let jupyterServerUri: IJupyterServerUri = {
 			baseUrl: "",
 			displayName: "",
 			token: "",
 		};
+
 		let validationErrorMessage = "";
+
 		let requiresPassword = false;
+
 		let isInsecureConnection = false;
+
 		let handle: string;
+
 		let nextStep: Steps = "Get Url";
+
 		let previousStep: Steps | undefined = "Get Url";
+
 		let url = initialUrl;
+
 		let initialUrlWasValid = false;
+
 		if (initialUrl) {
 			// Validate the URI first, which would otherwise be validated when user enters the Uri into the input box.
 			const initialVerification =
 				await this.jupyterServerUriInput.parseUserUriAndGetValidationError(
 					initialUrl,
 				);
+
 			if (typeof initialVerification.validationError === "string") {
 				// Uri has an error, show the error message by displaying the input box and pre-populating the url.
 				validationErrorMessage = initialVerification.validationError;
@@ -410,13 +436,16 @@ export class UserJupyterServerUrlProvider
 		}
 		try {
 			let failedUrlPasswordCapture = false;
+
 			while (true) {
 				try {
 					handle = uuid();
+
 					if (nextStep === "Get Url") {
 						initialUrlWasValid = false;
 						nextStep = "Check Passwords";
 						previousStep = undefined;
+
 						const errorMessage = validationErrorMessage;
 						validationErrorMessage = ""; // Never display this validation message again.
 						const result =
@@ -438,6 +467,7 @@ export class UserJupyterServerUrlProvider
 					// After the validation, we dispose the UI, and optionally display a new UI.
 					// This way there is no flicker in the UI.
 					const passwordDisposables: Disposable[] = [];
+
 					if (nextStep === "Check Passwords") {
 						nextStep = "Check Insecure Connections";
 						// If we were given a Url, then back should get out of this flow.
@@ -456,6 +486,7 @@ export class UserJupyterServerUrlProvider
 								))
 							) {
 								this.recommendInstallingJupyterHubExtension();
+
 								return InputFlowAction.cancel;
 							}
 							const result =
@@ -475,6 +506,7 @@ export class UserJupyterServerUrlProvider
 							failedUrlPasswordCapture = false;
 						} catch (err) {
 							failedUrlPasswordCapture = false;
+
 							if (
 								err instanceof CancellationError ||
 								err == InputFlowAction.back ||
@@ -503,6 +535,7 @@ export class UserJupyterServerUrlProvider
 								// Return the general connection error to show in the validation box
 								// Replace any Urls in the error message with markdown link.
 								const urlRegex = /(https?:\/\/[^\s]+)/g;
+
 								const errorMessage = (
 									err.message || err.toString()
 								).replace(
@@ -524,6 +557,7 @@ export class UserJupyterServerUrlProvider
 									// Possible we hit a CORS error, ignore this and try again.
 								} else {
 									nextStep = "Get Url";
+
 									continue;
 								}
 							}
@@ -547,6 +581,7 @@ export class UserJupyterServerUrlProvider
 							jupyterServerUri.token.length === 0
 								? "Check Passwords"
 								: "Get Url";
+
 						if (previousStep === "Get Url") {
 							// If we were given a Url, then back should get out of this flow.
 							previousStep =
@@ -563,8 +598,10 @@ export class UserJupyterServerUrlProvider
 						) {
 							isInsecureConnection = true;
 							dispose(passwordDisposables);
+
 							const proceed =
 								await this.secureConnectionValidator.promptToUseInsecureConnections();
+
 							if (!proceed) {
 								sendRemoteTelemetryForAdditionOfNewRemoteServer(
 									handle,
@@ -572,6 +609,7 @@ export class UserJupyterServerUrlProvider
 									false,
 									"InsecureHTTP",
 								);
+
 								return InputFlowAction.cancel;
 							}
 						}
@@ -601,6 +639,7 @@ export class UserJupyterServerUrlProvider
 								validationErrorMessage
 							) {
 								nextStep = "Get Url";
+
 								continue;
 							}
 							if (
@@ -621,6 +660,7 @@ export class UserJupyterServerUrlProvider
 									false,
 									"SelfCert",
 								);
+
 								continue;
 							} else if (
 								JupyterSelfCertsExpiredError.isSelfCertsExpiredError(
@@ -636,6 +676,7 @@ export class UserJupyterServerUrlProvider
 									false,
 									"ExpiredCert",
 								);
+
 								continue;
 							} else if (
 								requiresPassword &&
@@ -650,6 +691,7 @@ export class UserJupyterServerUrlProvider
 									false,
 									"AuthFailure",
 								);
+
 								continue;
 							} else {
 								sendRemoteTelemetryForAdditionOfNewRemoteServer(
@@ -661,6 +703,7 @@ export class UserJupyterServerUrlProvider
 								// Return the general connection error to show in the validation box
 								// Replace any Urls in the error message with markdown link.
 								const urlRegex = /(https?:\/\/[^\s]+)/g;
+
 								const errorMessage = (
 									err.message || err.toString()
 								).replace(
@@ -673,6 +716,7 @@ export class UserJupyterServerUrlProvider
 										: DataScience.remoteJupyterConnectionFailedWithoutServerWithError
 								)(errorMessage);
 								nextStep = "Get Url";
+
 								continue;
 							}
 						} finally {
@@ -691,6 +735,7 @@ export class UserJupyterServerUrlProvider
 								  jupyterServerUri.token.length === 0
 								? "Check Passwords"
 								: "Get Url";
+
 						if (previousStep === "Get Url") {
 							// If we were given a Url, then back should get out of this flow.
 							previousStep =
@@ -705,6 +750,7 @@ export class UserJupyterServerUrlProvider
 								jupyterServerUri.displayName ||
 									new URL(jupyterServerUri.baseUrl).hostname,
 							);
+
 						break;
 					}
 				} catch (ex) {
@@ -721,6 +767,7 @@ export class UserJupyterServerUrlProvider
 							return InputFlowAction.back;
 						}
 						nextStep = previousStep;
+
 						continue;
 					}
 
@@ -749,6 +796,7 @@ export class UserJupyterServerUrlProvider
 				jupyterServerUri.baseUrl,
 				false,
 			);
+
 			return handle;
 		} catch (ex) {
 			if (ex instanceof CancellationError) {
@@ -769,7 +817,9 @@ export class UserJupyterServerUrlProvider
 	}
 	async getServerUri(id: string): Promise<IJupyterServerUri> {
 		const servers = await this.newStorage.getServers(false);
+
 		const server = servers.find((s) => s.handle === id);
+
 		if (!server) {
 			throw new Error("Server not found");
 		}
@@ -778,11 +828,13 @@ export class UserJupyterServerUrlProvider
 		// Should be cleaned up later.
 		const displayName =
 			this.jupyterServerUriDisplayName.displayNamesOfHandles.get(id);
+
 		if (displayName) {
 			serverInfo.displayName = displayName;
 		}
 
 		let serverUriToReturn: any = Object.assign({}, serverInfo);
+
 		try {
 			const passwordResult =
 				await this.jupyterPasswordConnect.getPasswordConnectionInfo({
@@ -820,6 +872,7 @@ export class UserJupyterServerUriInput {
 		if (!initialValue && !isWeb) {
 			try {
 				const text = await env.clipboard.readText();
+
 				const parsedUri = text.trim().startsWith("https://github.com/")
 					? undefined
 					: Uri.parse(text.trim(), true);
@@ -875,12 +928,15 @@ export class UserJupyterServerUriInput {
 			const result = await this.parseUserUriAndGetValidationError(
 				input.value,
 			);
+
 			if (typeof result.validationError === "string") {
 				input.validationMessage = result.validationError;
+
 				return;
 			}
 			deferred.resolve(result);
 		});
+
 		return deferred.promise;
 	}
 
@@ -896,13 +952,16 @@ export class UserJupyterServerUriInput {
 	> {
 		// If it ends with /lab? or /lab or /tree? or /tree, then remove that part.
 		const uri = value.trim().replace(/\/(lab|tree)(\??)$/, "");
+
 		const jupyterServerUri = parseUri(uri, "");
+
 		if (!jupyterServerUri) {
 			return { validationError: DataScience.jupyterSelectURIInvalidURI };
 		}
 		jupyterServerUri.baseUrl =
 			(await getBaseJupyterUrl(uri, this.requestCreator)) ||
 			jupyterServerUri.baseUrl;
+
 		if (
 			!uri.toLowerCase().startsWith("http:") &&
 			!uri.toLowerCase().startsWith("https:")
@@ -932,6 +991,7 @@ export async function getBaseJupyterUrl(
 		// parseUri has special handling of `tree?` and `lab?`
 		// For some reasson Jupyter does not redirecto those the the a
 		url = parseUri(url, "")?.baseUrl || url;
+
 		if (new URL(url).pathname === "/") {
 			// No need to make a request, as we already have the base url.
 			return url;
@@ -940,12 +1000,16 @@ export async function getBaseJupyterUrl(
 			url.indexOf("token=") > 0
 				? url.substring(0, url.indexOf("token="))
 				: url;
+
 		const fetch = requestCreator.getFetchMethod();
+
 		const response = await fetch(urlWithoutToken, {
 			method: "GET",
 			redirect: "manual",
 		});
+
 		const loginPage = response.headers.get("location");
+
 		if (loginPage && loginPage.includes("login?")) {
 			return loginPage.substring(0, loginPage.indexOf("login?"));
 		}
@@ -969,6 +1033,7 @@ function sendRemoteTelemetryForAdditionOfNewRemoteServer(
 		| "AuthFailure",
 ) {
 	baseUrl = baseUrl.trim().toLowerCase();
+
 	const id = generateIdFromRemoteProvider({
 		handle,
 		extensionId: JVSC_EXTENSION_ID,
@@ -1002,6 +1067,7 @@ export class UserJupyterServerDisplayName {
 		defaultValue: string,
 	): Promise<string> {
 		const disposables: Disposable[] = [];
+
 		try {
 			const input = window.createInputBox();
 			disposables.push(input);
@@ -1012,6 +1078,7 @@ export class UserJupyterServerDisplayName {
 				DataScience.jupyterServerUriDisplayNameInputPlaceholder;
 			input.buttons = [QuickInputButtons.Back];
 			input.show();
+
 			const deferred = createDeferred<string>();
 			disposables.push(
 				input.onDidHide(() => deferred.reject(InputFlowAction.cancel)),
@@ -1034,6 +1101,7 @@ export class UserJupyterServerDisplayName {
 				this,
 				disposables,
 			);
+
 			return await deferred.promise;
 		} finally {
 			dispose(disposables);
@@ -1058,7 +1126,9 @@ export class SecureConnectionValidator {
 		}
 
 		const disposables: Disposable[] = [];
+
 		const deferred = createDeferred<boolean>();
+
 		try {
 			const input = window.createQuickPick();
 			disposables.push(input);
@@ -1093,6 +1163,7 @@ export class SecureConnectionValidator {
 				this,
 				disposables,
 			);
+
 			return await deferred.promise;
 		} finally {
 			dispose(disposables);
@@ -1156,6 +1227,7 @@ function storageFormatToServers(items: StorageItem[]) {
 	}[] = [];
 	items.forEach((s) => {
 		const server = parseUri(s.uri, s.displayName);
+
 		if (!server) {
 			return;
 		}
@@ -1165,6 +1237,7 @@ function storageFormatToServers(items: StorageItem[]) {
 			serverInfo: server,
 		});
 	});
+
 	return servers;
 }
 
@@ -1175,6 +1248,7 @@ export class NewStorage {
 		uri: string;
 		serverInfo: IJupyterServerUri;
 	}[];
+
 	constructor(
 		@inject(IEncryptedStorage)
 		private readonly encryptedStorage: IEncryptedStorage,
@@ -1192,6 +1266,7 @@ export class NewStorage {
 			Settings.JupyterServerRemoteLaunchService,
 			UserJupyterServerUriListKeyV2,
 		);
+
 		if (!data || data === "[]") {
 			return [];
 		}
@@ -1234,6 +1309,7 @@ export class NewStorage {
 					(s) => s.handle !== handle,
 				);
 				this.servers = servers;
+
 				return this.encryptedStorage.store(
 					Settings.JupyterServerRemoteLaunchService,
 					UserJupyterServerUriListKeyV2,

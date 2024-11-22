@@ -53,6 +53,7 @@ export class NotebookWatcher implements INotebookWatcher {
 	}
 	public get activeKernel(): IKernel | undefined {
 		const activeNotebook = window.activeNotebookEditor?.notebook;
+
 		const activeJupyterNotebookKernel =
 			activeNotebook?.notebookType == JupyterNotebookView
 				? this.kernelProvider.get(activeNotebook)
@@ -62,6 +63,7 @@ export class NotebookWatcher implements INotebookWatcher {
 			return activeJupyterNotebookKernel;
 		}
 		const interactiveWindowDoc = this.getActiveInteractiveWindowDocument();
+
 		const activeInteractiveWindowKernel = interactiveWindowDoc
 			? this.kernelProvider.get(interactiveWindowDoc)
 			: undefined;
@@ -70,6 +72,7 @@ export class NotebookWatcher implements INotebookWatcher {
 			return activeInteractiveWindowKernel;
 		}
 		const activeDataViewer = this.dataViewerFactory.activeViewer;
+
 		return activeDataViewer
 			? this.kernelProvider.kernels.find(
 					(item) => item === activeDataViewer.kernel,
@@ -79,6 +82,7 @@ export class NotebookWatcher implements INotebookWatcher {
 
 	public get activeNotebookExecutionCount(): number | undefined {
 		const activeNotebook = this.activeKernel?.notebook;
+
 		return activeNotebook
 			? this._executionCountTracker.get(activeNotebook)
 			: undefined;
@@ -135,6 +139,7 @@ export class NotebookWatcher implements INotebookWatcher {
 	private getActiveInteractiveWindowDocument() {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getActiveOrAssociatedInteractiveWindow();
+
 		if (!interactiveWindow) {
 			return;
 		}
@@ -188,6 +193,7 @@ export class NotebookWatcher implements INotebookWatcher {
 					this.activeKernel &&
 					this.kernelProvider.getKernelExecution(this.activeKernel)
 						.pendingCells.length === 0;
+
 				if (doneExecuting) {
 					this._onDidFinisheExecutingActiveNotebook.fire({
 						executionCount:

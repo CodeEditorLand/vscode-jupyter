@@ -38,6 +38,7 @@ export class ProcessServiceFactory implements IProcessServiceFactory {
 			"RunNonPythonCode",
 			cancelToken,
 		);
+
 		return trackDisposable(new ProcessService(customEnvVars));
 	}
 }

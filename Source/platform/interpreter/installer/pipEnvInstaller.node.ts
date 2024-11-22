@@ -54,9 +54,11 @@ export class PipEnvInstaller extends ModuleInstaller {
 			const interpreter = await this.serviceContainer
 				.get<IInterpreterService>(IInterpreterService)
 				.getActiveInterpreter(resource);
+
 			const workspaceFolder = resource
 				? workspace.getWorkspaceFolder(resource)
 				: undefined;
+
 			if (
 				!interpreter ||
 				!workspaceFolder ||
@@ -83,8 +85,11 @@ export class PipEnvInstaller extends ModuleInstaller {
 			flags & ModuleInstallFlags.reInstall ||
 			flags & ModuleInstallFlags.updateDependencies ||
 			flags & ModuleInstallFlags.upgrade;
+
 		const args = [update ? "update" : "install", moduleName, "--dev"];
+
 		const workspaceFolder = getInterpreterWorkspaceFolder(interpreter);
+
 		return {
 			args,
 			exe: pipenvName,

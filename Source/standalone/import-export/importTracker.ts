@@ -67,6 +67,7 @@ Things we are ignoring the following for simplicity/performance:
 */
 const ImportRegEx =
 	/^\s*(from (?<fromImport>\w+)(?:\.\w+)* import \w+(?:, \w+)*(?: as \w+)?|import (?<importImport>\w+(?:, \w+)*)(?: as \w+)?)$/;
+
 const MAX_DOCUMENT_LINES = 1000;
 
 // Capture isTestExecution on module load so that a test can turn it off and still
@@ -86,6 +87,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		number
 	>();
 	private isTelemetryDisabled: boolean;
+
 	constructor(
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 		delay = 1_000,
@@ -110,6 +112,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
 			),
 		);
+
 		const delayer = this.disposables.add(new Delayer<void>(delay));
 		this.disposables.add(
 			notebookCellExecutions.onDidChangeNotebookCellExecutionState(
@@ -143,12 +146,14 @@ export class ImportTracker implements IExtensionSyncActivationService {
 
 	private getDocumentLines(document: TextDocument): string[] {
 		const lines: string[] = [];
+
 		for (
 			let lineIndex = 0;
 			lineIndex < Math.min(MAX_DOCUMENT_LINES, document.lineCount);
 			lineIndex++
 		) {
 			const line = document.lineAt(lineIndex);
+
 			if (!line.isEmptyOrWhitespace) {
 				lines.push(line.text.trim());
 			}
@@ -172,6 +177,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 	private scheduleCheck(file: Uri, check: () => void) {
 		// If already scheduled, cancel.
 		const currentTimeout = this.pendingChecks.get(file);
+
 		if (currentTimeout) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			currentTimeout.dispose();
@@ -220,6 +226,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		}
 		try {
 			this.processedNotebookCells.set(cell, cell.document.version);
+
 			const resourceType =
 				cell.notebook.notebookType === JupyterNotebookView
 					? "notebook"
@@ -239,6 +246,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 
 	private lookForImports(lines: string[]) {
 		const packageNames: string[] = [];
+
 		try {
 			for (const s of lines) {
 				// No need of regex if we don't have imports
@@ -246,6 +254,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 					continue;
 				}
 				const match = s ? ImportRegEx.exec(s) : null;
+
 				if (match !== null && match.groups !== undefined) {
 					if (match.groups.fromImport !== undefined) {
 						// `from pkg ...`

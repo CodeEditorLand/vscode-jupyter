@@ -75,6 +75,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 		this._isDisposing = true;
 		(async () => {
 			logger.trace(`Disposing Jupyter Lab Helper`);
+
 			try {
 				if (this.contentsManager) {
 					logger.trace("SessionManager - dispose contents manager");
@@ -115,7 +116,9 @@ export class JupyterLabHelper extends ObservableDisposable {
 		await this.sessionManager.refreshRunning();
 
 		const sessions: Session.IModel[] = [];
+
 		const iterator = this.sessionManager.running();
+
 		let session = iterator.next().value;
 
 		while (session) {
@@ -132,10 +135,12 @@ export class JupyterLabHelper extends ObservableDisposable {
 		);
 		// Remove duplicates.
 		const dup = new Set<string>();
+
 		return models
 			.map((m) => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const jsonObject: JSONObject = m as any;
+
 				return {
 					id: m.id,
 					name: m.name,
@@ -154,6 +159,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 					return false;
 				}
 				dup.add(item.id);
+
 				return true;
 			});
 	}
@@ -168,7 +174,9 @@ export class JupyterLabHelper extends ObservableDisposable {
 		}
 		try {
 			const stopWatch = new StopWatch();
+
 			const specsManager = this.kernelSpecManager;
+
 			if (!specsManager) {
 				logger.error(
 					`No SessionManager to enumerate kernelspecs (no specs manager). Returning a default kernel. Specs ${JSON.stringify(
@@ -194,6 +202,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 				specsManagerReady: specsManager.isReady,
 				waitedForChangeEvent: false,
 			};
+
 			const getKernelSpecs = (
 				defaultValue: Record<string, ISpecModel | undefined> = {},
 			) => {
@@ -216,13 +225,16 @@ export class JupyterLabHelper extends ObservableDisposable {
 			telemetryProperties.specsManagerReady = specsManager.isReady;
 
 			let telemetrySent = false;
+
 			if (
 				specsManager &&
 				Object.keys(specsManager.specs?.kernelspecs || {}).length === 0
 			) {
 				// At this point wait for the specs to change
 				const disposables: IDisposable[] = [];
+
 				const promise = createDeferred();
+
 				const resolve = promise.resolve.bind(promise);
 				specsManager.specsChanged.connect(resolve);
 				disposables.push(
@@ -230,6 +242,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 						specsManager.specsChanged.disconnect(resolve),
 					),
 				);
+
 				const allPromises = Promise.all([
 					promise.promise,
 					specsManager.ready,
@@ -238,6 +251,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 				]);
 				await raceTimeout(10_000, allPromises);
 				telemetryProperties.waitedForChangeEvent = true;
+
 				if (!promise.completed) {
 					telemetrySent = true;
 					sendTelemetryEvent(
@@ -259,6 +273,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 			}
 
 			const kernelspecs = getKernelSpecs(oldKernelSpecs);
+
 			if (Object.keys(kernelspecs || {}).length) {
 				const specs: IJupyterKernelSpec[] = [];
 				Object.entries(kernelspecs).forEach(([_key, value]) => {
@@ -271,6 +286,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 					{ duration: stopWatch.elapsedTime },
 					telemetryProperties,
 				);
+
 				return specs;
 			} else {
 				logger.error(
@@ -278,6 +294,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 						kernelspecs,
 					)}.`,
 				);
+
 				if (!telemetrySent) {
 					sendTelemetryEvent(
 						Telemetry.JupyterKernelSpecEnumeration,

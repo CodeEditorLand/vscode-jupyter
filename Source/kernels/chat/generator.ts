@@ -72,7 +72,9 @@ export function generatePythonCodeToInvokeCallback(
 	response?: string,
 ): string {
 	const escaped = escapeStringToEmbedInPythonCode(response);
+
 	const value = typeof escaped === "string" ? `"${escaped}"` : "None";
+
 	return `
 import vscode as __vscode
 try:

@@ -96,6 +96,7 @@ export class DebuggingManager
 		notebook: NotebookDocument,
 	): KernelDebugMode | undefined {
 		const controller = this.notebookToRunByLineController.get(notebook);
+
 		return controller?.getMode();
 	}
 
@@ -108,6 +109,7 @@ export class DebuggingManager
 
 	private updateRunByLineContextKeys() {
 		const rblCellUris: Uri[] = [];
+
 		const rblDocumentUris: Uri[] = [];
 		this.notebookToRunByLineController.forEach((controller) => {
 			rblCellUris.push(controller.debugCell.document.uri);
@@ -140,10 +142,12 @@ export class DebuggingManager
 
 		if (!skipIpykernelCheck) {
 			const ipykernelResult = await this.checkIpykernelAndPrompt(cell);
+
 			if (ipykernelResult !== IpykernelCheckResult.Ok) {
 				logger.info(
 					`Ipykernel check failed: ${IpykernelCheckResult[ipykernelResult]}`,
 				);
+
 				return;
 			}
 		}
@@ -160,6 +164,7 @@ export class DebuggingManager
 		const controller = this.notebookToRunByLineController.get(
 			cell.notebook,
 		);
+
 		if (
 			controller &&
 			controller.debugCell.document.uri.toString() ===
@@ -173,6 +178,7 @@ export class DebuggingManager
 		const controller = this.notebookToRunByLineController.get(
 			cell.notebook,
 		);
+
 		if (controller) {
 			sendTelemetryEvent(DebuggingTelemetry.endedSession, undefined, {
 				reason: "withKeybinding",
@@ -186,7 +192,9 @@ export class DebuggingManager
 		cell: NotebookCell,
 	) {
 		const doc = cell.notebook;
+
 		const settings = this.configurationService.getSettings(doc.uri);
+
 		const config: INotebookDebugConfig = {
 			type: pythonKernelDebugAdapter,
 			name: path.basename(doc.uri.toString()),
@@ -198,6 +206,7 @@ export class DebuggingManager
 			__cellIndex: cell.index,
 			__notebookUri: doc.uri.toString(),
 		};
+
 		const opts: DebugSessionOptions | undefined =
 			mode === KernelDebugMode.RunByLine
 				? {
@@ -207,6 +216,7 @@ export class DebuggingManager
 						suppressSaveBeforeStart: true,
 					}
 				: { suppressSaveBeforeStart: true };
+
 		return this.startDebuggingConfig(config, opts);
 	}
 
@@ -217,6 +227,7 @@ export class DebuggingManager
 		assertIsDebugConfig(config);
 
 		const notebookUri = config.__notebookUri;
+
 		const notebook = workspace.notebookDocuments.find(
 			(doc) => doc.uri.toString() === notebookUri,
 		);
@@ -225,6 +236,7 @@ export class DebuggingManager
 			logger.info(
 				`Cannot start debugging. Notebook ${notebookUri} not found.`,
 			);
+
 			return;
 		}
 
@@ -232,6 +244,7 @@ export class DebuggingManager
 			logger.info(
 				`Cannot start debugging. Already debugging this notebook`,
 			);
+
 			return;
 		}
 
@@ -239,6 +252,7 @@ export class DebuggingManager
 			logger.info(
 				`Cannot start debugging. Already debugging this notebook document.`,
 			);
+
 			return;
 		}
 
@@ -246,9 +260,11 @@ export class DebuggingManager
 			notebook,
 			new Debugger(notebook, config, session),
 		);
+
 		try {
 			this.notebookInProgress.add(notebook);
 			this.updateDebugContextKey();
+
 			return await this.doCreateDebugAdapterDescriptor(
 				config,
 				session,
@@ -266,6 +282,7 @@ export class DebuggingManager
 		notebook: NotebookDocument,
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const kernel = await this.ensureKernelIsRunning(notebook);
+
 		if (kernel?.session) {
 			const adapter = new KernelDebugAdapter(
 				session,
@@ -281,6 +298,7 @@ export class DebuggingManager
 				typeof config.__cellIndex === "number"
 			) {
 				const cell = notebook.cellAt(config.__cellIndex);
+
 				const rblController = new RunByLineController(
 					adapter,
 					cell,
@@ -303,6 +321,7 @@ export class DebuggingManager
 				typeof config.__cellIndex === "number"
 			) {
 				const cell = notebook.cellAt(config.__cellIndex);
+
 				const controller = new DebugCellController(
 					adapter,
 					cell,

@@ -52,6 +52,7 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 			const useNewDebugger =
 				this.configService.getSettings(undefined)
 					.forceIPyKernelDebugger === true;
+
 			if (useNewDebugger) {
 				return [];
 			}

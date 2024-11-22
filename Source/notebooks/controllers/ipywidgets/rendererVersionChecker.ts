@@ -29,6 +29,7 @@ import { noop } from "../../../platform/common/utils/misc";
 export class RendererVersionChecker implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	static messageDisplayed: boolean = false;
+
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(this);
 	}
@@ -76,19 +77,27 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 		}
 
 		const rendererExtension = extensions.getExtension(RendererExtension);
+
 		if (!rendererExtension) {
 			this.displayNotInstalledMessage();
+
 			return;
 		}
 		const version = rendererExtension.packageJSON.version;
+
 		if (!version) {
 			this.displayUpdateMessage();
+
 			return;
 		}
 		const parts = version.split(".");
+
 		const major = parseInt(parts[0], 10);
+
 		const minor = parseInt(parts[1], 10);
+
 		const patch = parseInt(parts[2], 10);
+
 		if (major < 1 || (major === 1 && minor === 0 && patch < 15)) {
 			this.displayUpdateMessage();
 		}

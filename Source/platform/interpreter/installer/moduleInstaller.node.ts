@@ -64,22 +64,28 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 			typeof productOrModuleName == "string"
 				? productOrModuleName
 				: translateProductToModule(productOrModuleName);
+
 		const args = await this.getExecutionArgs(name, interpreter, flags);
+
 		const pythonFactory =
 			this.serviceContainer.get<IPythonExecutionFactory>(
 				IPythonExecutionFactory,
 			);
+
 		const procFactory = this.serviceContainer.get<IProcessServiceFactory>(
 			IProcessServiceFactory,
 		);
+
 		const activationHelper =
 			this.serviceContainer.get<IEnvironmentActivationService>(
 				IEnvironmentActivationService,
 			);
+
 		const environmentService =
 			this.serviceContainer.get<IEnvironmentVariablesService>(
 				IEnvironmentVariablesService,
 			);
+
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return;
 		}
@@ -91,6 +97,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 			token: CancellationToken,
 		) => {
 			const deferred = createDeferred();
+
 			const disposables: IDisposable[] = [];
 			// When the progress is canceled notify caller
 			token.onCancellationRequested(
@@ -107,6 +114,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 			// Some installers only work with shellexec
 			if (args.useShellExec) {
 				const proc = await procFactory.create(undefined);
+
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
@@ -128,13 +136,16 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 						undefined,
 						interpreter,
 					);
+
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
 				const env = { ...process.env };
 				environmentService.mergeVariables(envVars || {}, env);
 				environmentService.mergePaths(envVars || {}, env);
+
 				const proc = await procFactory.create(undefined);
+
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
@@ -148,6 +159,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				const proc = await pythonFactory.createActivatedEnvironment({
 					interpreter,
 				});
+
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
@@ -158,21 +170,28 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				});
 			}
 			let lastStdErr: string | undefined;
+
 			let couldNotInstallErr: string | undefined;
+
 			const ticker = [".", "..", "..."];
+
 			let counter = 0;
+
 			if (observable) {
 				observable.out.onDidChange(
 					(output) => {
 						const suffix = ticker[counter % 3];
+
 						const trimmedOutput = output.out.trim();
 						counter += 1;
+
 						const message =
 							trimmedOutput.length > 28
 								? `${trimmedOutput.substring(0, 28)}${suffix}`
 								: trimmedOutput;
 						progress.report({ message });
 						logger.debug(output.out);
+
 						if (output.source === "stderr") {
 							// https://github.com/microsoft/vscode-jupyter/issues/12703
 							// Sometimes on windows we get an error that says "ERROR: Could not install packages due to an OSError: [Errno 2] No such file or directory:"

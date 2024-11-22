@@ -29,6 +29,7 @@ import { IReplNotebookTrackerService } from '../../platform/notebooks/replNotebo
 type CodeLensCacheData = {
     cachedDocumentVersion: number | undefined;
     cachedExecutionCounts: Set<number>;
+
     documentLenses: CodeLens[];
     cellRanges: ICellRange[];
     gotoCellLens: CodeLens[];
@@ -36,21 +37,33 @@ type CodeLensCacheData = {
 
 type PerNotebookData = {
     cellExecutionCounts: Map<string, number>;
+
     documentExecutionCounts: Map<string, number>;
 };
 
 // localized code lense text
 const runCurrentandAllBelowTitle = localize.DataScience.runCurrentCellAndAddBelow;
+
 const addCellBelowTitle = localize.DataScience.addCellBelowCommandTitle;
+
 const debugCurrentCellTitle = localize.DataScience.debugCellCommandTitle;
+
 const debugCellTitle = localize.DataScience.debugCellCommandTitle;
+
 const debugStepOverTitle = localize.DataScience.debugStepOverCommandTitle;
+
 const DebugContinueTitle = localize.DataScience.debugContinueCommandTitle;
+
 const debugStopTitle = localize.DataScience.debugStopCommandTitle;
+
 const runCellTitle = localize.DataScience.runCellLensCommandTitle;
+
 const runAllCellsTitle = localize.DataScience.runAllCellsLensCommandTitle;
+
 const runAllAboveTitle = localize.DataScience.runAllCellsAboveLensCommandTitle;
+
 const runAllBelowTitle = localize.DataScience.runCellAndAllBelowLensCommandTitle;
+
 const scrollToCellFormat = localize.DataScience.scrollToCellTitleFormatMessage;
 
 /**
@@ -106,21 +119,26 @@ export class CodeLensFactory implements ICodeLensFactory {
 
     public createCodeLenses(document: TextDocument): CodeLens[] {
         const cache = this.getCodeLensCacheData(document);
+
         return [...cache.documentLenses, ...cache.gotoCellLens];
     }
 
     public getCellRanges(document: TextDocument): ICellRange[] {
         const cache = this.getCodeLensCacheData(document);
+
         return cache.cellRanges;
     }
 
     private getCodeLensCacheData(document: TextDocument): CodeLensCacheData {
         const stopWatch = new StopWatch();
+
         let updated = false;
 
         // See if we have a cached version of the code lenses for this document
         const key = document.uri.toString();
+
         let cache = this.codeLensCache.get(key);
+
         let needUpdate = false;
 
         // If we don't have one, generate one
@@ -149,6 +167,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 
         // If the document execution count doesn't match, then our goto cell lenses are out of date
         const documentCounts = this.getDocumentExecutionCounts(key);
+
         if (
             documentCounts.length !== cache.cachedExecutionCounts.size ||
             documentCounts.find((n) => !cache?.cachedExecutionCounts.has(n))
@@ -174,6 +193,7 @@ export class CodeLensFactory implements ICodeLensFactory {
             cache.cellRanges.forEach((r) => {
                 commands.forEach((c) => {
                     const codeLens = this.createCodeLens(document, r, c, firstCell);
+
                     if (codeLens) {
                         cache!.documentLenses.push(codeLens);
                     }
@@ -194,12 +214,15 @@ export class CodeLensFactory implements ICodeLensFactory {
             this.configService.getSettings(document.uri).addGotoCodeLenses
         ) {
             const storage = this.generatedCodeStorageFactory.get({ fileUri: document.uri });
+
             const generatedCodes = storage
                 ? storage.all.find((item) => item.uri.toString() === document.uri.toString())?.generatedCodes
                 : undefined;
+
             if (generatedCodes && generatedCodes.length) {
                 cache.cellRanges.forEach((r) => {
                     const codeLens = this.createExecutionLens(document, r.range, generatedCodes);
+
                     if (codeLens) {
                         cache?.gotoCellLens.push(codeLens); // NOSONAR
                     }
@@ -228,7 +251,9 @@ export class CodeLensFactory implements ICodeLensFactory {
             return;
         }
         const metadata = getInteractiveCellMetadata(e.cell);
+
         let data = this.notebookData.get(e.cell.notebook.uri.toString());
+
         if (!data) {
             data = {
                 cellExecutionCounts: new Map<string, number>(),
@@ -262,6 +287,7 @@ export class CodeLensFactory implements ICodeLensFactory {
         let fullCommandList: string[];
         // Add our non-debug commands
         const commands = this.configService.getSettings(resource).codeLenses;
+
         if (commands) {
             fullCommandList = commands.split(',').map((s) => s.trim());
         } else {
@@ -270,6 +296,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 
         // Add our debug commands
         const debugCommands = this.configService.getSettings(resource).debugCodeLenses;
+
         if (debugCommands) {
             fullCommandList = fullCommandList.concat(debugCommands.split(',').map((s) => s.trim()));
         } else {
@@ -317,14 +344,17 @@ export class CodeLensFactory implements ICodeLensFactory {
         // Be careful here. These arguments will be serialized during liveshare sessions
         // and so shouldn't reference local objects.
         const { range, cell_type } = cellRange;
+
         switch (commandName) {
             case Commands.RunCurrentCellAndAddBelow:
                 return this.generateCodeLens(range, Commands.RunCurrentCellAndAddBelow, runCurrentandAllBelowTitle);
+
             case Commands.AddCellBelow:
                 return this.generateCodeLens(range, Commands.AddCellBelow, addCellBelowTitle, [
                     document.uri,
                     range.start.line
                 ]);
+
             case Commands.DebugCurrentCellPalette:
                 return this.generateCodeLens(range, Commands.DebugCurrentCellPalette, debugCurrentCellTitle);
 
@@ -404,6 +434,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 
             default:
                 logger.warn(`Invalid command for code lens ${commandName}`);
+
                 break;
         }
 
@@ -413,6 +444,7 @@ export class CodeLensFactory implements ICodeLensFactory {
     private findMatchingCellExecutionCount(cellId: string) {
         // Cell ids on interactive window are generated on the fly so there shouldn't be dupes
         const data = [...this.notebookData.values()].find((d) => d.cellExecutionCounts.get(cellId));
+
         return data?.cellExecutionCounts.get(cellId);
     }
 
@@ -422,9 +454,12 @@ export class CodeLensFactory implements ICodeLensFactory {
             const rangeMatches = generatedCodes
                 .filter((h) => h.line - 2 === range.start.line)
                 .sort((a, b) => a.timestamp - b.timestamp);
+
             if (rangeMatches && rangeMatches.length) {
                 const rangeMatch = rangeMatches[rangeMatches.length - 1];
+
                 const matchingExecutionCount = this.findMatchingCellExecutionCount(rangeMatch.id);
+
                 if (matchingExecutionCount !== undefined) {
                     return this.generateCodeLens(
                         range,

@@ -80,6 +80,7 @@ export abstract class WebviewPanelHost<IMapping>
 
 	public setTitle(newTitle: string) {
 		this._title = newTitle;
+
 		if (!this.isDisposed && this.webPanel) {
 			this.webPanel.setTitle(newTitle);
 		}
@@ -112,8 +113,11 @@ export abstract class WebviewPanelHost<IMapping>
 
 	private webPanelViewStateChanged = (webPanel: IWebviewPanel) => {
 		const visible = webPanel.isVisible();
+
 		const active = webPanel.isActive();
+
 		const current = { visible, active };
+
 		const previous = {
 			visible: this.viewState.visible,
 			active: this.viewState.active,

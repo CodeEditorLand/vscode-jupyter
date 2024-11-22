@@ -111,6 +111,7 @@ export interface IInstallationChannelManager {
 		product: Product,
 		interpreter: PythonEnvironment,
 	): Promise<IModuleInstaller | undefined>;
+
 	getInstallationChannels(
 		interpreter: PythonEnvironment,
 	): Promise<IModuleInstaller[]>;

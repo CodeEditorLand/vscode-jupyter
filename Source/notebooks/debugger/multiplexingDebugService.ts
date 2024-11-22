@@ -128,6 +128,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 	}
 	public startRunByLine(config: DebugConfiguration): Thenable<boolean> {
 		this.lastStartedService = this.jupyterDebugService;
+
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
@@ -141,12 +142,14 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 			debugType,
 			provider,
 		);
+
 		if (this.jupyterDebugService) {
 			const d2 =
 				this.jupyterDebugService.registerDebugConfigurationProvider(
 					debugType,
 					provider,
 				);
+
 			return this.combineDisposables(d1, d2);
 		}
 		return d1;
@@ -159,12 +162,14 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 			debugType,
 			factory,
 		);
+
 		if (this.jupyterDebugService) {
 			const d2 =
 				this.jupyterDebugService.registerDebugAdapterTrackerFactory(
 					debugType,
 					factory,
 				);
+
 			return this.combineDisposables(d1, d2);
 		}
 		return d1;
@@ -175,6 +180,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 		parentSession?: DebugSession | undefined,
 	): Thenable<boolean> {
 		this.lastStartedService = this.vscodeDebugService;
+
 		return this.vscodeDebugService.startDebugging(
 			folder,
 			nameOrConfiguration,

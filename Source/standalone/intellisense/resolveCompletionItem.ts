@@ -42,7 +42,9 @@ import { convertDocumentationToMarkdown } from "./completionDocumentationFormatt
  * I.e. 1 request waiting for a response from the kernel is bad.
  */
 export const maxPendingKernelRequests = 1;
+
 const maxTimeWaitingForResolveCompletion = Settings.IntellisenseResolveTimeout;
+
 const maxNumberOfTimesAllowedToExceedTimeoutBeforeIgnoringAllRequests = 5;
 
 const kernelsThatDoNotSupportCompletionResolveOrAreTooSlowToReply =
@@ -88,14 +90,18 @@ export async function resolveCompletionItem(
 		document,
 		position,
 	);
+
 	const request = sendInspectRequest(message, kernel, token);
+
 	const consolidatedToken = wrapCancellationTokens(token);
+
 	try {
 		const content = await raceTimeoutError(
 			maxTimeWaitingForResolveCompletion,
 			new RequestTimedoutError(),
 			raceCancellation(consolidatedToken.token, request),
 		);
+
 		if (
 			!token.isCancellationRequested &&
 			content?.status === "ok" &&
@@ -152,6 +158,7 @@ function handleKernelRequestTimeout(
 	logger.warn(
 		`Failed to inspect code in kernel ${getDisplayNameOrNameOfKernelConnection(kernel.kernelConnectionMetadata)}`,
 	);
+
 	if (!telemetrySentForUnableToResolveCompletion.has(kernel)) {
 		telemetrySentForUnableToResolveCompletion.add(kernel);
 		sendTelemetryEvent(
@@ -184,9 +191,11 @@ async function sendPythonInspectRequest(
 	const codeToExecute = `return get_ipython().kernel.do_inspect("${escapeStringToEmbedInPythonCode(message.code)}", ${
 		message.cursor_pos
 	}, ${message.detail_level})`;
+
 	const content = await execCodeInBackgroundThread<
 		KernelMessage.IInspectReplyMsg["content"]
 	>(kernel, [codeToExecute], token);
+
 	return { content } as KernelMessage.IInspectReplyMsg;
 }
 
@@ -205,7 +214,9 @@ function getCachedResult(
 		return;
 	}
 	const cacheKey = JSON.stringify(message);
+
 	const cache = cachedKernelInspectRequests.get(kernel.session.kernel);
+
 	return cache?.get(cacheKey);
 }
 
@@ -221,6 +232,7 @@ function cachedResult(
 		return;
 	}
 	const cacheKey = JSON.stringify(message);
+
 	const cache =
 		cachedKernelInspectRequests.get(kernel.session.kernel) ||
 		new Map<string, KernelMessage.IInspectReplyMsg["content"]>();
@@ -252,6 +264,7 @@ function shoudlSendInspectRequest(kernel: IKernel) {
 		logger.warn(
 			`Not sending inspect request as previous requests took over ${maxTimeWaitingForResolveCompletion}s.`,
 		);
+
 		return false;
 	}
 
@@ -265,6 +278,7 @@ function shoudlSendInspectRequest(kernel: IKernel) {
 		logger.warn(
 			`Not sending inspect request as there have been at least ${maxNumberOfTimesAllowedToExceedTimeoutBeforeIgnoringAllRequests} requests that took over ${maxTimeWaitingForResolveCompletion}s.`,
 		);
+
 		return false;
 	}
 	if (
@@ -276,6 +290,7 @@ function shoudlSendInspectRequest(kernel: IKernel) {
 		logger.warn(
 			`Not sending inspect request as previous requests took over ${maxTimeWaitingForResolveCompletion}s.`,
 		);
+
 		return false;
 	}
 	return true;
@@ -296,7 +311,9 @@ async function waitForKernelToBeReady(
 			kernel.id
 		}, waiting for it to be ready.`,
 	);
+
 	const kernelConnection = kernel.session.kernel;
+
 	const disposables = new DisposableStore();
 	await raceCancellation(
 		token,
@@ -308,6 +325,7 @@ async function waitForKernelToBeReady(
 				if (!doesKernelHaveTooManyPendingRequests(kernel)) {
 					resolve();
 					dispose(disposables);
+
 					return;
 				}
 				// Perhaps we have some async code.
@@ -345,6 +363,7 @@ function trackCompletionTime(kernel: IKernel, elapsedTime: number) {
 	};
 	times.maxTime = Math.max(times.maxTime, elapsedTime);
 	times.lastRequestTime = Date.now();
+
 	if (elapsedTime > maxTimeWaitingForResolveCompletion) {
 		times.numberOfTimesMaxedOut += 1;
 	}
@@ -365,6 +384,7 @@ async function sendInspectRequest(
 		return;
 	}
 	const cachedValue = getCachedResult(kernel, message);
+
 	if (cachedValue) {
 		return cachedValue;
 	}
@@ -381,10 +401,12 @@ async function sendInspectRequest(
 	}
 
 	const completionPending = incrementPendingCounter(kernel);
+
 	const stopWatch = new StopWatch();
 
 	const codeForLogging = splitLines(message.code).reverse()[0].slice(-50);
 	logger.trace(`Inspecting code ${codeForLogging}`);
+
 	const request = isPythonKernelConnection(kernel.kernelConnectionMetadata)
 		? sendPythonInspectRequest(kernel, message, token)
 		: kernel.session.kernel.requestInspect(message);
@@ -403,6 +425,7 @@ async function sendInspectRequest(
 			stopWatch.elapsedTime > maxTimeWaitingForResolveCompletion
 				? logger.warn
 				: logger.debug;
+
 		if (token.isCancellationRequested) {
 			log(
 				`Inspected code ${codeForLogging} in ${stopWatch.elapsedTime}ms (but cancelled)`,
@@ -422,14 +445,18 @@ function createInspectRequestMessage(
 	position: Position,
 ): KernelMessage.IInspectRequestMsg["content"] {
 	const code = document.getText();
+
 	const insertText =
 		(typeof item.insertText === "string"
 			? item.insertText
 			: item.insertText?.value) ||
 		(typeof item.label === "string" ? item.label : item.label.label) ||
 		"";
+
 	const newCode = code.substring(0, position.character) + insertText;
+
 	const cursor_pos = position.character + insertText.length;
+
 	const contents: KernelMessage.IInspectRequestMsg["content"] = {
 		code: newCode,
 		cursor_pos,
@@ -469,6 +496,7 @@ function incrementPendingCounter(kernel: IKernel) {
 	};
 	pendingInspectRequests.set(kernel.session?.kernel, counter);
 	counter.count += 1;
+
 	return {
 		dispose: () => {
 			counter.count -= 1;

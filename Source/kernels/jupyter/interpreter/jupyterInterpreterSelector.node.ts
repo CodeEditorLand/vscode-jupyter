@@ -43,6 +43,7 @@ export class JupyterInterpreterSelector {
 		PythonEnvironment | undefined
 	> {
 		const env = await this.selectPythonEnvironment();
+
 		return (
 			env?.executable?.uri &&
 			(await this.serviceContainer
@@ -55,14 +56,18 @@ export class JupyterInterpreterSelector {
 	 */
 	public async selectPythonEnvironment(): Promise<Environment | undefined> {
 		const token = new CancellationTokenSource();
+
 		const platformService = new PlatformService();
+
 		const selectedInterpreter =
 			this.serviceContainer.get<JupyterInterpreterStateStore>(
 				JupyterInterpreterStateStore,
 			).selectedPythonPath;
+
 		const filter = ServiceContainer.instance.get<PythonEnvironmentFilter>(
 			PythonEnvironmentFilter,
 		);
+
 		const provider = ServiceContainer.instance
 			.get<PythonEnvironmentQuickPickItemProvider>(
 				PythonEnvironmentQuickPickItemProvider,
@@ -72,6 +77,7 @@ export class JupyterInterpreterSelector {
 					!isCondaEnvironmentWithoutPython(item) &&
 					!filter.isPythonEnvironmentExcluded(item),
 			);
+
 		const findSelectedEnvironment = () =>
 			provider.items.find((item) =>
 				areInterpreterPathsSame(
@@ -105,10 +111,12 @@ export class JupyterInterpreterSelector {
 		selector.selected = findSelectedEnvironment();
 		disposables.push(selector);
 		disposables.push(token);
+
 		try {
 			if (!selector.selected && selectedInterpreter) {
 				const onDidChangeHandler = provider.onDidChange(() => {
 					selector.selected = findSelectedEnvironment();
+
 					if (selector.selected) {
 						onDidChangeHandler.dispose();
 					}
@@ -117,6 +125,7 @@ export class JupyterInterpreterSelector {
 			}
 
 			const item = await selector.selectItem(token.token);
+
 			if (!item || item instanceof InputFlowAction) {
 				return;
 			}

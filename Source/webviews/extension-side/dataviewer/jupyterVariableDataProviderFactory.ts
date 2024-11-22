@@ -28,6 +28,7 @@ export class JupyterVariableDataProviderFactory
 				IJupyterVariableDataProvider,
 			);
 		jupyterVariableDataProvider.setDependencies(variable, kernel);
+
 		return jupyterVariableDataProvider;
 	}
 }

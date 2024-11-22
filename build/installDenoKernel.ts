@@ -7,7 +7,9 @@ import * as path from "path";
 import * as fs from "fs-extra";
 
 const winJupyterPath = path.join("AppData", "Roaming", "jupyter", "kernels");
+
 const linuxJupyterPath = path.join(".local", "share", "jupyter", "kernels");
+
 const macJupyterPath = path.join("Library", "Jupyter", "kernels");
 
 enum OSType {
@@ -54,8 +56,10 @@ function getKernelSpecRootPath() {
 	switch (getOSType()) {
 		case OSType.Windows:
 			return path.join(getUserHomeDir(), winJupyterPath);
+
 		case OSType.OSX:
 			return path.join(getUserHomeDir(), macJupyterPath);
+
 		default:
 			return path.join(getUserHomeDir(), linuxJupyterPath);
 	}
@@ -71,8 +75,10 @@ function getDenoKernelSpecPath() {
 
 function registerKernel() {
 	const denoKernelSpecPath = getDenoKernelSpecPath();
+
 	if (fs.existsSync(denoKernelSpecPath)) {
 		console.log(`Deno kernel already registered at ${denoKernelSpecPath}`);
+
 		return;
 	}
 

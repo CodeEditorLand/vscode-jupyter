@@ -26,6 +26,7 @@ export function getWorkspaceFolderIdentifier(
 		: workspace.workspaceFolders
 			? workspace.workspaceFolders[0] // Default to first folder if resource not passed in.
 			: undefined;
+
 	return workspaceFolder
 		? path.normalize(
 				getOSType() === OSType.Windows
@@ -41,5 +42,6 @@ export function getRootFolder() {
 		workspace.workspaceFolders.length > 0
 			? workspace.workspaceFolders[0]
 			: undefined;
+
 	return firstWorkspace?.uri;
 }

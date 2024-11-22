@@ -21,6 +21,7 @@ export function getZeroMQ(): typeof import("zeromq") {
 		// We do not want to block the process from exiting if there are any pending messages.
 		zmq.context.blocky = false;
 		sendZMQTelemetry(false).catch(noop);
+
 		return zmq;
 	} catch (e) {
 		try {
@@ -36,6 +37,7 @@ export function getZeroMQ(): typeof import("zeromq") {
 			sendZMQTelemetry(false, true, e.message || e.toString()).catch(
 				noop,
 			);
+
 			return zmq;
 		} catch (e2) {
 			sendZMQTelemetry(
@@ -67,6 +69,7 @@ async function getLocalZmqBinaries() {
 			"zeromq",
 			"prebuilds",
 		);
+
 		if (
 			!(await fs.pathExists(
 				path.join(EXTENSION_ROOT_DIR, "dist", "node_modules"),
@@ -78,7 +81,9 @@ async function getLocalZmqBinaries() {
 		const filesPromises = await fs.readdir(zmqFolder).then((folders) =>
 			folders.map(async (folder) => {
 				const folderPath = path.join(zmqFolder, folder);
+
 				const stat = await fs.stat(folderPath);
+
 				if (stat.isDirectory()) {
 					return fs
 						.readdir(folderPath)
@@ -89,7 +94,9 @@ async function getLocalZmqBinaries() {
 				return [];
 			}),
 		);
+
 		const files = (await Promise.all(filesPromises.flat())).flat();
+
 		return files.map((file) =>
 			file
 				.substring(
@@ -100,6 +107,7 @@ async function getLocalZmqBinaries() {
 		);
 	} catch (ex) {
 		logger.warn(`Failed to determine local zmq binaries.`, ex);
+
 		return ["Failed to determine local zmq binaries."];
 	}
 }
@@ -114,10 +122,12 @@ async function sendZMQTelemetry(
 		return;
 	}
 	telemetrySentOnce = true;
+
 	const [distro, zmqBinaries] = await Promise.all([
 		getDistroInfo().catch(() => <DistroInfo>{ id: "", version_id: "" }),
 		getLocalZmqBinaries(),
 	]);
+
 	const platformInfo = getPlatformInfo();
 	sendTelemetryEvent(Telemetry.ZMQSupport, undefined, {
 		distro_id: distro.id,
@@ -158,12 +168,18 @@ function getPlatformInfo() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const vars: Record<string, any> =
 			(process.config && process.config.variables) || {};
+
 		const npmConfigArch = (process.env.npm_config_arch || "").trim();
+
 		const arch = npmConfigArch || os.arch();
+
 		const platform = process.env.npm_config_platform || os.platform();
+
 		const alpine = isAlpine(platform);
+
 		const libc =
 			process.env.LIBC || (isAlpine(platform) ? "musl" : "glibc");
+
 		const armv =
 			process.env.ARM_VERSION ||
 			(arch === "arm64" ? "8" : vars.arm_version) ||
@@ -180,6 +196,7 @@ function getPlatformInfo() {
 			`Failed to determine platform information used to load zeromq binary.`,
 			ex,
 		);
+
 		return {};
 	}
 }

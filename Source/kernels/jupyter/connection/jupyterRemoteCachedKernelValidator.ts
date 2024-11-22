@@ -39,17 +39,21 @@ export class JupyterRemoteCachedKernelValidator
 					c.extensionId === kernel.serverProviderHandle.extensionId &&
 					c.id === kernel.serverProviderHandle.id,
 			);
+
 		if (!collection) {
 			logger.warn(
 				`Extension ${kernel.serverProviderHandle.extensionId} may have been uninstalled for provider ${kernel.serverProviderHandle.id}, handle ${kernel.serverProviderHandle.handle}`,
 			);
+
 			return false;
 		}
 		const token = new CancellationTokenSource();
+
 		try {
 			const servers = await Promise.resolve(
 				collection.serverProvider.provideJupyterServers(token.token),
 			);
+
 			if (!servers) {
 				return false;
 			}
@@ -72,6 +76,7 @@ export class JupyterRemoteCachedKernelValidator
 				`Failed to fetch remote servers from ${kernel.serverProviderHandle.extensionId}:${kernel.serverProviderHandle.id}`,
 				ex,
 			);
+
 			return false;
 		} finally {
 			token.dispose();

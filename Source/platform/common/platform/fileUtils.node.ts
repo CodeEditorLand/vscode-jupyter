@@ -33,6 +33,7 @@ export async function shellExecute(
 	const service = await internalServiceContainer
 		.get<IProcessServiceFactory>(IProcessServiceFactory)
 		.create(undefined);
+
 	return service.shellExec(command, options);
 }
 
@@ -80,6 +81,7 @@ export function getEnvironmentDirFromPath(interpreterPath: string): string {
 	// env <--- Return this directory if it is not 'bin' or 'scripts'
 	// |__ python  <--- interpreterPath
 	const dir = path.basename(path.dirname(interpreterPath));
+
 	if (!skipDirs.map((e) => normCasePath(e)).includes(normCasePath(dir))) {
 		return path.dirname(interpreterPath);
 	}
@@ -105,7 +107,9 @@ export async function isVirtualenvEnvironment(
 	// |__ activate, activate.*  <--- check if any of these files exist
 	// |__ python  <--- interpreterPath
 	const directory = path.dirname(interpreterPath);
+
 	const files = await fsapi.readdir(directory);
+
 	const regex = /^activate(\.([A-z]|\d)+)?$/i;
 
 	return files.find((file) => regex.test(file)) !== undefined;

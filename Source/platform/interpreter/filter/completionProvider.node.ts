@@ -88,7 +88,9 @@ export class PythonEnvFilterCompletionProvider
 			})
 			.map((env) => {
 				const label = getPythonEnvDisplayName(env);
+
 				const envPath = getDisplayPath(env.executable.uri);
+
 				return {
 					label,
 					detail: envPath,
@@ -122,19 +124,25 @@ export class PythonEnvFilterCompletionProvider
 	): string[] {
 		try {
 			const settings = document.getText();
+
 			const location = getLocation(settings, document.offsetAt(position));
+
 			const root = parseTree(settings);
+
 			const settingsNode = findNodeAtLocation(root, [location.path[0]]);
+
 			if (!settingsNode) {
 				return [];
 			}
 			const items = getNodeValue(settingsNode) as string[];
+
 			return Array.isArray(items) ? items : [];
 		} catch (ex) {
 			logger.warn(
 				`Failed to provide completions for python env filter`,
 				ex,
 			);
+
 			return [];
 		}
 	}

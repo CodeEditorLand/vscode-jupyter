@@ -21,6 +21,7 @@ export function getPythonEnvDisplayName(
 	interpreter: PythonEnvironment | Environment | { id: string },
 ) {
 	const env = getCachedEnvironment(interpreter);
+
 	if (isCI) {
 		logger.ci(
 			`Python Env Info for ${JSON.stringify(interpreter)} is ${JSON.stringify(env)}`,
@@ -28,20 +29,26 @@ export function getPythonEnvDisplayName(
 	}
 	if (env) {
 		const versionParts: string[] = [];
+
 		if (typeof env.version?.major === "number") {
 			versionParts.push(env.version.major.toString());
+
 			if (typeof env.version.minor === "number") {
 				versionParts.push(env.version.minor.toString());
+
 				if (typeof env.version.micro === "number") {
 					versionParts.push(env.version.micro.toString());
 				}
 			}
 		}
 		const version = versionParts.length ? versionParts.join(".") : "";
+
 		const envName =
 			env.environment?.name ||
 			(env.environment ? basename(env.environment?.folderUri) : "");
+
 		const nameWithVersion = version ? `Python ${version}` : "Python";
+
 		if (isCondaEnvironmentWithoutPython(interpreter) && envName) {
 			return envName;
 		}
@@ -60,18 +67,23 @@ export function getPythonEnvDisplayName(
 	// If this is a conda environment without Python, then don't display `Python` in it.
 	const isCondaEnvWithoutPython =
 		isCondaEnvironmentWithoutPython(interpreter);
+
 	const nameWithVersion = pythonVersion
 		? `Python ${pythonVersion}`
 		: "Python";
+
 	const envName = getPythonEnvironmentName(interpreter as PythonEnvironment);
+
 	if (isCondaEnvWithoutPython && envName) {
 		return envName;
 	}
 	const details: string[] = [];
+
 	if (envName) {
 		details.push(envName);
 	}
 	const envType = getEnvironmentType(interpreter);
+
 	if (envType && envType !== EnvironmentType.Unknown) {
 		details.push(envType);
 	}
@@ -84,7 +96,9 @@ export function getPythonEnvironmentName(pythonEnv: PythonEnvironment) {
 	// Sometimes Python extension doesn't detect conda environments correctly (e.g. conda env create without a name).
 	// In such cases the envName is empty, but it has a path.
 	const env = getCachedEnvironment(pythonEnv);
+
 	let envName = env?.environment?.name;
+
 	if (
 		!envName &&
 		env?.environment?.folderUri &&
@@ -110,6 +124,7 @@ export function getEnvironmentType(interpreter: {
 	id: string;
 }): EnvironmentType {
 	const env = getCachedEnvironment(interpreter);
+
 	return env ? getEnvironmentTypeImpl(env) : EnvironmentType.Unknown;
 }
 function getEnvironmentTypeImpl(env: Environment): EnvironmentType {
@@ -130,6 +145,7 @@ function getEnvironmentTypeImpl(env: Environment): EnvironmentType {
 		["VirtualEnv", EnvironmentType.VirtualEnv],
 		["Venv", EnvironmentType.Venv],
 	];
+
 	for (const [pythonEnvTool, JupyterEnv] of orderOrEnvs) {
 		if (env.tools.includes(pythonEnvTool)) {
 			return JupyterEnv;
@@ -154,6 +170,7 @@ export async function getInterpreterInfo(interpreter?: { id: string }) {
 		return;
 	}
 	const api = await PythonExtension.api();
+
 	return api.environments.resolveEnvironment(interpreter.id);
 }
 
@@ -171,6 +188,7 @@ export function isCondaEnvironmentWithoutPython(interpreter?: { id: string }) {
 	}
 
 	const env = getCachedEnvironment(interpreter);
+
 	return (
 		env &&
 		getEnvironmentType(env) === EnvironmentType.Conda &&
@@ -196,15 +214,18 @@ export async function getSysPrefix(interpreter?: { id: string }) {
 		const cachedInfo = pythonApi.environments.known.find(
 			(i) => i.id === interpreter.id,
 		);
+
 		if (cachedInfo?.executable?.sysPrefix) {
 			return cachedInfo.executable.sysPrefix;
 		}
 	}
 
 	const api = await PythonExtension.api();
+
 	const sysPrefix = await api.environments
 		.resolveEnvironment(interpreter.id)
 		.then((i) => i?.executable?.sysPrefix);
+
 	if (!sysPrefix) {
 		logger.warn(
 			`Unable to find sysPrefix for interpreter ${getDisplayPath(interpreter.id)}`,
@@ -223,6 +244,7 @@ export function getCachedSysPrefix(interpreter?: { id: string }) {
 	const cachedInfo = pythonApi.environments.known.find(
 		(i) => i.id === interpreter.id,
 	);
+
 	return cachedInfo?.executable?.sysPrefix;
 }
 export async function getVersion(
@@ -236,13 +258,16 @@ export async function getVersion(
 		const cachedInfo = pythonApi.environments.known.find(
 			(i) => i.id === interpreter.id,
 		);
+
 		if (cachedInfo?.version) {
 			return cachedInfo.version;
 		}
 	}
 
 	const api = await PythonExtension.api();
+
 	const info = await api.environments.resolveEnvironment(interpreter.id);
+
 	if (!info?.version) {
 		logger.warn(
 			`Unable to find Version for interpreter ${getDisplayPath(interpreter.id)}`,
@@ -261,6 +286,7 @@ export function getCachedVersion(interpreter?: { id?: string }) {
 	const cachedInfo = pythonApi.environments.known.find(
 		(i) => i.id === interpreter.id,
 	);
+
 	return cachedInfo?.version;
 }
 
@@ -278,7 +304,9 @@ export function resolvedPythonEnvToJupyterEnv(
 	}
 	// Map the Python env tool to a Jupyter environment type.
 	let uri: Uri;
+
 	let id = env.id;
+
 	if (!env.executable.uri) {
 		if (getEnvironmentType(env) === EnvironmentType.Conda) {
 			uri =
@@ -296,6 +324,7 @@ export function resolvedPythonEnvToJupyterEnv(
 			logger.warn(
 				`Python environment ${getDisplayPath(env.id)} excluded as Uri is undefined`,
 			);
+
 			return;
 		}
 	} else {

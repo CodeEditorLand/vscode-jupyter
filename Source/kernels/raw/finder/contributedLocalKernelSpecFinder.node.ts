@@ -66,6 +66,7 @@ export class ContributedLocalKernelSpecFinder
 	private wasPythonInstalledWhenFetchingControllers = false;
 
 	private cache: LocalKernelConnectionMetadata[] = [];
+
 	constructor(
 		@inject(LocalKnownPathKernelSpecFinder)
 		private readonly nonPythonKernelFinder: LocalKnownPathKernelSpecFinder,
@@ -99,7 +100,9 @@ export class ContributedLocalKernelSpecFinder
 		});
 
 		this.updateCache();
+
 		let combinedProgress: Deferred<void> | undefined = undefined;
+
 		const updateCombinedStatus = () => {
 			const latestStatus: (typeof this.nonPythonKernelFinder.status)[] = [
 				this.nonPythonKernelFinder.status,
@@ -108,6 +111,7 @@ export class ContributedLocalKernelSpecFinder
 					? "discovering"
 					: "idle",
 			];
+
 			if (latestStatus.includes("discovering")) {
 				if (!combinedProgress) {
 					combinedProgress = createDeferred<void>();
@@ -192,6 +196,7 @@ export class ContributedLocalKernelSpecFinder
 					return true;
 				},
 			);
+
 			const kernelSpecsFromPythonKernelFinder =
 				this.pythonKernelFinder.kernels.filter((item) =>
 					isUserRegisteredKernelSpecConnection(item),
@@ -206,6 +211,7 @@ export class ContributedLocalKernelSpecFinder
 	}
 	public get kernels(): LocalKernelConnectionMetadata[] {
 		const loadedKernelSpecFiles = new Set<string>();
+
 		const kernels: LocalKernelConnectionMetadata[] = [];
 		// If we have a global kernel spec returned by Python kernel finder,
 		// give that preference over the same kernel found using local kernel spec finder.
@@ -214,6 +220,7 @@ export class ContributedLocalKernelSpecFinder
 			const kernelSpecKind = getKernelRegistrationInfo(
 				connection.kernelSpec,
 			);
+
 			if (
 				connection.kernelSpec.specFile &&
 				kernelSpecKind ===
@@ -232,6 +239,7 @@ export class ContributedLocalKernelSpecFinder
 			}
 			kernels.push(connection);
 		});
+
 		return kernels;
 	}
 	private writeToCache(values: LocalKernelConnectionMetadata[]) {
@@ -241,21 +249,28 @@ export class ContributedLocalKernelSpecFinder
 				return false;
 			}
 			uniqueIds.add(item.id);
+
 			return true;
 		});
 
 		const oldValues = this.cache;
+
 		const oldKernels = new Map(oldValues.map((item) => [item.id, item]));
+
 		const kernels = new Map(values.map((item) => [item.id, item]));
+
 		const added = values.filter((k) => !oldKernels.has(k.id));
+
 		const updated = values.filter(
 			(k) =>
 				oldKernels.has(k.id) &&
 				!areObjectsWithUrisTheSame(k, oldKernels.get(k.id)),
 		);
+
 		const removed = oldValues.filter((k) => !kernels.has(k.id));
 
 		this.cache = values;
+
 		if (added.length || updated.length || removed.length) {
 			this._onDidChangeKernels.fire({ removed });
 		}

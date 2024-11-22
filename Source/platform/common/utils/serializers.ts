@@ -19,6 +19,7 @@ export function serializeDataViews(
 	// eslint-disable-next-line @typescript-eslint/prefer-for-of
 	for (let i = 0; i < buffers.length; i += 1) {
 		const item = buffers[i];
+
 		if ("buffer" in item && "byteOffset" in item) {
 			// It is an ArrayBufferView
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,6 +65,7 @@ export function deserializeDataViews(
 	// eslint-disable-next-line @typescript-eslint/prefer-for-of
 	for (let i = 0; i < buffers.length; i += 1) {
 		const item = buffers[i];
+
 		if ("buffer" in item && "byteOffset" in item) {
 			const buffer = new Uint8Array(item.buffer).buffer;
 			// It is an ArrayBufferView

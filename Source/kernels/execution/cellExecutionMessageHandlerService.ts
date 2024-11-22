@@ -23,6 +23,7 @@ export class CellExecutionMessageHandlerService {
 		NotebookCell,
 		CellExecutionMessageHandler
 	>();
+
 	constructor(
 		private readonly controller: IKernelController,
 		private readonly context: IExtensionContext,
@@ -47,6 +48,7 @@ export class CellExecutionMessageHandlerService {
 	}
 	public dispose() {
 		dispose(this.disposables);
+
 		if (this.notebook) {
 			this.notebook
 				.getCells()
@@ -66,6 +68,7 @@ export class CellExecutionMessageHandlerService {
 	): CellExecutionMessageHandler {
 		// Always dispose any previous handlers & create new ones.
 		this.messageHandlers.get(cell)?.dispose();
+
 		const handler = new CellExecutionMessageHandler(
 			cell,
 			this.controller,
@@ -78,6 +81,7 @@ export class CellExecutionMessageHandlerService {
 		);
 		// This object must be kept in memory has it monitors the kernel messages.
 		this.messageHandlers.set(cell, handler);
+
 		return handler;
 	}
 	public registerListenerForResumingExecution(
@@ -90,6 +94,7 @@ export class CellExecutionMessageHandlerService {
 	): CellExecutionMessageHandler {
 		// Always dispose any previous handlers & create new ones.
 		this.messageHandlers.get(cell)?.dispose();
+
 		const handler = new CellExecutionMessageHandler(
 			cell,
 			this.controller,
@@ -102,6 +107,7 @@ export class CellExecutionMessageHandlerService {
 		);
 		// This object must be kept in memory has it monitors the kernel messages.
 		this.messageHandlers.set(cell, handler);
+
 		return handler;
 	}
 }

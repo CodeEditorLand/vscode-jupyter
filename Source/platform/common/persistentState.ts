@@ -29,6 +29,7 @@ export class PersistentState<T> implements IPersistentState<T> {
 				this.key,
 				{ data: this.defaultValue! },
 			);
+
 			if (
 				!cachedData ||
 				!cachedData.expiry ||

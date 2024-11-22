@@ -56,6 +56,7 @@ export namespace notebookCellExecutions {
 	) {
 		if (state !== NotebookCellExecutionState.Idle || !executionOrder) {
 			eventEmitter.fire({ cell, state });
+
 			return;
 		}
 		// Wait for VS Code to update the cell execution state before firing the event.
@@ -67,6 +68,7 @@ export namespace notebookCellExecutions {
 				const currentCellChange = e.cellChanges.find(
 					(c) => c.cell === cell,
 				);
+
 				if (
 					currentCellChange?.cell?.executionSummary
 						?.executionOrder === executionOrder

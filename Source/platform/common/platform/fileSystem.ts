@@ -19,6 +19,7 @@ export const ENCODING = "utf8";
 @injectable()
 export class FileSystem implements IFileSystem {
 	protected vscfs: vscode.FileSystem;
+
 	constructor() {
 		this.vscfs = vscode.workspace.fs;
 	}
@@ -30,6 +31,7 @@ export class FileSystem implements IFileSystem {
 
 	async getFiles(dir: vscode.Uri): Promise<vscode.Uri[]> {
 		const files = await this.vscfs.readDirectory(dir);
+
 		return files
 			.filter((f) => f[1] === vscode.FileType.File)
 			.map((f) => vscode.Uri.file(f[0]));
@@ -55,6 +57,7 @@ export class FileSystem implements IFileSystem {
 
 	async readFile(uri: vscode.Uri): Promise<string> {
 		const result = await this.vscfs.readFile(uri);
+
 		return new TextDecoder().decode(result);
 	}
 
@@ -87,6 +90,7 @@ export class FileSystem implements IFileSystem {
 
 		// Otherwise use stat
 		let stat: vscode.FileStat;
+
 		try {
 			// Note that we are using stat() rather than lstat().  This
 			// means that any symlinks are getting resolved.
@@ -96,6 +100,7 @@ export class FileSystem implements IFileSystem {
 				return false;
 			}
 			logger.error(`stat() failed for "${filename}"`, err);
+
 			return false;
 		}
 
@@ -112,7 +117,9 @@ export class FileSystem implements IFileSystem {
 	async getFileHash(filename: vscode.Uri): Promise<string> {
 		// The reason for lstat rather than stat is not clear...
 		const stat = await this.stat(filename);
+
 		const data = `${stat.ctime}-${stat.mtime}`;
+
 		return computeHash(data, "SHA-512");
 	}
 }

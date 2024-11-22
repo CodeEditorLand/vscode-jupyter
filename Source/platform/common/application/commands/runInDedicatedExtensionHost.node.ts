@@ -28,7 +28,9 @@ export class RunInDedicatedExtensionHostCommandHandler
 			.get("experimental.affinity") as
 			| { [key: string]: number }
 			| undefined;
+
 		let maxAffinity = 0;
+
 		if (affinity) {
 			Object.values(affinity).forEach((value) => {
 				maxAffinity = Math.max(maxAffinity, value);

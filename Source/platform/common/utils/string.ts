@@ -16,6 +16,7 @@ export function uint8ArrayToBase64(buffer: Uint8Array): string {
 	} else {
 		// https://developer.mozilla.org/en-US/docs/Glossary/Base64#solution_1_%E2%80%93_escaping_the_string_before_encoding_it
 		const stringValue = textDecoder.decode(buffer);
+
 		return btoa(
 			encodeURIComponent(stringValue).replace(
 				/%([0-9A-F]{2})/g,

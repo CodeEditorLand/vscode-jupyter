@@ -68,6 +68,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 		string,
 		Promise<KernelInterpreterDependencyResponse>
 	>();
+
 	constructor(
 		@inject(IInstaller) private readonly installer: IInstaller,
 		@inject(IMemento)
@@ -113,6 +114,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				kernelConnection.interpreter?.uri,
 			)}, ui.disabled=${ui.disableUI} for resource '${getDisplayPath(resource)}'`,
 		);
+
 		const checkForPackages = async () => {
 			const alreadyInstalled =
 				await KernelProgressReporter.wrapAndReportProgress(
@@ -125,6 +127,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							ignoreCache,
 						),
 				);
+
 			if (alreadyInstalled) {
 				return KernelInterpreterDependencyResponse.ok;
 			}
@@ -135,6 +138,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 		if (!installWithoutPrompting) {
 			const result = await checkForPackages();
+
 			if (
 				result === KernelInterpreterDependencyResponse.ok ||
 				result === KernelInterpreterDependencyResponse.cancel
@@ -145,10 +149,14 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 		// Cache the install run
 		const key = getComparisonKey(kernelConnection.interpreter.uri);
+
 		let promise = this.installPromises.get(key);
+
 		let cancelTokenSource: CancellationTokenSource | undefined;
+
 		if (!promise) {
 			const cancelTokenSource = new CancellationTokenSource();
+
 			const disposable = token.onCancellationRequested(() => {
 				cancelTokenSource.cancel();
 				disposable.dispose();
@@ -159,6 +167,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				async () => {
 					if (installWithoutPrompting) {
 						const result = await checkForPackages();
+
 						if (
 							result === KernelInterpreterDependencyResponse.ok ||
 							result ===
@@ -189,9 +198,11 @@ export class KernelDependencyService implements IKernelDependencyService {
 		// Get the result of the question
 		let dependencyResponse: KernelInterpreterDependencyResponse =
 			KernelInterpreterDependencyResponse.failed;
+
 		try {
 			// This can throw an exception (if say it fails to install) or it can cancel
 			dependencyResponse = await promise;
+
 			if (
 				cancelTokenSource?.token?.isCancellationRequested ||
 				token.isCancellationRequested
@@ -239,6 +250,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			logger.info(
 				`IPyKernel found previously in this environment ${getDisplayPath(kernelConnection.interpreter.uri)}`,
 			);
+
 			return true;
 		}
 		const installedPromise = this.installer
@@ -253,6 +265,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				).catch(noop);
 			}
 		}, noop);
+
 		return raceCancellation(token, false, installedPromise);
 	}
 
@@ -274,6 +287,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			return KernelInterpreterDependencyResponse.uiHidden;
 		}
 		const interpreterType = getEnvironmentType(interpreter);
+
 		const [isModulePresent, isPipAvailableForNonConda] = await Promise.all([
 			isModulePresentInEnvironment(
 				this.memento,
@@ -284,26 +298,32 @@ export class KernelDependencyService implements IKernelDependencyService {
 				? undefined
 				: await this.installer.isInstalled(Product.pip, interpreter),
 		]);
+
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return KernelInterpreterDependencyResponse.cancel;
 		}
 		const messageFormat = isModulePresent
 			? DataScience.libraryRequiredToLaunchJupyterKernelNotInstalledInterpreterAndRequiresUpdate
 			: DataScience.libraryRequiredToLaunchJupyterKernelNotInstalledInterpreter;
+
 		const products =
 			isPipAvailableForNonConda === false
 				? [Product.ipykernel, Product.pip]
 				: [Product.ipykernel];
+
 		const message = messageFormat(
 			getPythonEnvDisplayName(interpreter) || interpreter.uri.fsPath,
 			products
 				.map((product) => ProductNames.get(product)!)
 				.join(` ${Common.and} `),
 		);
+
 		const productNameForTelemetry = products
 			.map((product) => ProductNames.get(product)!)
 			.join(", ");
+
 		const resourceType = resource ? getResourceType(resource) : undefined;
+
 		const resourceHash = resource
 			? await getTelemetrySafeHashedString(resource.toString())
 			: undefined;
@@ -322,9 +342,13 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 		// Build our set of prompt actions
 		const installOption = Common.install;
+
 		const selectKernelOption = DataScience.selectKernel;
+
 		const moreInfoOption = Common.moreInfo;
+
 		const options = [installOption];
+
 		if (resource && !cannotChangeKernels) {
 			// Due to a bug in our code, if we don't have a resource, don't display the option to change kernels.
 			// https://github.com/microsoft/vscode-jupyter/issues/6135
@@ -348,6 +372,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				);
 			}
 			let selection;
+
 			do {
 				selection =
 					isCodeSpace() || installWithoutPrompting
@@ -381,6 +406,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 				}
 				// "More Info" isn't a full valid response here, so reprompt after showing it
 			} while (selection === moreInfoOption);
+
 			if (cancelTokenSource.token.isCancellationRequested) {
 				sendKernelTelemetryEvent(
 					resource,
@@ -394,6 +420,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						pythonEnvType: interpreterType,
 					},
 				);
+
 				return KernelInterpreterDependencyResponse.cancel;
 			}
 			if (selection === selectKernelOption) {
@@ -409,6 +436,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						pythonEnvType: interpreterType,
 					},
 				);
+
 				return KernelInterpreterDependencyResponse.selectDifferentKernel;
 			} else if (selection === installOption) {
 				sendKernelTelemetryEvent(
@@ -435,6 +463,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 						isPipAvailableForNonConda === false,
 					),
 				);
+
 				if (response === InstallerResponse.Installed) {
 					sendKernelTelemetryEvent(
 						resource,
@@ -448,6 +477,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							pythonEnvType: interpreterType,
 						},
 					);
+
 					return KernelInterpreterDependencyResponse.ok;
 				} else if (response === InstallerResponse.Ignore) {
 					sendKernelTelemetryEvent(
@@ -462,6 +492,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							pythonEnvType: interpreterType,
 						},
 					);
+
 					return KernelInterpreterDependencyResponse.failed; // Happens when errors in pip or conda.
 				}
 			}
@@ -477,6 +508,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 					pythonEnvType: interpreterType,
 				},
 			);
+
 			return KernelInterpreterDependencyResponse.cancel;
 		} catch (ex) {
 			logger.error(`Failed to install ${productNameForTelemetry}`, ex);
@@ -492,6 +524,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 					pythonEnvType: interpreterType,
 				},
 			);
+
 			throw ex;
 		}
 	}

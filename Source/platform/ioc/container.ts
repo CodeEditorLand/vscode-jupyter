@@ -29,6 +29,7 @@ export class ServiceContainer implements IServiceContainer {
 		return ServiceContainer._instance;
 	}
 	private static _instance: IServiceContainer;
+
 	constructor(private container: Container) {
 		ServiceContainer._instance = this;
 	}

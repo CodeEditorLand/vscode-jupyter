@@ -70,6 +70,7 @@ export class CommonMessageCoordinator {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public get postMessage(): Event<{ message: string; payload: any }> {
 		this.listeningToPostMessageEvent = true;
+
 		return this.postEmitter.event;
 	}
 	private ipyWidgetMessageDispatcher?: IIPyWidgetMessageDispatcher;
@@ -143,6 +144,7 @@ export class CommonMessageCoordinator {
 							type: e.message,
 							payload: e.payload,
 						});
+
 						return;
 					}
 					this.sendPendingWebViewMessages(webview);
@@ -154,15 +156,21 @@ export class CommonMessageCoordinator {
 			this,
 			this.disposables,
 		);
+
 		const deferred = createDeferred<7 | 8>();
+
 		const sendIPyWidgetsVersion = async () => {
 			const stopWatch = new StopWatch();
+
 			if (!deferred.completed) {
 				// Determine the version of ipywidgets and send the appropriate script url to the webview.
 				const disposables: IDisposable[] = [];
+
 				const kernelProvider =
 					this.serviceContainer.get<IKernelProvider>(IKernelProvider);
+
 				const kernelPromise = createDeferred<IKernel>();
+
 				if (kernelProvider.get(this.document)) {
 					kernelPromise.resolve(kernelProvider.get(this.document));
 				} else {
@@ -177,6 +185,7 @@ export class CommonMessageCoordinator {
 					);
 				}
 				const kernel = await kernelPromise.promise;
+
 				if (kernel) {
 					if (
 						isPythonKernelConnection(
@@ -232,6 +241,7 @@ export class CommonMessageCoordinator {
 					`${ConsoleForegroundColors.Green}Widget Coordinator received ${m.type}`,
 				);
 				this.onMessage(webview, m.type, m.payload);
+
 				if (
 					m.type ===
 					IPyWidgetMessages.IPyWidgets_Request_Widget_Version
@@ -341,10 +351,14 @@ export class CommonMessageCoordinator {
 	) {
 		try {
 			let errorMessage: string = payload.error.toString();
+
 			const widgetScriptSources =
 				this.configService.getSettings(undefined).widgetScriptSources;
+
 			const cdnsEnabled = widgetScriptSources.length > 0;
+
 			const key = `${payload.moduleName}:${payload.moduleVersion}`;
+
 			if (!payload.isOnline) {
 				errorMessage = DataScience.loadClassFailedWithNoInternet(
 					payload.moduleName,
@@ -356,7 +370,9 @@ export class CommonMessageCoordinator {
 				!this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.has(key)
 			) {
 				this.modulesForWhichWeHaveDisplayedWidgetErrorMessage.add(key);
+
 				const moreInfo = Common.moreInfo;
+
 				const enableDownloads = DataScience.enableCDNForWidgetsButton;
 				errorMessage = DataScience.enableCDNForWidgetsSetting(
 					payload.moduleName,
@@ -374,10 +390,14 @@ export class CommonMessageCoordinator {
 								void env.openExternal(
 									Uri.parse("https://aka.ms/PVSCIPyWidgets"),
 								);
+
 								break;
+
 							case enableDownloads:
 								this.enableCDNForWidgets(webview).catch(noop);
+
 								break;
+
 							default:
 								break;
 						}
@@ -516,6 +536,7 @@ export class CommonMessageCoordinator {
 				`${ConsoleForegroundColors.Green}Queuing messages (no listeners)`,
 			);
 			this.cachedMessages.push(data);
+
 			return;
 		}
 		this.cachedMessages.forEach((item) => this.postEmitter.fire(item));

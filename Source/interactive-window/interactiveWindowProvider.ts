@@ -92,6 +92,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
     // returns the active Editor if it is an Interactive Window that we are tracking
     public get activeWindow(): IInteractiveWindow | undefined {
         const notebookUri = window.activeNotebookEditor?.notebook.uri.toString();
+
         return notebookUri ? this._windows.find((win) => win.notebookUri?.toString() === notebookUri) : undefined;
     }
 
@@ -120,6 +121,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         window.tabGroups.all.forEach((group) => {
             group.tabs.forEach((tab) => {
                 const input = tab.input;
+
                 if (input instanceof TabInputInteractiveWindow || input instanceof TabInputNotebook) {
                     interactiveWindowMapping.set(input.uri.toString(), input);
                 }
@@ -195,6 +197,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
 
         // See if we already have a match
         let result = this.getExisting(resource, mode, connection);
+
         if (!result) {
             // No match. Create a new item.
             result = await this.create(resource, mode, connection);
@@ -211,6 +214,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
      */
     public get(owner: Uri): IInteractiveWindow | undefined {
         const mode = this.configService.getSettings(owner).interactiveWindowMode;
+
         return this.getExisting(owner, mode);
     }
 
@@ -219,10 +223,12 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         const creationInProgress = createDeferred<void>();
         // Ensure we don't end up calling this method multiple times when creating an IW for the same resource.
         this.pendingCreations = creationInProgress.promise;
+
         try {
             const useNotebookModel = this.configService.getSettings(resource).interactiveReplNotebook;
 
             const viewType = useNotebookModel ? JupyterNotebookView : InteractiveWindowView;
+
             let initialController = await this.controllerHelper.getInitialController(resource, viewType, connection);
 
             logger.info(
@@ -232,6 +238,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
             );
 
             const [inputUri, editor] = await this.createEditor(initialController, resource, mode, useNotebookModel);
+
             if (initialController) {
                 initialController.controller.updateNotebookAffinity(
                     editor.notebook,
@@ -291,7 +298,9 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         withNotebookModel: boolean
     ): Promise<[Uri, NotebookEditor]> {
         const title = resource && mode === 'perFile' ? getInteractiveWindowTitle(resource) : undefined;
+
         const preserveFocus = resource !== undefined;
+
         const viewColumn = this.getInteractiveViewColumn(resource);
 
         if (withNotebookModel) {
@@ -306,6 +315,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
             preferredController ? `${JVSC_EXTENSION_ID}/${preferredController.id}` : undefined,
             title
         )) as unknown as INativeInteractiveWindow;
+
         if (!notebookEditor) {
             // This means VS Code failed to create an interactive window.
             // This should never happen.
@@ -321,6 +331,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         title?: string
     ): Promise<[Uri, NotebookEditor]> {
         title = title || 'Interactive-1';
+
         const notebookDocument = await workspace.openNotebookDocument(JupyterNotebookView);
 
         const editor = await window.showNotebookDocument(notebookDocument, {
@@ -342,6 +353,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
             });
         }
         const inputUri = notebookDocument.cellAt(editor.replOptions.appendIndex).document.uri;
+
         return [inputUri, editor];
     }
 
@@ -351,6 +363,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         }
 
         const setting = this.configService.getSettings(resource).interactiveWindowViewColumn;
+
         if (setting === 'secondGroup') {
             return ViewColumn.One;
         } else if (setting === 'active') {
@@ -374,6 +387,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         ) {
             // See if the first window was tied to a file or not.
             this.globalMemento.update(AskedForPerFileSettingKey, true).then(noop, noop);
+
             const questions = [
                 localize.DataScience.interactiveWindowModeBannerSwitchYes,
                 localize.DataScience.interactiveWindowModeBannerSwitchNo
@@ -383,6 +397,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
                 localize.DataScience.interactiveWindowModeBannerTitle,
                 ...questions
             );
+
             if (response === questions[0]) {
                 result = 'perFile';
                 this._windows[0].changeMode(result);
@@ -451,6 +466,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
         interactiveWindow.dispose();
         this._windows = this._windows.filter((w) => w !== interactiveWindow);
         this._updateWindowCache();
+
         if (this.lastActiveInteractiveWindow === interactiveWindow) {
             this.lastActiveInteractiveWindow = this._windows[0];
         }
@@ -465,6 +481,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
             return;
         }
         const textDocumentUri = window.activeTextEditor.document.uri;
+
         if (textDocumentUri.scheme !== NotebookCellScheme) {
             return this.get(textDocumentUri);
         }
@@ -472,6 +489,7 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
 
     findNotebookEditor(resource: Resource): NotebookEditor | undefined {
         let notebook: NotebookDocument | undefined;
+
         if (resource && resource.path.endsWith('.interactive')) {
             notebook = this.get(resource)?.notebookDocument;
         } else {
@@ -484,12 +502,15 @@ export class InteractiveWindowProvider implements IInteractiveWindowProvider, IE
 
     findAssociatedNotebookDocument(uri: Uri): NotebookDocument | undefined {
         const interactiveWindow = this._windows.find((w) => w.inputUri?.toString() === uri.toString());
+
         let notebook = interactiveWindow?.notebookDocument;
+
         return notebook;
     }
 
     getInteractiveWindowWithNotebook(notebookUri: Uri | undefined) {
         let targetInteractiveWindow;
+
         if (notebookUri !== undefined) {
             targetInteractiveWindow = this._windows.find((w) => w.notebookUri?.toString() === notebookUri.toString());
         } else {

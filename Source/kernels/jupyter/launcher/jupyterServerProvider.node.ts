@@ -20,6 +20,7 @@ import { IJupyterServerHelper, IJupyterServerProvider } from "../types";
 @injectable()
 export class JupyterServerProvider implements IJupyterServerProvider {
 	private serverPromise?: Promise<IJupyterConnection>;
+
 	constructor(
 		@inject(IJupyterServerHelper)
 		@optional()
@@ -46,6 +47,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 		options: GetServerOptions,
 	): Promise<IJupyterConnection> {
 		const jupyterServerHelper = this.jupyterServerHelper;
+
 		if (!jupyterServerHelper) {
 			throw new NotSupportedInWebError();
 		}
@@ -55,6 +57,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 			logger.trace(`Checking for server usability.`);
 
 			const usable = await this.checkUsable();
+
 			if (!usable) {
 				logger.trace("Server not usable (should ask for install now)");
 				// Indicate failing.
@@ -66,11 +69,13 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 			}
 			// Then actually start the server
 			logger.debug(`Starting notebook server.`);
+
 			const result = await jupyterServerHelper.startServer(
 				options.resource,
 				options.token,
 			);
 			Cancellation.throwIfCanceled(options.token);
+
 			return result;
 		} catch (e) {
 			// If user cancelled, then do nothing.
@@ -94,6 +99,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 			if (this.jupyterServerHelper) {
 				const usableInterpreter =
 					await this.jupyterServerHelper.getUsableJupyterPython();
+
 				return usableInterpreter ? true : false;
 			} else {
 				return true;
@@ -106,6 +112,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				const displayName =
 					getPythonEnvDisplayName(activeInterpreter) ||
 					getFilePath(activeInterpreter.uri);
+
 				throw new Error(
 					DataScience.jupyterNotSupportedBecauseOfEnvironment(
 						displayName,

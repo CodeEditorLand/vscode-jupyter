@@ -19,6 +19,7 @@ function kernelPackaging(kernel: IKernel): "%conda" | "%pip" {
 	const envType =
 		kernel.kernelConnectionMetadata.interpreter &&
 		getEnvironmentType(kernel.kernelConnectionMetadata.interpreter);
+
 	const isConda = envType === EnvironmentType.Conda;
 	// From https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pip (%conda is here as well).
 	return isConda ? "%conda" : "%pip";
@@ -36,7 +37,9 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 			throw new SessionDisposedError();
 		}
 		const outputs = await executeSilently(kernel.session.kernel, command);
+
 		const error = outputs.find((item) => item.output_type === "error");
+
 		if (error) {
 			logger.warn(DataScience.failedToGetVersionOfPandas, error.message);
 		}
@@ -45,18 +48,23 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 
 	protected async _getVersion(kernel: IKernel): Promise<string | undefined> {
 		const outputs = await this.execute(kernelGetPandasVersion, kernel);
+
 		const output = outputs
 			.map((text) => (text ? text.toString() : undefined))
 			.find((item) => item);
+
 		if (!output?.includes(separator)) {
 			logger.warn(
 				DataScience.failedToGetVersionOfPandas,
 				`Output is ${output}`,
 			);
+
 			return "";
 		}
 		const items = splitLines(output.trim());
+
 		const indexOfSeparator = items.indexOf(separator);
+
 		return indexOfSeparator >= 0 ? items[indexOfSeparator - 1] : "";
 	}
 
@@ -73,6 +81,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 				undefined,
 				e,
 			);
+
 			throw new Error(DataScience.failedToInstallPandas);
 		}
 	}
@@ -82,6 +91,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 
 		if (!kernel.session?.kernel) {
 			sendTelemetryEvent(Telemetry.NoActiveKernelSession);
+
 			throw new Error("No no active kernel session.");
 		}
 

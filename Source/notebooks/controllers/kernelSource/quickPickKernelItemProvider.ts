@@ -46,6 +46,7 @@ export class QuickPickKernelItemProvider
 	recommended: KernelConnectionMetadata | undefined;
 	private readonly disposables: IDisposable[] = [];
 	private refreshInvoked?: boolean;
+
 	constructor(
 		private readonly notebook: NotebookDocument,
 		kind: ContributedKernelFinderKind,
@@ -61,6 +62,7 @@ export class QuickPickKernelItemProvider
 		this.title = DataScience.kernelPickerSelectKernelTitle;
 		this.kind = kind;
 		this.disposables.push(this._onDidRefresh);
+
 		if (isPromise(finderPromise)) {
 			finderPromise
 				.then((finder) => this.setupFinder(finder))
@@ -79,6 +81,7 @@ export class QuickPickKernelItemProvider
 	}
 	private setupFinder(finder: IContributedKernelFinder) {
 		this.refresh = async () => finder.refresh();
+
 		if (this.status !== finder.status && !this.refreshInvoked) {
 			this.status = finder.status;
 			this._onDidChangeStatus.fire();
@@ -111,15 +114,20 @@ export class QuickPickKernelItemProvider
 		switch (finder.kind) {
 			case ContributedKernelFinderKind.LocalKernelSpec:
 				this.title = DataScience.kernelPickerSelectLocalKernelSpecTitle;
+
 				break;
+
 			case ContributedKernelFinderKind.LocalPythonEnvironment:
 				this.title = DataScience.quickPickSelectPythonEnvironmentTitle;
+
 				break;
+
 			default:
 				this.title =
 					DataScience.kernelPickerSelectKernelFromRemoteTitle(
 						finder.displayName,
 					);
+
 				break;
 		}
 		finder.onDidChangeKernels(
@@ -155,6 +163,7 @@ export class QuickPickKernelItemProvider
 		const cancellationToken = new CancellationTokenSource();
 		this.disposables.push(new Disposable(() => cancellationToken.cancel()));
 		this.disposables.push(cancellationToken);
+
 		const preferred = new PreferredKernelConnectionService(this.connection);
 		this.disposables.push(preferred);
 
@@ -174,6 +183,7 @@ export class QuickPickKernelItemProvider
 	}
 	private filteredKernels(kernels: KernelConnectionMetadata[]) {
 		const filter = this.pythonEnvFilter;
+
 		if (!filter) {
 			return kernels;
 		}

@@ -42,6 +42,7 @@ export class RestartNotSupportedController implements IDebuggingDelegate {
 					modal: true,
 				})
 				.then(noop, noop);
+
 			return {
 				command: request.command,
 				request_seq: request.seq,

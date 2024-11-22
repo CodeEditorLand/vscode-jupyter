@@ -98,6 +98,7 @@ export class KernelAutoReconnectMonitor
 						return;
 					}
 					const kernel = this.kernelProvider.get(e.cell.notebook);
+
 					if (
 						!kernel ||
 						this.lastExecutedCellPerKernel.get(kernel) !== e.cell
@@ -115,6 +116,7 @@ export class KernelAutoReconnectMonitor
 			this.kernelDisposables.get(kernel) || new DisposableStore();
 		this.disposableRegistry.push(kernelDisposables);
 		this.kernelDisposables.set(kernel, kernelDisposables);
+
 		return kernelDisposables;
 	}
 	private onDidStartKernel(kernel: IKernel) {
@@ -169,6 +171,7 @@ export class KernelAutoReconnectMonitor
 		connectionStatus: Kernel.ConnectionStatus,
 	) {
 		const kernel = this.kernelConnectionToKernelMapping.get(connection);
+
 		if (!kernel) {
 			return;
 		}
@@ -179,6 +182,7 @@ export class KernelAutoReconnectMonitor
 			case "connected": {
 				this.kernelReconnectProgress.get(kernel)?.dispose();
 				this.kernelReconnectProgress.delete(kernel);
+
 				return;
 			}
 			case "disconnected": {
@@ -194,13 +198,16 @@ export class KernelAutoReconnectMonitor
 					this.onKernelConnecting(kernel)?.catch(noop);
 				}
 				return;
+
 			default:
 				return;
 		}
 	}
 	private async onKernelConnecting(kernel: IKernel) {
 		const kernelDisposables = this.getKernelSpecificDisposables(kernel);
+
 		const deferred = createDeferred<void>();
+
 		const disposable = new Disposable(() => deferred.resolve());
 		this.kernelReconnectProgress.set(kernel, disposable);
 
@@ -209,6 +216,7 @@ export class KernelAutoReconnectMonitor
 				kernel,
 				kernel.kernelConnectionMetadata,
 			);
+
 			if (handled) {
 				return;
 			}
@@ -264,6 +272,7 @@ export class KernelAutoReconnectMonitor
 
 		try {
 			const lastExecutedCell = this.lastExecutedCellPerKernel.get(kernel);
+
 			if (
 				!lastExecutedCell ||
 				lastExecutedCell.document.isClosed ||
@@ -302,22 +311,27 @@ export class KernelAutoReconnectMonitor
 						metadata.serverProviderHandle.extensionId &&
 					c.id === metadata.serverProviderHandle.id,
 			);
+
 		if (!collection) {
 			return false;
 		}
 
 		const token = new CancellationTokenSource();
+
 		try {
 			const servers = await Promise.resolve(
 				collection.serverProvider.provideJupyterServers(token.token),
 			);
+
 			const handles = (servers || []).map((s) => s.id);
+
 			if (!handles.includes(metadata.serverProviderHandle.handle)) {
 				await this.serverUriStorage.remove(
 					metadata.serverProviderHandle,
 				);
 				this.kernelReconnectProgress.get(kernel)?.dispose();
 				this.kernelReconnectProgress.delete(kernel);
+
 				return true;
 			}
 			return false;

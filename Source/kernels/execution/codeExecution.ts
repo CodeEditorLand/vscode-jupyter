@@ -84,12 +84,14 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 	}
 	public async start(session: IKernelSession) {
 		this.session = session;
+
 		if (this.cancelHandled) {
 			traceExecMessage(
 				this.extensionId,
 				this.executionId,
 				"Not starting as it was cancelled",
 			);
+
 			return;
 		}
 		traceExecMessage(
@@ -98,12 +100,14 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			"Start Code execution",
 		);
 		logger.ci(`Code Exec contents ${this.code.substring(0, 50)}...`);
+
 		if (
 			!session.kernel ||
 			session.kernel.isDisposed ||
 			session.isDisposed
 		) {
 			this._done.reject(new SessionDisposedError());
+
 			return;
 		}
 
@@ -136,6 +140,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			return;
 		}
 		this.cancelRequested = true;
+
 		if (this.started) {
 			// At this point the cell execution can only be stopped from kernel by interrupting it.
 			// stop handling execution results & the like from the kernel.
@@ -144,6 +149,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 				this.executionId,
 				"Code is already running, interrupting and waiting for it to finish or kernel to start",
 			);
+
 			const kernel = this.session?.kernel;
 			// When Jupyter extnsion runs code internall using this,
 			// we do not want to interrupt the kernel as we're more in control of the kernel.
@@ -179,6 +185,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			return;
 		}
 		this.disposed = true;
+
 		if (!this._completed) {
 			traceExecMessage(
 				this.extensionId,
@@ -193,6 +200,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 		if (!session.kernel) {
 			const error = new Error("No kernel available to execute code");
 			this._done.resolve();
+
 			throw error;
 		}
 		traceExecMessage(
@@ -202,6 +210,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 		);
 
 		const kernelConnection = session.kernel;
+
 		try {
 			this.started = true;
 			this._onRequestSent.fire();
@@ -227,6 +236,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			);
 			this._completed = true;
 			this._done.reject(ex);
+
 			return;
 		}
 
@@ -240,6 +250,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			// Solution is to wait for all messages to get processed.
 			const response = await this.request!.done;
 			this._completed = true;
+
 			if (response.content.status === "error") {
 				traceExecMessage(
 					this.extensionId,
@@ -257,6 +268,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			}
 		} catch (ex) {
 			this._completed = true;
+
 			if (this.cancelHandled) {
 				return;
 			}

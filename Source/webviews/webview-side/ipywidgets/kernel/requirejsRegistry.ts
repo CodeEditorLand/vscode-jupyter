@@ -35,12 +35,14 @@ function getScriptsWithAValidScriptUriToBeRegistered(
 				logMessage(
 					`Source for IPyWidget ${source.moduleName} found in ${source.source} @ ${source.scriptUri}.`,
 				);
+
 				return true;
 			} else {
 				// eslint-disable-next-line no-console
 				console.error(
 					`Source for IPyWidget ${source.moduleName} not found.`,
 				);
+
 				return false;
 			}
 		})
@@ -54,8 +56,10 @@ function getRequireJs() {
 		define: Function;
 		undef: Function;
 	};
+
 	if (!requireJsFunc) {
 		window.console.error("Requirejs not found");
+
 		throw new Error("Requirejs not found");
 	}
 	return requireJsFunc;
@@ -65,9 +69,11 @@ function registerScriptsInRequireJs(
 	scripts: NonPartial<WidgetScriptSource>[],
 ) {
 	const requireJsFunc = getRequireJs();
+
 	const config: { baseUrl?: string; paths: Record<string, string> } = {
 		paths: {},
 	};
+
 	if (baseUrl) {
 		config.baseUrl = baseUrl;
 	}
@@ -94,6 +100,7 @@ function registerScriptsInRequireJs(
 
 export function undefineModule(moduleName: string) {
 	scriptsAlreadyRegisteredInRequireJs.delete(moduleName);
+
 	getRequireJs().undef(moduleName);
 }
 export function registerScripts(
@@ -101,6 +108,7 @@ export function registerScripts(
 	scripts: WidgetScriptSource[],
 ) {
 	const scriptsToRegister = getScriptsToBeRegistered(scripts);
+
 	const validScriptsToRegister =
 		getScriptsWithAValidScriptUriToBeRegistered(scriptsToRegister);
 	registerScriptsInRequireJs(baseUrl, validScriptsToRegister);
@@ -113,6 +121,7 @@ function registerCustomScripts() {
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(registerCustomScripts as any).invoked = true;
+
 	getRequireJs().config({
 		map: {
 			"*": {

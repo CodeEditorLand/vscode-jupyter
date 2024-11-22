@@ -29,6 +29,7 @@ export class DebugCellController implements IDebuggingDelegate {
 	public readonly ready = this._ready.promise;
 
 	private cellDumpInvoked?: boolean;
+
 	constructor(
 		private readonly debugAdapter: IKernelDebugAdapter,
 		public readonly debugCell: NotebookCell,
@@ -49,12 +50,14 @@ export class DebugCellController implements IDebuggingDelegate {
 				"intercept",
 				"debugpyAttach request for subprocess, not supported",
 			);
+
 			return true;
 		}
 
 		if (msg.event === "output") {
 			if (isJustMyCodeNotification(msg.body.output)) {
 				this.trace("intercept", "justMyCode notification");
+
 				return true;
 			}
 		}
@@ -67,6 +70,7 @@ export class DebugCellController implements IDebuggingDelegate {
 		request: DebugProtocol.Request,
 	): Promise<undefined | DebugProtocol.Response> {
 		const metadata = getInteractiveCellMetadata(this.debugCell);
+
 		if (
 			request.command === "setBreakpoints" &&
 			metadata &&

@@ -16,6 +16,7 @@ export class CryptoUtils implements ICryptoUtils {
 }
 
 const computedHashes: Record<string, string> = {};
+
 let stopStoringHashes = false;
 
 let cryptoProvider: Crypto;
@@ -55,6 +56,7 @@ export async function computeHash(
 		data.includes("/") ||
 		data.includes("\\") ||
 		data.endsWith(".interactive");
+
 	if (isCandidateForCaching && computedHashes[data]) {
 		return computedHashes[data];
 	}
@@ -79,6 +81,7 @@ async function computeHashInternal(
 	algorithm: "SHA-512" | "SHA-256" | "SHA-1",
 ): Promise<string> {
 	const inputBuffer = new TextEncoder().encode(data);
+
 	const hashBuffer = await cryptoProvider.subtle.digest(
 		{ name: algorithm },
 		inputBuffer,
@@ -86,5 +89,6 @@ async function computeHashInternal(
 
 	// Turn into hash string (got this logic from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest)
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
+
 	return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }

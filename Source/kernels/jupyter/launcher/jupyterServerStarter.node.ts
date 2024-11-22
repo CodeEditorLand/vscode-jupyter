@@ -49,6 +49,7 @@ import { JupyterConnectionWaiter } from "./jupyterConnectionWaiter.node";
 @injectable()
 export class JupyterServerStarter implements IJupyterServerStarter {
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IJupyterSubCommandExecutionService)
 		private readonly jupyterInterpreterService: IJupyterSubCommandExecutionService,
@@ -62,6 +63,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 	public dispose() {
 		while (this.disposables.length > 0) {
 			const disposable = this.disposables.shift();
+
 			try {
 				if (disposable) {
 					disposable.dispose();
@@ -81,12 +83,16 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 		logger.info("Starting Jupyter Server");
 		// Now actually launch it
 		let exitCode: number | null = 0;
+
 		let starter: JupyterConnectionWaiter | undefined;
+
 		const disposables: IDisposable[] = [];
+
 		const progress = KernelProgressReporter.reportProgress(
 			resource,
 			ReportableAction.NotebookStart,
 		);
+
 		try {
 			// Generate a temp dir with a unique GUID, both to match up our started server and to easily clean up after
 			const tempDirPromise = this.generateTempDir();
@@ -154,6 +160,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			);
 			// Make sure we haven't canceled already.
 			Cancellation.throwIfCanceled(cancelToken);
+
 			const connection = await raceCancellationError(
 				cancelToken,
 				starter.ready,
@@ -164,8 +171,10 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 					new URL(connection.baseUrl).port || "0",
 					10,
 				);
+
 				if (port && !isNaN(port)) {
 					const disposable = ignorePortForwarding(port);
+
 					if (launchResult.proc) {
 						launchResult.proc.on("exit", () => {
 							UsedPorts.delete(port);
@@ -178,9 +187,11 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 				logger.error(`Parsing failed ${connection.baseUrl}`, ex);
 			}
 			dispose(disposables);
+
 			return connection;
 		} catch (err) {
 			dispose(disposables);
+
 			if (
 				isCancellationError(err) ||
 				err instanceof JupyterConnectError ||
@@ -223,6 +234,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 		promisedArgs.push(
 			Promise.resolve(this.getNotebookDirArgument(workingDirectory)),
 		);
+
 		if (useDefaultConfig) {
 			promisedArgs.push(this.getConfigArgument(tempDirPromise));
 		}
@@ -336,6 +348,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			const cgroup = await this.fs
 				.readFile(Uri.file("/proc/self/cgroup"))
 				.catch(() => "");
+
 			if (!cgroup.includes("docker") && !cgroup.includes("kubepods")) {
 				return args;
 			}
@@ -371,6 +384,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 				// We don't want to do async as async dispose means it may never finish and then we don't
 				// delete
 				let count = 0;
+
 				while (count < 10) {
 					try {
 						await this.fs.delete(resultDir);

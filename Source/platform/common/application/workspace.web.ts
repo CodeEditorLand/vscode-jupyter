@@ -18,6 +18,7 @@ export class WorkspaceService extends BaseWorkspaceService {
 	public async computeWorkingDirectory(resource: Resource): Promise<string> {
 		if (resource) {
 			const filePath = getFilePath(resource);
+
 			if (filePath.includes(".")) {
 				return getFilePath(urlPath.dirname(resource));
 			} else {

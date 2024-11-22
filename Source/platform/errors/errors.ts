@@ -13,7 +13,9 @@ export function getErrorTags(stdErrOrStackTrace: string | string[]) {
 		? stdErrOrStackTrace[0].toLowerCase()
 		: stdErrOrStackTrace.toLowerCase();
 	taggers.forEach((tagger) => tagger(stdErrOrStackTraceLowered, tags));
+
 	const error = analyzeKernelErrors([], stdErrOrStackTraceLowered, undefined);
+
 	if (error?.telemetrySafeTags.length) {
 		tags.push(...error.telemetrySafeTags);
 	}

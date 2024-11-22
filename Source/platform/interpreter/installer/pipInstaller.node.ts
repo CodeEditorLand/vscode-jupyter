@@ -73,6 +73,7 @@ export class PipInstaller extends ModuleInstaller {
 		if (moduleName === translateProductToModule(Product.pip)) {
 			// If `ensurepip` is available, if not, then install pip using the script file.
 			const installer = this.serviceContainer.get<IInstaller>(IInstaller);
+
 			if (await installer.isInstalled(Product.ensurepip, interpreter)) {
 				return {
 					args: ["-m", "ensurepip"],
@@ -86,12 +87,15 @@ export class PipInstaller extends ModuleInstaller {
 		}
 
 		const args: string[] = [];
+
 		const proxy = workspace.getConfiguration("http").get("proxy", "");
+
 		if (proxy.length > 0) {
 			args.push("--proxy");
 			args.push(proxy);
 		}
 		args.push(...["install", "-U"]);
+
 		if (flags & ModuleInstallFlags.reInstall) {
 			args.push("--force-reinstall");
 		}
@@ -111,6 +115,7 @@ export class PipInstaller extends ModuleInstaller {
 			this.serviceContainer.get<IPythonExecutionFactory>(
 				IPythonExecutionFactory,
 			);
+
 		return pythonExecutionFactory
 			.create({ resource: undefined, interpreter })
 			.then((proc) => proc.isModuleInstalled("pip"))

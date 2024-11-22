@@ -44,12 +44,14 @@ export class DebugCellController implements IDebuggingDelegate {
 				"intercept",
 				"debugpyAttach request for subprocess, not supported",
 			);
+
 			return true;
 		}
 
 		if (msg.event === "output") {
 			if (isJustMyCodeNotification(msg.body.output)) {
 				this.trace("intercept", "justMyCode notification");
+
 				return true;
 			}
 		}

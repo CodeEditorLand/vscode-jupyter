@@ -21,10 +21,12 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 
 	public async getFileToExecute(): Promise<Uri | undefined> {
 		const activeEditor = window.activeTextEditor;
+
 		if (!activeEditor) {
 			window
 				.showErrorMessage("No open file to run in terminal")
 				.then(noop, noop);
+
 			return;
 		}
 		if (activeEditor.document.isUntitled) {
@@ -33,12 +35,14 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 					"The active file needs to be saved before it can be run",
 				)
 				.then(noop, noop);
+
 			return;
 		}
 		if (activeEditor.document.languageId !== PYTHON_LANGUAGE) {
 			window
 				.showErrorMessage("The active file is not a Python source file")
 				.then(noop, noop);
+
 			return;
 		}
 		if (activeEditor.document.isDirty) {
@@ -55,7 +59,9 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 		}
 
 		const selection = textEditor.selection;
+
 		let code: string;
+
 		if (selection.isEmpty) {
 			code = textEditor.document.lineAt(selection.start.line).text;
 		} else if (selection.isSingleLine) {
@@ -71,6 +77,7 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 		const docs = workspace.textDocuments.filter(
 			(d) => d.uri.path === file.path,
 		);
+
 		if (docs.length === 1 && docs[0].isDirty) {
 			await docs[0].save();
 		}
@@ -78,8 +85,11 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 
 	private getSingleLineSelectionText(textEditor: TextEditor): string {
 		const selection = textEditor.selection;
+
 		const selectionRange = new Range(selection.start, selection.end);
+
 		const selectionText = textEditor.document.getText(selectionRange);
+
 		const fullLineText = textEditor.document.lineAt(
 			selection.start.line,
 		).text;
@@ -107,7 +117,9 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 
 	private getMultiLineSelectionText(textEditor: TextEditor): string {
 		const selection = textEditor.selection;
+
 		const selectionRange = new Range(selection.start, selection.end);
+
 		const selectionText = textEditor.document.getText(selectionRange);
 
 		const fullTextRange = new Range(
@@ -117,6 +129,7 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 				textEditor.document.lineAt(selection.end.line).text.length,
 			),
 		);
+
 		const fullText = textEditor.document.getText(fullTextRange);
 
 		// This handles case where:
@@ -143,10 +156,12 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 		const fullStartLineText = textEditor.document.lineAt(
 			selection.start.line,
 		).text;
+
 		const selectionFirstLineRange = new Range(
 			selection.start,
 			new Position(selection.start.line, fullStartLineText.length),
 		);
+
 		const selectionFirstLineText = textEditor.document.getText(
 			selectionFirstLineRange,
 		);

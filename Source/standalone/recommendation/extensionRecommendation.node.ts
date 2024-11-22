@@ -39,6 +39,7 @@ import { sendTelemetryEvent } from "../../telemetry";
 
 const mementoKeyToNeverPromptExtensionAgain =
 	"JVSC_NEVER_PROMPT_EXTENSIONS_LIST";
+
 const knownExtensionsToRecommend = new Map<
 	string,
 	{ displayName: string; extensionLink: string }
@@ -52,6 +53,7 @@ const knownExtensionsToRecommend = new Map<
 		},
 	],
 ]);
+
 const extensionsThatSupportJupyterKernelLanguages = new Map<string, string>([
 	["c#", "ms-dotnettools.dotnet-interactive-vscode"],
 	["csharp", "ms-dotnettools.dotnet-interactive-vscode"],
@@ -69,6 +71,7 @@ export class ExtensionRecommendationService
 {
 	private readonly disposables: IDisposable[] = [];
 	private recommendedInSession = new Set<string>();
+
 	constructor(
 		@inject(IControllerRegistration)
 		private readonly controllerManager: IControllerRegistration,
@@ -103,6 +106,7 @@ export class ExtensionRecommendationService
 		const language = getLanguageInNotebookMetadata(
 			getNotebookMetadata(notebook),
 		);
+
 		if (language) {
 			this.recommendExtensionForLanguage(language).catch(noop);
 		}
@@ -123,6 +127,7 @@ export class ExtensionRecommendationService
 			return;
 		}
 		const language = getKernelConnectionLanguage(controller.connection);
+
 		if (language) {
 			this.recommendExtensionForLanguage(language).catch(noop);
 		}
@@ -131,10 +136,12 @@ export class ExtensionRecommendationService
 		const extensionId = extensionsThatSupportJupyterKernelLanguages.get(
 			language.toLowerCase(),
 		);
+
 		if (!extensionId || extensions.getExtension(extensionId)) {
 			return;
 		}
 		const extensionInfo = knownExtensionsToRecommend.get(extensionId);
+
 		if (!extensionInfo) {
 			return;
 		}
@@ -147,6 +154,7 @@ export class ExtensionRecommendationService
 			return;
 		}
 		this.recommendedInSession.add(extensionId);
+
 		const message = DataScience.recommendExtensionForNotebookLanguage(
 			`[${extensionInfo.displayName}](${extensionInfo.extensionLink})`,
 			language,
@@ -155,12 +163,14 @@ export class ExtensionRecommendationService
 			extensionId,
 			action: "displayed",
 		});
+
 		const selection = await window.showInformationMessage(
 			message,
 			Common.bannerLabelYes,
 			Common.bannerLabelNo,
 			Common.doNotShowAgain,
 		);
+
 		switch (selection) {
 			case Common.bannerLabelYes: {
 				sendTelemetryEvent(Telemetry.RecommendExtension, undefined, {
@@ -170,6 +180,7 @@ export class ExtensionRecommendationService
 				commands
 					.executeCommand("extension.open", extensionId)
 					.then(noop, noop);
+
 				break;
 			}
 			case Common.bannerLabelNo: {
@@ -177,6 +188,7 @@ export class ExtensionRecommendationService
 					extensionId,
 					action: "cancel",
 				});
+
 				break;
 			}
 			case Common.doNotShowAgain: {
@@ -184,10 +196,12 @@ export class ExtensionRecommendationService
 					extensionId,
 					action: "doNotShowAgain",
 				});
+
 				const list = this.globalMemento.get<string[]>(
 					mementoKeyToNeverPromptExtensionAgain,
 					[],
 				);
+
 				if (!list.includes(extensionId)) {
 					list.push(extensionId);
 					await this.globalMemento.update(

@@ -16,6 +16,7 @@ import { BaseError } from "./types";
  */
 export class RemoteJupyterServerConnectionError extends BaseError {
 	public readonly baseUrl: string;
+
 	constructor(
 		readonly url: string,
 		public readonly serverProviderHandle: {
@@ -38,5 +39,6 @@ export class RemoteJupyterServerConnectionError extends BaseError {
 
 function getBaseUrl(url: string) {
 	const uri = new URL(url);
+
 	return `${uri.protocol}//${uri.host}/`;
 }

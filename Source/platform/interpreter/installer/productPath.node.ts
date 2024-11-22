@@ -20,6 +20,7 @@ import {
 export abstract class BaseProductPathsService implements IProductPathService {
 	protected readonly configService: IConfigurationService;
 	protected readonly productInstaller: IInstaller;
+
 	constructor(protected serviceContainer: IServiceContainer) {
 		this.configService = serviceContainer.get<IConfigurationService>(
 			IConfigurationService,
@@ -35,6 +36,7 @@ export abstract class BaseProductPathsService implements IProductPathService {
 			return false;
 		}
 		let moduleName: string | undefined;
+
 		try {
 			moduleName = this.productInstaller.translateProductToModuleName(
 				product,

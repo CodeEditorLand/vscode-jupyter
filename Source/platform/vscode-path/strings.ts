@@ -31,7 +31,9 @@ export function compareSubstring(
 ): number {
 	for (; aStart < aEnd && bStart < bEnd; aStart++, bStart++) {
 		let codeA = a.charCodeAt(aStart);
+
 		let codeB = b.charCodeAt(bStart);
+
 		if (codeA < codeB) {
 			return -1;
 		} else if (codeA > codeB) {
@@ -39,7 +41,9 @@ export function compareSubstring(
 		}
 	}
 	const aLen = aEnd - aStart;
+
 	const bLen = bEnd - bStart;
+
 	if (aLen < bLen) {
 		return -1;
 	} else if (aLen > bLen) {
@@ -62,6 +66,7 @@ export function compareSubstringIgnoreCase(
 ): number {
 	for (; aStart < aEnd && bStart < bEnd; aStart++, bStart++) {
 		let codeA = a.charCodeAt(aStart);
+
 		let codeB = b.charCodeAt(bStart);
 
 		if (codeA === codeB) {
@@ -92,6 +97,7 @@ export function compareSubstringIgnoreCase(
 
 		// compare both code points
 		const diff = codeA - codeB;
+
 		if (diff === 0) {
 			continue;
 		}
@@ -100,6 +106,7 @@ export function compareSubstringIgnoreCase(
 	}
 
 	const aLen = aEnd - aStart;
+
 	const bLen = bEnd - bStart;
 
 	if (aLen < bLen) {
@@ -121,6 +128,7 @@ export function equalsIgnoreCase(a: string, b: string): boolean {
 
 export function startsWithIgnoreCase(str: string, candidate: string): boolean {
 	const candidateLength = candidate.length;
+
 	if (candidate.length > str.length) {
 		return false;
 	}
@@ -148,6 +156,7 @@ export class AmbiguousCharacters {
 	>((locales) => {
 		function arrayToMap(arr: number[]): Map<number, number> {
 			const result = new Map<number, number>();
+
 			for (let i = 0; i < arr.length; i += 2) {
 				result.set(arr[i], arr[i + 1]);
 			}
@@ -159,6 +168,7 @@ export class AmbiguousCharacters {
 			map2: Map<number, number>,
 		): Map<number, number> {
 			const result = new Map<number, number>(map1);
+
 			for (const [key, value] of map2) {
 				result.set(key, value);
 			}
@@ -173,6 +183,7 @@ export class AmbiguousCharacters {
 				return map2;
 			}
 			const result = new Map<number, number>();
+
 			for (const [key, value] of map1) {
 				if (map2.has(key)) {
 					result.set(key, value);
@@ -186,17 +197,20 @@ export class AmbiguousCharacters {
 		let filteredLocales = locales.filter(
 			(l) => !l.startsWith("_") && l in data,
 		);
+
 		if (filteredLocales.length === 0) {
 			filteredLocales = ["_default"];
 		}
 
 		let languageSpecificMap: Map<number, number> | undefined = undefined;
+
 		for (const locale of filteredLocales) {
 			const map = arrayToMap(data[locale]);
 			languageSpecificMap = intersectMaps(languageSpecificMap, map);
 		}
 
 		const commonMap = arrayToMap(data["_common"]);
+
 		const map = mergeMaps(commonMap, languageSpecificMap!);
 
 		return new AmbiguousCharacters(map);

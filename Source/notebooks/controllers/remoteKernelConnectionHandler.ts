@@ -89,6 +89,7 @@ export class RemoteKernelConnectionHandler
 			return;
 		}
 		const resource = kernel.resourceUri;
+
 		if (
 			kernel.kernelConnectionMetadata.kind !==
 			"startUsingRemoteKernelSpec"
@@ -96,8 +97,10 @@ export class RemoteKernelConnectionHandler
 			return;
 		}
 		const serverId = kernel.kernelConnectionMetadata.serverProviderHandle;
+
 		const storeKernelInfo = () => {
 			const kernelId = kernel.session?.kernel?.id;
+
 			if (!kernel.disposed && !kernel.disposing && kernelId) {
 				logger.debug(
 					`Updating preferred kernel for remote notebook ${kernelId}`,

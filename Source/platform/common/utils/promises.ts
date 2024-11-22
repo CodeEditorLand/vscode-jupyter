@@ -23,6 +23,7 @@ export class PromiseMonitor {
         promise
             .finally(() => {
                 this.promises.delete(promise);
+
                 if (this.isComplete) {
                     this._onStateChange.fire();
                 }

@@ -51,10 +51,13 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 		logger.trace(
 			`Creating raw notebook for resource '${getDisplayPath(options.resource)}'`,
 		);
+
 		let session: RawSessionConnection | undefined;
+
 		const cwdTracker = getNotebookTelemetryTracker(
 			options.resource,
 		)?.computeCwd();
+
 		const [workingDirectory, localWorkingDirectory] = await Promise.all([
 			raceCancellationError(
 				options.token,
@@ -82,6 +85,7 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 			),
 		]);
 		cwdTracker?.stop();
+
 		const launchTimeout = this.configService.getSettings(
 			options.resource,
 		).jupyterLaunchTimeout;
@@ -95,6 +99,7 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 				? "notebook"
 				: "console",
 		);
+
 		try {
 			await raceCancellationError(
 				options.token,
@@ -119,6 +124,7 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 				)
 				.finally(() => session?.dispose())
 				.catch(noop);
+
 			throw error;
 		}
 
@@ -140,6 +146,7 @@ export async function computeLocalWorkingDirectory(
 		configService,
 		fs,
 	);
+
 	if (suggestedDir && (await fs.exists(suggestedDir))) {
 		return suggestedDir.fsPath;
 	} else if (
@@ -155,6 +162,7 @@ export async function computeLocalWorkingDirectory(
 				configService.getSettings(resource),
 			),
 		);
+
 		if (suggestedDir && (await fs.exists(suggestedDir))) {
 			return suggestedDir.fsPath;
 		}
@@ -169,13 +177,16 @@ async function doComputeLocalWorkingDirectory(
 	let workingDir: vscode.Uri | undefined;
 	// For a local launch calculate the working directory that we should switch into
 	const settings = configService.getSettings(resource);
+
 	const fileRootStr = untildify(settings.notebookFileRoot);
 
 	// If we don't have a workspace open the notebookFileRoot seems to often have a random location in it (we use ${workspaceRoot} as default)
 	// so only do this setting if we actually have a valid workspace open
 	if (fileRootStr && vscode.workspace.workspaceFolders?.length) {
 		const fileRoot = vscode.Uri.file(fileRootStr);
+
 		const workspaceFolderPath = vscode.workspace.workspaceFolders![0].uri;
+
 		if (path.isAbsolute(fileRootStr)) {
 			if (await fs.exists(fileRoot)) {
 				// User setting is absolute and exists, use it
@@ -190,6 +201,7 @@ async function doComputeLocalWorkingDirectory(
 				workspaceFolderPath,
 				fileRootStr,
 			);
+
 			if (await fs.exists(combinedPath)) {
 				// combined path exists, use it
 				workingDir = combinedPath;

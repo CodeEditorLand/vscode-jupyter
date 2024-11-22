@@ -125,6 +125,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		callback: (message: string, payload: any) => void,
 	) {
 		const index = this.onMessageListeners.indexOf(callback);
+
 		if (index >= 0) {
 			this.onMessageListeners.splice(index, 1);
 		}
@@ -169,6 +170,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		switch (message) {
 			case SharedMessages.Started:
 				this.webViewRendered();
+
 				break;
 
 			case InteractiveWindowMessages.GetHTMLByIdResponse:
@@ -204,6 +206,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		if (this.webview === undefined) {
 			// Get our settings to pass along to the react control
 			const settings = await this.generateDataScienceExtraSettings();
+
 			const workspaceFolder = workspace.getWorkspaceFolder(cwd)?.uri;
 
 			this.webview = await this.provideWebview(
@@ -228,12 +231,17 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 
 	protected async generateDataScienceExtraSettings(): Promise<IJupyterExtraSettings> {
 		const resource = this.owningResource;
+
 		const editor = workspace.getConfiguration("editor");
+
 		const workbench = workspace.getConfiguration("workbench");
+
 		const theme = !workbench
 			? DefaultTheme
 			: workbench.get<string>("colorTheme", DefaultTheme);
+
 		const pythonExt = extensions.getExtension(PythonExtension);
+
 		const sendableSettings = JSON.parse(
 			JSON.stringify(this.configService.getSettings(resource)),
 		);
@@ -424,6 +432,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		) {
 			// See if the theme changed
 			const newSettings = await this.generateDataScienceExtraSettings();
+
 			if (newSettings) {
 				const dsSettings = JSON.stringify(newSettings);
 				this.postMessageInternal(

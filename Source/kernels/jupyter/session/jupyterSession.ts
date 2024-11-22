@@ -49,6 +49,7 @@ export class JupyterSessionWrapper
 				this.session ? "defined" : "undefined"
 			} & real kernel is ${this.session?.kernel ? "defined" : "undefined"}`,
 		);
+
 		return "unknown";
 	}
 	private restartToken?: CancellationTokenSource;
@@ -89,16 +90,20 @@ export class JupyterSessionWrapper
 		} catch (ex) {
 			logger.ci(`Error waiting for idle`, ex);
 			await this.shutdown().catch(noop);
+
 			throw ex;
 		}
 	}
 	public override async restart(): Promise<void> {
 		const disposables: IDisposable[] = [];
+
 		const token = new CancellationTokenSource();
 		this.restartToken = token;
+
 		const ui = new DisplayOptions(false);
 		disposables.push(ui);
 		disposables.push(token);
+
 		try {
 			await this.validateLocalKernelDependencies(token.token, ui);
 			await super.restart();
@@ -139,6 +144,7 @@ export class JupyterSessionWrapper
 	public override async shutdown(): Promise<void> {
 		this.restartToken?.cancel();
 		this.restartToken?.dispose();
+
 		return this.shutdownImplementation(true);
 	}
 
@@ -155,8 +161,10 @@ export class JupyterSessionWrapper
 		logger.trace(
 			`Shutdown session - current session, called from \n ${stack.map((l) => `    ${l}`).join("\n")}`,
 		);
+
 		const kernelIdForLogging = `${this.session.kernel?.id}, ${this.kernelConnectionMetadata.id}`;
 		logger.debug(`shutdownSession ${kernelIdForLogging} - start`);
+
 		try {
 			if (shutdownEvenIfRemote || this.canShutdownSession()) {
 				try {

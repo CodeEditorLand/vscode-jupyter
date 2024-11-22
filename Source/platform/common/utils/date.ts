@@ -4,10 +4,15 @@
 import { l10n } from "vscode";
 
 const minute = 60;
+
 const hour = minute * 60;
+
 const day = hour * 24;
+
 const week = day * 7;
+
 const month = day * 30;
+
 const year = day * 365;
 
 /**
@@ -30,6 +35,7 @@ export function fromNow(
 	}
 
 	const seconds = Math.round((new Date().getTime() - date) / 1000);
+
 	if (seconds < -30) {
 		return l10n.t(
 			"in {0}",
@@ -42,6 +48,7 @@ export function fromNow(
 	}
 
 	let value: number;
+
 	if (seconds < minute) {
 		value = seconds;
 
@@ -70,6 +77,7 @@ export function fromNow(
 
 	if (seconds < hour) {
 		value = Math.floor(seconds / minute);
+
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
@@ -95,6 +103,7 @@ export function fromNow(
 
 	if (seconds < day) {
 		value = Math.floor(seconds / hour);
+
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
@@ -120,6 +129,7 @@ export function fromNow(
 
 	if (seconds < week) {
 		value = Math.floor(seconds / day);
+
 		if (appendAgoLabel) {
 			return value === 1
 				? l10n.t("{0} day ago", value)
@@ -133,6 +143,7 @@ export function fromNow(
 
 	if (seconds < month) {
 		value = Math.floor(seconds / week);
+
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
@@ -158,6 +169,7 @@ export function fromNow(
 
 	if (seconds < year) {
 		value = Math.floor(seconds / month);
+
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
@@ -182,6 +194,7 @@ export function fromNow(
 	}
 
 	value = Math.floor(seconds / year);
+
 	if (appendAgoLabel) {
 		if (value === 1) {
 			return useFullTimeWords

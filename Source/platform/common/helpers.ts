@@ -14,7 +14,9 @@ export function splitLines(
 	},
 ): string[] {
 	value = value || "";
+
 	let lines = value.split(/\r?\n/g);
+
 	if (splitOptions && splitOptions.trim) {
 		lines = lines.map((line) => line.trim());
 	}
@@ -77,6 +79,7 @@ export function createPublicAPIProxy<T extends object>(
 	membersToHide: (keyof T)[],
 ): T {
 	const membersToHideList = membersToHide as (string | symbol)[];
+
 	return new Proxy(target, {
 		has(target, p) {
 			if (membersToHideList.includes(p)) {
@@ -107,11 +110,14 @@ export function stripCodicons(text: string | undefined) {
 
 export function dedentCode(code: string) {
 	const lines = code.split("\n");
+
 	const firstNonEmptyLine = lines.find(
 		(line) => line.trim().length > 0 && !line.trim().startsWith("#"),
 	);
+
 	if (firstNonEmptyLine) {
 		const leadingSpaces = firstNonEmptyLine.match(/^\s*/)![0];
+
 		return lines
 			.map((line) => {
 				if (line.startsWith(leadingSpaces)) {

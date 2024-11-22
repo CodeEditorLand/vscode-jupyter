@@ -194,6 +194,7 @@ export class RemoteKernelFinder
 			this.kernelProvider.onDidDisposeKernel((k) => {
 				if (k && isRemoteConnection(k.kernelConnectionMetadata)) {
 					this.kernelDisposeDelayTimer?.dispose();
+
 					const timer = setTimeout(() => {
 						this.updateCache().then(noop, noop);
 					}, REMOTE_KERNEL_REFRESH_INTERVAL);
@@ -201,6 +202,7 @@ export class RemoteKernelFinder
 					this.kernelDisposeDelayTimer = new Disposable(() =>
 						clearTimeout(timer),
 					);
+
 					return timer;
 				}
 			}, this),
@@ -224,6 +226,7 @@ export class RemoteKernelFinder
 			.then((connInfo) => {
 				if (connInfo) {
 					this.cachedConnection = Promise.resolve(connInfo);
+
 					return this.listKernelsFromConnection(connInfo);
 				}
 				return Promise.resolve([]);
@@ -239,6 +242,7 @@ export class RemoteKernelFinder
 					);
 				}
 				this.cachedConnection = undefined;
+
 				return Promise.reject(ex);
 			});
 	}
@@ -248,6 +252,7 @@ export class RemoteKernelFinder
 		displayProgress: boolean = false,
 	): Promise<void> {
 		logger.ci(`Remote Kernel Finder load cache Server: ${this.id}`);
+
 		const promise = (async () => {
 			const kernelsFromCache = ignoreCache
 				? []
@@ -299,6 +304,7 @@ export class RemoteKernelFinder
 		const promise = (async () => {
 			let kernels: RemoteKernelConnectionMetadata[] = [];
 			this._cacheUpdateCancelTokenSource?.dispose();
+
 			const updateCacheCancellationToken = new CancellationTokenSource();
 			this._cacheUpdateCancelTokenSource = updateCacheCancellationToken;
 
@@ -335,6 +341,7 @@ export class RemoteKernelFinder
 		displayProgress: boolean = true,
 	): Promise<IJupyterConnection | undefined> {
 		const disposables: IDisposable[] = [];
+
 		if (displayProgress) {
 			disposables.push(
 				KernelProgressReporter.createProgressReporter(
@@ -364,6 +371,7 @@ export class RemoteKernelFinder
 			}
 			// Validate
 			const validValues: RemoteKernelConnectionMetadata[] = [];
+
 			const promise = Promise.all(
 				results.map(async (item) => {
 					if (await this.isValidCachedKernel(item)) {
@@ -372,6 +380,7 @@ export class RemoteKernelFinder
 				}),
 			);
 			await raceCancellation(cancelToken, promise);
+
 			return validValues;
 		} catch (ex) {
 			logger.error(
@@ -387,11 +396,14 @@ export class RemoteKernelFinder
 	> {
 		try {
 			const data = await this.fs.readFile(this.cacheFile);
+
 			const json = JSON.parse(data) as CacheDataFormat;
+
 			if (json.extensionVersion !== this.env.extensionVersion) {
 				return [];
 			}
 			const cache = json.data[this.cacheKey] || [];
+
 			if (Array.isArray(cache)) {
 				return cache.map((item) =>
 					BaseKernelConnectionMetadata.fromJSON(item),
@@ -409,6 +421,7 @@ export class RemoteKernelFinder
 		connInfo: IJupyterConnection,
 	): Promise<RemoteKernelConnectionMetadata[]> {
 		const disposables: IAsyncDisposable[] = [];
+
 		try {
 			const sessionManager = JupyterLabHelper.create(connInfo.settings);
 			disposables.push({ dispose: () => disposeAsync(sessionManager) });
@@ -424,6 +437,7 @@ export class RemoteKernelFinder
 			// Turn them both into a combined list
 			const mappedSpecs = specs.map((s) => {
 				sendKernelSpecTelemetry(s, "remote");
+
 				return RemoteKernelSpecConnectionMetadata.create({
 					kernelSpec: s,
 					id: getKernelId(s, undefined, serverId),
@@ -431,17 +445,22 @@ export class RemoteKernelFinder
 					serverProviderHandle: connInfo.serverProviderHandle,
 				});
 			});
+
 			const mappedLive = sessions.map((s) => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const liveKernel = s.kernel as any;
+
 				const lastActivityTime = liveKernel.last_activity
 					? new Date(Date.parse(liveKernel.last_activity.toString()))
 					: new Date();
+
 				const numberOfConnections = liveKernel.connections
 					? parseInt(liveKernel.connections.toString(), 10)
 					: 0;
+
 				const activeKernel =
 					running.find((active) => active.id === s.kernel?.id) || {};
+
 				const matchingSpec: Partial<IJupyterKernelSpec> =
 					specs.find((spec) => spec.name === s.kernel?.name) || {};
 
@@ -459,6 +478,7 @@ export class RemoteKernelFinder
 					id: s.kernel?.id || "",
 					serverProviderHandle: connInfo.serverProviderHandle,
 				});
+
 				return kernel;
 			});
 
@@ -466,12 +486,14 @@ export class RemoteKernelFinder
 			const filtered = mappedLive.filter(
 				(k) => !this.kernelIdsToHide.has(k.kernelModel.id || ""),
 			);
+
 			return [...filtered, ...mappedSpecs];
 		} catch (ex) {
 			logger.error(
 				`Error fetching kernels from ${connInfo.baseUrl} (${connInfo.displayName}):`,
 				ex,
 			);
+
 			throw ex;
 		} finally {
 			await Promise.all(disposables.map((d) => d.dispose().catch(noop)));
@@ -485,18 +507,23 @@ export class RemoteKernelFinder
 			);
 
 			const oldValues = this.cache;
+
 			const oldKernels = new Map(
 				oldValues.map((item) => [item.id, item]),
 			);
+
 			const latestValidKernels = new Map(
 				values.map((item) => [item.id, item]),
 			);
+
 			const added = values.filter((k) => !oldKernels.has(k.id));
+
 			const updated = values.filter(
 				(k) =>
 					oldKernels.has(k.id) &&
 					!areObjectsWithUrisTheSame(k, oldKernels.get(k.id)),
 			);
+
 			const removed = oldValues.filter(
 				(k) => !latestValidKernels.has(k.id),
 			);
@@ -511,6 +538,7 @@ export class RemoteKernelFinder
 			// Now update the objects in place.
 			this.cache.forEach((kernel) => {
 				const latestKernel = latestValidKernels.get(kernel.id)!;
+
 				if (kernel === latestKernel) {
 					// same object ref, that means this is not really an old item.
 					return;
@@ -523,14 +551,19 @@ export class RemoteKernelFinder
 					kernel.updateModel(latestKernel.kernelModel);
 				}
 			});
+
 			const serialized = values.map((item) => item.toJSON());
+
 			let currentData: CacheDataFormat = {
 				extensionVersion: this.env.extensionVersion,
 				data: {},
 			};
+
 			try {
 				const data = await this.fs.readFile(this.cacheFile);
+
 				const json = JSON.parse(data) as CacheDataFormat;
+
 				if (json.extensionVersion === this.env.extensionVersion) {
 					currentData = json;
 				}
@@ -570,6 +603,7 @@ export class RemoteKernelFinder
 			case "startUsingRemoteKernelSpec":
 				// Always fetch the latest kernels from remotes, no need to display cached remote kernels.
 				return false;
+
 			case "connectToLiveRemoteKernel":
 				return this.cachedRemoteKernelValidator.isValid(kernel);
 		}

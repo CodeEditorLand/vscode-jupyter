@@ -70,6 +70,7 @@ export class ExportBase implements IExportBase {
 				interpreter,
 			);
 			await this.fs.writeFile(target, contents);
+
 			return;
 		}
 
@@ -87,9 +88,11 @@ export class ExportBase implements IExportBase {
             we store it in a temp directory. The name of the file matters because when
             exporting to certain formats the filename is used within the exported document as the title. */
 		const tempDir = await new ExportUtilNode().generateTempDir();
+
 		const source = await this.makeSourceFile(target, contents, tempDir);
 
 		const service = await this.getExecutionService(source, interpreter);
+
 		if (!service) {
 			return;
 		}
@@ -101,6 +104,7 @@ export class ExportBase implements IExportBase {
 		const tempTarget = await this.fs.createTemporaryLocalFile(
 			path.extname(target.fsPath),
 		);
+
 		const args = [
 			source.fsPath,
 			"--to",
@@ -111,6 +115,7 @@ export class ExportBase implements IExportBase {
 			path.dirname(tempTarget.filePath),
 			"--debug",
 		];
+
 		const result = await service.execModule(
 			"jupyter",
 			["nbconvert"].concat(args),
@@ -123,6 +128,7 @@ export class ExportBase implements IExportBase {
 
 		if (token.isCancellationRequested) {
 			tempTarget.dispose();
+
 			return;
 		}
 		try {
@@ -152,11 +158,13 @@ export class ExportBase implements IExportBase {
 			target.fsPath,
 			path.extname(target.fsPath),
 		);
+
 		const sourceFilePath = await new ExportUtilNode().makeFileInDirectory(
 			contents,
 			`${fileName}.ipynb`,
 			tempDir.path,
 		);
+
 		return Uri.file(sourceFilePath);
 	}
 

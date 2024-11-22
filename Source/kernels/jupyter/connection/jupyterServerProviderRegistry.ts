@@ -25,6 +25,7 @@ export function getJupyterDisplayName(
 			c.extensionId === serverHandle.extensionId &&
 			c.id === serverHandle.id,
 	);
+
 	return (
 		displayNames.get(generateIdFromRemoteProvider(serverHandle)) ||
 		collection?.label ||

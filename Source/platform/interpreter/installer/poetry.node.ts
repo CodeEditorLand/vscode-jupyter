@@ -42,6 +42,7 @@ async function isGlobalPoetryEnvironment(
 	interpreterPath: string,
 ): Promise<boolean> {
 	const envDir = getEnvironmentDirFromPath(interpreterPath);
+
 	return globalPoetryEnvDirRegex.test(path.basename(envDir))
 		? isVirtualenvEnvironment(interpreterPath)
 		: false;
@@ -67,10 +68,12 @@ async function isLocalPoetryEnvironment(
 	//     |__ Scripts/bin
 	//         |__ python  <--- interpreterPath
 	const envDir = getEnvironmentDirFromPath(interpreterPath);
+
 	if (path.basename(envDir) !== localPoetryEnvDirName) {
 		return false;
 	}
 	const project = path.dirname(envDir);
+
 	if (!hasValidPyprojectToml(project)) {
 		return false;
 	}
@@ -155,13 +158,16 @@ export class Poetry {
 		// Produce a list of candidate binaries to be probed by exec'ing them.
 		function* getCandidates() {
 			const customPoetryPath = getPythonSetting<string>("poetryPath");
+
 			if (customPoetryPath && customPoetryPath !== "poetry") {
 				// If user has specified a custom poetry path, use it first.
 				yield customPoetryPath;
 			}
 			// Check unqualified filename, in case it's on PATH.
 			yield "poetry";
+
 			const home = getUserHomeDir();
+
 			if (home) {
 				const defaultPoetryPath = path.join(
 					home.fsPath,
@@ -169,6 +175,7 @@ export class Poetry {
 					"bin",
 					"poetry",
 				);
+
 				if (pathExistsSync(defaultPoetryPath)) {
 					yield defaultPoetryPath;
 				}
@@ -178,12 +185,16 @@ export class Poetry {
 		// Probe the candidates, and pick the first one that exists and does what we need.
 		for (const poetryPath of getCandidates()) {
 			logger.debug(`Probing poetry binary for ${cwd}: ${poetryPath}`);
+
 			const poetry = new Poetry(poetryPath, cwd);
+
 			const virtualenvs = await poetry.getEnvList();
+
 			if (virtualenvs !== undefined) {
 				logger.debug(
 					`Found poetry via filesystem probing for ${cwd}: ${poetryPath}`,
 				);
+
 				return poetry;
 			}
 			logger.debug(`Failed to find poetry for ${cwd}: ${poetryPath}`);
@@ -191,6 +202,7 @@ export class Poetry {
 
 		// Didn't find anything.
 		logger.debug(`No poetry binary found for ${cwd}`);
+
 		return undefined;
 	}
 
@@ -219,6 +231,7 @@ export class Poetry {
 		const result = await this.safeShellExecute(
 			`${command} env list --full-path`,
 		);
+
 		if (!result) {
 			return undefined;
 		}
@@ -232,15 +245,18 @@ export class Poetry {
 		 * So we'll need to remove the string "(Activated)" after splitting lines to get the full path.
 		 */
 		const activated = "(Activated)";
+
 		const res = await Promise.all(
 			splitLines(result.stdout).map(async (line) => {
 				if (line.endsWith(activated)) {
 					line = line.slice(0, -activated.length);
 				}
 				const folder = line.trim();
+
 				return (await pathExists(folder)) ? folder : undefined;
 			}),
 		);
+
 		return res.filter((r) => r !== undefined).map((r) => r!);
 	}
 
@@ -264,6 +280,7 @@ export class Poetry {
 			`${this.command} env info -p`,
 			true,
 		);
+
 		if (!result) {
 			return undefined;
 		}
@@ -278,6 +295,7 @@ export class Poetry {
 		const result = await this.safeShellExecute(
 			`${this.command} config virtualenvs.path`,
 		);
+
 		if (!result) {
 			return undefined;
 		}
@@ -308,6 +326,7 @@ export class Poetry {
 		// It has been observed that commands related to conda or poetry binary take upto 10-15 seconds unlike
 		// python binaries. So have a large timeout.
 		const stopWatch = new StopWatch();
+
 		const result = await shellExecute(command, {
 			cwd: this.cwd,
 			throwOnStdErr: true,
@@ -324,6 +343,7 @@ export class Poetry {
 			`Time taken to run ${command} in ms`,
 			stopWatch.elapsedTime,
 		);
+
 		return result;
 	}
 }
@@ -343,7 +363,9 @@ export async function isPoetryEnvironmentRelatedToFolder(
 	const poetry = poetryPath
 		? new Poetry(poetryPath, folder)
 		: await Poetry.getPoetry(folder);
+
 	const pathToEnv = await poetry?.getActiveEnvPath();
+
 	if (!pathToEnv) {
 		return false;
 	}
@@ -358,10 +380,12 @@ export async function isPoetryEnvironmentRelatedToFolder(
  */
 function hasValidPyprojectToml(folder: string): boolean {
 	const pyprojectToml = path.join(folder, "pyproject.toml");
+
 	if (!pathExistsSync(pyprojectToml)) {
 		return false;
 	}
 	const content = readFileSync(pyprojectToml);
+
 	if (!content.includes("[tool.poetry]")) {
 		return false;
 	}

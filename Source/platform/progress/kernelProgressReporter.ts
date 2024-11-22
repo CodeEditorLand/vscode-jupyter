@@ -42,6 +42,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			reporter?: Progress<{ message?: string; increment?: number }>;
 		} & ProgressReporter
 	>();
+
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(this);
 		KernelProgressReporter.instance = this;
@@ -76,6 +77,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 
 		// If we have a progress reporter, then use it.
 		const key = resource ? getComparisonKey(resource) : "";
+
 		if (
 			KernelProgressReporter.instance.kernelResourceProgressReporter.has(
 				key,
@@ -102,6 +104,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		cb: () => Promise<T>,
 	): Promise<T> {
 		const key = resource ? getComparisonKey(resource) : "";
+
 		if (!KernelProgressReporter.instance) {
 			return cb();
 		}
@@ -109,6 +112,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			key,
 			title,
 		);
+
 		return cb().finally(() => progress?.dispose());
 	}
 
@@ -132,7 +136,9 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		const progressMessage =
 			getUserMessageForAction(option as unknown as ReportableAction) ||
 			option;
+
 		const key = resource ? getComparisonKey(resource) : "";
+
 		if (!progressMessage) {
 			return new Disposable(() => noop);
 		}
@@ -153,6 +159,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			KernelProgressReporter.instance.kernelResourceProgressReporter.get(
 				key,
 			);
+
 		if (!progressInfo) {
 			progressInfo = {
 				title,
@@ -193,6 +200,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 					const index = progressInfo.progressList.findIndex(
 						(value) => value === title,
 					);
+
 					if (index >= 0) {
 						progressInfo.progressList.splice(index);
 					}
@@ -202,6 +210,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 							progressInfo.progressList[
 								progressInfo.progressList.length - 1
 							];
+
 						if (progressInfo.reporter) {
 							progressInfo.reporter.report({
 								message:
@@ -234,7 +243,9 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		initiallyHidden?: boolean,
 	) {
 		const deferred = createDeferred();
+
 		const disposable = new Disposable(() => deferred.resolve());
+
 		const existingInfo =
 			KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
 				key,
@@ -249,6 +260,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			};
 
 		let shownOnce = false;
+
 		const show = () => {
 			if (shownOnce) {
 				// Its already visible.
@@ -263,6 +275,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 							KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
 								key,
 							);
+
 						if (!info) {
 							return;
 						}
@@ -270,6 +283,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 						// If we have any messages, then report them.
 						while (info.pendingProgress.length > 0) {
 							const message = info.pendingProgress.shift();
+
 							if (message === title) {
 								info.progressList.push(message);
 							} else if (message !== title && message) {
@@ -278,6 +292,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 							}
 						}
 						await raceCancellation(token, deferred.promise);
+
 						if (
 							KernelProgressReporter.instance!.kernelResourceProgressReporter.get(
 								key,

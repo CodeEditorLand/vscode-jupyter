@@ -48,9 +48,11 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 
 	private __resolveString(value: string): string {
 		const regexp = /\$\{(.*?)\}/g;
+
 		return value.replace(regexp, (match: string, name: string) => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const newValue = (<any>this)[name];
+
 			if (Types.isString(newValue)) {
 				return newValue;
 			} else {
@@ -75,6 +77,7 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			result[key] = <any>this.resolve(<any>value);
 		});
+
 		return result;
 	}
 
@@ -89,6 +92,7 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			result[key] = <any>this.resolveAny(<any>value);
 		});
+
 		return result;
 	}
 

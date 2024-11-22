@@ -39,6 +39,7 @@ export class RawJupyterSessionWrapper
 		logger.ci(
 			`Real kernel is ${this.session.kernel ? "defined" : "undefined"}`,
 		);
+
 		return "unknown";
 	}
 
@@ -71,6 +72,7 @@ export class RawJupyterSessionWrapper
 		} catch (ex) {
 			logger.ci(`Error waiting for idle`, ex);
 			await this.shutdown().catch(noop);
+
 			throw ex;
 		}
 	}
@@ -83,6 +85,7 @@ export class RawJupyterSessionWrapper
 		this.shutdownInProgress = true;
 		this.terminatingStatus = "terminating";
 		this.statusChanged.emit("terminating");
+
 		const kernelIdForLogging = `${this.session.kernel?.id}, ${this.kernelConnectionMetadata?.id}`;
 		logger.debug(
 			`Shutdown session ${kernelIdForLogging} - start called from ${new Error("").stack}`,

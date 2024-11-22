@@ -40,14 +40,17 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 		resource?: Uri,
 	): Promise<string> {
 		const disposables: IDisposable[] = [];
+
 		try {
 			const codeTrimmed = code.trim();
+
 			if (codeTrimmed.length === 0) {
 				return "";
 			}
 			// On windows cr is not handled well by python when passing in/out via stdin/stdout.
 			// So just remove cr from the input.
 			code = code.replace(new RegExp("\\r", "g"), "");
+
 			if (codeTrimmed.indexOf("\n") === -1) {
 				// the input is a single line, maybe indented, without terminator
 				return codeTrimmed + "\n";
@@ -55,10 +58,12 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 
 			const interpreter =
 				await this.interpreterService.getActiveInterpreter(resource);
+
 			const processService =
 				await this.processServiceFactory.create(resource);
 
 			const [args, parse] = internalScripts.normalizeSelection();
+
 			const observable = processService.execObservable(
 				getFilePath(interpreter?.uri) || "python",
 				args,
@@ -87,7 +92,9 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 
 			// We expect a serialized JSON object back, with the normalized code under the "normalized" key.
 			await observable.out.done;
+
 			const result = normalized;
+
 			const object = JSON.parse(result);
 
 			const normalizedLines = parse(object.normalized);
@@ -96,6 +103,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				trim: true,
 				removeEmptyEntries: false,
 			}).findIndex((line) => line.length);
+
 			const indexOfFirstNonEmptyLineInNormalizedCode = splitLines(
 				normalizedLines,
 				{
@@ -103,6 +111,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 					removeEmptyEntries: false,
 				},
 			).findIndex((line) => line.length);
+
 			if (
 				indexOfFirstNonEmptyLineInOriginalCode >
 				indexOfFirstNonEmptyLineInNormalizedCode
@@ -111,6 +120,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				const trimmedLineCount =
 					indexOfFirstNonEmptyLineInOriginalCode -
 					indexOfFirstNonEmptyLineInNormalizedCode;
+
 				return `${"\n".repeat(trimmedLineCount)}${normalizedLines}`;
 			}
 			return normalizedLines;
@@ -119,6 +129,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 				ex,
 				"Python: Failed to normalize code for execution in Interactive Window",
 			);
+
 			return code;
 		} finally {
 			dispose(disposables);

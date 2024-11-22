@@ -42,6 +42,7 @@ export class JupyterKernelServiceFactory
 {
 	private readonly chainedApiAccess = new PromiseChain();
 	private readonly extensionApi = new Map<string, IExportedKernelService>();
+
 	constructor(
 		@inject(IKernelProvider)
 		private readonly kernelProvider: IKernelProvider,
@@ -59,9 +60,11 @@ export class JupyterKernelServiceFactory
 	) {}
 	public async getService() {
 		const info = this.extensions.determineExtensionFromCallStack();
+
 		const accessInfo = await this.chainedApiAccess.chainFinally(() =>
 			this.apiAccess.getAccessInformation(info),
 		);
+
 		if (!accessInfo.accessAllowed) {
 			return;
 		}
@@ -79,6 +82,7 @@ export class JupyterKernelServiceFactory
 			this.serviceContainer,
 		);
 		this.extensionApi.set(accessInfo.extensionId, service);
+
 		return service;
 	}
 }
@@ -100,6 +104,7 @@ class JupyterKernelService implements IExportedKernelService {
 			pemUsed: "onDidChangeKernelSpecifications",
 		});
 		logger.debug(`API called from ${this.callingExtensionId}`);
+
 		return this._onDidChangeKernelSpecifications.event;
 	}
 	public get onDidChangeKernels(): Event<void> {
@@ -107,6 +112,7 @@ class JupyterKernelService implements IExportedKernelService {
 			extensionId: this.callingExtensionId,
 			pemUsed: "onDidChangeKernels",
 		});
+
 		return this._onDidChangeKernels.event;
 	}
 	private _status: "idle" | "discovering";
@@ -199,6 +205,7 @@ class JupyterKernelService implements IExportedKernelService {
 			extensionId: this.callingExtensionId,
 			pemUsed: "getKernelSpecifications",
 		});
+
 		return this.kernelFinder.kernels.map((item) =>
 			this.translateKernelConnectionMetadataToExportedType(item),
 		);
@@ -211,11 +218,13 @@ class JupyterKernelService implements IExportedKernelService {
 			extensionId: this.callingExtensionId,
 			pemUsed: "getActiveKernels",
 		});
+
 		const kernels: {
 			metadata: KernelConnectionMetadata;
 			uri: Uri | undefined;
 			id: string;
 		}[] = [];
+
 		const kernelsAlreadyListed = new Set<string>();
 		this.kernelProvider.kernels
 			.filter(
@@ -286,6 +295,7 @@ class JupyterKernelService implements IExportedKernelService {
 				id: item.id,
 			});
 		});
+
 		return kernels;
 	}
 	getKernel(
@@ -300,9 +310,11 @@ class JupyterKernelService implements IExportedKernelService {
 			extensionId: this.callingExtensionId,
 			pemUsed: "getKernel",
 		});
+
 		const kernel =
 			this.thirdPartyKernelProvider.get(uri) ??
 			this.kernelProvider.get(uri);
+
 		if (kernel?.session) {
 			return {
 				metadata: this.translateKernelConnectionMetadataToExportedType(
@@ -320,6 +332,7 @@ class JupyterKernelService implements IExportedKernelService {
 			extensionId: this.callingExtensionId,
 			pemUsed: "startKernel",
 		});
+
 		return this.startOrConnect(spec, uri);
 	}
 	async connect(
@@ -330,6 +343,7 @@ class JupyterKernelService implements IExportedKernelService {
 			extensionId: this.callingExtensionId,
 			pemUsed: "connect",
 		});
+
 		return this.startOrConnect(spec, uri);
 	}
 	private async startOrConnect(
@@ -339,6 +353,7 @@ class JupyterKernelService implements IExportedKernelService {
 		const connection = this.kernelFinder.kernels.find(
 			(item) => item.id === spec.id,
 		);
+
 		if (!connection) {
 			throw new Error("Not found");
 		}
@@ -350,6 +365,7 @@ class JupyterKernelService implements IExportedKernelService {
 			this.disposables,
 			"3rdPartyExtension",
 		);
+
 		if (!kernel?.session) {
 			throw new Error("Not found");
 		}

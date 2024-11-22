@@ -39,6 +39,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 		const settings = this.configurationService.getSettings(
 			cell.document.uri,
 		);
+
 		const formatStackTraces = settings?.formatStackTraces ?? false;
 
 		if (formatStackTraces && /^[Cell|Input|File].*?\n.*/.test(traceFrame)) {
@@ -67,6 +68,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 			/(;32m[ ->]*?)(\d+)(.*)\n/g,
 			(_s, prefix, num, suffix) => {
 				suffix = suffix.replace(/\u001b\[3\d+m/g, "\u001b[39m");
+
 				return `${prefix}${num}${suffix}\n`;
 			},
 		);
@@ -79,6 +81,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 				LineNumberMatchRegex,
 				(_s, prefix, num, suffix) => {
 					const n = parseInt(num, 10);
+
 					return `${prefix}<a href='${cell.document.uri.toString()}?line=${n - 1}'>${n}</a>${suffix}`;
 				},
 			);
@@ -88,6 +91,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 				getFilePath(cell.document.uri),
 				cell.index + 1,
 			);
+
 			return afterLineReplace.replace(
 				/.*?\n/,
 				`\u001b[1;32m${cellAt}\u001b[0m line \u001b[0;36m${line}\n`,
@@ -97,6 +101,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 		const inputMatch = /^Input.*?\[.*32mIn\s+\[(\d+).*?0;36m(.*?)\n.*/.exec(
 			traceFrame,
 		);
+
 		if (inputMatch && inputMatch.length > 1) {
 			return tracebackLinkify(traceFrame, inputMatch[2]);
 		}
@@ -105,6 +110,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 			/Cell.*?\[.*32mIn\s*\[(\d+)\]\,\s+line\s+([(\d+)])(.*?)\n.*/gm.exec(
 				traceFrame,
 			);
+
 		if (cellMatch && cellMatch.length > 1) {
 			return tracebackLinkify(traceFrame, cellMatch[2]);
 		}

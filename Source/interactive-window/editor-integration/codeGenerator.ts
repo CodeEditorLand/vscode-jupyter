@@ -41,6 +41,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 	private cellIndexesCounted: Record<number, boolean> = {};
 	private disposed?: boolean;
 	private disposables: Disposable[] = [];
+
 	constructor(
 		private readonly configService: IConfigurationService,
 		private readonly storage: IGeneratedCodeStore,
@@ -89,6 +90,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		// user added code that we're about to execute, so increase the execution count for the code that we need to generate
 		this.executionCount += 1;
 		this.cellIndexesCounted[cellIndex] = true;
+
 		if (
 			executableLines.length > 0 &&
 			executableLines.find((s) => s.trim().length > 0)
@@ -109,8 +111,11 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		>,
 	): { lines: string[]; executableLines: string[] } {
 		const code = metadata.interactive.originalSource;
+
 		const settings = this.configService.getSettings(this.notebook.uri);
+
 		const cellMatcher = new CellMatcher(settings);
+
 		const lines = splitMultilineString(code);
 
 		if (settings.magicCommandsAsComments) {
@@ -130,6 +135,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			const nonEmptyLines = lines
 				.slice(1)
 				.filter((line) => line.trim().length > 0);
+
 			if (
 				nonEmptyLines.length > 0 &&
 				nonEmptyLines[0].trim().startsWith("%%")
@@ -137,6 +143,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 				const executableLines = lines.slice(
 					lines.indexOf(nonEmptyLines[0]),
 				);
+
 				return { lines: executableLines, executableLines };
 			}
 		}
@@ -181,9 +188,11 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		// Find the text document that matches. We need more information than
 		// the add code gives us
 		const { lineIndex: cellLine, uristring } = metadata.interactive;
+
 		const doc = workspace.textDocuments.find(
 			(d) => d.uri.toString() === uristring,
 		);
+
 		if (!doc) {
 			return;
 		}
@@ -191,12 +200,14 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		const { stripped, trueStartLine } = this.extractStrippedLines(metadata);
 
 		const line = doc.lineAt(trueStartLine);
+
 		const endLine = doc.lineAt(
 			Math.min(trueStartLine + stripped.length - 1, doc.lineCount - 1),
 		);
 
 		// Find the first non blank line
 		let firstNonBlankIndex = 0;
+
 		while (
 			firstNonBlankIndex < stripped.length &&
 			stripped[firstNonBlankIndex].trim().length === 0
@@ -208,7 +219,9 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		// Use the original values however to track edits. This is what we need
 		// to move around
 		const startOffset = doc.offsetAt(new Position(cellLine, 0));
+
 		const endOffset = doc.offsetAt(endLine.rangeIncludingLineBreak.end);
+
 		const hasCellMarker =
 			(metadata.interactiveWindowCellMarker || "").length > 0;
 
@@ -223,16 +236,19 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		);
 
 		const hashedCode = stripped.join("");
+
 		const realCode = doc.getText(
 			new Range(
 				new Position(cellLine, 0),
 				endLine.rangeIncludingLineBreak.end,
 			),
 		);
+
 		const hashValue = (await computeHash(hashedCode, "SHA-1")).substring(
 			0,
 			12,
 		);
+
 		const runtimeFile = this.getRuntimeFile(hashValue, expectedCount);
 		// If we're debugging reduce one line for the `breakpoint()` statement added by us.
 		const lineOffsetRelativeToIndexOfFirstLineInCell = debug ? -1 : 0;
@@ -263,6 +279,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			`Generated code for ${expectedCount} = ${runtimeFile} with ${stripped.length} lines`,
 		);
 		this.storage.store(Uri.parse(metadata.interactive.uristring), hash);
+
 		return hash;
 	}
 
@@ -273,6 +290,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 	private onChangedDocument(e: TextDocumentChangeEvent) {
 		// See if the document is in our list of docs to watch
 		const perFile = this.storage.getFileGeneratedCode(e.document.uri);
+
 		if (perFile) {
 			// Apply the content changes to the file's cells.
 			const docText = e.document.getText();
@@ -296,19 +314,23 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		const { lines: stripped } = this.extractExecutableLines(metadata);
 
 		let trueStartLine = metadata.interactive.lineIndex + 1;
+
 		if (!metadata.interactiveWindowCellMarker) {
 			// Figure out our true 'start' line. This is what we need to tell the debugger is
 			// actually the start of the code as that's what Jupyter will be getting.
 			trueStartLine = metadata.interactive.lineIndex;
+
 			for (let i = 0; i < stripped.length; i += 1) {
 				if (stripped[i] !== lines[i]) {
 					trueStartLine += i + 1;
+
 					break;
 				}
 			}
 		}
 		// Find the first non blank line
 		let firstNonBlankIndex = 0;
+
 		while (
 			firstNonBlankIndex < stripped.length &&
 			stripped[firstNonBlankIndex].trim().length === 0
@@ -318,10 +340,14 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 
 		// Jupyter also removes blank lines at the end. Make sure only one
 		let lastLinePos = stripped.length - 1;
+
 		let nextToLastLinePos = stripped.length - 2;
+
 		while (nextToLastLinePos > 0) {
 			const lastLine = stripped[lastLinePos];
+
 			const nextToLastLine = stripped[nextToLastLinePos];
+
 			if (
 				(lastLine.length === 0 || lastLine === "\n") &&
 				(nextToLastLine.length === 0 || nextToLastLine === "\n")
@@ -359,6 +385,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			c.range.end.line +
 			c.text.split("\n").length -
 			1;
+
 		const offsetDiff = c.text.length - c.rangeLength;
 
 		// Compute the inclusive offset that is changed by the cell.
@@ -434,6 +461,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			usingJupyterDebugProtocol ||
 			this.configService.getSettings(undefined).forceIPyKernelDebugger ===
 				true;
+
 		if (
 			debug &&
 			this.configService.getSettings(this.notebook.uri)
@@ -442,6 +470,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			if (useNewDebugger) {
 				// Inject the breakpoint line
 				source.splice(0, 0, "breakpoint()\n");
+
 				return { runtimeLine: 1, debuggerStartLine: trueStartLine + 1 };
 			} else {
 				// Inject the breakpoint line
@@ -457,6 +486,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		const debuggerStartLine = hasCellMarker
 			? firstNonBlankLineIndex
 			: firstNonBlankLineIndex + 1;
+
 		return { runtimeLine: 1, debuggerStartLine };
 	}
 }

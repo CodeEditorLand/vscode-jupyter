@@ -13,6 +13,7 @@ function getSearchHeight() {
 	// PIPENV_MAX_DEPTH tells pipenv the maximum number of directories to recursively search for
 	// a Pipfile, defaults to 3: https://pipenv.pypa.io/en/latest/advanced/#pipenv.environments.PIPENV_MAX_DEPTH
 	const maxDepthStr = getEnvironmentVariable("PIPENV_MAX_DEPTH");
+
 	if (maxDepthStr === undefined) {
 		return 3;
 	}
@@ -22,6 +23,7 @@ function getSearchHeight() {
 		logger.error(
 			`PIPENV_MAX_DEPTH is incorrectly set. Converting value '${maxDepthStr}' to number results in NaN`,
 		);
+
 		return 1;
 	}
 	return maxDepth;
@@ -37,14 +39,17 @@ export async function _getAssociatedPipfile(
 	options: { lookIntoParentDirectories: boolean },
 ): Promise<string | undefined> {
 	const pipFileName = getEnvironmentVariable("PIPENV_PIPFILE") || "Pipfile";
+
 	let heightToSearch = options.lookIntoParentDirectories
 		? getSearchHeight()
 		: 1;
+
 	while (
 		heightToSearch > 0 &&
 		!arePathsSame(searchDir, path.dirname(searchDir))
 	) {
 		const pipFile = path.join(searchDir, pipFileName);
+
 		if (await pathExists(pipFile)) {
 			return pipFile;
 		}
@@ -68,14 +73,17 @@ async function getProjectDir(envFolder: string): Promise<string | undefined> {
 	//     |__ python  <--- interpreterPath
 	// We get the project by reading the .project file
 	const dotProjectFile = path.join(envFolder, ".project");
+
 	if (!(await pathExists(dotProjectFile))) {
 		return undefined;
 	}
 	const projectDir = await readFile(dotProjectFile);
+
 	if (!(await pathExists(projectDir))) {
 		logger.error(
 			`The .project file inside environment folder: ${envFolder} doesn't contain a valid path to the project`,
 		);
+
 		return undefined;
 	}
 	return projectDir;
@@ -89,7 +97,9 @@ async function getPipfileIfGlobal(
 	interpreterPath: Uri,
 ): Promise<string | undefined> {
 	const envFolder = path.dirname(path.dirname(interpreterPath.fsPath));
+
 	const projectDir = await getProjectDir(envFolder);
+
 	if (projectDir === undefined) {
 		return undefined;
 	}
@@ -99,6 +109,7 @@ async function getPipfileIfGlobal(
 	// |__ Pipfile  <--- check if Pipfile exists here and return it
 	// The name of the project (directory where Pipfile resides) is used as a prefix in the environment folder
 	const envFolderName = path.basename(normCasePath(envFolder));
+
 	if (
 		!envFolderName.startsWith(`${path.basename(normCasePath(projectDir))}-`)
 	) {
@@ -121,6 +132,7 @@ export async function isPipenvEnvironmentRelatedToFolder(
 ): Promise<boolean> {
 	const pipFileAssociatedWithEnvironment =
 		await getPipfileIfGlobal(interpreterPath);
+
 	if (!pipFileAssociatedWithEnvironment) {
 		return false;
 	}
@@ -129,10 +141,12 @@ export async function isPipenvEnvironmentRelatedToFolder(
 	// https://pipenv.pypa.io/en/latest/advanced/#pipenv.environments.PIPENV_NO_INHERIT
 	const lookIntoParentDirectories =
 		getEnvironmentVariable("PIPENV_NO_INHERIT") === undefined;
+
 	const pipFileAssociatedWithFolder = await _getAssociatedPipfile(
 		folder.fsPath,
 		{ lookIntoParentDirectories },
 	);
+
 	if (!pipFileAssociatedWithFolder) {
 		return false;
 	}

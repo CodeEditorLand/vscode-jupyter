@@ -45,9 +45,11 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 	): Promise<SemVer | undefined> {
 		try {
 			const version = await this._getVersion(executer, token);
+
 			return typeof version === "string" ? parseSemVer(version) : version;
 		} catch (e) {
 			logger.warn(DataScience.failedToGetVersionOfPandas, e.message);
+
 			return;
 		}
 	}
@@ -82,6 +84,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 			await this._doInstall(executer, tokenSource);
 		} else {
 			sendTelemetryEvent(Telemetry.UserDidNotInstallPandas);
+
 			throw new Error(message);
 		}
 	}
@@ -97,6 +100,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 
 			if (tokenSource.token.isCancellationRequested) {
 				sendTelemetryEvent(Telemetry.PandasInstallCanceled);
+
 				return;
 			}
 
@@ -107,6 +111,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 					) > 0
 				) {
 					sendTelemetryEvent(Telemetry.PandasOK);
+
 					return;
 				}
 				sendTelemetryEvent(Telemetry.PandasTooOld);

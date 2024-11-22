@@ -32,7 +32,9 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 				// Add all of the authorization parts onto the headers.
 				const origHeaders = this.headers;
+
 				const authorizationHeader = getAuthHeader!();
+
 				const keys = Object.keys(authorizationHeader);
 				keys.forEach((k) =>
 					origHeaders.append(k, authorizationHeader[k].toString()),
@@ -63,6 +65,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 	): ClassType<WebSocket> {
 		const generateOptions = (): WebSocketIsomorphic.ClientOptions => {
 			let co: WebSocketIsomorphic.ClientOptions = {};
+
 			let co_headers: { [key: string]: string } | undefined;
 
 			if (allowUnauthorized) {
@@ -86,6 +89,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 			}
 			return co;
 		};
+
 		class JupyterWebSocket extends KernelSocketWrapper(
 			WebSocketIsomorphic,
 		) {
@@ -97,9 +101,11 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				protocols?: string | string[] | undefined,
 			) {
 				super(url, protocols, generateOptions());
+
 				let timer: NodeJS.Timeout | undefined = undefined;
 				// Parse the url for the kernel id
 				const parsed = /.*\/kernels\/(.*)\/.*/.exec(url);
+
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
@@ -138,9 +144,11 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				options?: unknown,
 			) {
 				super(url, protocols, options);
+
 				let timer: NodeJS.Timeout | undefined = undefined;
 				// Parse the url for the kernel id
 				const parsed = /.*\/kernels\/(.*)\/.*/.exec(url);
+
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}

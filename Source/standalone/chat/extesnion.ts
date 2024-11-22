@@ -20,20 +20,25 @@ export async function activate(
 			async (uri) => {
 				const documentUri =
 					uri ?? vscode.window.activeNotebookEditor?.notebook.uri;
+
 				if (documentUri) {
 					const kernelProvider =
 						ServiceContainer.instance.get<IKernelProvider>(
 							IKernelProvider,
 						);
+
 					const kernel = await kernelProvider.get(documentUri);
+
 					if (kernel) {
 						const token = new vscode.CancellationTokenSource()
 							.token;
+
 						try {
 							const result = await sendPipListRequest(
 								kernel,
 								token,
 							);
+
 							if (Array.isArray(result.content)) {
 								return result.content;
 							}
@@ -72,18 +77,22 @@ export async function activate(
 					ServiceContainer.instance.get<IControllerRegistration>(
 						IControllerRegistration,
 					);
+
 				const controller = controllerRegistry.getSelected(document);
+
 				if (!controller) {
 					return [];
 				}
 
 				const variablesProvider = controller.controller
 					.variableProvider as JupyterVariablesProvider;
+
 				if (!variablesProvider) {
 					return [];
 				}
 
 				const token = new vscode.CancellationTokenSource().token;
+
 				const variables =
 					variablesProvider.provideVariablesWithSummarization(
 						document,
@@ -94,6 +103,7 @@ export async function activate(
 					);
 
 				const resolvedVariables = [];
+
 				for await (const variable of variables) {
 					resolvedVariables.push(variable);
 				}
@@ -117,6 +127,7 @@ return stdout
 		const content = await execCodeInBackgroundThread<
 			KernelMessage.IInspectReplyMsg["content"]
 		>(kernel, codeToExecute, token);
+
 		return { content } as KernelMessage.IInspectReplyMsg;
 	} catch (ex) {
 		throw ex;

@@ -41,6 +41,7 @@ export function uncommentMagicCommands(line: string): string {
 function generateCodeCell(code: string[], matcher: CellMatcher) {
 	const lines =
 		matcher.isCell(code[0]) && code.length > 1 ? code.slice(1) : code;
+
 	return new NotebookCellData(
 		NotebookCellKind.Code,
 		lines.join("\n"),
@@ -63,8 +64,11 @@ export function generateCells(
 ): NotebookCellData[] {
 	// Determine if we have a markdown cell/ markdown and code cell combined/ or just a code cell
 	const split = splitLines(code, { trim: false });
+
 	const firstLine = split[0];
+
 	const matcher = new CellMatcher(settings);
+
 	if (matcher.isMarkdown(firstLine)) {
 		// We have at least one markdown. We might have to split it if there any lines that don't begin
 		// with # or are inside a multiline comment
@@ -79,6 +83,7 @@ export function generateCells(
 				}
 			},
 		);
+
 		if (firstNonMarkdown >= 0) {
 			// Make sure if we split, the second cell has a new id. It's a new submission.
 			return [
@@ -101,9 +106,12 @@ export function generateCellRangesFromDocument(
 ): ICellRange[] {
 	// Implmentation of getCells here based on Don's Jupyter extension work
 	const matcher = new CellMatcher(settings);
+
 	const cells: ICellRange[] = [];
+
 	for (let index = 0; index < document.lineCount; index += 1) {
 		const line = document.lineAt(index);
+
 		if (matcher.isCell(line.text)) {
 			if (cells.length > 0) {
 				const previousCell = cells[cells.length - 1];
@@ -122,6 +130,7 @@ export function generateCellRangesFromDocument(
 
 	if (cells.length >= 1) {
 		const line = document.lineAt(document.lineCount - 1);
+
 		const previousCell = cells[cells.length - 1];
 		previousCell.range = new Range(
 			previousCell.range.start,
@@ -142,6 +151,7 @@ export function generateCellsFromDocument(
 	return Array.prototype.concat(
 		...ranges.map((cr) => {
 			const code = document.getText(cr.range);
+
 			return generateCells(settings, code, false);
 		}),
 	);
@@ -159,6 +169,7 @@ export function generateCellsFromNotebookDocument(
 				trim: false,
 				removeEmptyEntries: false,
 			});
+
 			if (cell.metadata.interactiveWindowCellMarker !== undefined) {
 				code.unshift(cell.metadata.interactiveWindowCellMarker + "\n");
 			}
@@ -169,10 +180,12 @@ export function generateCellsFromNotebookDocument(
 					? cell.document.languageId
 					: "markdown",
 			);
+
 			if (cell.kind === NotebookCellKind.Code) {
 				cellData.outputs = [...cell.outputs];
 			}
 			cellData.metadata = getCellMetadata(cell);
+
 			return cellData;
 		});
 }

@@ -20,6 +20,7 @@ export class LocalWidgetScriptSourceProvider
 	implements IWidgetScriptSourceProvider
 {
 	id = "local";
+
 	constructor(
 		private readonly kernel: IKernel,
 		private readonly localResourceUriConverter: ILocalResourceUriConverter,
@@ -29,10 +30,12 @@ export class LocalWidgetScriptSourceProvider
 		moduleName: string,
 	): Promise<Readonly<WidgetScriptSource>> {
 		const sources = await this.getWidgetScriptSources();
+
 		const found = sources.find(
 			(item) =>
 				item.moduleName.toLowerCase() === moduleName.toLowerCase(),
 		);
+
 		return found || { moduleName };
 	}
 	public dispose() {
@@ -44,8 +47,10 @@ export class LocalWidgetScriptSourceProvider
 		const scriptManager = this.scriptManagerFactory.getOrCreate(
 			this.kernel,
 		);
+
 		const widgetModuleMappings =
 			await scriptManager.getWidgetModuleMappings();
+
 		if (widgetModuleMappings && Object.keys(widgetModuleMappings).length) {
 			const sources = await Promise.all(
 				Object.keys(widgetModuleMappings).map(async (moduleName) => {
@@ -54,6 +59,7 @@ export class LocalWidgetScriptSourceProvider
 							widgetModuleMappings[moduleName],
 						)
 					).toString();
+
 					return <WidgetScriptSource>{
 						moduleName,
 						scriptUri,
@@ -61,6 +67,7 @@ export class LocalWidgetScriptSourceProvider
 					};
 				}),
 			);
+
 			return sources;
 		}
 		return [];
@@ -69,10 +76,12 @@ export class LocalWidgetScriptSourceProvider
 		const scriptManager = this.scriptManagerFactory.getOrCreate(
 			this.kernel,
 		);
+
 		if (!scriptManager.getBaseUrl) {
 			return;
 		}
 		const baseUrl = await scriptManager.getBaseUrl();
+
 		if (!baseUrl) {
 			return;
 		}

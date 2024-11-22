@@ -74,6 +74,7 @@ export class CondaInstaller extends ModuleInstaller {
 		const condaLocator =
 			this.serviceContainer.get<CondaService>(CondaService);
 		this._isCondaAvailable = await condaLocator.isCondaAvailable();
+
 		if (!this._isCondaAvailable) {
 			return false;
 		}
@@ -101,6 +102,7 @@ export class CondaInstaller extends ModuleInstaller {
 				this.serviceContainer.get<IPythonExtensionChecker>(
 					IPythonExtensionChecker,
 				);
+
 			if (!pythonExt.isPythonExtensionActive) {
 				return;
 			}
@@ -108,8 +110,10 @@ export class CondaInstaller extends ModuleInstaller {
 				this.serviceContainer.get<IInterpreterService>(
 					IInterpreterService,
 				);
+
 			const updatedCondaEnv =
 				await interpreterService.getInterpreterDetails(interpreter.id);
+
 			if (
 				updatedCondaEnv &&
 				!isCondaEnvironmentWithoutPython(updatedCondaEnv)
@@ -129,9 +133,13 @@ export class CondaInstaller extends ModuleInstaller {
 	): Promise<ExecutionInstallArgs> {
 		const condaService =
 			this.serviceContainer.get<CondaService>(CondaService);
+
 		const condaFile = await condaService.getCondaFile();
+
 		const name = getCachedEnvironment(interpreter)?.environment?.name;
+
 		const envPath = this.getEnvironmentPath(interpreter);
+
 		const args = [
 			flags & ModuleInstallFlags.upgrade ? "update" : "install",
 		];
@@ -170,6 +178,7 @@ export class CondaInstaller extends ModuleInstaller {
 		args.push(moduleName);
 		args.push(...getPinnedPackages("conda", moduleName));
 		args.push("-y");
+
 		return {
 			exe: condaFile,
 			args,
@@ -178,17 +187,22 @@ export class CondaInstaller extends ModuleInstaller {
 
 	private getEnvironmentPath(interpreter: PythonEnvironment | Environment) {
 		let exeuctablePath: Uri;
+
 		const env = getCachedEnvironment(interpreter);
+
 		if (env?.environment?.folderUri) {
 			return env.environment.folderUri.fsPath;
 		}
 		exeuctablePath = env?.executable.uri || Uri.file(interpreter.id);
+
 		const dir = path.dirname(exeuctablePath.fsPath);
 
 		// If interpreter is in bin or Scripts, then go up one level
 		const subDirName = path.basename(dir);
+
 		const goUpOnLevel =
 			["BIN", "SCRIPTS"].indexOf(subDirName.toUpperCase()) !== -1;
+
 		return goUpOnLevel ? path.join(dir, "..") : dir;
 	}
 }

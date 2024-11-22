@@ -45,6 +45,7 @@ export function isModuleInstalled(
 			return true;
 		} else {
 			logger.debug(`Module ${name} is not installed. Output ${out}`);
+
 			return false;
 		}
 	}

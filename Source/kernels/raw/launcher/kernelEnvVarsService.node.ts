@@ -67,6 +67,7 @@ export class KernelEnvironmentVariablesService {
 						kernelSpec.env,
 					) as ReadWrite<NodeJS.ProcessEnv>)
 				: undefined;
+
 		const isPythonKernel =
 			(kernelSpec.language || "").toLowerCase() === PYTHON_LANGUAGE;
 		// If an interpreter was not explicitly passed in, check for an interpreter path in the kernelspec to use
@@ -81,6 +82,7 @@ export class KernelEnvironmentVariablesService {
 						"Failed to fetch interpreter information for interpreter that owns a kernel",
 						ex,
 					);
+
 					return undefined;
 				});
 		}
@@ -107,10 +109,12 @@ export class KernelEnvironmentVariablesService {
 								"Failed to get env variables for interpreter, hence no variables for Kernel",
 								ex,
 							);
+
 							return undefined;
 						})
 				: undefined,
 		]);
+
 		if (token?.isCancellationRequested) {
 			return;
 		}
@@ -140,6 +144,7 @@ export class KernelEnvironmentVariablesService {
 		// Keep a list of the kernelSpec variables that need to be substituted.
 		const kernelSpecVariablesRequiringSubstitution: Record<string, string> =
 			{};
+
 		for (const [key, value] of Object.entries(kernelEnv || {})) {
 			if (
 				typeof value === "string" &&
@@ -203,6 +208,7 @@ function substituteEnvVars(
 	//   https://github.com/motdotla/dotenv-expand/blob/master/lib/main.js
 
 	let invalid = false;
+
 	let replacement = value;
 	replacement = replacement.replace(
 		SUBST_REGEX,
@@ -212,11 +218,13 @@ function substituteEnvVars(
 			}
 			if ((bogus && bogus !== "") || !substName || substName === "") {
 				invalid = true;
+
 				return match;
 			}
 			return globalVars[substName] || "";
 		},
 	);
+
 	if (!invalid && replacement !== value) {
 		logger.debug(
 			`${key} value in kernelSpec updated from ${value} to ${replacement}`,

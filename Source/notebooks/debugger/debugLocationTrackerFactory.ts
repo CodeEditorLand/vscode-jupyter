@@ -60,6 +60,7 @@ export class DebugLocationTrackerFactory
 			this.disposableRegistry,
 		);
 		this.onLocationUpdated();
+
 		return result;
 	}
 
@@ -71,6 +72,7 @@ export class DebugLocationTrackerFactory
 		const tracker =
 			this.activeTrackers.get(session) ||
 			this.activeTrackersById.get(session.id);
+
 		if (tracker) {
 			return tracker.debugLocation;
 		}

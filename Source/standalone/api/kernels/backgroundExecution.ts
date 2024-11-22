@@ -20,10 +20,15 @@ export async function execCodeInBackgroundThread<T>(
 ) {
 	const counter = executionCounters.get(kernel) || 0;
 	executionCounters.set(kernel, counter + 1);
+
 	const api = createKernelApiForExtension(JVSC_EXTENSION_ID, kernel);
+
 	const mime = `application/vnd.vscode.bg.execution.${counter}`;
+
 	const mimeFinalResult = `application/vnd.vscode.bg.execution.${counter}.result`;
+
 	const mimeErrorResult = `application/vnd.vscode.bg.execution.${counter}.error`;
+
 	let displayId = "";
 
 	const codeToSend = `
@@ -54,8 +59,10 @@ def __jupyter_exec_background__():
 __jupyter_exec_background__()
 del __jupyter_exec_background__
 `.trim();
+
 	const disposables = new DisposableStore();
 	disposables.add(token.onCancellationRequested(() => disposables.dispose()));
+
 	const promise = raceCancellation(
 		token,
 		new Promise<T | undefined>((resolve, reject) => {
@@ -65,6 +72,7 @@ del __jupyter_exec_background__
 						return resolve(undefined);
 					}
 					const metadata = getNotebookCellOutputMetadata(output);
+
 					if (
 						!displayId ||
 						metadata?.transient?.display_id !== displayId
@@ -74,6 +82,7 @@ del __jupyter_exec_background__
 					const result = output.items.find(
 						(item) => item.mime === mimeFinalResult,
 					);
+
 					if (!result) {
 						return;
 					}
@@ -104,12 +113,15 @@ del __jupyter_exec_background__
 			return;
 		}
 		const metadata = getNotebookCellOutputMetadata(output);
+
 		if (!metadata?.transient?.display_id) {
 			continue;
 		}
 		const dummyMessage = output.items.find((item) => item.mime === mime);
+
 		if (dummyMessage) {
 			displayId = metadata.transient.display_id;
+
 			continue;
 		}
 
@@ -119,6 +131,7 @@ del __jupyter_exec_background__
 					item.mime === mimeFinalResult ||
 					item.mime === mimeErrorResult,
 			);
+
 			if (result?.mime === mimeFinalResult) {
 				return JSON.parse(new TextDecoder().decode(result.data)) as T;
 			} else if (result?.mime === mimeErrorResult) {
@@ -126,6 +139,7 @@ del __jupyter_exec_background__
 					"Error in background execution:\n",
 					new TextDecoder().decode(result.data),
 				);
+
 				return;
 			}
 		}
@@ -135,6 +149,7 @@ del __jupyter_exec_background__
 	}
 	if (!displayId) {
 		logger.warn("Failed to get display id for completions");
+
 		return;
 	}
 

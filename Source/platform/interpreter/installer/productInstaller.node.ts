@@ -51,10 +51,12 @@ export async function isModulePresentInEnvironment(
 	interpreter: PythonEnvironment,
 ) {
 	const key = `${await getInterpreterHash(interpreter)}#${ProductNames.get(product)}`;
+
 	if (memento.get(key, false)) {
 		return true;
 	}
 	const packageName = translateProductToModule(product);
+
 	const packageVersionPromise = InterpreterPackages.instance
 		? InterpreterPackages.instance
 				.getPackageVersion(interpreter, packageName)
@@ -66,12 +68,15 @@ export async function isModulePresentInEnvironment(
 						"Failed to get interpreter package version",
 						ex,
 					);
+
 					return undefined;
 				})
 		: Promise.resolve(undefined);
+
 	try {
 		// Dont wait for too long we don't want to delay installation prompt.
 		const version = await raceTimeout(500, packageVersionPromise);
+
 		if (typeof version === "string") {
 			return version === "found";
 		}
@@ -117,10 +122,12 @@ export class DataScienceInstaller {
 		const channels = this.serviceContainer.get<IInstallationChannelManager>(
 			IInstallationChannelManager,
 		);
+
 		const installer = await channels.getInstallationChannel(
 			product,
 			interpreter,
 		);
+
 		if (!installer) {
 			return InstallerResponse.Ignore;
 		}
@@ -132,6 +139,7 @@ export class DataScienceInstaller {
 				? ModuleInstallFlags.updateDependencies |
 					ModuleInstallFlags.reInstall
 				: undefined;
+
 		if (installPipIfRequired === true) {
 			flags = flags
 				? flags | ModuleInstallFlags.installPipIfRequired
@@ -143,6 +151,7 @@ export class DataScienceInstaller {
 			cancelTokenSource,
 			flags,
 		);
+
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return InstallerResponse.Cancelled;
 		}
@@ -162,7 +171,9 @@ export class DataScienceInstaller {
 			product,
 			undefined,
 		);
+
 		const isModule = this.isExecutableAModule(product, undefined);
+
 		if (isModule) {
 			const pythonProcess = await this.serviceContainer
 				.get<IPythonExecutionFactory>(IPythonExecutionFactory)
@@ -170,11 +181,13 @@ export class DataScienceInstaller {
 					resource: undefined,
 					interpreter,
 				});
+
 			return pythonProcess.isModuleInstalled(executableName);
 		} else {
 			const process = await this.serviceContainer
 				.get<IProcessServiceFactory>(IProcessServiceFactory)
 				.create(undefined);
+
 			return process
 				.exec(executableName, ["--version"], { mergeStdOutErr: true })
 				.then(() => true)
@@ -187,11 +200,13 @@ export class DataScienceInstaller {
 		resource?: Uri,
 	): string {
 		const productType = this.productService.getProductType(product);
+
 		const productPathService =
 			this.serviceContainer.get<IProductPathService>(
 				IProductPathService,
 				productType,
 			);
+
 		return productPathService.getExecutableNameFromSettings(
 			product,
 			resource,
@@ -200,11 +215,13 @@ export class DataScienceInstaller {
 
 	protected isExecutableAModule(product: Product, resource?: Uri): boolean {
 		const productType = this.productService.getProductType(product);
+
 		const productPathService =
 			this.serviceContainer.get<IProductPathService>(
 				IProductPathService,
 				productType,
 			);
+
 		return productPathService.isExecutableAModule(product, resource);
 	}
 }
@@ -261,6 +278,7 @@ export class ProductInstaller implements IInstaller {
 			| "disabled"
 			| "ignored"
 			| "cancelled" = "installed";
+
 		try {
 			const result = await this.createInstaller(product).install(
 				product,
@@ -274,28 +292,38 @@ export class ProductInstaller implements IInstaller {
 				product,
 				interpreter,
 			).catch(noop);
+
 			if (result === InstallerResponse.Installed) {
 				this._onInstalled.fire({ product, resource: interpreter });
 			}
 			switch (result) {
 				case InstallerResponse.Cancelled:
 					action = "cancelled";
+
 					break;
+
 				case InstallerResponse.Installed:
 					action = "installed";
+
 					break;
+
 				case InstallerResponse.Ignore:
 					action = "ignored";
+
 					break;
+
 				case InstallerResponse.Disabled:
 					action = "disabled";
+
 					break;
+
 				default:
 					break;
 			}
 			return result;
 		} catch (ex) {
 			action = "failed";
+
 			throw ex;
 		} finally {
 			sendTelemetryEvent(Telemetry.PythonModuleInstall, undefined, {
@@ -319,12 +347,14 @@ export class ProductInstaller implements IInstaller {
 
 	private createInstaller(product: Product): DataScienceInstaller {
 		const productType = this.productService.getProductType(product);
+
 		switch (productType) {
 			case ProductType.DataScience:
 				return new DataScienceInstaller(
 					this.serviceContainer,
 					this.output,
 				);
+
 			default:
 				break;
 		}

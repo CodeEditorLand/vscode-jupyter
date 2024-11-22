@@ -42,6 +42,7 @@ export abstract class FileConverterBase implements IFileConverter {
 			localize.DataScience.importingIpynb,
 			true,
 		);
+
 		try {
 			// Open the source as a NotebookDocument, note that this doesn't actually show an editor, and we don't need
 			// a specific close action as VS Code owns the lifetime
@@ -85,6 +86,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				format: format,
 				cancelled: true,
 			});
+
 			return;
 		}
 	}
@@ -102,6 +104,7 @@ export abstract class FileConverterBase implements IFileConverter {
 				sourceDocument.uri,
 				defaultFileName,
 			);
+
 			if (!target) {
 				return;
 			}
@@ -184,6 +187,7 @@ export abstract class FileConverterBase implements IFileConverter {
 						target,
 						cancelToken,
 					);
+
 					break;
 			}
 		}

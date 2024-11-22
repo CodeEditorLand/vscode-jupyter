@@ -39,6 +39,7 @@ export class JupyterServerHelper
 	private usablePythonInterpreter: PythonEnvironment | undefined;
 	private cache?: Promise<IJupyterConnection>;
 	private _isDisposing = false;
+
 	constructor(
 		@inject(IInterpreterService)
 		private readonly interpreterService: IInterpreterService,
@@ -75,6 +76,7 @@ export class JupyterServerHelper
 			this,
 			this.disposableRegistry,
 		);
+
 		asyncRegistry.push({ dispose: () => disposeAsync(this) });
 	}
 
@@ -108,6 +110,7 @@ export class JupyterServerHelper
 			));
 			promise.catch((ex) => {
 				logger.error(`Failed to start the Jupyter Server`, ex);
+
 				if (this.cache === promise) {
 					this.cache = undefined;
 				}
@@ -165,11 +168,14 @@ export class JupyterServerHelper
 
 			// Try to connect to our jupyter process. Check our setting for the number of tries
 			let tryCount = 1;
+
 			const maxTries = Math.max(
 				1,
 				this.configuration.getSettings(undefined).jupyterLaunchRetries,
 			);
+
 			let lastTryError: Error;
+
 			while (
 				tryCount <= maxTries &&
 				!this.isDisposed &&
@@ -180,9 +186,11 @@ export class JupyterServerHelper
 					connection = await this.startImpl(resource, cancelToken);
 
 					logger.trace(`Connection complete server`);
+
 					return connection;
 				} catch (err) {
 					lastTryError = err;
+
 					if (
 						err instanceof JupyterWaitForIdleError &&
 						tryCount < maxTries
@@ -193,6 +201,7 @@ export class JupyterServerHelper
 
 						// Close existing connection.
 						connection?.dispose();
+
 						tryCount += 1;
 					} else if (connection) {
 						// If this is occurring during shutdown, don't worry about it.
@@ -208,6 +217,7 @@ export class JupyterServerHelper
 			}
 			throw new Error("Max number of attempts reached");
 		};
+
 		return raceCancellationError(cancelToken, work());
 	}
 
@@ -218,11 +228,15 @@ export class JupyterServerHelper
 		// If our uri is undefined or if it's set to local launch we need to launch a server locally
 		// If that works, then attempt to start the server
 		logger.debug(`Launching server`);
+
 		const settings = this.configuration.getSettings(resource);
+
 		const useDefaultConfig = settings.useDefaultConfigForJupyter;
+
 		const workingDir = await computeWorkingDirectory(resource);
 		// Expand the working directory. Create a dummy launching file in the root path (so we expand correctly)
 		const rootFolder = getRootFolder();
+
 		const workingDirectory = expandWorkingDir(
 			workingDir,
 			rootFolder

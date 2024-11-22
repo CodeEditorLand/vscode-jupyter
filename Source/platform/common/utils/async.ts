@@ -24,7 +24,9 @@ export async function waitForCondition(
 	// Set a timer that will resolve with null
 	return new Promise<boolean>((resolve) => {
 		let finish: (result: boolean) => void;
+
 		const timer = setTimeout(() => finish(false), timeout);
+
 		const intervalId = setInterval(() => {
 			condition()
 				.then((r) => {
@@ -57,6 +59,7 @@ export function raceTimeout<T>(
 	...promises: Promise<T>[]
 ): Promise<T> {
 	const resolveValue = isPromiseLike(defaultValue) ? undefined : defaultValue;
+
 	if (isPromiseLike(defaultValue)) {
 		promises.push(defaultValue as unknown as Promise<T>);
 	}
@@ -80,6 +83,7 @@ export function raceTimeoutError<T>(
 	...promises: Promise<T>[]
 ): Promise<T> {
 	let promiseReject: ((value: unknown) => void) | undefined = undefined;
+
 	const timer = setTimeout(() => promiseReject?.(error), timeout);
 
 	return Promise.race([
@@ -166,6 +170,7 @@ export function createDeferredFromPromise<T>(promise: Promise<T>): Deferred<T> {
 	promise
 		.then(deferred.resolve.bind(deferred))
 		.catch(deferred.reject.bind(deferred));
+
 	return deferred;
 }
 
@@ -181,6 +186,7 @@ export class PromiseChain {
 	 */
 	public async chain<T>(promise: () => Promise<T>): Promise<T> {
 		const deferred = createDeferred<T>();
+
 		const previousPromise = this.currentPromise;
 		this.currentPromise = this.currentPromise.then(async () => {
 			try {
@@ -188,11 +194,13 @@ export class PromiseChain {
 				deferred.resolve(result);
 			} catch (ex) {
 				deferred.reject(ex);
+
 				throw ex;
 			}
 		});
 		// Wait for previous promises to complete.
 		await previousPromise;
+
 		return deferred.promise;
 	}
 	/**
@@ -205,6 +213,7 @@ export class PromiseChain {
 				.then((result) => deferred.resolve(result))
 				.catch((ex) => deferred.reject(ex)),
 		);
+
 		return deferred.promise;
 	}
 }
@@ -313,10 +322,12 @@ interface IScheduledLater extends IDisposable {
 
 const timeoutDeferred = (timeout: number, fn: () => void): IScheduledLater => {
 	let scheduled = true;
+
 	const handle = setTimeout(() => {
 		scheduled = false;
 		fn();
 	}, timeout);
+
 	return {
 		isTriggered: () => scheduled,
 		dispose: () => {
@@ -395,9 +406,11 @@ export class Delayer<T> implements IDisposable {
 			}).then(() => {
 				this.completionPromise = null;
 				this.doResolve = null;
+
 				if (this.task) {
 					const task = this.task;
 					this.task = null;
+
 					return task();
 				}
 				return undefined;

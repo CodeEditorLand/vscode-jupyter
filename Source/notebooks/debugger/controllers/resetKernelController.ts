@@ -25,6 +25,7 @@ export class ResetKernelController implements IDebuggingDelegate {
 		// This might happen if VS Code or the extension host crashes
 		if (request.command === "attach") {
 			this.trace("attach", "Continuing paused kernel threads if needed");
+
 			const info = await this.debugAdapter.debugInfo();
 
 			// If there's stopped threads at this point, continue them all

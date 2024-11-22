@@ -170,8 +170,10 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		selection: Promise<MultiStepInputQuickPicResponseType<T, P>>;
 	} {
 		const disposables: Disposable[] = [];
+
 		const deferred =
 			createDeferred<MultiStepInputQuickPicResponseType<T, P>>();
+
 		const input = window.createQuickPick<T>();
 		input.title = title;
 		input.step = step;
@@ -179,6 +181,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		input.placeholder = placeholder;
 		input.ignoreFocusOut = ignoreFocusOut ?? true;
 		input.items = items;
+
 		if (stopBusy) {
 			input.busy = startBusy ?? false;
 			stopBusy(
@@ -210,6 +213,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		}
 		input.matchOnDescription = matchOnDescription || false;
 		input.matchOnDetail = matchOnDetail || false;
+
 		if (activeItem) {
 			input.activeItems = [activeItem];
 		} else {
@@ -235,11 +239,15 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				const itemLabel = selectedItems.length
 					? selectedItems[0].label
 					: "";
+
 				let resolvable = itemLabel ? true : false;
+
 				if (itemLabel && validate && selectedItems.length) {
 					input.enabled = false;
 					input.busy = true;
+
 					const message = await validate(selectedItems[0]);
+
 					if (message) {
 						resolvable = false;
 						// No validation allowed on a quick pick. Have to put up a dialog instead
@@ -262,6 +270,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				})().catch(deferred.reject);
 			}),
 		);
+
 		if (acceptFilterBoxTextAsSelection) {
 			disposables.push(
 				input.onDidAccept(async () => {
@@ -269,6 +278,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 						const validationMessage = validate
 							? await validate(input)
 							: undefined;
+
 						if (!validationMessage) {
 							deferred.resolve(<any>input.value);
 						} else {
@@ -289,6 +299,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		this.current = input;
 		this.current.show();
 		deferred.promise.finally(() => dispose(disposables)).catch(noop);
+
 		return { quickPick: input, selection: deferred.promise };
 	}
 
@@ -305,6 +316,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		validationMessage,
 	}: P): Promise<MultiStepInputInputBoxResponseType<P>> {
 		const disposables: Disposable[] = [];
+
 		try {
 			return await new Promise<MultiStepInputInputBoxResponseType<P>>(
 				(resolve, reject) => {
@@ -336,8 +348,10 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 							const inputValue = input.value;
 							input.enabled = false;
 							input.busy = true;
+
 							const validationMessage =
 								await validate(inputValue);
+
 							if (!validationMessage) {
 								input.validationMessage = "";
 								resolve(inputValue);
@@ -368,6 +382,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 							})().catch(reject);
 						}),
 					);
+
 					if (this.current) {
 						this.current.dispose();
 					}
@@ -385,8 +400,10 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		state: S,
 	): Promise<InputFlowAction | undefined> {
 		let step: InputStep<S> | void = start;
+
 		while (step) {
 			this.steps.push(step);
+
 			if (this.current) {
 				this.current.enabled = false;
 				this.current.busy = true;

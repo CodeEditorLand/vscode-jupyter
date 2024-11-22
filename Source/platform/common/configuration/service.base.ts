@@ -31,7 +31,9 @@ export abstract class BaseConfigurationService
 			uri: resource,
 			target: configTarget || ConfigurationTarget.WorkspaceFolder,
 		};
+
 		let settingsInfo = defaultSetting;
+
 		if (
 			section === "jupyter" &&
 			configTarget !== ConfigurationTarget.Global
@@ -42,6 +44,7 @@ export abstract class BaseConfigurationService
 			section,
 			settingsInfo.uri,
 		);
+
 		const currentValue = configSection.inspect(setting);
 
 		if (
@@ -56,6 +59,7 @@ export abstract class BaseConfigurationService
 			return;
 		}
 		await configSection.update(setting, value, configTarget);
+
 		if (configTarget) {
 			await this.verifySetting(
 				configSection,
@@ -89,8 +93,10 @@ export abstract class BaseConfigurationService
 	): Promise<void> {
 		if (isTestExecution() && !isUnitTestExecution()) {
 			let retries = 0;
+
 			do {
 				const setting = configSection.inspect(settingName);
+
 				if (!setting && value === undefined) {
 					break; // Both are unset
 				}
@@ -102,6 +108,7 @@ export abstract class BaseConfigurationService
 							: target === ConfigurationTarget.Workspace
 								? setting.workspaceValue
 								: setting.workspaceFolderValue;
+
 					if (actual === value) {
 						break;
 					}

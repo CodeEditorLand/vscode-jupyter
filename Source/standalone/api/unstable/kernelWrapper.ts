@@ -15,6 +15,7 @@ const wrappedSession = new WeakMap<
 >();
 export function wrapKernelSession(session: Session.ISessionConnection) {
 	let wrapper = wrappedSession.get(session);
+
 	if (!wrapper) {
 		wrapper = createSessionWrapper(session);
 		wrappedSession.set(session, wrapper);
@@ -42,6 +43,7 @@ const wrappedKernel = new WeakMap<
 >();
 export function wrapKernel(kernel: Kernel.IKernelConnection) {
 	let wrapper = wrappedKernel.get(kernel);
+
 	if (!wrapper) {
 		wrapper = createKernelWrapper(kernel);
 		wrappedKernel.set(kernel, wrapper);
@@ -64,6 +66,7 @@ function createKernelWrapper(kernel: Kernel.IKernelConnection) {
 					) => void | PromiseLike<void>,
 				): void => {
 					registerCommTargetFor3rdPartyExtensions(kernel, targetName);
+
 					return Reflect.get(target, p).apply(target, [
 						targetName,
 						callback,
@@ -79,6 +82,7 @@ function createKernelWrapper(kernel: Kernel.IKernelConnection) {
 					) => void | PromiseLike<void>,
 				): void => {
 					removeCommTargetFor3rdPartyExtensions(kernel, targetName);
+
 					return Reflect.get(target, p).apply(target, [
 						targetName,
 						callback,

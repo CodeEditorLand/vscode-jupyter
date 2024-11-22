@@ -16,6 +16,7 @@ export function getTelemetrySafeVersion(
 			const [major, minor, patch] = `${version.trim()}...`
 				.split(".")
 				.map((item) => parseInt(item, 10));
+
 			if (isNaN(major)) {
 				return "";
 			} else if (isNaN(minor)) {
@@ -26,6 +27,7 @@ export function getTelemetrySafeVersion(
 			return `${major}.${minor}.${patch}`;
 		} catch (ex) {
 			logger.error(`Failed to parse version ${version}`, ex);
+
 			return "";
 		}
 	}

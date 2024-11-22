@@ -44,6 +44,7 @@ export class PlotViewer
 		@inject(IExtensionContext) readonly context: IExtensionContext,
 	) {
 		const startupTimer = new StopWatch();
+
 		const plotDir = joinPath(
 			context.extensionUri,
 			"dist",
@@ -51,6 +52,7 @@ export class PlotViewer
 			"webview-side",
 			"viewers",
 		);
+
 		super(
 			configuration,
 			provider,
@@ -102,6 +104,7 @@ export class PlotViewer
 	public override dispose() {
 		super.dispose();
 		this.removedEvent.dispose();
+
 		if (this.closedEvent) {
 			this.closedEvent.fire(this);
 		}
@@ -116,14 +119,17 @@ export class PlotViewer
 		switch (message) {
 			case PlotViewerMessages.CopyPlot:
 				this.copyPlot(payload.toString()).catch(noop);
+
 				break;
 
 			case PlotViewerMessages.ExportPlot:
 				this.exportPlot(payload).catch(noop);
+
 				break;
 
 			case PlotViewerMessages.RemovePlot:
 				this.removePlot(payload);
+
 				break;
 
 			default:
@@ -145,6 +151,7 @@ export class PlotViewer
 
 	protected async exportPlot(payload: IExportPlotRequest): Promise<void> {
 		logger.info("exporting plot...");
+
 		const filtersObject: Record<string, string[]> = {};
 		filtersObject[localize.DataScience.pngFilter] = ["png"];
 		filtersObject[localize.DataScience.svgFilter] = ["svg"];
@@ -154,21 +161,25 @@ export class PlotViewer
 			saveLabel: localize.DataScience.exportPlotTitle,
 			filters: filtersObject,
 		});
+
 		try {
 			if (file) {
 				const ext = path.extname(file.path);
+
 				switch (ext.toLowerCase()) {
 					case ".png":
 						const buffer = base64ToUint8Array(
 							payload.png.replace("data:image/png;base64", ""),
 						);
 						await this.fs.writeFile(file, buffer);
+
 						break;
 
 					default:
 					case ".svg":
 						// This is the easy one:
 						await this.fs.writeFile(file, payload.svg);
+
 						break;
 				}
 			}

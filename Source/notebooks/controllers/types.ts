@@ -37,6 +37,7 @@ export interface IVSCodeNotebookController extends IDisposable {
     asWebviewUri(localResource: vscode.Uri): vscode.Uri;
     isAssociatedWithDocument(notebook: vscode.NotebookDocument): boolean;
     updateConnection(connection: KernelConnectionMetadata): void;
+
     setPendingCellAddition(notebook: vscode.NotebookDocument, promise: Promise<void>): void;
 }
 
@@ -69,6 +70,7 @@ export interface IControllerRegistration {
         controller: IVSCodeNotebookController;
         selected: boolean;
     }>;
+
     getSelected(document: vscode.NotebookDocument): IVSCodeNotebookController | undefined;
     /**
      * Keeps track of controllers created for the active interpreter.
@@ -121,6 +123,7 @@ export interface ILocalNotebookKernelSourceSelector {
 export const ILocalPythonNotebookKernelSourceSelector = Symbol('ILocalPythonNotebookKernelSourceSelector');
 export interface ILocalPythonNotebookKernelSourceSelector {
     selectLocalKernel(notebook: vscode.NotebookDocument): Promise<PythonKernelConnectionMetadata | undefined>;
+
     getKernelConnection(env: EnvironmentPath): Promise<PythonKernelConnectionMetadata | undefined>;
 }
 

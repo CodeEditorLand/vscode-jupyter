@@ -13,8 +13,11 @@ export interface IPythonApiProvider {
 	onDidActivatePythonExtension: Event<void>;
 	pythonExtensionHooked: Promise<void>;
 	pythonExtensionVersion: SemVer | undefined;
+
 	getApi(): Promise<PythonApi>;
+
 	getNewApi(): Promise<PythonExtension | undefined>;
+
 	setApi(api: PythonApi): void;
 }
 export const IPythonExtensionChecker = Symbol("IPythonExtensionChecker");
@@ -85,6 +88,7 @@ export interface PythonApi {
 	registerInterpreterStatusFilter(
 		filter: IInterpreterStatusbarVisibilityFilter,
 	): void;
+
 	getCondaVersion?(): Promise<SemVer | undefined>;
 	/**
 	 * Returns the conda executable.

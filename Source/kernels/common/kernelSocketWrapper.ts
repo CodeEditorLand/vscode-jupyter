@@ -68,6 +68,7 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 			direction: "send";
 		}>();
 		public onAnyMessage = this._onAnyMessage.event;
+
 		constructor(...rest: any[]) {
 			super(...rest);
 			// Make sure the message chain is initialized

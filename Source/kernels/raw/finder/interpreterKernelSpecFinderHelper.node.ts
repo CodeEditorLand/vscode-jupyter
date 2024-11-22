@@ -64,6 +64,7 @@ import { ITrustedKernelPaths } from "./types";
 export function localPythonKernelsCacheKey() {
 	const LocalPythonKernelsCacheKey =
 		"LOCAL_KERNEL_PYTHON_AND_RELATED_SPECS_CACHE_KEY_V_2023_3";
+
 	return `${LocalPythonKernelsCacheKey}:${env.appHost}:${env.remoteName || ""}`;
 }
 
@@ -76,15 +77,19 @@ export async function findKernelSpecsInInterpreter(
 ): Promise<void> {
 	// Find all the possible places to look for this resource
 	const sysPrefix = await getSysPrefix(interpreter);
+
 	if (!sysPrefix) {
 		logger.warn(
 			`Failed to get sysPrefix for interpreter ${getDisplayPath(interpreter.id)}`,
 		);
+
 		return;
 	}
 	const kernelSearchPath = Uri.file(path.join(sysPrefix, baseKernelPath));
+
 	const rootSpecPaths =
 		await jupyterPaths.getKernelSpecRootPaths(cancelToken);
+
 	if (cancelToken.isCancellationRequested) {
 		return;
 	}
@@ -100,6 +105,7 @@ export async function findKernelSpecsInInterpreter(
 		kernelSearchPath,
 		cancelToken,
 	);
+
 	if (cancelToken.isCancellationRequested) {
 		return;
 	}
@@ -123,6 +129,7 @@ export async function findKernelSpecsInInterpreter(
 					cancelToken,
 					interpreter,
 				);
+
 				if (cancelToken.isCancellationRequested) {
 					return;
 				}
@@ -146,6 +153,7 @@ export async function findKernelSpecsInInterpreter(
 					originalSpecFiles.add(kernelSpec.specFile);
 				}
 				const existing = byDisplayName.get(kernelSpec.display_name);
+
 				if (existing && existing.executable !== kernelSpec.executable) {
 					// This item has dupe name but has a different path to start the exe
 					emitter.fire(kernelSpec);
@@ -186,6 +194,7 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 		}>(),
 	);
 	public onDidChangeKernels = this._onDidChangeKernels.event;
+
 	constructor(
 		public readonly interpreter: PythonEnvironment,
 		private readonly interpreterService: IInterpreterService,
@@ -230,12 +239,15 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 					logger.trace(
 						`No Kernels found in interpreter ${this.interpreter.id}`,
 					);
+
 					break;
+
 				case 1:
 					// Thats the default kernel we create for this interpreter.
 					// It will be the startUsingPythonInterpreter kernel.
 					// No need to log this, just noise. It will be an obvious entry
 					break;
+
 				default:
 					logger.trace(
 						`Kernels for interpreter ${this.interpreter.id} are ${Array.from(
@@ -244,16 +256,20 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 					);
 			}
 		});
+
 		return this.kernelSpecPromise;
 	}
 
 	private clearCacheWhenInterpretersChange() {
 		const interpreter = getCachedEnvironment({ id: this.interpreter.id });
+
 		if (!interpreter) {
 			return;
 		}
 		const version = getCachedVersion(interpreter);
+
 		const sysPrefix = getCachedSysPrefix(interpreter);
+
 		if (
 			// If the version, syspath has changed, then we need to re-discover the kernels.
 			this.lastKnownEnvFolder?.fsPath !==
@@ -271,7 +287,9 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 	}
 	private async listKernelSpecsImpl() {
 		const cancelToken = this.cancelToken.token;
+
 		const sysPrefix = getCachedSysPrefix(this.interpreter);
+
 		if (!sysPrefix) {
 			return;
 		}
@@ -290,7 +308,9 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 			string,
 			LocalKernelConnectionMetadata
 		>();
+
 		const onFound = new EventEmitter<IJupyterKernelSpec>();
+
 		const disposable = onFound.event((jupyterKernelSpec) => {
 			if (cancelToken.isCancellationRequested) {
 				return;
@@ -311,6 +331,7 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 						jupyterKernelSpec.interpreterPath,
 					)} (KernelSpec file ${getDisplayPath(jupyterKernelSpec.specFile)})`,
 				);
+
 				return;
 			}
 			const kernelSpec = isKernelLaunchedViaLocalPythonIPyKernel(
@@ -365,6 +386,7 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 
 		// Update spec to have a default spec file
 		const spec = await interpreterSpecificKernelSpec;
+
 		if (cancelToken.isCancellationRequested) {
 			return;
 		}
@@ -374,6 +396,7 @@ export class InterpreterSpecificKernelSpecsFinder extends DisposableBase {
 			interpreter: this.interpreter,
 			id: getKernelId(spec, this.interpreter),
 		});
+
 		if (!this._kernels.has(result.id)) {
 			this._kernels.set(result.id, result);
 			this._onDidChangeKernels.fire({ added: [result], removed: [] });
@@ -408,6 +431,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 		[];
 	private static globalPythonKernelSpecsForWhichWeCouldNotFindInterpreterInfo =
 		new Set<string>();
+
 	constructor(
 		private readonly interpreterService: IInterpreterService,
 		private readonly kernelSpecsFromKnownLocations: LocalKnownPathKernelSpecFinder,
@@ -417,8 +441,10 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 		kernelSpecsFromKnownLocations.onDidChangeKernels(() => {
 			const lastKnownGlobalPythonKernelSpecs =
 				this.lastKnownGlobalPythonKernelSpecs;
+
 			const newGlobalPythonKernelSpecs =
 				this.listGlobalPythonKernelSpecs();
+
 			if (
 				lastKnownGlobalPythonKernelSpecs.length !==
 					newGlobalPythonKernelSpecs.length ||
@@ -428,6 +454,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 				)
 			) {
 				this.kernelSpecPromise = undefined;
+
 				return;
 			}
 		});
@@ -446,6 +473,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 		this.clear();
 		this.cancelToken = new CancellationTokenSource();
 		this.kernelSpecPromise = this.listKernelSpecsImpl();
+
 		return this.kernelSpecPromise;
 	}
 	public clear() {
@@ -469,10 +497,13 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 			kernelSpec.argv.length > 0
 				? kernelSpec.argv[0]
 				: undefined;
+
 		const kernelSpecLanguage = kernelSpec.language || "";
+
 		const kernelSpecHash = kernelSpec.specFile
 			? await getTelemetrySafeHashedString(kernelSpec.specFile)
 			: "";
+
 		const isCreatedByUs = getKernelRegistrationInfo(kernelSpec)
 			? true
 			: false;
@@ -514,10 +545,12 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 				logger.trace(
 					`Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on metadata.interpreter.`,
 				);
+
 				return true;
 			}
 			return false;
 		});
+
 		if (exactMatch) {
 			return resolvedPythonEnvToJupyterEnv(exactMatch);
 		}
@@ -539,15 +572,18 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 		// 2. Check if we have a fully qualified path in `argv`
 		if (pathInArgv && path.basename(pathInArgv) !== pathInArgv) {
 			const pathInArgVUri = Uri.file(pathInArgv);
+
 			const exactMatchBasedOnArgv = interpreters.find((i) => {
 				if (areInterpreterPathsSame(pathInArgVUri, i.executable.uri)) {
 					logger.trace(
 						`Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on argv.`,
 					);
+
 					return true;
 				}
 				return false;
 			});
+
 			if (exactMatchBasedOnArgv) {
 				if (kernelSpec.specFile && !isCreatedByUs) {
 					sendTelemetryEvent(
@@ -579,6 +615,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 						pathInArgVUri,
 						cancelToken,
 					);
+
 				if (cancelToken?.isCancellationRequested) {
 					return;
 				}
@@ -637,6 +674,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 			const kernelSpecInterpreterPath = Uri.file(
 				kernelSpec.interpreterPath,
 			);
+
 			const matchBasedOnInterpreterPath = interpreters.find((i) => {
 				if (
 					kernelSpec.interpreterPath &&
@@ -648,10 +686,12 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 					logger.trace(
 						`Kernel ${kernelSpec.name} matches ${getDisplayPath(i.id)} based on interpreterPath.`,
 					);
+
 					return true;
 				}
 				return false;
 			});
+
 			if (matchBasedOnInterpreterPath) {
 				return resolvedPythonEnvToJupyterEnv(
 					matchBasedOnInterpreterPath,
@@ -667,6 +707,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 						kernelSpecInterpreterPath,
 						cancelToken,
 					);
+
 				if (interpreterInInterpreterPath) {
 					return interpreterInInterpreterPath;
 				}
@@ -700,6 +741,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 							isCreatedByUs,
 						},
 					);
+
 					return true;
 				}
 				return false;
@@ -740,6 +782,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 	}
 	private async listKernelSpecsImpl() {
 		const cancelToken = this.cancelToken.token;
+
 		const globalPythonKernelSpecs =
 			this.listGlobalPythonKernelSpecs().filter(
 				// Its impossible to have kernels registered by us that are in global.
@@ -767,7 +810,9 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 				return false;
 			}
 			const args = item.kernelSpec.argv.map((arg) => arg.toLowerCase());
+
 			const moduleIndex = args.indexOf("-m");
+
 			if (moduleIndex === -1) {
 				return false;
 			}
@@ -775,6 +820,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 				args.length - 1 >= moduleIndex
 					? args[moduleIndex + 1]
 					: undefined;
+
 			if (!moduleName) {
 				return false;
 			}
@@ -796,6 +842,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 					const registrationInfo = getKernelRegistrationInfo(
 						item.kernelSpec,
 					);
+
 					if (
 						!registrationInfo &&
 						(usingNonIpyKernelLauncher(item) ||
@@ -820,6 +867,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 							item.kernelSpec.language
 						}, registrationInfo = ${registrationInfo})`,
 					);
+
 					return false;
 				})
 				.map(async (item) => {
@@ -832,6 +880,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 							"startUsingLocalKernelSpec",
 							cancelToken,
 						);
+
 					if (cancelToken.isCancellationRequested) {
 						return;
 					}
@@ -843,10 +892,12 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 						const executable = item.kernelSpec.argv.length
 							? item.kernelSpec.argv[0].toLowerCase()
 							: "";
+
 						if (isLikelyAPythonExecutable(executable)) {
 							this.warnAboutPythonKernelSpecWithInvalidPythonExec(
 								item.kernelSpec,
 							);
+
 							return;
 						}
 					}
@@ -861,6 +912,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 						},
 					);
 					distinctKernelMetadata.set(kernelSpec.id, kernelSpec);
+
 					if (kernelSpec.kernelSpec.specFile) {
 						globalKernelSpecsLoadedForPython.add(
 							kernelSpec.kernelSpec.specFile,
@@ -868,6 +920,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 					}
 				}),
 		);
+
 		if (cancelToken.isCancellationRequested) {
 			return [];
 		}
@@ -1043,6 +1096,7 @@ export class GlobalPythonKernelSpecFinder implements IDisposable {
 		//                     }
 		//                 })
 		//         );
+
 		if (cancelToken.isCancellationRequested) {
 			return [];
 		}

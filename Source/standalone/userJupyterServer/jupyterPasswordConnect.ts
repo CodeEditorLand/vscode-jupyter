@@ -26,6 +26,7 @@ export interface IJupyterPasswordConnectInfo {
  */
 export class JupyterPasswordConnect {
     private savedConnectInfo = new Map<string, Promise<IJupyterPasswordConnectInfo>>();
+
     constructor(
         private readonly configService: IConfigurationService,
         private readonly agentCreator: IJupyterRequestAgentCreator | undefined,
@@ -49,11 +50,14 @@ export class JupyterPasswordConnect {
 
         // Add on a trailing slash to our URL if it's not there already
         const newUrl = addTrailingSlash(options.url);
+
         const disposables = options.disposables || [];
+
         const disposeOnDone = !Array.isArray(options.disposables);
 
         // See if we already have this data. Don't need to ask for a password more than once. (This can happen in remote when listing kernels)
         let result = this.savedConnectInfo.get(options.handle);
+
         if (!result) {
             result = this.getJupyterConnectionInfo({
                 url: newUrl,
@@ -101,8 +105,11 @@ export class JupyterPasswordConnect {
         disposables: IDisposable[];
     }): Promise<IJupyterPasswordConnectInfo> {
         let xsrfCookie: string | undefined;
+
         let sessionCookieName: string | undefined;
+
         let sessionCookieValue: string | undefined;
+
         let userPassword: string | undefined = undefined;
 
         // First determine if we need a password. A request for the base URL with /tree? should return a 302 if we do.
@@ -172,11 +179,15 @@ export class JupyterPasswordConnect {
         // Remember session cookie can be empty, if both token and password are empty
         if (xsrfCookie && sessionCookieName && (sessionCookieValue || options.isTokenEmpty)) {
             sendTelemetryEvent(Telemetry.GetPasswordSuccess);
+
             const cookieString = `_xsrf=${xsrfCookie}; ${sessionCookieName}=${sessionCookieValue || ''}`;
+
             const requestHeaders = { Cookie: cookieString, 'X-XSRFToken': xsrfCookie };
+
             return { requestHeaders, requiresPassword };
         } else {
             sendTelemetryEvent(Telemetry.GetPasswordFailure);
+
             return { requiresPassword };
         }
     }
@@ -196,7 +207,9 @@ export class JupyterPasswordConnect {
 
     private async getXSRFToken(url: string, sessionCookie: string): Promise<string | undefined> {
         let xsrfCookie: string | undefined;
+
         let headers;
+
         let tokenUrl = new URL('login?', addTrailingSlash(url)).toString();
 
         if (sessionCookie != '') {
@@ -219,6 +232,7 @@ export class JupyterPasswordConnect {
 
         if (response !== undefined && response.ok) {
             const cookies = this.getCookies(response);
+
             if (cookies.has('_xsrf')) {
                 xsrfCookie = cookies.get('_xsrf')?.split(';')[0];
             }
@@ -234,6 +248,7 @@ export class JupyterPasswordConnect {
             redirect: 'follow',
             headers: { Connection: 'keep-alive' }
         });
+
         if (response.status === 200 && response.redirected) {
             if (response.url.toLowerCase().includes('/login?')) {
                 return true;
@@ -250,8 +265,10 @@ export class JupyterPasswordConnect {
             redirect: 'manual',
             headers: { Connection: 'keep-alive' }
         });
+
         if (response.status === 404) {
             logger.error(`Jupyter Server not found at ${url}, got 404 for ${treeUrl}`);
+
             return false;
         }
         return response.status !== 200;
@@ -270,13 +287,16 @@ export class JupyterPasswordConnect {
             if (e.message.indexOf('reason: self signed certificate') >= 0) {
                 // Ask user to change setting and possibly try again.
                 const enableOption: string = DataScience.jupyterSelfCertEnable;
+
                 const closeOption: string = DataScience.jupyterSelfCertClose;
+
                 const value = await window.showErrorMessage(
                     DataScience.jupyterSelfCertFail(e.message),
                     { modal: true },
                     enableOption,
                     closeOption
                 );
+
                 if (value === enableOption) {
                     sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
                     await this.configService.updateSetting(
@@ -285,6 +305,7 @@ export class JupyterPasswordConnect {
                         undefined,
                         ConfigurationTarget.Workspace
                     );
+
                     return this.requestCreator.getFetchMethod()(url, this.addAllowUnauthorized(url, true, options));
                 } else if (value === closeOption) {
                     sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
@@ -306,6 +327,7 @@ export class JupyterPasswordConnect {
         password: string
     ): Promise<{ sessionCookieName: string | undefined; sessionCookieValue: string | undefined }> {
         let sessionCookieName: string | undefined;
+
         let sessionCookieValue: string | undefined;
         // Create the form params that we need
         const postParams = new URLSearchParams();
@@ -330,6 +352,7 @@ export class JupyterPasswordConnect {
             // Session cookie is the first one
             if (cookies.size > 0) {
                 const cookie = cookies.entries().next().value;
+
                 if (cookie) {
                     sessionCookieName = cookie[0];
                     sessionCookieValue = cookie[1];
@@ -351,6 +374,7 @@ export class JupyterPasswordConnect {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             cookies.forEach((value: any) => {
                 const cookieKey = value.substring(0, value.indexOf('='));
+
                 const cookieVal = value.substring(value.indexOf('=') + 1);
                 cookieList.set(cookieKey, cookieVal);
             });
@@ -373,6 +397,7 @@ export class JupyterPasswordConnect {
 
 export function addTrailingSlash(url: string): string {
     let newUrl = url;
+
     if (newUrl[newUrl.length - 1] !== '/') {
         newUrl = `${newUrl}/`;
     }

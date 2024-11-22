@@ -45,6 +45,7 @@ import {
 import { DebugLocationTracker } from "./debugLocationTracker";
 
 const KnownExcludedVariables = new Set<string>(["In", "Out", "exit", "quit"]);
+
 const MaximumRowChunkSizeForDebugger = 100;
 
 /**
@@ -113,6 +114,7 @@ export class DebuggerVariables
 		}
 		const execution =
 			kernel && this.kernelProvider.getKernelExecution(kernel);
+
 		const result: IJupyterVariablesResponse = {
 			executionCount: execution
 				? execution.executionCount
@@ -125,13 +127,16 @@ export class DebuggerVariables
 
 		if (this.active) {
 			type SortableColumn = "name" | "type";
+
 			const sortColumn = request.sortColumn as SortableColumn;
+
 			const comparer = (
 				a: IJupyterVariable,
 				b: IJupyterVariable,
 			): number => {
 				// In case it is undefined or null
 				const aColumn = a[sortColumn] ? a[sortColumn] : "";
+
 				const bColumn = b[sortColumn] ? b[sortColumn] : "";
 
 				if (request.sortAscending) {
@@ -147,6 +152,7 @@ export class DebuggerVariables
 			this.lastKnownVariables.sort(comparer);
 
 			const startPos = request.startIndex ? request.startIndex : 0;
+
 			const chunkSize = request.pageSize
 				? request.pageSize
 				: MaximumRowChunkSizeForDebugger;
@@ -177,6 +183,7 @@ export class DebuggerVariables
 		if (this.active) {
 			// Note, full variable results isn't necessary for this call. It only really needs the variable value.
 			const result = this.lastKnownVariables.find((v) => v.name === name);
+
 			if (
 				result &&
 				kernel?.resourceUri &&
@@ -211,6 +218,7 @@ export class DebuggerVariables
 		}
 
 		let expression = targetVariable.name;
+
 		if (sliceExpression) {
 			expression = `${targetVariable.name}${sliceExpression}`;
 		}
@@ -221,6 +229,7 @@ export class DebuggerVariables
 				isDebugging: true,
 				variableName: expression,
 			});
+
 		const results = await this.evaluate({
 			code,
 			cleanupCode,
@@ -230,7 +239,9 @@ export class DebuggerVariables
 		});
 
 		const notebook = kernel?.notebook;
+
 		let fileName = notebook ? path.basename(notebook.uri.path) : "";
+
 		if (!fileName && this.debugLocation?.fileName) {
 			fileName = path.basename(this.debugLocation.fileName);
 		}
@@ -273,6 +284,7 @@ export class DebuggerVariables
 		}
 
 		let expression = targetVariable.name;
+
 		if (sliceExpression) {
 			expression = `${targetVariable.name}${sliceExpression}`;
 		}
@@ -284,6 +296,7 @@ export class DebuggerVariables
 				startIndex: start,
 				endIndex: end,
 			});
+
 		const results = await this.evaluate({
 			code,
 			cleanupCode,
@@ -291,12 +304,14 @@ export class DebuggerVariables
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			frameId: (targetVariable as any).frameId,
 		});
+
 		return parseDataFrame(JSON.parse(results.result));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public override onWillReceiveMessage(message: any) {
 		super.onWillReceiveMessage(message);
+
 		if (
 			message.type === "request" &&
 			message.command === "variables" &&
@@ -334,6 +349,7 @@ export class DebuggerVariables
 			// Keep track of variablesReference because "hover" requests also try to update variables
 			const newVariablesReference =
 				response.body.scopes[0].variablesReference;
+
 			if (newVariablesReference !== this.currentVariablesReference) {
 				this.currentVariablesReference = newVariablesReference;
 				this.currentSeqNumsForVariables.clear();
@@ -367,7 +383,9 @@ export class DebuggerVariables
 			this.topMostFrameId = 0;
 			this.debuggingStarted = false;
 			this.refreshEventEmitter.fire();
+
 			const key = this.debugService.activeDebugSession?.id;
+
 			if (key) {
 				this.importedGetVariableInfoScriptsIntoKernel.delete(key);
 			}
@@ -376,6 +394,7 @@ export class DebuggerVariables
 
 	private watchKernel(kernel: IKernel) {
 		const key = kernel.notebook?.uri.toString();
+
 		if (key && !this.watchedNotebooks.has(key)) {
 			const disposables: Disposable[] = [];
 			disposables.push(
@@ -410,6 +429,7 @@ export class DebuggerVariables
 	}): Promise<any> {
 		if (this.debugService.activeDebugSession) {
 			frameId = this.topMostFrameId || frameId;
+
 			const defaultEvalOptions = {
 				frameId,
 				context: "repl",
@@ -418,6 +438,7 @@ export class DebuggerVariables
 			logger.debug(
 				`Evaluating in debugger : ${this.debugService.activeDebugSession.id}: ${code}`,
 			);
+
 			try {
 				if (initializeCode) {
 					await this.debugService.activeDebugSession.customRequest(
@@ -436,10 +457,12 @@ export class DebuggerVariables
 							expression: code,
 						},
 					);
+
 				if (results && results.result !== "None") {
 					return results;
 				} else {
 					logger.error(`Cannot evaluate ${code}`);
+
 					return undefined;
 				}
 			} finally {
@@ -465,6 +488,7 @@ export class DebuggerVariables
 				isDebugging: true,
 				variableName: variable.name,
 			});
+
 		const results = await this.evaluate({
 			code,
 			initializeCode,
@@ -472,6 +496,7 @@ export class DebuggerVariables
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			frameId: (variable as any).frameId,
 		});
+
 		if (results && results.result) {
 			// Results should be the updated variable.
 			return {
@@ -537,6 +562,7 @@ export class DebuggerVariables
 
 	private activeNotebookIsDebugging(): boolean {
 		const activeNotebook = window.activeNotebookEditor;
+
 		return (
 			!!activeNotebook &&
 			this.debuggingManager.isDebugging(activeNotebook.notebook)
@@ -548,10 +574,12 @@ export class DebuggerVariables
 		stoppedMessage: DebugProtocol.StoppedEvent,
 	): Promise<void> {
 		const doc = window.activeNotebookEditor?.notebook;
+
 		const threadId = stoppedMessage.body.threadId;
 
 		if (doc) {
 			const session = this.debuggingManager.getDebugSession(doc);
+
 			if (session) {
 				// Call stack trace
 				const stResponse: DebugProtocol.StackTraceResponse["body"] =
@@ -564,7 +592,9 @@ export class DebuggerVariables
 				//  Call scopes
 				if (stResponse && stResponse.stackFrames[0]) {
 					const sf = stResponse.stackFrames[0];
+
 					const mode = this.debuggingManager.getDebugMode(doc);
+
 					let scopesResponse:
 						| DebugProtocol.ScopesResponse["body"]
 						| undefined;
@@ -572,6 +602,7 @@ export class DebuggerVariables
 					if (mode === KernelDebugMode.RunByLine) {
 						// Only call scopes (and variables) if we are stopped on the cell we are executing
 						const cell = this.debuggingManager.getDebugCell(doc);
+
 						if (
 							sf.source &&
 							cell &&
@@ -585,6 +616,7 @@ export class DebuggerVariables
 					} else {
 						// Only call scopes (and variables) if we are stopped on the notebook we are executing
 						const docURI = path.basename(doc.uri.toString());
+
 						if (
 							sf.source &&
 							sf.source.path &&

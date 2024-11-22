@@ -44,6 +44,7 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 
 		if (channels.length === 0) {
 			await this.showNoInstallersMessage(interpreter);
+
 			return;
 		}
 	}
@@ -53,13 +54,17 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 	): Promise<IModuleInstaller[]> {
 		const installers =
 			this.serviceContainer.getAll<IModuleInstaller>(IModuleInstaller);
+
 		const supportedInstallers: IModuleInstaller[] = [];
+
 		if (installers.length === 0) {
 			return [];
 		}
 		// group by priority and pick supported from the highest priority
 		installers.sort((a, b) => b.priority - a.priority);
+
 		let currentPri = installers[0].priority;
+
 		for (const mi of installers) {
 			if (mi.priority !== currentPri) {
 				if (supportedInstallers.length > 0) {
@@ -79,6 +84,7 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 		interpreter: PythonEnvironment,
 	): Promise<void> {
 		const envType = getEnvironmentType(interpreter);
+
 		const result = await window.showErrorMessage(
 			envType === EnvironmentType.Conda
 				? Installer.noCondaOrPipInstaller
@@ -86,9 +92,11 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 			{ modal: true },
 			Installer.searchForHelp,
 		);
+
 		if (result === Installer.searchForHelp) {
 			const platform =
 				this.serviceContainer.get<IPlatformService>(IPlatformService);
+
 			const osName = platform.isWindows
 				? "Windows"
 				: platform.isMac

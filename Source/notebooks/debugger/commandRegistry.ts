@@ -55,6 +55,7 @@ export class CommandRegistry
 	private async runByLine(cell: NotebookCell | undefined) {
 		sendTelemetryEvent(DebuggingTelemetry.clickedRunByLine);
 		cell ??= this.getCellFromActiveEditor();
+
 		if (!cell) {
 			return;
 		}
@@ -67,6 +68,7 @@ export class CommandRegistry
 
 	private async runByLineNext(cell: NotebookCell | undefined) {
 		cell ??= this.getCellFromActiveEditor();
+
 		if (!cell) {
 			return;
 		}
@@ -76,6 +78,7 @@ export class CommandRegistry
 
 	private async runByLineStop(cell: NotebookCell | undefined) {
 		cell ??= this.getCellFromActiveEditor();
+
 		if (!cell) {
 			return;
 		}
@@ -86,6 +89,7 @@ export class CommandRegistry
 	private async runAndDebugCell(cell: NotebookCell | undefined) {
 		sendTelemetryEvent(DebuggingTelemetry.clickedRunAndDebugCell);
 		cell ??= this.getCellFromActiveEditor();
+
 		if (!cell) {
 			return;
 		}
@@ -98,8 +102,10 @@ export class CommandRegistry
 
 	private getCellFromActiveEditor(): NotebookCell | undefined {
 		const editor = window.activeNotebookEditor;
+
 		if (editor) {
 			const range = editor.selections[0];
+
 			if (range) {
 				return editor.notebook.cellAt(range.start);
 			}

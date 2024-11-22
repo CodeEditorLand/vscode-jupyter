@@ -34,6 +34,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 
 	private getActiveResource(): Resource {
 		const editor = window.activeTextEditor;
+
 		if (editor && !editor.document.isUntitled) {
 			return editor.document.uri;
 		}
@@ -46,6 +47,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 	@errorDecorator("Failed to activate a workspace")
 	public async activateWorkspace(resource: Resource) {
 		const key = this.getWorkspaceKey(resource);
+
 		if (this.activatedWorkspaces.has(key)) {
 			return;
 		}
@@ -98,10 +100,13 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 		const workspaceKeys = (workspace.workspaceFolders || [])!.map(
 			(workspaceFolder) => this.getWorkspaceKey(workspaceFolder.uri),
 		);
+
 		const activatedWkspcKeys = Array.from(this.activatedWorkspaces.keys());
+
 		const activatedWkspcFoldersRemoved = activatedWkspcKeys.filter(
 			(item) => workspaceKeys.indexOf(item) < 0,
 		);
+
 		if (activatedWkspcFoldersRemoved.length > 0) {
 			for (const folder of activatedWkspcFoldersRemoved) {
 				this.activatedWorkspaces.delete(folder);

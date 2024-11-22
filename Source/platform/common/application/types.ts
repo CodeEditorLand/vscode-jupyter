@@ -243,6 +243,7 @@ export interface IWebviewPanel extends IWebview {
 	 * one of the editor view columns.
 	 */
 	viewColumn: ViewColumn | undefined;
+
 	setTitle(val: string): void;
 	/**
 	 * Makes the webpanel show up.

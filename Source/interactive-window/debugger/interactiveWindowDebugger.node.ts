@@ -36,6 +36,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	private readonly tracingEnableCode: string;
 	private readonly tracingDisableCode: string;
 	private debuggingActive: boolean = false;
+
 	constructor(
 		@inject(IPythonApiProvider)
 		private readonly apiProvider: IPythonApiProvider,
@@ -79,7 +80,9 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			return;
 		}
 		const notebook = kernel.notebook;
+
 		const config = this.configs.get(notebook);
+
 		if (config) {
 			logger.info("stop debugging");
 
@@ -144,11 +147,13 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		extraConfig: Partial<DebugConfiguration>,
 	) {
 		logger.info("start debugging");
+
 		if (!kernel.session?.kernel) {
 			return;
 		}
 		// Try to connect to this notebook
 		const config = await this.connect(kernel, extraConfig);
+
 		if (config) {
 			logger.info("connected to notebook during debugging");
 
@@ -171,6 +176,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 							Telemetry.InteractiveWindowDebugSetupCodeFailure,
 					},
 				);
+
 				if (
 					importResults.some((item) => item.output_type === "error")
 				) {
@@ -194,7 +200,9 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		const notebook = kernel.notebook;
 		// If we already have configuration, we're already attached, don't do it again.
 		const key = notebook;
+
 		let result = this.configs.get(key);
+
 		if (result) {
 			return {
 				...result,
@@ -213,6 +221,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			request: "attach",
 			...extraConfig,
 		};
+
 		const { host, port } = await this.connectToLocal(kernel);
 		result.host = host;
 		result.port = port;
@@ -222,6 +231,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 
 			// Sign up for any change to the kernel to delete this config.
 			const disposables: Disposable[] = [];
+
 			const clear = () => {
 				this.configs.delete(key);
 				disposables.forEach((d) => d.dispose());
@@ -258,6 +268,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		// this path.
 		if (isLocalConnection(kernel.kernelConnectionMetadata)) {
 			let localPath = await this.getDebuggerPath();
+
 			if (this.platform.isWindows) {
 				localPath = localPath.replace(/\\/g, "\\\\");
 			}
@@ -330,14 +341,17 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			// Simplest is to test each output.
 			for (const output of outputs) {
 				let enableAttachString = getPlainTextOrStreamOutput([output]);
+
 				if (enableAttachString) {
 					enableAttachString = trimQuotes(enableAttachString);
 
 					// Important: This regex matches the format of the string returned from enable_attach. When
 					// doing enable_attach remotely, make sure to print out a string in the format ('host', port)
 					const debugInfoRegEx = /\('(.*?)', ([0-9]*)\)/;
+
 					const debugInfoMatch =
 						debugInfoRegEx.exec(enableAttachString);
+
 					if (debugInfoMatch) {
 						return {
 							port: parseInt(debugInfoMatch[2], 10),
@@ -350,6 +364,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		// if we cannot parse the connect information, throw so we exit out of debugging
 		if (outputs.length > 0 && outputs[0].output_type === "error") {
 			const error = outputs[0] as nbformat.IError;
+
 			throw new JupyterDebuggerNotInstalledError(
 				this.debuggerPackage,
 				error.ename,

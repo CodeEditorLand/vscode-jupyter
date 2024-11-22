@@ -28,9 +28,11 @@ import { initialize } from "./test/vscode-mock";
 initialize();
 
 const GDPRData = new IEventNamePropertyMapping();
+
 let gdprEntryOfCurrentlyComputingTelemetryEventName:
 	| [name: string, gdpr: TelemetryEventInfo<unknown>]
 	| undefined;
+
 const errorsByOwners: Record<string, Record<string, EventProblem>> = {};
 
 /**
@@ -95,12 +97,14 @@ function findNode(
 	length?: number,
 ): ts.Node | undefined {
 	let found: ts.Node | undefined;
+
 	let lastFoundNode: ts.Node | undefined;
 	sourceFile.forEachChild(visit);
 
 	function visit(node: ts.Node) {
 		if (node.pos === position) {
 			found = node;
+
 			return;
 		} else if (node.pos > position) {
 			return;
@@ -131,6 +135,7 @@ type TelemetryPropertyGroup = {
 };
 type TelemetryEntry = {
 	name: string;
+
 	constantName: string;
 	description: string;
 	gdpr: IEventData;
@@ -149,15 +154,20 @@ function computePropertiesForLiteralType(
 			ts.isPropertySignature(m)
 		) {
 			const name = m.name.getText();
+
 			const anyM = m as unknown as { jsDoc?: { comment: string }[] };
+
 			const descriptions = Array.isArray(anyM.jsDoc)
 				? anyM.jsDoc[0].comment.split(/\r?\n/) || []
 				: [];
+
 			let possibleValues: {
 				value: string;
 				comment?: string | string[];
 			}[] = [];
+
 			let typeValue = "";
+
 			if (
 				(m.type?.kind === ts.SyntaxKind.TypeReference &&
 					ts.isTypeReferenceNode(m.type)) ||
@@ -165,21 +175,26 @@ function computePropertiesForLiteralType(
 					ts.isUnionTypeNode(m.type))
 			) {
 				const type = typeChecker.getTypeAtLocation(m.type);
+
 				if (type.isUnion()) {
 					const isEnum = type
 						.getSymbol()
 						?.getDeclarations()
 						?.some((d) => d.kind === ts.SyntaxKind.EnumDeclaration);
+
 					const enumName = type.getSymbol()?.escapedName;
 					type.types.forEach((t) => {
 						if (t.isLiteral()) {
 							const value = t.value.toString();
+
 							const declaration = t.symbol?.declarations?.length
 								? (t.symbol.declarations[0] as unknown as {
 										jsDoc?: { comment: string }[];
 									})
 								: undefined;
+
 							const comment = [];
+
 							if (
 								isEnum &&
 								parseInt(value, 10).toString() === value.trim()
@@ -200,6 +215,7 @@ function computePropertiesForLiteralType(
 					});
 				}
 				const mType = m.type;
+
 				if (
 					mType.kind === ts.SyntaxKind.UnionType &&
 					ts.isUnionTypeNode(mType) &&
@@ -215,6 +231,7 @@ function computePropertiesForLiteralType(
 					mType.types.forEach((t) => {
 						if (t.kind === ts.SyntaxKind.LiteralType) {
 							const value = t.getText();
+
 							const comment = getCommentForUnions(t);
 							newPossibleValues.push({ value, comment });
 						} else if (
@@ -236,6 +253,7 @@ function computePropertiesForLiteralType(
 							});
 						}
 					});
+
 					if (
 						possibleValues.length === 0 ||
 						(newPossibleValues.length === possibleValues.length &&
@@ -259,6 +277,7 @@ function computePropertiesForLiteralType(
 				| undefined
 				| IPropertyDataMeasurement
 				| IPropertyDataNonMeasurement;
+
 			if (gdprEntryOfCurrentlyComputingTelemetryEventName) {
 				if (
 					"properties" in
@@ -321,6 +340,7 @@ function computePropertiesForLiteralType(
 						.split(/\r?\n/)
 						.join();
 					gdprEntry.comment = (gdprEntry.comment || "").trim();
+
 					if (gdprEntry.comment) {
 						if (
 							!comment
@@ -359,11 +379,14 @@ function computePropertiesForLiteralType(
 				} else {
 					const gdprInfo =
 						gdprEntryOfCurrentlyComputingTelemetryEventName[1];
+
 					const eventName =
 						gdprEntryOfCurrentlyComputingTelemetryEventName[0];
+
 					const ownerIssues: Record<string, EventProblem> =
 						(errorsByOwners[gdprInfo.owner] =
 							errorsByOwners[gdprInfo.owner] || {});
+
 					const eventIssues: EventProblem = (ownerIssues[eventName] =
 						ownerIssues[eventName] || {
 							eventConstantName: "",
@@ -386,6 +409,7 @@ function computePropertiesForLiteralType(
 			throw new Error(`Unexpected node kind: ${m.kind}`);
 		}
 	});
+
 	return properties;
 }
 function comptePropertyGroupsFromReferenceNode(
@@ -396,6 +420,7 @@ function comptePropertyGroupsFromReferenceNode(
 		return computePropertyForType(t.typeArguments[0], typeChecker);
 	}
 	const type = typeChecker.getTypeAtLocation(t);
+
 	if (
 		type.aliasSymbol?.escapedName === "Partial" &&
 		type.aliasTypeArguments?.length === 1
@@ -414,6 +439,7 @@ function comptePropertyGroupsFromReferenceNode(
 				typeChecker,
 			);
 			props.forEach((prop) => (prop.isNullable = true));
+
 			return props;
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} else if (Array.isArray((type.aliasTypeArguments[0] as any).types)) {
@@ -434,6 +460,7 @@ function comptePropertyGroupsFromReferenceNode(
 					allProps.push(...props);
 				}
 			});
+
 			return allProps;
 		}
 	}
@@ -453,6 +480,7 @@ function comptePropertyGroupsForIntersectionTypes(
 	type.types.forEach((t) =>
 		properties.push(...computePropertyForType(t, typeChecker)),
 	);
+
 	return properties;
 }
 function comptePropertyGroupsForPrenthesizedTypes(
@@ -488,6 +516,7 @@ function getCommentForUnions(t: ts.TypeNode) {
 		.getFullText()
 		.replace(t.getText(), "")
 		.split(/\r?\n/);
+
 	const comment = commentLines.map((line, index) => {
 		if (index === 0) {
 			line = line.trim().startsWith("/**")
@@ -533,10 +562,12 @@ function getTsCompilerOptionsJson(): any {
 		EXTENSION_ROOT_DIR_FOR_TESTS,
 		"tsconfig.json",
 	);
+
 	const jsonContent = ts.parseConfigFileTextToJson(
 		tsconfigPath,
 		fs.readFileSync(tsconfigPath, "utf8"),
 	);
+
 	return ts.convertCompilerOptionsFromJson(
 		jsonContent.config.compilerOptions,
 		"",
@@ -546,7 +577,9 @@ function getTsCompilerOptionsJson(): any {
 /** Generate documentation for all classes in a set of .ts files */
 function generateDocumentationForCommonTypes(fileNames: string[]): void {
 	const configFile = getTsCompilerOptionsJson();
+
 	const program = ts.createProgram(fileNames, configFile.options);
+
 	const typeChecker = program!.getTypeChecker();
 
 	// Visit every sourceFile in the program
@@ -567,6 +600,7 @@ function generateDocumentationForCommonTypes(fileNames: string[]): void {
 		if (ts.isModuleDeclaration(node)) {
 			// This is a namespace, visit its children
 			ts.forEachChild(node, visit.bind(undefined, sourceFile));
+
 			return;
 		}
 
@@ -584,6 +618,7 @@ function generateDocumentationForCommonTypes(fileNames: string[]): void {
 					comment.split(/\n?\r/).join(" "),
 				);
 			});
+
 			return;
 		}
 	}
@@ -591,17 +626,22 @@ function generateDocumentationForCommonTypes(fileNames: string[]): void {
 
 function generateDocumentation(fileNames: string[]): void {
 	const configFile = getTsCompilerOptionsJson();
+
 	const host = new TypeScriptLanguageServiceHost(
 		fileNames,
 		configFile.options,
 	);
+
 	const languageService = ts.createLanguageService(
 		host,
 		undefined,
 		ts.LanguageServiceMode.Semantic,
 	);
+
 	const program = languageService.getProgram()!;
+
 	const typeChecker = program!.getTypeChecker();
+
 	const entries = new Map<string, TelemetryEntry>();
 
 	// First generate documentation for common properties and measures.
@@ -625,6 +665,7 @@ function generateDocumentation(fileNames: string[]): void {
 		if (ts.isModuleDeclaration(node)) {
 			// This is a namespace, visit its children
 			ts.forEachChild(node, visit.bind(undefined, sourceFile));
+
 			return;
 		}
 
@@ -639,6 +680,7 @@ function generateDocumentation(fileNames: string[]): void {
 			node.members.forEach((m) => {
 				if (ts.isPropertyDeclaration(m)) {
 					const typeNode = m.type;
+
 					if (
 						!typeNode ||
 						typeNode.kind !== ts.SyntaxKind.TypeReference
@@ -651,6 +693,7 @@ function generateDocumentation(fileNames: string[]): void {
 						typeNode.typeName.getText() === "TelemetryEventInfo"
 					) {
 						let name = m.name.getText().trim();
+
 						let constantName = m.name
 							.getText()
 							.trim()
@@ -665,10 +708,12 @@ function generateDocumentation(fileNames: string[]): void {
 									m.getSourceFile().fileName,
 									m.name.end - 1,
 								);
+
 							if (defs) {
 								const refSourceFile = program!.getSourceFile(
 									defs[0].fileName,
 								);
+
 								if (refSourceFile) {
 									const refNode = findNode(
 										refSourceFile,
@@ -686,6 +731,7 @@ function generateDocumentation(fileNames: string[]): void {
 							}
 						} else if (ts.isStringLiteral(m.name)) {
 							name = m.name.text;
+
 							constantName = name;
 						}
 						gdprEntryOfCurrentlyComputingTelemetryEventName = [
@@ -694,10 +740,12 @@ function generateDocumentation(fileNames: string[]): void {
 								name as keyof IEventNamePropertyMapping
 							] as TelemetryEventInfo<unknown>,
 						];
+
 						if (entries.has(name)) {
 							return;
 						}
 						let jsDocNode: ts.JSDoc | undefined;
+
 						let stopSearching = false;
 						m.getChildren().forEach((c) => {
 							if (
@@ -705,6 +753,7 @@ function generateDocumentation(fileNames: string[]): void {
 								c.kind === ts.SyntaxKind.ComputedPropertyName
 							) {
 								stopSearching = true;
+
 								return;
 							}
 							if (
@@ -712,6 +761,7 @@ function generateDocumentation(fileNames: string[]): void {
 								c.kind === ts.SyntaxKind.ColonToken
 							) {
 								stopSearching = true;
+
 								return;
 							}
 							if (ts.isJSDoc(c)) {
@@ -719,12 +769,14 @@ function generateDocumentation(fileNames: string[]): void {
 								stopSearching = true;
 							}
 						});
+
 						const description =
 							typeof jsDocNode?.comment === "string"
 								? jsDocNode.comment
 								: (jsDocNode?.comment || [])
 										.map((item) => item.getText())
 										.join("\n");
+
 						const currentGdprComment = (
 							gdprEntryOfCurrentlyComputingTelemetryEventName[1]
 								.comment || ""
@@ -736,8 +788,11 @@ function generateDocumentation(fileNames: string[]): void {
 									? " "
 									: ". "
 							}${description}`.trim();
+
 						const type = typeNode.typeArguments[0];
+
 						const groups: TelemetryPropertyGroup[] = [];
+
 						if (ts.isTypeLiteralNode(type)) {
 							const properties = computePropertiesForLiteralType(
 								type,
@@ -750,6 +805,7 @@ function generateDocumentation(fileNames: string[]): void {
 									t,
 									typeChecker,
 								);
+
 								const comment = getCommentForUnions(t);
 								groups.push({
 									description: comment || [],
@@ -762,6 +818,7 @@ function generateDocumentation(fileNames: string[]): void {
 									type,
 									typeChecker,
 								);
+
 							const comment = getCommentForUnions(type);
 							groups.push({ description: comment, properties });
 						} else if (ts.isIntersectionTypeNode(type)) {
@@ -770,6 +827,7 @@ function generateDocumentation(fileNames: string[]): void {
 									type,
 									typeChecker,
 								);
+
 							const comment = getCommentForUnions(type);
 							groups.push({ description: comment, properties });
 						} else if (
@@ -817,6 +875,7 @@ function generateDocumentation(fileNames: string[]): void {
 	if (Object.keys(errorsByOwners).length) {
 		Object.keys(errorsByOwners).forEach((owner) => {
 			console.error(colors.red(`Problems for ${owner}:`));
+
 			const eventProblems: Record<string, EventProblem> =
 				errorsByOwners[owner];
 			Object.keys(eventProblems).forEach((eventName) => {
@@ -831,6 +890,7 @@ function generateDocumentation(fileNames: string[]): void {
 				});
 			});
 		});
+
 		throw new Error("Has errors, check the logs");
 	}
 }
@@ -869,6 +929,7 @@ function generateTelemetryCSV(output: TelemetryEntry[]) {
 					const description = Array.isArray(p.descriptions)
 						? p.descriptions.join("\n")
 						: p.descriptions || "";
+
 					const possibleValues =
 						Array.isArray(p.possibleValues) &&
 						p.possibleValues.length
@@ -903,7 +964,9 @@ function generateTelemetryCSV(output: TelemetryEntry[]) {
 	});
 
 	const fields = Object.keys(entries[0]);
+
 	const parser = new Parser({ fields });
+
 	const csv = parser.parse(entries);
 	fs.writeFileSync("./TELEMETRY.csv", csv);
 }
@@ -919,20 +982,27 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 	const file = "./src/gdpr.ts";
 	fs.writeFileSync(file, "");
 	fs.appendFileSync(file, gdprHeader);
+
 	const gdpr = "__GDPR__FRAGMENT__";
 	fs.appendFileSync(file, `/* ${gdpr}\n`);
 	fs.appendFileSync(file, `   "F1" : {\n`);
+
 	const commonFields = ['     "${include}": ['];
+
 	const fieldListForFile: string[] = [];
 	Object.keys(CommonProperties).forEach((key) => {
 		const entry = (CommonProperties as any)[key] as
 			| IPropertyDataMeasurement
 			| IPropertyDataNonMeasurement;
+
 		const isMeasurement = entry.isMeasurement === true;
+
 		const jsDocComment = commonPropertyComments.get(key) || "";
+
 		let comment = (entry.comment || "").split(/\r?\n/).join(" ").trim();
 		comment =
 			`${comment}${comment.length === 0 || comment.endsWith(".") ? "" : ". "}${jsDocComment}`.trim();
+
 		if (!comment) {
 			console.error(
 				`No comments for common property ${key}, Update CommonPropertyAndMeasureTypeNames in telemetry.ts`,
@@ -958,6 +1028,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 	output.forEach((item, index) => {
 		// Do not include `__GDPR__` in the string with JSON comments, else telemetry tool treats this as a valid GDPR annotation.
 		const gdpr = "__GDPR__";
+
 		const header = [
 			`// (${index + 1}). ${item.constantName} (${item.name})`,
 			...(item.description.trim().length
@@ -968,7 +1039,9 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 			`/* ${gdpr}`,
 			`   "${item.name}" : {`,
 		];
+
 		const footer = ["   }", " */", "", ""];
+
 		const properties: Record<string, IPropertyDataNonMeasurement> =
 			"properties" in item.gdpr
 				? (item.gdpr["properties"] as Record<
@@ -976,6 +1049,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 						IPropertyDataNonMeasurement
 					>)
 				: {};
+
 		const measures: Record<string, IPropertyDataMeasurement> =
 			"measures" in item.gdpr
 				? (item.gdpr["measures"] as Record<
@@ -983,18 +1057,21 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 						IPropertyDataMeasurement
 					>)
 				: {};
+
 		const entries: string[] = [];
 		Object.keys(properties).forEach((key) => {
 			if (key in CommonProperties) {
 				return;
 			}
 			const prop = properties[key];
+
 			const json: Record<string, string> = {
 				classification: prop.classification,
 				purpose: prop.purpose,
 				comment: prop.comment || "",
 				owner: item.gdpr.owner,
 			};
+
 			if (prop.expiration) {
 				json.expiration = prop.expiration;
 			}
@@ -1005,6 +1082,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 				return;
 			}
 			const prop = measures[key];
+
 			const json: Record<string, string | boolean> = {
 				classification: prop.classification,
 				purpose: prop.purpose,
@@ -1012,6 +1090,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 				owner: item.gdpr.owner,
 				isMeasurement: true,
 			};
+
 			if (prop.expiration) {
 				json.expiration = prop.expiration;
 			}

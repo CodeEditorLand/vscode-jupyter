@@ -21,8 +21,11 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 	}
 	public initialize() {
 		const kernel = this.kernel;
+
 		const controller = this.controller;
+
 		const notebook = this.notebook;
+
 		if (
 			kernel.kernelConnectionMetadata.kind !== "connectToLiveRemoteKernel"
 		) {
@@ -56,6 +59,7 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 				}
 			}, this),
 		);
+
 		const execution = controller.createNotebookExecution(notebook);
 		execution.start();
 		this._register(new Disposable(() => execution.end()));

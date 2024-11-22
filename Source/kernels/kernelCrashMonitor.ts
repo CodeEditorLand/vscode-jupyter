@@ -112,6 +112,7 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 	private async endCellAndDisplayErrorsInCell(kernel: IKernel) {
 		const lastExecutedCell = this.lastExecutedCellPerKernel.get(kernel);
 		sendKernelTelemetryEvent(kernel.resourceUri, Telemetry.KernelCrash);
+
 		if (!lastExecutedCell) {
 			return;
 		}

@@ -21,6 +21,7 @@ export function getDisplayPathFromLocalFile(
 				},
 			]
 		: [];
+
 	return getDisplayPathCommon(
 		file ? Uri.file(file) : undefined,
 		folders,

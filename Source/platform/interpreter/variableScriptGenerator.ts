@@ -13,6 +13,7 @@ import {
 import { joinPath } from "../vscode-path/resources";
 
 const VariableFunc = "_VSCODE_getVariable";
+
 const cleanupCode = dedent`
                             try:
                                 del _VSCODE_getVariable
@@ -27,17 +28,22 @@ const cleanupCode = dedent`
 export class VariableScriptGenerator implements IVariableScriptGenerator {
 	static contentsOfScript: string | undefined;
 	static contentsOfVariablesScript: string | undefined;
+
 	constructor(
 		@inject(IFileSystem) private readonly fs: IFileSystem,
 		@inject(IExtensionContext) private readonly context: IExtensionContext,
 	) {}
 	async generateCodeToGetVariableInfo(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 	}) {
 		const initializeCode = await this.getContentsOfScript();
+
 		const isDebugging = options.isDebugging ? "True" : "False";
+
 		const code = `${VariableFunc}("info", ${isDebugging}, ${options.variableName})`;
+
 		if (options.isDebugging) {
 			// When debugging, the code is evaluated in the debugger, so we need to initialize the script.
 			// We cannot send complex code to the debugger, it has to be a simple expression that produces a value.
@@ -55,12 +61,16 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 	}
 	async generateCodeToGetVariableProperties(options: {
 		isDebugging: boolean;
+
 		variableName: string;
 		stringifiedAttributeNameList: string;
 	}) {
 		const initializeCode = await this.getContentsOfScript();
+
 		const isDebugging = options.isDebugging ? "True" : "False";
+
 		const code = `${VariableFunc}("properties", ${isDebugging}, ${options.variableName}, ${options.stringifiedAttributeNameList})`;
+
 		if (options.isDebugging) {
 			return {
 				initializeCode,
@@ -78,6 +88,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 		parentOptions: ParentOptions | undefined,
 	) {
 		let scriptCode = await this.getContentsOfVariablesScript();
+
 		if (parentOptions) {
 			scriptCode =
 				scriptCode +
@@ -94,8 +105,11 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 
 	async generateCodeToGetVariableTypes(options: { isDebugging: boolean }) {
 		const scriptCode = await this.getContentsOfScript();
+
 		const initializeCode = `${scriptCode}\n\n_VSCODE_rwho_ls = %who_ls\n`;
+
 		const isDebugging = options.isDebugging ? "True" : "False";
+
 		const cleanupWhoLsCode = dedent`
         try:
             del _VSCODE_rwho_ls
@@ -104,6 +118,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
         `;
 
 		const code = `${VariableFunc}("types", ${isDebugging}, _VSCODE_rwho_ls)`;
+
 		if (options.isDebugging) {
 			return {
 				initializeCode,
@@ -121,6 +136,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 		scriptCode =
 			scriptCode +
 			`\n\nvariables= %who_ls\nreturn _VSCODE_getVariableSummary(${variableName})`;
+
 		return scriptCode;
 	}
 	/**
@@ -137,8 +153,10 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 			"getVariableInfo",
 			"vscodeGetVariableInfo.py",
 		);
+
 		const contents = await this.fs.readFile(scriptPath);
 		VariableScriptGenerator.contentsOfScript = contents;
+
 		return contents;
 	}
 
@@ -153,8 +171,10 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 			"getVariableInfo",
 			"vscodeGetVariablesForProvider.py",
 		);
+
 		const contents = await this.fs.readFile(scriptPath);
 		VariableScriptGenerator.contentsOfVariablesScript = contents;
+
 		return contents;
 	}
 }

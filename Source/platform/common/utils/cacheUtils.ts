@@ -7,9 +7,11 @@ type CacheData = {
 	value: unknown;
 	expiry: number;
 };
+
 const resourceSpecificCacheStores = new Map<string, Map<string, CacheData>>();
 export class DataWithExpiry {
 	private readonly expiryTime: number;
+
 	constructor(
 		expiryDuration: number,
 		private _data: any,
@@ -18,6 +20,7 @@ export class DataWithExpiry {
 	}
 	public get expired() {
 		const hasExpired = this.expiryTime <= Date.now();
+
 		if (hasExpired) {
 			this._data = undefined;
 		}
@@ -48,6 +51,7 @@ export function getCacheKeyFromFunctionArgs(
 	const argsKey = fnArgs
 		.map((arg) => `${JSON.stringify(arg)}`)
 		.join("-Arg-Separator-");
+
 	return `KeyPrefix=${keyPrefix}-Args=${argsKey}`;
 }
 
@@ -63,6 +67,7 @@ export class InMemoryCache<T> {
 	) {}
 	public get hasData() {
 		const store = globalCacheStore.get(this.cacheKey);
+
 		return store && !store.expired ? true : false;
 	}
 	/**
@@ -78,6 +83,7 @@ export class InMemoryCache<T> {
 			return;
 		}
 		const store = globalCacheStore.get(this.cacheKey);
+
 		return store?.data;
 	}
 	public set data(value: T | undefined) {

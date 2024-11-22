@@ -27,6 +27,7 @@ import { ExperimentationTelemetry } from "./telemetry.node";
 // This is a hacky way to determine what experiments have been loaded by the Experiments service.
 // There's no public API yet, hence we access the global storage that is updated by the experiments package.
 const EXP_MEMENTO_KEY = "VSCode.ABExp.FeatureData";
+
 const EXP_CONFIG_ID = "vscode";
 
 /**
@@ -66,6 +67,7 @@ export class ExperimentService implements IExperimentService {
 
 		// Users can only opt in or out of experiment groups, not control groups.
 		const optInto = this.settings.experiments.optInto;
+
 		const optOutFrom = this.settings.experiments.optOutFrom;
 		this._optInto = optInto.filter((exp) => !exp.endsWith("control"));
 		this._optOutFrom = optOutFrom.filter((exp) => !exp.endsWith("control"));
@@ -97,6 +99,7 @@ export class ExperimentService implements IExperimentService {
 	public async activate() {
 		if (this.experimentationService && this.enabled) {
 			await this.experimentationService.initializePromise;
+
 			if (this.getFeatures().length === 0) {
 				// Only await on this if we don't have anything in cache.
 				// This means that we start the session with partial experiment info.
@@ -135,6 +138,7 @@ export class ExperimentService implements IExperimentService {
 				EXP_CONFIG_ID,
 				experiment as unknown as string,
 			);
+
 			return true;
 		}
 
@@ -158,6 +162,7 @@ export class ExperimentService implements IExperimentService {
 				EXP_CONFIG_ID,
 				experiment as unknown as string,
 			);
+
 		return treatmentVariable === true;
 	}
 
@@ -184,7 +189,9 @@ export class ExperimentService implements IExperimentService {
 	}
 	private logExperiments() {
 		const telemetrySettings = workspace.getConfiguration("telemetry");
+
 		let experimentsDisabled = false;
+
 		if (
 			telemetrySettings &&
 			telemetrySettings.get<boolean>("enableTelemetry") === false
@@ -224,6 +231,7 @@ export class ExperimentService implements IExperimentService {
 		}
 
 		const optedIntoExperiments = new Set(this._optInto);
+
 		const enabledExperiments = new Set<string>();
 
 		// Log experiments that users manually opt out, these are experiments which are added using the exp framework.

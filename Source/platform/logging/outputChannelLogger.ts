@@ -11,6 +11,7 @@ const format = require("format-util") as typeof import("format-util");
 export class OutputChannelLogger implements ILogger {
 	private readonly homeReplaceRegEx?: RegExp;
 	private readonly userNameReplaceRegEx?: RegExp;
+
 	constructor(
 		private readonly channel: OutputChannel,
 		homeRegEx?: RegExp,
@@ -27,6 +28,7 @@ export class OutputChannelLogger implements ILogger {
 		let logMessage = level
 			? `${getTimeForLogging()} [${level}] ${format(message, ...data)}`
 			: format(message, ...data);
+
 		if (this.homeReplaceRegEx) {
 			logMessage = logMessage.replace(this.homeReplaceRegEx, "~");
 		}

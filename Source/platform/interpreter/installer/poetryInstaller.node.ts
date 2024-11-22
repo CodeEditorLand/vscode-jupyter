@@ -60,6 +60,7 @@ export class PoetryInstaller extends ModuleInstaller {
 		}
 
 		const folder = getInterpreterWorkspaceFolder(interpreter);
+
 		if (folder) {
 			const executable =
 				"executable" in interpreter
@@ -82,7 +83,9 @@ export class PoetryInstaller extends ModuleInstaller {
 	): Promise<ExecutionInstallArgs> {
 		const execPath =
 			this.configurationService.getSettings(undefined).poetryPath;
+
 		const args = [execPath, "add", "--dev", moduleName];
+
 		const cwd = getInterpreterWorkspaceFolder(interpreter)?.fsPath;
 
 		// TODO: We have to shell exec this because child_process.spawn will die

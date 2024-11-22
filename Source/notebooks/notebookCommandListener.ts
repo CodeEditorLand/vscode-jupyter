@@ -42,6 +42,7 @@ import { INotebookEditorProvider } from "./types";
 @injectable()
 export class NotebookCommandListener implements IDataScienceCommandListener {
 	private kernelInterruptedDontAskToRestart: boolean = false;
+
 	constructor(
 		@inject(IDisposableRegistry)
 		private disposableRegistry: IDisposableRegistry,
@@ -137,6 +138,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
 	private removeAllCells() {
 		const document = window.activeNotebookEditor?.notebook;
+
 		if (!document) {
 			return;
 		}
@@ -161,6 +163,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		const uri =
 			notebookUri ??
 			this.notebookEditorProvider.activeNotebookEditor?.notebook.uri;
+
 		const document = workspace.notebookDocuments.find(
 			(document) => document.uri.toString() === uri?.toString(),
 		);
@@ -173,8 +176,10 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		);
 
 		const kernel = this.kernelProvider.get(document);
+
 		if (!kernel) {
 			logger.info(`Interrupt requested & no kernel.`);
+
 			return;
 		}
 		await this.wrapKernelMethod("interrupt", kernel);
@@ -203,6 +208,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		const uri =
 			notebookUri ??
 			this.notebookEditorProvider.activeNotebookEditor?.notebook.uri;
+
 		const document = workspace.notebookDocuments.find(
 			(document) => document.uri.toString() === uri?.toString(),
 		);
@@ -217,10 +223,13 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			logger.debug(
 				`Restart kernel command handler for ${getDisplayPath(document.uri)}`,
 			);
+
 			if (await this.shouldAskForRestart(document.uri)) {
 				// Ask the user if they want us to restart or not.
 				const message = DataScience.restartKernelMessage;
+
 				const yes = DataScience.restartKernelMessageYes;
+
 				const dontAskAgain =
 					DataScience.restartKernelMessageDontAskAgain;
 
@@ -230,6 +239,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 					yes,
 					dontAskAgain,
 				);
+
 				if (response === dontAskAgain) {
 					await this.disableAskForRestart(document.uri);
 					this.wrapKernelMethod("restart", kernel).catch(noop);
@@ -253,6 +263,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		const notebook = kernel.notebook;
 		// We don't want to create multiple restarts/interrupt requests for the same kernel.
 		const pendingPromise = this.pendingRestartInterrupt.get(kernel);
+
 		if (pendingPromise) {
 			return pendingPromise;
 		}
@@ -260,8 +271,10 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			// Get currently executing cell and controller
 			const currentCell =
 				this.kernelProvider.getKernelExecution(kernel).pendingCells[0];
+
 			const controller =
 				this.controllerRegistration.getSelected(notebook);
+
 			try {
 				if (!controller) {
 					throw new Error("No kernel associated with the notebook");
@@ -305,6 +318,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			})
 			.catch(noop);
 		this.pendingRestartInterrupt.set(kernel, promise);
+
 		return promise;
 	}
 
@@ -313,11 +327,13 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 			return false;
 		}
 		const settings = this.configurationService.getSettings(notebookUri);
+
 		return settings && settings.askForKernelRestart === true;
 	}
 
 	private async disableAskForRestart(notebookUri: Uri): Promise<void> {
 		const settings = this.configurationService.getSettings(notebookUri);
+
 		if (settings) {
 			this.configurationService
 				.updateSetting(

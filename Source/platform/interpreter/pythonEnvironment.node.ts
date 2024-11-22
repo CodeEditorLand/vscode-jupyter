@@ -24,11 +24,13 @@ import * as internalPython from "./internal/python.node";
 class PythonEnvironment {
 	private readonly executable: Uri;
 	private readonly pythonEnvId: string;
+
 	constructor(
 		interpreter: { uri: Uri; id: string } | Environment,
 		// "deps" is the externally defined functionality used by the class.
 		protected readonly deps: {
 			getPythonArgv(python: Uri): string[];
+
 			getObservablePythonArgv(python: Uri): string[];
 			isValidExecutable(python: Uri): Promise<boolean>;
 			// from ProcessService:
@@ -44,6 +46,7 @@ class PythonEnvironment {
 		},
 	) {
 		this.pythonEnvId = interpreter.id;
+
 		if ("executable" in interpreter) {
 			if (!interpreter.executable.uri) {
 				throw new Error(
@@ -58,12 +61,14 @@ class PythonEnvironment {
 
 	public getExecutionInfo(pythonArgs: string[] = []): PythonExecInfo {
 		const python = this.deps.getPythonArgv(this.executable);
+
 		return buildPythonExecInfo(python, pythonArgs);
 	}
 	public getExecutionObservableInfo(
 		pythonArgs: string[] = [],
 	): PythonExecInfo {
 		const python = this.deps.getObservablePythonArgv(this.executable);
+
 		return buildPythonExecInfo(python, pythonArgs);
 	}
 	public async getExecutablePath(): Promise<Uri> {
@@ -73,23 +78,28 @@ class PythonEnvironment {
 			return this.executable;
 		}
 		const python = this.getExecutionInfo();
+
 		return getExecutablePath(python, this.deps.exec);
 	}
 
 	public async isModuleInstalled(moduleName: string): Promise<boolean> {
 		// prettier-ignore
 		const [args, parse] = internalPython.isModuleInstalled(moduleName);
+
 		const info = this.getExecutionInfo(args);
+
 		try {
 			const output = await this.deps.exec(info.command, info.args, {
 				throwOnStdErr: false,
 			});
+
 			return parse(output.stdout);
 		} catch (ex) {
 			logger.warn(
 				`Module ${moduleName} not installed in environment ${this.pythonEnvId}`,
 				ex,
 			);
+
 			return false;
 		}
 	}
@@ -144,6 +154,7 @@ export function createPythonEnv(
 		(file, args, opts) => procs.exec(file, args, opts),
 		(command, opts) => procs.shellExec(command, opts),
 	);
+
 	return new PythonEnvironment(interpreter, deps);
 }
 
@@ -160,12 +171,14 @@ export function createCondaEnv(
 	fs: IFileSystem,
 ): PythonEnvironment {
 	const runArgs = ["run"];
+
 	if (condaInfo.name === "") {
 		runArgs.push("-p", condaInfo.path);
 	} else {
 		runArgs.push("-n", condaInfo.name);
 	}
 	const pythonArgv = [condaFile, ...runArgs, "python"];
+
 	const deps = createDeps(
 		async (filename) => fs.exists(filename),
 		pythonArgv,
@@ -177,5 +190,6 @@ export function createCondaEnv(
 		(file, args, opts) => procs.exec(file, args, opts),
 		(command, opts) => procs.shellExec(command, opts),
 	);
+
 	return new PythonEnvironment(interpreter, deps);
 }

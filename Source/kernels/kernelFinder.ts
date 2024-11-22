@@ -60,6 +60,7 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 		finder: IContributedKernelFinder<KernelConnectionMetadata>,
 	): IDisposable {
 		this._finders.push(finder);
+
 		const updateStatus = () => {
 			// If all finders are idle, then we are idle.
 			this.status = this._finders.every((f) => f.status === "idle")
@@ -68,12 +69,14 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 		};
 
 		updateStatus();
+
 		const disposables = this._register(new DisposableStore());
 
 		const disposeKernel = () => {
 			const removeIndex = this._finders.findIndex(
 				(listFinder) => listFinder === finder,
 			);
+
 			if (removeIndex >= 0) {
 				this._finders.splice(removeIndex, 1);
 			}
@@ -107,6 +110,7 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 
 		// List kernels might be called after finders or connections are removed so just clear out and regenerate
 		this.connectionFinderMapping.clear();
+
 		const loadedKernelSpecFiles = new Set<string>();
 		// If we have a global kernel spec returned by Python kernel finder,
 		// give that preference over the same kernel found using local kernel spec finder.
@@ -161,6 +165,7 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 		const remoteFinders = this._finders.filter(
 			(finder) => finder.kind === ContributedKernelFinderKind.Remote,
 		);
+
 		for (const finder of remoteFinders) {
 			const contributedKernels = finder.kernels;
 

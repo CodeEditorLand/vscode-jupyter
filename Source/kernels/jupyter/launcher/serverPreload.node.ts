@@ -26,6 +26,7 @@ import { IRawNotebookSupportedService } from "../../raw/types";
 import { IJupyterServerConnector, IKernel, IKernelProvider } from "../../types";
 
 const LastPythonNotebookCreatedKey = "last-python-notebook-created";
+
 const LastNotebookCreatedKey = "last-notebook-created";
 
 /**
@@ -72,6 +73,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		const time = this.mementoStorage.get<number | undefined>(
 			LastNotebookCreatedKey,
 		);
+
 		return time ? new Date(time) : undefined;
 	}
 
@@ -85,8 +87,11 @@ export class ServerPreload implements IExtensionSyncActivationService {
 			return false;
 		}
 		const currentTime = new Date();
+
 		const diff = currentTime.getTime() - lastTime.getTime();
+
 		const diffInDays = Math.floor(diff / (24 * 3600 * 1000));
+
 		return diffInDays <= 7;
 	}
 
@@ -95,7 +100,9 @@ export class ServerPreload implements IExtensionSyncActivationService {
 			return;
 		}
 		const source = new CancellationTokenSource();
+
 		const ui = new DisplayOptions(true);
+
 		try {
 			logger.info(
 				`Attempting to start a server because of preload conditions ...`,

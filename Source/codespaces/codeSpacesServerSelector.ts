@@ -54,6 +54,7 @@ export class CodespacesJupyterServerSelector {
 				`Error in validating the Remote Uri ${provider.id}.${provider.handle}`,
 				err,
 			);
+
 			return;
 		}
 

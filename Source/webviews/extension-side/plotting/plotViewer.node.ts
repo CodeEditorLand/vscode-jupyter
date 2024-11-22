@@ -34,6 +34,7 @@ export class PlotViewer extends PlotViewerBase {
 		payload: IExportPlotRequest,
 	): Promise<void> {
 		logger.info("exporting plot...");
+
 		const filtersObject: Record<string, string[]> = {};
 		filtersObject[localize.DataScience.pdfFilter] = ["pdf"];
 		filtersObject[localize.DataScience.pngFilter] = ["png"];
@@ -44,12 +45,15 @@ export class PlotViewer extends PlotViewerBase {
 			saveLabel: localize.DataScience.exportPlotTitle,
 			filters: filtersObject,
 		});
+
 		try {
 			if (file) {
 				const ext = path.extname(file.fsPath);
+
 				switch (ext.toLowerCase()) {
 					case ".pdf":
 						await saveSvgToPdf(payload.svg, this.fsNode, file);
+
 						break;
 
 					case ".png":
@@ -57,12 +61,14 @@ export class PlotViewer extends PlotViewerBase {
 							payload.png.replace("data:image/png;base64", ""),
 						);
 						await this.fs.writeFile(file, buffer);
+
 						break;
 
 					default:
 					case ".svg":
 						// This is the easy one:
 						await this.fs.writeFile(file, payload.svg);
+
 						break;
 				}
 			}
@@ -83,18 +89,23 @@ export async function saveSvgToPdf(
 	logger.info("Attempting pdf write...");
 	// Import here since pdfkit is so huge.
 	const SVGtoPDF = (await import("svg-to-pdfkit")).default;
+
 	const deferred = createDeferred<void>();
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const pdfkit =
 		require("pdfkit/js/pdfkit.standalone") as typeof import("pdfkit");
+
 	const doc = new pdfkit();
+
 	const ws = fs.createLocalWriteStream(file.fsPath);
 	logger.info(`Writing pdf to ${file.fsPath}`);
 	ws.on("finish", () => deferred.resolve);
 	// See docs or demo from source https://cdn.statically.io/gh/alafr/SVG-to-PDFKit/master/examples/demo.htm
 	// How to resize to fit (fit within the height & width of page).
 	SVGtoPDF(doc, svg, 0, 0, { preserveAspectRatio: "xMinYMin meet" });
+
 	doc.pipe(ws);
+
 	doc.end();
 	logger.info(`Finishing pdf to ${file.fsPath}`);
 	await deferred.promise;

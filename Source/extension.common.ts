@@ -64,13 +64,16 @@ export async function initializeLoggers(
     // Log env info.
     standardOutputChannel.appendLine(`${env.appName} (${version}, ${env.remoteName}, ${env.appHost})`);
     standardOutputChannel.appendLine(`Jupyter Extension Version: ${context.extension.packageJSON['version']}.`);
+
     const pythonExtension = extensions.getExtension(PythonExtension);
+
     if (pythonExtension) {
         standardOutputChannel.appendLine(`Python Extension Version: ${pythonExtension.packageJSON['version']}.`);
     } else {
         standardOutputChannel.appendLine('Python Extension not installed.');
     }
     const pylanceExtension = extensions.getExtension(PylanceExtension);
+
     if (pylanceExtension) {
         standardOutputChannel.appendLine(
             `Pylance Extension Version${isUsingPylance() ? '' : ' (Not Used) '}: ${
@@ -84,6 +87,7 @@ export async function initializeLoggers(
         standardOutputChannel.appendLine(`Platform: ${options.platform} (${options.arch}).`);
     }
     standardOutputChannel.appendLine(`Temp Storage folder ${getDisplayPath(await getExtensionTempDir(context))}`);
+
     if (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0) {
         standardOutputChannel.appendLine(`No workspace folder opened.`);
     } else if (workspace.workspaceFolders.length === 1) {
@@ -106,7 +110,9 @@ export function initializeGlobals(
     standardOutputChannel: OutputChannel
 ): [IServiceManager, IServiceContainer] {
     const cont = new Container({ skipBaseClassChecks: true });
+
     const serviceManager = new ServiceManager(cont);
+
     const serviceContainer = new ServiceContainer(cont);
 
     serviceManager.addSingletonInstance<IServiceContainer>(IServiceContainer, serviceContainer);
@@ -129,8 +135,10 @@ export function initializeGlobals(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function displayProgress() {
     const promise = createDeferred<void>();
+
     const progressOptions: ProgressOptions = { location: ProgressLocation.Window, title: Common.loadingExtension };
     window.withProgress(progressOptions, () => promise.promise).then(noop, noop);
+
     return { dispose: () => promise.resolve() };
 }
 
@@ -169,6 +177,7 @@ export async function postActivateLegacy(context: IExtensionContext, serviceCont
     // This must be done first, this guarantees all experiment information has loaded & all telemetry will contain experiment info.
     const stopWatch = new StopWatch();
     await experimentService.activate();
+
     const duration = stopWatch.elapsedTime;
     sendTelemetryEvent(Telemetry.ExperimentLoad, { duration });
 
@@ -177,6 +186,7 @@ export async function postActivateLegacy(context: IExtensionContext, serviceCont
 
     // "activate" everything else
     serviceContainer.get<IExtensionActivationManager>(IExtensionActivationManager).activate();
+
     const featureManager = serviceContainer.get<IFeaturesManager>(IFeaturesManager);
     featureManager.initialize();
     context.subscriptions.push(featureManager);

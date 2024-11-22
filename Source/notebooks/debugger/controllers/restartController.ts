@@ -55,6 +55,7 @@ export class RestartController implements IDebuggingDelegate {
 		if (request.command === "restart") {
 			// We have to implement restart manually because the previous launch config includes the cell index, but the cell index may have changed.
 			this.trace("restart", "Handling restart request");
+
 			setTimeout(() => {
 				// The restart response has to be sent _before_ the debug session is disconnected - otherwise the pending restart request will be canceled,
 				// and considered to have failed. eg a call to executeCommand('workbench.action.debug.restart') would fail.
@@ -62,6 +63,7 @@ export class RestartController implements IDebuggingDelegate {
 					.disconnect()
 					.then(() => {
 						this.trace("restart", "doRestart");
+
 						return this.debuggingManager.tryToStartDebugging(
 							this.mode,
 							this.debugCell,
@@ -72,6 +74,7 @@ export class RestartController implements IDebuggingDelegate {
 						this.error("restart", `Error restarting: ${err}`);
 					});
 			}, 0);
+
 			return {
 				command: request.command,
 				request_seq: request.seq,

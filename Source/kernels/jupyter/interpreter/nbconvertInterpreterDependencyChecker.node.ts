@@ -25,6 +25,7 @@ export class NbConvertInterpreterDependencyChecker
 {
 	// Track interpreters that nbconvert has been installed into
 	private readonly nbconvertInstalledInInterpreter = new ResourceSet();
+
 	constructor(
 		@inject(IInstaller) private readonly installer: IInstaller,
 		@inject(IJupyterCommandFactory)
@@ -46,6 +47,7 @@ export class NbConvertInterpreterDependencyChecker
 				interpreter,
 			)) &&
 			!!(await this.installer.isInstalled(Product.jupyter, interpreter));
+
 		if (isInstalled === true) {
 			this.nbconvertInstalledInInterpreter.add(interpreter.uri);
 		}

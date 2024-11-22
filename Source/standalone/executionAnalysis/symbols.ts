@@ -91,7 +91,9 @@ export class CellAnalysis {
 		const virtualCellList = forceReadNotebook
 			? this._notebookDocument.getCells()
 			: this._getVirtualCellList(cell);
+
 		var i;
+
 		for (
 			i = virtualCellList.length - 1;
 			i >= 0 &&
@@ -107,10 +109,12 @@ export class CellAnalysis {
 		}
 
 		const lastExecutionIndex = i;
+
 		const slicedCellExecution = virtualCellList.slice(
 			0,
 			lastExecutionIndex + 1,
 		);
+
 		const cellBitmap: boolean[] = new Array(
 			slicedCellExecution.length,
 		).fill(false);
@@ -134,6 +138,7 @@ export class CellAnalysis {
 			// if a cell modifies a symbol, then all other cells that use the symbol (no matter read or write) will depend on this cell
 			dependents.forEach((dependent) => {
 				const fragment = dependent.uri.fragment;
+
 				if (reversedCellRefs.has(fragment)) {
 					reversedCellRefs.get(fragment)?.push(...modifications);
 				} else {
@@ -152,6 +157,7 @@ export class CellAnalysis {
 		);
 
 		const cellData: vscode.NotebookCell[] = [];
+
 		for (let i = 0; i < cellBitmap.length; i++) {
 			if (cellBitmap[i]) {
 				cellData.push(slicedCellExecution[i]);
@@ -172,6 +178,7 @@ export class CellAnalysis {
 		const cellIndex = virtualCellList.findIndex(
 			(item) => item.document.uri.fragment === cell.document.uri.fragment,
 		);
+
 		if (cellIndex === -1) {
 			return [];
 		}
@@ -190,6 +197,7 @@ export class CellAnalysis {
 				if (ref.kind === "write") {
 					// this is a write ref, so all other read/write references to this symbol will depend on this cell
 					const modifiedCellFragment = ref.uri.fragment;
+
 					const modifiedCellRefs =
 						modificationCellRefs.get(modifiedCellFragment) ?? [];
 					modifiedCellRefs.push(
@@ -210,10 +218,12 @@ export class CellAnalysis {
 					this._cellRefs.get(
 						virtualCellList[i].document.uri.fragment,
 					) || [];
+
 				const modificationDeps =
 					modificationCellRefs.get(
 						virtualCellList[i].document.uri.fragment,
 					) || [];
+
 				const mergedDeps = [...deps, ...modificationDeps];
 
 				mergedDeps.forEach((dep) => {
@@ -230,6 +240,7 @@ export class CellAnalysis {
 		}
 
 		const cellData: vscode.NotebookCell[] = [];
+
 		for (let i = 0; i < cellBitmap.length; i++) {
 			if (cellBitmap[i]) {
 				cellData.push(virtualCellList[i]);
@@ -295,6 +306,7 @@ export class NotebookDocumentSymbolTracker {
 	private _staleCellRefs: Map<string, CellExecutionStatus> = new Map(); // key: cell uri fragment, value: 'stale' | 'fresh' | 'executing'
 	private _cellExecution: ICellExecution[] = [];
 	private _disposables: vscode.Disposable[] = [];
+
 	constructor(
 		private readonly _notebookEditor: vscode.NotebookEditor,
 		private readonly _client: INotebookLanguageClient,
@@ -388,6 +400,7 @@ export class NotebookDocumentSymbolTracker {
 			const cell = this._notebookEditor.notebook
 				.getCells()
 				.find((cell) => cell.document.uri.fragment === key);
+
 			if (cell) {
 				await this._requestCellSymbols(cell, true);
 			}
@@ -396,6 +409,7 @@ export class NotebookDocumentSymbolTracker {
 
 	async getCellSymbolRefs(cell: vscode.NotebookCell) {
 		const refs = this._cellRefs.get(cell.document.uri.fragment);
+
 		if (!refs) {
 			return;
 		}
@@ -441,11 +455,13 @@ export class NotebookDocumentSymbolTracker {
 
 	async getPrecedentCells(cell: vscode.NotebookCell) {
 		await this._requestCellSymbolsSync();
+
 		const analysis = new CellAnalysis(
 			this._notebookEditor.notebook,
 			this._cellExecution,
 			this._cellRefs,
 		);
+
 		let precedentCells: vscode.NotebookCell[] = [];
 
 		try {
@@ -478,14 +494,17 @@ export class NotebookDocumentSymbolTracker {
 
 	async getSuccessorCells(cell: vscode.NotebookCell) {
 		await this._requestCellSymbolsSync();
+
 		const analysis = new CellAnalysis(
 			this._notebookEditor.notebook,
 			this._cellExecution,
 			this._cellRefs,
 		);
+
 		const successorCells = analysis.getSuccessorCells(
 			cell,
 		) as vscode.NotebookCell[];
+
 		const cellRanges = cellIndexesToRanges(
 			successorCells.map((cell) => cell.index),
 		);
@@ -501,11 +520,13 @@ export class NotebookDocumentSymbolTracker {
 
 		for (const editor of vscode.window.visibleTextEditors) {
 			const document = editor.document;
+
 			if (
 				document.uri.scheme === "vscode-notebook-cell" &&
 				document.uri.path === this._notebookEditor.notebook.uri.path
 			) {
 				const refs = this._cellRefs.get(document.uri.fragment);
+
 				if (refs) {
 					locations.push(...refs);
 				}
@@ -519,6 +540,7 @@ export class NotebookDocumentSymbolTracker {
 		>();
 		locations.forEach((loc) => {
 			const fragment = loc.uri.fragment;
+
 			if (!locationsByUriFragment.has(fragment)) {
 				locationsByUriFragment.set(fragment, []);
 			}
@@ -532,8 +554,10 @@ export class NotebookDocumentSymbolTracker {
 						this._notebookEditor.notebook.uri.path &&
 					editor.document.uri.fragment === fragment,
 			);
+
 			if (matcheEditor) {
 				const writeRanges: vscode.Range[] = [];
+
 				const readRanges: vscode.Range[] = [];
 
 				const dedupedLocations = locations.reduce(
@@ -544,6 +568,7 @@ export class NotebookDocumentSymbolTracker {
 						const isDuplicate = acc.find((item) =>
 							areRangesEqual(item.range, current.range),
 						);
+
 						if (!isDuplicate) {
 							return acc.concat([current]);
 						} else {
@@ -558,6 +583,7 @@ export class NotebookDocumentSymbolTracker {
 						loc.range.end.line,
 						loc.range.end.character,
 					);
+
 					const range = new vscode.Range(position, position);
 
 					if (loc.kind === "write") {
@@ -579,6 +605,7 @@ export class NotebookDocumentSymbolTracker {
 	) {
 		// request cell symbols in a debounced fashion
 		const existing = this._pendingRequests.get(cell.document.uri.fragment);
+
 		if (existing) {
 			existing.cancel();
 		}
@@ -591,6 +618,7 @@ export class NotebookDocumentSymbolTracker {
 				cancellationTokenSource.token,
 			);
 			cancellationTokenSource.dispose();
+
 			return;
 		}
 
@@ -607,6 +635,7 @@ export class NotebookDocumentSymbolTracker {
 			}
 
 			this._pendingRequests.delete(cell.document.uri.fragment);
+
 			if (request.token.isCancellationRequested) {
 				return;
 			}
@@ -618,12 +647,15 @@ export class NotebookDocumentSymbolTracker {
 	private async _getDocumentSymbols(cell: vscode.NotebookCell) {
 		if (this._client.getDocumentSymbols) {
 			const tokenSource = new vscode.CancellationTokenSource();
+
 			const symbols = await this._client.getDocumentSymbols(
 				cell.document,
 				tokenSource.token,
 			);
+
 			if (symbols && symbols.length > 0) {
 				tokenSource.dispose();
+
 				return symbols;
 			}
 		}
@@ -642,6 +674,7 @@ export class NotebookDocumentSymbolTracker {
 		token: vscode.CancellationToken,
 	) {
 		const symbols = await this._getDocumentSymbols(cell);
+
 		if (!symbols) {
 			return;
 		}
@@ -649,6 +682,7 @@ export class NotebookDocumentSymbolTracker {
 		const references: (LocationWithReferenceKind & {
 			associatedSymbol: ISymbol;
 		})[] = [];
+
 		for (const symbol of symbols) {
 			const symbolReferences = await this._client.getReferences(
 				cell.document,
@@ -656,6 +690,7 @@ export class NotebookDocumentSymbolTracker {
 				{ includeDeclaration: true },
 				token,
 			);
+
 			if (symbolReferences) {
 				references.push(
 					...symbolReferences
@@ -704,6 +739,7 @@ export class SymbolsTracker {
 		string,
 		NotebookDocumentSymbolTracker
 	> = new Map();
+
 	constructor(private readonly _client: INotebookLanguageClient) {
 		vscode.window.visibleNotebookEditors.forEach((editor) => {
 			this._notebookDocumentSymbolTrackers.set(
@@ -753,6 +789,7 @@ export class SymbolsTracker {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
 			notebookDocument.uri.toString(),
 		);
+
 		if (tracker) {
 			await tracker.debugSymbols();
 		}
@@ -765,6 +802,7 @@ export class SymbolsTracker {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
 			notebookDocument.uri.toString(),
 		);
+
 		if (tracker) {
 			await tracker.runSuccessorCells(cell);
 		}
@@ -777,6 +815,7 @@ export class SymbolsTracker {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
 			notebookDocument.uri.toString(),
 		);
+
 		if (tracker) {
 			await tracker.runPrecedentCells(cell);
 		}
@@ -789,6 +828,7 @@ export class SymbolsTracker {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
 			notebookDocument.uri.toString(),
 		);
+
 		if (tracker) {
 			await tracker.selectSuccessorCells(cell);
 		}
@@ -801,6 +841,7 @@ export class SymbolsTracker {
 		const tracker = this._notebookDocumentSymbolTrackers.get(
 			notebookDocument.uri.toString(),
 		);
+
 		if (tracker) {
 			await tracker.selectPrecedentCells(cell);
 		}
@@ -827,8 +868,11 @@ export class ExecutionFixCodeActionsProvider
 			(notebookDocument) =>
 				notebookDocument.uri.path === document.uri.path,
 		);
+
 		let targetCell: vscode.NotebookCell | undefined;
+
 		let notebookDocument: vscode.NotebookDocument | undefined;
+
 		for (const doc of notebookDocuments) {
 			targetCell = doc
 				.getCells()
@@ -837,8 +881,10 @@ export class ExecutionFixCodeActionsProvider
 						cell.document.uri.toString() ===
 						document.uri.toString(),
 				);
+
 			if (targetCell) {
 				notebookDocument = doc;
+
 				break;
 			}
 		}
@@ -850,6 +896,7 @@ export class ExecutionFixCodeActionsProvider
 		const tracker = this.symbolsTracker.getNotebookDocumentSymbolTracker(
 			notebookDocument.uri,
 		);
+
 		if (!tracker) {
 			return [];
 		}
@@ -870,6 +917,7 @@ export class ExecutionFixCodeActionsProvider
 		const match = diagnostic.message.match(
 			/NameError: name '(.+)' is not defined/,
 		);
+
 		if (!match) {
 			return [];
 		}
@@ -882,10 +930,12 @@ export class ExecutionFixCodeActionsProvider
 		const matchingRefs = await Promise.all(
 			cellRangesToIndexes(precedentCellsRanges).map(async (index) => {
 				const cell = notebookDocument?.cellAt(index);
+
 				if (!cell) {
 					return false;
 				}
 				const symbols = await tracker.getCellSymbolRefs(cell);
+
 				if (!symbols || symbols.length <= 0) {
 					return false;
 				}

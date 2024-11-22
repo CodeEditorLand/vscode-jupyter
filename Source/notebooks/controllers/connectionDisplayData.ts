@@ -47,8 +47,10 @@ export function getKernelConnectionCategory(
 	switch (kernelConnection.kind) {
 		case "connectToLiveRemoteKernel":
 			return DataScience.kernelCategoryForJupyterSession;
+
 		case "startUsingRemoteKernelSpec":
 			return DataScience.kernelCategoryForRemoteJupyterKernel;
+
 		default:
 			return getKernelConnectionCategorySync(kernelConnection);
 	}
@@ -59,6 +61,7 @@ export function getKernelConnectionCategorySync(
 	switch (kernelConnection.kind) {
 		case "startUsingLocalKernelSpec":
 			return DataScience.kernelCategoryForJupyterKernel;
+
 		case "startUsingPythonInterpreter": {
 			if (
 				getKernelRegistrationInfo(kernelConnection.kernelSpec) ===
@@ -73,16 +76,21 @@ export function getKernelConnectionCategorySync(
 					)
 						? DataScience.kernelCategoryForCondaWithoutPython
 						: DataScience.kernelCategoryForConda;
+
 				case EnvironmentType.Pipenv:
 					return DataScience.kernelCategoryForPipEnv;
+
 				case EnvironmentType.Poetry:
 					return DataScience.kernelCategoryForPoetry;
+
 				case EnvironmentType.Pyenv:
 					return DataScience.kernelCategoryForPyEnv;
+
 				case EnvironmentType.Venv:
 				case EnvironmentType.VirtualEnv:
 				case EnvironmentType.VirtualEnvWrapper:
 					return DataScience.kernelCategoryForVirtual;
+
 				default:
 					return DataScience.kernelCategoryForGlobal;
 			}

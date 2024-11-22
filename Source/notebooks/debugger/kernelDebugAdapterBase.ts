@@ -71,6 +71,7 @@ export abstract class KernelDebugAdapterBase
 	onDidEndSession: Event<DebugSession> = this.endSession.event;
 	public readonly debugCell: NotebookCell | undefined;
 	private disconnected: boolean = false;
+
 	constructor(
 		protected session: DebugSession,
 		protected notebookDocument: NotebookDocument,
@@ -80,6 +81,7 @@ export abstract class KernelDebugAdapterBase
 		private readonly debugService: IDebugService,
 	) {
 		logger.ci(`Creating kernel debug adapter for debugging notebooks`);
+
 		const configuration = this.session.configuration;
 		assertIsDebugConfig(configuration);
 		this.configuration = configuration;
@@ -186,8 +188,10 @@ export abstract class KernelDebugAdapterBase
 
 	async onIOPubMessage(_: unknown, msg: KernelMessage.IIOPubMessage) {
 		logger.ci(`Debug IO Pub message: ${JSON.stringify(msg)}`);
+
 		if (isDebugEventMsg(msg)) {
 			this.trace("event", JSON.stringify(msg));
+
 			for (const d of this.delegates ?? []) {
 				if (await d?.willSendEvent?.(msg.content)) {
 					return;
@@ -219,6 +223,7 @@ export abstract class KernelDebugAdapterBase
 				(message as DebugProtocol.Request).command === "setBreakpoints"
 			) {
 				const args = (message as DebugProtocol.Request).arguments;
+
 				if (
 					args.source &&
 					args.source.path &&
@@ -230,6 +235,7 @@ export abstract class KernelDebugAdapterBase
 							(c) =>
 								c.document.uri.toString() === args.source.path,
 						);
+
 					if (cell) {
 						await this.dumpCell(cell.index);
 					}
@@ -241,9 +247,11 @@ export abstract class KernelDebugAdapterBase
 					const response = await d?.willSendRequest?.(
 						message as DebugProtocol.Request,
 					);
+
 					if (response) {
 						this.trace("response", JSON.stringify(response));
 						this.sendMessage.fire(response);
+
 						return;
 					}
 				}
@@ -286,6 +294,7 @@ export abstract class KernelDebugAdapterBase
 	public async disconnect() {
 		if (!this.disconnected) {
 			this.disconnected = true;
+
 			if (
 				this.debugService.activeDebugSession === this.session ||
 				this.debugService.activeDebugSession?.id === this.session.id
@@ -343,6 +352,7 @@ export abstract class KernelDebugAdapterBase
 		}
 
 		sourcePath = path.normalize(sourcePath);
+
 		for (let [file, cell] of this.fileToCell.entries()) {
 			if (
 				isShortNamePath(file) &&
@@ -366,12 +376,15 @@ export abstract class KernelDebugAdapterBase
 			logger.info(
 				`Skipping sending message ${message.type} because session is disposed`,
 			);
+
 			return;
 		}
 
 		this.trace("to kernel", JSON.stringify(message));
+
 		if (message.type === "request") {
 			const response = await this.sendRequestToJupyterSession(message);
+
 			if (response) {
 				this.sendMessage.fire(response);
 			}
@@ -382,6 +395,7 @@ export abstract class KernelDebugAdapterBase
 			);
 			// responses of reverse requests
 			const response = message as DebugProtocol.Response;
+
 			const control = this.jupyterSession.kernel.requestDebug(
 				{
 					seq: response.seq,
@@ -390,6 +404,7 @@ export abstract class KernelDebugAdapterBase
 				},
 				true,
 			);
+
 			return control.done;
 		} else {
 			// cannot send via iopub, no way to handle events even if they existed
@@ -404,12 +419,15 @@ export abstract class KernelDebugAdapterBase
 			message,
 			this.translateRealLocationToDebuggerLocation.bind(this),
 		);
+
 		if (!this.jupyterSession.kernel) {
 			throw new SessionDisposedError();
 		}
 
 		this.trace("to kernel, mapped", JSON.stringify(message));
+
 		const request = message as DebugProtocol.Request;
+
 		const control = this.jupyterSession.kernel.requestDebug(
 			{
 				seq: request.seq,
@@ -419,8 +437,11 @@ export abstract class KernelDebugAdapterBase
 			},
 			true,
 		);
+
 		const msg = await control.done;
+
 		const response = msg.content as DebugProtocol.Response;
+
 		getMessageSourceAndHookIt(
 			response,
 			this.translateDebuggerLocationToRealLocation.bind(this),
@@ -431,6 +452,7 @@ export abstract class KernelDebugAdapterBase
 		}
 
 		this.trace("response", JSON.stringify(response));
+
 		return response;
 	}
 
@@ -443,10 +465,12 @@ export abstract class KernelDebugAdapterBase
 		source?: DebugProtocol.Source,
 	) {
 		source = location?.source ?? source;
+
 		if (source && source.path) {
 			const mapping =
 				this.fileToCell.get(source.path) ??
 				this.lookupCellByLongName(source.path);
+
 			if (mapping) {
 				source.name = path.basename(mapping.path);
 				source.path = mapping.toString();

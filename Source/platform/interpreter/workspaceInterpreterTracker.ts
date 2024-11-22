@@ -20,6 +20,7 @@ export class WorkspaceInterpreterTracker
 		resource: Resource,
 		interpreter?: PythonEnvironment,
 	) => boolean = () => false;
+
 	constructor(
 		@inject(IWorkspaceInterpreterTracker)
 		@optional()

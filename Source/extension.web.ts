@@ -85,19 +85,25 @@ let activatedServiceContainer: IServiceContainer | undefined;
 
 export async function activate(context: IExtensionContext): Promise<IExtensionApi> {
     durations.startActivateTime = stopWatch.elapsedTime;
+
     const standardOutputChannel = await initializeLoggers(context, { addConsoleLogger: isTestExecution() });
 
     activateNotebookTelemetry(stopWatch);
+
     setDisposableTracker(context.subscriptions);
+
     setIsCodeSpace(env.uiKind == UIKind.Web);
+
     setIsWebExtension(true);
     context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
+
     try {
         const [api, ready] = activateUnsafe(context, standardOutputChannel);
         await ready;
         // Send the "success" telemetry only if activation did not fail.
         // Otherwise Telemetry is send via the error handler.
         sendStartupTelemetry(durations, stopWatch);
+
         return api;
     } catch (ex) {
         // We want to completely handle the error
@@ -130,6 +136,7 @@ export function deactivate(): Thenable<void> {
     // Make sure to shutdown anybody who needs it.
     if (activatedServiceContainer) {
         const registry = activatedServiceContainer.get<IAsyncDisposableRegistry>(IAsyncDisposableRegistry);
+
         if (registry) {
             return registry.dispose();
         }
@@ -147,6 +154,7 @@ function activateUnsafe(
     standardOutputChannel: OutputChannel
 ): [IExtensionApi, Promise<void>, IServiceContainer] {
     const progress = displayProgress();
+
     try {
         //===============================================
         // activation starts here
@@ -155,12 +163,14 @@ function activateUnsafe(
 
         activatedServiceContainer = serviceContainer;
         initializeTelemetryGlobals(() => Promise.resolve(new Map()));
+
         const activationPromise = activateLegacy(context, serviceManager, serviceContainer);
 
         //===============================================
         // activation ends here
 
         const api = buildApi(activationPromise, serviceManager, serviceContainer, context);
+
         return [api, activationPromise, serviceContainer];
     } finally {
         progress.dispose();
@@ -188,6 +198,7 @@ async function activateLegacy(
         workspace.getConfiguration('jupyter').get<boolean>('development', false);
 
     serviceManager.addSingletonInstance<boolean>(IsDevMode, isDevMode);
+
     if (isDevMode) {
         commands.executeCommand('setContext', 'jupyter.development', true).then(noop, noop);
     }

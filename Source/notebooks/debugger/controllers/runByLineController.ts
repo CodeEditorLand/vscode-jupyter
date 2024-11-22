@@ -42,6 +42,7 @@ export class RunByLineController implements IDebuggingDelegate {
 		if (typeof this.lastPausedThreadId !== "number") {
 			logger.debug(`No paused thread, can't do RBL`);
 			this.stop();
+
 			return;
 		}
 
@@ -57,14 +58,17 @@ export class RunByLineController implements IDebuggingDelegate {
 
 	public getMode(): KernelDebugMode {
 		const config = this.debugAdapter.getConfiguration();
+
 		return config.__mode;
 	}
 
 	public async willSendEvent(msg: DebugProtocol.Event): Promise<boolean> {
 		if (msg.event === "stopped") {
 			this.lastPausedThreadId = msg.body.threadId;
+
 			if (await this.handleStoppedEvent(this.lastPausedThreadId!)) {
 				this.trace("intercepted", "handled stop event");
+
 				return true;
 			}
 		}
@@ -72,6 +76,7 @@ export class RunByLineController implements IDebuggingDelegate {
 		if (msg.event === "output") {
 			if (isJustMyCodeNotification(msg.body.output)) {
 				this.trace("intercept", "justMyCode notification");
+
 				return true;
 			}
 		}
@@ -83,6 +88,7 @@ export class RunByLineController implements IDebuggingDelegate {
 		request: DebugProtocol.Request,
 	): Promise<undefined> {
 		logger.ci(`willSendRequest: ${request.command}`);
+
 		if (request.command === "configurationDone") {
 			await this.initializeExecute();
 		}
@@ -93,6 +99,7 @@ export class RunByLineController implements IDebuggingDelegate {
 	private async handleStoppedEvent(threadId: number): Promise<boolean> {
 		if (await this.shouldStepIn(threadId)) {
 			this.debugAdapter.stepIn(threadId).then(noop, noop);
+
 			return true;
 		}
 
@@ -110,14 +117,18 @@ export class RunByLineController implements IDebuggingDelegate {
 
 		if (stResponse && stResponse.stackFrames[0]) {
 			const sf = stResponse.stackFrames[0];
+
 			const pausePos = new Position(sf.line, sf.column);
+
 			if (this.lastPausePosition?.isEqual(pausePos)) {
 				// This is a workaround for https://github.com/microsoft/debugpy/issues/1104
 				this.trace("intercept", "working around duplicate stop event");
+
 				return true;
 			}
 
 			this.lastPausePosition = pausePos;
+
 			return (
 				!!sf.source &&
 				sf.source.path !== this.debugCell.document.uri.toString()
@@ -140,6 +151,7 @@ export class RunByLineController implements IDebuggingDelegate {
 			trim: false,
 			removeEmptyEntries: false,
 		});
+
 		const lineList: number[] = [];
 		parseForComments(
 			textLines,
@@ -170,6 +182,7 @@ export class RunByLineController implements IDebuggingDelegate {
 			const settings = this.settings.getSettings(
 				this.debugCell.notebook.uri,
 			);
+
 			if (settings.showVariableViewWhenDebugging) {
 				commands
 					.executeCommand(Commands.OpenVariableView)

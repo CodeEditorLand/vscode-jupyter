@@ -20,6 +20,7 @@ export abstract class ExportUtilBase implements IExportUtil {
 		const serializerApi = extensions.getExtension<{
 			exportNotebook: (notebook: NotebookData) => string;
 		}>("vscode.ipynb");
+
 		if (!serializerApi) {
 			throw new Error(
 				"Unable to export notebook as the built-in vscode.ipynb extension is currently unavailable.",
@@ -31,6 +32,7 @@ export abstract class ExportUtilBase implements IExportUtil {
 		}
 
 		const cells = document.getCells();
+
 		const cellData = cells.map((c) => {
 			const data = new NotebookCellData(
 				c.kind,
@@ -40,10 +42,13 @@ export abstract class ExportUtilBase implements IExportUtil {
 			data.metadata = c.metadata;
 			data.mime = c.mime;
 			data.outputs = [...c.outputs];
+
 			return data;
 		});
+
 		const notebookData = new NotebookData(cellData);
 		notebookData.metadata = JSON.parse(JSON.stringify(document.metadata));
+
 		return serializerApi.exports.exportNotebook(notebookData);
 	}
 

@@ -43,6 +43,7 @@ import { ProtocolParser } from "./protocolParser.node";
  */
 class JupyterDebugSession implements DebugSession {
 	private _name = "JupyterDebugSession";
+
 	constructor(
 		private _id: string,
 		private _configuration: DebugConfiguration,
@@ -106,6 +107,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	private _stoppedThreadId: number | undefined;
 	private _topFrameId: number | undefined;
 	private protocolParser: ProtocolParser;
+
 	constructor(
 		@inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
 	) {
@@ -169,6 +171,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		provider: DebugAdapterTrackerFactory,
 	): Disposable {
 		this.debugAdapterTrackerFactories.push(provider);
+
 		return {
 			dispose: () => {
 				this.debugAdapterTrackerFactories =
@@ -221,6 +224,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			);
 			this.socket.on("error", this.onError.bind(this));
 			this.socket.on("close", this.onClose.bind(this));
+
 			return this.sendStartSequence(config, this.session.id).then(
 				() => true,
 			);
@@ -253,7 +257,9 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		const deferred = createDeferred<DebugProtocol.StackFrame[]>();
 		this.protocolParser.once("response_stackTrace", (args: any) => {
 			this.sendToTrackers(args);
+
 			const response = args as DebugProtocol.StackTraceResponse;
+
 			const frames = response.body.stackFrames
 				? response.body.stackFrames
 				: [];
@@ -265,18 +271,22 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			startFrame: 0,
 			levels: 1,
 		});
+
 		return deferred.promise;
 	}
 
 	public async requestVariables(): Promise<void> {
 		// Need a stack trace so we have a topmost frame id
 		await this.getStack();
+
 		const deferred = createDeferred<void>();
+
 		let variablesReference = 0;
 		this.protocolParser.once("response_scopes", (args: any) => {
 			this.sendToTrackers(args);
 			// Get locals variables reference
 			const response = args as DebugProtocol.ScopesResponse;
+
 			if (response) {
 				variablesReference = response.body.scopes[0].variablesReference;
 			}
@@ -292,6 +302,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		await this.emitMessage("scopes", {
 			frameId: this._topFrameId ? this._topFrameId : 1,
 		});
+
 		return deferred.promise;
 	}
 
@@ -307,11 +318,14 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 						d.onWillReceiveMessage(args);
 					}
 				});
+
 				break;
+
 			default:
 				this.debugAdapterTrackers.forEach((d) =>
 					d.onDidSendMessage!(args),
 				);
+
 				break;
 		}
 	}
@@ -326,15 +340,18 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	): Promise<void> {
 		logger.info("Sending debugger initialize...");
 		await this.sendInitialize();
+
 		if (this._breakpoints.length > 0) {
 			logger.info("Sending breakpoints");
 			await this.sendBreakpoints();
 		}
 		logger.info("Sending debugger attach...");
+
 		const attachPromise = this.sendAttach(config, sessionId);
 		logger.info("Sending configuration done");
 		await this.sendConfigurationDone();
 		logger.info("Session started.");
+
 		return attachPromise.then(() => {
 			this.sessionStartedEvent.fire(this.session!);
 		});
@@ -344,6 +361,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		// Only supporting a single file now
 		const sbs = this._breakpoints.map((b) => b as SourceBreakpoint); // NOSONAR
 		const file = sbs[0].location.uri.fsPath;
+
 		return this.sendMessage("setBreakpoints", {
 			source: {
 				name: path.basename(file),
@@ -401,9 +419,11 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 
 	private sendMessage(command: string, args?: any): Promise<any> {
 		const response = createDeferred<any>();
+
 		const disposable = this.sessionTerminatedEvent.event(() => {
 			response.resolve({ body: {} });
 		});
+
 		const sequenceNumber = this.sequence;
 		this.protocolParser.on(`response_${command}`, (resp: any) => {
 			if (resp.request_seq === sequenceNumber) {
@@ -422,6 +442,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 				exc,
 			);
 		});
+
 		return response.promise;
 	}
 
@@ -436,8 +457,10 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 						seq: this.sequence,
 					};
 					this.sequence += 1;
+
 					const objString = JSON.stringify(obj);
 					logger.info(`Sending request to debugger: ${objString}`);
+
 					const message = `Content-Length: ${objString.length}\r\n\r\n${objString}`;
 					this.socket.write(message, (_a: any) => {
 						this.sendToTrackers(obj);

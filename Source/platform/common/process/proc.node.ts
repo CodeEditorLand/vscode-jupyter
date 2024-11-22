@@ -40,6 +40,7 @@ export class BufferDecoder implements IBufferDecoder {
 export class ProcessService implements IProcessService {
 	private processesToKill = new Set<IDisposable>();
 	private readonly decoder: IBufferDecoder;
+
 	constructor(private readonly env?: EnvironmentVariables) {
 		this.decoder = new BufferDecoder();
 	}
@@ -49,6 +50,7 @@ export class ProcessService implements IProcessService {
 				return false;
 			}
 			process.kill(pid, 0);
+
 			return true;
 		} catch {
 			return false;
@@ -85,10 +87,14 @@ export class ProcessService implements IProcessService {
 		options: SpawnOptions = {},
 	): ObservableExecutionResult<string> {
 		const spawnOptions = this.getDefaultOptions(options);
+
 		const proc = spawn(file, args, spawnOptions);
+
 		let procExited = false;
 		logger.ci(`Exec observable ${file}, ${args.join(" ")}`);
+
 		const disposables: IDisposable[] = [];
+
 		const disposable: IDisposable = {
 			// eslint-disable-next-line
 			dispose: function () {
@@ -126,6 +132,7 @@ export class ProcessService implements IProcessService {
 
 		const sendOutput = (source: "stdout" | "stderr", data: Buffer) => {
 			const out = this.decoder.decode([data]);
+
 			if (source === "stderr" && options.throwOnStdErr) {
 				output.reject(new StdErrError(out));
 			} else {
@@ -166,8 +173,11 @@ export class ProcessService implements IProcessService {
 		options: SpawnOptions = {},
 	): Promise<ExecutionResult<string>> {
 		const spawnOptions = this.getDefaultOptions(options);
+
 		const proc = spawn(file, args, spawnOptions);
+
 		const deferred = createDeferred<ExecutionResult<string>>();
+
 		const disposable: IDisposable = {
 			dispose: () => {
 				if (!proc.killed && !deferred.completed) {
@@ -176,6 +186,7 @@ export class ProcessService implements IProcessService {
 			},
 		};
 		this.processesToKill.add(disposable);
+
 		const disposables: IDisposable[] = [];
 
 		const on = (ee: NodeJS.EventEmitter, name: string, fn: Function) => {
@@ -193,6 +204,7 @@ export class ProcessService implements IProcessService {
 
 		const stdoutBuffers: Buffer[] = [];
 		on(proc.stdout!, "data", (data: Buffer) => stdoutBuffers.push(data));
+
 		const stderrBuffers: Buffer[] = [];
 		on(proc.stderr!, "data", (data: Buffer) => {
 			if (options.mergeStdOutErr) {
@@ -211,6 +223,7 @@ export class ProcessService implements IProcessService {
 				stderrBuffers.length === 0
 					? undefined
 					: this.decoder.decode(stderrBuffers);
+
 			if (stderr && stderr.length > 0 && options.throwOnStdErr) {
 				deferred.reject(new StdErrError(stderr));
 			} else {
@@ -238,10 +251,13 @@ export class ProcessService implements IProcessService {
 		@ignoreLogging() options: ShellOptions = {},
 	): Promise<ExecutionResult<string>> {
 		const shellOptions = this.getDefaultOptions(options);
+
 		return new Promise((resolve, reject) => {
 			let cancelDisposable: Disposable | undefined;
+
 			const proc = exec(command, shellOptions, (e, stdout, stderr) => {
 				cancelDisposable?.dispose();
+
 				if (e && e !== null) {
 					reject(e);
 				} else if (
@@ -260,6 +276,7 @@ export class ProcessService implements IProcessService {
 					});
 				}
 			});
+
 			if (options.token) {
 				cancelDisposable = options.token.onCancellationRequested(() => {
 					if (proc.exitCode === null && !proc.killed) {
@@ -284,7 +301,9 @@ export class ProcessService implements IProcessService {
 		options: T,
 	): T {
 		const defaultOptions = { ...options };
+
 		const execOptions = defaultOptions as SpawnOptions;
+
 		if (execOptions) {
 			const encoding = (execOptions.encoding =
 				typeof execOptions.encoding === "string" &&
@@ -299,6 +318,7 @@ export class ProcessService implements IProcessService {
 			Object.keys(defaultOptions.env).length === 0
 		) {
 			const env = this.env ? this.env : process.env;
+
 			defaultOptions.env = { ...env };
 		} else {
 			defaultOptions.env = { ...defaultOptions.env };
@@ -306,6 +326,7 @@ export class ProcessService implements IProcessService {
 
 		// Always ensure we have unbuffered output.
 		defaultOptions.env.PYTHONUNBUFFERED = "1";
+
 		if (!defaultOptions.env.PYTHONIOENCODING) {
 			defaultOptions.env.PYTHONIOENCODING = "utf-8";
 		}
@@ -321,9 +342,11 @@ export class ProcessService implements IProcessService {
 
 export function createObservable<T>() {
 	const onDidChange = new EventEmitter<T>();
+
 	const promise = createDeferred<void>();
 	// No dangling promises.
 	promise.promise.catch(noop);
+
 	return {
 		get onDidChange() {
 			return onDidChange.event;

@@ -111,6 +111,7 @@ export class InteractiveWindow implements IInteractiveWindow {
     private readonly debuggingManager: IInteractiveWindowDebuggingManager;
     private readonly kernelProvider: IKernelProvider;
     private controller: InteractiveController | undefined;
+
     constructor(
         private readonly serviceContainer: IServiceContainer,
         private _owner: Resource,
@@ -185,6 +186,7 @@ export class InteractiveWindow implements IInteractiveWindow {
     private initController() {
         const controller = this.controllerFactory.create(this, this.errorHandler, this.kernelProvider, this._owner);
         this.internalDisposables.push(controller.listenForControllerSelection());
+
         return controller;
     }
 
@@ -232,6 +234,7 @@ export class InteractiveWindow implements IInteractiveWindow {
         });
 
         const notebook = this.notebookDocument || (await this.openNotebookDocument());
+
         const editor = await window.showNotebookDocument(notebook, {
             preserveFocus: true,
             viewColumn,
@@ -243,6 +246,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     private async openNotebookDocument(): Promise<NotebookDocument> {
         logger.debug(`Opening notebook document ${this.notebookUri}`);
+
         return await workspace.openNotebookDocument(this.notebookUri);
     }
 
@@ -254,9 +258,12 @@ export class InteractiveWindow implements IInteractiveWindow {
     @chainable()
     async showErrorForCell(message: string, notebookCell: NotebookCell): Promise<void> {
         const controller = this.controller?.controller;
+
         const output = createOutputWithErrorMessageForDisplay(message);
+
         if (controller && output && notebookCell) {
             const execution = CellExecutionCreator.getOrCreate(notebookCell, new KernelController(controller));
+
             try {
                 await execution.appendOutput(output);
             } catch (err) {
@@ -279,6 +286,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     private useNewDebugMode(): boolean {
         const settings = this.configuration.getSettings(this.owner);
+
         return !!(
             settings.forceIPyKernelDebugger ||
             (this.controller?.metadata && !isLocalConnection(this.controller.metadata))
@@ -289,6 +297,7 @@ export class InteractiveWindow implements IInteractiveWindow {
         let saved = true;
         // Make sure the file is saved before debugging
         const doc = workspace.textDocuments.find((d) => this.fs.arePathsSame(d.uri, fileUri));
+
         if (!this.useNewDebugMode() && doc && doc.isUntitled) {
             // Before we start, get the list of documents
             const beforeSave = [...workspace.textDocuments];
@@ -299,6 +308,7 @@ export class InteractiveWindow implements IInteractiveWindow {
             // the new entry in the list
             if (saved) {
                 const diff = workspace.textDocuments.filter((f) => beforeSave.indexOf(f) === -1);
+
                 if (diff && diff.length > 0) {
                     // The interactive window often opens at the same time. Avoid picking that one.
                     // Another unrelated window could open at the same time too.
@@ -335,8 +345,11 @@ export class InteractiveWindow implements IInteractiveWindow {
 
         // Code may have markdown inside of it, if so, split into two cells
         const split = splitLines(code, { trim: false });
+
         const matcher = new CellMatcher(this.configuration.getSettings(fileUri));
+
         let firstNonMarkdown = -1;
+
         if (matcher.isMarkdown(split[0])) {
             parseForComments(
                 split,
@@ -390,6 +403,7 @@ export class InteractiveWindow implements IInteractiveWindow {
                 .finally(() => {
                     deferred?.resolve();
                 });
+
             return promise;
         });
 
@@ -405,13 +419,17 @@ export class InteractiveWindow implements IInteractiveWindow {
         logger.ci('InteractiveWindow.ts.createExecutionPromise.start');
         // Kick of starting kernels early.
         const kernelPromise = this.controller.startKernel();
+
         const cell = await notebookCellPromise;
 
         let success = true;
+
         let detachKernel = async () => noop();
+
         try {
             const kernel = await kernelPromise;
             await this.generateCodeAndAddMetadata(cell, isDebug, kernel);
+
             if (isDebug && this.useNewDebugMode()) {
                 // New ipykernel 7 debugger using the Jupyter protocol.
                 await this.debuggingManager.start(this.notebookDocument, cell);
@@ -430,7 +448,9 @@ export class InteractiveWindow implements IInteractiveWindow {
                 this.interactiveWindowDebugger.enable(kernel);
             }
             logger.ci('InteractiveWindow.ts.createExecutionPromise.kernel.executeCell');
+
             const iwCellMetadata = getInteractiveCellMetadata(cell);
+
             const execution = this.kernelProvider.getKernelExecution(kernel!);
             success = await execution.executeCell(cell, iwCellMetadata?.generatedCode?.code).then(
                 () => true,
@@ -480,7 +500,9 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     public async scrollToCell(id: string): Promise<void> {
         const editor = await this.showInteractiveEditor();
+
         const matchingCell = editor.notebook.getCells().find((cell) => getInteractiveCellMetadata(cell)?.id === id);
+
         if (matchingCell) {
             const notebookRange = new NotebookRange(matchingCell.index, matchingCell.index + 1);
             editor.revealRange(notebookRange, NotebookEditorRevealType.Default);
@@ -490,6 +512,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     public async hasCell(id: string): Promise<boolean> {
         const notebook = this.notebookDocument;
+
         return !!notebook && notebook.getCells().some((cell) => getInteractiveCellMetadata(cell)?.id === id);
     }
 
@@ -498,6 +521,7 @@ export class InteractiveWindow implements IInteractiveWindow {
             return this.owner;
         }
         const root = getRootFolder();
+
         if (root) {
             return root;
         }
@@ -519,27 +543,33 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     private async addNotebookCell(code: string, file: Uri, line: number): Promise<NotebookCell> {
         const notebookDocument = this.notebookDocument;
+
         if (!notebookDocument) {
             throw new Error('No notebook document');
         }
 
         // Strip #%% and store it in the cell metadata so we can reconstruct the cell structure when exporting to Python files
         const settings = this.configuration.getSettings(this.owningResource);
+
         const isMarkdown = this.cellMatcher.getCellType(code) === MARKDOWN_LANGUAGE;
+
         const strippedCode = isMarkdown
             ? generateMarkdownFromCodeLines(splitLines(code)).join('')
             : generateInteractiveCode(code, settings, this.cellMatcher);
+
         const interactiveWindowCellMarker = this.cellMatcher.getFirstMarker(code);
 
         // Insert cell into NotebookDocument
         const language =
             workspace.textDocuments.find((document) => document.uri.toString() === this.owner?.toString())
                 ?.languageId ?? PYTHON_LANGUAGE;
+
         const notebookCellData = new NotebookCellData(
             isMarkdown ? NotebookCellKind.Markup : NotebookCellKind.Code,
             strippedCode,
             isMarkdown ? MARKDOWN_LANGUAGE : language
         );
+
         const interactive = {
             uristring: file.toString(), // Has to be simple types
             lineIndex: line,
@@ -556,9 +586,11 @@ export class InteractiveWindow implements IInteractiveWindow {
         let index: number | undefined;
         await chainWithPendingUpdates(notebookDocument, async (edit) => {
             index = await this.getAppendIndex();
+
             const nbEdit = NotebookEdit.insertCells(index, [notebookCellData]);
             edit.set(notebookDocument.uri, [nbEdit]);
         });
+
         return notebookDocument.cellAt(index!);
     }
 
@@ -571,6 +603,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     private async generateCodeAndAddMetadata(cell: NotebookCell, isDebug: boolean, kernel: IKernel) {
         const metadata = getInteractiveCellMetadata(cell);
+
         if (!metadata) {
             return;
         }
@@ -588,6 +621,7 @@ export class InteractiveWindow implements IInteractiveWindow {
         };
 
         const edit = new WorkspaceEdit();
+
         const cellEdit = NotebookEdit.updateCellMetadata(cell.index, newMetadata);
         edit.set(cell.notebook.uri, [cellEdit]);
         await workspace.applyEdit(edit);
@@ -601,6 +635,7 @@ export class InteractiveWindow implements IInteractiveWindow {
 
         // Bring up the export file dialog box
         const uri = await new ExportDialog().showDialog(ExportFormat.ipynb, this.owningResource);
+
         if (uri) {
             await this.jupyterExporter?.exportToFile(cells, getFilePath(uri));
         }
@@ -608,15 +643,18 @@ export class InteractiveWindow implements IInteractiveWindow {
 
     public async exportAs() {
         await this.ensureInitialized();
+
         if (!this.controller) {
             throw new Error('An active kernel is required to export the notebook.');
         }
         const kernel = this.controller.kernel?.value;
 
         let defaultFileName;
+
         if (this.submitters && this.submitters.length) {
             const lastSubmitter = this.submitters[this.submitters.length - 1];
             lastSubmitter;
+
             defaultFileName = path.basename(lastSubmitter.path, path.extname(lastSubmitter.path));
         }
 

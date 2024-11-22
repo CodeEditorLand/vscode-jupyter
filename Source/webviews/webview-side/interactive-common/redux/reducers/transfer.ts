@@ -20,6 +20,7 @@ export namespace Transfer {
 			variable: arg.payload.data.variable,
 			columnSize: arg.payload.data.columnSize,
 		});
+
 		return arg.prevState;
 	}
 
@@ -46,6 +47,7 @@ export namespace Transfer {
 	export function variableViewStarted(arg: CommonReducerArg): IMainState {
 		// Send all of our initial requests
 		postActionToExtension(arg, InteractiveWindowMessages.Started);
+
 		return arg.prevState;
 	}
 }

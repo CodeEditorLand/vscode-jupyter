@@ -12,6 +12,7 @@ export function sendKernelSpecTelemetry(
 ) {
 	const usesShell = (kernelSpec.argv || []).some((arg) => {
 		arg = arg.toLowerCase();
+
 		return shellScripts.some((shell) => arg.includes(shell));
 	});
 	sendTelemetryEvent(Telemetry.KernelSpecLanguage, undefined, {

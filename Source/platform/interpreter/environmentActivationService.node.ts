@@ -45,6 +45,7 @@ export class EnvironmentActivationService
 		string,
 		{ promise: Promise<NodeJS.ProcessEnv | undefined>; time: StopWatch }
 	>();
+
 	constructor(
 		@inject(IInterpreterService)
 		private interpreterService: IInterpreterService,
@@ -90,6 +91,7 @@ export class EnvironmentActivationService
 		const title = DataScience.activatingPythonEnvironment(
 			getPythonEnvDisplayName(interpreter),
 		);
+
 		return KernelProgressReporter.wrapAndReportProgress(
 			resource,
 			title,
@@ -108,12 +110,16 @@ export class EnvironmentActivationService
 	): Promise<NodeJS.ProcessEnv | undefined> {
 		const env =
 			await this.interpreterService.resolveEnvironment(interpreterId);
+
 		if (!env) {
 			logger.warn(`Failed to resolve environment for ${interpreterId}`);
+
 			return;
 		}
 		const key = `${resource?.toString() || ""}${interpreterId}`;
+
 		const info = this.activatedEnvVariablesCache.get(key);
+
 		if (info && info.time.elapsedTime >= ENV_VAR_CACHE_TIMEOUT) {
 			this.activatedEnvVariablesCache.delete(key);
 		}
@@ -130,6 +136,7 @@ export class EnvironmentActivationService
 			});
 		}
 		const promise = this.activatedEnvVariablesCache.get(key)!.promise;
+
 		if (token) {
 			return promise;
 		}
@@ -145,6 +152,7 @@ export class EnvironmentActivationService
 			return;
 		}
 		const stopWatch = new StopWatch();
+
 		return this.getActivatedEnvironmentVariablesFromPython(
 			resource,
 			environment,
@@ -163,6 +171,7 @@ export class EnvironmentActivationService
 					}ms`,
 					ex,
 				);
+
 				return undefined;
 			});
 	}
@@ -183,6 +192,7 @@ export class EnvironmentActivationService
 
 		// Ensure the cache is only valid for a limited time.
 		const info = this.cachedEnvVariables.get(key);
+
 		if (
 			info &&
 			info.lastRequestedTime.elapsedTime > ENV_VAR_CACHE_TIMEOUT
@@ -216,6 +226,7 @@ export class EnvironmentActivationService
 			: workspace.workspaceFolders?.length
 				? workspace.workspaceFolders[0].uri
 				: undefined;
+
 		const stopWatch = new StopWatch();
 		// We'll need this later.
 		const customEnvVarsPromise = this.customEnvVarsService
@@ -227,6 +238,7 @@ export class EnvironmentActivationService
 			| "emptyVariables"
 			| "failedToGetActivatedEnvVariablesFromPython"
 			| "failedToGetCustomEnvVariables" = "emptyVariables";
+
 		let failureEx: Error | undefined;
 
 		let env = await this.apiProvider.getApi().then((api) =>
@@ -241,9 +253,11 @@ export class EnvironmentActivationService
 					);
 					reasonForFailure =
 						"failedToGetActivatedEnvVariablesFromPython";
+
 					return undefined;
 				}),
 		);
+
 		if (token?.isCancellationRequested) {
 			return;
 		}
@@ -287,6 +301,7 @@ export class EnvironmentActivationService
 			// Patch for conda envs.
 			if (getEnvironmentType(environment) === EnvironmentType.Conda) {
 				const sysPrefix = await getSysPrefix(environment);
+
 				if (sysPrefix) {
 					env.CONDA_PREFIX = sysPrefix;
 				} else {
@@ -299,6 +314,7 @@ export class EnvironmentActivationService
 			this.envVarsService.mergeVariables(process.env, env); // Copy current proc vars into new obj.
 			this.envVarsService.mergeVariables(customEnvVars!, env); // Copy custom vars over into obj.
 			this.envVarsService.mergePaths(process.env, env);
+
 			if (process.env.PYTHONPATH) {
 				env.PYTHONPATH = process.env.PYTHONPATH;
 			}
@@ -307,6 +323,7 @@ export class EnvironmentActivationService
 						(k) => k.toLowerCase() == "path",
 					)
 				: undefined;
+
 			if (pathKey && customEnvVars![pathKey]) {
 				this.envVarsService.appendPath(env, customEnvVars![pathKey]!);
 			}
@@ -320,11 +337,13 @@ export class EnvironmentActivationService
 			const executablesPath = await this.globalExecPaths
 				.getExecutablesPath(environment)
 				.catch(noop);
+
 			if (token?.isCancellationRequested) {
 				return;
 			}
 
 			const pathValue = env.PATH || env.Path;
+
 			const pathValues = pathValue ? pathValue.split(path.delimiter) : [];
 			// First value in PATH is expected to be the directory of python executable.
 			// Second value in PATH is expected to be the site packages directory.

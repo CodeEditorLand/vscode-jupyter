@@ -37,6 +37,7 @@ declare namespace Slick {
 		constructor(options?: SlickGridCheckBoxSelectColumnOptions);
 		init(grid: Slick.Grid<T>): void;
 		destroy(): void;
+
 		getColumnDefinition(): Slick.ColumnMetadata<T>;
 	}
 }

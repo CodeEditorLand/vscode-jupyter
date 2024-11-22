@@ -52,6 +52,7 @@ export class ExportUtil extends ExportUtilBase {
 export class ExportUtilNode {
 	public async generateTempDir(): Promise<TemporaryDirectory> {
 		const resultDir = Uri.file(path.join(os.tmpdir(), uuid()));
+
 		const fs =
 			ServiceContainer.instance.get<IFileSystemNode>(IFileSystemNode);
 		await fs.createDirectory(resultDir);
@@ -63,6 +64,7 @@ export class ExportUtilNode {
 				// We don't want to do async as async dispose means it may never finish and then we don't
 				// delete
 				let count = 0;
+
 				while (count < 10) {
 					try {
 						await fs.delete(resultDir);
@@ -82,6 +84,7 @@ export class ExportUtilNode {
 		dirPath: string,
 	): Promise<string> {
 		const newFilePath = path.join(dirPath, fileName);
+
 		const fs =
 			ServiceContainer.instance.get<IFileSystemNode>(IFileSystemNode);
 		await fs.writeFile(Uri.file(newFilePath), contents);
@@ -91,11 +94,13 @@ export class ExportUtilNode {
 }
 export async function removeSvgs(model: string) {
 	const content = JSON.parse(model) as nbformat.INotebookContent;
+
 	for (const cell of content.cells) {
 		const outputs =
 			"outputs" in cell
 				? (cell.outputs as nbformat.IOutput[])
 				: undefined;
+
 		if (outputs && Array.isArray(outputs)) {
 			removeSvgFromOutputs(outputs);
 		}
@@ -105,7 +110,9 @@ export async function removeSvgs(model: string) {
 
 function removeSvgFromOutputs(outputs: nbformat.IOutput[]) {
 	const SVG = "image/svg+xml";
+
 	const PNG = "image/png";
+
 	for (const output of outputs as nbformat.IOutput[]) {
 		if ("data" in output) {
 			const data = output.data as nbformat.IMimeBundle;

@@ -83,6 +83,7 @@ let activatedServiceContainer: IServiceContainer | undefined;
 
 export async function activate(context: IExtensionContext): Promise<IExtensionApi> {
     durations.startActivateTime = stopWatch.elapsedTime;
+
     const standardOutputChannel = await initializeLoggers(context, {
         addConsoleLogger: !!process.env.VSC_JUPYTER_FORCE_LOGGING,
         userNameRegEx: tryGetUsername(),
@@ -93,10 +94,14 @@ export async function activate(context: IExtensionContext): Promise<IExtensionAp
     });
 
     activateNotebookTelemetry(stopWatch);
+
     setDisposableTracker(context.subscriptions);
+
     setIsCodeSpace(env.uiKind == UIKind.Web);
+
     setIsWebExtension(false);
     context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
+
     try {
         const [api, ready] = activateUnsafe(context, standardOutputChannel);
         await ready;
@@ -105,6 +110,7 @@ export async function activate(context: IExtensionContext): Promise<IExtensionAp
         durations.endActivateTime = stopWatch.elapsedTime;
         sendStartupTelemetry(durations, stopWatch);
         deleteOldTempDirs(context).catch(noop);
+
         return api;
     } catch (ex) {
         // We want to completely handle the error
@@ -137,6 +143,7 @@ export function deactivate(): Thenable<void> {
     // Make sure to shutdown anybody who needs it.
     if (activatedServiceContainer) {
         const registry = activatedServiceContainer.get<IAsyncDisposableRegistry>(IAsyncDisposableRegistry);
+
         if (registry) {
             return registry.dispose();
         }
@@ -157,6 +164,7 @@ function activateUnsafe(
     standardOutputChannel: OutputChannel
 ): [IExtensionApi, Promise<void>, IServiceContainer] {
     const progress = displayProgress();
+
     try {
         //===============================================
         // activation starts here
@@ -166,6 +174,7 @@ function activateUnsafe(
         initializeTelemetryGlobals((interpreter) =>
             serviceContainer.get<IInterpreterPackages>(IInterpreterPackages).getPackageVersions(interpreter)
         );
+
         const activationPromise = activateLegacy(context, serviceManager, serviceContainer);
 
         //===============================================
@@ -177,6 +186,7 @@ function activateUnsafe(
         activateChat(context).then(noop, noop);
 
         const api = buildApi(activationPromise, serviceManager, serviceContainer, context);
+
         return [api, activationPromise, serviceContainer];
     } finally {
         progress.dispose();
@@ -190,6 +200,7 @@ function escapeRegExp(text: string) {
 function tryGetUsername() {
     try {
         const username = escapeRegExp(userInfo().username);
+
         return new RegExp(username, 'ig');
     } catch (e) {
         console.info(
@@ -201,6 +212,7 @@ function tryGetUsername() {
 function tryGetHomePath() {
     try {
         const homeDir = escapeRegExp(getUserHomeDir().fsPath);
+
         return new RegExp(homeDir, 'ig');
     } catch (e) {
         console.info(
@@ -230,6 +242,7 @@ async function activateLegacy(
         (context.extensionMode === ExtensionMode.Development ||
             workspace.getConfiguration('jupyter').get<boolean>('development', false));
     serviceManager.addSingletonInstance<boolean>(IsDevMode, isDevMode);
+
     if (isDevMode) {
         commands.executeCommand('setContext', 'jupyter.development', true).then(noop, noop);
     }

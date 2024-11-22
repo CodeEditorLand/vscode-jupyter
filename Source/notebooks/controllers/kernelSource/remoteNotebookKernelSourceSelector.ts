@@ -102,6 +102,7 @@ export class RemoteNotebookKernelSourceSelector
 {
 	private localDisposables: IDisposable[] = [];
 	private cancellationTokenSource: CancellationTokenSource | undefined;
+
 	constructor(
 		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
 		@inject(IJupyterServerUriStorage)
@@ -134,8 +135,11 @@ export class RemoteNotebookKernelSourceSelector
 		this.cancellationTokenSource?.dispose();
 
 		this.cancellationTokenSource = new CancellationTokenSource();
+
 		const multiStep = new MultiStepInput<MultiStepResult>();
+
 		const state: MultiStepResult = { disposables: [], notebook };
+
 		try {
 			const result = await multiStep.run(
 				this.getRemoteServersFromProvider.bind(
@@ -145,6 +149,7 @@ export class RemoteNotebookKernelSourceSelector
 				),
 				state,
 			);
+
 			if (
 				result === InputFlowAction.cancel ||
 				state.selection?.type === "userPerformedSomeOtherAction"
@@ -154,6 +159,7 @@ export class RemoteNotebookKernelSourceSelector
 
 			if (this.cancellationTokenSource.token.isCancellationRequested) {
 				dispose(state.disposables);
+
 				return;
 			}
 
@@ -175,12 +181,14 @@ export class RemoteNotebookKernelSourceSelector
 		const servers = this.kernelFinder.registered.filter(
 			(info) => info.kind === "remote",
 		) as IRemoteKernelFinder[];
+
 		const quickPickServerItems: (
 			| ContributedKernelFinderQuickPickItem
 			| KernelProviderItemsQuickPickItem
 			| JupyterServerQuickPickItem
 			| QuickPickItem
 		)[] = [];
+
 		const quickPickCommandItems: (
 			| ContributedKernelFinderQuickPickItem
 			| KernelProviderItemsQuickPickItem
@@ -191,12 +199,14 @@ export class RemoteNotebookKernelSourceSelector
 			server: IRemoteKernelFinder;
 			time?: number;
 		}[] = [];
+
 		const serverProvider =
 			this.jupyterServerRegistry.jupyterCollections.find(
 				(p) =>
 					p.extensionId === provider.extensionId &&
 					p.id === provider.id,
 			)?.serverProvider;
+
 		const serversPromise = serverProvider?.provideJupyterServers
 			? Promise.resolve(
 					serverProvider.provideJupyterServers.bind(serverProvider)(
@@ -204,8 +214,11 @@ export class RemoteNotebookKernelSourceSelector
 					),
 				).then((servers) => servers || [])
 			: Promise.resolve([]);
+
 		const handledServerIds = new Set<string>();
+
 		const jupyterServers = await serversPromise;
+
 		const validServers = new Set(jupyterServers.map((s) => s.id));
 		servers
 			.filter((s) => s.serverProviderHandle.id === provider.id)
@@ -300,6 +313,7 @@ export class RemoteNotebookKernelSourceSelector
 					id: provider.id,
 					handle: server.id,
 				});
+
 				if (handledServerIds.has(id)) {
 					return;
 				}
@@ -343,6 +357,7 @@ export class RemoteNotebookKernelSourceSelector
 					command: i,
 				};
 			});
+
 			if (quickPickServerItems.length > 0 && newProviderItems.length) {
 				quickPickCommandItems.push({
 					label: "",
@@ -353,13 +368,16 @@ export class RemoteNotebookKernelSourceSelector
 		}
 
 		const items = quickPickServerItems.concat(quickPickCommandItems);
+
 		const onDidChangeItems = new EventEmitter<typeof items>();
+
 		let defaultSelection: (typeof items)[0] | undefined =
 			items.length === 1 &&
 			"command" in items[0] &&
 			items[0].command.canBeAutoSelected
 				? items[0]
 				: undefined;
+
 		if (serverProvider) {
 			// If the only item is a server, then aut select that.
 			const itemsWithoutSeparators = items.filter((i) => "type" in i) as (
@@ -367,6 +385,7 @@ export class RemoteNotebookKernelSourceSelector
 				| KernelProviderItemsQuickPickItem
 				| JupyterServerQuickPickItem
 			)[];
+
 			if (
 				itemsWithoutSeparators.length === 1 &&
 				itemsWithoutSeparators.every(
@@ -398,12 +417,14 @@ export class RemoteNotebookKernelSourceSelector
 					| KernelProviderItemsQuickPickItem
 			  >
 			| undefined;
+
 		let selectedSource:
 			| ContributedKernelFinderQuickPickItem
 			| KernelProviderItemsQuickPickItem
 			| JupyterServerQuickPickItem
 			| QuickPickItem
 			| undefined;
+
 		if (defaultSelection) {
 			selectedSource = defaultSelection;
 		} else {
@@ -436,9 +457,11 @@ export class RemoteNotebookKernelSourceSelector
 								KernelFinderEntityQuickPickType.JupyterServer)
 					) {
 						const serverId = e.item.idAndHandle.handle;
+
 						const serverToRemove = jupyterServers.find(
 							(s) => s.id === serverId,
 						);
+
 						if (
 							serverProvider?.removeJupyterServer &&
 							serverToRemove &&
@@ -471,6 +494,7 @@ export class RemoteNotebookKernelSourceSelector
 					return;
 				}
 				const quickPickCommandItems: QuickPickItem[] = [];
+
 				if (quickPickServerItems.length > 0) {
 					quickPickCommandItems.push({
 						label: "",
@@ -481,6 +505,7 @@ export class RemoteNotebookKernelSourceSelector
 				const commands = await Promise.resolve(
 					provider.commandProvider.provideCommands(e, token),
 				);
+
 				const newProviderItems: KernelProviderItemsQuickPickItem[] = (
 					commands || []
 				).map((i) => {
@@ -515,6 +540,7 @@ export class RemoteNotebookKernelSourceSelector
 					).catch((ex) =>
 						logger.error(`Failed to select a kernel`, ex),
 					);
+
 					if (result && result === InputFlowAction.back) {
 						if (selectedSource === defaultSelection) {
 							throw InputFlowAction.back;
@@ -533,6 +559,7 @@ export class RemoteNotebookKernelSourceSelector
 						type: "connection",
 						connection: result,
 					};
+
 					return;
 				}
 				case KernelFinderEntityQuickPickType.JupyterServer: {
@@ -542,6 +569,7 @@ export class RemoteNotebookKernelSourceSelector
 							handle: selectedSource.server.id,
 							extensionId: provider.extensionId,
 						};
+
 						if (
 							provider.extensionId.toLowerCase() ===
 							CodespaceExtensionId.toLowerCase()
@@ -564,6 +592,7 @@ export class RemoteNotebookKernelSourceSelector
 					).catch((ex) =>
 						logger.error(`Failed to select a kernel`, ex),
 					);
+
 					if (result && result === InputFlowAction.back) {
 						if (selectedSource === defaultSelection) {
 							throw InputFlowAction.back;
@@ -582,6 +611,7 @@ export class RemoteNotebookKernelSourceSelector
 						type: "connection",
 						connection: result,
 					};
+
 					return;
 				}
 				case KernelFinderEntityQuickPickType.UriProviderQuickPick: {
@@ -589,6 +619,7 @@ export class RemoteNotebookKernelSourceSelector
 						notebooks.createNotebookControllerDetectionTask(
 							JupyterNotebookView,
 						);
+
 					try {
 						if (lazyQuickPick) {
 							lazyQuickPick.busy = true;
@@ -599,6 +630,7 @@ export class RemoteNotebookKernelSourceSelector
 								state,
 								token,
 							);
+
 						if (lazyQuickPick) {
 							lazyQuickPick.busy = false;
 						}
@@ -656,6 +688,7 @@ export class RemoteNotebookKernelSourceSelector
 				handle: server.id,
 				extensionId: selectedSource.provider.extensionId,
 			};
+
 			if (
 				serverId.extensionId.toLowerCase() ===
 				CodespaceExtensionId.toLowerCase()
@@ -676,18 +709,21 @@ export class RemoteNotebookKernelSourceSelector
 			finderPromise,
 			token,
 		).catch((ex) => logger.error(`Failed to select a kernel`, ex));
+
 		if (result && result === InputFlowAction.back) {
 			// Do not go back to the previous command,
 			// We have no idea whta the previous command in the 3rd party extension does,
 			// Its possible we start a server, or make some http request or the like.
 			// Thus implicitly calling the action on the command is wrong, instead the user must chose this operation.
 			// return this.selectRemoteServerFromRemoteKernelFinder(selectedSource, state, token);
+
 			throw InputFlowAction.back;
 		}
 		if (!result || result instanceof InputFlowAction) {
 			throw new CancellationError();
 		}
 		state.selection = { type: "connection", connection: result };
+
 		return;
 	}
 	private async selectRemoteKernelFromPicker(
@@ -696,15 +732,19 @@ export class RemoteNotebookKernelSourceSelector
 		token: CancellationToken,
 	) {
 		let recommended: RemoteKernelConnectionMetadata | undefined;
+
 		const quickPickFactory = (item: KernelConnectionMetadata) => {
 			const displayData = this.displayDataProvider.getDisplayData(item);
+
 			const prefix = item === recommended ? "$(star-full) " : "";
+
 			return <QuickPickItem>{
 				label: `${prefix}${displayData.label}`,
 				description: displayData.description,
 				detail: displayData.detail,
 			};
 		};
+
 		const getCategory = (item: KernelConnectionMetadata) => {
 			return <{ label: string; sortKey?: string }>{
 				label:
@@ -712,10 +752,12 @@ export class RemoteNotebookKernelSourceSelector
 					"Other",
 			};
 		};
+
 		const errorToQuickPickItem = (_error: Error) => ({
 			label: DataScience.failedToFetchKernelSpecsRemoteErrorMessageForQuickPickLabel,
 			detail: DataScience.failedToFetchKernelSpecsRemoteErrorMessageForQuickPickDetail,
 		});
+
 		const remoteKernelPicker = new BaseProviderBasedQuickPick(
 			source,
 			quickPickFactory,
@@ -723,6 +765,7 @@ export class RemoteNotebookKernelSourceSelector
 			{ supportsBack: true },
 			errorToQuickPickItem,
 		);
+
 		const preferred = new PreferredKernelConnectionService(
 			this.jupyterConnection,
 		);
@@ -736,6 +779,7 @@ export class RemoteNotebookKernelSourceSelector
 			)
 			.then((item) => {
 				recommended = item;
+
 				if (item?.kind === "startUsingRemoteKernelSpec") {
 					remoteKernelPicker.recommended = item;
 				}
@@ -744,6 +788,7 @@ export class RemoteNotebookKernelSourceSelector
 			.catch((ex) =>
 				logger.error(`Failed to determine preferred remote kernel`, ex),
 			);
+
 		return remoteKernelPicker.selectItem(token);
 	}
 }

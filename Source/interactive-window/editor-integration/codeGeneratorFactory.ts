@@ -47,6 +47,7 @@ export class CodeGeneratorFactory
 		notebook: NotebookDocument,
 	): IInteractiveWindowCodeGenerator {
 		const existing = this.get(notebook);
+
 		if (existing) {
 			return existing;
 		}
@@ -57,6 +58,7 @@ export class CodeGeneratorFactory
 			this.disposables,
 		);
 		this.codeGenerators.set(notebook, codeGenerator);
+
 		return codeGenerator;
 	}
 	public get(

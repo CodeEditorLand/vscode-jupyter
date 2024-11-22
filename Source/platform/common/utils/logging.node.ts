@@ -3,6 +3,7 @@
 
 export function formatErrorForLogging(error: Error | string): string {
 	let message: string = "";
+
 	if (typeof error === "string") {
 		message = error;
 	} else {
@@ -14,6 +15,7 @@ export function formatErrorForLogging(error: Error | string): string {
 		}
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const innerException = (error as any).innerException;
+
 		if (innerException && (innerException.message || innerException.name)) {
 			if (innerException.message) {
 				message += `, Inner Error Message: ${innerException.message}`;

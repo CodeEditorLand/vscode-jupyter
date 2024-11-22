@@ -178,6 +178,7 @@ export class CellExecutionMessageHandler implements IDisposable {
     private gotShellReply = false;
     private streamsReAttachedToExecutingCell = false;
     private endAbnormallyTimeout?: NodeJS.Timeout | number;
+
     constructor(
         public readonly cell: NotebookCell,
         private readonly controller: IKernelController,
@@ -199,6 +200,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                     return;
                 }
                 const thisCellChange = e.cellChanges.find(({ cell }) => cell === this.cell);
+
                 if (!thisCellChange) {
                     return;
                 }
@@ -229,6 +231,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                 // Cell has been deleted or the like.
                 if (this.cell.document.isClosed) {
                     request.dispose();
+
                     return;
                 }
                 this.handleReply(msg);
@@ -330,6 +333,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             const gotANewMessage = parentMsgId
                 ? parentMsgId !== this.executeRequestMessageId && !isBusyProcessingAnotherRequest
                 : false;
+
             const isResponseToInterruptRequest =
                 typeof msg.parent_header === 'object' &&
                 msg.parent_header &&
@@ -346,10 +350,12 @@ export class CellExecutionMessageHandler implements IDisposable {
             // If we get a response for that, then this means the previous cell execution has completed.
             // Similarly if we see a response for an execution then the previous execution has completed.
             const messageTypesIndicatingEndOfCellExecution = ['kernel_info_reply', 'execute_input', 'execute_reply'];
+
             const gotMessageThatIndicatesEndOfCellExecution =
                 'msg_type' in msg &&
                 typeof msg.msg_type === 'string' &&
                 messageTypesIndicatingEndOfCellExecution.includes(msg.msg_type);
+
             if (!this.completedExecution && completed) {
                 this.completedExecution = true;
                 // Clear the hacky way of ending the execution.
@@ -368,6 +374,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                     () => {
                         this.completedExecution = true;
                         this.endAbnormallyTimeout = undefined;
+
                         return this.endCellExecution();
                     },
                     // If we got an idle response to an interrupt request, this means the previous request has ended.
@@ -380,6 +387,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                         this.endAbnormallyTimeout = undefined;
                     })
                 );
+
                 return;
             }
         }
@@ -417,6 +425,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             this.handleIOPub(msg);
         } catch (ex) {
             logger.error(`Failed to handle iopub message as a result of some comm message`, msg, ex);
+
             if (!this.completedExecution && !this.cell.document.isClosed) {
                 // If there are problems handling the execution, then bubble those to the calling code.
                 // Else just log the errors.
@@ -441,6 +450,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         }
         // If we have an active task, use that instead of creating a new task.
         const existingTask = activeNotebookCellExecution.get(this.cell.notebook);
+
         if (existingTask) {
             return existingTask;
         }
@@ -449,6 +459,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         this.previousResultsToRestore = { ...(this.cell.executionSummary || {}) };
         this.temporaryExecution = CellExecutionCreator.getOrCreate(this.cell, this.controller);
         this.temporaryExecution?.start();
+
         if (this.previousResultsToRestore?.executionOrder && this.temporaryExecution) {
             this.temporaryExecution.executionOrder = this.previousResultsToRestore.executionOrder;
         }
@@ -492,6 +503,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const jupyterLab = require('@jupyterlab/services') as typeof import('@jupyterlab/services');
+
         if (jupyterLab.KernelMessage.isCommOpenMsg(msg)) {
             this.handleCommOpen(msg);
         } else if (jupyterLab.KernelMessage.isExecuteResultMsg(msg)) {
@@ -533,6 +545,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         // Check if this is a message for an Output Widget,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const state: { _model_module: string } | undefined = (msg.content.data?.state as any) || undefined;
+
         if (
             msg.content.target_name === Identifiers.DefaultCommTarget &&
             state &&
@@ -546,6 +559,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             method: 'update';
             state: { msg_id: string } | { children: string[] };
         }>;
+
         if (!data || data.method !== 'update' || typeof data.state !== 'object') {
             return;
         }
@@ -555,6 +569,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             // the kernel is instructing the front end (UI widget manager)
             // to handle all of the messages that would have other wise been handled as regular execution messages for msg_id.
             const parentHeader = 'msg_id' in msg.parent_header ? msg.parent_header : undefined;
+
             if (
                 this.ownedRequestMsgIds.has(msg.content.comm_id) ||
                 (parentHeader && this.ownedRequestMsgIds.has(parentHeader.msg_id))
@@ -607,6 +622,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             this.clearLastUsedStreamOutput();
             execution?.clearOutput().then(noop, noop);
             this.clearOutputOnNextUpdateToOutput = false;
+
             return { previousValueOfClearOutputOnNextUpdateToOutput: true };
         }
         return { previousValueOfClearOutputOnNextUpdateToOutput: false };
@@ -617,6 +633,7 @@ export class CellExecutionMessageHandler implements IDisposable {
     ) {
         if (output.data && typeof output.data === 'object' && WIDGET_MIMETYPE in output.data) {
             const widgetData = output.data[WIDGET_MIMETYPE] as WidgetData;
+
             if (widgetData && this.context.extensionMode === ExtensionMode.Test) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (widgetData as any)['_vsc_test_cellIndex'] = this.cell.index;
@@ -628,6 +645,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             }
         }
         const cellOutput = cellOutputToVSCCellOutput(output);
+
         const displayId =
             'transient' in output &&
             typeof output.transient === 'object' &&
@@ -636,6 +654,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             typeof output.transient?.display_id === 'string'
                 ? output.transient?.display_id
                 : undefined;
+
         if (this.cell.document.isClosed) {
             return;
         }
@@ -659,7 +678,9 @@ export class CellExecutionMessageHandler implements IDisposable {
         traceCellMessage(this.cell, 'Append output in addToCellData');
         // If the output belongs to a widget, then add the output to that specific widget (i.e. just below the widget).
         let outputShouldBeAppended = true;
+
         const parentHeaderMsgId = getParentHeaderMsgId(originalMessage);
+
         if (
             this.outputsAreSpecificToAWidget.length &&
             this.outputsAreSpecificToAWidget[this.outputsAreSpecificToAWidget.length - 1].msgIdsToSwallow ===
@@ -701,6 +722,7 @@ export class CellExecutionMessageHandler implements IDisposable {
      */
     private canMimeTypeBeRenderedByWidgetManager(outputItem: NotebookCellOutputItem) {
         const mime = outputItem.mime;
+
         if (
             mime == CellOutputMimeTypes.stderr ||
             mime == CellOutputMimeTypes.stdout ||
@@ -746,7 +768,9 @@ export class CellExecutionMessageHandler implements IDisposable {
         const outputAreSpecificToAWidgetHandlingCommId = this.outputsAreSpecificToAWidget.length
             ? this.outputsAreSpecificToAWidget[this.outputsAreSpecificToAWidget.length - 1].handlingCommId
             : undefined;
+
         const commId = 'commId' in options ? options.commId : outputAreSpecificToAWidgetHandlingCommId;
+
         if (!commId) {
             return;
         }
@@ -757,8 +781,10 @@ export class CellExecutionMessageHandler implements IDisposable {
         const cell = this.cell.notebook
             .getCells()
             .find((cell) => CellExecutionMessageHandler.modelIdsOwnedByCells.get(cell)?.has(expectedModelId));
+
         if (!cell) {
             logger.warn(`Unable to find a cell that owns the model ${expectedModelId}`);
+
             return;
         }
         const widgetOutput = cell.outputs.find((output) => {
@@ -768,6 +794,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                 }
                 try {
                     const value = JSON.parse(new TextDecoder().decode(outputItem.data)) as { model_id?: string };
+
                     return value.model_id === expectedModelId;
                 } catch (ex) {
                     logger.warn(`Failed to deserialize the widget data`, ex);
@@ -775,6 +802,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                 return false;
             });
         });
+
         if (!widgetOutput) {
             return;
         }
@@ -784,12 +812,14 @@ export class CellExecutionMessageHandler implements IDisposable {
         // We have some new outputs, that need to be placed immediately after the widget and before any other output
         // that doesn't belong to the widget.
         const clearOption = 'clearOutput' in options ? options.clearOutput : false;
+
         const clearWidgetOutput =
             clearOption ||
             (this.outputsAreSpecificToAWidget.length
                 ? this.outputsAreSpecificToAWidget[this.outputsAreSpecificToAWidget.length - 1]
                       .clearOutputOnNextUpdateToOutput === true
                 : false);
+
         if (this.outputsAreSpecificToAWidget.length) {
             this.outputsAreSpecificToAWidget[
                 this.outputsAreSpecificToAWidget.length - 1
@@ -807,9 +837,11 @@ export class CellExecutionMessageHandler implements IDisposable {
         });
 
         const outputsUptoWidget = newOutputs.slice(0, newOutputs.indexOf(widgetOutput) + 1);
+
         const outputsAfterWidget = newOutputs.slice(newOutputs.indexOf(widgetOutput) + 1);
 
         CellExecutionMessageHandler.outputsOwnedByWidgetModel.set(expectedModelId, outputsOwnedByWidgetModel);
+
         if (outputToAppend) {
             // Keep track of the output added that belongs to the widget.
             // Next time when we need to clear the output belonging to this widget, all we need to do is
@@ -821,6 +853,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         const newOutput = outputToAppend
             ? outputsUptoWidget.concat(outputToAppend).concat(outputsAfterWidget)
             : outputsUptoWidget.concat(outputsAfterWidget);
+
         if (outputsAfterWidget.length === 0 && outputToAppend) {
             // No need to replace everything, just append what we need.
             task?.appendOutput(outputToAppend, cell).then(noop, noop);
@@ -837,6 +870,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         if (msg.content && 'prompt' in msg.content) {
             const cancelToken = new CancellationTokenSource();
             this.prompts.add(cancelToken);
+
             const hasPassword = msg.content.password !== null && (msg.content.password as boolean);
             await window
                 .showInputBox(
@@ -874,6 +908,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 
     private handleExecuteReply(msg: KernelMessage.IExecuteReplyMsg) {
         const reply = msg.content as KernelMessage.IExecuteReply;
+
         if (reply.payload) {
             reply.payload.forEach((payload) => {
                 if (
@@ -905,6 +940,7 @@ export class CellExecutionMessageHandler implements IDisposable {
     // Handle our set_next_input message, which can either replace or insert a new cell with text
     private handleSetNextInput(payload: ISetNextInputPayload) {
         const edit = new WorkspaceEdit();
+
         if (payload.replace) {
             // Replace the contents of the current cell with text
             edit.replace(
@@ -918,9 +954,11 @@ export class CellExecutionMessageHandler implements IDisposable {
         } else {
             // Add a new cell after the current with text
             traceCellMessage(this.cell, 'Create new cell after current');
+
             const cellData = new NotebookCellData(NotebookCellKind.Code, payload.text, this.cell.document.languageId);
             cellData.outputs = [];
             cellData.metadata = {};
+
             const nbEdit = NotebookEdit.insertCells(this.cell.index + 1, [cellData]);
             edit.set(this.cell.notebook.uri, [nbEdit]);
         }
@@ -990,6 +1028,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         } else if (previousValueOfClearOutputOnNextUpdateToOutput) {
             // Replace the current outputs with a single new output.
             const text = concatMultilineString(msg.content.text);
+
             const output = cellOutputToVSCCellOutput({
                 output_type: 'stream',
                 name: msg.content.name,
@@ -1001,6 +1040,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         } else {
             // Create a new output
             const text = formatStreamText(concatMultilineString(msg.content.text));
+
             const output = cellOutputToVSCCellOutput({
                 output_type: 'stream',
                 name: msg.content.name,
@@ -1067,6 +1107,7 @@ export class CellExecutionMessageHandler implements IDisposable {
             traceback = formatter.format(this.cell, traceback);
         });
         logger.ci(`Traceback for error after formatting ${traceback}`);
+
         const output: nbformat.IError = {
             output_type: 'error',
             ename: msg.content.ename,
@@ -1076,6 +1117,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 
         if (this.cell.notebook.notebookType !== 'interactive') {
             const cellExecution = CellExecutionCreator.get(this.cell);
+
             if (cellExecution && msg.content.ename !== 'KeyboardInterrupt') {
                 cellExecution.errorInfo = {
                     name: msg.content.ename,
@@ -1110,23 +1152,29 @@ export class CellExecutionMessageHandler implements IDisposable {
      */
     private handleUpdateDisplayDataMessage(msg: KernelMessage.IUpdateDisplayDataMsg) {
         const displayId = msg.content.transient.display_id;
+
         if (!displayId) {
             logger.warn('Update display data message received, but no display id', msg.content);
+
             return;
         }
         const outputToBeUpdated = CellOutputDisplayIdTracker.getMappedOutput(this.cell.notebook, displayId);
+
         if (!outputToBeUpdated) {
             // Possible this is a display Id that was created by code executed by an extension.
             logger.trace('Update display data message received, but no output found to update', msg.content);
+
             return;
         }
         if (outputToBeUpdated.cell.document.isClosed) {
             logger.warn('Update display data message received, but output cell is closed', msg.content);
+
             return;
         }
         const output = translateCellDisplayOutput(
             new NotebookCellOutput(outputToBeUpdated.outputItems, outputToBeUpdated.outputContainer.metadata)
         );
+
         const newOutput = cellOutputToVSCCellOutput({
             ...output,
             data: msg.content.data,
@@ -1135,13 +1183,16 @@ export class CellExecutionMessageHandler implements IDisposable {
         // If there was no output and still no output, then nothing to do.
         if (outputToBeUpdated.outputItems.length === 0 && newOutput.items.length === 0) {
             logger.trace('Update display data message received, but no output to update', msg.content);
+
             return;
         }
         // Compare each output item (at the end of the day everything is serializable).
         // Hence this is a safe comparison.
         let outputMetadataHasChanged = false;
+
         if (outputToBeUpdated.outputItems.length === newOutput.items.length) {
             let allAllOutputItemsSame = true;
+
             if (!fastDeepEqual(outputToBeUpdated.outputContainer.metadata || {}, newOutput.metadata || {})) {
                 outputMetadataHasChanged = true;
                 allAllOutputItemsSame = false;
@@ -1150,6 +1201,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                 for (let index = 0; index < outputToBeUpdated.outputItems.length; index++) {
                     if (!fastDeepEqual(outputToBeUpdated.outputItems[index], newOutput.items[index])) {
                         allAllOutputItemsSame = false;
+
                         break;
                     }
                 }
@@ -1160,6 +1212,7 @@ export class CellExecutionMessageHandler implements IDisposable {
                     'Update display data message received, but no output to update (data is the same)',
                     msg.content
                 );
+
                 return;
             }
         }
@@ -1168,6 +1221,7 @@ export class CellExecutionMessageHandler implements IDisposable {
         // In such circumstances, create a temporary task & use that to update the output (only cell execution tasks can update cell output).
         const task = this.execution || this.createTemporaryTask();
         traceCellMessage(this.cell, `Replace output items in display data ${newOutput.items.length}`);
+
         if (outputMetadataHasChanged) {
             // https://github.com/microsoft/vscode/issues/181369
             // This operation is very unsafe as we replace all of the outputs, when we need to replace just one output.

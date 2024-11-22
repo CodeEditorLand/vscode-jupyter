@@ -57,6 +57,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		string,
 		Promise<Set<string>>
 	>();
+
 	constructor(
 		@inject(IPythonExtensionChecker)
 		private readonly pythonExtensionChecker: IPythonExtensionChecker,
@@ -89,7 +90,9 @@ export class InterpreterPackages implements IInterpreterPackages {
 			return Promise.resolve(new Map<string, string>());
 		}
 		const key = getComparisonKey(interpreter.uri);
+
 		let deferred = this.interpreterInformation.get(key);
+
 		if (!deferred) {
 			deferred = createDeferred<Map<string, string>>();
 			this.interpreterInformation.set(key, deferred);
@@ -105,13 +108,16 @@ export class InterpreterPackages implements IInterpreterPackages {
 			return Promise.resolve(undefined);
 		}
 		const packages = await this.getPackageVersions(interpreter);
+
 		const telemetrySafeString = await getTelemetrySafeHashedString(
 			packageName.toLocaleLowerCase(),
 		);
+
 		if (!packages.has(telemetrySafeString)) {
 			return;
 		}
 		const version = packages.get(telemetrySafeString);
+
 		if (!version) {
 			return;
 		}
@@ -132,6 +138,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		}
 
 		const workspaceKey = getWorkspaceFolderIdentifier(resource);
+
 		if (!this.interpreterPackages.has(workspaceKey)) {
 			const promise = this.listPackagesImpl(resource);
 			this.interpreterPackages.set(workspaceKey, promise);
@@ -152,6 +159,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 	private async listPackagesImpl(resource?: Resource): Promise<Set<string>> {
 		const interpreter =
 			await this.interpreterService.getActiveInterpreter(resource);
+
 		if (!interpreter) {
 			return new Set<string>();
 		}
@@ -159,15 +167,20 @@ export class InterpreterPackages implements IInterpreterPackages {
 			interpreter,
 			resource,
 		});
+
 		const separator = "389a87b7-288f-4235-92bf-73bf19bf6491";
+
 		const code = `import pkgutil;import json;print("${separator}");print(json.dumps(list([x.name for x in pkgutil.iter_modules()])));print("${separator}");`;
+
 		const modulesOutput = await service.exec(["-c", code], {
 			throwOnStdErr: false,
 		});
+
 		if (modulesOutput.stdout) {
 			const modules = JSON.parse(
 				modulesOutput.stdout.split(separator)[1].trim(),
 			) as string[];
+
 			return new Set(
 				modules.concat(modules.map((item) => item.toLowerCase())),
 			);
@@ -176,6 +189,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 				`Failed to get list of installed packages for ${getDisplayPath(interpreter.uri)}`,
 				modulesOutput.stderr,
 			);
+
 			return new Set<string>();
 		}
 	}
@@ -186,15 +200,18 @@ export class InterpreterPackages implements IInterpreterPackages {
 	) {
 		if (!this.pythonExtensionChecker.isPythonExtensionActive) {
 			this.pendingInterpreterBeforeActivation.add(interpreterUri);
+
 			return;
 		}
 		let interpreter: PythonEnvironment;
+
 		if (isResource(interpreterUri)) {
 			// Get details of active interpreter for the Uri provided.
 			const activeInterpreter =
 				await this.interpreterService.getActiveInterpreter(
 					interpreterUri,
 				);
+
 			if (!activeInterpreter) {
 				return;
 			}
@@ -209,6 +226,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		ignoreCache?: boolean,
 	) {
 		const key = getComparisonKey(interpreter.uri);
+
 		if (this.pendingInterpreterInformation.has(key) && !ignoreCache) {
 			return;
 		}
@@ -225,6 +243,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 						this.pendingInterpreterInformation.delete(key);
 					}
 				}, 300_000);
+
 				const disposable = { dispose: () => clearTimeout(timer) };
 				this.disposables.push(disposable);
 			})
@@ -249,6 +268,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 			throwOnStdErr: false,
 			mergeStdOutErr: true,
 		});
+
 		const packageAndVersions = new Map<string, string>();
 		// Add defaults.
 		await Promise.all(
@@ -268,10 +288,12 @@ export class InterpreterPackages implements IInterpreterPackages {
 					const parts = line
 						.split(" ")
 						.filter((item) => item.trim().length);
+
 					if (parts.length < 2) {
 						return;
 					}
 					const [packageName, rawVersion] = parts;
+
 					if (
 						!interestedPackages.has(
 							packageName.toLowerCase().trim(),
@@ -286,8 +308,11 @@ export class InterpreterPackages implements IInterpreterPackages {
 					);
 				}),
 		);
+
 		const key = getComparisonKey(interpreter.uri);
+
 		let deferred = this.interpreterInformation.get(key);
+
 		if (!deferred) {
 			deferred = createDeferred<Map<string, string>>();
 			this.interpreterInformation.set(key, deferred);

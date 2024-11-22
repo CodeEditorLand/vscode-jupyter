@@ -40,6 +40,7 @@ export class PythonCellFoldingProvider
 	public activate() {
 		const enabled =
 			this.configurationService.getSettings().pythonCellFolding;
+
 		if (enabled) {
 			this.extensionContext.subscriptions.push(
 				languages.registerFoldingRangeProvider(
@@ -65,8 +66,10 @@ export class PythonCellFoldingProvider
 
 		const codeWatcher =
 			this.dataScienceCodeLensProvider.getCodeWatcher(document);
+
 		if (codeWatcher) {
 			const codeLenses = codeWatcher.getCodeLenses();
+
 			if (token.isCancellationRequested || codeLenses.length == 0) {
 				return undefined;
 			}

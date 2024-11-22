@@ -17,6 +17,7 @@ export function noop() {}
 export function swallowExceptions(cb: Function): void {
 	try {
 		const result = cb();
+
 		if (isPromise(result)) {
 			result.catch(noop);
 		}
@@ -86,6 +87,7 @@ export function isResource(
 		return true;
 	}
 	const uri = resource as Uri;
+
 	return typeof uri.path === "string" && typeof uri.scheme === "string";
 }
 
@@ -104,11 +106,13 @@ export function isUri(resource?: Uri | any): resource is Uri {
 		return false;
 	}
 	const uri = resource as Uri;
+
 	return typeof uri.path === "string" && typeof uri.scheme === "string";
 }
 
 export function isNotebookCell(documentOrUri: TextDocument | Uri): boolean {
 	const uri = isUri(documentOrUri) ? documentOrUri : documentOrUri.uri;
+
 	return (
 		uri.scheme.includes(NotebookCellScheme) ||
 		uri.path.endsWith(".interactive")

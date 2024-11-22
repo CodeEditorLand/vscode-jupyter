@@ -33,20 +33,25 @@ export async function chainWithPendingUpdates(
 	update: (edit: WorkspaceEdit) => void | Promise<void>,
 ): Promise<boolean> {
 	const notebook = document;
+
 	if (document.isClosed) {
 		return true;
 	}
 	const pendingUpdates = pendingCellUpdates.has(notebook)
 		? pendingCellUpdates.get(notebook)!
 		: Promise.resolve();
+
 	const deferred = createDeferred<boolean>();
+
 	const aggregatedPromise = pendingUpdates
 		// We need to ensure the update operation gets invoked after previous updates have been completed.
 		// This way, the callback making references to cell metadata will have the latest information.
 		// Even if previous update fails, we should not fail this current update.
 		.finally(async () => {
 			const edit = new WorkspaceEdit();
+
 			const result = update(edit);
+
 			if (isPromise(result)) {
 				await result;
 			}
@@ -57,11 +62,13 @@ export async function chainWithPendingUpdates(
 		})
 		.catch(noop);
 	pendingCellUpdates.set(notebook, aggregatedPromise);
+
 	return deferred.promise;
 }
 
 export function clearPendingChainedUpdatesForTests() {
 	const editor: NotebookEditor | undefined = window.activeNotebookEditor;
+
 	if (editor?.notebook) {
 		pendingCellUpdates.delete(editor.notebook);
 	}

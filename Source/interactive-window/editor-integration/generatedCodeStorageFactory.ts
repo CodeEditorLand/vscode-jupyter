@@ -18,6 +18,7 @@ export class GeneratedCodeStorageFactory
 		NotebookDocument,
 		IGeneratedCodeStore
 	>();
+
 	getOrCreate(notebook: NotebookDocument): IGeneratedCodeStore {
 		if (!this.storages.has(notebook)) {
 			this.storages.set(notebook, new GeneratedCodeStorage());
@@ -32,11 +33,13 @@ export class GeneratedCodeStorageFactory
 		} else {
 			const notebook = workspace.notebookDocuments.find((nb) => {
 				const storage = this.storages.get(nb);
+
 				return storage?.all.find(
 					(item) =>
 						item.uri.toString() === options.fileUri.toString(),
 				);
 			});
+
 			return notebook ? this.storages.get(notebook) : undefined;
 		}
 	}

@@ -30,22 +30,28 @@ export class Extensions implements IExtensions {
 		displayName: string;
 	} {
 		stack = stack || new Error().stack;
+
 		try {
 			const jupyterExtRoot = extensions
 				.getExtension(JVSC_EXTENSION_ID)!
 				.extensionUri.toString()
 				.toLowerCase();
+
 			let frames: string[] = [];
+
 			if (stack) {
 				frames = stack
 					.split("\n")
 					.map((f) => {
 						const result = /\((.*)\)/.exec(f);
+
 						const filenameWithPositions = result
 							? result[1]
 							: undefined;
+
 						try {
 							const filename = /\((.*)\:\d*\:\d*\)/.exec(f);
+
 							if (!filename) {
 								return filenameWithPositions;
 							}
@@ -65,10 +71,13 @@ export class Extensions implements IExtensions {
 							item &&
 							!item.toLowerCase().startsWith(jupyterExtRoot),
 					) as string[];
+
 				const folderParts = jupyterExtRoot.split(/[\\/]/);
+
 				const indexOfJupyterExtFolder = folderParts.findIndex((item) =>
 					item.startsWith(JVSC_EXTENSION_ID),
 				);
+
 				const extensionFolderName =
 					indexOfJupyterExtFolder === -1
 						? undefined
@@ -76,6 +85,7 @@ export class Extensions implements IExtensions {
 
 				parseStack(new Error("Ex")).forEach((item) => {
 					const fileName = item.getFileName();
+
 					if (
 						fileName &&
 						!fileName.toLowerCase().startsWith(jupyterExtRoot)
@@ -83,6 +93,7 @@ export class Extensions implements IExtensions {
 						frames.push(fileName);
 					}
 				});
+
 				for (const frame of frames) {
 					const matchingExt = this.extensions.find(
 						(ext) =>
@@ -98,6 +109,7 @@ export class Extensions implements IExtensions {
 										ext.extensionUri.path.toLowerCase(),
 									)),
 					);
+
 					if (matchingExt) {
 						return {
 							extensionId: matchingExt.id,
@@ -109,6 +121,7 @@ export class Extensions implements IExtensions {
 				let extensionPathFromFrames = frames.find((frame) =>
 					frame.includes(JVSC_EXTENSION_ID),
 				);
+
 				if (extensionPathFromFrames) {
 					extensionPathFromFrames = extensionPathFromFrames.substring(
 						0,
@@ -134,6 +147,7 @@ export class Extensions implements IExtensions {
 						.substring(extensionPathFromFrames.length)
 						.substring(1)
 						.split(/[\\/]/)[0];
+
 					if (extensionIdInFrame.includes("-")) {
 						extensionIdInFrame = extensionIdInFrame.substring(
 							0,
@@ -143,6 +157,7 @@ export class Extensions implements IExtensions {
 					const matchingExt = this.extensions.find(
 						(ext) => ext.id === extensionIdInFrame,
 					);
+
 					if (matchingExt) {
 						return {
 							extensionId: matchingExt.id,
@@ -157,6 +172,7 @@ export class Extensions implements IExtensions {
 			);
 			logger.error(`Jupyter Root`, jupyterExtRoot);
 			logger.error(`Frames`, frames);
+
 			return {
 				extensionId: unknownExtensionId,
 				displayName: DataScience.unknownPackage,
@@ -167,6 +183,7 @@ export class Extensions implements IExtensions {
 				stack,
 			);
 			logger.error(`Failure error`, ex);
+
 			return {
 				extensionId: unknownExtensionId,
 				displayName: DataScience.unknownPackage,

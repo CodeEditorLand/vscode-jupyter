@@ -34,11 +34,13 @@ export class CellRangeCache implements ICellRangeCache {
 
     public getCellRanges(document: vscode.TextDocument): ICellRange[] {
         const cached = this.cache.get(document.uri);
+
         if (cached && cached.version === document.version) {
             return cached.ranges;
         }
 
         const settings = this.configService.getSettings(document.uri);
+
         const ranges = generateCellRangesFromDocument(document, settings);
         this.cache.set(document.uri, { version: document.version, ranges });
 
@@ -80,6 +82,7 @@ export class CellRangeCache implements ICellRangeCache {
 
     private updateContextKeys(documentOrOverride?: vscode.TextDocument | boolean) {
         let hasCodeCells = false;
+
         if (typeof documentOrOverride == 'boolean') {
             hasCodeCells = documentOrOverride;
         } else {

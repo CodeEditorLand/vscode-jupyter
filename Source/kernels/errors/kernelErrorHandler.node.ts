@@ -62,22 +62,28 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 			await this.getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
 				resource,
 			);
+
 		if (problematicFiles.length > 0) {
 			const cwd = resource ? path.dirname(resource) : undefined;
+
 			const fileLinks = problematicFiles.map((item) => {
 				if (item.type === "file") {
 					const displayPath = resource
 						? getDisplayPath(item.uri, [], cwd)
 						: path.basename(item.uri);
+
 					return `<a href='${item.uri.toString()}?line=1'>${displayPath}</a>`;
 				} else {
 					const displayPath = resource
 						? getDisplayPath(item.uri, [], cwd)
 						: `${path.basename(path.dirname(item.uri))}/__init__.py`;
+
 					return `<a href='${item.uri.toString()}?line=1'>${displayPath}</a>`;
 				}
 			});
+
 			let files = "";
+
 			if (fileLinks.length === 1) {
 				files = fileLinks[0];
 			} else {

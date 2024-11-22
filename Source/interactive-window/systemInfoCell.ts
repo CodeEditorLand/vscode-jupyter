@@ -24,6 +24,7 @@ export function getStartConnectMessage(
 	reason: SysInfoReason,
 ) {
 	const displayName = getDisplayNameOrNameOfKernelConnection(kernelMetadata);
+
 	if (displayName) {
 		return reason == SysInfoReason.Restart
 			? DataScience.restartingKernelCustomHeader(displayName)
@@ -40,6 +41,7 @@ export function getFinishConnectMessage(
 	reason: SysInfoReason,
 ) {
 	const displayName = getDisplayNameOrNameOfKernelConnection(kernelMetadata);
+
 	return reason == SysInfoReason.Restart
 		? DataScience.restartedKernelHeader(displayName || "")
 		: DataScience.connectedKernelHeader(displayName || "");
@@ -71,8 +73,10 @@ export class SystemInfoCell {
 	private async getOrUpdate(message: string) {
 		const lastCellIndex =
 			(await this.interactiveWindow.getAppendIndex()) - 1;
+
 		if (lastCellIndex >= 0) {
 			const lastCell = this.notebookDocument.cellAt(lastCellIndex);
+
 			if (isSysInfoCell(lastCell)) {
 				return this.updateMessage(message);
 			}
@@ -91,11 +95,13 @@ export class SystemInfoCell {
 			);
 			markdownCell.metadata = { isInteractiveWindowMessageCell: true };
 			addedCellIndex = await this.interactiveWindow.getAppendIndex();
+
 			const nbEdit = NotebookEdit.insertCells(addedCellIndex, [
 				markdownCell,
 			]);
 			edit.set(this.notebookDocument.uri, [nbEdit]);
 		});
+
 		return this.notebookDocument.cellAt(addedCellIndex!);
 	}
 
@@ -115,15 +121,18 @@ export class SystemInfoCell {
 							isInteractiveWindowMessageCell: true,
 						}),
 					]);
+
 					return;
 				}
 			}
 		});
+
 		return cell;
 	}
 
 	public async deleteCell() {
 		this.isDeleted = true;
+
 		const cell = await this.sysInfoCellPromise;
 		await chainWithPendingUpdates(this.notebookDocument, (edit) => {
 			if (cell.index >= 0) {
@@ -132,6 +141,7 @@ export class SystemInfoCell {
 						new NotebookRange(cell.index, cell.index + 1),
 					);
 					edit.set(this.notebookDocument.uri, [nbEdit]);
+
 					return;
 				}
 			}

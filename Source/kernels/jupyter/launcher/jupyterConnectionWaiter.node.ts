@@ -61,6 +61,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 		const configService = serviceContainer.get<IConfigurationService>(
 			IConfigurationService,
 		);
+
 		const jupyterLaunchTimeout =
 			configService.getSettings(undefined).jupyterLaunchTimeout;
 
@@ -72,6 +73,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 
 		// Listen for crashes
 		let exitCode = 0;
+
 		if (launchResult.proc) {
 			launchResult.proc.on("exit", (c) => (exitCode = c ? c : 0));
 		}
@@ -80,6 +82,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 			launchResult.out.onDidChange((output: Output<string>) => {
 				logger.trace(output.out);
 				this.output += output.out;
+
 				if (
 					RegExpValues.HttpPattern.exec(this.output) &&
 					!this.startPromise.completed
@@ -129,8 +132,10 @@ export class JupyterConnectionWaiter implements IDisposable {
 					getFilePath(Uri.file(info.notebook_dir)),
 				);
 			});
+
 			if (matchInfo) {
 				const url = matchInfo.url;
+
 				const token = matchInfo.token;
 				this.resolveStartPromise(url, token);
 			}
@@ -139,7 +144,9 @@ export class JupyterConnectionWaiter implements IDisposable {
 		// our URL parse
 		if (!this.startPromise.completed) {
 			const urlMatch = urlMatcher.exec(data);
+
 			const groups = urlMatch?.groups;
+
 			if (
 				!this.startPromise.completed &&
 				groups &&
@@ -147,15 +154,18 @@ export class JupyterConnectionWaiter implements IDisposable {
 			) {
 				// Rebuild the URI from our group hits
 				const host = groups.LOCAL ? groups.LOCAL : groups.IP;
+
 				const uriString = `${groups.PREFIX}${host}${groups.REST}`;
 
 				let url: URL;
+
 				try {
 					url = new URL(uriString);
 				} catch (err) {
 					logger.error(`Failed to parse ${uriString}`, err);
 					// Failed to parse the url either via server infos or the string
 					this.rejectStartPromise(DataScience.jupyterLaunchNoURL);
+
 					return;
 				}
 
@@ -175,18 +185,22 @@ export class JupyterConnectionWaiter implements IDisposable {
 	private resolveStartPromise(baseUrl: string, token: string) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		clearTimeout(this.launchTimeout as any);
+
 		if (!this.startPromise.rejected) {
 			const configService =
 				this.serviceContainer.get<IConfigurationService>(
 					IConfigurationService,
 				);
+
 			const requestCreator =
 				this.serviceContainer.get<IJupyterRequestCreator>(
 					IJupyterRequestCreator,
 				);
+
 			const requestAgentCreator = this.serviceContainer.get<
 				IJupyterRequestAgentCreator | undefined
 			>(IJupyterRequestAgentCreator);
+
 			const connection = createJupyterConnectionInfo(
 				{
 					handle: "",
@@ -215,10 +229,14 @@ export class JupyterConnectionWaiter implements IDisposable {
 	private rejectStartPromise(message: string | Error) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		clearTimeout(this.launchTimeout as any);
+
 		if (!this.startPromise.resolved) {
 			message = typeof message === "string" ? message : message.message;
+
 			let error: Error;
+
 			const stderr = this.output;
+
 			if (
 				stderr.includes("Jupyter command `jupyter-notebook` not found")
 			) {

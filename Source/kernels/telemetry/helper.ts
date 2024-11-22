@@ -62,6 +62,7 @@ export async function trackKernelResourceInformation(
 		return;
 	}
 	const key = getComparisonKey(resource);
+
 	const [currentData, context] = trackedInfo.get(key) || [
 		{
 			resourceType: getResourceType(resource),
@@ -85,6 +86,7 @@ export async function trackKernelResourceInformation(
 		},
 		{ previouslySelectedKernelConnectionId: "" },
 	];
+
 	if (typeof information.capturedEnvVars === "boolean") {
 		currentData.capturedEnvVars = information.capturedEnvVars;
 	}
@@ -95,6 +97,7 @@ export async function trackKernelResourceInformation(
 		currentData.disableUI = information.disableUI;
 	}
 	const kernelConnection = information.kernelConnection;
+
 	if (kernelConnection) {
 		const newKernelConnectionId = kernelConnection.id;
 		// If we have selected a whole new kernel connection for this,
@@ -116,17 +119,24 @@ export async function trackKernelResourceInformation(
 			);
 		}
 		let language: string | undefined;
+
 		switch (kernelConnection.kind) {
 			case "connectToLiveRemoteKernel":
 				language = kernelConnection.kernelModel.language;
+
 				break;
+
 			case "startUsingRemoteKernelSpec":
 			case "startUsingLocalKernelSpec":
 				language = kernelConnection.kernelSpec.language;
+
 				break;
+
 			case "startUsingPythonInterpreter":
 				language = PYTHON_LANGUAGE;
+
 				break;
+
 			default:
 				break;
 		}
@@ -147,6 +157,7 @@ export async function trackKernelResourceInformation(
 		context.previouslySelectedKernelConnectionId = kernelConnection.id;
 
 		const interpreter = kernelConnection.interpreter;
+
 		if (interpreter) {
 			currentData.isUsingActiveInterpreter =
 				WorkspaceInterpreterTracker.isActiveWorkspaceInterpreter(
@@ -154,6 +165,7 @@ export async function trackKernelResourceInformation(
 					interpreter,
 				);
 			currentData.pythonEnvironmentType = getEnvironmentType(interpreter);
+
 			const [pythonEnvironmentPath, version] = await Promise.all([
 				getTelemetrySafeHashedString(
 					getFilePath(getNormalizedInterpreterPath(interpreter.uri)),
@@ -165,6 +177,7 @@ export async function trackKernelResourceInformation(
 				currentData.pythonEnvironmentPath,
 				interpreter,
 			);
+
 			if (version) {
 				currentData.pythonEnvironmentVersion = `${version.major}.${version.minor}.${version.micro}`;
 			} else {

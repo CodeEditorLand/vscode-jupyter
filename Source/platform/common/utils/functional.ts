@@ -3,7 +3,9 @@
 
 export function once<T extends Function>(this: unknown, fn: T): T {
 	const _this = this;
+
 	let didCall = false;
+
 	let result: unknown;
 
 	return function () {

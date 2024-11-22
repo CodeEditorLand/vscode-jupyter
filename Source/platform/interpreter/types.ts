@@ -27,9 +27,11 @@ export interface IReservedPythonNamedProvider extends IDisposable {
 export const IInterpreterPackages = Symbol("IInterpreterPackages");
 export interface IInterpreterPackages {
 	listPackages(resource?: Resource): Promise<string[]>;
+
 	getPackageVersions(
 		interpreter: PythonEnvironment,
 	): Promise<Map<string, string>>;
+
 	getPackageVersion(
 		interpreter: PythonEnvironment,
 		packageName: string,

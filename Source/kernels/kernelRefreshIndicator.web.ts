@@ -21,6 +21,7 @@ import { IKernelFinder } from "./types";
 export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
 	private refreshedOnceBefore?: boolean;
+
 	constructor(
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
@@ -60,10 +61,12 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	private displayProgressIndicator() {
 		const id = Date.now().toString();
 		logger.debug(`Start refreshing Kernel Picker (${id})`);
+
 		const taskNb =
 			notebooks.createNotebookControllerDetectionTask(
 				JupyterNotebookView,
 			);
+
 		const taskIW = notebooks.createNotebookControllerDetectionTask(
 			InteractiveWindowView,
 		);

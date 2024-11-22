@@ -18,7 +18,9 @@ import { getZeroMQ } from "./zeromq.node";
 
 function formConnectionString(config: IKernelConnection, channel: string) {
 	const portDelimiter = config.transport === "tcp" ? ":" : "-";
+
 	const port = config[`${channel}_port` as keyof IKernelConnection];
+
 	if (!port) {
 		throw new Error(`Port not found for channel "${channel}"`);
 	}
@@ -69,6 +71,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	 * Empty string means no protocol (old behavior, this is simpler for raw sockets as we just want to serialize to JSON and back).
 	 */
 	public readonly protocol = "";
+
 	constructor(
 		private connection: IKernelConnection,
 		private serialize: (
@@ -110,7 +113,9 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 					type: "message",
 					target: this,
 				});
+
 				break;
+
 			case "close":
 				this.onclose({
 					wasClean: true,
@@ -118,7 +123,9 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 					reason: "",
 					target: this,
 				});
+
 				break;
+
 			case "error":
 				this.onerror({
 					error: "",
@@ -126,10 +133,14 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 					type: "error",
 					target: this,
 				});
+
 				break;
+
 			case "open":
 				this.onopen({ target: this });
+
 				break;
+
 			default:
 				break;
 		}
@@ -176,6 +187,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 		this.processSocketMessages(channel, result).catch((ex) =>
 			logger.error(`Failed to read messages from channel ${channel}`, ex),
 		);
+
 		return result;
 	}
 	private async processSocketMessages(
@@ -284,6 +296,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 				.then(() => {
 					// Hooks expect serialized data as this normally comes from a WebSocket
 					const serialized = this.serialize(message);
+
 					return Promise.all(
 						this.receiveHooks.map((p) => p(serialized)),
 					);
@@ -358,6 +371,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 
 	private postToSocket(channel: string, data: any) {
 		const socket = (this.channels as any)[channel];
+
 		if (socket) {
 			(socket as Dealer).send(data).catch((exc) => {
 				logger.error(`Error communicating with the kernel`, exc);
@@ -423,6 +437,7 @@ function ensureFields(message: KernelMessage.IMessage, channel: Channel) {
 			header[field] = "";
 		}
 	});
+
 	if (typeof message.channel !== "string") {
 		message.channel = channel;
 	}
@@ -443,6 +458,7 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 	}
 	const messageType = message.header
 		.msg_type as keyof typeof IOPUB_CONTENT_FIELDS;
+
 	if (messageType in IOPUB_CONTENT_FIELDS) {
 		const fields = IOPUB_CONTENT_FIELDS[messageType] as Record<string, any>;
 		// Check for unknown message type.
@@ -450,13 +466,17 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 			return;
 		}
 		const names = Object.keys(fields);
+
 		const content = message.content as Record<string, any>;
+
 		for (let i = 0; i < names.length; i++) {
 			let args = fields[names[i]];
+
 			if (!Array.isArray(args)) {
 				args = [args];
 			}
 			const fieldName = names[i];
+
 			if (
 				!(fieldName in content) ||
 				typeof content[fieldName] !== args[0]
@@ -465,15 +485,22 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 				switch (args[0]) {
 					case "string":
 						content[fieldName] = "";
+
 						break;
+
 					case "boolean":
 						content[fieldName] = false;
+
 						break;
+
 					case "object":
 						content[fieldName] = {};
+
 						break;
+
 					case "number":
 						content[fieldName] = 0;
+
 						break;
 				}
 			}

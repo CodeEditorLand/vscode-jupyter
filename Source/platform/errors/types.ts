@@ -9,6 +9,7 @@
 export abstract class BaseError extends Error {
 	public stdErr?: string;
 	public isJupyterError = true;
+
 	constructor(
 		public readonly category: ErrorCategory,
 		message: string,
@@ -27,6 +28,7 @@ export class WrappedError extends BaseError {
 		category?: ErrorCategory,
 	) {
 		super(category || getErrorCategory(originalException), message);
+
 		if (originalException) {
 			// Retain call stack that trapped the error and rethrows this error.
 			// Also retain the call stack of the original error.

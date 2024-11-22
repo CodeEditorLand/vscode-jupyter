@@ -37,6 +37,7 @@ export class KernelSessionFactory implements IKernelSessionFactory {
 		options: KernelSessionCreationOptions,
 	): Promise<IKernelSession> {
 		const kernelConnection = options.kernelConnection;
+
 		if (
 			this.rawKernelSupported.isSupported &&
 			isLocalConnection(kernelConnection) &&

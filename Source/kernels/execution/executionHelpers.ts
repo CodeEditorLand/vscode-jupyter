@@ -12,6 +12,7 @@ import type * as nbformat from "@jupyterlab/nbformat";
 export function handleTensorBoardDisplayDataOutput(data: nbformat.IMimeBundle) {
 	if (data.hasOwnProperty("text/html")) {
 		const text = data["text/html"];
+
 		if (
 			typeof text === "string" &&
 			text.includes('<iframe id="tensorboard-frame-')

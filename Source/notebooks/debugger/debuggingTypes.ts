@@ -66,6 +66,7 @@ export interface IKernelDebugAdapter extends DebugAdapter {
 	stackTrace(
 		args: DebugProtocol.StackTraceArguments,
 	): Thenable<DebugProtocol.StackTraceResponse["body"]>;
+
 	setBreakpoints(
 		args: DebugProtocol.SetBreakpointsArguments,
 	): Thenable<DebugProtocol.SetBreakpointsResponse["body"]>;
@@ -79,15 +80,20 @@ export interface IKernelDebugAdapter extends DebugAdapter {
 
 	onDidEndSession: Event<DebugSession>;
 	dumpAllCells(): Promise<void>;
+
 	getConfiguration(): IBaseNotebookDebugConfig;
 }
 
 export interface IDebuggingManager {
 	readonly onDoneDebugging: Event<void>;
 	isDebugging(notebook: NotebookDocument): boolean;
+
 	getDebugMode(notebook: NotebookDocument): KernelDebugMode | undefined;
+
 	getDebugSession(notebook: NotebookDocument): DebugSession | undefined;
+
 	getDebugCell(notebook: NotebookDocument): NotebookCell | undefined;
+
 	getDebugAdapter(
 		notebook: NotebookDocument,
 	): IKernelDebugAdapter | undefined;
@@ -189,5 +195,6 @@ export interface IDebugLocationTrackerFactory {
 export const IDebugLocationTracker = Symbol("IDebugLocationTracker");
 export interface IDebugLocationTracker {
 	updated: Event<void>;
+
 	getLocation(debugSession: DebugSession): IDebugLocation | undefined;
 }

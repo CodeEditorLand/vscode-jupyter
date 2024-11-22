@@ -73,6 +73,7 @@ class VsCodeMessageApi implements IMessageApi {
 				const api = this.vscodeApi as any as
 					| undefined
 					| { handleMessage?: Function };
+
 				if (api && api.handleMessage) {
 					api.handleMessage(this.handleVSCodeApiMessages.bind(this));
 				}
@@ -102,6 +103,7 @@ class VsCodeMessageApi implements IMessageApi {
 
 	private async handleVSCodeApiMessages(ev: MessageEvent) {
 		const msg = ev.data as WebviewMessage;
+
 		if (msg && this.messageCallback) {
 			await this.messageCallback(msg);
 		}
@@ -115,6 +117,7 @@ class KernelMessageApi implements IMessageApi {
 		| undefined;
 	private kernelHandler: IDisposable | undefined;
 	private readonly kernelMessagingApi: KernelMessagingApi;
+
 	constructor(kernelMessagingApi?: KernelMessagingApi) {
 		this.kernelMessagingApi = kernelMessagingApi
 			? kernelMessagingApi
@@ -126,6 +129,7 @@ class KernelMessageApi implements IMessageApi {
 
 	public register(msgCallback: (msg: WebviewMessage) => Promise<void>) {
 		this.messageCallback = msgCallback;
+
 		if (!this.kernelHandler) {
 			this.kernelHandler =
 				this.kernelMessagingApi.onDidReceiveKernelMessage(
@@ -148,6 +152,7 @@ class KernelMessageApi implements IMessageApi {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private async handleKernelMessage(ev: unknown) {
 		const msg = ev as unknown as WebviewMessage;
+
 		if (msg && this.messageCallback) {
 			await this.messageCallback(msg);
 		}
@@ -165,6 +170,7 @@ export type KernelMessagingApi = {
 export class PostOffice implements IDisposable {
 	private messageApi: IMessageApi | undefined;
 	private handlers: IMessageHandler[] = [];
+
 	constructor(private readonly kernelMessagingApi?: KernelMessagingApi) {}
 	public dispose() {
 		if (this.messageApi) {

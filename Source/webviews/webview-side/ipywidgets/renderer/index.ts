@@ -55,6 +55,7 @@ async function getRendererFunction() {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(window as any).ipywidgetsKernel?.renderOutput ||
 				(global as any).ipywidgetsKernel?.renderOutput;
+
 			if (renderOutputFunc) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(window as any).ipywidgetsKernel.initialize();
@@ -63,8 +64,10 @@ async function getRendererFunction() {
 				setTimeout(getRendererFuncImpl, 100);
 			}
 		};
+
 		getRendererFuncImpl();
 	});
+
 	return promise;
 }
 export const activate: ActivationFunction = (context) => {
@@ -83,16 +86,19 @@ export const activate: ActivationFunction = (context) => {
 
 	logger("Jupyter IPyWidget Renderer Activated");
 	hookupTestScripts(context);
+
 	const modelAvailabilityResponse = new Map<
 		string,
 		Deferred<{ hasWidgetState: boolean; kernelSelected: boolean }>
 	>();
+
 	const rendererInitPromise = createDeferred<{
 		version?: 7 | 8;
 		widgetState?: NotebookMetadata["widgets"];
 		widgetStateLoaded: boolean;
 		kernelSelected: boolean;
 	}>();
+
 	if (context.postMessage) {
 		context.postMessage({ command: "ipywidget-renderer-loaded" });
 	}
@@ -106,6 +112,7 @@ export const activate: ActivationFunction = (context) => {
 			if (e.command === "ipywidget-renderer-init") {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const ipywidgetsKernel = (window as any).ipywidgetsKernel;
+
 				if (e.version) {
 					// Load the specific version of the widget scripts
 					const widgets7Promise = new Promise<void>((resolve) => {
@@ -116,8 +123,10 @@ export const activate: ActivationFunction = (context) => {
 							}
 							setTimeout(checkIfLoaded, 500);
 						};
+
 						setTimeout(checkIfLoaded, 500);
 					});
+
 					const widgets8Promise = new Promise<void>((resolve) => {
 						const checkIfLoaded = () => {
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,9 +135,11 @@ export const activate: ActivationFunction = (context) => {
 							}
 							setTimeout(checkIfLoaded, 500);
 						};
+
 						setTimeout(checkIfLoaded, 500);
 					});
 					await Promise.all([widgets7Promise, widgets8Promise]);
+
 					const unloadWidgets8 = () => {
 						try {
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,6 +148,7 @@ export const activate: ActivationFunction = (context) => {
 							//
 						}
 					};
+
 					const unloadWidgets7 = () => {
 						try {
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,6 +157,7 @@ export const activate: ActivationFunction = (context) => {
 							//
 						}
 					};
+
 					if (e.version === 7) {
 						unloadWidgets8();
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -190,6 +203,7 @@ export const activate: ActivationFunction = (context) => {
 			}>();
 		modelAvailabilityResponse.set(model_id, deferred);
 		context.postMessage({ command: "query-widget-state", model_id });
+
 		return deferred.promise;
 	}
 	return {
@@ -207,30 +221,38 @@ export const activate: ActivationFunction = (context) => {
 			_signal: AbortController,
 		) {
 			logger(`Got item for Rendering ${outputItem.id}}`);
+
 			try {
 				const widgetModel =
 					convertVSCodeOutputToExecuteResultOrDisplayData(outputItem);
+
 				if (!widgetModel) {
 					logger(
 						`Error: Model not found to render output ${outputItem.id}`,
 						"error",
 					);
+
 					throw new FallbackRenderer();
 				}
 				// Query this state when loading ipywidgets from the notebook metadata.
 				// const info = await rendererInitPromise.promise;
+
 				const renderOutputFuncPromise = getRendererFunction();
+
 				const { hasWidgetState, kernelSelected } =
 					await doesKernelHaveWidgetState(widgetModel.model_id);
+
 				const renderOutputFunc =
 					hasWidgetState && kernelSelected
 						? await renderOutputFuncPromise
 						: undefined;
+
 				if (!hasWidgetState) {
 					logger(
 						`Model not found in Kernel state to render output ${outputItem.id}, rendering a fallback mime type`,
 						"info",
 					);
+
 					throw new FallbackRenderer();
 				}
 				if (!kernelSelected) {
@@ -238,6 +260,7 @@ export const activate: ActivationFunction = (context) => {
 						`No Kernel selected, hence not rendering widget output ${outputItem.id}`,
 						"error",
 					);
+
 					throw new FallbackRenderer();
 				}
 				if (renderOutputFunc) {
@@ -247,6 +270,7 @@ export const activate: ActivationFunction = (context) => {
 					element.className =
 						(element.className || "") +
 						" cell-output-ipywidget-background";
+
 					return renderOutputFunc(
 						outputItem,
 						widgetModel,
@@ -260,6 +284,7 @@ export const activate: ActivationFunction = (context) => {
 				logErrorMessage(
 					`Failed to render output ${outputItem.id}, ${ex}`,
 				);
+
 				throw ex;
 			} finally {
 				sendRenderOutputItem(context, outputItem, element);
@@ -267,10 +292,12 @@ export const activate: ActivationFunction = (context) => {
 		},
 		disposeOutputItem(id?: string) {
 			logger(`Disposing rendered output for ${id}`);
+
 			const disposeOutputFunc =
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(window as any).ipywidgetsKernel?.disposeOutput ||
 				(global as any).ipywidgetsKernel?.disposeOutput;
+
 			if (disposeOutputFunc) {
 				return disposeOutputFunc(id);
 			}
@@ -282,6 +309,7 @@ export const activate: ActivationFunction = (context) => {
 function hookupTestScripts(context: RendererContext<unknown>) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const anyWindow = window as any;
+
 	if (
 		!anyWindow.widgetEntryPoint ||
 		typeof anyWindow.widgetEntryPoint.initialize !== "function"
@@ -303,6 +331,7 @@ function sendRenderOutputItem(
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const anyWindow = window as any;
+
 	if (
 		!anyWindow.widgetEntryPoint ||
 		typeof anyWindow.widgetEntryPoint.renderOutputItem !== "function"

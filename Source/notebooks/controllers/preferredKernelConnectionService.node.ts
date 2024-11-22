@@ -19,12 +19,14 @@ export function findPreferredPythonEnvironment(
         notebook,
         pythonApi.environments.known.filter((e) => !filter.isPythonEnvironmentExcluded(e))
     );
+
     if (localEnv) {
         return localEnv;
     }
 
     const findMatchingActiveEnvironment = () => {
         const envPath = pythonApi.environments.getActiveEnvironmentPath(notebook.uri);
+
         return envPath && pythonApi.environments.known.find((e) => e.id === envPath.id);
     };
     // 3. Fall back to the active interpreter.
@@ -35,7 +37,9 @@ function findPythonEnvironmentClosestToNotebook(notebook: NotebookDocument, envs
     const defaultFolder =
         workspace.getWorkspaceFolder(notebook.uri)?.uri ||
         (workspace.workspaceFolders?.length === 1 ? workspace.workspaceFolders[0].uri : undefined);
+
     const localEnvNextToNbFile = findPythonEnvBelongingToFolder(path.dirname(notebook.uri), envs);
+
     if (localEnvNextToNbFile) {
         return localEnvNextToNbFile;
     }

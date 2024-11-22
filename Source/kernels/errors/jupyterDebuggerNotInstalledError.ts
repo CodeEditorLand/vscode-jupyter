@@ -23,6 +23,7 @@ export class JupyterDebuggerNotInstalledError extends BaseKernelError {
 		const errorMessage = message
 			? message
 			: DataScience.jupyterDebuggerNotInstalledError(debuggerPkg);
+
 		super("notinstalled", errorMessage, kernelConnectionMetadata);
 	}
 }

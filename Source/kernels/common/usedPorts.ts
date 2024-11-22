@@ -18,6 +18,7 @@ export const UsedPorts = new Set<number>();
 
 export function ignorePortForwarding(...ports: number[]) {
 	const disposableStore = new DisposableStore();
+
 	try {
 		const provider = new (class implements PortAttributesProvider {
 			async providePortAttributes(

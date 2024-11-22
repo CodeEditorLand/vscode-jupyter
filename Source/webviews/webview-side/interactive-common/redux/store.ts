@@ -84,14 +84,17 @@ function createSendInfoMiddleware(): Redux.Middleware<{}, IStore> {
 /* TODO: Figure out a better way to do this. Cant use process.env anymore
 function createTestLogger() {
     const logFileEnv = process.env.VSC_JUPYTER_WEBVIEW_LOG_FILE;
+
     if (logFileEnv) {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const log4js = require('log4js') as typeof import('log4js');
+
         const logFilePath = path.isAbsolute(logFileEnv) ? logFileEnv : path.join(EXTENSION_ROOT_DIR, logFileEnv);
         log4js.configure({
             appenders: { reduxLogger: { type: 'file', filename: logFilePath } },
             categories: { default: { appenders: ['reduxLogger'], level: 'debug' } }
         });
+
         return log4js.getLogger();
     }
 }
@@ -106,7 +109,9 @@ function createTestMiddleware(
 	// eslint-disable-next-line complexity
 	return (store) => (next) => (action) => {
 		const prevState = store.getState();
+
 		const res = next(action);
+
 		const afterState = store.getState();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const sendMessage = (message: any, payload?: any) => {
@@ -169,7 +174,9 @@ function createMiddleWare(
 	const isUITest = (postOffice.acquireApi() as any)?.handleMessage
 		? true
 		: false;
+
 	let forceOnTestMiddleware = false;
+
 	if (typeof forceTestMiddleware !== "undefined") {
 		forceOnTestMiddleware = forceTestMiddleware();
 	}
@@ -181,6 +188,7 @@ function createMiddleWare(
 	/* Fixup this code if you need to debug redux
     // Create the logger if we're not in production mode or we're forcing logging
     const reduceLogMessage = '<payload too large to displayed in logs (at least on CI)>';
+
     const logger = createLogger({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stateTransformer: (state: any) => {
@@ -189,6 +197,7 @@ function createMiddleWare(
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rootState = { ...state } as any;
+
             if ('main' in rootState && typeof rootState.main === 'object') {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const main = (rootState.main = ({ ...rootState.main } as any) as Partial<IMainState>);
@@ -213,6 +222,7 @@ function createMiddleWare(
 	const results: Redux.Middleware<{}, IStore>[] = [];
 	results.push(queueableActions);
 	results.push(updateContext);
+
 	if (testMiddleware) {
 		results.push(testMiddleware);
 	}
@@ -222,6 +232,7 @@ function createMiddleWare(
 
 export interface IStore {
 	main: IMainState;
+
 	variables: IVariableState;
 	post: {};
 }

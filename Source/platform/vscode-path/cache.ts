@@ -9,6 +9,7 @@ export interface CacheResult<T> extends Disposable {
 
 export class Cache<T> {
 	private result: CacheResult<T> | null = null;
+
 	constructor(private task: (ct: CancellationToken) => Promise<T>) {}
 
 	get(): CacheResult<T> {
@@ -17,6 +18,7 @@ export class Cache<T> {
 		}
 
 		const cts = new CancellationTokenSource();
+
 		const promise = this.task(cts.token);
 
 		this.result = {
@@ -45,6 +47,7 @@ export class LRUCachedComputed<TArg, TComputed> {
 
 	public get(arg: TArg): TComputed {
 		const key = JSON.stringify(arg);
+
 		if (this.lastArgKey !== key) {
 			this.lastArgKey = key;
 			this.lastCache = this.computeFn(arg);

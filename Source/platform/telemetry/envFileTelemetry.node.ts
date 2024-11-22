@@ -10,6 +10,7 @@ import { SystemVariables } from "../common/variables/systemVariables.node";
 import { EventName } from "./constants";
 
 let _defaultEnvFileSetting: string | undefined;
+
 let envFileTelemetrySent = false;
 
 export function sendFileCreationTelemetry() {
@@ -24,9 +25,11 @@ export async function sendActivationTelemetry(
 ) {
 	if (shouldSendTelemetry()) {
 		const systemVariables = new SystemVariables(resource, undefined);
+
 		const envFilePath = systemVariables.resolveAny(
 			defaultEnvFileSetting(),
 		)!;
+
 		const envFileExists = await fileSystem.exists(Uri.file(envFilePath));
 
 		if (envFileExists) {
@@ -62,6 +65,7 @@ export namespace EnvFileTelemetryTests {
 		defaultSetting,
 	}: {
 		telemetrySent?: boolean;
+
 		defaultSetting?: string;
 	}) {
 		if (telemetrySent !== undefined) {

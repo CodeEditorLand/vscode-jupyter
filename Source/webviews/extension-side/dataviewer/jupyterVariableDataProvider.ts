@@ -52,10 +52,13 @@ export class JupyterVariableDataProvider
 	): { key: string; type: ColumnType }[] {
 		return columns.map((column: { key: string; type: string }) => {
 			let normalizedType: ColumnType;
+
 			switch (column.type) {
 				case "bool":
 					normalizedType = ColumnType.Bool;
+
 					break;
+
 				case "integer":
 				case "int32":
 				case "int64":
@@ -64,7 +67,9 @@ export class JupyterVariableDataProvider
 				case "float64":
 				case "number":
 					normalizedType = ColumnType.Number;
+
 					break;
+
 				default:
 					normalizedType = ColumnType.String;
 			}
@@ -107,7 +112,9 @@ export class JupyterVariableDataProvider
 	): Promise<IDataFrameInfo> {
 		let dataFrameInfo: IDataFrameInfo = {};
 		await this.ensureInitialized();
+
 		let variable = this.variable;
+
 		if (variable) {
 			if (sliceExpression || isRefresh) {
 				variable = await this.variableManager.getDataFrameInfo(
@@ -143,6 +150,7 @@ export class JupyterVariableDataProvider
 	public async getAllRows(sliceExpression?: string) {
 		let allRows: IRowsResponse = [];
 		await this.ensureInitialized();
+
 		if (this.variable && this.variable.rowCount) {
 			const dataFrameRows = await this.variableManager.getDataFrameRows(
 				this.variable,
@@ -159,6 +167,7 @@ export class JupyterVariableDataProvider
 	public async getRows(start: number, end: number, sliceExpression?: string) {
 		let rows: IRowsResponse = [];
 		await this.ensureInitialized();
+
 		if (this.variable && this.variable.rowCount) {
 			const dataFrameRows = await this.variableManager.getDataFrameRows(
 				this.variable,
@@ -176,6 +185,7 @@ export class JupyterVariableDataProvider
 		// Postpone pre-req and variable initialization until data is requested.
 		if (!this.initialized && this.variable) {
 			this.initialized = true;
+
 			if (
 				this._kernel?.kernelConnectionMetadata &&
 				this.dependencyService

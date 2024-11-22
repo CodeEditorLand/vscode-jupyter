@@ -17,6 +17,8 @@ export function getInterpreterWorkspaceFolder(
 		"executable" in interpreter
 			? interpreter.executable.uri || Uri.file(interpreter.path)
 			: interpreter.uri;
+
 	const folder = workspace.getWorkspaceFolder(uri);
+
 	return folder?.uri || getRootFolder();
 }

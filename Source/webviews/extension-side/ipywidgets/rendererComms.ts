@@ -38,6 +38,7 @@ type RendererLoadedCommand = { command: "ipywidget-renderer-loaded" };
 @injectable()
 export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
+
 	constructor(
 		@inject(IKernelProvider)
 		private readonly kernelProvider: IKernelProvider,
@@ -73,8 +74,11 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 	}
 	private hookupKernel(kernel: IKernel) {
 		this.widgetOutputsPerNotebook.delete(kernel.notebook);
+
 		const previousKernelConnection = kernel.session?.kernel;
+
 		const iopubMessage = kernel.session?.kernel?.iopubMessage;
+
 		if (!iopubMessage) {
 			return;
 		}
@@ -82,6 +86,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const jupyterLab =
 			require("@jupyterlab/services") as typeof import("@jupyterlab/services");
+
 		const handler = (
 			kernelConnection: IKernelConnection,
 			msg: IIOPubMessage<IOPubMessageType>,
@@ -114,16 +119,19 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		},
 	) {
 		const output = msg.content;
+
 		if (
 			output.data &&
 			typeof output.data === "object" &&
 			WIDGET_MIMETYPE in output.data
 		) {
 			const widgetData = output.data[WIDGET_MIMETYPE] as WidgetData;
+
 			if (widgetData && "model_id" in widgetData) {
 				const set =
 					this.widgetOutputsPerNotebook.get(notebook) ||
 					new Set<string>();
+
 				set.add(widgetData.model_id);
 				this.widgetOutputsPerNotebook.set(notebook, set);
 			}
@@ -162,7 +170,9 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		const availableModels = this.widgetOutputsPerNotebook.get(
 			editor.notebook,
 		);
+
 		const kernelSelected = !!this.controllers.getSelected(editor.notebook);
+
 		const hasWidgetState = !!availableModels?.has(message.model_id);
 		comms
 			.postMessage(
@@ -203,6 +213,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		//             : undefined;
 		// }
 		const version = kernel?.ipywidgetsVersion; // || versionInWidgetState;
+
 		if (kernel?.ipywidgetsVersion) {
 			logger.trace(
 				`IPyWidget version in Kernel is ${kernel?.ipywidgetsVersion}.`,

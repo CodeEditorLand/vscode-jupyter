@@ -18,6 +18,7 @@ export class ExposeUsedAzMLServerHandles
 	activate(): void {
 		commands.registerCommand("jupyter.getUsedAzMLServerHandles", () => {
 			const usedItems: { id: string; handle: string }[] = [];
+
 			const items = this.uriStorage.all;
 			items.forEach((item) => {
 				if (
@@ -27,6 +28,7 @@ export class ExposeUsedAzMLServerHandles
 					usedItems.push(item.provider);
 				}
 			});
+
 			return usedItems;
 		});
 	}

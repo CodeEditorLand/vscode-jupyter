@@ -32,12 +32,17 @@ import { getPythonEnvDisplayName, getSysPrefix } from '../../../platform/interpr
 import { getExtensionTempDir } from '../../../platform/common/temp';
 
 const winJupyterPath = path.join('AppData', 'Roaming', 'jupyter', 'kernels');
+
 const linuxJupyterPath = path.join('.local', 'share', 'jupyter', 'kernels');
+
 const macJupyterPath = path.join('Library', 'Jupyter', 'kernels');
+
 const winJupyterRuntimePath = path.join('AppData', 'Roaming', 'jupyter', 'runtime');
+
 const macJupyterRuntimePath = path.join('Library', 'Jupyter', 'runtime');
 
 export const baseKernelPath = path.join('share', 'jupyter', 'kernels');
+
 const CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH = 'CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH.';
 export const CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS = 'CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS_.';
 
@@ -50,6 +55,7 @@ export class JupyterPaths {
     private cachedJupyterKernelPaths?: Promise<Uri[]>;
     private cachedJupyterPaths?: Promise<Uri[]>;
     private cachedDataDirs = new Map<string, Promise<Uri[]>>();
+
     constructor(
         @inject(IPlatformService) private platformService: IPlatformService,
         @inject(ICustomEnvironmentVariablesProvider)
@@ -78,6 +84,7 @@ export class JupyterPaths {
     public async getKernelSpecTempRegistrationFolder() {
         const dir = uriPath.joinPath(await getExtensionTempDir(this.context), 'jupyter', 'kernels');
         await this.fs.createDirectory(dir);
+
         return dir;
     }
     /**
@@ -86,11 +93,13 @@ export class JupyterPaths {
      */
     public async getKernelSpecRootPath(): Promise<Uri | undefined> {
         const cachedRootPath = this.getCachedRootPath();
+
         if (cachedRootPath || this.cachedKernelSpecRootPath) {
             return cachedRootPath || this.cachedKernelSpecRootPath;
         }
         this.cachedKernelSpecRootPath = (async () => {
             const userHomeDir = this.platformService.homeDir;
+
             if (userHomeDir) {
                 if (this.platformService.isWindows) {
                     // On windows the path is not correct if we combine those variables.
@@ -109,6 +118,7 @@ export class JupyterPaths {
                 this.updateCachedRootPath(value);
             })
             .catch(noop);
+
         return this.cachedKernelSpecRootPath;
     }
     /**
@@ -118,6 +128,7 @@ export class JupyterPaths {
      */
     public async getRuntimeDir(): Promise<Uri> {
         const runtimeDir = await this.getRuntimeDirImpl();
+
         if (runtimeDir) {
             return runtimeDir;
         }
@@ -126,13 +137,16 @@ export class JupyterPaths {
         const extensionRuntimeDir = Uri.joinPath(await getExtensionTempDir(this.context), 'jupyter', 'runtime');
         await fs.ensureDir(extensionRuntimeDir.fsPath);
         logger.trace(`Using extension runtime directory ${extensionRuntimeDir.fsPath}`);
+
         return extensionRuntimeDir;
     }
 
     private runtimeDirIsWritable = false;
     private async getRuntimeDirImpl(): Promise<Uri | undefined> {
         let runtimeDir: Uri | undefined;
+
         const userHomeDir = this.platformService.homeDir;
+
         if (userHomeDir) {
             if (this.platformService.isWindows) {
                 // On windows the path is not correct if we combine those variables.
@@ -148,15 +162,18 @@ export class JupyterPaths {
         }
         if (!runtimeDir) {
             logger.error(`Failed to determine Jupyter runtime directory`);
+
             return;
         }
 
         try {
             // Make sure the directory exists and is writable.
             await this.fs.createDirectory(runtimeDir);
+
             if (!this.runtimeDirIsWritable) {
                 // Ensure this folder is writable as well, we've found cases where this folder is not writable.
                 const tempFileName = `temp-test-write-access-${crypto.randomBytes(20).toString('hex')}.txt`;
+
                 const tempFile = uriPath.joinPath(runtimeDir, tempFileName);
                 // If this fails, then thats find, at least we know the folder is not writable, even if it exists.
                 await fs.writeFile(tempFile.fsPath, '');
@@ -174,6 +191,7 @@ export class JupyterPaths {
      */
     public async getDataDirs(options: { resource: Resource; interpreter?: PythonEnvironment }): Promise<Uri[]> {
         const key = options.interpreter ? options.interpreter.uri.toString() : '';
+
         if (!this.cachedDataDirs.has(key)) {
             this.cachedDataDirs.set(key, this.getDataDirsImpl(options.resource, options.interpreter));
         }
@@ -190,6 +208,7 @@ export class JupyterPaths {
 
         // 1. Add the JUPYTER_PATH
         const jupyterPaths = await this.getJupyterPaths();
+
         for (const jupyterPathItem of jupyterPaths) {
             if (jupyterPathItem && !dataDir.has(jupyterPathItem)) {
                 dataDir.set(jupyterPathItem, dataDir.size);
@@ -200,14 +219,19 @@ export class JupyterPaths {
         if (interpreter) {
             try {
                 logger.ci(`Getting Jupyter Data Dir for ${interpreter.uri.fsPath}`);
+
                 const factory = await this.pythonExecFactory.createActivatedEnvironment({
                     interpreter,
                     resource
                 });
+
                 const pythonFile = Uri.joinPath(this.context.extensionUri, 'pythonFiles', 'printJupyterDataDir.py');
+
                 const result = await factory.exec([pythonFile.fsPath], {});
+
                 if (result.stdout.trim().length) {
                     const sitePath = Uri.file(result.stdout.trim());
+
                     if (await this.fs.exists(sitePath)) {
                         if (!dataDir.has(sitePath)) {
                             dataDir.set(sitePath, dataDir.size);
@@ -226,17 +250,20 @@ export class JupyterPaths {
 
         // 3. Add the paths based on user and env data directories
         let sysPrefix: string | undefined;
+
         if (interpreter) {
             sysPrefix = await getSysPrefix(interpreter);
         }
         const possibleEnvJupyterPath = sysPrefix ? Uri.joinPath(Uri.file(sysPrefix), 'share', 'jupyter') : undefined;
 
         const systemDataDirectories = this.getSystemJupyterPaths();
+
         const envJupyterPath = possibleEnvJupyterPath
             ? new ResourceSet(systemDataDirectories).has(possibleEnvJupyterPath)
                 ? undefined
                 : possibleEnvJupyterPath
             : undefined;
+
         const userDataDirectory = this.getJupyterDataDir();
         // If the JUPYTER_PREFER_ENV_PATH environment variable is set, the environment-level
         // directories will have priority over user-level directories.
@@ -266,6 +293,7 @@ export class JupyterPaths {
         });
 
         const sortedEntries = Array.from(dataDir.entries()).sort((a, b) => a[1] - b[1]);
+
         return sortedEntries.map((item) => item[0]);
     }
     private getJupyterConfigDir() {
@@ -277,6 +305,7 @@ export class JupyterPaths {
     private getSystemJupyterPaths() {
         if (this.platformService.isWindows) {
             const programData = process.env['PROGRAMDATA'] ? path.normalize(process.env['PROGRAMDATA']) : undefined;
+
             return programData ? [Uri.joinPath(Uri.file(programData), 'jupyter')] : [];
         } else {
             return [Uri.file('/usr/local/share/jupyter'), Uri.file('/usr/share/jupyter')];
@@ -292,21 +321,26 @@ export class JupyterPaths {
         switch (this.platformService.osType) {
             case OSType.OSX:
                 return Uri.joinPath(this.platformService.homeDir, 'Library', 'Jupyter');
+
             case OSType.Windows:
                 const appData = process.env['APPDATA'] ? Uri.file(path.normalize(process.env['APPDATA'])) : '';
+
                 if (appData) {
                     return Uri.joinPath(appData, 'jupyter');
                 }
                 const configDir = this.getJupyterConfigDir();
+
                 if (configDir) {
                     return Uri.joinPath(configDir, 'data');
                 }
                 return Uri.joinPath(this.platformService.homeDir, 'Library', 'Jupyter');
+
             default: {
                 // Linux, non-OS X Unix, AIX, etc.
                 const xdgDataHome = process.env['XDG_DATA_HOME']
                     ? Uri.file(path.normalize(process.env['XDG_DATA_HOME']))
                     : Uri.joinPath(this.platformService.homeDir, '.local', 'share');
+
                 return Uri.joinPath(xdgDataHome, 'jupyter');
             }
         }
@@ -321,24 +355,29 @@ export class JupyterPaths {
             return this.cachedKernelSpecRootPaths.promise;
         }
         const stopWatch = new StopWatch();
+
         const promise = this.getKernelSpecRootPathsImpl(cancelToken);
         this.cachedKernelSpecRootPaths = { promise, stopWatch };
+
         const disposable = cancelToken.onCancellationRequested(() => {
             if (this.cachedKernelSpecRootPaths?.promise === promise) {
                 this.cachedKernelSpecRootPaths = undefined;
             }
         }, this);
         promise.finally(() => disposable.dispose()).catch(noop);
+
         return promise;
     }
     private async getKernelSpecRootPathsImpl(cancelToken: CancellationToken): Promise<Uri[]> {
         // Paths specified in JUPYTER_PATH are supposed to come first in searching
         const paths = new ResourceSet(await this.getJupyterPathKernelPaths(cancelToken));
+
         if (cancelToken.isCancellationRequested) {
             return [];
         }
         if (this.platformService.isWindows) {
             const winPath = await this.getKernelSpecRootPath();
+
             if (cancelToken.isCancellationRequested) {
                 return [];
             }
@@ -355,6 +394,7 @@ export class JupyterPaths {
 
             paths.add(Uri.file(path.join('/', 'usr', 'share', 'jupyter', 'kernels')));
             paths.add(Uri.file(path.join('/', 'usr', 'local', 'share', 'jupyter', 'kernels')));
+
             if (this.platformService.homeDir) {
                 paths.add(uriPath.joinPath(this.platformService.homeDir, secondPart));
             }
@@ -365,6 +405,7 @@ export class JupyterPaths {
                 .map((uri) => getDisplayPath(uri))
                 .join(', ')}`
         );
+
         return Array.from(paths);
     }
 
@@ -376,11 +417,13 @@ export class JupyterPaths {
                 this.updateCachedPaths(value).then(noop, noop);
             }
         }, noop);
+
         return this.getCachedPaths().length > 0 ? this.getCachedPaths() : this.cachedJupyterKernelPaths;
     }
 
     private async getJupyterPaths(cancelToken?: CancellationToken): Promise<Uri[]> {
         this.cachedJupyterPaths = this.cachedJupyterPaths || this.getJupyterPathSubPaths(cancelToken);
+
         return this.cachedJupyterPaths;
     }
 
@@ -391,7 +434,9 @@ export class JupyterPaths {
      */
     private async getJupyterPathSubPaths(cancelToken?: CancellationToken, subDir?: string): Promise<Uri[]> {
         const paths = new ResourceSet();
+
         const vars = await this.envVarsProvider.getEnvironmentVariables(undefined, 'RunPythonCode');
+
         if (cancelToken?.isCancellationRequested) {
             return [];
         }
@@ -414,6 +459,7 @@ export class JupyterPaths {
         }
 
         logger.debug(`Jupyter Paths ${getDisplayPath(subDir)}: ${Array.from(paths).map((uri) => getDisplayPath(uri))}`);
+
         return Array.from(paths);
     }
 
@@ -423,7 +469,9 @@ export class JupyterPaths {
 
     private async updateCachedPaths(paths: Uri[]) {
         const currentValue = this.globalState.get<string[]>(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, []);
+
         const newValue = paths.map(Uri.toString);
+
         if (currentValue.join(',') !== newValue.join(',')) {
             await this.globalState.update(CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS, newValue);
         }
@@ -432,6 +480,7 @@ export class JupyterPaths {
     private getCachedRootPath(): Uri | undefined {
         if (this.globalState.get(CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH)) {
             const cached = this.globalState.get<string>(CACHE_KEY_FOR_JUPYTER_KERNELSPEC_ROOT_PATH);
+
             if (cached) {
                 return Uri.parse(cached);
             }

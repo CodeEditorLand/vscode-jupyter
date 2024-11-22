@@ -578,15 +578,22 @@ declare namespace AdazzleReactDataGrid {
 	export namespace ReactDataGrid {
 		// Useful types
 		export import Column = AdazzleReactDataGrid.Column;
+
 		export import Filter = AdazzleReactDataGrid.Filter;
 
 		// Various events
 		export import RowUpdateEvent = AdazzleReactDataGrid.RowUpdateEvent;
+
 		export import SelectionParams = AdazzleReactDataGrid.SelectionParams;
+
 		export import CellDragEvent = AdazzleReactDataGrid.CellDragEvent;
+
 		export import DragHandleDoubleClickEvent = AdazzleReactDataGrid.DragHandleDoubleClickEvent;
+
 		export import CellCopyPasteEvent = AdazzleReactDataGrid.CellCopyPasteEvent;
+
 		export import GridRowsUpdatedEvent = AdazzleReactDataGrid.GridRowsUpdatedEvent;
+
 		export import OnRowExpandToggle = AdazzleReactDataGrid.OnRowExpandToggle;
 
 		export namespace editors {
@@ -679,6 +686,7 @@ declare namespace AdazzleReactDataGridPlugins {
 	export namespace Data {
 		export const Selectors: {
 			getRows: (state: object) => object[];
+
 			getSelectedRowsByKey: (state: object) => object[];
 		};
 	}
@@ -691,10 +699,13 @@ declare namespace AdazzleReactDataGridPlugins {
 		export class SubMenu extends React.Component<any> {}
 		export const monitor: {
 			getItem(): any;
+
 			getPosition(): any;
 			hideMenu(): void;
 		};
+
 		export function connect(Menu: any): any;
+
 		export function ContextMenuLayer(
 			identifier: any,
 			configure?: (props: any) => any,
@@ -711,12 +722,19 @@ declare module "react-data-grid" {
 
 declare module "react-data-grid-addons" {
 	import Plugins = AdazzleReactDataGridPlugins;
+
 	import Editors = Plugins.Editors;
+
 	import Filters = Plugins.Filters;
+
 	import Formatters = Plugins.Formatters;
+
 	import Toolbar = Plugins.Toolbar;
+
 	import Menu = Plugins.Menu;
+
 	import Data = Plugins.Data;
+
 	import DraggableHeader = Plugins.DraggableHeader;
 
 	// ES6 named exports
