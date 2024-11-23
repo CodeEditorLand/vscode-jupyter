@@ -298,9 +298,7 @@ class JupyterKernelService implements IExportedKernelService {
 
 		return kernels;
 	}
-	getKernel(
-		uri: Uri,
-	):
+	getKernel(uri: Uri):
 		| {
 				metadata: KernelConnectionMetadata;
 				connection: Session.ISessionConnection;

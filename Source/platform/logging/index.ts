@@ -107,11 +107,9 @@ type LoggingLevelSettingType =
 	| "Warn";
 function getLoggingLevelFromConfig() {
 	try {
-		const { level } = workspace
-			.getConfiguration("jupyter")
-			.get<{
-				level: LoggingLevelSettingType;
-			}>("logging", { level: "Info" });
+		const { level } = workspace.getConfiguration("jupyter").get<{
+			level: LoggingLevelSettingType;
+		}>("logging", { level: "Info" });
 
 		switch (level) {
 			case "debug":
