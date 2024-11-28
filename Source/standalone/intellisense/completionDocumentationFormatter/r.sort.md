@@ -163,12 +163,12 @@ Sorting and Searching_, 2nd ed.  Addison-Wesley.
   
 Sedgewick, R. (1986).  A new upper bound for Shellsort.  _Journal  
 of Algorithms_, *7*, 159-173.  doi:10.1016/0196-6774(86)90001-5  
-<https://doi.org/10.1016/0196-6774%2886%2990001-5>.  
+<HTTPS://doi.org/10.1016/0196-6774%2886%2990001-5>.  
   
 Singleton, R. C. (1969).  Algorithm 347: an efficient algorithm  
 for sorting with minimal storage.  _Communications of the ACM_,  
 *12*, 185-186.  doi:10.1145/362875.362901  
-<https://doi.org/10.1145/362875.362901>.  
+<HTTPS://doi.org/10.1145/362875.362901>.  
   
 ## See Also:  
   
@@ -218,3 +218,4 @@ stopifnot(identical(x1, x2))
 stopifnot(identical(x1, x3))  
 ## End(Not run)  
 ```
+

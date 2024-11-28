@@ -163,7 +163,7 @@ As from R 3.4.0 the license check is done when the namespace is
 loaded.  
   
 Free or Open Source Software (FOSS, e.g.  
-<https://en.wikipedia.org/wiki/FOSS>) packages are determined by  
+<HTTPS://en.wikipedia.org/wiki/FOSS>) packages are determined by  
 the same filters used by ‘available.packages’ but applied to just  
 the current package, not its dependencies.  
   
@@ -243,3 +243,4 @@ require(nonexistent)        # FALSE
 library(mypkg, pos = "package:base")  
 ## End(Not run)  
 ```
+
