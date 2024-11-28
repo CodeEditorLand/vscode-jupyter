@@ -33,6 +33,7 @@ export class DataWithExpiry {
 		return this._data;
 	}
 }
+
 const globalCacheStore = new Map<string, DataWithExpiry>();
 
 /**

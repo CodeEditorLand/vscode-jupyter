@@ -700,6 +700,7 @@ function computeNotebookSummary(notebook: NotebookDocument) {
 
 	return notebookSummary;
 }
+
 const sendTelemetryForFirstAutoSelectedKernel = once(function (
 	notebook: NotebookDocument,
 	info: {

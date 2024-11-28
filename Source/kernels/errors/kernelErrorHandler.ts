@@ -760,6 +760,7 @@ export abstract class DataScienceErrorHandler
 		});
 	}
 }
+
 const errorPrefixes = {
 	restart: DataScience.failedToRestartKernel,
 	start: DataScience.failedToStartKernel,

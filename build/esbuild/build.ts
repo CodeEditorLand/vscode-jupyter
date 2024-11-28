@@ -86,6 +86,7 @@ interface StylePluginOptions {
 	 */
 	charset?: Charset;
 }
+
 const loader: { [ext: string]: Loader } = {
 	".woff": "dataurl",
 	".woff2": "dataurl",

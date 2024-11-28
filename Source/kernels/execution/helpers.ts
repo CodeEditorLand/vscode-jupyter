@@ -410,6 +410,7 @@ export function translateCellErrorOutput(
 			splitMultilineString(value.stack || value.message || ""),
 	};
 }
+
 const textDecoder = new TextDecoder();
 
 const textMimeTypes = [
