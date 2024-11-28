@@ -72,8 +72,10 @@ import { JupyterHubPasswordConnect } from "../userJupyterHubServer/jupyterHubPas
 import { JupyterPasswordConnect } from "./jupyterPasswordConnect";
 
 export const UserJupyterServerUriListKey = "user-jupyter-server-uri-list";
+
 export const UserJupyterServerUriListKeyV2 =
 	"user-jupyter-server-uri-list-version2";
+
 export const UserJupyterServerUriListMementoKey =
 	"_builtin.jupyterServerUrlProvider.uriList";
 

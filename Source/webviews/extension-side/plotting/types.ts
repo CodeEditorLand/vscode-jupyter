@@ -36,6 +36,7 @@ export class IPlotViewerMapping {
 }
 
 export const IPlotViewerProvider = Symbol("IPlotViewerProvider");
+
 export interface IPlotViewerProvider {
 	showPlot(imageHtml: string): Promise<void>;
 }

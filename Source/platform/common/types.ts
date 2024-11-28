@@ -16,16 +16,24 @@ import { PythonEnvironment } from "../pythonEnvironments/info";
 import { ISystemVariables } from "./variables/types";
 
 export const IsDevMode = Symbol("IsDevMode");
+
 export const IOutputChannel = Symbol("IOutputChannel");
+
 export interface IOutputChannel extends OutputChannel {}
 export const IsWindows = Symbol("IS_WINDOWS");
+
 export const IDisposableRegistry = Symbol("IDisposableRegistry");
+
 export type IDisposableRegistry = Disposable[];
+
 export const IMemento = Symbol("IGlobalMemento");
+
 export const GLOBAL_MEMENTO = Symbol("IGlobalMemento");
+
 export const WORKSPACE_MEMENTO = Symbol("IWorkspaceMemento");
 
 export type Resource = Uri | undefined;
+
 export interface IPersistentState<T> {
 	readonly value: T;
 	updateValue(value: T): Promise<void>;
@@ -56,6 +64,7 @@ export interface IPersistentStateFactory {
 }
 
 export const IRandom = Symbol("IRandom");
+
 export interface IRandom {
 	getRandomInt(min?: number, max?: number): number;
 }
@@ -146,6 +155,7 @@ export type InteractiveWindowViewColumn = "beside" | "active" | "secondGroup";
 export type WidgetCDNs = "unpkg.com" | "jsdelivr.com";
 
 export const IConfigurationService = Symbol("IConfigurationService");
+
 export interface IConfigurationService {
 	getSettings(resource?: Uri): IWatchableJupyterSettings;
 	updateSetting(
@@ -193,9 +203,11 @@ export interface IHttpClient {
 }
 
 export const IExtensionContext = Symbol("ExtensionContext");
+
 export interface IExtensionContext extends ExtensionContext {}
 
 export const IExtensions = Symbol("IExtensions");
+
 export interface IExtensions {
 	determineExtensionFromCallStack(stack?: string): {
 		extensionId: string;
@@ -204,6 +216,7 @@ export interface IExtensions {
 }
 
 export const IJupyterExtensionBanner = Symbol("IJupyterExtensionBanner");
+
 export interface IJupyterExtensionBanner {
 	isEnabled(type: BannerType): boolean;
 	showBanner(type: BannerType): Promise<void>;
@@ -245,6 +258,7 @@ export interface IAsyncDisposable {
  * Interface used to implement cryptography tools
  */
 export const ICryptoUtils = Symbol("ICryptoUtils");
+
 export interface ICryptoUtils {
 	/**
 	 * Creates hash using the data and encoding specified
@@ -259,6 +273,7 @@ export interface ICryptoUtils {
 }
 
 export const IAsyncDisposableRegistry = Symbol("IAsyncDisposableRegistry");
+
 export interface IAsyncDisposableRegistry extends IAsyncDisposable {
 	push(disposable: IDisposable | IAsyncDisposable): void;
 }
@@ -273,6 +288,7 @@ export enum Experiments {
  * Experiment service leveraging VS Code's experiment framework.
  */
 export const IExperimentService = Symbol("IExperimentService");
+
 export interface IExperimentService {
 	activate(): Promise<void>;
 	inExperiment(experimentName: Experiments): boolean;
@@ -287,6 +303,7 @@ export type InterpreterUri = Resource | PythonEnvironment;
 export const IDataScienceCommandListener = Symbol(
 	"IDataScienceCommandListener",
 );
+
 export interface IDataScienceCommandListener {
 	register(): void;
 }
@@ -324,11 +341,13 @@ type ScriptCode = {
 	 */
 	cleanupCode?: string;
 };
+
 export type ParentOptions = {
 	root: string;
 	propertyChain: (string | number)[];
 	startIndex: number;
 };
+
 export interface IVariableScriptGenerator {
 	generateCodeToGetVariableInfo(options: {
 		isDebugging: boolean;
@@ -352,6 +371,7 @@ export interface IVariableScriptGenerator {
 	): Promise<string>;
 }
 export const IDataFrameScriptGenerator = Symbol("IDataFrameScriptGenerator");
+
 export interface IDataFrameScriptGenerator {
 	generateCodeToGetDataFrameInfo(options: {
 		isDebugging: boolean;

@@ -13,6 +13,7 @@ import {
 } from "../types";
 
 export const IKernelLauncher = Symbol("IKernelLauncher");
+
 export interface IKernelLauncher {
 	launch(
 		kernelConnectionMetadata:
@@ -68,11 +69,13 @@ export interface IKernelProcess extends ObservableDisposable {
 export const IRawNotebookSupportedService = Symbol(
 	"IRawNotebookSupportedService",
 );
+
 export interface IRawNotebookSupportedService {
 	isSupported: boolean;
 }
 
 export const IRawKernelSessionFactory = Symbol("IRawKernelSessionFactory");
+
 export interface IRawKernelSessionFactory {
 	create(
 		options: LocaLKernelSessionCreationOptions,

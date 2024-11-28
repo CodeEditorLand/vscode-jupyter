@@ -13,6 +13,7 @@ const wrappedSession = new WeakMap<
 	Session.ISessionConnection,
 	Session.ISessionConnection
 >();
+
 export function wrapKernelSession(session: Session.ISessionConnection) {
 	let wrapper = wrappedSession.get(session);
 
@@ -41,6 +42,7 @@ const wrappedKernel = new WeakMap<
 	Kernel.IKernelConnection,
 	Kernel.IKernelConnection
 >();
+
 export function wrapKernel(kernel: Kernel.IKernelConnection) {
 	let wrapper = wrappedKernel.get(kernel);
 

@@ -106,6 +106,7 @@ export function _resetSharedProperties(): void {
 }
 
 let telemetryReporter: TelemetryReporter | undefined;
+
 export function getTelemetryReporter(): TelemetryReporter {
 	if (telemetryReporter) {
 		return telemetryReporter;
@@ -273,9 +274,11 @@ type TypedMethodDescriptor<T> = (
 ) => TypedPropertyDescriptor<T> | void;
 
 const timesSeenThisEventWithSameProperties = new Set<string>();
+
 export type PickTypeNumberProps<T, Value> = {
 	[P in keyof T as T[P] extends Value ? P : never]: T[P];
 };
+
 export type PickPropertiesOnly<T> = {
 	[P in keyof T as T[P] extends TelemetryEventInfo<infer R>
 		? keyof PickType<R, number> extends never

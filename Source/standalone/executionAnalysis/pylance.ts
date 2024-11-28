@@ -66,6 +66,7 @@ export async function runPylance(
 }
 
 let _client: INotebookLanguageClient | undefined;
+
 export async function activatePylance(): Promise<
 	INotebookLanguageClient | undefined
 > {

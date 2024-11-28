@@ -28,6 +28,7 @@ export type INativeInteractiveWindow = {
 };
 
 export const IInteractiveWindowDebugger = Symbol("IInteractiveWindowDebugger");
+
 export interface IInteractiveWindowDebugger {
 	attach(kernel: IKernel): Promise<void>;
 	detach(kernel: IKernel): Promise<void>;
@@ -37,6 +38,7 @@ export interface IInteractiveWindowDebugger {
 }
 
 export const IInteractiveWindowProvider = Symbol("IInteractiveWindowProvider");
+
 export interface IInteractiveWindowProvider {
 	/**
 	 * The active interactive window if it has the focus.
@@ -81,6 +83,7 @@ export interface IInteractiveWindowProvider {
 export const IInteractiveControllerHelper = Symbol(
 	"IInteractiveControllerHelper",
 );
+
 export interface IInteractiveControllerHelper {
 	onControllerSelected: Event<{
 		notebook: NotebookDocument;
@@ -147,6 +150,7 @@ export interface IInteractiveWindowCache {
 export const IInteractiveWindowDebuggingManager = Symbol(
 	"IInteractiveWindowDebuggingManager",
 );
+
 export interface IInteractiveWindowDebuggingManager extends IDebuggingManager {
 	start(notebook: NotebookDocument, cell: NotebookCell): Promise<void>;
 	updateSourceMaps(

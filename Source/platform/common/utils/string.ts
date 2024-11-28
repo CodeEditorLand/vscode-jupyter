@@ -10,6 +10,7 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 }
 
 const textDecoder = new TextDecoder();
+
 export function uint8ArrayToBase64(buffer: Uint8Array): string {
 	if (typeof Buffer !== "undefined" && typeof Buffer.from === "function") {
 		return Buffer.from(buffer).toString("base64");

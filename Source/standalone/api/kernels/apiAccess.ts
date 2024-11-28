@@ -229,6 +229,7 @@ async function getAccessForExtensionsFromStore(
 
 // Chain the updates, as we do not want to lose any transient updates/changes.
 let updatePromise = Promise.resolve();
+
 export async function updateListOfExtensionsAllowedToAccessApi(
 	extensionIds: string[],
 ) {

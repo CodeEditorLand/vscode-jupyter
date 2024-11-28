@@ -131,6 +131,7 @@ export enum PreferredKernelExactMatchReason {
 export const IRemoteNotebookKernelSourceSelector = Symbol(
 	"IRemoteNotebookKernelSourceSelector",
 );
+
 export interface IRemoteNotebookKernelSourceSelector {
 	selectRemoteKernel(
 		notebook: vscode.NotebookDocument,
@@ -140,6 +141,7 @@ export interface IRemoteNotebookKernelSourceSelector {
 export const ILocalNotebookKernelSourceSelector = Symbol(
 	"ILocalNotebookKernelSourceSelector",
 );
+
 export interface ILocalNotebookKernelSourceSelector {
 	selectLocalKernel(
 		notebook: vscode.NotebookDocument,
@@ -148,6 +150,7 @@ export interface ILocalNotebookKernelSourceSelector {
 export const ILocalPythonNotebookKernelSourceSelector = Symbol(
 	"ILocalPythonNotebookKernelSourceSelector",
 );
+
 export interface ILocalPythonNotebookKernelSourceSelector {
 	selectLocalKernel(
 		notebook: vscode.NotebookDocument,
@@ -168,6 +171,7 @@ export interface IConnectionDisplayData extends IDisposable {
 }
 
 export const IConnectionDisplayDataProvider = Symbol("IConnectionDisplayData");
+
 export interface IConnectionDisplayDataProvider {
 	getDisplayData(
 		connection: KernelConnectionMetadata,

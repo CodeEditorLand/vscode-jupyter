@@ -31,6 +31,7 @@ type WebViewViewState = {
 	readonly visible: boolean;
 	readonly active: boolean;
 };
+
 export type WebViewViewChangeEventArgs = {
 	current: WebViewViewState;
 	previous: WebViewViewState;

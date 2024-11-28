@@ -55,6 +55,7 @@ export enum JupyterInterpreterDependencyResponse {
 }
 
 export const IJupyterServerHelper = Symbol("JupyterServerHelper");
+
 export interface IJupyterServerHelper {
 	isJupyterServerSupported(cancelToken?: CancellationToken): Promise<boolean>;
 	startServer(
@@ -84,6 +85,7 @@ export interface IJupyterKernel {
 }
 
 export const INotebookImporter = Symbol("INotebookImporter");
+
 export interface INotebookImporter extends Disposable {
 	importFromFile(
 		contentsFile: Uri,
@@ -92,6 +94,7 @@ export interface INotebookImporter extends Disposable {
 }
 
 export const INotebookExporter = Symbol("INotebookExporter");
+
 export interface INotebookExporter {
 	serialize(
 		cells: NotebookCellData[],
@@ -108,6 +111,7 @@ export interface INotebookExporter {
 export const IJupyterInterpreterDependencyManager = Symbol(
 	"IJupyterInterpreterDependencyManager",
 );
+
 export interface IJupyterInterpreterDependencyManager {
 	/**
 	 * Installs the dependencies required to launch jupyter.
@@ -124,6 +128,7 @@ export interface IJupyterInterpreterDependencyManager {
 export const INbConvertInterpreterDependencyChecker = Symbol(
 	"INbConvertInterpreterDependencyChecker",
 );
+
 export interface INbConvertInterpreterDependencyChecker {
 	isNbConvertInstalled(
 		interpreter: PythonEnvironment,
@@ -139,6 +144,7 @@ export interface INbConvertInterpreterDependencyChecker {
 export const INbConvertExportToPythonService = Symbol(
 	"INbConvertExportToPythonService",
 );
+
 export interface INbConvertExportToPythonService {
 	exportNotebookToPython(
 		file: Uri,
@@ -191,6 +197,7 @@ export interface IJupyterServerUriEntry {
 }
 
 export const IJupyterServerUriStorage = Symbol("IJupyterServerUriStorage");
+
 export interface IJupyterServerUriStorage {
 	/**
 	 * Temporary event, the old API was async, the new API is sync.
@@ -220,6 +227,7 @@ export interface IBackupFile {
 }
 
 export const IJupyterKernelService = Symbol("IJupyterKernelService");
+
 export interface IJupyterKernelService {
 	ensureKernelIsUsable(
 		resource: Resource,
@@ -233,12 +241,14 @@ export interface IJupyterKernelService {
 export const IJupyterRequestAgentCreator = Symbol(
 	"IJupyterRequestAgentCreator",
 );
+
 export interface IJupyterRequestAgentCreator {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	createHttpRequestAgent(): any;
 }
 
 export const IJupyterRequestCreator = Symbol("IJupyterRequestCreator");
+
 export interface IJupyterRequestCreator {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	getRequestCtor(
@@ -267,6 +277,7 @@ export interface IJupyterRequestCreator {
 }
 
 export const INotebookStarter = Symbol("INotebookStarter");
+
 export interface INotebookStarter extends IDisposable {
 	start(
 		resource: Resource,
@@ -280,6 +291,7 @@ export interface INotebookStarter extends IDisposable {
 export const ILiveRemoteKernelConnectionUsageTracker = Symbol(
 	"ILiveRemoteKernelConnectionUsageTracker",
 );
+
 export interface ILiveRemoteKernelConnectionUsageTracker {
 	/**
 	 * Whether the provided remote kernel was ever used by any notebook within the extension.
@@ -306,6 +318,7 @@ export interface ILiveRemoteKernelConnectionUsageTracker {
 export const IJupyterRemoteCachedKernelValidator = Symbol(
 	"IJupyterRemoteCachedKernelValidator",
 );
+
 export interface IJupyterRemoteCachedKernelValidator {
 	isValid(kernel: LiveRemoteKernelConnectionMetadata): Promise<boolean>;
 }
@@ -320,6 +333,7 @@ export interface IRemoteKernelFinder
 export const IJupyterServerProviderRegistry = Symbol(
 	"IJupyterServerProviderRegistry",
 );
+
 export interface IJupyterServerProviderRegistry {
 	onDidChangeCollections: Event<{
 		added: JupyterServerCollection[];

@@ -402,6 +402,7 @@ export type KernelHooks =
 	| "interruptCompleted"
 	| "didStart"
 	| "willCancel";
+
 export interface IBaseKernel extends IAsyncDisposable {
 	readonly ipywidgetsVersion?: 7 | 8;
 	readonly onIPyWidgetVersionResolved: Event<7 | 8 | undefined>;
@@ -600,6 +601,7 @@ export interface IBaseKernelProvider<T extends IBaseKernel>
  * Kernel provider for fetching and creating kernels inside the extension.
  */
 export const IKernelProvider = Symbol("IKernelProvider");
+
 export interface IKernelProvider extends IBaseKernelProvider<IKernel> {
 	/**
 	 * Get hold of the active kernel for a given notebook document.
@@ -622,6 +624,7 @@ export interface IKernelProvider extends IBaseKernelProvider<IKernel> {
  * Kernel provider used by third party extensions (indirectly).
  */
 export const IThirdPartyKernelProvider = Symbol("IThirdPartyKernelProvider");
+
 export interface IThirdPartyKernelProvider
 	extends IBaseKernelProvider<IThirdPartyKernel> {
 	/**
@@ -802,6 +805,7 @@ export interface IJupyterServerConnector {
 }
 
 export const IKernelSessionFactory = Symbol("IKernelSessionFactory");
+
 export interface IKernelSessionFactory {
 	/**
 	 * Creates a notebook.
@@ -900,6 +904,7 @@ export enum KernelInterpreterDependencyResponse {
 }
 
 export const IKernelDependencyService = Symbol("IKernelDependencyService");
+
 export interface IKernelDependencyService {
 	/**
 	 * @param {boolean} [ignoreCache] We cache the results of this call so we don't have to do it again (users rarely uninstall ipykernel).
@@ -951,6 +956,7 @@ export type KernelAction = "start" | "interrupt" | "restart" | "execution";
 export type KernelActionSource = "jupyterExtension" | "3rdPartyExtension";
 
 export const ITracebackFormatter = Symbol("ITracebackFormatter");
+
 export interface ITracebackFormatter {
 	/**
 	 * Modifies a traceback from an error message.
@@ -974,6 +980,7 @@ export const enum StartupCodePriority {
  * Startup code provider provides code snippets that are run right after the kernel is started but before running any code.
  */
 export const IStartupCodeProviders = Symbol("IStartupCodeProviders");
+
 export interface IStartupCodeProviders {
 	getProviders(
 		notebookViewType:

@@ -13,6 +13,7 @@ export enum ExportFormat {
 }
 
 export const IFileConverter = Symbol("IFileConverter");
+
 export interface IFileConverter {
 	export(
 		format: ExportFormat,
@@ -25,6 +26,7 @@ export interface IFileConverter {
 }
 
 export const IExportBase = Symbol("IExportBase");
+
 export interface IExportBase {
 	executeCommand(
 		sourceDocument: NotebookDocument,
@@ -36,6 +38,7 @@ export interface IExportBase {
 }
 
 export const IExport = Symbol("IExport");
+
 export interface IExport {
 	export(
 		sourceDocument: NotebookDocument,
@@ -45,6 +48,7 @@ export interface IExport {
 }
 
 export const IExportUtil = Symbol("IExportUtil");
+
 export interface IExportUtil {
 	getContent(document: NotebookDocument): Promise<string>;
 

@@ -8,6 +8,7 @@ const jupyterNotebookModuleNames = [
 	translateProductToModule(Product.jupyter),
 	translateProductToModule(Product.notebook),
 ];
+
 export function getPinnedPackages(
 	installer: "conda" | "pip",
 	moduleName: string,

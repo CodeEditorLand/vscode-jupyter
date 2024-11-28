@@ -175,6 +175,7 @@ export async function getInterpreterInfo(interpreter?: { id: string }) {
 }
 
 let pythonApi: PythonExtension;
+
 export function setPythonApi(api: PythonExtension) {
 	pythonApi = api;
 }

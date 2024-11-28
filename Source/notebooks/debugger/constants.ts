@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 export const pythonKernelDebugAdapter = "Python Kernel Debug Adapter";
+
 export const pythonIWKernelDebugAdapter =
 	"Python Interactive Window Debug Adapter";
 

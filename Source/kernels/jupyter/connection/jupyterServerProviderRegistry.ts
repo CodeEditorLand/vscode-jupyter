@@ -9,6 +9,7 @@ import {
 } from "../types";
 
 const displayNames = new Map<string, string>();
+
 export function trackRemoteServerDisplayName(
 	serverHandle: JupyterServerProviderHandle,
 	displayName: string,

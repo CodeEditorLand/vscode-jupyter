@@ -30,6 +30,7 @@ export type MultiStepResult<
 		| { type: "userPerformedSomeOtherAction" };
 	disposables: IDisposable[];
 };
+
 export interface IQuickPickKernelItemProvider {
 	readonly title: string;
 	readonly kind: ContributedKernelFinderKind;

@@ -30,6 +30,7 @@ const REQUIRE_PATTERNS = [
 	'["requirejs"]["config"]({',
 	"['requirejs']['config']({",
 ];
+
 export async function extractRequireConfigFromWidgetEntry(
 	baseUrl: Uri,
 	widgetFolderName: string,

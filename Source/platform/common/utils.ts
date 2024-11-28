@@ -53,6 +53,7 @@ const dummyExecuteResultObj: nbformat.IExecuteResult = {
 	data: {},
 	metadata: {},
 };
+
 export const AllowedCellOutputKeys = {
 	["stream"]: new Set(Object.keys(dummyStreamObj)),
 	["error"]: new Set(Object.keys(dummyErrorObj)),
@@ -138,6 +139,7 @@ export function translateKernelLanguageToMonaco(language: string): string {
 export function isJupyterNotebook(document: NotebookDocument): boolean;
 // eslint-disable-next-line @typescript-eslint/unified-signatures
 export function isJupyterNotebook(viewType: string): boolean;
+
 export function isJupyterNotebook(option: NotebookDocument | string) {
 	if (typeof option === "string") {
 		return (

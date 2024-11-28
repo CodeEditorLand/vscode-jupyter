@@ -27,6 +27,7 @@ export interface ISourceMapRequest {
 }
 
 export const IJupyterDebugService = Symbol("IJupyterDebugService");
+
 export interface IJupyterDebugService extends IDebugService {
 	/**
 	 * Event fired when a breakpoint is hit (debugger has stopped)
@@ -100,6 +101,7 @@ export interface IDebuggingManager {
 }
 
 export const INotebookDebuggingManager = Symbol("INotebookDebuggingManager");
+
 export interface INotebookDebuggingManager extends IDebuggingManager {
 	tryToStartDebugging(
 		mode: KernelDebugMode,
@@ -188,11 +190,13 @@ export interface IDebugLocation {
 export const IDebugLocationTrackerFactory = Symbol(
 	"IDebugLocationTrackerFactory",
 );
+
 export interface IDebugLocationTrackerFactory {
 	createDebugAdapterTracker(session: DebugSession): DebugAdapterTracker;
 }
 
 export const IDebugLocationTracker = Symbol("IDebugLocationTracker");
+
 export interface IDebugLocationTracker {
 	updated: Event<void>;
 

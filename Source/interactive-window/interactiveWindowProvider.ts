@@ -65,6 +65,7 @@ import {
 
 // Export for testing
 export const AskedForPerFileSettingKey = "ds_asked_per_file_interactive";
+
 export const InteractiveWindowCacheKey = "ds_interactive_window_cache";
 
 @injectable()

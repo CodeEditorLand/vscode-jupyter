@@ -18,6 +18,7 @@ import * as path from "../../../platform/vscode-path/path";
 import { IPlotSaveHandler } from "./types";
 
 export const svgMimeType = "image/svg+xml";
+
 export const imageExtensionForMimeType: Record<string, string> = {
 	"image/png": "png",
 	"image/jpeg": "jpeg",

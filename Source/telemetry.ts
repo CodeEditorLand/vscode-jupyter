@@ -26,6 +26,7 @@ import { SharedPropertyMapping } from "./platform/telemetry/index";
 import { IExtensionApi } from "./standalone/api";
 
 export * from "./platform/telemetry/index";
+
 export type DurationMeasurement = {
 	/**
 	 * Duration of a measure in milliseconds.
@@ -33,6 +34,7 @@ export type DurationMeasurement = {
 	 */
 	duration: number;
 };
+
 export type ResourceTypeTelemetryProperty = {
 	/**
 	 * Used to determine whether this event is related to a Notebooks or Interactive window.
@@ -92,6 +94,7 @@ type ICustomEventData = {
 	 */
 	source: EventSource;
 };
+
 export type IEventData = IGdprEventData & ICustomEventData;
 /**
  * Used to define an individual property (data item) of an Event.
@@ -140,6 +143,7 @@ export type IPropertyDataNonMeasurement = IBasePropertyData & {
 	 */
 	isMeasurement?: false;
 };
+
 export type IPropertyDataMeasurement = IBasePropertyData & {
 	/**
 	 * Numbers are handled differently in the telemetry system.
@@ -389,6 +393,7 @@ export const CommonProperties = {
 	// ...commonClassificationForResourceType(),
 	...globallySharedProperties(),
 };
+
 export const CommonPropertyAndMeasureTypeNames = [
 	"ResourceSpecificTelemetryProperties",
 	"DurationMeasurement",

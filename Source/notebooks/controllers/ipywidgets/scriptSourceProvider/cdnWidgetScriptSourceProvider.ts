@@ -34,8 +34,10 @@ const jsdelivrUrl = "https://cdn.jsdelivr.net/npm/";
 
 export const GlobalStateKeyToTrackIfUserConfiguredCDNAtLeastOnce =
 	"IPYWidgetCDNConfigured";
+
 export const GlobalStateKeyToNeverWarnAboutScriptsNotFoundOnCDN =
 	"IPYWidgetNotFoundOnCDN";
+
 export const GlobalStateKeyToNeverWarnAboutNoNetworkAccess =
 	"IPYWidgetNoNetWorkAccess";
 

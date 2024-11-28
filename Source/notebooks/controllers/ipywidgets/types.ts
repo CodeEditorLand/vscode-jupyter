@@ -100,6 +100,7 @@ export interface ILocalResourceUriConverter {
 }
 
 export const INbExtensionsPathProvider = Symbol("INbExtensionsPathProvider");
+
 export interface INbExtensionsPathProvider {
 	getNbExtensionsParentPath(kernel: IKernel): Promise<Uri | undefined>;
 }
@@ -107,10 +108,12 @@ export interface INbExtensionsPathProvider {
 export const IIPyWidgetScriptManagerFactory = Symbol(
 	"IIPyWidgetScriptManagerFactory",
 );
+
 export interface IIPyWidgetScriptManagerFactory {
 	getOrCreate(kernel: IKernel): IIPyWidgetScriptManager;
 }
 export const IIPyWidgetScriptManager = Symbol("IIPyWidgetScriptManager");
+
 export interface IIPyWidgetScriptManager {
 	/**
 	 * Returns the path to the local nbextensions folder.

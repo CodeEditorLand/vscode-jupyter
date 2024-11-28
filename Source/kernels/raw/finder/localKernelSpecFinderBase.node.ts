@@ -48,7 +48,9 @@ export type KernelSpecFileWithContainingInterpreter = {
 	interpreter?: PythonEnvironment;
 	kernelSpecFile: Uri;
 };
+
 export const isDefaultPythonKernelSpecSpecName = /python\s\d*.?\d*$/;
+
 export const oldKernelsSpecFolderName = "__old_vscode_kernelspecs";
 
 /**

@@ -7,7 +7,9 @@ import { CancellationToken, Event, Uri } from "vscode";
 import { PythonEnvironment } from "../pythonEnvironments/info";
 
 type InterpreterId = string;
+
 export const IInterpreterService = Symbol("IInterpreterService");
+
 export interface IInterpreterService {
 	// #region New API
 	resolveEnvironment(

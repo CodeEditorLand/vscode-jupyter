@@ -27,6 +27,7 @@ import {
 } from "../../platform/notebooks/cellExecutionStateService";
 
 export const ISurveyBanner = Symbol("ISurveyBanner");
+
 export interface ISurveyBanner
 	extends IExtensionSyncActivationService,
 		IJupyterExtensionBanner {}

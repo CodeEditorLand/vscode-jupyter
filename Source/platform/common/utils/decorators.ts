@@ -17,6 +17,7 @@ import { StopWatch } from "./stopWatch";
 type PromiseFunctionWithAnyArgs = (...any: any) => Promise<any>;
 
 const cacheStoreForMethods = getGlobalCacheStore();
+
 export function cache(expiryDurationMs: number) {
 	return function (
 		target: Object,

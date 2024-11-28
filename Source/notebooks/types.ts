@@ -11,6 +11,7 @@ export interface IEmbedNotebookEditorProvider {
 }
 
 export const INotebookEditorProvider = Symbol("INotebookEditorProvider");
+
 export interface INotebookEditorProvider {
 	activeNotebookEditor: NotebookEditor | undefined;
 	findNotebookEditor(resource: Resource): NotebookEditor | undefined;

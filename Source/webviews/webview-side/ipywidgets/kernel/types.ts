@@ -25,6 +25,7 @@ export type ScriptLoader = {
 		moduleVersion: string,
 	): void;
 };
+
 export type IJupyterLabWidgetManagerCtor = new (
 	kernel: Kernel.IKernelConnection,
 	el: HTMLElement,

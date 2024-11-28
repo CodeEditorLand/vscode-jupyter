@@ -30,6 +30,7 @@ export class VariableResultCacheBase<T> {
 }
 
 export const VariableResultCache = VariableResultCacheBase<VariablesResult[]>;
+
 export const VariableSummaryCache = VariableResultCacheBase<
 	string | null | undefined
 >;

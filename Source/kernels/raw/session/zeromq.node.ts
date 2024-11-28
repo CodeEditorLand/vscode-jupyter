@@ -15,6 +15,7 @@ import * as path from "../../../platform/vscode-path/path";
 import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
 
 const zeromqModuleName = `${"zeromq"}`;
+
 export function getZeroMQ(): typeof import("zeromq") {
 	try {
 		const zmq: typeof import("zeromq") = require(zeromqModuleName);

@@ -16,16 +16,19 @@ import { getTelemetrySafeHashedString } from "./helpers";
 type Context = {
 	previouslySelectedKernelConnectionId: string;
 };
+
 export const trackedInfo = new Map<
 	string,
 	[ResourceSpecificTelemetryProperties, Context]
 >();
+
 export const pythonEnvironmentsByHash = new Map<string, PythonEnvironment>();
 type InterpreterPackageProvider = (
 	interpreter: PythonEnvironment,
 ) => Promise<Map<string, string>>;
 
 let _interpreterPackageProvider: InterpreterPackageProvider | undefined;
+
 export function initializeGlobals(
 	interpreterPackageProvider: InterpreterPackageProvider,
 ) {

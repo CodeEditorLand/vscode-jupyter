@@ -12,9 +12,11 @@ interface TypedAnyAction<T> extends Action<T> {
 	[extraProps: string]: any;
 }
 export type QueueAnotherFunc<T> = (nextAction: Action<T>) => void;
+
 export type QueuableAction<M> = TypedAnyAction<keyof M> & {
 	queueAction: QueueAnotherFunc<keyof M>;
 };
+
 export type ReducerArg<
 	S,
 	AT = AnyAction,
@@ -32,9 +34,11 @@ export type ReducerArg<
 		};
 
 export type ReducerFunc<S, AT, T> = (args: ReducerArg<S, AT, T>) => S;
+
 export type ActionWithPayload<T, K> = TypedAnyAction<K> & {
 	payload: BaseReduxActionPayload<T>;
 };
+
 export type ActionWithOutPayloadData<K> = TypedAnyAction<K> & {
 	payload: BaseReduxActionPayload;
 };

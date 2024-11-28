@@ -10,6 +10,7 @@ import { IFileSystem, TemporaryFile } from "./types";
 export type WriteStream = fs.WriteStream;
 
 export const IFileSystemNode = Symbol("IFileSystemNode");
+
 export interface IFileSystemNode extends IFileSystem {
 	createLocalWriteStream(path: string): WriteStream;
 	createTemporaryLocalFile(options: {

@@ -15,6 +15,7 @@ import {
 } from "../../platform/errors/types";
 
 export const IDataScienceErrorHandler = Symbol("IDataScienceErrorHandler");
+
 export interface IDataScienceErrorHandler {
 	/**
 	 * Handles the errors and if necessary displays an error message.

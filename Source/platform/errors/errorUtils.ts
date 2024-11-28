@@ -236,6 +236,7 @@ type BaseFailure<Reason extends KernelFailureReason, ExtraData = {}> = {
 	 */
 	moreInfoLink: string | undefined;
 } & ExtraData;
+
 export type OverridingBuiltInModulesFailure = BaseFailure<
 	KernelFailureReason.overridingBuiltinModules,
 	| {
@@ -259,6 +260,7 @@ export type OverridingBuiltInModulesFailure = BaseFailure<
 			folderName: string;
 	  }
 >;
+
 export type ImportErrorFailure = BaseFailure<
 	KernelFailureReason.importFailure,
 	{
@@ -270,6 +272,7 @@ export type ImportErrorFailure = BaseFailure<
 		fileName?: string;
 	}
 >;
+
 export type ModuleNotFoundFailure = BaseFailure<
 	KernelFailureReason.moduleNotFoundFailure,
 	{
@@ -279,6 +282,7 @@ export type ModuleNotFoundFailure = BaseFailure<
 		moduleName: string;
 	}
 >;
+
 export type DllLoadFailure = BaseFailure<
 	KernelFailureReason.dllLoadFailure,
 	{
@@ -288,6 +292,7 @@ export type DllLoadFailure = BaseFailure<
 		moduleName?: string;
 	}
 >;
+
 export type JupyterStartFailure = BaseFailure<
 	| KernelFailureReason.jupyterStartFailure
 	| KernelFailureReason.jupyterStartFailureOutdatedTraitlets,
@@ -298,14 +303,19 @@ export type JupyterStartFailure = BaseFailure<
 		pythonError?: string;
 	}
 >;
+
 export type ImportWin32ApiFailure =
 	BaseFailure<KernelFailureReason.importWin32apiFailure>;
+
 export type ZmqModuleFailure =
 	BaseFailure<KernelFailureReason.zmqModuleFailure>;
+
 export type OldIPyKernelFailure =
 	BaseFailure<KernelFailureReason.oldIPyKernelFailure>;
+
 export type OldIPythonFailure =
 	BaseFailure<KernelFailureReason.oldIPythonFailure>;
+
 export type KernelSessionDisposedFailure =
 	BaseFailure<KernelFailureReason.sessionDisposed>;
 

@@ -9,6 +9,7 @@ type CacheData = {
 };
 
 const resourceSpecificCacheStores = new Map<string, Map<string, CacheData>>();
+
 export class DataWithExpiry {
 	private readonly expiryTime: number;
 

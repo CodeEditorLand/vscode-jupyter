@@ -9,6 +9,7 @@ import { OSType } from "../utils/platform";
 // platform
 
 export const IPlatformService = Symbol("IPlatformService");
+
 export interface IPlatformService {
 	readonly osType: OSType;
 	// convenience methods
@@ -23,7 +24,9 @@ export interface IPlatformService {
 // temp FS
 
 export type TemporaryFileUri = { file: vscode.Uri } & vscode.Disposable;
+
 export type TemporaryFile = { filePath: string } & vscode.Disposable;
+
 export type TemporaryDirectory = { path: string } & vscode.Disposable;
 
 // Where to fine executables.
@@ -36,6 +39,7 @@ export interface IExecutables {
 }
 
 export const IFileSystem = Symbol("IFileSystem");
+
 export interface IFileSystem {
 	arePathsSame(path1: vscode.Uri, path2: vscode.Uri): boolean;
 	copy(

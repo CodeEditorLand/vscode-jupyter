@@ -5,6 +5,7 @@ import { JVSC_EXTENSION_ID } from "../common/constants";
 import { analyzeKernelErrors } from "./errorUtils";
 
 const taggers = [tagWithChildProcessExited, tagWithKernelRestarterFailed];
+
 export function getErrorTags(stdErrOrStackTrace: string | string[]) {
 	const tags: string[] = [];
 

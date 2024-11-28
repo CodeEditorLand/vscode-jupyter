@@ -44,6 +44,7 @@ export interface IActiveNotebookChangedEvent {
 }
 
 export const INotebookWatcher = Symbol("INotebookWatcher");
+
 export interface INotebookWatcher {
 	readonly activeKernel?: IKernel;
 	readonly activeNotebookExecutionCount?: number;
@@ -55,6 +56,7 @@ export interface INotebookWatcher {
 }
 
 export const IVariableViewProvider = Symbol("IVariableViewProvider");
+
 export interface IVariableViewProvider extends IVSCWebviewViewProvider {}
 
 export interface IVariableViewer {

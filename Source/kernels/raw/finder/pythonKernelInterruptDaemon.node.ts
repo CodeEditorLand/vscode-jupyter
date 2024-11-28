@@ -72,6 +72,7 @@ type Command =
 	| { command: "INITIALIZE_INTERRUPT" }
 	| { command: "INTERRUPT"; handle: InterruptHandle }
 	| { command: "DISPOSE_INTERRUPT_HANDLE"; handle: InterruptHandle };
+
 export type Interrupter = IDisposable & {
 	handle: InterruptHandle;
 	interrupt: () => Promise<void>;

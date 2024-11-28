@@ -56,6 +56,7 @@ export enum ProductType {
 }
 
 export const IModuleInstaller = Symbol("IModuleInstaller");
+
 export interface IModuleInstaller {
 	readonly name: string;
 	readonly displayName: string;
@@ -99,6 +100,7 @@ export interface IModuleInstaller {
 }
 
 export const IPythonInstallation = Symbol("IPythonInstallation");
+
 export interface IPythonInstallation {
 	checkInstallation(): Promise<boolean>;
 }
@@ -106,6 +108,7 @@ export interface IPythonInstallation {
 export const IInstallationChannelManager = Symbol(
 	"IInstallationChannelManager",
 );
+
 export interface IInstallationChannelManager {
 	getInstallationChannel(
 		product: Product,
@@ -118,10 +121,12 @@ export interface IInstallationChannelManager {
 	showNoInstallersMessage(interpreter: PythonEnvironment): void;
 }
 export const IProductService = Symbol("IProductService");
+
 export interface IProductService {
 	getProductType(product: Product): ProductType;
 }
 export const IProductPathService = Symbol("IProductPathService");
+
 export interface IProductPathService {
 	getExecutableNameFromSettings(product: Product, resource?: Uri): string;
 	isExecutableAModule(product: Product, resource?: Uri): boolean;

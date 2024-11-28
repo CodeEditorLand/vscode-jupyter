@@ -48,11 +48,13 @@ export function raceTimeout<T>(
 	timeout: number,
 	...promises: Promise<T>[]
 ): Promise<T | undefined>;
+
 export function raceTimeout<T>(
 	timeout: number,
 	defaultValue: T,
 	...promises: Promise<T>[]
 ): Promise<T>;
+
 export function raceTimeout<T>(
 	timeout: number,
 	defaultValue: T,

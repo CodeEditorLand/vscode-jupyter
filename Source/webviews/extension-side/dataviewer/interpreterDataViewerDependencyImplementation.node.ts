@@ -19,6 +19,7 @@ import { sendTelemetryEvent, Telemetry } from "../../../telemetry";
 import { BaseDataViewerDependencyImplementation } from "./baseDataViewerDependencyImplementation";
 
 const separator = "5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d";
+
 export const interpreterGetPandasVersion = `import pandas;print(pandas.__version__);print("${separator}")`;
 
 /**

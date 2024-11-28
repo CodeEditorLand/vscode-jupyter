@@ -21,6 +21,7 @@ export interface IJupyterCommand {
 }
 
 export const IJupyterCommandFactory = Symbol("IJupyterCommandFactory");
+
 export interface IJupyterCommandFactory {
 	createInterpreterCommand(
 		command: JupyterCommands,

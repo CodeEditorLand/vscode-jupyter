@@ -10,6 +10,7 @@ let realEntryPoint: {
 	activate: typeof activate;
 	deactivate: typeof deactivate;
 };
+
 export async function activate(
 	context: IExtensionContext,
 ): Promise<IExtensionApi> {

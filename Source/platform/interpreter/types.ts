@@ -13,6 +13,7 @@ import { PythonEnvironment } from "../pythonEnvironments/info";
 export const IReservedPythonNamedProvider = Symbol(
 	"IReservedPythonNamedProvider",
 );
+
 export interface IReservedPythonNamedProvider extends IDisposable {
 	getUriOverridingReservedPythonNames(
 		cwd: Uri,
@@ -25,6 +26,7 @@ export interface IReservedPythonNamedProvider extends IDisposable {
 }
 
 export const IInterpreterPackages = Symbol("IInterpreterPackages");
+
 export interface IInterpreterPackages {
 	listPackages(resource?: Resource): Promise<string[]>;
 
@@ -42,6 +44,7 @@ export interface IInterpreterPackages {
 export const IWorkspaceInterpreterTracker = Symbol(
 	"IWorkspaceInterpreterTracker",
 );
+
 export interface IWorkspaceInterpreterTracker {
 	activate(): void;
 	isActiveWorkspaceInterpreter(

@@ -31,6 +31,7 @@ const uriToNotebookMap = new Map<string, WeakRef<NotebookDocument>>();
 let mainStopWatch: { elapsedTime: number };
 
 let mainStopWatchStartAt = 0;
+
 export function getNotebookTelemetryTracker(
 	query: NotebookDocument | Uri | undefined,
 ) {
@@ -117,6 +118,7 @@ type ExtraTimes = {
 	interpreterDiscovered: number;
 	executeCellAcknowledged: number;
 };
+
 export type NotebookFirstStartBreakDownMeasures = Partial<
 	{ [K in keyof Times as `${K}StartedAfter`]: number } & {
 		[K in keyof ExtraTimes as `${K}After`]: number;

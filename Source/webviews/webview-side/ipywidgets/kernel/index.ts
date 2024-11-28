@@ -121,6 +121,7 @@ let stackOfWidgetsRenderStatusByOutputId: {
 	container: HTMLElement;
 	success?: boolean;
 }[] = [];
+
 export async function renderOutput(
 	outputItem: OutputItem,
 	model: nbformat.IMimeBundle & {
@@ -437,6 +438,7 @@ function initializeWidgetManager(widgetState?: NotebookMetadata["widgets"]) {
 	initialize(JupyterLabWidgetManager, capturedContext, widgetState);
 }
 let ipyWidgetVersionResponseHandled = false;
+
 export function activate(context: KernelMessagingApi) {
 	capturedContext = context;
 	hookWindowFunctions(context);

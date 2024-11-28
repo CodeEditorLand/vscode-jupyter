@@ -4,6 +4,7 @@
 import { Uri } from "vscode";
 
 export const ITrustedKernelPaths = Symbol("ITrustedKernelPaths");
+
 export interface ITrustedKernelPaths {
 	isTrusted(kernelPath: Uri): boolean;
 }

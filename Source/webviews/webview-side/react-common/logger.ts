@@ -4,6 +4,7 @@
 let messageLogger:
 	| undefined
 	| ((category: "error" | "verbose", message: string) => void);
+
 export function logMessage(message: string) {
 	if (messageLogger) {
 		messageLogger("verbose", message);

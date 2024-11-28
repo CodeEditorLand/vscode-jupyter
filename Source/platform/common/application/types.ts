@@ -135,6 +135,7 @@ export interface IDebugService {
 }
 
 export const IApplicationEnvironment = Symbol("IApplicationEnvironment");
+
 export interface IApplicationEnvironment {
 	/**
 	 * The extension name.
@@ -156,6 +157,7 @@ export interface IWebviewMessageListener {
 export const IWebviewPanelMessageListener = Symbol(
 	"IWebviewPanelMessageListener",
 );
+
 export interface IWebviewPanelMessageListener
 	extends IWebviewMessageListener,
 		IDisposable {
@@ -168,6 +170,7 @@ export interface IWebviewPanelMessageListener
 export const IWebviewViewMessageListener = Symbol(
 	"IWebviewViewMessageListener",
 );
+
 export interface IWebviewViewMessageListener
 	extends IWebviewMessageListener,
 		IDisposable {}
@@ -186,6 +189,7 @@ export type WebviewMessage = {
 
 // Wraps a VS Code webview
 export const IWebview = Symbol("IWebview");
+
 export interface IWebview {
 	/**
 	 * Event is fired when the load for a web panel fails
@@ -211,6 +215,7 @@ export interface IWebview {
 
 // Wraps the VS Code webview view
 export const IWebviewView = Symbol("IWebviewView");
+
 export interface IWebviewView extends IWebview {
 	readonly onDidChangeVisibility: Event<void>;
 	readonly visible: boolean;
@@ -237,6 +242,7 @@ export interface IWebviewViewOptions extends IWebviewOptions {
 
 // Wraps the VS Code webview panel
 export const IWebviewPanel = Symbol("IWebviewPanel");
+
 export interface IWebviewPanel extends IWebview {
 	/**
 	 * Editor position of the panel. This property is only set if the webview is in
@@ -274,6 +280,7 @@ export interface IWebviewPanelOptions extends IWebviewOptions {
 
 // Wraps the VS Code api for creating a web panel
 export const IWebviewPanelProvider = Symbol("IWebviewPanelProvider");
+
 export interface IWebviewPanelProvider {
 	create(options: IWebviewPanelOptions): Promise<IWebviewPanel>;
 }
@@ -283,12 +290,14 @@ export interface IWebviewViewOptions extends IWebviewOptions {
 }
 
 export const IWebviewViewProvider = Symbol("IWebviewViewProvider");
+
 export interface IWebviewViewProvider {
 	create(options: IWebviewViewOptions): Promise<IWebviewView>;
 }
 export type Channel = "stable" | "insiders";
 
 export const IEncryptedStorage = Symbol("IEncryptedStorage");
+
 export interface IEncryptedStorage {
 	store(
 		service: string,

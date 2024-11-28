@@ -247,6 +247,7 @@ export function removeNotebookSuffixAddedByExtension(notebookPath: string) {
 type ConnectionWithKernelSpec =
 	| LocalKernelSpecConnectionMetadata
 	| PythonKernelConnectionMetadata;
+
 export function kernelConnectionMetadataHasKernelSpec(
 	connectionMetadata: KernelConnectionMetadata,
 ): connectionMetadata is ConnectionWithKernelSpec {

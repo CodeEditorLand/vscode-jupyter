@@ -6,6 +6,7 @@ import { sendTelemetryEvent } from "../../../telemetry";
 import { IJupyterKernelSpec } from "../../types";
 
 const shellScripts = ["/bin/sh", "/bin/bash", "/bin/zsh"];
+
 export function sendKernelSpecTelemetry(
 	kernelSpec: IJupyterKernelSpec,
 	kind: "local" | "remote",

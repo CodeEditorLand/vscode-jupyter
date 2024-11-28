@@ -11,9 +11,13 @@ import { PythonEnvironment } from "../../../platform/pythonEnvironments/info";
 import { SliceOperationSource } from "../../../platform/telemetry/constants";
 
 export const CellFetchAllLimit = 100000;
+
 export const CellFetchSizeFirst = 100000;
+
 export const CellFetchSizeSubsequent = 1000000;
+
 export const MaxStringCompare = 200;
+
 export const ColumnWarningSize = 1000; // Anything over this takes too long to load
 
 export namespace DataViewerRowStates {
@@ -125,6 +129,7 @@ export enum ColumnType {
 export type IRowsResponse = Record<string, unknown>[];
 
 export const IDataViewerFactory = Symbol("IDataViewerFactory");
+
 export interface IDataViewerFactory {
 	create(
 		dataProvider: IDataViewerDataProvider,
@@ -134,6 +139,7 @@ export interface IDataViewerFactory {
 }
 
 export const IDataViewer = Symbol("IDataViewer");
+
 export interface IDataViewer extends IDisposable {
 	readonly active: boolean;
 	readonly kernel?: IKernel | undefined;
@@ -150,6 +156,7 @@ export interface IDataViewer extends IDisposable {
 export const IJupyterVariableDataProvider = Symbol(
 	"IJupyterVariableDataProvider",
 );
+
 export interface IJupyterVariableDataProvider extends IDataViewerDataProvider {
 	readonly kernel: IKernel | undefined;
 
@@ -159,6 +166,7 @@ export interface IJupyterVariableDataProvider extends IDataViewerDataProvider {
 export const IJupyterVariableDataProviderFactory = Symbol(
 	"IJupyterVariableDataProviderFactory",
 );
+
 export interface IJupyterVariableDataProviderFactory {
 	create(
 		variable: IJupyterVariable,

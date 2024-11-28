@@ -8,6 +8,7 @@ import { Resource } from "../../common/types";
 export const IEnvironmentActivationService = Symbol(
 	"IEnvironmentActivationService",
 );
+
 export interface IEnvironmentActivationService {
 	getActivatedEnvironmentVariables(
 		resource: Resource,

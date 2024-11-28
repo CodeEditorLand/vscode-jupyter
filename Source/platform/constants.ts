@@ -26,6 +26,7 @@ export const Exiting = {
 
 export const TestingKernelPickerProviderId =
 	"_builtin.JupyterServerSelectorForTesting";
+
 export const UserJupyterServerPickerProviderId =
 	"_builtin.jupyterServerUrlProvider";
 
@@ -37,6 +38,7 @@ export function isBuiltInJupyterProvider(id: string) {
 }
 
 let isCodeSpaceValue = false;
+
 export function setIsCodeSpace(value: boolean) {
 	isCodeSpaceValue = value;
 }
@@ -46,6 +48,7 @@ export function isCodeSpace() {
 }
 
 let isWebExtensionValue = false;
+
 export function setIsWebExtension(value: boolean) {
 	isWebExtensionValue = value;
 }

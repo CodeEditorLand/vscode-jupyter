@@ -4,6 +4,7 @@
 import { IServiceContainer } from "./types";
 
 let container: IServiceContainer;
+
 export function getServiceContainer() {
 	return container;
 }

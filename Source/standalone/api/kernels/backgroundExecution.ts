@@ -13,6 +13,7 @@ import { logger } from "../../../platform/logging";
 import { createKernelApiForExtension } from "./kernel";
 
 export const executionCounters = new WeakMap<IKernel, number>();
+
 export async function execCodeInBackgroundThread<T>(
 	kernel: IKernel,
 	codeWithReturnStatement: string[],

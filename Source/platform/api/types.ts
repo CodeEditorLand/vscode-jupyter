@@ -9,6 +9,7 @@ import { Resource } from "../common/types";
 import { PythonVersion } from "../pythonEnvironments/info/pythonVersion";
 
 export const IPythonApiProvider = Symbol("IPythonApi");
+
 export interface IPythonApiProvider {
 	onDidActivatePythonExtension: Event<void>;
 	pythonExtensionHooked: Promise<void>;
@@ -21,6 +22,7 @@ export interface IPythonApiProvider {
 	setApi(api: PythonApi): void;
 }
 export const IPythonExtensionChecker = Symbol("IPythonExtensionChecker");
+
 export interface IPythonExtensionChecker {
 	readonly isPythonExtensionInstalled: boolean;
 	readonly isPythonExtensionActive: boolean;

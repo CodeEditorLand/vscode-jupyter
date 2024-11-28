@@ -12,6 +12,7 @@ import { BaseError } from "../../errors/types";
 import { IDisposable, Resource } from "../types";
 
 export const IBufferDecoder = Symbol("IBufferDecoder");
+
 export interface IBufferDecoder {
 	decode(buffers: Buffer[]): string;
 }

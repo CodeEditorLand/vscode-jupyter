@@ -18,6 +18,7 @@ import { normCasePath } from "./fileUtils";
 export { arePathsSame } from "./fileUtils";
 
 let internalServiceContainer: IServiceContainer;
+
 export function initializeExternalDependencies(
 	serviceContainer: IServiceContainer,
 ): void {

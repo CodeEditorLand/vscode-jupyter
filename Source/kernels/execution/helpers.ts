@@ -183,6 +183,7 @@ cellOutputMappers.set("execute_result", translateDisplayDataOutput as any);
 cellOutputMappers.set("stream", translateStreamOutput as any);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 cellOutputMappers.set("update_display_data", translateDisplayDataOutput as any);
+
 export function cellOutputToVSCCellOutput(
 	output: nbformat.IOutput,
 ): NotebookCellOutput {

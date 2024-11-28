@@ -18,6 +18,7 @@ import { ICellRange, IDisposable } from "../../platform/common/types";
 export const IDataScienceCodeLensProvider = Symbol(
 	"IDataScienceCodeLensProvider",
 );
+
 export interface IDataScienceCodeLensProvider extends CodeLensProvider {
 	getCodeWatcher(document: TextDocument): ICodeWatcher | undefined;
 }
@@ -30,6 +31,7 @@ export type CodeLensPerfMeasures = {
 
 // Wraps the Code Watcher API
 export const ICodeWatcher = Symbol("ICodeWatcher");
+
 export interface ICodeWatcher extends IDisposable {
 	readonly uri: Uri | undefined;
 	codeLensUpdated: Event<void>;
@@ -77,6 +79,7 @@ export interface ICodeWatcher extends IDisposable {
 }
 
 export const ICodeLensFactory = Symbol("ICodeLensFactory");
+
 export interface ICodeLensFactory {
 	updateRequired: Event<void>;
 	createCodeLenses(document: TextDocument): CodeLens[];
@@ -87,6 +90,7 @@ export interface ICodeLensFactory {
 }
 
 export const ICellRangeCache = Symbol("ICellRangeCache");
+
 export interface ICellRangeCache extends IDisposable {
 	clear(): void;
 
@@ -122,6 +126,7 @@ export interface IFileGeneratedCodes {
 }
 
 export const IGeneratedCodeStore = Symbol("IGeneratedCodeStore");
+
 export interface IGeneratedCodeStore {
 	clear(): void;
 	readonly all: IFileGeneratedCodes[];
@@ -133,6 +138,7 @@ export interface IGeneratedCodeStore {
 export const IGeneratedCodeStorageFactory = Symbol(
 	"IGeneratedCodeStorageFactory",
 );
+
 export interface IGeneratedCodeStorageFactory {
 	getOrCreate(notebook: NotebookDocument): IGeneratedCodeStore;
 
@@ -165,6 +171,7 @@ export interface IInteractiveWindowCodeGenerator extends IDisposable {
 }
 
 export const ICodeGeneratorFactory = Symbol("ICodeGeneratorFactory");
+
 export interface ICodeGeneratorFactory {
 	getOrCreate(notebook: NotebookDocument): IInteractiveWindowCodeGenerator;
 

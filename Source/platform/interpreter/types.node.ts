@@ -21,7 +21,9 @@ export type ExecutionFactoryCreateWithEnvironmentOptions = {
 	interpreter: PythonEnvironment | Environment;
 	allowEnvironmentFetchExceptions?: boolean;
 };
+
 export const IPythonExecutionFactory = Symbol("IPythonExecutionFactory");
+
 export interface IPythonExecutionFactory {
 	create(
 		options: ExecutionFactoryCreationOptions,

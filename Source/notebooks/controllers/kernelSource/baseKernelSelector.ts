@@ -34,6 +34,7 @@ export type CompoundQuickPickItem =
 	| ConnectionQuickPickItem
 	| KernelListErrorQuickPickItem
 	| QuickPickItem;
+
 export function isKernelPickItem(
 	item: CompoundQuickPickItem,
 ): item is ConnectionQuickPickItem {

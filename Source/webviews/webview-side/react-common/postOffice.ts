@@ -161,6 +161,7 @@ class KernelMessageApi implements IMessageApi {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PostOfficeMessage = { type: string; payload?: any };
+
 export type KernelMessagingApi = {
 	onDidReceiveKernelMessage: VSCodeEvent<unknown>;
 	postKernelMessage: (data: unknown) => void;

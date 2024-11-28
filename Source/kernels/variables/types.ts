@@ -36,6 +36,7 @@ export interface IJupyterVariable {
 }
 
 export const IJupyterVariables = Symbol("IJupyterVariables");
+
 export interface IJupyterVariables {
 	readonly refreshRequired: Event<void>;
 
@@ -184,4 +185,5 @@ export interface IKernelVariableRequester {
 }
 
 export const IJupyterVariablesProvider = Symbol("IJupyterVariablesProvider");
+
 export interface IJupyterVariablesProvider extends NotebookVariableProvider {}

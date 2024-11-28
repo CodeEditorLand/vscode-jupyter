@@ -17,6 +17,7 @@ export type OpenImageInPlotViewer = {
 	outputId: string;
 	mimeType: string;
 };
+
 export type SaveImageAs = {
 	type: "saveImageAs";
 	outputId: string;

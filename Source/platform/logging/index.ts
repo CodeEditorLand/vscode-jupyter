@@ -36,6 +36,7 @@ export type TraceInfo =
 let loggers: ILogger[] = [];
 
 let globalLoggingLevel: LogLevel = LogLevel.Info;
+
 export const logger: ILogger = {
 	error: (message: string, ...data: Arguments) => logError(message, ...data),
 	warn: (message: string, ...data: Arguments) => logWarning(message, ...data),
@@ -322,6 +323,7 @@ const formattedParameters = new WeakMap<
 	ClassInstance,
 	Map<MethodName, ParameterLogInformation[]>
 >();
+
 export function logValue<T>(property: keyof T) {
 	return (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
