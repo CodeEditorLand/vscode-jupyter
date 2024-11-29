@@ -29,11 +29,13 @@ export function pythonEnvironmentQuickPick(
 				: "";
 
 	const quickPickItem: QuickPickItem = { label: `${icon}${label}` };
+
 	quickPickItem.description = getDisplayPath(
 		item.executable.uri || item.path,
 		workspace.workspaceFolders || [],
 		new PlatformService().homeDir,
 	);
+
 	quickPickItem.tooltip = isCondaEnvironmentWithoutPython(item)
 		? DataScience.pythonCondaKernelsWithoutPython
 		: "";
@@ -42,6 +44,7 @@ export function pythonEnvironmentQuickPick(
 }
 export function getPythonEnvironmentCategory(item: Environment): {
 	label: string;
+
 	sortKey?: string;
 } {
 	switch (getEnvironmentType(item)) {

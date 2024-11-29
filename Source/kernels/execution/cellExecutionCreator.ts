@@ -23,10 +23,13 @@ import { IKernelController } from "../types";
  */
 export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 	public _started: boolean = false;
+
 	public get started() {
 		return this._started;
 	}
+
 	private _startTime?: number;
+
 	public errorInfo: CellExecutionError;
 	/**
 	 * @param {boolean} [clearOutputOnStartWithTime=false] If true, clear the output when start is called with a time.
@@ -37,33 +40,42 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 		private _endCallback: (() => void) | undefined,
 		private readonly clearOutputOnStartWithTime = false,
 	) {}
+
 	public get cell(): NotebookCell {
 		return this._impl.cell;
 	}
+
 	public get token(): CancellationToken {
 		return this._impl.token;
 	}
+
 	public get executionOrder(): number | undefined {
 		return this._impl.executionOrder;
 	}
+
 	public set executionOrder(value: number | undefined) {
 		if (value) {
 			getNotebookTelemetryTracker(
 				this._impl.cell.notebook,
 			)?.executeCellAcknowledged();
 		}
+
 		this._impl.executionOrder = value;
 	}
+
 	private startIfNecessary() {
 		if (!this.started) {
 			this._impl.start();
 		}
 	}
+
 	start(startTime?: number): void {
 		// Allow this to be called more than once (so we can switch out a kernel during running a cell)
 		if (!this.started) {
 			this._started = true;
+
 			this._impl.start(startTime);
+
 			this._startTime = startTime;
 			// We clear the output as soon as we start,
 			// We generally start with a time, when we receive a response from the kernel,
@@ -73,6 +85,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 				logger.trace(
 					`Start cell ${this.cell.index} execution @ ${startTime} (clear output)`,
 				);
+
 				this._impl.clearOutput().then(noop, noop);
 			} else {
 				logger.trace(
@@ -81,10 +94,12 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 			}
 		}
 	}
+
 	end(success: boolean | undefined, endTime?: number): void {
 		if (this._endCallback) {
 			try {
 				this._impl.end(success, endTime, this.errorInfo);
+
 				logger.trace(
 					`Cell ${this.cell.index} completed in ${
 						((endTime || 0) - (this._startTime || 0)) / 1000
@@ -92,15 +107,18 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 				);
 			} finally {
 				this._endCallback();
+
 				this._endCallback = undefined;
 			}
 		}
 	}
+
 	clearOutput(cell?: NotebookCell): Thenable<void> {
 		this.startIfNecessary();
 
 		return this._impl.clearOutput(cell);
 	}
+
 	replaceOutput(
 		out: NotebookCellOutput | NotebookCellOutput[],
 		cell?: NotebookCell,
@@ -109,6 +127,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 
 		return this._impl.replaceOutput(out, cell);
 	}
+
 	appendOutput(
 		out: NotebookCellOutput | NotebookCellOutput[],
 		cell?: NotebookCell,
@@ -117,6 +136,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 
 		return this._impl.appendOutput(out, cell);
 	}
+
 	replaceOutputItems(
 		items: NotebookCellOutputItem | NotebookCellOutputItem[],
 		output: NotebookCellOutput,
@@ -125,6 +145,7 @@ export class NotebookCellExecutionWrapper implements NotebookCellExecution {
 
 		return this._impl.replaceOutputItems(items, output);
 	}
+
 	appendOutputItems(
 		items: NotebookCellOutputItem | NotebookCellOutputItem[],
 		output: NotebookCellOutput,
@@ -143,6 +164,7 @@ export class CellExecutionCreator {
 		TextDocument,
 		NotebookCellExecutionWrapper
 	>();
+
 	static getOrCreate(
 		cell: NotebookCell,
 		controller: IKernelController,
@@ -151,6 +173,7 @@ export class CellExecutionCreator {
 		let cellExecution: NotebookCellExecutionWrapper | undefined;
 
 		const key = cell.document;
+
 		cellExecution = this.get(cell);
 
 		if (!cellExecution) {
@@ -165,6 +188,7 @@ export class CellExecutionCreator {
 			if (cellExecution.controllerId !== controller.id) {
 				// Stop the old execution so we don't have more than one for a cell at a time.
 				const oldExecution = cellExecution;
+
 				oldExecution.end(undefined);
 
 				// Create a new one with the new controller
@@ -181,8 +205,10 @@ export class CellExecutionCreator {
 				}
 			}
 		}
+
 		return cellExecution;
 	}
+
 	static get(cell: NotebookCell) {
 		const key = cell.document;
 
@@ -203,6 +229,7 @@ export class CellExecutionCreator {
 			},
 			clearOutputOnStartWithTime,
 		);
+
 		CellExecutionCreator._map.set(key, result);
 
 		return result;

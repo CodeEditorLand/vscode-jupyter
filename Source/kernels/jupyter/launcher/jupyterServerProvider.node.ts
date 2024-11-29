@@ -28,18 +28,21 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 		@inject(IInterpreterService)
 		private readonly interpreterService: IInterpreterService,
 	) {}
+
 	public async getOrStartServer(
 		options: GetServerOptions,
 	): Promise<IJupyterConnection> {
 		if (!this.serverPromise) {
 			const promise = (this.serverPromise =
 				this.startServerImpl(options));
+
 			promise.catch(() => {
 				if (promise === this.serverPromise) {
 					this.serverPromise = undefined;
 				}
 			});
 		}
+
 		return this.serverPromise;
 	}
 
@@ -74,6 +77,7 @@ export class JupyterServerProvider implements IJupyterServerProvider {
 				options.resource,
 				options.token,
 			);
+
 			Cancellation.throwIfCanceled(options.token);
 
 			return result;

@@ -42,9 +42,13 @@ const urlMatcher = new RegExp(RegExpValues.UrlPatternRegEx);
  */
 export class JupyterConnectionWaiter implements IDisposable {
 	private startPromise = createDeferred<IJupyterConnection>();
+
 	private launchTimeout: NodeJS.Timer | number;
+
 	private output = "";
+
 	private subscriptions: IDisposable[] = [];
+
 	public readonly ready = this.startPromise.promise;
 
 	constructor(
@@ -81,6 +85,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 		this.subscriptions.push(
 			launchResult.out.onDidChange((output: Output<string>) => {
 				logger.trace(output.out);
+
 				this.output += output.out;
 
 				if (
@@ -110,9 +115,11 @@ export class JupyterConnectionWaiter implements IDisposable {
 			)
 			.catch((e) => this.rejectStartPromise(e));
 	}
+
 	public dispose() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		clearTimeout(this.launchTimeout as any);
+
 		dispose(this.subscriptions);
 	}
 
@@ -137,6 +144,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 				const url = matchInfo.url;
 
 				const token = matchInfo.token;
+
 				this.resolveStartPromise(url, token);
 			}
 		}
@@ -221,6 +229,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 				this.rootDir,
 				new Disposable(() => this.launchResult.dispose()),
 			);
+
 			this.startPromise.resolve(connection);
 		}
 	}
@@ -262,6 +271,7 @@ export class JupyterConnectionWaiter implements IDisposable {
 					this.interpreter,
 				);
 			}
+
 			this.startPromise.reject(error);
 		}
 	}

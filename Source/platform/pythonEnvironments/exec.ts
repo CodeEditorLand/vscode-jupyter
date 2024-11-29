@@ -11,9 +11,11 @@
  */
 export type PythonExecInfo = {
 	command: string;
+
 	args: string[];
 
 	python: string[];
+
 	pythonExecutable: string;
 };
 
@@ -33,6 +35,7 @@ export function buildPythonExecInfo(
 		if (pythonArgs) {
 			args.push(...pythonArgs);
 		}
+
 		return {
 			args,
 			command: python[0],
@@ -42,6 +45,7 @@ export function buildPythonExecInfo(
 			pythonExecutable: python[python.length - 1],
 		};
 	}
+
 	return {
 		command: python,
 		args: pythonArgs || [],
@@ -70,10 +74,12 @@ export function copyPythonExecInfo(
 	if (extraPythonArgs) {
 		info.args.push(...extraPythonArgs);
 	}
+
 	if (info.pythonExecutable === undefined) {
 		// It isn't necessarily the last item but our supported
 		// cases it currently is.
 		info.pythonExecutable = info.python[info.python.length - 1];
 	}
+
 	return info;
 }

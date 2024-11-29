@@ -44,20 +44,26 @@ export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingletonInstance<boolean>(IsWindows, IS_WINDOWS);
 
 	serviceManager.addSingleton<IExtensions>(IExtensions, Extensions);
+
 	serviceManager.addSingleton<IPersistentStateFactory>(
 		IPersistentStateFactory,
 		PersistentStateFactory,
 	);
+
 	serviceManager.addSingleton<IDebugService>(IDebugService, DebugService);
+
 	serviceManager.addSingleton<IApplicationEnvironment>(
 		IApplicationEnvironment,
 		ApplicationEnvironment,
 	);
+
 	serviceManager.addSingleton<IEncryptedStorage>(
 		IEncryptedStorage,
 		EncryptedStorage,
 	);
+
 	serviceManager.addSingleton<ICryptoUtils>(ICryptoUtils, CryptoUtils);
+
 	serviceManager.addSingleton<IExperimentService>(
 		IExperimentService,
 		ExperimentService,
@@ -72,27 +78,34 @@ export function registerTypes(serviceManager: IServiceManager) {
 		IAsyncDisposableRegistry,
 		AsyncDisposableRegistry,
 	);
+
 	serviceManager.addSingleton<IMultiStepInputFactory>(
 		IMultiStepInputFactory,
 		MultiStepInputFactory,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		LanguageInitializer,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		OldCacheCleaner,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ReloadVSCodeCommandHandler,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		RunInDedicatedExtensionHostCommandHandler,
 	);
+
 	registerPlatformTypes(serviceManager);
+
 	processRegisterTypes(serviceManager);
 
 	variableRegisterTypes(serviceManager);

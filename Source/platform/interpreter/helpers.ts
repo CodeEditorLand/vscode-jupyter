@@ -27,6 +27,7 @@ export function getPythonEnvDisplayName(
 			`Python Env Info for ${JSON.stringify(interpreter)} is ${JSON.stringify(env)}`,
 		);
 	}
+
 	if (env) {
 		const versionParts: string[] = [];
 
@@ -41,6 +42,7 @@ export function getPythonEnvDisplayName(
 				}
 			}
 		}
+
 		const version = versionParts.length ? versionParts.join(".") : "";
 
 		const envName =
@@ -52,11 +54,14 @@ export function getPythonEnvDisplayName(
 		if (isCondaEnvironmentWithoutPython(interpreter) && envName) {
 			return envName;
 		}
+
 		if (envName) {
 			return `${envName} (${nameWithVersion})`;
 		}
+
 		return nameWithVersion;
 	}
+
 	if (Object.keys(interpreter).length === 1 && interpreter.id) {
 		return interpreter.id;
 	}
@@ -77,16 +82,19 @@ export function getPythonEnvDisplayName(
 	if (isCondaEnvWithoutPython && envName) {
 		return envName;
 	}
+
 	const details: string[] = [];
 
 	if (envName) {
 		details.push(envName);
 	}
+
 	const envType = getEnvironmentType(interpreter);
 
 	if (envType && envType !== EnvironmentType.Unknown) {
 		details.push(envType);
 	}
+
 	return [nameWithVersion, details.length ? `(${details.join(": ")})` : ""]
 		.join(" ")
 		.trim();
@@ -106,6 +114,7 @@ export function getPythonEnvironmentName(pythonEnv: PythonEnvironment) {
 	) {
 		envName = basename(env?.environment?.folderUri);
 	}
+
 	return envName;
 }
 
@@ -151,6 +160,7 @@ function getEnvironmentTypeImpl(env: Environment): EnvironmentType {
 			return JupyterEnv;
 		}
 	}
+
 	if (env.environment?.type === "VirtualEnvironment") {
 		return EnvironmentType.VirtualEnv;
 	}
@@ -162,6 +172,7 @@ function getEnvironmentTypeImpl(env: Environment): EnvironmentType {
 			return type;
 		}
 	}
+
 	return EnvironmentType.Unknown;
 }
 
@@ -169,6 +180,7 @@ export async function getInterpreterInfo(interpreter?: { id: string }) {
 	if (!interpreter?.id) {
 		return;
 	}
+
 	const api = await PythonExtension.api();
 
 	return api.environments.resolveEnvironment(interpreter.id);
@@ -184,6 +196,7 @@ export function isCondaEnvironmentWithoutPython(interpreter?: { id: string }) {
 	if (!interpreter) {
 		return false;
 	}
+
 	if (!pythonApi) {
 		return false;
 	}
@@ -201,9 +214,11 @@ export function getCachedEnvironment(interpreter?: { id: string }) {
 	if (!interpreter) {
 		return;
 	}
+
 	if (!pythonApi) {
 		throw new Error("Python API not initialized");
 	}
+
 	return pythonApi.environments.known.find((i) => i.id === interpreter.id);
 }
 
@@ -211,6 +226,7 @@ export async function getSysPrefix(interpreter?: { id: string }) {
 	if (!interpreter?.id) {
 		return;
 	}
+
 	if (pythonApi) {
 		const cachedInfo = pythonApi.environments.known.find(
 			(i) => i.id === interpreter.id,
@@ -232,6 +248,7 @@ export async function getSysPrefix(interpreter?: { id: string }) {
 			`Unable to find sysPrefix for interpreter ${getDisplayPath(interpreter.id)}`,
 		);
 	}
+
 	return sysPrefix;
 }
 
@@ -239,9 +256,11 @@ export function getCachedSysPrefix(interpreter?: { id: string }) {
 	if (!interpreter?.id) {
 		return;
 	}
+
 	if (!pythonApi) {
 		throw new Error("Python API not initialized");
 	}
+
 	const cachedInfo = pythonApi.environments.known.find(
 		(i) => i.id === interpreter.id,
 	);
@@ -255,6 +274,7 @@ export async function getVersion(
 	if (!interpreter?.id) {
 		return;
 	}
+
 	if (pythonApi && !ignoreCache) {
 		const cachedInfo = pythonApi.environments.known.find(
 			(i) => i.id === interpreter.id,
@@ -274,6 +294,7 @@ export async function getVersion(
 			`Unable to find Version for interpreter ${getDisplayPath(interpreter.id)}`,
 		);
 	}
+
 	return info?.version;
 }
 
@@ -281,9 +302,11 @@ export function getCachedVersion(interpreter?: { id?: string }) {
 	if (!interpreter?.id) {
 		return;
 	}
+
 	if (!pythonApi) {
 		throw new Error("Python API not initialized");
 	}
+
 	const cachedInfo = pythonApi.environments.known.find(
 		(i) => i.id === interpreter.id,
 	);
@@ -295,6 +318,7 @@ export function getCachedEnvironments() {
 	if (!pythonApi) {
 		return [];
 	}
+
 	return pythonApi.environments.known;
 }
 export function resolvedPythonEnvToJupyterEnv(

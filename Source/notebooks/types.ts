@@ -7,6 +7,7 @@ import { Resource } from "../platform/common/types";
 
 export interface IEmbedNotebookEditorProvider {
 	findNotebookEditor(resource: Resource): NotebookEditor | undefined;
+
 	findAssociatedNotebookDocument(uri: Uri): NotebookDocument | undefined;
 }
 
@@ -14,7 +15,10 @@ export const INotebookEditorProvider = Symbol("INotebookEditorProvider");
 
 export interface INotebookEditorProvider {
 	activeNotebookEditor: NotebookEditor | undefined;
+
 	findNotebookEditor(resource: Resource): NotebookEditor | undefined;
+
 	findAssociatedNotebookDocument(uri: Uri): NotebookDocument | undefined;
+
 	registerEmbedNotebookProvider(provider: IEmbedNotebookEditorProvider): void;
 }

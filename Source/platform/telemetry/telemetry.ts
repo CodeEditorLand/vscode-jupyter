@@ -78,6 +78,7 @@ async function getPythonEnvironmentPackages(
 
 		return "{}";
 	}
+
 	let interpreter: PythonEnvironment | undefined;
 
 	if ("interpreter" in options) {
@@ -85,14 +86,17 @@ async function getPythonEnvironmentPackages(
 	} else {
 		interpreter = pythonEnvironmentsByHash.get(options.interpreterHash);
 	}
+
 	if (!interpreter) {
 		return "{}";
 	}
+
 	const packages = await _interpreterPackageProvider(interpreter);
 
 	if (!packages || packages.size === 0) {
 		return "{}";
 	}
+
 	return JSON.stringify(Object.fromEntries(packages));
 }
 export function deleteTrackedInformation(resource: Uri) {
@@ -109,6 +113,7 @@ export async function getContextualPropsForTelemetry(
 	if (!resource) {
 		return {};
 	}
+
 	const data = trackedInfo.get(getComparisonKey(resource));
 
 	const resourceType = getResourceType(resource);
@@ -121,6 +126,7 @@ export async function getContextualPropsForTelemetry(
 				: undefined,
 		};
 	}
+
 	if (!data) {
 		return {};
 	}

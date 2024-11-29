@@ -41,6 +41,7 @@ export class EnvironmentActivationService
 	implements IEnvironmentActivationService
 {
 	private readonly disposables: IDisposable[] = [];
+
 	private readonly activatedEnvVariablesCache = new Map<
 		string,
 		{ promise: Promise<NodeJS.ProcessEnv | undefined>; time: StopWatch }
@@ -65,24 +66,30 @@ export class EnvironmentActivationService
 			this,
 			this.disposables,
 		);
+
 		this.interpreterService.onDidChangeInterpreter(
 			this.clearCache,
 			this,
 			this.disposables,
 		);
+
 		this.interpreterService.onDidEnvironmentVariablesChange(
 			this.clearCache,
 			this,
 			this.disposables,
 		);
 	}
+
 	public clearCache() {
 		this.activatedEnvVariablesCache.clear();
+
 		this.cachedEnvVariables.clear();
 	}
+
 	public dispose(): void {
 		this.disposables.forEach((d) => d.dispose());
 	}
+
 	public async getActivatedEnvironmentVariables(
 		resource: Resource,
 		interpreter: { id: string },
@@ -103,6 +110,7 @@ export class EnvironmentActivationService
 				),
 		);
 	}
+
 	private async getActivatedEnvironmentVariablesImplWithCaching(
 		resource: Resource,
 		interpreterId: string,
@@ -116,6 +124,7 @@ export class EnvironmentActivationService
 
 			return;
 		}
+
 		const key = `${resource?.toString() || ""}${interpreterId}`;
 
 		const info = this.activatedEnvVariablesCache.get(key);
@@ -123,23 +132,28 @@ export class EnvironmentActivationService
 		if (info && info.time.elapsedTime >= ENV_VAR_CACHE_TIMEOUT) {
 			this.activatedEnvVariablesCache.delete(key);
 		}
+
 		if (!this.activatedEnvVariablesCache.has(key)) {
 			const promise = this.getActivatedEnvironmentVariablesImpl(
 				resource,
 				env,
 				token,
 			);
+
 			promise.catch(noop);
+
 			this.activatedEnvVariablesCache.set(key, {
 				promise,
 				time: new StopWatch(),
 			});
 		}
+
 		const promise = this.activatedEnvVariablesCache.get(key)!.promise;
 
 		if (token) {
 			return promise;
 		}
+
 		return raceCancellation(token, promise);
 	}
 	@debugDecorator("Getting activated env variables", TraceOptions.Arguments)
@@ -151,6 +165,7 @@ export class EnvironmentActivationService
 		if (!this.extensionChecker.isPythonExtensionInstalled) {
 			return;
 		}
+
 		const stopWatch = new StopWatch();
 
 		return this.getActivatedEnvironmentVariablesFromPython(
@@ -162,6 +177,7 @@ export class EnvironmentActivationService
 				if (token?.isCancellationRequested) {
 					return;
 				}
+
 				return env;
 			})
 			.catch((ex) => {
@@ -180,9 +196,11 @@ export class EnvironmentActivationService
 		string,
 		{
 			promise: Promise<NodeJS.ProcessEnv | undefined>;
+
 			lastRequestedTime: StopWatch;
 		}
 	>();
+
 	private async getActivatedEnvironmentVariablesFromPython(
 		resource: Resource,
 		@logValue<{ id: string }>("id") environment: Environment,
@@ -199,12 +217,14 @@ export class EnvironmentActivationService
 		) {
 			this.cachedEnvVariables.delete(key);
 		}
+
 		if (!this.cachedEnvVariables.has(key)) {
 			const promise = this.getActivatedEnvironmentVariablesFromPythonImpl(
 				resource,
 				environment,
 				token,
 			);
+
 			this.cachedEnvVariables.set(key, {
 				promise,
 				lastRequestedTime: new StopWatch(),
@@ -216,6 +236,7 @@ export class EnvironmentActivationService
 			this.cachedEnvVariables.get(key)!.promise,
 		);
 	}
+
 	private async getActivatedEnvironmentVariablesFromPythonImpl(
 		resource: Resource,
 		environment: Environment,
@@ -251,6 +272,7 @@ export class EnvironmentActivationService
 						)}`,
 						ex,
 					);
+
 					reasonForFailure =
 						"failedToGetActivatedEnvVariablesFromPython";
 
@@ -261,7 +283,9 @@ export class EnvironmentActivationService
 		if (token?.isCancellationRequested) {
 			return;
 		}
+
 		const envType = getEnvironmentType(environment);
+
 		sendTelemetryEvent(
 			Telemetry.GetActivatedEnvironmentVariables,
 			{ duration: stopWatch.elapsedTime },
@@ -292,10 +316,12 @@ export class EnvironmentActivationService
 				`Failed to get activated env vars for ${getDisplayPath(environment.path)} in ${stopWatch.elapsedTime}ms`,
 			);
 		}
+
 		if (!env) {
 			// Temporary work around until https://github.com/microsoft/vscode-python/issues/20678
 			// However we might still need a work around for failure to activate conda envs without Python.
 			const customEnvVars = await customEnvVarsPromise;
+
 			env = {};
 
 			// Patch for conda envs.
@@ -318,6 +344,7 @@ export class EnvironmentActivationService
 			if (process.env.PYTHONPATH) {
 				env.PYTHONPATH = process.env.PYTHONPATH;
 			}
+
 			let pathKey = customEnvVars
 				? Object.keys(customEnvVars).find(
 						(k) => k.toLowerCase() == "path",
@@ -327,6 +354,7 @@ export class EnvironmentActivationService
 			if (pathKey && customEnvVars![pathKey]) {
 				this.envVarsService.appendPath(env, customEnvVars![pathKey]!);
 			}
+
 			if (customEnvVars!.PYTHONPATH) {
 				this.envVarsService.appendPythonPath(
 					env,
@@ -383,6 +411,7 @@ export class EnvironmentActivationService
 			logger.trace(
 				`Prepend PATH with python bin for ${getDisplayPath(environment.path)}`,
 			);
+
 			this.envVarsService.prependPath(
 				env,
 				path.dirname(environment.executable.uri.fsPath),

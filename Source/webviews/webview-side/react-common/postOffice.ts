@@ -19,6 +19,7 @@ export interface IVsCodeApi {
 export interface IMessageHandler {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	handleMessage(type: string, payload?: any): boolean;
+
 	dispose?(): void;
 }
 
@@ -26,6 +27,7 @@ interface IMessageApi {
 	register(msgCallback: (msg: WebviewMessage) => Promise<void>): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	sendMessage(type: string, payload?: any): void;
+
 	dispose(): void;
 }
 
@@ -39,8 +41,11 @@ class VsCodeMessageApi implements IMessageApi {
 	private messageCallback:
 		| ((msg: WebviewMessage) => Promise<void>)
 		| undefined;
+
 	private vscodeApi: IVsCodeApi | undefined;
+
 	private registered: boolean = false;
+
 	private baseHandler = this.handleVSCodeApiMessages.bind(this);
 
 	public register(msgCallback: (msg: WebviewMessage) => Promise<void>) {
@@ -58,11 +63,14 @@ class VsCodeMessageApi implements IMessageApi {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			this.vscodeApi = (window as any).acquireVsCodeApi();
 		}
+
 		if (!this.vscodeApi) {
 			console.error("The vscode api is not set");
 		}
+
 		if (!this.registered) {
 			this.registered = true;
+
 			window.addEventListener("message", this.baseHandler);
 
 			try {
@@ -97,6 +105,7 @@ class VsCodeMessageApi implements IMessageApi {
 	public dispose() {
 		if (this.registered) {
 			this.registered = false;
+
 			window.removeEventListener("message", this.baseHandler);
 		}
 	}
@@ -115,7 +124,9 @@ class KernelMessageApi implements IMessageApi {
 	private messageCallback:
 		| ((msg: WebviewMessage) => Promise<void>)
 		| undefined;
+
 	private kernelHandler: IDisposable | undefined;
+
 	private readonly kernelMessagingApi: KernelMessagingApi;
 
 	constructor(kernelMessagingApi?: KernelMessagingApi) {
@@ -164,15 +175,18 @@ export type PostOfficeMessage = { type: string; payload?: any };
 
 export type KernelMessagingApi = {
 	onDidReceiveKernelMessage: VSCodeEvent<unknown>;
+
 	postKernelMessage: (data: unknown) => void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class PostOffice implements IDisposable {
 	private messageApi: IMessageApi | undefined;
+
 	private handlers: IMessageHandler[] = [];
 
 	constructor(private readonly kernelMessagingApi?: KernelMessagingApi) {}
+
 	public dispose() {
 		if (this.messageApi) {
 			this.messageApi.dispose();
@@ -200,6 +214,7 @@ export class PostOffice implements IDisposable {
 	public addHandler(handler: IMessageHandler) {
 		// Acquire here too so that the message handlers are setup during tests.
 		this.acquireApi();
+
 		this.handlers.push(handler);
 	}
 

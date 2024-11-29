@@ -38,12 +38,15 @@ export class IPyWidgetScriptSourceProvider
 	implements IWidgetScriptSourceProvider
 {
 	id = "all";
+
 	private readonly scriptProviders: IWidgetScriptSourceProvider[];
+
 	private get configuredScriptSources(): readonly WidgetCDNs[] {
 		const settings = this.configurationSettings.getSettings(undefined);
 
 		return settings.widgetScriptSources;
 	}
+
 	private static trackedWidgetModuleNames = new Set<string>();
 
 	constructor(
@@ -55,13 +58,17 @@ export class IPyWidgetScriptSourceProvider
 		private readonly cdnScriptProvider: CDNWidgetScriptSourceProvider,
 	) {
 		super();
+
 		this.scriptProviders = this.sourceProviderFactory.getProviders(
 			this.kernel,
 			this.localResourceUriConverter,
 		);
+
 		this.scriptProviders.forEach((c) => this._register(c));
+
 		this.monitorKernel();
 	}
+
 	public async getBaseUrl() {
 		const provider = this.scriptProviders.find((item) => item.getBaseUrl);
 
@@ -71,8 +78,10 @@ export class IPyWidgetScriptSourceProvider
 
 		return provider.getBaseUrl!();
 	}
+
 	public async getWidgetScriptSources() {
 		const sources: WidgetScriptSource[] = [];
+
 		await Promise.all(
 			this.scriptProviders.map(async (item) => {
 				if (item.getWidgetScriptSources) {
@@ -103,6 +112,7 @@ export class IPyWidgetScriptSourceProvider
 			if (!scriptProvider) {
 				continue;
 			}
+
 			const source = await scriptProvider.getWidgetScriptSource(
 				moduleName,
 				moduleVersion,
@@ -119,6 +129,7 @@ export class IPyWidgetScriptSourceProvider
 				);
 			}
 		}
+
 		this.sendTelemetryForWidgetModule(
 			moduleName,
 			moduleVersion,
@@ -137,6 +148,7 @@ export class IPyWidgetScriptSourceProvider
 				`Script source for Widget ${moduleName}@${moduleVersion} was found from source ${found.source} and ${found.scriptUri}`,
 			);
 		}
+
 		return found;
 	}
 	@swallowExceptions()
@@ -151,6 +163,7 @@ export class IPyWidgetScriptSourceProvider
 		if (IPyWidgetScriptSourceProvider.trackedWidgetModuleNames.has(key)) {
 			return;
 		}
+
 		IPyWidgetScriptSourceProvider.trackedWidgetModuleNames.add(key);
 
 		const isJupyterWidget = moduleName
@@ -190,10 +203,14 @@ export class IPyWidgetScriptSourceProvider
 			cdnSearched: this.configuredScriptSources.length > 0,
 		});
 	}
+
 	private monitorKernel() {
 		this.hookKernelEvents();
+
 		this._register(this.kernel.onStarted(this.hookKernelEvents, this));
+
 		this._register(this.kernel.onRestarted(this.hookKernelEvents, this));
+
 		this._register(
 			this.kernel.onDidKernelSocketChange(
 				() => this.hookKernelEvents(),
@@ -201,13 +218,16 @@ export class IPyWidgetScriptSourceProvider
 			),
 		);
 	}
+
 	private hookKernelEvents() {
 		const kernelConnection = this.kernel.session?.kernel;
 
 		if (!kernelConnection) {
 			return;
 		}
+
 		kernelConnection.anyMessage.connect(this.onAnyMessage, this);
+
 		this._register(
 			new Disposable(() =>
 				kernelConnection.anyMessage.disconnect(this.onAnyMessage, this),
@@ -227,7 +247,9 @@ export class IPyWidgetScriptSourceProvider
 			const data = commOpen.content.data as {
 				state?: {
 					_model_module?: string;
+
 					_model_module_version?: string;
+
 					_model_name?: string;
 				};
 			};

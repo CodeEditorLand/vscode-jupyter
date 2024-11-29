@@ -61,6 +61,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
 		private readonly workspaceStorage: Memento,
 	) {
 		super(asyncDisposables, disposables);
+
 		disposables.push(
 			jupyterServerUriStorage.onDidRemove(
 				this.handleServerRemoval.bind(this),
@@ -80,6 +81,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
 		) {
 			return existingKernelInfo.kernel;
 		}
+
 		if (existingKernelInfo) {
 			logger.trace(
 				`Kernel for ${getDisplayPath(notebook.uri)} with id ${
@@ -87,6 +89,7 @@ export class KernelProvider extends BaseCoreKernelProvider {
 				} is being replaced with ${options.metadata.id}`,
 			);
 		}
+
 		this.disposeOldKernel(notebook, "createNewKernel");
 
 		const resourceUri =
@@ -112,31 +115,37 @@ export class KernelProvider extends BaseCoreKernelProvider {
 			this.startupCodeProviders.getProviders(notebookType),
 			this.workspaceStorage,
 		) as IKernel;
+
 		kernel.onRestarted(
 			() => this._onDidRestartKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onPostInitialized(
 			() => this._onDidPostInitializeKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onDisposed(
 			() => this._onDidDisposeKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onStarted(
 			() => this._onDidStartKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onStatusChanged(
 			(status) => this._onKernelStatusChanged.fire({ kernel, status }),
 			this,
 			this.disposables,
 		);
+
 		this.executions.set(
 			kernel,
 			new NotebookKernelExecution(
@@ -146,7 +155,9 @@ export class KernelProvider extends BaseCoreKernelProvider {
 				notebook,
 			),
 		);
+
 		this.asyncDisposables.push(kernel);
+
 		this.storeKernel(notebook, options, kernel);
 
 		this.deleteMappingIfKernelIsDisposed(kernel);
@@ -186,6 +197,7 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 		) {
 			return existingKernelInfo.kernel;
 		}
+
 		this.disposeOldKernel(uri);
 
 		const resourceUri = uri;
@@ -207,31 +219,37 @@ export class ThirdPartyKernelProvider extends BaseThirdPartyKernelProvider {
 			this.startupCodeProviders.getProviders(notebookType),
 			this.workspaceStorage,
 		);
+
 		kernel.onRestarted(
 			() => this._onDidRestartKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onPostInitialized(
 			() => this._onDidPostInitializeKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onDisposed(
 			() => this._onDidDisposeKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onStarted(
 			() => this._onDidStartKernel.fire(kernel),
 			this,
 			this.disposables,
 		);
+
 		kernel.onStatusChanged(
 			(status) => this._onKernelStatusChanged.fire({ kernel, status }),
 			this,
 			this.disposables,
 		);
+
 		this.asyncDisposables.push(kernel);
 
 		this.storeKernel(uri, options, kernel);

@@ -33,7 +33,9 @@ export class RemoteIPyWidgetScriptManager
 	implements IIPyWidgetScriptManager
 {
 	private readonly kernelConnection: RemoteKernelConnectionMetadata;
+
 	private code?: Promise<string>;
+
 	private widgetEntryPointsPromise?: Promise<
 		{ uri: Uri; widgetFolderName: string }[]
 	>;
@@ -56,26 +58,34 @@ export class RemoteIPyWidgetScriptManager
 				"Invalid usage, can only be used for remote kernels",
 			);
 		}
+
 		this.kernelConnection = kernel.kernelConnectionMetadata;
+
 		this.getWidgetEntryPoints().catch(noop);
 	}
+
 	public getBaseUrl() {
 		return this.getNbExtensionsParentPath();
 	}
+
 	public async getNbExtensionsParentPath() {
 		return Uri.parse(this.kernelConnection.baseUrl);
 	}
+
 	protected override onKernelRestarted(): void {
 		this.widgetEntryPointsPromise = undefined;
 
 		super.onKernelRestarted();
 	}
+
 	protected async getWidgetEntryPoints() {
 		if (!this.widgetEntryPointsPromise) {
 			this.widgetEntryPointsPromise = this.getWidgetEntryPointsImpl();
 		}
+
 		return this.widgetEntryPointsPromise;
 	}
+
 	private getCodeToExecute() {
 		if (!this.code) {
 			this.code = this.fs.readFile(
@@ -86,8 +96,10 @@ export class RemoteIPyWidgetScriptManager
 				),
 			);
 		}
+
 		return this.code!;
 	}
+
 	private async getWidgetEntryPointsImpl() {
 		// If we're connected to a non-python kernel, then assume we don't have 3rd party widget script sources for now.
 		// If we do, we can get this later on by starting a python kernel.
@@ -102,7 +114,9 @@ export class RemoteIPyWidgetScriptManager
 
 			return [];
 		}
+
 		const promises: Promise<nbformat.IOutput[]>[] = [];
+
 		promises.push(
 			executeSilently(this.kernel.session.kernel, code, {
 				traceErrors: true,
@@ -135,6 +149,7 @@ export class RemoteIPyWidgetScriptManager
 
 			return [];
 		}
+
 		const output = outputs[0] as nbformat.IStream;
 
 		if (output.output_type !== "stream" || output.name !== "stdout") {
@@ -144,6 +159,7 @@ export class RemoteIPyWidgetScriptManager
 
 			return [];
 		}
+
 		try {
 			logger.trace(`Widget Outputs include, ${output.text}`);
 			// Value will be an array of the form `['xyz', 'abc']`
@@ -176,6 +192,7 @@ export class RemoteIPyWidgetScriptManager
 			return [];
 		}
 	}
+
 	protected async getWidgetScriptSource(script: Uri): Promise<string> {
 		const httpClientResponse =
 			this.getWidgetScriptSourceUsingHttpClient(script);
@@ -191,6 +208,7 @@ export class RemoteIPyWidgetScriptManager
 					ex,
 				),
 			);
+
 			logger.error(
 				`Failed to download widget script source from ${script.toString(true)}`,
 				ex,
@@ -199,6 +217,7 @@ export class RemoteIPyWidgetScriptManager
 
 		return promise;
 	}
+
 	private async getWidgetScriptSourceUsingHttpClient(
 		script: Uri,
 	): Promise<string> {
@@ -216,6 +235,7 @@ export class RemoteIPyWidgetScriptManager
 			);
 		}
 	}
+
 	private async getWidgetScriptSourceUsingFetch(
 		script: Uri,
 	): Promise<string> {

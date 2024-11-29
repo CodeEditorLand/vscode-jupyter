@@ -25,7 +25,9 @@ export class RemoteJupyterServerMruUpdate
 	implements IExtensionSyncActivationService
 {
 	private readonly disposables: IDisposable[] = [];
+
 	private readonly timeouts = new Set<Disposable>();
+
 	private readonly kernelSpecificUpdates = new WeakMap<
 		IKernel,
 		Delayer<void>
@@ -40,10 +42,13 @@ export class RemoteJupyterServerMruUpdate
 	) {
 		disposables.push(this);
 	}
+
 	dispose() {
 		dispose(this.disposables);
+
 		dispose(Array.from(this.timeouts.values()));
 	}
+
 	activate(): void {
 		this.disposables.push(
 			notebookCellExecutions.onDidChangeNotebookCellExecutionState(
@@ -52,6 +57,7 @@ export class RemoteJupyterServerMruUpdate
 			),
 		);
 	}
+
 	private onDidChangeNotebookCellExecutionState(
 		e: NotebookCellExecutionStateChangeEvent,
 	) {
@@ -60,14 +66,17 @@ export class RemoteJupyterServerMruUpdate
 		if (!kernel) {
 			return;
 		}
+
 		const connection = kernel.kernelConnectionMetadata;
 
 		if (!isRemoteConnection(connection)) {
 			return;
 		}
+
 		const delayer =
 			this.kernelSpecificUpdates.get(kernel) ||
 			new Delayer(INTERVAL_IN_SECONDS_TO_UPDATE_MRU);
+
 		this.kernelSpecificUpdates.set(kernel, delayer);
 
 		// We do not want 100s of 1000s of these timeouts,

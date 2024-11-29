@@ -9,6 +9,7 @@ import { splitLines } from "../helpers";
 
 export type DistroInfo = {
 	id: string;
+
 	version_id: string;
 };
 
@@ -98,6 +99,7 @@ export async function getDistroInfo(): Promise<DistroInfo> {
 	if (os.platform() === "darwin" || os.platform() === "win32") {
 		return distro;
 	}
+
 	try {
 		const contents = await fs.readFile("/etc/os-release", "utf-8");
 
@@ -121,6 +123,7 @@ export async function getDistroInfo(): Promise<DistroInfo> {
 						.join(", ");
 				} else {
 					const versionNumber = parseFloat(value) || "";
+
 					distro.version_id = VERSION_REG.test(value)
 						? value
 						: versionNumber.toString();

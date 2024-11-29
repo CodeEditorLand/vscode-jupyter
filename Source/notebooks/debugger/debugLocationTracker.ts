@@ -9,11 +9,16 @@ import { IDebugLocation } from "./debuggingTypes";
 // When a python debugging session is active keep track of the current debug location
 export class DebugLocationTracker implements DebugAdapterTracker {
 	protected topMostFrameId = 0;
+
 	protected sequenceNumbersOfRequestsPendingResponses = new Set<number>();
+
 	private waitingForStackTrace = false;
+
 	private _debugLocation: IDebugLocation | undefined;
+
 	private debugLocationUpdatedEvent: EventEmitter<void> =
 		new EventEmitter<void>();
+
 	private sessionEndedEmitter: EventEmitter<DebugLocationTracker> =
 		new EventEmitter<DebugLocationTracker>();
 
@@ -41,7 +46,9 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 		if (this.isResponseForRequestToFetchAllFrames(message)) {
 			// This should be the top frame. We need to use this to compute the value of a variable
 			const topMostFrame = message.body?.stackFrames[0];
+
 			this.topMostFrameId = topMostFrame?.id;
+
 			this.sequenceNumbersOfRequestsPendingResponses.delete(
 				message.request_seq,
 			);
@@ -54,9 +61,11 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 					),
 					column: topMostFrame.column,
 				};
+
 				this.waitingForStackTrace = false;
 			}
 		}
+
 		if (this.isStopEvent(message)) {
 			// Some type of stop, wait to see our next stack trace to find our location
 			this.waitingForStackTrace = true;
@@ -65,6 +74,7 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 		if (this.isContinueEvent(message)) {
 			// Running, clear the location
 			this.DebugLocation = undefined;
+
 			this.waitingForStackTrace = false;
 		}
 	}
@@ -87,6 +97,7 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 	// Set our new location and fire our debug event
 	private set DebugLocation(newLocation: IDebugLocation | undefined) {
 		const oldLocation = this._debugLocation;
+
 		this._debugLocation = newLocation;
 
 		if (this._debugLocation !== oldLocation) {
@@ -100,6 +111,7 @@ export class DebugLocationTracker implements DebugAdapterTracker {
 		if (process.platform !== "win32") {
 			return path.replace(/\\/g, "/");
 		}
+
 		return path;
 	}
 

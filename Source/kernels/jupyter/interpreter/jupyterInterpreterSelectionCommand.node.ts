@@ -22,6 +22,7 @@ export class JupyterInterpreterSelectionCommand
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
 	) {}
+
 	public activate() {
 		this.disposables.push(
 			commands.registerCommand("jupyter.selectJupyterInterpreter", () => {

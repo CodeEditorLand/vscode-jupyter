@@ -27,6 +27,7 @@ import {
 @injectable()
 export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 	private knownViewers = new Set<IDataViewer>();
+
 	private viewContext: ContextKey;
 
 	constructor(
@@ -34,7 +35,9 @@ export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 		@inject(IDisposableRegistry) private disposables: IDisposableRegistry,
 	) {
 		disposables.push(this);
+
 		this.viewContext = new ContextKey(EditorContexts.IsDataViewerActive);
+
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RefreshDataViewer,
@@ -64,11 +67,13 @@ export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 		try {
 			// Then load the data.
 			this.knownViewers.add(dataExplorer);
+
 			dataExplorer.onDidDisposeDataViewer(
 				this.updateOpenDataViewers,
 				this,
 				this.disposables,
 			);
+
 			dataExplorer.onDidChangeDataViewerViewState(
 				this.updateViewStateContext,
 				this,
@@ -76,6 +81,7 @@ export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 			);
 			// Show the window and the data
 			await dataExplorer.showData(dataProvider, title);
+
 			result = dataExplorer;
 		} finally {
 			if (!result) {
@@ -83,6 +89,7 @@ export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 				dataExplorer.dispose();
 			}
 		}
+
 		return result;
 	}
 
@@ -97,11 +104,13 @@ export class DataViewerFactory implements IDataViewerFactory, IDisposable {
 	private async updateViewStateContext() {
 		// A data viewer's view state has changed. Look through our known viewers to see if any are active
 		let hasActiveViewer = false;
+
 		this.knownViewers.forEach((viewer) => {
 			if (viewer.active) {
 				hasActiveViewer = true;
 			}
 		});
+
 		await this.viewContext.set(hasActiveViewer);
 	}
 

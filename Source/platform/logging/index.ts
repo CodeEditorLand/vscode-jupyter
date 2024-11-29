@@ -29,6 +29,7 @@ export type TraceInfo =
 			// Either returnValue or err will be set.
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			returnValue?: any;
+
 			err?: Error;
 	  }
 	| undefined;
@@ -54,13 +55,19 @@ export const logger: ILogger = {
 
 export function initializeLoggers(options: {
 	addConsoleLogger: boolean;
+
 	userNameRegEx?: RegExp;
+
 	homePathRegEx?: RegExp;
+
 	platform?: string;
+
 	arch?: string;
+
 	homePath?: string;
 }) {
 	globalLoggingLevel = getLoggingLevelFromConfig();
+
 	trackDisposable(
 		workspace.onDidChangeConfiguration((e) => {
 			if (e.affectsConfiguration("jupyter.logging")) {
@@ -73,6 +80,7 @@ export function initializeLoggers(options: {
 		OutputChannelNames.jupyter,
 		"log",
 	);
+
 	registerLogger(
 		new OutputChannelLogger(
 			standardOutputChannel,
@@ -117,24 +125,29 @@ function getLoggingLevelFromConfig() {
 			case "Debug": {
 				return LogLevel.Debug;
 			}
+
 			case "warn":
 			case "Warn":
 			case "warning":
 			case "Warning": {
 				return LogLevel.Warning;
 			}
+
 			case "Off":
 			case "off": {
 				return LogLevel.Off;
 			}
+
 			case "Error":
 			case "error": {
 				return LogLevel.Error;
 			}
+
 			case "Trace":
 			case "trace": {
 				return LogLevel.Trace;
 			}
+
 			default: {
 				return LogLevel.Info;
 			}
@@ -156,6 +169,7 @@ function formatErrors(...args: Arguments) {
 	if (!formatError) {
 		return args;
 	}
+
 	return args.map((arg) => {
 		if (!(arg instanceof Error)) {
 			return arg;
@@ -164,6 +178,7 @@ function formatErrors(...args: Arguments) {
 		if (!("isJupyterError" in arg)) {
 			return arg;
 		}
+
 		const info: string[] = [`${arg.name}: ${arg.message}`.trim()];
 
 		if (
@@ -186,6 +201,7 @@ function formatErrors(...args: Arguments) {
 				);
 			}
 		}
+
 		if (arg.stack) {
 			const stack = splitLines(arg.stack);
 
@@ -201,6 +217,7 @@ function formatErrors(...args: Arguments) {
 				info.push(stack[0]);
 			}
 		}
+
 		const propertiesToIgnore = [
 			"stack",
 			"message",
@@ -210,6 +227,7 @@ function formatErrors(...args: Arguments) {
 			"exitCode",
 			"isJupyterError",
 		];
+
 		Object.keys(arg)
 			.filter((key) => propertiesToIgnore.indexOf(key) === -1)
 			.forEach((key) =>
@@ -225,6 +243,7 @@ function formatErrors(...args: Arguments) {
 function logError(message: string, ...args: Arguments): void {
 	if (globalLoggingLevel <= LogLevel.Error) {
 		args = formatErrors(...args);
+
 		loggers.forEach((l) => l.error(message, ...args));
 	}
 }
@@ -232,6 +251,7 @@ function logError(message: string, ...args: Arguments): void {
 function logWarning(message: string, ...args: Arguments): void {
 	if (globalLoggingLevel <= LogLevel.Warning) {
 		args = formatErrors(...args);
+
 		loggers.forEach((l) => l.warn(message, ...args));
 	}
 }
@@ -271,8 +291,10 @@ function logInfoIfCI(arg1: any, ...args: Arguments): void {
 				message = result;
 			} else {
 				message = result.shift()!;
+
 				rest = result;
 			}
+
 			logger.info(message, ...rest);
 		} else {
 			logger.info(arg1, ...args);
@@ -313,6 +335,7 @@ export function warnDecorator(message: string): TraceDecoratorType {
 type ParameterLogInformation =
 	| {
 			parameterIndex: number;
+
 			propertyOfParameterToLog: string;
 	  }
 	| { parameterIndex: number; ignore: true };
@@ -337,6 +360,7 @@ export function logValue<T>(property: keyof T) {
 				new Map<MethodName, ParameterLogInformation[]>(),
 			);
 		}
+
 		let parameterInfos = formattedParameters.get(target);
 
 		if (!parameterInfos) {
@@ -348,10 +372,13 @@ export function logValue<T>(property: keyof T) {
 				>()),
 			);
 		}
+
 		if (!parameterInfos.has(methodName)) {
 			parameterInfos.set(methodName, []);
 		}
+
 		const params = parameterInfos.get(methodName)!;
+
 		params.push({
 			parameterIndex,
 			propertyOfParameterToLog: property as string,
@@ -371,6 +398,7 @@ export function ignoreLogging() {
 				new Map<MethodName, ParameterLogInformation[]>(),
 			);
 		}
+
 		let parameterInfos = formattedParameters.get(target);
 
 		if (!parameterInfos) {
@@ -382,10 +410,13 @@ export function ignoreLogging() {
 				>()),
 			);
 		}
+
 		if (!parameterInfos.has(methodName)) {
 			parameterInfos.set(methodName, []);
 		}
+
 		const params = parameterInfos.get(methodName)!;
+
 		params.push({
 			parameterIndex,
 			ignore: true,
@@ -401,7 +432,9 @@ function createTracingDecorator(logInfo: LogInfo) {
 
 type LogInfo = {
 	opts: TraceOptions;
+
 	message: string;
+
 	level?: LogLevel;
 };
 
@@ -411,12 +444,15 @@ function normalizeCall(call: CallInfo): CallInfo {
 	if (!kind || kind === "") {
 		kind = "Function";
 	}
+
 	if (!name || name === "") {
 		name = "<anon>";
 	}
+
 	if (!args) {
 		args = [];
 	}
+
 	return {
 		kind,
 		name,
@@ -431,6 +467,7 @@ function isUri(resource?: Uri | any): resource is Uri {
 	if (!resource) {
 		return false;
 	}
+
 	const uri = resource as Uri;
 
 	return typeof uri.path === "string" && typeof uri.scheme === "string";
@@ -457,9 +494,11 @@ function formatArgument(
 		// Where possible strip user names from paths, then users will be more likely to provide the logs.
 		return removeUserPaths(arg.path);
 	}
+
 	if (!arg) {
 		return arg;
 	}
+
 	const parameterInfos = formattedParameters.get(target)?.get(method);
 
 	const info = parameterInfos?.find(
@@ -469,6 +508,7 @@ function formatArgument(
 	if (!info) {
 		return typeof arg === "string" ? removeUserPaths(arg) : arg;
 	}
+
 	if ("ignore" in info && info.ignore) {
 		return "";
 	}
@@ -478,6 +518,7 @@ function formatArgument(
 	if ("propertyOfParameterToLog" in info && info.propertyOfParameterToLog) {
 		valueToLog = arg[info.propertyOfParameterToLog];
 	}
+
 	return typeof valueToLog === "string"
 		? removeUserPaths(valueToLog)
 		: valueToLog;
@@ -491,10 +532,12 @@ function formatMessages(
 	``;
 
 	const messages = [info.message];
+
 	messages.push(`${call.kind} name = ${call.name}`.trim());
 
 	if (traced) {
 		messages.push(`completed in ${traced.elapsed}ms`);
+
 		messages.push(
 			`has a ${traced.returnValue ? "truthy" : "falsy"} return value`,
 		);
@@ -502,6 +545,7 @@ function formatMessages(
 		messages[messages.length - 1] =
 			`${messages[messages.length - 1]} (started execution)`;
 	}
+
 	if ((info.opts & TraceOptions.Arguments) === TraceOptions.Arguments) {
 		if (info.level === LogLevel.Debug) {
 			// This is slower, hence do this only when user enables trace logging.
@@ -523,12 +567,14 @@ function formatMessages(
 			messages.push(argsToLogString(call.args));
 		}
 	}
+
 	if (
 		traced &&
 		(info.opts & TraceOptions.ReturnValue) === TraceOptions.ReturnValue
 	) {
 		messages.push(returnValueToLogString(traced.returnValue));
 	}
+
 	return messages.join(", ");
 }
 

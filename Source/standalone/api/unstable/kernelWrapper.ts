@@ -19,8 +19,10 @@ export function wrapKernelSession(session: Session.ISessionConnection) {
 
 	if (!wrapper) {
 		wrapper = createSessionWrapper(session);
+
 		wrappedSession.set(session, wrapper);
 	}
+
 	return wrapper;
 }
 
@@ -31,8 +33,10 @@ function createSessionWrapper(session: Session.ISessionConnection) {
 				if (!target.kernel) {
 					return;
 				}
+
 				return wrapKernel(target.kernel);
 			}
+
 			return Reflect.get(target, p);
 		},
 	});
@@ -48,8 +52,10 @@ export function wrapKernel(kernel: Kernel.IKernelConnection) {
 
 	if (!wrapper) {
 		wrapper = createKernelWrapper(kernel);
+
 		wrappedKernel.set(kernel, wrapper);
 	}
+
 	return wrapper;
 }
 
@@ -75,6 +81,7 @@ function createKernelWrapper(kernel: Kernel.IKernelConnection) {
 					]);
 				};
 			}
+
 			if (p === "removeCommTarget") {
 				return (
 					targetName: string,
@@ -91,6 +98,7 @@ function createKernelWrapper(kernel: Kernel.IKernelConnection) {
 					]);
 				};
 			}
+
 			return Reflect.get(target, p);
 		},
 	});

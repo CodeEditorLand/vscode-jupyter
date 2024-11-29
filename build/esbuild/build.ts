@@ -156,6 +156,7 @@ function style({
 				contents: `
             import { injectStyle } from "__style_helper__"
             import css from ${JSON.stringify(args.path)}
+
             injectStyle(css)
           `,
 			}));
@@ -164,6 +165,7 @@ function style({
 				{ filter: /.*/, namespace: "style-content" },
 				async (args) => {
 					const options = { entryPoints: [args.path], ...opt };
+
 					options.loader = options.loader || {};
 					// Add the same loaders we add for other places
 					Object.keys(loader).forEach((key) => {
@@ -203,14 +205,17 @@ function createConfig(
 			),
 		);
 	}
+
 	if (source.endsWith(path.join("data-explorer", "index.tsx"))) {
 		inject.push(path.join(__dirname, "jquery.js"));
 	}
+
 	const external = target === "web" ? webExternals : commonExternals;
 
 	if (source.toLowerCase().endsWith("extension.node.ts")) {
 		external.push(...desktopExternals);
 	}
+
 	const isPreRelease =
 		isDevbuild ||
 		process.env.IS_PRE_RELEASE_VERSION_OF_JUPYTER_EXTENSION === "true";
@@ -237,6 +242,7 @@ function createConfig(
 			"main.js",
 		);
 	}
+
 	return {
 		entryPoints: [source],
 		outfile,
@@ -274,6 +280,7 @@ async function build(
 		const context = await esbuild.context(
 			createConfig(source, outfile, options.target, options.watch),
 		);
+
 		await context.watch();
 	} else {
 		const result = await esbuild.build(
@@ -283,13 +290,16 @@ async function build(
 		const size = fs.statSync(outfile).size;
 
 		const relativePath = `./${path.relative(extensionFolder, outfile)}`;
+
 		console.log(
 			`asset ${green(relativePath)} size: ${(size / 1024).toFixed()} KiB`,
 		);
 
 		if (isDevbuild && result.metafile) {
 			const metafile = `${outfile}.esbuild.meta.json`;
+
 			await fs.writeFile(metafile, JSON.stringify(result.metafile));
+
 			console.log(
 				`metafile ${green(`./${path.relative(extensionFolder, metafile)}`)}`,
 			);
@@ -344,6 +354,7 @@ async function buildAll() {
 			),
 		];
 	};
+
 	await Promise.all(getLessBuilders(false));
 
 	const builders: Promise<void>[] = [];
@@ -476,6 +487,7 @@ async function buildAll() {
 			),
 		);
 	}
+
 	if (bundleConfig !== "desktop") {
 		builders.push(
 			build(
@@ -485,6 +497,7 @@ async function buildAll() {
 			),
 		);
 	}
+
 	if (bundleConfig !== "web") {
 		builders.push(
 			build(
@@ -493,6 +506,7 @@ async function buildAll() {
 				{ target: "desktop", watch: isWatchMode },
 			),
 		);
+
 		builders.push(
 			build(
 				path.join(extensionFolder, "src", "extension.node.proxy.ts"),
@@ -501,6 +515,7 @@ async function buildAll() {
 				{ target: "desktop", watch: false },
 			),
 		);
+
 		builders.push(
 			...deskTopNodeModulesToExternalize
 				// zeromq will be manually bundled.
@@ -530,6 +545,7 @@ async function buildAll() {
 					);
 				}),
 		);
+
 		builders.push(
 			copyJQuery(),
 			copyAminya(),
@@ -565,7 +581,9 @@ async function copyJQuery() {
 	const license = require
 		.resolve("jquery")
 		.replace(path.join("out", "jquery.js"), "LICENSE.txt");
+
 	await fs.ensureDir(path.dirname(target));
+
 	await Promise.all([
 		fs.copyFile(source, target),
 		fs.copyFile(
@@ -594,15 +612,20 @@ async function copyAminya() {
 		"node_modules",
 		"@aminya/node-gyp-build",
 	);
+
 	await fs.ensureDir(path.dirname(target));
+
 	await fs.ensureDir(target);
+
 	await fs.copy(source, target, { recursive: true });
 }
 async function copyZeroMQ() {
 	const source = path.join(extensionFolder, "node_modules", "zeromq");
 
 	const target = path.join(extensionFolder, "dist", "node_modules", "zeromq");
+
 	await fs.ensureDir(target);
+
 	await fs.copy(source, target, {
 		recursive: true,
 		filter: (src) => shouldCopyFileFromZmqFolder(src),
@@ -617,8 +640,11 @@ async function copyZeroMQOld() {
 		"node_modules",
 		"zeromqold",
 	);
+
 	await fs.ensureDir(path.dirname(target));
+
 	await fs.ensureDir(target);
+
 	await fs.copy(source, target, {
 		recursive: true,
 		filter: (src) => shouldCopyFileFromZmqFolder(src),
@@ -633,8 +659,11 @@ async function copyNodeGypBuild() {
 		"node_modules",
 		"node-gyp-build",
 	);
+
 	await fs.ensureDir(path.dirname(target));
+
 	await fs.ensureDir(target);
+
 	await fs.copy(source, target, { recursive: true });
 }
 async function buildVSCodeJsonRPC() {
@@ -647,6 +676,7 @@ async function buildVSCodeJsonRPC() {
 		"vscode-jsonrpc",
 		"index.js",
 	);
+
 	await fs.ensureDir(path.dirname(target));
 
 	const fullPath = require.resolve(source);
@@ -659,6 +689,7 @@ async function buildVSCodeJsonRPC() {
 'use strict';
 
 module.exports = require('./index');`;
+
 	await fs.writeFile(path.join(path.dirname(target), "node.js"), contents);
 
 	return build(fullPath, target, {
@@ -718,10 +749,12 @@ function shouldCopyFileFromZmqFolder(resourcePath) {
 		// We do not ship any other sub directory.
 		return false;
 	}
+
 	if (filename.includes("electron.") && resourcePath.endsWith(".node")) {
 		// We do not ship electron binaries.
 		return false;
 	}
+
 	const preBuildsFoldersToCopy = getZeroMQPreBuildsFoldersToKeep();
 
 	if (preBuildsFoldersToCopy.length === 0) {
@@ -737,6 +770,7 @@ function shouldCopyFileFromZmqFolder(resourcePath) {
 	) {
 		return true;
 	}
+
 	return false;
 }
 

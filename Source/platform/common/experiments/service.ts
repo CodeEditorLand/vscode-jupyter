@@ -46,6 +46,7 @@ export class ExperimentService implements IExperimentService {
 	public _optOutFrom: string[] = [];
 
 	private readonly experimentationService?: IExperimentationService;
+
 	private readonly settings: IJupyterSettings;
 
 	private get enabled() {
@@ -54,6 +55,7 @@ export class ExperimentService implements IExperimentService {
 			!this.settings.experiments.optOutFrom.includes("All")
 		);
 	}
+
 	constructor(
 		@inject(IConfigurationService)
 		readonly configurationService: IConfigurationService,
@@ -69,7 +71,9 @@ export class ExperimentService implements IExperimentService {
 		const optInto = this.settings.experiments.optInto;
 
 		const optOutFrom = this.settings.experiments.optOutFrom;
+
 		this._optInto = optInto.filter((exp) => !exp.endsWith("control"));
+
 		this._optOutFrom = optOutFrom.filter((exp) => !exp.endsWith("control"));
 
 		// Don't initialize the experiment service if the extension's experiments setting is disabled.
@@ -117,6 +121,7 @@ export class ExperimentService implements IExperimentService {
 			this.logExperiments();
 		}
 	}
+
 	public inExperiment(experiment: ExperimentGroups): boolean {
 		if (!this.experimentationService || !this.enabled) {
 			return false;
@@ -148,6 +153,7 @@ export class ExperimentService implements IExperimentService {
 		) {
 			return true;
 		}
+
 		if (
 			experiment === ExperimentGroups.DataViewerContribution &&
 			(getVSCodeChannel() === "insiders" || isPreReleaseVersion())
@@ -182,11 +188,13 @@ export class ExperimentService implements IExperimentService {
 			experiment as unknown as string,
 		);
 	}
+
 	private getFeatures() {
 		return this.globalState.get<{ features: string[] }>(EXP_MEMENTO_KEY, {
 			features: [],
 		}).features;
 	}
+
 	private logExperiments() {
 		const telemetrySettings = workspace.getConfiguration("telemetry");
 
@@ -197,6 +205,7 @@ export class ExperimentService implements IExperimentService {
 			telemetrySettings.get<boolean>("enableTelemetry") === false
 		) {
 			logger.info("Telemetry is disabled");
+
 			experimentsDisabled = true;
 		}
 
@@ -205,6 +214,7 @@ export class ExperimentService implements IExperimentService {
 			telemetrySettings.get<string>("telemetryLevel") === "off"
 		) {
 			logger.info("Telemetry level is off");
+
 			experimentsDisabled = true;
 		}
 
@@ -221,6 +231,7 @@ export class ExperimentService implements IExperimentService {
 			// confusion. So skip printing out any specific experiment details to the log.
 			return;
 		}
+
 		if (this._optInto.includes("All")) {
 			// Only if 'All' is not in optOut then check if it is in Opt In.
 			logger.info(Experiments.inGroup("All"));
@@ -246,6 +257,7 @@ export class ExperimentService implements IExperimentService {
 			.filter((exp) => exp !== "All")
 			.forEach((exp) => {
 				enabledExperiments.add(exp);
+
 				logger.info(Experiments.inGroup(exp));
 			});
 
@@ -274,6 +286,7 @@ export class ExperimentService implements IExperimentService {
 					!this._optInto.includes(exp)
 				) {
 					optedIntoExperiments.add(exp);
+
 					logger.info(Experiments.inGroup(exp));
 				}
 			});

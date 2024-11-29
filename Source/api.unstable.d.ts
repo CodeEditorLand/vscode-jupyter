@@ -95,13 +95,17 @@ declare module "./api" {
 		 * The original version string.
 		 */
 		raw: string;
+
 		major: number;
+
 		minor: number;
+
 		patch: number;
 	};
 
 	export interface PythonEnvironment {
 		id: string;
+
 		uri: Uri;
 	}
 	//#endregion
@@ -116,11 +120,13 @@ declare module "./api" {
 		 * Id of an existing (active) Kernel from an active session.
 		 */
 		id?: string;
+
 		name: string;
 		/**
 		 * The name of the language of the kernel
 		 */
 		language?: string;
+
 		path: string;
 		/**
 		 * A dictionary of environment variables to set for the kernel.
@@ -171,6 +177,7 @@ declare module "./api" {
 	 */
 	export type LocalKernelSpecConnectionMetadata = Readonly<{
 		kernelModel?: undefined;
+
 		kernelSpec: IJupyterKernelSpec;
 		/**
 		 * Indicates the interpreter that may be used to start the kernel.
@@ -178,7 +185,9 @@ declare module "./api" {
 		 * This interpreter could also be the interpreter associated with the kernel spec that we are supposed to start.
 		 */
 		interpreter?: PythonEnvironment;
+
 		kind: "startUsingLocalKernelSpec";
+
 		id: string;
 	}>;
 	/**
@@ -188,10 +197,15 @@ declare module "./api" {
 	 */
 	export type RemoteKernelSpecConnectionMetadata = Readonly<{
 		kernelModel?: undefined;
+
 		interpreter?: undefined;
+
 		kernelSpec: IJupyterKernelSpec;
+
 		kind: "startUsingRemoteKernelSpec";
+
 		baseUrl: string;
+
 		id: string;
 	}>;
 	/**
@@ -202,21 +216,27 @@ declare module "./api" {
 	 */
 	export type PythonKernelConnectionMetadata = Readonly<{
 		kernelSpec: IJupyterKernelSpec;
+
 		interpreter: PythonEnvironment;
+
 		kind: "startUsingPythonInterpreter";
+
 		id: string;
 	}>;
+
 	interface IJupyterKernel {
 		/**
 		 * Id of an existing (active) Kernel from an active session.
 		 */
 		id?: string;
+
 		name: string;
 	}
 
 	export type LiveKernelModel = IJupyterKernel &
 		Partial<IJupyterKernelSpec> & {
 			model: Session.IModel | undefined;
+
 			notebook?: { path?: string };
 		};
 
@@ -230,8 +250,11 @@ declare module "./api" {
 		 * Python interpreter will be used for intellisense & the like.
 		 */
 		interpreter?: PythonEnvironment;
+
 		baseUrl: string;
+
 		kind: "connectToLiveRemoteKernel";
+
 		id: string;
 	}>;
 
@@ -278,6 +301,7 @@ declare module "./api" {
 		 */
 		getActiveKernels(): {
 			metadata: KernelConnectionMetadata;
+
 			uri: Uri | undefined;
 		}[];
 		/**
@@ -287,6 +311,7 @@ declare module "./api" {
 		getKernel(uri: Uri):
 			| {
 					metadata: KernelConnectionMetadata;
+
 					connection: Session.ISessionConnection;
 			  }
 			| undefined;

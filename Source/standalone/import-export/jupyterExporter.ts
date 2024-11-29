@@ -51,7 +51,9 @@ export class JupyterExporter implements INotebookExporter {
 			if (!showOpenPrompt) {
 				return;
 			}
+
 			const openQuestion1 = DataScience.exportOpenQuestion1;
+
 			window
 				.showInformationMessage(
 					DataScience.exportDialogComplete(file),
@@ -69,6 +71,7 @@ export class JupyterExporter implements INotebookExporter {
 				}, noop);
 		} catch (exc) {
 			logger.error("Error in exporting notebook file");
+
 			window
 				.showInformationMessage(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,6 +80,7 @@ export class JupyterExporter implements INotebookExporter {
 				.then(noop, noop);
 		}
 	}
+
 	async serialize(
 		cells: NotebookCellData[],
 		kernelSpec?: nbformat.IKernelspecMetadata,
@@ -111,7 +115,9 @@ export class JupyterExporter implements INotebookExporter {
 		if (!ipynbMain) {
 			throw new Error("vscode.ipynb extension not found");
 		}
+
 		const notebook = new NotebookData(cells);
+
 		notebook.metadata = {
 			metadata,
 			nbformat: defaultNotebookFormat.major,
@@ -120,6 +126,7 @@ export class JupyterExporter implements INotebookExporter {
 
 		return ipynbMain.exportNotebook(notebook);
 	}
+
 	private extractPythonMainVersion = async (): Promise<number> => {
 		if (!this.jupyterServerHelper) {
 			return 3;

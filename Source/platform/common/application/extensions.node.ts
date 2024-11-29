@@ -16,17 +16,22 @@ import { DataScience } from "../utils/localize";
 @injectable()
 export class Extensions implements IExtensions {
 	private _extensions: readonly Extension<unknown>[] = [];
+
 	private get extensions() {
 		return this._extensions;
 	}
+
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(
 			extensions.onDidChange(() => (this._extensions = extensions.all)),
 		);
+
 		this._extensions = extensions.all;
 	}
+
 	public determineExtensionFromCallStack(stack?: string): {
 		extensionId: string;
+
 		displayName: string;
 	} {
 		stack = stack || new Error().stack;
@@ -55,15 +60,18 @@ export class Extensions implements IExtensions {
 							if (!filename) {
 								return filenameWithPositions;
 							}
+
 							if (!filenameWithPositions) {
 								return filename[1];
 							}
+
 							if (filenameWithPositions.startsWith(filename[1])) {
 								return filename[1];
 							}
 						} catch {
 							//
 						}
+
 						return filenameWithPositions;
 					})
 					.filter(
@@ -154,6 +162,7 @@ export class Extensions implements IExtensions {
 							extensionIdInFrame.lastIndexOf("-"),
 						);
 					}
+
 					const matchingExt = this.extensions.find(
 						(ext) => ext.id === extensionIdInFrame,
 					);
@@ -166,11 +175,14 @@ export class Extensions implements IExtensions {
 					}
 				}
 			}
+
 			logger.error(
 				`Unable to determine the caller of the extension API for trace stack`,
 				stack,
 			);
+
 			logger.error(`Jupyter Root`, jupyterExtRoot);
+
 			logger.error(`Frames`, frames);
 
 			return {
@@ -182,6 +194,7 @@ export class Extensions implements IExtensions {
 				`Unable to determine the caller of the extension API for trace stack.`,
 				stack,
 			);
+
 			logger.error(`Failure error`, ex);
 
 			return {

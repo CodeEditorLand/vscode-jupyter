@@ -42,21 +42,37 @@ export type Mode = typeof MODE_IDLE | typeof MODE_PANNING | typeof MODE_ZOOMING;
 
 export interface Value {
 	version: 2;
+
 	mode: Mode;
+
 	focus: boolean;
+
 	a: number;
+
 	b: number;
+
 	c: number;
+
 	d: number;
+
 	e: number;
+
 	f: number;
+
 	viewerWidth: number;
+
 	viewerHeight: number;
+
 	SVGWidth: number;
+
 	SVGHeight: number;
+
 	startX?: number | null;
+
 	startY?: number | null;
+
 	endX?: number | null;
+
 	endY?: number | null;
 }
 
@@ -142,6 +158,7 @@ export interface OptionalProps {
 	// override default toolbar component
 	// TODO: specify function type more clearly
 	customToolbar: React.Component<any> | React.StatelessComponent<any>;
+
 	customMiniature: React.Component<any> | React.StatelessComponent<any>;
 
 	// How about touch events? They are in README but not in `propTypes`.
@@ -163,13 +180,16 @@ export type Props = RequiredProps & Partial<OptionalProps>;
 
 export class ReactSVGPanZoom extends React.Component<Props> {
 	pan(SVGDeltaX: number, SVGDeltaY: number): void;
+
 	zoom(SVGPointX: number, SVGPointY: number, scaleFactor: number): void;
+
 	fitSelection(
 		selectionSVGPointX: number,
 		selectionSVGPointY: number,
 		selectionWidth: number,
 		selectionHeight: number,
 	): void;
+
 	fitToViewer(): void;
 
 	setPointOnViewerCenter(
@@ -177,7 +197,9 @@ export class ReactSVGPanZoom extends React.Component<Props> {
 		SVGPointY: number,
 		zoomLevel: number,
 	): void;
+
 	reset(): void;
+
 	zoomOnViewerCenter(scaleFactor: number): void;
 
 	getValue(): Value;
@@ -191,13 +213,16 @@ export class ReactSVGPanZoom extends React.Component<Props> {
 
 export class UncontrolledReactSVGPanZoom extends React.Component<Props> {
 	pan(SVGDeltaX: number, SVGDeltaY: number): void;
+
 	zoom(SVGPointX: number, SVGPointY: number, scaleFactor: number): void;
+
 	fitSelection(
 		selectionSVGPointX: number,
 		selectionSVGPointY: number,
 		selectionWidth: number,
 		selectionHeight: number,
 	): void;
+
 	fitToViewer(): void;
 
 	setPointOnViewerCenter(
@@ -205,39 +230,61 @@ export class UncontrolledReactSVGPanZoom extends React.Component<Props> {
 		SVGPointY: number,
 		zoomLevel: number,
 	): void;
+
 	reset(): void;
+
 	zoomOnViewerCenter(scaleFactor: number): void;
+
 	changeValue(value: Value): void;
+
 	changeTool(tool: Tool): void;
 }
 
 export interface Point {
 	x: number;
+
 	y: number;
 }
 
 export interface ViewerMouseEvent<T> {
 	originalEvent: React.MouseEvent<T>;
+
 	SVGViewer: SVGSVGElement;
+
 	point: Point;
+
 	x: number;
+
 	y: number;
+
 	scaleFactor: number;
+
 	translationX: number;
+
 	translationY: number;
+
 	preventDefault(): void;
+
 	stopPropagation(): void;
 }
 
 export interface ViewerTouchEvent<T> {
 	originalEvent: React.TouchEvent<T>;
+
 	SVGViewer: SVGSVGElement;
+
 	points: Point[];
+
 	changedPoints: Point[];
+
 	scaleFactor: number;
+
 	translationX: number;
+
 	translationY: number;
+
 	preventDefault(): void;
+
 	stopPropagation(): void;
 }
 

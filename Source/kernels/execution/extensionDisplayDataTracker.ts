@@ -28,12 +28,16 @@ export function trackDisplayDataForExtension(
 	if (output.metadata?.outputType !== "display_data" || !displayId) {
 		return;
 	}
+
 	const extensionMap =
 		displayIdsByExtension.get(kernel) || new Map<Extension, string[]>();
+
 	displayIdsByExtension.set(kernel, extensionMap);
 
 	const displayIds = extensionMap.get(extension) || [];
+
 	extensionMap.set(extension, displayIds);
+
 	displayIds.push(displayId);
 	// Lets put a limit on the number of displayIds we store per extension.
 	if (displayIds.length > 1000) {
@@ -53,6 +57,7 @@ export function isDisplayIdTrackedForAnExtension(
 			return true;
 		}
 	}
+
 	return false;
 }
 export function isDisplayIdTrackedForExtension(

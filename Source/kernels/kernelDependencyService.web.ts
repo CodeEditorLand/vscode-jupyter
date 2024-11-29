@@ -19,15 +19,22 @@ import {
 export class KernelDependencyService implements IKernelDependencyService {
 	public async installMissingDependencies(_options: {
 		resource: Resource;
+
 		kernelConnection: KernelConnectionMetadata;
+
 		ui: IDisplayOptions;
+
 		token: CancellationToken;
+
 		ignoreCache?: boolean;
+
 		cannotChangeKernels?: boolean;
+
 		installWithoutPrompting?: boolean;
 	}): Promise<KernelInterpreterDependencyResponse> {
 		return KernelInterpreterDependencyResponse.cancel;
 	}
+
 	public async areDependenciesInstalled(
 		_kernelConnection: KernelConnectionMetadata,
 		_token?: CancellationToken,

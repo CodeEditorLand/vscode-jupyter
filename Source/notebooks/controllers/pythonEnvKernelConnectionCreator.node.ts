@@ -34,6 +34,7 @@ import { IControllerRegistration } from "./types";
 
 type CreateEnvironmentResult = {
 	path: string | undefined;
+
 	action?: "Back" | "Cancel";
 };
 
@@ -42,12 +43,17 @@ type CreateEnvironmentResult = {
  */
 export class PythonEnvKernelConnectionCreator {
 	private readonly disposables: IDisposable[] = [];
+
 	private createdEnvId: string | undefined;
+
 	private readonly cancelTokeSource;
+
 	public dispose() {
 		this.cancelTokeSource.dispose();
+
 		dispose(this.disposables);
 	}
+
 	constructor(
 		private readonly notebook: NotebookDocument,
 		cancelToken: CancellationToken,
@@ -104,6 +110,7 @@ export class PythonEnvKernelConnectionCreator {
 
 			return { action: envResult.action || "Cancel" };
 		}
+
 		if (!envResult.interpreter) {
 			sendTelemetryEvent(Telemetry.CreatePythonEnvironment, undefined, {
 				failed: true,
@@ -112,7 +119,9 @@ export class PythonEnvKernelConnectionCreator {
 
 			return { action: "Cancel" };
 		}
+
 		env = envResult.interpreter;
+
 		logger.debug(`Python Environment created ${env.id}`);
 
 		const kernelConnection = await this.waitForPythonKernel(
@@ -127,15 +136,18 @@ export class PythonEnvKernelConnectionCreator {
 
 			return { action: "Cancel" };
 		}
+
 		if (!kernelConnection) {
 			sendTelemetryEvent(Telemetry.CreatePythonEnvironment, undefined, {
 				failed: true,
 				reason: "kernelConnectionNotCreated",
 			});
+
 			logger.debug(`Python Environment ${env.id} not found as a kernel`);
 
 			return { action: "Cancel" };
 		}
+
 		logger.debug(
 			`Python Environment ${env.id} found as a kernel ${kernelConnection.kind}:${kernelConnection.id}`,
 		);
@@ -159,6 +171,7 @@ export class PythonEnvKernelConnectionCreator {
 
 		if (result !== KernelInterpreterDependencyResponse.ok) {
 			dependenciesInstalled = false;
+
 			logger.warn(
 				`Dependencies not installed for new Python Env ${getDisplayPath(env.uri)} for notebook ${getDisplayPath(
 					this.notebook.uri,
@@ -173,6 +186,7 @@ export class PythonEnvKernelConnectionCreator {
 
 		return { kernelConnection };
 	}
+
 	private async waitForPythonKernel(env: PythonEnvironment) {
 		const kernelFinder =
 			ServiceContainer.instance.get<IKernelFinder>(IKernelFinder);
@@ -186,8 +200,10 @@ export class PythonEnvKernelConnectionCreator {
 		if (!finder) {
 			return;
 		}
+
 		return this.waitForPythonKernelFromFinder(env, finder);
 	}
+
 	private async waitForPythonKernelFromFinder(
 		env: PythonEnvironment,
 		finder: IContributedKernelFinder<PythonKernelConnectionMetadata>,
@@ -202,6 +218,7 @@ export class PythonEnvKernelConnectionCreator {
 
 		return new Promise<PythonKernelConnectionMetadata>((resolve) => {
 			const disposables: IDisposable[] = [];
+
 			disposables.push(
 				finder.onDidChangeKernels(
 					() => {
@@ -210,6 +227,7 @@ export class PythonEnvKernelConnectionCreator {
 						) {
 							return;
 						}
+
 						const kernel = finder.kernels.find(
 							(item) => item.interpreter.id === env.id,
 						);
@@ -235,16 +253,20 @@ export class PythonEnvKernelConnectionCreator {
 			if (this.cancelTokeSource.token.isCancellationRequested) {
 				return;
 			}
+
 			if (!kernel) {
 				logger.warn(
 					`New Python Environment ${getDisplayPath(env.uri)} not found as a kernel`,
 				);
 			}
+
 			return kernel;
 		});
 	}
+
 	private async createPythonEnvironment(): Promise<{
 		interpreter?: PythonEnvironment;
+
 		action?: "Back" | "Cancel";
 	}> {
 		const interpreterService =
@@ -264,14 +286,17 @@ export class PythonEnvKernelConnectionCreator {
 			if (result?.action === "Cancel") {
 				return { action: "Cancel" };
 			}
+
 			if (result?.action === "Back") {
 				return { action: "Back" };
 			}
+
 			const path = result?.path;
 
 			if (this.cancelTokeSource.token.isCancellationRequested) {
 				return { action: "Cancel" };
 			}
+
 			if (!path) {
 				logger.warn(
 					`Python Environment not created, either user cancelled the creation or there was an error in the Python Extension`,
@@ -279,7 +304,9 @@ export class PythonEnvKernelConnectionCreator {
 
 				return { action: "Cancel" };
 			}
+
 			this.createdEnvId = path;
+
 			logger.debug(`Python Environment created ${path}`);
 
 			const env = await interpreterService.getInterpreterDetails({
@@ -289,16 +316,19 @@ export class PythonEnvKernelConnectionCreator {
 			if (this.cancelTokeSource.token.isCancellationRequested) {
 				return { action: "Cancel" };
 			}
+
 			if (!env) {
 				logger.warn(
 					`No interpreter details for New Python Environment ${getDisplayPath(Uri.file(path))}`,
 				);
 			}
+
 			this.createdEnvId = env?.id;
 
 			return { interpreter: env };
 		} finally {
 			cancellation.cancel();
+
 			cancellation.dispose();
 		}
 	}

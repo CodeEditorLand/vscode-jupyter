@@ -3,9 +3,13 @@ declare module "ansi-to-html" {
 
 	class ansiToHtml {
 		constructor(options?: any);
+
 		opts: any;
+
 		stack: any;
+
 		stickyStack: any;
+
 		toHtml(input: any): any;
 	}
 }

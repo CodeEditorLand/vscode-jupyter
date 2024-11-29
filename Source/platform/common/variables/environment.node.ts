@@ -29,6 +29,7 @@ export class EnvironmentVariablesService
 		if (!filePath) {
 			return;
 		}
+
 		try {
 			return parseEnvFile(
 				await this.fs.readFile(Uri.file(filePath)),
@@ -48,6 +49,7 @@ export class EnvironmentVariablesService
 		if (!target) {
 			return;
 		}
+
 		Object.keys(source).forEach((setting) => {
 			const lowerCase = setting.toLowerCase();
 
@@ -56,10 +58,12 @@ export class EnvironmentVariablesService
 				// upon the source so check all cases.
 				return;
 			}
+
 			const targetSetting =
 				Object.keys(target).find(
 					(k) => k.toLowerCase() === lowerCase,
 				) || setting;
+
 			target[targetSetting] = source[setting];
 		});
 	}
@@ -197,6 +201,7 @@ export class EnvironmentVariablesService
 				vars[setKey] = valueToAppendOrPrepend;
 			}
 		}
+
 		return vars;
 	}
 }
@@ -208,6 +213,7 @@ export function parseEnvFile(
 	const globalVars = baseVars ? baseVars : {};
 
 	const vars: EnvironmentVariables = {};
+
 	lines
 		.toString()
 		.split("\n")
@@ -217,6 +223,7 @@ export function parseEnvFile(
 			if (name === "") {
 				return;
 			}
+
 			vars[name] = substituteEnvVars(value, vars, globalVars);
 		});
 
@@ -241,9 +248,11 @@ function parseEnvLine(line: string): [string, string] {
 	if (value && value !== "") {
 		if (value[0] === "'" && value[value.length - 1] === "'") {
 			value = value.substring(1, value.length - 1);
+
 			value = value.replace(/\\n/gm, "\n");
 		} else if (value[0] === '"' && value[value.length - 1] === '"') {
 			value = value.substring(1, value.length - 1);
+
 			value = value.replace(/\\n/gm, "\n");
 		}
 	} else {
@@ -267,23 +276,27 @@ function substituteEnvVars(
 	let invalid = false;
 
 	let replacement = value;
+
 	replacement = replacement.replace(
 		SUBST_REGEX,
 		(match, substName, bogus, offset, orig) => {
 			if (offset > 0 && orig[offset - 1] === "\\") {
 				return match;
 			}
+
 			if ((bogus && bogus !== "") || !substName || substName === "") {
 				invalid = true;
 
 				return match;
 			}
+
 			return localVars[substName] || globalVars[substName] || missing;
 		},
 	);
 
 	if (!invalid && replacement !== value) {
 		value = replacement;
+
 		sendTelemetryEvent(EventName.ENVFILE_VARIABLE_SUBSTITUTION);
 	}
 

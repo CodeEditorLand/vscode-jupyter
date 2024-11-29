@@ -78,6 +78,7 @@ export interface IShowDataViewerAction extends IShowDataViewer {}
 
 export interface IVariableExplorerHeight {
 	containerHeight: number;
+
 	gridHeight: number;
 }
 
@@ -92,5 +93,6 @@ export type CommonAction<T = never | undefined> = ActionWithPayload<
 
 export type ISortVariablesRequest = {
 	sortColumn: string;
+
 	sortAscending: boolean;
 };

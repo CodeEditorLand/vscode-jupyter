@@ -20,6 +20,7 @@ export class OutputCommandListener implements IDataScienceCommandListener {
 		@inject(IDisposableRegistry)
 		private readonly disposableRegistry: IDisposableRegistry,
 	) {}
+
 	register(): void {
 		this.disposableRegistry.push(
 			commands.registerCommand(

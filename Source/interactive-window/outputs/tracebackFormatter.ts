@@ -49,6 +49,7 @@ export class InteractiveWindowTracebackFormatter
 		if (!this.replTracker.isForReplEditor(cell.notebook)) {
 			return traceback;
 		}
+
 		const storage = this.storageFactory.get({ notebook: cell.notebook });
 
 		const useIPython8Format = traceback.some((traceFrame) =>
@@ -84,6 +85,7 @@ export class InteractiveWindowTracebackFormatter
 			}
 		});
 	}
+
 	private modifyTracebackFrameIPython8(
 		traceFrame: string,
 		generatedCodes: IFileGeneratedCodes[] | undefined,
@@ -132,6 +134,7 @@ export class InteractiveWindowTracebackFormatter
 			inputMatch.groups?.lineNumber
 		) {
 			executionCount = parseInt(inputMatch.groups.executionCount);
+
 			location = inputMatch.groups?.lineNumber;
 		} else if (
 			cellMatch &&
@@ -139,6 +142,7 @@ export class InteractiveWindowTracebackFormatter
 			cellMatch.groups?.lineNumber
 		) {
 			executionCount = parseInt(cellMatch.groups.executionCount);
+
 			location = cellMatch.groups.lineNumber;
 		}
 
@@ -159,6 +163,7 @@ export class InteractiveWindowTracebackFormatter
 					break;
 				}
 			}
+
 			if (match && matchUri) {
 				// We have a match, replace source lines first
 				let result = traceFrame;
@@ -223,11 +228,13 @@ export class InteractiveWindowTracebackFormatter
 
 		return traceFrame;
 	}
+
 	private modifyTracebackFrameIPython7(
 		traceFrame: string,
 		allGeneratedCodes: IFileGeneratedCodes[],
 	): string {
 		const allUris = allGeneratedCodes.map((item) => item.uri);
+
 		allUris.forEach((uri) => {
 			const filePath = getFilePath(uri);
 
@@ -256,7 +263,9 @@ export class InteractiveWindowTracebackFormatter
 
 				for (
 					let l = regex.exec(traceFrame);
+
 					l && l.length > 3;
+
 					l = regex.exec(traceFrame)
 				) {
 					const newLine = stripAnsi(l[3]).substr(1); // Seem to have a space on the front
@@ -306,6 +315,7 @@ export class InteractiveWindowTracebackFormatter
 
 		return traceFrame;
 	}
+
 	private findCellOffset(
 		generatedCodes: IGeneratedCode[] | undefined,
 		codeLines: string,

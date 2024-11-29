@@ -69,6 +69,7 @@ export async function handleSelfCertsError(
 
 	if (value === enableOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
+
 		await config.updateSetting(
 			"allowUnauthorizedRemoteConnection",
 			true,
@@ -80,6 +81,7 @@ export async function handleSelfCertsError(
 	} else if (value === closeOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
 	}
+
 	return false;
 }
 
@@ -101,6 +103,7 @@ export async function handleExpiredCertsError(
 
 	if (value === enableOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
+
 		await config.updateSetting(
 			"allowUnauthorizedRemoteConnection",
 			true,
@@ -112,6 +115,7 @@ export async function handleExpiredCertsError(
 	} else if (value === closeOption) {
 		sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
 	}
+
 	return false;
 }
 
@@ -148,6 +152,7 @@ export function createJupyterConnectionInfo(
 		// Do not overwrite the token if its already set.
 		authHeader.Authorization = authHeader.Authorization || `token ${token}`;
 	}
+
 	const getAuthHeader = authHeader ? () => authHeader : undefined;
 
 	let serverSettings: Partial<ServerConnection.ISettings> = {
@@ -179,6 +184,7 @@ export function createJupyterConnectionInfo(
 		requestAgentCreator
 	) {
 		const requestAgent = requestAgentCreator.createHttpRequestAgent();
+
 		requestInit = { ...requestInit, agent: requestAgent };
 	}
 
@@ -289,13 +295,16 @@ export function extractJupyterServerHandleAndId(
 					`Unable to determine the extension id for the remote server handle', { ${id}, ${uriHandle} }`,
 				);
 			}
+
 			return { handle: uriHandle, id, extensionId };
 		}
+
 		throw new Error("Invalid remote URI");
 	} catch (ex) {
 		if (ex instanceof FailedToDetermineExtensionId) {
 			throw ex;
 		}
+
 		throw new Error(
 			`'Failed to parse remote URI ${getSafeUrlForLogging(uri)}`,
 		);
@@ -329,17 +338,21 @@ export function getOwnerExtensionOfProviderHandle(id: string) {
 	if (!id) {
 		return;
 	}
+
 	if (isBuiltInJupyterProvider(id)) {
 		return JVSC_EXTENSION_ID;
 	}
+
 	if (
 		id.startsWith("azureml_compute_instances") ||
 		id.startsWith("azureml_connected_compute_instances")
 	) {
 		return "ms-toolsai.vscode-ai";
 	}
+
 	if (id === "github-codespaces") {
 		return "GitHub.codespaces";
 	}
+
 	logger.warn(`Extension Id not found for server Id ${id}`);
 }

@@ -23,6 +23,7 @@ import * as internalPython from "./internal/python.node";
 
 class PythonEnvironment {
 	private readonly executable: Uri;
+
 	private readonly pythonEnvId: string;
 
 	constructor(
@@ -32,6 +33,7 @@ class PythonEnvironment {
 			getPythonArgv(python: Uri): string[];
 
 			getObservablePythonArgv(python: Uri): string[];
+
 			isValidExecutable(python: Uri): Promise<boolean>;
 			// from ProcessService:
 			exec(
@@ -39,6 +41,7 @@ class PythonEnvironment {
 				args: string[],
 				options?: SpawnOptions,
 			): Promise<ExecutionResult<string>>;
+
 			shellExec(
 				command: string,
 				timeout: number,
@@ -53,6 +56,7 @@ class PythonEnvironment {
 					`interpreter.executable.uri is not defined for ${interpreter.id}`,
 				);
 			}
+
 			this.executable = interpreter.executable.uri;
 		} else {
 			this.executable = interpreter.uri;
@@ -64,6 +68,7 @@ class PythonEnvironment {
 
 		return buildPythonExecInfo(python, pythonArgs);
 	}
+
 	public getExecutionObservableInfo(
 		pythonArgs: string[] = [],
 	): PythonExecInfo {
@@ -71,12 +76,14 @@ class PythonEnvironment {
 
 		return buildPythonExecInfo(python, pythonArgs);
 	}
+
 	public async getExecutablePath(): Promise<Uri> {
 		// If we've passed the python file, then return the file.
 		// This is because on mac if using the interpreter /usr/bin/python2.7 we can get a different value for the path
 		if (await this.deps.isValidExecutable(this.executable)) {
 			return this.executable;
 		}
+
 		const python = this.getExecutionInfo();
 
 		return getExecutablePath(python, this.deps.exec);
@@ -162,7 +169,9 @@ export function createCondaEnv(
 	condaFile: string,
 	condaInfo: {
 		name: string;
+
 		path: string;
+
 		version?: SemVer;
 	},
 	interpreter: { uri: Uri; id: string } | Environment,
@@ -177,6 +186,7 @@ export function createCondaEnv(
 	} else {
 		runArgs.push("-n", condaInfo.name);
 	}
+
 	const pythonArgv = [condaFile, ...runArgs, "python"];
 
 	const deps = createDeps(

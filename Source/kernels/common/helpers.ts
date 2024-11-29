@@ -36,6 +36,7 @@ export async function waitForIdleOnSession(
 	if (progress) {
 		disposables.push(progress);
 	}
+
 	try {
 		logger.trace(
 			`Waiting for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
@@ -43,6 +44,7 @@ export async function waitForIdleOnSession(
 
 		// When our kernel connects and gets a status message it triggers the ready promise
 		const kernelStatus = createDeferred<string>();
+
 		token.onCancellationRequested(
 			() => kernelStatus.reject(new CancellationError()),
 			undefined,
@@ -59,7 +61,9 @@ export async function waitForIdleOnSession(
 				kernelStatus.resolve(status);
 			}
 		};
+
 		session.kernel.statusChanged?.connect(handler);
+
 		disposables.push(
 			new Disposable(() =>
 				swallowExceptions(() =>
@@ -75,7 +79,9 @@ export async function waitForIdleOnSession(
 		const sessionDisposed = createDeferred<string>();
 
 		const sessionDisposedHandler = () => sessionDisposed.resolve("");
+
 		session.disposed.connect(sessionDisposedHandler, sessionDisposed);
+
 		disposables.push(
 			new Disposable(() =>
 				swallowExceptions(() =>
@@ -86,7 +92,9 @@ export async function waitForIdleOnSession(
 				),
 			),
 		);
+
 		sessionDisposed.promise.catch(noop);
+
 		kernelStatus.promise.catch(noop);
 
 		const result = await raceTimeout(
@@ -111,6 +119,7 @@ export async function waitForIdleOnSession(
 		if (result == "idle") {
 			return;
 		}
+
 		logger.error(
 			`Shutting down after failing to wait for idle on (kernel): ${session.kernel.id} -> ${session.kernel.status}`,
 		);

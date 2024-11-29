@@ -55,6 +55,7 @@ export class ExportUtilNode {
 
 		const fs =
 			ServiceContainer.instance.get<IFileSystemNode>(IFileSystemNode);
+
 		await fs.createDirectory(resultDir);
 
 		return {
@@ -68,9 +69,11 @@ export class ExportUtilNode {
 				while (count < 10) {
 					try {
 						await fs.delete(resultDir);
+
 						count = 10;
 					} catch {
 						await sleep(3000);
+
 						count += 1;
 					}
 				}
@@ -87,6 +90,7 @@ export class ExportUtilNode {
 
 		const fs =
 			ServiceContainer.instance.get<IFileSystemNode>(IFileSystemNode);
+
 		await fs.writeFile(Uri.file(newFilePath), contents);
 
 		return newFilePath;
@@ -105,6 +109,7 @@ export async function removeSvgs(model: string) {
 			removeSvgFromOutputs(outputs);
 		}
 	}
+
 	return JSON.stringify(content, undefined, 4);
 }
 
@@ -120,6 +125,7 @@ function removeSvgFromOutputs(outputs: nbformat.IOutput[]) {
 			if (!(SVG in data)) {
 				continue;
 			}
+
 			if (PNG in data) {
 				delete data[SVG];
 			}

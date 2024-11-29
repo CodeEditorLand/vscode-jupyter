@@ -38,6 +38,7 @@ export function getNotebookTelemetryTracker(
 	if (!query) {
 		return;
 	}
+
 	if (isUri(query) && !uriToNotebookMap.has(query.toString())) {
 		const nb = workspace.notebookDocuments.find(
 			(item) => item.uri.toString() === query.toString(),
@@ -47,6 +48,7 @@ export function getNotebookTelemetryTracker(
 			uriToNotebookMap.set(query.toString(), new WeakRef(nb));
 		}
 	}
+
 	const notebook = isUri(query)
 		? uriToNotebookMap.get(query.toString())?.deref()
 		: query;
@@ -60,11 +62,15 @@ export function getNotebookTelemetryTracker(
 
 export function activateNotebookTelemetry(stopWatch: { elapsedTime: number }) {
 	const disposable = new DisposableStore();
+
 	mainStopWatch = stopWatch;
+
 	mainStopWatchStartAt = stopWatch.elapsedTime;
+
 	workspace.notebookDocuments.forEach((nb) =>
 		notebooksOpenedTime.set(nb, createNotebookTracker(nb, true, stopWatch)),
 	);
+
 	disposable.add(
 		workspace.onDidOpenNotebookDocument((e) => {
 			if (!notebooksOpenedTime.has(e) && !wasAnyCellExecutedInSession) {
@@ -75,9 +81,11 @@ export function activateNotebookTelemetry(stopWatch: { elapsedTime: number }) {
 			}
 		}),
 	);
+
 	disposable.add(
 		workspace.onDidCloseNotebookDocument((e) => {
 			notebooksOpenedTime.delete(e);
+
 			uriToNotebookMap.delete(e.uri.toString());
 		}),
 	);
@@ -91,21 +99,35 @@ export function onDidManuallySelectKernel(notebook: NotebookDocument) {
 
 type Times = {
 	preExecuteCellTelemetry: number;
+
 	startKernel: number;
+
 	executeCell: number;
+
 	sessionTelemetry: number;
+
 	postKernelStart: number;
+
 	computeCwd: number;
+
 	kernelInfo: number;
+
 	kernelIdle: number;
+
 	kernelReady: number;
 
 	getConnection: number;
+
 	updateConnection: number;
+
 	portUsage: number;
+
 	spawn: number;
+
 	pythonEnvVars: number;
+
 	envVars: number;
+
 	interruptHandle: number;
 };
 
@@ -115,7 +137,9 @@ const pythonExtensionActivation = {
 };
 type ExtraTimes = {
 	controllerCreated: number;
+
 	interpreterDiscovered: number;
+
 	executeCellAcknowledged: number;
 };
 
@@ -126,7 +150,9 @@ export type NotebookFirstStartBreakDownMeasures = Partial<
 		[K in keyof Times as `${K}CompletedAfter`]: number;
 	} & {
 		openedAfter: number;
+
 		executeCellCount?: number;
+
 		kernelSelectedAfter?: number;
 	}
 >;
@@ -153,6 +179,7 @@ export function trackControllerCreation(
 	pythonInterpreterId?: string,
 ) {
 	controllerCreationTimes.set(kernelConnectionId, mainStopWatch?.elapsedTime);
+
 	controllerInterpreterMapping.set(
 		kernelConnectionId,
 		pythonInterpreterId || "",
@@ -162,6 +189,7 @@ export function trackInterpreterDiscovery(pythonEnv: Environment) {
 	if (!pythonEnv.executable.uri) {
 		return;
 	}
+
 	interpreterDiscoveryTimes.set(pythonEnv.id, mainStopWatch?.elapsedTime);
 }
 function createNotebookTracker(
@@ -181,6 +209,7 @@ function createNotebookTracker(
 		if (measure === "executeCell") {
 			wasAnyCellExecutedInSession = true;
 		}
+
 		measures[`${measure}StartedAfter`] = stopWatch.elapsedTime;
 
 		const obj = {
@@ -194,6 +223,7 @@ function createNotebookTracker(
 
 	const info: {
 		manuallySelectedKernel?: boolean;
+
 		wasAlreadyOpen: boolean;
 	} = {
 		wasAlreadyOpen,
@@ -223,8 +253,10 @@ function createNotebookTracker(
 								controllerCreatedTime;
 						}
 					}
+
 					measures.interpreterDiscoveredAfter =
 						interpreterDiscoveryTimes.get(interpreterId || "");
+
 					measures.kernelSelectedAfter = stopWatch.elapsedTime;
 
 					if (!info.manuallySelectedKernel) {
@@ -268,6 +300,7 @@ function createNotebookTracker(
 				: once(() => {
 						measures.executeCellAcknowledgedAfter =
 							stopWatch.elapsedTime;
+
 						sendTelemetry(notebook, info, measures);
 					}),
 			// Breakdown of starting a kernel.
@@ -318,23 +351,33 @@ function createNotebookTracker(
 
 type StartupSummary = {
 	sessionTelemetry: number;
+
 	postKernelStart: number;
+
 	computeCwd: number;
+
 	kernelReady: number;
 
 	getConnection: number;
+
 	updateConnection: number;
+
 	portUsage: number;
+
 	spawn: number;
 };
 type PostKernelStartupSummary = {
 	startupCode: number;
+
 	kernelInfo: number;
+
 	kernelIdle: number;
 };
 type SpawnSummary = {
 	pythonEnvVars: number;
+
 	envVars: number;
+
 	interruptHandle: number;
 };
 type NotebookSummary = {
@@ -376,7 +419,9 @@ const sendTelemetry = once(function (
 	notebook: NotebookDocument,
 	info: {
 		executeCellCount?: number;
+
 		manuallySelectedKernel?: boolean;
+
 		wasAlreadyOpen: boolean;
 	},
 	measures: NotebookFirstStartBreakDownMeasures,
@@ -419,8 +464,11 @@ const sendTelemetry = once(function (
 	// E.g. If the controller was created before the notebook was created, then we do not care about that.
 	type BriefSummary = {
 		duration: number;
+
 		preExecuteCellTelemetry: number;
+
 		startKernel: number;
+
 		executeCell?: number;
 	};
 
@@ -433,7 +481,9 @@ const sendTelemetry = once(function (
 	{
 		const briefSummaryParts: {
 			name: keyof BriefSummary;
+
 			start: number;
+
 			end: number;
 		}[] = [
 			{
@@ -456,7 +506,9 @@ const sendTelemetry = once(function (
 		const duration =
 			measures.executeCellAcknowledgedAfter -
 			measures.preExecuteCellTelemetryStartedAfter;
+
 		briefSummary.duration = duration;
+
 		computeSummary(
 			briefSummary,
 			briefSummaryParts,
@@ -478,7 +530,9 @@ const sendTelemetry = once(function (
 	{
 		const startupSummaryParts: {
 			name: keyof StartupSummary;
+
 			start: number;
+
 			end: number;
 		}[] = [
 			{
@@ -526,6 +580,7 @@ const sendTelemetry = once(function (
 		const duration =
 			measures.startKernelCompletedAfter -
 			measures.startKernelStartedAfter;
+
 		computeSummary(
 			startupSummary,
 			startupSummaryParts,
@@ -543,7 +598,9 @@ const sendTelemetry = once(function (
 	{
 		const postKernelStartSummaryParts: {
 			name: keyof PostKernelStartupSummary;
+
 			start: number;
+
 			end: number;
 		}[] = [
 			{
@@ -566,6 +623,7 @@ const sendTelemetry = once(function (
 		const duration =
 			measures.postKernelStartCompletedAfter -
 			measures.postKernelStartStartedAfter;
+
 		computeSummary(
 			postKernelStartSummary,
 			postKernelStartSummaryParts,
@@ -583,7 +641,9 @@ const sendTelemetry = once(function (
 	{
 		const spawnSummaryParts: {
 			name: keyof SpawnSummary;
+
 			start: number;
+
 			end: number;
 		}[] = [
 			{
@@ -605,6 +665,7 @@ const sendTelemetry = once(function (
 
 		const duration =
 			measures.spawnCompletedAfter - measures.spawnStartedAfter;
+
 		computeSummary(
 			spawnSummary,
 			spawnSummaryParts,
@@ -612,6 +673,7 @@ const sendTelemetry = once(function (
 			measures.openedAfter,
 		);
 	}
+
 	const notebookSummary = computeNotebookSummary(notebook);
 
 	const allMeasures: BriefSummary &
@@ -624,6 +686,7 @@ const sendTelemetry = once(function (
 		...spawnSummary,
 		...notebookSummary,
 	};
+
 	sendKernelTelemetryEvent(
 		notebook.uri,
 		Telemetry.NotebookFirstStartBreakDown,
@@ -652,6 +715,7 @@ function computeNotebookSummary(notebook: NotebookDocument) {
 
 		if (cell.kind === NotebookCellKind.Markup) {
 			notebookSummary.mdCellCount += 1;
+
 			notebookSummary.mdCellCharLength += length;
 
 			try {
@@ -659,6 +723,7 @@ function computeNotebookSummary(notebook: NotebookDocument) {
 
 				const attachments = (metadata.attachments ||
 					{}) as unknown as Record<string, string>;
+
 				Object.keys(attachments).forEach((key) => {
 					notebookSummary.attachmentCount += 1;
 
@@ -686,8 +751,11 @@ function computeNotebookSummary(notebook: NotebookDocument) {
 			}
 		} else {
 			notebookSummary.codeCellCount += 1;
+
 			notebookSummary.codeCellCharLength += length;
+
 			notebookSummary.outputCount += cell.outputs.length;
+
 			notebookSummary.outputsByteSize += cell.outputs.reduce(
 				(acc, output) =>
 					acc +
@@ -710,15 +778,21 @@ const sendTelemetryForFirstAutoSelectedKernel = once(function (
 	},
 	measures: {
 		openedAfter: number;
+
 		kernelSelectedAfter: number;
+
 		controllerCreatedAfter?: number;
+
 		interpreterDiscoveredAfter?: number;
+
 		pythonExtensionActivationStartedAfter?: number;
+
 		pythonExtensionActivationCompletedAfter?: number;
 	},
 ) {
 	measures.pythonExtensionActivationStartedAfter =
 		pythonExtensionActivation.starAfter;
+
 	measures.pythonExtensionActivationCompletedAfter =
 		pythonExtensionActivation.completedAfter;
 
@@ -736,10 +810,15 @@ const sendTelemetryForFirstAutoSelectedKernel = once(function (
 	// E.g. If the controller was created before the notebook was created, then we do not care about that.
 	type Summary = {
 		duration: number;
+
 		callPythonApi?: number;
+
 		activatePython?: number;
+
 		discoverEnv?: number;
+
 		createController?: number;
+
 		selectController?: number;
 	};
 
@@ -774,7 +853,9 @@ const sendTelemetryForFirstAutoSelectedKernel = once(function (
 	const duration = measures.kernelSelectedAfter - measures.openedAfter;
 
 	const summary: Summary = { duration };
+
 	computeSummary(summary, parts, duration, measures.openedAfter);
+
 	sendKernelTelemetryEvent(
 		notebook.uri,
 		Telemetry.NotebookFirstKernelAutoSelectionBreakDown,
@@ -787,7 +868,9 @@ function computeSummary(
 	summary: { [k: string]: number },
 	breakdown: {
 		name: keyof typeof summary;
+
 		start: number;
+
 		end: number;
 	}[],
 	duration: number,

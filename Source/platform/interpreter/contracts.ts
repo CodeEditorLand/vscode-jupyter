@@ -19,11 +19,17 @@ export interface IInterpreterService {
 
 	// #region Old API
 	readonly status: "refreshing" | "idle";
+
 	readonly onDidChangeStatus: Event<void>;
+
 	readonly onDidEnvironmentVariablesChange: Event<void>;
+
 	onDidChangeInterpreter: Event<PythonEnvironment | undefined>;
+
 	onDidChangeInterpreters: Event<PythonEnvironment[]>;
+
 	onDidRemoveInterpreter: Event<{ id: string }>;
+
 	refreshInterpreters(forceRefresh?: boolean): Promise<void>;
 	/**
 	 * Hook up the Python API to the interpreter service.

@@ -71,7 +71,9 @@ interface INotebookState {
 @injectable()
 export class KernelVariables implements IJupyterVariables {
 	private variableRequesters = new Map<string, IKernelVariableRequester>();
+
 	private cachedVariables = new Map<string, INotebookState>();
+
 	private refreshEventEmitter = new EventEmitter<void>();
 
 	constructor(
@@ -111,6 +113,7 @@ export class KernelVariables implements IJupyterVariables {
 				token,
 			);
 		}
+
 		return [];
 	}
 
@@ -140,6 +143,7 @@ export class KernelVariables implements IJupyterVariables {
 					token,
 				);
 			}
+
 			return match;
 		} else {
 			// No items in the cache yet, just ask for the names
@@ -227,12 +231,14 @@ export class KernelVariables implements IJupyterVariables {
 			if (sliceExpression) {
 				expression = `${targetVariable.name}${sliceExpression}`;
 			}
+
 			return variableRequester.getDataFrameInfo(
 				targetVariable,
 				kernel,
 				expression,
 			);
 		}
+
 		return targetVariable;
 	}
 
@@ -255,6 +261,7 @@ export class KernelVariables implements IJupyterVariables {
 			if (sliceExpression) {
 				expression = `${targetVariable.name}${sliceExpression}`;
 			}
+
 			return variableRequester.getDataFrameRows(
 				start,
 				end,
@@ -262,6 +269,7 @@ export class KernelVariables implements IJupyterVariables {
 				expression,
 			);
 		}
+
 		return { data: [] };
 	}
 
@@ -283,6 +291,7 @@ export class KernelVariables implements IJupyterVariables {
 				token,
 			);
 		}
+
 		return targetVariable;
 	}
 
@@ -367,16 +376,19 @@ export class KernelVariables implements IJupyterVariables {
 					});
 				}
 			};
+
 			list.variables.sort(comparer);
 
 			const startPos = request.startIndex ? request.startIndex : 0;
 
 			const chunkSize = request.pageSize ? request.pageSize : 100;
+
 			result.pageStartIndex = startPos;
 
 			// Do one at a time. All at once doesn't work as they all have to wait for each other anyway
 			for (
 				let i = startPos;
+
 				i < startPos + chunkSize && i < list.variables.length;
 
 			) {
@@ -399,7 +411,9 @@ export class KernelVariables implements IJupyterVariables {
 							);
 
 				list.variables[i] = fullVariable;
+
 				result.pageResponse.push(fullVariable);
+
 				i += 1;
 			}
 
@@ -547,6 +561,7 @@ export class KernelVariables implements IJupyterVariables {
 				if (count) {
 					result.count = parseInt(count[1], 10);
 				}
+
 				if (shape) {
 					result.shape = `(${shape[1]}, ${shape[2]})`;
 				}
@@ -556,6 +571,7 @@ export class KernelVariables implements IJupyterVariables {
 			if (output && output.type) {
 				result.type = output.type.toString();
 			}
+
 			if (output && output.value) {
 				result.value = output.value.toString();
 			}

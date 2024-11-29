@@ -73,16 +73,21 @@ class NotebookCellSpecificKernelCompletionProvider
 		private readonly kernel: IKernel,
 		private readonly monacoLanguage: string,
 	) {}
+
 	public allowStringFilterForPython: boolean;
+
 	private pendingCompletionRequest = new WeakMap<
 		TextDocument,
 		{ position: Position; version: number }
 	>();
+
 	private previousCompletionItems = new WeakMap<
 		CompletionItem,
 		{
 			documentRef: WeakRef<TextDocument>;
+
 			position: Position;
+
 			originalCompletionItem: CompletionItem;
 		}
 	>();
@@ -96,12 +101,14 @@ class NotebookCellSpecificKernelCompletionProvider
 		if (!this.kernel.session?.kernel) {
 			return [];
 		}
+
 		const version = document.version;
 		// Most likely being called again by us in getCompletionsFromOtherLanguageProviders
 		// Or a previous request for completions has not yet completed, hence no point trying another.
 		if (this.pendingCompletionRequest.has(document)) {
 			return [];
 		}
+
 		this.pendingCompletionRequest.set(document, { position, version });
 
 		const disposable = new Disposable(() => {
@@ -142,6 +149,7 @@ class NotebookCellSpecificKernelCompletionProvider
 			if (token.isCancellationRequested) {
 				return [];
 			}
+
 			const completions = await raceTimeoutError(
 				Settings.IntellisenseTimeout,
 				new RequestTimedoutError(),
@@ -210,14 +218,17 @@ class NotebookCellSpecificKernelCompletionProvider
 			if (ex instanceof RequestTimedoutError) {
 				return [];
 			}
+
 			if (!(ex instanceof CancellationError)) {
 				logger.debug(`Completions failed`, ex);
 			}
+
 			throw ex;
 		} finally {
 			disposable.dispose();
 		}
 	}
+
 	async provideCompletionItemsFromKernel(
 		document: TextDocument,
 		position: Position,
@@ -227,6 +238,7 @@ class NotebookCellSpecificKernelCompletionProvider
 		if (token.isCancellationRequested || !this.kernel.session?.kernel) {
 			return [];
 		}
+
 		const stopWatch = new StopWatch();
 
 		const measures: TelemetryMeasures<Telemetry.KernelCodeCompletion> = {
@@ -256,6 +268,7 @@ class NotebookCellSpecificKernelCompletionProvider
 		) {
 			return [];
 		}
+
 		const code = document.getText();
 
 		const cursor_pos = document.offsetAt(position);
@@ -266,10 +279,15 @@ class NotebookCellSpecificKernelCompletionProvider
 			token,
 			this.getKernelCompletion(code, cursor_pos, token),
 		);
+
 		logger.debug(`Jupyter completion time: ${stopWatch.elapsedTime}`);
+
 		properties.cancelled = token.isCancellationRequested;
+
 		properties.completed = !token.isCancellationRequested;
+
 		properties.kernelStatusAfterRequest = this.kernel.status;
+
 		measures.requestDuration = token.isCancellationRequested
 			? 0
 			: stopWatch.elapsedTime;
@@ -286,6 +304,7 @@ class NotebookCellSpecificKernelCompletionProvider
 
 			return [];
 		}
+
 		const result: INotebookCompletion = {
 			matches: kernelCompletions.content.matches,
 			cursor: {
@@ -298,7 +317,9 @@ class NotebookCellSpecificKernelCompletionProvider
 		const experimentMatches = result.metadata
 			? result.metadata._jupyter_types_experimental
 			: [];
+
 		measures.completionItems = result.matches.length;
+
 		sendCompletionTelemetry(this.kernel, measures, properties);
 
 		// Check if we have more information about the completion items & whether its valid.
@@ -346,7 +367,9 @@ class NotebookCellSpecificKernelCompletionProvider
 				} else {
 					completionItem.range = range;
 				}
+
 				completionItem.insertText = item.text;
+
 				completionItem.sortText = generateSortString(index);
 
 				if (
@@ -375,6 +398,7 @@ class NotebookCellSpecificKernelCompletionProvider
 				const completionItem = new CompletionItem(label);
 
 				completionItem.range = range;
+
 				completionItem.sortText = generateSortString(index);
 
 				if (
@@ -388,6 +412,7 @@ class NotebookCellSpecificKernelCompletionProvider
 					// extra long label.
 					completionItem.sortText = `ZZZ${completionItem.sortText}`;
 				}
+
 				this.previousCompletionItems.set(completionItem, {
 					...dataToStore,
 					originalCompletionItem: completionItem,
@@ -396,6 +421,7 @@ class NotebookCellSpecificKernelCompletionProvider
 				return completionItem;
 			});
 		}
+
 		if (isPythonKernelConnection(this.kernel.kernelConnectionMetadata)) {
 			return generatePythonCompletions(
 				context.triggerCharacter,
@@ -405,8 +431,10 @@ class NotebookCellSpecificKernelCompletionProvider
 				position,
 			);
 		}
+
 		return items;
 	}
+
 	async resolveCompletionItem(
 		item: CompletionItem,
 		token: CancellationToken,
@@ -415,11 +443,13 @@ class NotebookCellSpecificKernelCompletionProvider
 			// We always set a range in the completion item we send.
 			return item;
 		}
+
 		const info = this.previousCompletionItems.get(item);
 
 		if (!info) {
 			return item;
 		}
+
 		const { documentRef, position, originalCompletionItem } = info;
 
 		const document = documentRef.deref();
@@ -427,6 +457,7 @@ class NotebookCellSpecificKernelCompletionProvider
 		if (!document) {
 			return item;
 		}
+
 		return resolveCompletionItem(
 			item,
 			originalCompletionItem,
@@ -447,6 +478,7 @@ class NotebookCellSpecificKernelCompletionProvider
 		if (!this.kernel.session?.kernel) {
 			return;
 		}
+
 		if (!isPythonKernelConnection(this.kernel.kernelConnectionMetadata)) {
 			return raceCancellation(
 				token,
@@ -456,6 +488,7 @@ class NotebookCellSpecificKernelCompletionProvider
 				}),
 			);
 		}
+
 		return this.getPythonKernelCompletion(code, cursor_pos, token);
 	}
 
@@ -482,7 +515,9 @@ const lastTelemetryExceedingMaxTimeout = new WeakMap<
 	IKernel,
 	{
 		count: number;
+
 		measures: TelemetryMeasures<Telemetry.KernelCodeCompletion>;
+
 		properties: TelemetryProperties<Telemetry.KernelCodeCompletion>;
 	}
 >();
@@ -504,6 +539,7 @@ function sendCompletionTelemetry(
 			properties,
 		});
 	}
+
 	measures.timesExceededTimeout = timesExceededTimeout;
 
 	if (!lastSentCompletionTime) {
@@ -512,8 +548,11 @@ function sendCompletionTelemetry(
 			measures,
 			properties,
 		);
+
 		lastSentCompletionTime = new StopWatch();
+
 		lastSentCompletionTimes.set(kernel, new StopWatch());
+
 		lastTelemetryExceedingMaxTimeout.delete(kernel);
 	} else if (lastSentCompletionTime.elapsedTime > 60_000) {
 		sendTelemetryEvent(
@@ -521,7 +560,9 @@ function sendCompletionTelemetry(
 			measures,
 			properties,
 		);
+
 		lastSentCompletionTime.reset();
+
 		lastTelemetryExceedingMaxTimeout.delete(kernel);
 	}
 }
@@ -534,14 +575,18 @@ class KernelSpecificCompletionProvider
 		TextDocument,
 		NotebookCellSpecificKernelCompletionProvider
 	>();
+
 	private completionItemsSent = new WeakMap<
 		CompletionItem,
 		NotebookCellSpecificKernelCompletionProvider
 	>();
+
 	private completionProvider?: IDisposable;
+
 	private readonly monacoLanguage = getKernelLanguageAsMonacoLanguage(
 		this.kernel,
 	);
+
 	private allowStringFilterForPython: boolean;
 
 	constructor(
@@ -549,12 +594,15 @@ class KernelSpecificCompletionProvider
 		private readonly notebookEditorProvider: INotebookEditorProvider,
 	) {
 		super();
+
 		this.registerCompletionProvider();
+
 		this._register(
 			workspace.onDidChangeConfiguration((e) => {
 				if (e.affectsConfiguration("jupyter.enableKernelCompletions")) {
 					if (!isKernelCompletionEnabled(this.kernel.notebook.uri)) {
 						this.completionProvider?.dispose();
+
 						this.completionProvider = undefined;
 
 						return;
@@ -562,6 +610,7 @@ class KernelSpecificCompletionProvider
 						this.registerCompletionProvider();
 					}
 				}
+
 				if (
 					!e.affectsConfiguration(
 						"jupyter.completionTriggerCharacters",
@@ -572,10 +621,12 @@ class KernelSpecificCompletionProvider
 				) {
 					return;
 				}
+
 				this.registerCompletionProvider();
 			}),
 		);
 	}
+
 	private registerCompletionProvider() {
 		if (!isKernelCompletionEnabled(this.kernel.notebook.uri)) {
 			return;
@@ -594,10 +645,14 @@ class KernelSpecificCompletionProvider
 				this.kernel.kernelConnectionMetadata,
 			)} for language ${this.monacoLanguage}`,
 		);
+
 		this.allowStringFilterForPython =
 			triggerCharacters.includes("'") || triggerCharacters.includes('"');
+
 		this.completionProvider?.dispose();
+
 		this.completionProvider = undefined;
+
 		this.completionProvider = languages.registerCompletionItemProvider(
 			this.monacoLanguage,
 			this,
@@ -606,10 +661,13 @@ class KernelSpecificCompletionProvider
 
 		return;
 	}
+
 	override dispose() {
 		super.dispose();
+
 		this.completionProvider?.dispose();
 	}
+
 	async provideCompletionItems(
 		document: TextDocument,
 		position: Position,
@@ -623,19 +681,23 @@ class KernelSpecificCompletionProvider
 		) {
 			return [];
 		}
+
 		let provider = this.cellCompletionProviders.get(document);
 
 		if (!provider) {
 			const kernelId = await getTelemetrySafeHashedString(
 				this.kernel.kernelConnectionMetadata.id,
 			);
+
 			provider = new NotebookCellSpecificKernelCompletionProvider(
 				kernelId,
 				this.kernel,
 				this.monacoLanguage,
 			);
+
 			this.cellCompletionProviders.set(document, provider);
 		}
+
 		provider.allowStringFilterForPython = this.allowStringFilterForPython;
 
 		return provider
@@ -648,6 +710,7 @@ class KernelSpecificCompletionProvider
 				return items;
 			});
 	}
+
 	async resolveCompletionItem(
 		item: CompletionItem,
 		token: CancellationToken,
@@ -673,11 +736,14 @@ export class KernelCompletionProvider
 
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		super();
+
 		disposables.push(this);
 	}
+
 	public activate(): void {
 		const kernelProvider =
 			ServiceContainer.instance.get<IKernelProvider>(IKernelProvider);
+
 		this._register(
 			kernelProvider.onDidStartKernel(async (e) => {
 				if (
@@ -704,9 +770,11 @@ export class KernelCompletionProvider
 				if (!language) {
 					return;
 				}
+
 				if (this.kernelCompletionProviders.has(e)) {
 					return;
 				}
+
 				const notebookProvider =
 					ServiceContainer.instance.get<INotebookEditorProvider>(
 						INotebookEditorProvider,
@@ -715,9 +783,11 @@ export class KernelCompletionProvider
 				const completionProvider = this._register(
 					new KernelSpecificCompletionProvider(e, notebookProvider),
 				);
+
 				this.kernelCompletionProviders.set(e, completionProvider);
 			}),
 		);
+
 		this._register(
 			kernelProvider.onDidDisposeKernel((e) => {
 				this.kernelCompletionProviders.get(e)?.dispose();
@@ -776,6 +846,7 @@ function getCompletionTriggerCharacter(kernel: IKernel) {
 	if (!triggerCharacters || typeof triggerCharacters !== "object") {
 		return [];
 	}
+
 	const kernelLanguage = getKernelLanguage(kernel);
 
 	const monacoLanguage = getKernelLanguageAsMonacoLanguage(kernel);
@@ -790,12 +861,14 @@ function getCompletionTriggerCharacter(kernel: IKernel) {
 			? triggerCharacters[kernelLanguage]
 			: [];
 	}
+
 	if (monacoLanguage in triggerCharacters) {
 		// Possible a user still has some old setting.
 		return Array.isArray(triggerCharacters[monacoLanguage])
 			? triggerCharacters[monacoLanguage]
 			: [];
 	}
+
 	return [];
 }
 
@@ -939,12 +1012,14 @@ export function generatePythonCompletions(
 				newLabel = label.substring(
 					label.indexOf(word) + (wordDot ? word.length : 0),
 				);
+
 				newText = label.substring(label.indexOf(word) + word.length);
 
 				const changeInCharacters =
 					(typeof r.label === "string"
 						? r.label.length
 						: r.label.label.length) - newText.length;
+
 				newRange =
 					r.range && "start" in r.range
 						? new Range(
@@ -963,12 +1038,14 @@ export function generatePythonCompletions(
 				newLabel = label.substring(
 					label.indexOf(word) + (wordDot ? word.length : 0),
 				);
+
 				newText = label.substring(label.indexOf(word) + word.length);
 
 				const changeInCharacters =
 					(typeof r.label === "string"
 						? r.label.length
 						: r.label.label.length) - newText.length;
+
 				newRange =
 					r.range && "start" in r.range
 						? new Range(
@@ -981,12 +1058,18 @@ export function generatePythonCompletions(
 							)
 						: r.range;
 			}
+
 			if (newLabel && newText && newRange) {
 				r.label = newLabel;
+
 				itemText = newText;
+
 				r.insertText = newText;
+
 				r.filterText = wordDot ? `.${newText}` : newText;
+
 				r.range = newRange;
+
 				r.sortText = generateSortString(i);
 			}
 			// If inside a string and ending with '/', then add a command to force a suggestion right after

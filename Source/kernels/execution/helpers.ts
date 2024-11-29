@@ -71,6 +71,7 @@ function isEmptyVendoredMimeType(outputItem: NotebookCellOutputItem) {
 			return new TextDecoder().decode(outputItem.data).length === 0;
 		} catch {}
 	}
+
 	return false;
 }
 function sortOutputItemsBasedOnDisplayOrder(
@@ -81,6 +82,7 @@ function sortOutputItemsBasedOnDisplayOrder(
 			if (value.endsWith(".*")) {
 				value = value.substr(0, value.indexOf(".*"));
 			}
+
 			return compareWith.startsWith(value);
 		};
 
@@ -97,10 +99,13 @@ function sortOutputItemsBasedOnDisplayOrder(
 		if (isEmptyVendoredMimeType(outputItemA)) {
 			indexOfMimeTypeA = -1;
 		}
+
 		if (isEmptyVendoredMimeType(outputItemB)) {
 			indexOfMimeTypeB = -1;
 		}
+
 		indexOfMimeTypeA = indexOfMimeTypeA == -1 ? 100 : indexOfMimeTypeA;
+
 		indexOfMimeTypeB = indexOfMimeTypeB == -1 ? 100 : indexOfMimeTypeB;
 
 		return indexOfMimeTypeA - indexOfMimeTypeB;
@@ -115,15 +120,19 @@ export class NotebookCellStateTracker {
 		NotebookCell,
 		{
 			stateTransition: string[];
+
 			state: NotebookCellExecutionState;
+
 			start: StopWatch;
 		}
 	>();
+
 	public static getCellState(
 		cell: NotebookCell,
 	): NotebookCellExecutionState | undefined {
 		return NotebookCellStateTracker.cellStates.get(cell)?.state;
 	}
+
 	public static getCellStatus(cell: NotebookCell): string {
 		return (
 			(
@@ -132,6 +141,7 @@ export class NotebookCellStateTracker {
 			).join(", ") || ""
 		);
 	}
+
 	public static setCellState(
 		cell: NotebookCell,
 		state: NotebookCellExecutionState,
@@ -143,9 +153,11 @@ export class NotebookCellStateTracker {
 		const previousState =
 			NotebookCellStateTracker.cellStates.get(cell)?.stateTransition ||
 			[];
+
 		previousState.push(
 			`${state} ${previousState.length === 0 ? "@ start" : `After ${stopWatch.elapsedTime}ms`}`,
 		);
+
 		NotebookCellStateTracker.cellStates.set(cell, {
 			stateTransition: previousState,
 			state,
@@ -159,6 +171,7 @@ export function traceCellMessage(
 	message: string | (() => string),
 ) {
 	let messageToLog = typeof message === "string" ? () => message : message;
+
 	logger.ci(
 		() =>
 			`Cell Index:${cell.index}, of document ${uriPath.basename(
@@ -223,6 +236,7 @@ export function cellOutputToVSCCellOutput(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		result = translateDisplayDataOutput(output as any);
 	}
+
 	return result;
 }
 
@@ -242,12 +256,14 @@ function getOutputMetadata(output: nbformat.IOutput): CellOutputMetadata {
 		case "execute_result":
 		case "update_display_data": {
 			metadata.executionCount = output.execution_count;
+
 			metadata.metadata = output.metadata
 				? JSON.parse(JSON.stringify(output.metadata))
 				: {};
 
 			break;
 		}
+
 		default:
 			break;
 	}
@@ -257,6 +273,7 @@ function getOutputMetadata(output: nbformat.IOutput): CellOutputMetadata {
 
 export function getNotebookCellOutputMetadata(output: {
 	items: NotebookCellOutputItem[];
+
 	metadata?: { [key: string]: unknown };
 }): CellOutputMetadata | undefined {
 	return output.metadata as CellOutputMetadata | undefined;
@@ -295,6 +312,7 @@ function translateDisplayDataOutput(
 	if ("image/svg+xml" in output.data || "image/png" in output.data) {
 		metadata.__displayOpenPlotIcon = true;
 	}
+
 	const items: NotebookCellOutputItem[] = [];
 
 	if (output.data) {
@@ -366,6 +384,7 @@ interface CellOutputMetadata {
 	 * Original cell output type
 	 */
 	outputType: nbformat.OutputType | string;
+
 	executionCount?: nbformat.IExecuteResult["ExecutionCount"];
 	/**
 	 * Whether the original Mime data is JSON or not.
@@ -393,6 +412,7 @@ export function translateCellErrorOutput(
 			traceback: [],
 		};
 	}
+
 	const originalError: undefined | nbformat.IError =
 		output.metadata?.originalError;
 
@@ -424,6 +444,7 @@ function convertOutputMimeToJupyterOutput(mime: string, value: Uint8Array) {
 	if (!value) {
 		return "";
 	}
+
 	try {
 		if (mime === CellOutputMimeTypes.error) {
 			const stringValue = textDecoder.decode(value);
@@ -480,6 +501,7 @@ function convertJupyterOutputToBuffer(
 	if (!value) {
 		return NotebookCellOutputItem.text("", mime);
 	}
+
 	try {
 		if (
 			(mime.startsWith("text/") || textMimeTypes.includes(mime)) &&
@@ -521,6 +543,7 @@ function convertJupyterOutputToBuffer(
 }
 function convertStreamOutput(output: NotebookCellOutput): JupyterOutput {
 	const outputs: string[] = [];
+
 	output.items
 		.filter(
 			(opit) =>
@@ -537,6 +560,7 @@ function convertStreamOutput(output: NotebookCellOutput): JupyterOutput {
 				outputs[outputs.length - 1] =
 					`${outputs[outputs.length - 1]}${lines.shift()!}`;
 			}
+
 			for (const line of lines) {
 				outputs.push(line);
 			}
@@ -575,11 +599,13 @@ export function translateCellDisplayOutput(
 
 			break;
 		}
+
 		case "stream": {
 			result = convertStreamOutput(output);
 
 			break;
 		}
+
 		case "display_data": {
 			result = {
 				output_type: "display_data",
@@ -597,6 +623,7 @@ export function translateCellDisplayOutput(
 
 			break;
 		}
+
 		case "execute_result": {
 			result = {
 				output_type: "execute_result",
@@ -618,6 +645,7 @@ export function translateCellDisplayOutput(
 
 			break;
 		}
+
 		case "update_display_data": {
 			result = {
 				output_type: "update_display_data",
@@ -635,6 +663,7 @@ export function translateCellDisplayOutput(
 
 			break;
 		}
+
 		default: {
 			const isError =
 				output.items.length === 1 &&
@@ -658,6 +687,7 @@ export function translateCellDisplayOutput(
 			const outputType: nbformat.OutputType =
 				<nbformat.OutputType>customMetadata?.outputType ||
 				(isStream ? "stream" : "display_data");
+
 			sendTelemetryEvent(
 				Telemetry.VSCNotebookCellTranslationFailed,
 				undefined,
@@ -681,15 +711,18 @@ export function translateCellDisplayOutput(
 					metadata: {},
 					output_type: "display_data",
 				};
+
 				unknownOutput = displayData;
 			} else {
 				unknownOutput = {
 					output_type: outputType,
 				};
 			}
+
 			if (customMetadata?.metadata) {
 				unknownOutput.metadata = customMetadata.metadata;
 			}
+
 			if (output.items.length > 0) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				unknownOutput.data = output.items.reduce((prev: any, curr) => {
@@ -701,6 +734,7 @@ export function translateCellDisplayOutput(
 					return prev;
 				}, {});
 			}
+
 			result = unknownOutput;
 
 			break;
@@ -712,6 +746,7 @@ export function translateCellDisplayOutput(
 	if (result && customMetadata && customMetadata.transient) {
 		result.transient = customMetadata.transient;
 	}
+
 	return result;
 }
 
@@ -814,8 +849,10 @@ export async function updateNotebookMetadataWithSelectedKernel(
 		default:
 			break;
 	}
+
 	if (metadata.language_info.name !== language && language) {
 		metadata.language_info.name = language;
+
 		changed = true;
 	}
 
@@ -828,6 +865,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			metadata.language_info = JSON.parse(
 				JSON.stringify(kernelInfo.language_info),
 			);
+
 			changed = true;
 		}
 	} else {
@@ -852,6 +890,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			metadata.language_info.version !== version
 		) {
 			metadata.language_info.version = version;
+
 			changed = true;
 		} else if (
 			!interpreter &&
@@ -862,6 +901,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			// for this case clear out old invalid language_info entries as they are related to the previous execution
 			// However we should clear previous language info only if language is python, else just leave it as is.
 			metadata.language_info = undefined;
+
 			changed = true;
 		}
 	}
@@ -906,12 +946,14 @@ export async function updateNotebookMetadataWithSelectedKernel(
 					: undefined;
 
 				name = originalNameFromOriginalSpecFile || kernelSpec.name;
+
 				displayName =
 					kernelSpec.metadata?.vscode?.originalDisplayName ||
 					displayName;
 
 				break;
 			}
+
 			default:
 				name = kernelSpec.name;
 
@@ -923,6 +965,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			metadata.kernelspec?.display_name !== displayName
 		) {
 			changed = true;
+
 			metadata.kernelspec = {
 				name,
 				language: PYTHON_LANGUAGE,
@@ -932,6 +975,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			if ("vscode" in metadata) {
 				delete metadata["vscode"];
 			}
+
 			if ("interpreter" in metadata) {
 				delete metadata["interpreter"];
 			}
@@ -962,7 +1006,9 @@ export async function updateNotebookMetadataWithSelectedKernel(
 		if (kernelSpecOrModel.language) {
 			metadata.kernelspec.language = kernelSpecOrModel.language;
 		}
+
 		kernelId = kernelSpecOrModel.id;
+
 		changed = true;
 	} else if (kernelSpecOrModel && metadata.kernelspec) {
 		const originalNameFromOriginalSpecFile = kernelSpecOrModel.metadata
@@ -996,11 +1042,16 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			kernelId !== kernelSpecOrModel.id
 		) {
 			changed = true;
+
 			metadata.kernelspec.name = name;
+
 			metadata.kernelspec.display_name = displayName;
+
 			metadata.kernelspec.language = language;
+
 			kernelId = kernelSpecOrModel.id;
 		}
+
 		try {
 			// This is set only for when we select an interpreter.
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1009,6 +1060,7 @@ export async function updateNotebookMetadataWithSelectedKernel(
 			// Noop.
 		}
 	}
+
 	return { changed, kernelId };
 }
 
@@ -1029,8 +1081,10 @@ export async function endCellAndDisplayErrorsInCell(
 				cell.executionSummary?.timing?.endTime,
 			);
 		}
+
 		return;
 	}
+
 	if (!CellExecutionCreator.get(cell)) {
 		// If we don't have an execution, then we can end the execution that we end up creating
 		isCancelled = true;
@@ -1043,10 +1097,13 @@ export async function endCellAndDisplayErrorsInCell(
 
 	if (!execution.started) {
 		execution.start(cell.executionSummary?.timing?.startTime);
+
 		execution.executionOrder =
 			cell.executionSummary?.executionOrder || originalExecutionOrder;
 	}
+
 	await execution.appendOutput(output);
+
 	execution.end(
 		isCancelled ? undefined : false,
 		cell.executionSummary?.timing?.endTime,

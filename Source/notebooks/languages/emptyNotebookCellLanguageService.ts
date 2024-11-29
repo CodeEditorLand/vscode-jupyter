@@ -36,6 +36,7 @@ export class EmptyNotebookCellLanguageService
 		@inject(IControllerRegistration)
 		private readonly controllerRegistration: IControllerRegistration,
 	) {}
+
 	public activate() {
 		this.controllerRegistration.onControllerSelected(
 			this.onDidChangeNotebookController,
@@ -46,6 +47,7 @@ export class EmptyNotebookCellLanguageService
 
 	private async onDidChangeNotebookController(event: {
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}) {
 		const document = event.notebook;
@@ -55,6 +57,7 @@ export class EmptyNotebookCellLanguageService
 		if (!isJupyterNotebook(document)) {
 			return;
 		}
+
 		const editor = window.visibleNotebookEditors.find(
 			(item) => item.notebook === document,
 		);
@@ -92,17 +95,20 @@ export class EmptyNotebookCellLanguageService
 
 				break;
 			}
+
 			case "startUsingRemoteKernelSpec":
 			case "startUsingLocalKernelSpec": {
 				language = connection.kernelSpec.language;
 
 				break;
 			}
+
 			case "startUsingPythonInterpreter": {
 				language = PYTHON_LANGUAGE;
 
 				break;
 			}
+
 			default: {
 				logger.error(
 					`Unsupported kernel kind encountered ${kernelKind}`,
@@ -111,16 +117,19 @@ export class EmptyNotebookCellLanguageService
 				return;
 			}
 		}
+
 		if (!language) {
 			return;
 		}
 
 		const monacoLanguage = translateKernelLanguageToMonaco(language);
+
 		chainWithPendingUpdates(editor.notebook, async () => {
 			await emptyCodeCells.map(async (cell) => {
 				if (monacoLanguage.toLowerCase() === cell.document.languageId) {
 					return;
 				}
+
 				return languages
 					.setTextDocumentLanguage(cell.document, monacoLanguage)
 					.then(noop, noop);

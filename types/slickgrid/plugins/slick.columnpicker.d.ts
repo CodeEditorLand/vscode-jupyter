@@ -17,6 +17,7 @@ declare namespace Slick {
 			);
 
 			getAllColumns(): Slick.Column<T>[];
+
 			destroy(): void;
 		}
 	}

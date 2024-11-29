@@ -26,6 +26,7 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 		IKernel,
 		NotebookCell | undefined
 	>();
+
 	private kernelsStartedSuccessfully = new WeakSet<IKernel>();
 
 	constructor(
@@ -33,20 +34,24 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 		private disposableRegistry: IDisposableRegistry,
 		@inject(IKernelProvider) private kernelProvider: IKernelProvider,
 	) {}
+
 	public activate(): void {
 		this.kernelProvider.onKernelStatusChanged(
 			this.onKernelStatusChanged,
 			this,
 			this.disposableRegistry,
 		);
+
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
 			this.disposableRegistry,
 		);
 	}
+
 	private onDidStartKernel(kernel: IKernel) {
 		this.kernelsStartedSuccessfully.add(kernel);
+
 		notebookCellExecutions.onDidChangeNotebookCellExecutionState((e) => {
 			if (
 				e.cell.notebook === kernel.notebook &&
@@ -62,12 +67,14 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 		kernel,
 	}: {
 		status: KernelMessage.Status;
+
 		kernel: IKernel;
 	}) {
 		// We're only interested in kernels that started successfully.
 		if (!this.kernelsStartedSuccessfully.has(kernel)) {
 			return;
 		}
+
 		if (kernel.disposed || kernel.disposing || !kernel.session) {
 			return;
 		}
@@ -109,13 +116,16 @@ export class KernelCrashMonitor implements IExtensionSyncActivationService {
 			await this.endCellAndDisplayErrorsInCell(kernel);
 		}
 	}
+
 	private async endCellAndDisplayErrorsInCell(kernel: IKernel) {
 		const lastExecutedCell = this.lastExecutedCellPerKernel.get(kernel);
+
 		sendKernelTelemetryEvent(kernel.resourceUri, Telemetry.KernelCrash);
 
 		if (!lastExecutedCell) {
 			return;
 		}
+
 		return endCellAndDisplayErrorsInCell(
 			lastExecutedCell,
 			kernel.controller,

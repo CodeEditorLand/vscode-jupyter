@@ -10,6 +10,7 @@ export class VariableViewMessageListener
 	implements IWebviewViewMessageListener
 {
 	private disposedCallback: () => void;
+
 	private callback: (message: string, payload: any) => void;
 
 	constructor(

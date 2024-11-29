@@ -19,6 +19,7 @@ export class NbExtensionsPathProvider implements INbExtensionsPathProvider {
 			case "startUsingRemoteKernelSpec": {
 				return Uri.parse(kernel.kernelConnectionMetadata.baseUrl);
 			}
+
 			case "startUsingPythonInterpreter": {
 				const sysPrefix = await getSysPrefix(
 					kernel.kernelConnectionMetadata.interpreter,
@@ -27,8 +28,10 @@ export class NbExtensionsPathProvider implements INbExtensionsPathProvider {
 				if (!sysPrefix) {
 					return;
 				}
+
 				return Uri.joinPath(Uri.file(sysPrefix), "share", "jupyter");
 			}
+
 			default: {
 				// We haven't come across scenarios with non-python kernels that use widgets
 				// & have custom widget sources. If we do, we can implement that as we come across them.

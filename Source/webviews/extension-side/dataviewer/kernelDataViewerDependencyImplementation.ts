@@ -37,6 +37,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 		if (!kernel.session?.kernel) {
 			throw new SessionDisposedError();
 		}
+
 		const outputs = await executeSilently(kernel.session.kernel, command);
 
 		const error = outputs.find((item) => item.output_type === "error");
@@ -44,6 +45,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 		if (error) {
 			logger.warn(DataScience.failedToGetVersionOfPandas, error.message);
 		}
+
 		return outputs.map((item) => item.text?.toString());
 	}
 
@@ -62,6 +64,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 
 			return "";
 		}
+
 		const items = splitLines(output.trim());
 
 		const indexOfSeparator = items.indexOf(separator);
@@ -74,6 +77,7 @@ export class KernelDataViewerDependencyImplementation extends BaseDataViewerDepe
 
 		try {
 			await this.execute(command, kernel);
+
 			sendTelemetryEvent(Telemetry.UserInstalledPandas);
 		} catch (e) {
 			sendTelemetryEvent(

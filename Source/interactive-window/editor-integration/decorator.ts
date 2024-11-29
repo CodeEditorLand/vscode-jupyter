@@ -23,13 +23,17 @@ import { ICellRangeCache } from "./types";
 @injectable()
 export class Decorator implements IExtensionSyncActivationService, IDisposable {
 	private currentCellTop: vscode.TextEditorDecorationType | undefined;
+
 	private currentCellBottom: vscode.TextEditorDecorationType | undefined;
+
 	private currentCellTopUnfocused:
 		| vscode.TextEditorDecorationType
 		| undefined;
+
 	private currentCellBottomUnfocused:
 		| vscode.TextEditorDecorationType
 		| undefined;
+
 	private timer: NodeJS.Timer | undefined | number;
 
 	constructor(
@@ -41,27 +45,33 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 		@inject(ICellRangeCache) private cellRangeCache: ICellRangeCache,
 	) {
 		this.computeDecorations();
+
 		disposables.push(this);
+
 		disposables.push(
 			this.configuration
 				.getSettings(undefined)
 				.onDidChange(this.settingsChanged, this),
 		);
+
 		disposables.push(
 			vscode.window.onDidChangeActiveTextEditor(this.changedEditor, this),
 		);
+
 		disposables.push(
 			vscode.window.onDidChangeTextEditorSelection(
 				this.changedSelection,
 				this,
 			),
 		);
+
 		disposables.push(
 			vscode.workspace.onDidChangeTextDocument(
 				this.changedDocument,
 				this,
 			),
 		);
+
 		this.settingsChanged();
 	}
 
@@ -107,6 +117,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			clearTimeout(this.timer as any);
 		}
+
 		this.timer = setTimeout(() => this.update(editor), 100);
 	}
 
@@ -119,6 +130,7 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 			borderStyle: "solid",
 			isWholeLine: true,
 		});
+
 		this.currentCellBottomUnfocused = window.createTextEditorDecorationType(
 			{
 				borderColor: new vscode.ThemeColor(
@@ -129,12 +141,14 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 				isWholeLine: true,
 			},
 		);
+
 		this.currentCellTop = window.createTextEditorDecorationType({
 			borderColor: new vscode.ThemeColor("interactive.activeCodeBorder"),
 			borderWidth: "2px 0px 0px 0px",
 			borderStyle: "solid",
 			isWholeLine: true,
 		});
+
 		this.currentCellBottom = window.createTextEditorDecorationType({
 			borderColor: new vscode.ThemeColor("interactive.activeCodeBorder"),
 			borderWidth: "0px 0px 1px 0px",
@@ -227,25 +241,31 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 
 					if (window.activeTextEditor === editor) {
 						editor.setDecorations(this.currentCellTop, rangeTop);
+
 						editor.setDecorations(
 							this.currentCellBottom,
 							rangeBottom,
 						);
+
 						editor.setDecorations(
 							this.currentCellTopUnfocused,
 							nonCurrentCells,
 						);
+
 						editor.setDecorations(
 							this.currentCellBottomUnfocused,
 							[],
 						);
 					} else {
 						editor.setDecorations(this.currentCellTop, []);
+
 						editor.setDecorations(this.currentCellBottom, []);
+
 						editor.setDecorations(this.currentCellTopUnfocused, [
 							...nonCurrentCells,
 							...rangeTop,
 						]);
+
 						editor.setDecorations(
 							this.currentCellBottomUnfocused,
 							rangeBottom,
@@ -253,8 +273,11 @@ export class Decorator implements IExtensionSyncActivationService, IDisposable {
 					}
 				} else {
 					editor.setDecorations(this.currentCellTop, []);
+
 					editor.setDecorations(this.currentCellBottom, []);
+
 					editor.setDecorations(this.currentCellTopUnfocused, []);
+
 					editor.setDecorations(this.currentCellBottomUnfocused, []);
 				}
 			}

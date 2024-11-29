@@ -16,6 +16,7 @@ export class KernelStartupTelemetry implements IExtensionSyncActivationService {
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
 	) {}
+
 	activate(): void {
 		this.kernelProvider.onDidCreateKernel(
 			(kernel) => this.addOnStartHooks(kernel),

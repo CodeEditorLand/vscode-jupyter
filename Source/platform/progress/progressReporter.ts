@@ -24,10 +24,14 @@ import { IProgressReporter, Progress, ReportableAction } from "./types";
 export class ProgressReporter implements IProgressReporter {
 	private progressReporters: VSCProgress<{
 		message?: string | undefined;
+
 		increment?: number | undefined;
 	}>[] = [];
+
 	private actionPhases = new Map<ReportableAction, "started" | "completed">();
+
 	private currentActions: ReportableAction[] = [];
+
 	private get currentAction(): ReportableAction | undefined {
 		return this.currentActions.length === 0
 			? undefined
@@ -65,12 +69,16 @@ export class ProgressReporter implements IProgressReporter {
 					if (cancelToken.isCancellationRequested) {
 						cancellation.cancel();
 					}
+
 					deferred.resolve();
 				});
+
 				cancellation.token.onCancellationRequested(() => {
 					deferred.resolve();
 				});
+
 				this.progressReporters.push(progress);
+
 				await deferred.promise;
 			})
 			.then(noop, noop);
@@ -95,6 +103,7 @@ export class ProgressReporter implements IProgressReporter {
 		if (this.progressReporters.length === 0) {
 			return;
 		}
+
 		this.actionPhases.set(progress.action, progress.phase);
 
 		if (progress.phase === "started") {
@@ -112,6 +121,7 @@ export class ProgressReporter implements IProgressReporter {
 			this.actionPhases.get(this.currentAction) !== "started"
 		) {
 			this.actionPhases.delete(this.currentAction);
+
 			this.currentActions.pop();
 		}
 
@@ -122,6 +132,7 @@ export class ProgressReporter implements IProgressReporter {
 		if (!this.currentAction || this.progressReporters.length === 0) {
 			return;
 		}
+
 		const message = getUserMessageForAction(this.currentAction);
 
 		if (message) {

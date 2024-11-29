@@ -24,12 +24,16 @@ function formConnectionString(config: IKernelConnection, channel: string) {
 	if (!port) {
 		throw new Error(`Port not found for channel "${channel}"`);
 	}
+
 	return `${config.transport}://${config.ip}${portDelimiter}${port}`;
 }
 interface IChannels {
 	shell: Dealer;
+
 	control: Dealer;
+
 	stdin: Dealer;
+
 	iopub: Subscriber;
 }
 
@@ -40,31 +44,48 @@ interface IChannels {
  */
 export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	public onopen: (event: { target: any }) => void = noop;
+
 	public onerror: (event: {
 		error: any;
+
 		message: string;
+
 		type: string;
+
 		target: any;
 	}) => void = noop;
+
 	public onclose: (event: {
 		wasClean: boolean;
+
 		code: number;
+
 		reason: string;
+
 		target: any;
 	}) => void = noop;
+
 	public onmessage: (event: {
 		data: WebSocketWS.Data;
+
 		type: string;
+
 		target: any;
 	}) => void = noop;
+
 	private receiveHooks: ((data: WebSocketWS.Data) => Promise<void>)[] = [];
+
 	private sendHooks: ((
 		data: any,
 		cb?: (err?: Error) => void,
 	) => Promise<void>)[] = [];
+
 	private msgChain: Promise<any> = Promise.resolve();
+
 	private sendChain: Promise<any> = Promise.resolve();
+
 	private channels: IChannels;
+
 	private closed = false;
 	/**
 	 * Used to configure the protocol for WebSocket messages in Jupyter Lab.
@@ -99,9 +120,13 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 				logger.error(`Error during socket shutdown`, ex);
 			}
 		};
+
 		closer(this.channels.control);
+
 		closer(this.channels.iopub);
+
 		closer(this.channels.shell);
+
 		closer(this.channels.stdin);
 	}
 
@@ -144,8 +169,10 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 			default:
 				break;
 		}
+
 		return true;
 	}
+
 	public send(data: any, _callback: any): void {
 		// This comes directly from the jupyter lab kernel. It should be a message already
 		this.sendMessage(data as KernelMessage.IMessage, false);
@@ -156,11 +183,13 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	): void {
 		this.receiveHooks.push(hook);
 	}
+
 	public removeReceiveHook(
 		hook: (data: WebSocketWS.Data) => Promise<void>,
 	): void {
 		this.receiveHooks = this.receiveHooks.filter((l) => l !== hook);
 	}
+
 	public addSendHook(
 		hook: (
 			data: any,
@@ -169,6 +198,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	): void {
 		this.sendHooks.push(hook);
 	}
+
 	public removeSendHook(
 		hook: (
 			data: any,
@@ -177,19 +207,23 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 	): void {
 		this.sendHooks = this.sendHooks.filter((p) => p !== hook);
 	}
+
 	private generateChannel<T extends Subscriber | Dealer>(
 		connection: IKernelConnection,
 		channel: Channel,
 		ctor: () => T,
 	): T {
 		const result = ctor();
+
 		result.connect(formConnectionString(connection, channel));
+
 		this.processSocketMessages(channel, result).catch((ex) =>
 			logger.error(`Failed to read messages from channel ${channel}`, ex),
 		);
 
 		return result;
 	}
+
 	private async processSocketMessages(
 		channel: Channel,
 		readable: Subscriber | Dealer,
@@ -313,6 +347,7 @@ export class RawSocket implements IWebSocketLike, IKernelSocket, IDisposable {
 		if (!this.closed) {
 			try {
 				ensureFields(message, channel);
+
 				this.onmessage({
 					data: message as any,
 					type: "message",
@@ -432,6 +467,7 @@ const IOPUB_CONTENT_FIELDS = {
  */
 function ensureFields(message: KernelMessage.IMessage, channel: Channel) {
 	const header = message.header as any;
+
 	HEADER_FIELDS.forEach((field) => {
 		if (typeof header[field] !== "string") {
 			header[field] = "";
@@ -441,12 +477,15 @@ function ensureFields(message: KernelMessage.IMessage, channel: Channel) {
 	if (typeof message.channel !== "string") {
 		message.channel = channel;
 	}
+
 	if (!message.content) {
 		message.content = {};
 	}
+
 	if (!message.metadata) {
 		message.metadata = {};
 	}
+
 	if (message.channel === "iopub") {
 		ensureIOPubContent(message);
 	}
@@ -456,6 +495,7 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 	if (message.channel !== "iopub") {
 		return;
 	}
+
 	const messageType = message.header
 		.msg_type as keyof typeof IOPUB_CONTENT_FIELDS;
 
@@ -465,6 +505,7 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 		if (fields === undefined) {
 			return;
 		}
+
 		const names = Object.keys(fields);
 
 		const content = message.content as Record<string, any>;
@@ -475,6 +516,7 @@ function ensureIOPubContent(message: KernelMessage.IMessage) {
 			if (!Array.isArray(args)) {
 				args = [args];
 			}
+
 			const fieldName = names[i];
 
 			if (

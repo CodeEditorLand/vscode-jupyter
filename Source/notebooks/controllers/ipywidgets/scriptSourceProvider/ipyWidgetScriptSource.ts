@@ -41,20 +41,27 @@ export class IPyWidgetScriptSource {
 	public get postMessage(): Event<{ message: string; payload: any }> {
 		return this.postEmitter.event;
 	}
+
 	private postEmitter = new EventEmitter<{
 		message: string;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		payload: any;
 	}>();
+
 	private kernel?: IKernel;
+
 	private jupyterLab?: typeof jupyterlabService;
+
 	private scriptProvider?: IPyWidgetScriptSourceProvider;
+
 	private allWidgetScriptsSent?: boolean;
+
 	private disposables: IDisposable[] = [];
 	/**
 	 * Whether the webview has access to the internet to download widget JS files from the CDN.
 	 */
 	private readonly isWebViewOnline = createDeferred<boolean>();
+
 	private readonly widgetSources = new Map<string, WidgetScriptSource>();
 	/**
 	 * Key value pair of widget modules along with the version that needs to be loaded.
@@ -63,7 +70,9 @@ export class IPyWidgetScriptSource {
 		string,
 		{ moduleVersion?: string; requestId?: string }
 	>();
+
 	private readonly uriConverter: ILocalResourceUriConverter;
+
 	private readonly uriTranslationRequests = new ResourceMap<Deferred<Uri>>();
 
 	constructor(
@@ -82,6 +91,7 @@ export class IPyWidgetScriptSource {
 						resource,
 						createDeferred<Uri>(),
 					);
+
 				this.postEmitter.fire({
 					message:
 						InteractiveWindowMessages.ConvertUriForUseInWebViewRequest,
@@ -93,7 +103,9 @@ export class IPyWidgetScriptSource {
 		);
 		// Don't leave dangling promises.
 		this.isWebViewOnline.promise.catch(noop);
+
 		disposables.push(this);
+
 		this.kernelProvider.onDidStartKernel(
 			(e) => {
 				if (e.notebook === this.document) {
@@ -127,9 +139,11 @@ export class IPyWidgetScriptSource {
 			}
 		} else if (message === IPyWidgetMessages.IPyWidgets_Ready) {
 			this.sendBaseUrl();
+
 			this.sendWidgetScriptSources().catch(noop);
 		} else if (message === IPyWidgetMessages.IPyWidgets_IsOnline) {
 			const isOnline = (payload as { isOnline: boolean }).isOnline;
+
 			this.isWebViewOnline.resolve(isOnline);
 		} else if (
 			message === IPyWidgetMessages.IPyWidgets_WidgetScriptSourceRequest
@@ -138,13 +152,16 @@ export class IPyWidgetScriptSource {
 				this.onRequestWidgetScript(
 					payload as {
 						moduleName: string;
+
 						moduleVersion: string;
+
 						requestId: string;
 					},
 				).catch(noop);
 			}
 		}
 	}
+
 	public initialize() {
 		if (!this.jupyterLab) {
 			// Lazy load jupyter lab for faster extension loading.
@@ -156,12 +173,15 @@ export class IPyWidgetScriptSource {
 		if (!this.kernel) {
 			this.kernel = this.kernelProvider.get(this.document);
 		}
+
 		if (!this.kernel?.session) {
 			return;
 		}
+
 		if (this.scriptProvider && !this.scriptProvider.isDisposed) {
 			return;
 		}
+
 		this.scriptProvider = new IPyWidgetScriptSourceProvider(
 			this.kernel,
 			this.uriConverter,
@@ -170,9 +190,13 @@ export class IPyWidgetScriptSource {
 			this.isWebViewOnline.promise,
 			this.cdnScriptProvider,
 		);
+
 		this.kernel.onDisposed(() => this.dispose());
+
 		this.handlePendingRequests();
+
 		this.sendBaseUrl();
+
 		logger.trace("IPyWidgetScriptSource.initialize");
 	}
 	/**
@@ -204,12 +228,14 @@ export class IPyWidgetScriptSource {
 		if (!this.scriptProvider) {
 			return;
 		}
+
 		if (this.allWidgetScriptsSent) {
 			return;
 		}
 		// Ensure we send all of the widget script sources found in the `<python env>/share/jupyter/nbextensions` folder.
 		try {
 			const sources = await this.scriptProvider.getWidgetScriptSources();
+
 			sources.forEach((widgetSource) => {
 				// If we have a widget source from CDN, never overwrite that.
 				if (
@@ -234,9 +260,12 @@ export class IPyWidgetScriptSource {
 			this.allWidgetScriptsSent = true;
 		}
 	}
+
 	private async onRequestWidgetScript(payload: {
 		moduleName: string;
+
 		moduleVersion: string;
+
 		requestId: string;
 	}) {
 		const { moduleName, moduleVersion, requestId } = payload;
@@ -244,6 +273,7 @@ export class IPyWidgetScriptSource {
 		logger.trace(
 			`${ConsoleForegroundColors.Green}Fetch Script for ${JSON.stringify(payload)}`,
 		);
+
 		await this.sendWidgetSource(moduleName, moduleVersion, requestId).catch(
 			(ex) =>
 				logger.error("Failed to send widget sources upon ready", ex),
@@ -280,6 +310,7 @@ export class IPyWidgetScriptSource {
 		if (!moduleName || moduleName.startsWith("@jupyter")) {
 			return;
 		}
+
 		if (!this.kernel || !this.scriptProvider) {
 			this.pendingModuleRequests.set(moduleName, {
 				moduleVersion,
@@ -295,6 +326,7 @@ export class IPyWidgetScriptSource {
 			logger.trace(
 				`${ConsoleForegroundColors.Green}Fetch Script for ${moduleName}`,
 			);
+
 			widgetSource = await this.scriptProvider.getWidgetScriptSource(
 				moduleName,
 				moduleVersion,
@@ -308,6 +340,7 @@ export class IPyWidgetScriptSource {
 			}
 		} catch (ex) {
 			logger.error("Failed to get widget source due to an error", ex);
+
 			sendTelemetryEvent(Telemetry.HashedIPyWidgetScriptDiscoveryError);
 		} finally {
 			logger.trace(
@@ -321,6 +354,7 @@ export class IPyWidgetScriptSource {
 			});
 		}
 	}
+
 	private handlePendingRequests() {
 		const pendingModuleNames = Array.from(
 			this.pendingModuleRequests.keys(),
@@ -332,7 +366,9 @@ export class IPyWidgetScriptSource {
 			if (moduleName) {
 				const { moduleVersion, requestId } =
 					this.pendingModuleRequests.get(moduleName)!;
+
 				this.pendingModuleRequests.delete(moduleName);
+
 				this.sendWidgetSource(
 					moduleName,
 					moduleVersion,

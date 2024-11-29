@@ -20,9 +20,11 @@ export function splitLines(
 	if (splitOptions && splitOptions.trim) {
 		lines = lines.map((line) => line.trim());
 	}
+
 	if (splitOptions && splitOptions.removeEmptyEntries) {
 		lines = lines.filter((line) => line.length > 0);
 	}
+
 	return lines;
 }
 
@@ -35,6 +37,7 @@ export function toCommandArgument(value: string): string {
 	if (!value) {
 		return value;
 	}
+
 	return value.indexOf(" ") >= 0 &&
 		!value.startsWith('"') &&
 		!value.endsWith('"')
@@ -50,6 +53,7 @@ export function fileToCommandArgument(value: string): string {
 	if (!value) {
 		return value;
 	}
+
 	return toCommandArgument(value).replace(/\\/g, "/");
 }
 
@@ -61,6 +65,7 @@ export function trimQuotes(value: string): string {
 	if (!value) {
 		return value;
 	}
+
 	return value.replace(/(^['"])|(['"]$)/g, "");
 }
 
@@ -85,6 +90,7 @@ export function createPublicAPIProxy<T extends object>(
 			if (membersToHideList.includes(p)) {
 				return false;
 			}
+
 			return Reflect.has(target, p);
 		},
 		ownKeys(target) {
@@ -96,6 +102,7 @@ export function createPublicAPIProxy<T extends object>(
 			if (membersToHideList.includes(p)) {
 				return undefined;
 			}
+
 			return Reflect.getOwnPropertyDescriptor(target, p);
 		},
 	});
@@ -105,6 +112,7 @@ export function stripCodicons(text: string | undefined) {
 	if (!text) {
 		return text || "";
 	}
+
 	return text.replace(/\$\([a-z0-9\-]+?\)/gi, "").trim();
 }
 
@@ -123,9 +131,11 @@ export function dedentCode(code: string) {
 				if (line.startsWith(leadingSpaces)) {
 					return line.replace(leadingSpaces, "");
 				}
+
 				return line;
 			})
 			.join("\n");
 	}
+
 	return code;
 }

@@ -48,6 +48,7 @@ export class ConsoleLogger implements ILogger {
 			formatMessage("debug", `${this.prefix || ""} ${message}`, ...data),
 		);
 	}
+
 	public trace(message: string, ...data: Arguments): void {
 		console.trace(
 			formatMessage("trace", `${this.prefix || ""} ${message}`, ...data),

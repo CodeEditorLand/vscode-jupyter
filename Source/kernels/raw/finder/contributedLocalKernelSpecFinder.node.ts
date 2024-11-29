@@ -40,27 +40,37 @@ export class ContributedLocalKernelSpecFinder
 		IExtensionSyncActivationService
 {
 	private _status: "discovering" | "idle" = "idle";
+
 	public get status() {
 		return this._status;
 	}
+
 	private set status(value: typeof this._status) {
 		if (this._status === value) {
 			return;
 		}
+
 		this._status = value;
+
 		this._onDidChangeStatus.fire();
 	}
+
 	private readonly _onDidChangeStatus = new EventEmitter<void>();
+
 	public readonly onDidChangeStatus = this._onDidChangeStatus.event;
+
 	private readonly promiseMonitor = new PromiseMonitor();
 
 	kind = ContributedKernelFinderKind.LocalKernelSpec;
+
 	id: string = ContributedKernelFinderKind.LocalKernelSpec;
+
 	displayName: string = DataScience.localKernelSpecs;
 
 	private _onDidChangeKernels = new EventEmitter<{
 		removed?: { id: string }[];
 	}>();
+
 	onDidChangeKernels = this._onDidChangeKernels.event;
 
 	private wasPythonInstalledWhenFetchingControllers = false;
@@ -81,10 +91,15 @@ export class ContributedLocalKernelSpecFinder
 		private readonly interpreters: IInterpreterService,
 	) {
 		super();
+
 		this.disposables.push(this);
+
 		kernelFinder.registerKernelFinder(this);
+
 		this.disposables.push(this._onDidChangeStatus);
+
 		this.disposables.push(this._onDidChangeKernels);
+
 		this.disposables.push(this.promiseMonitor);
 	}
 
@@ -115,35 +130,44 @@ export class ContributedLocalKernelSpecFinder
 			if (latestStatus.includes("discovering")) {
 				if (!combinedProgress) {
 					combinedProgress = createDeferred<void>();
+
 					this.promiseMonitor.push(combinedProgress.promise);
 				}
 			} else {
 				combinedProgress?.resolve();
+
 				combinedProgress = undefined;
 			}
 		};
+
 		updateCombinedStatus();
+
 		this.nonPythonKernelFinder.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
 			this.disposables,
 		);
+
 		this.pythonKernelFinder.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
 			this.disposables,
 		);
+
 		this.interpreters.onDidChangeStatus(
 			updateCombinedStatus,
 			this,
 			this.disposables,
 		);
+
 		this.updateCache();
+
 		this.interpreters.onDidChangeInterpreters(
 			this.updateCache,
 			this,
 			this.disposables,
 		);
+
 		extensions.onDidChange(
 			() => {
 				// If we just installed the Python extension and we fetched the controllers, then fetch it again.
@@ -157,16 +181,19 @@ export class ContributedLocalKernelSpecFinder
 			this,
 			this.disposables,
 		);
+
 		this.nonPythonKernelFinder.onDidChangeKernels(
 			this.updateCache,
 			this,
 			this.disposables,
 		);
+
 		this.pythonKernelFinder.onDidChangeKernels(
 			this.updateCache,
 			this,
 			this.disposables,
 		);
+
 		this.wasPythonInstalledWhenFetchingControllers =
 			this.extensionChecker.isPythonExtensionInstalled;
 	}
@@ -174,10 +201,14 @@ export class ContributedLocalKernelSpecFinder
 	public async refresh() {
 		const promise = (async () => {
 			await this.nonPythonKernelFinder.refresh();
+
 			await this.pythonKernelFinder.refresh();
+
 			this.updateCache();
 		})();
+
 		this.promiseMonitor.push(promise);
+
 		await promise;
 	}
 
@@ -193,6 +224,7 @@ export class ContributedLocalKernelSpecFinder
 					if (this.extensionChecker.isPythonExtensionInstalled) {
 						return item.kernelSpec.language !== PYTHON_LANGUAGE;
 					}
+
 					return true;
 				},
 			);
@@ -201,14 +233,17 @@ export class ContributedLocalKernelSpecFinder
 				this.pythonKernelFinder.kernels.filter((item) =>
 					isUserRegisteredKernelSpecConnection(item),
 				) as LocalKernelConnectionMetadata[];
+
 			kernels = kernels
 				.concat(kernelSpecs)
 				.concat(kernelSpecsFromPythonKernelFinder);
+
 			this.writeToCache(kernels);
 		} catch (ex) {
 			logger.error("Exception Saving loaded kernels", ex);
 		}
 	}
+
 	public get kernels(): LocalKernelConnectionMetadata[] {
 		const loadedKernelSpecFiles = new Set<string>();
 
@@ -227,9 +262,11 @@ export class ContributedLocalKernelSpecFinder
 					"registeredByNewVersionOfExtForCustomKernelSpec"
 			) {
 				loadedKernelSpecFiles.add(connection.kernelSpec.specFile);
+
 				kernels.push(connection);
 			}
 		});
+
 		this.cache.forEach((connection) => {
 			if (
 				connection.kernelSpec.specFile &&
@@ -237,17 +274,21 @@ export class ContributedLocalKernelSpecFinder
 			) {
 				return;
 			}
+
 			kernels.push(connection);
 		});
 
 		return kernels;
 	}
+
 	private writeToCache(values: LocalKernelConnectionMetadata[]) {
 		const uniqueIds = new Set<string>();
+
 		values = values.filter((item) => {
 			if (uniqueIds.has(item.id)) {
 				return false;
 			}
+
 			uniqueIds.add(item.id);
 
 			return true;

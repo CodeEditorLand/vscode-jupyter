@@ -30,20 +30,27 @@ import { WebviewViewProvider } from "./webviews/webviewViewProvider";
 
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<FileSystem>(FileSystem, FileSystem);
+
 	serviceManager.addBinding(FileSystem, IFileSystemNode);
+
 	serviceManager.addBinding(FileSystem, IFileSystem);
+
 	serviceManager.addSingleton<IWorkspaceService>(
 		IWorkspaceService,
 		WorkspaceService,
 	);
+
 	serviceManager.addSingleton<IConfigurationService>(
 		IConfigurationService,
 		ConfigurationService,
 	);
 
 	registerApiTypes(serviceManager);
+
 	registerCommonTypes(serviceManager);
+
 	registerTerminalTypes(serviceManager);
+
 	registerInterpreterTypes(serviceManager);
 
 	// Root platform types
@@ -56,10 +63,12 @@ export function registerTypes(serviceManager: IServiceManager) {
 		ProgressReporter,
 		ProgressReporter,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		KernelProgressReporter,
 	);
+
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
 		OutputCommandListener,
@@ -69,6 +78,7 @@ export function registerTypes(serviceManager: IServiceManager) {
 		IWebviewViewProvider,
 		WebviewViewProvider,
 	);
+
 	serviceManager.add<IWebviewPanelProvider>(
 		IWebviewPanelProvider,
 		WebviewPanelProvider,

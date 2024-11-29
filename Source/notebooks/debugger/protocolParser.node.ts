@@ -15,7 +15,9 @@ type Listener = (...args: any[]) => void;
 
 export interface IProtocolParser extends Disposable {
 	connect(stream: Readable): void;
+
 	once(event: string | symbol, listener: Function): this;
+
 	on(event: string | symbol, listener: Function): this;
 }
 
@@ -33,37 +35,49 @@ export interface IProtocolParser extends Disposable {
  */
 export class ProtocolParser implements IProtocolParser {
 	private rawData = Buffer.concat([]);
+
 	private contentLength: number = -1;
+
 	private disposed: boolean = false;
+
 	private stream?: Readable;
+
 	private events: EventEmitter;
 
 	constructor() {
 		this.events = new EventEmitter();
 	}
+
 	public dispose() {
 		if (this.stream) {
 			this.stream.removeListener("data", this.dataCallbackHandler);
+
 			this.stream = undefined;
 		}
 	}
+
 	public connect(stream: Readable) {
 		this.stream = stream;
+
 		stream.addListener("data", this.dataCallbackHandler);
 	}
+
 	public on(event: string | symbol, listener: Listener): this {
 		this.events.on(event, listener);
 
 		return this;
 	}
+
 	public once(event: string | symbol, listener: Listener): this {
 		this.events.once(event, listener);
 
 		return this;
 	}
+
 	private dataCallbackHandler = (data: string | Buffer) => {
 		this.handleData(data as Buffer);
 	};
+
 	private dispatch(body: string): void {
 		const message = JSON.parse(body) as DebugProtocol.ProtocolMessage;
 
@@ -74,8 +88,10 @@ export class ProtocolParser implements IProtocolParser {
 				if (typeof event.event === "string") {
 					this.events.emit(`${message.type}_${event.event}`, event);
 				}
+
 				break;
 			}
+
 			case "request": {
 				const request = message as DebugProtocol.Request;
 
@@ -85,8 +101,10 @@ export class ProtocolParser implements IProtocolParser {
 						request,
 					);
 				}
+
 				break;
 			}
+
 			case "response": {
 				const reponse = message as DebugProtocol.Response;
 
@@ -96,8 +114,10 @@ export class ProtocolParser implements IProtocolParser {
 						reponse,
 					);
 				}
+
 				break;
 			}
+
 			default: {
 				this.events.emit(`${message.type}`, message);
 			}
@@ -105,10 +125,12 @@ export class ProtocolParser implements IProtocolParser {
 
 		this.events.emit("data", message);
 	}
+
 	private handleData(data: Buffer): void {
 		if (this.disposed) {
 			return;
 		}
+
 		this.rawData = Buffer.concat([this.rawData, data]);
 
 		while (true) {
@@ -119,7 +141,9 @@ export class ProtocolParser implements IProtocolParser {
 						0,
 						this.contentLength,
 					);
+
 					this.rawData = this.rawData.slice(this.contentLength);
+
 					this.contentLength = -1;
 
 					if (message.length > 0) {
@@ -143,6 +167,7 @@ export class ProtocolParser implements IProtocolParser {
 							this.contentLength = +pair[1];
 						}
 					}
+
 					this.rawData = this.rawData.slice(
 						idx + PROTOCOL_START_INDENTIFIER.length,
 					);
@@ -150,6 +175,7 @@ export class ProtocolParser implements IProtocolParser {
 					continue;
 				}
 			}
+
 			break;
 		}
 	}

@@ -30,10 +30,12 @@ import { getParentHeaderMsgId } from "./cellExecutionMessageHandler";
 const MAX_TRACKING_TIME = 1_000 * 60 * 60 * 24 * 2; // 2 days
 type CellExecutionInfo = Omit<ResumeCellExecutionInformation, "token"> & {
 	kernelId: string;
+
 	cellIndex: number;
 };
 type StorageExecutionInfo = CellExecutionInfo & {
 	serverId: string;
+
 	sessionId: string;
 };
 
@@ -49,9 +51,13 @@ export class LastCellExecutionTracker
 		NotebookCell,
 		Partial<CellExecutionInfo>
 	>();
+
 	private chainedPromises = Promise.resolve();
+
 	private readonly storageFile: Uri;
+
 	private ensureStorageExistsPromise?: Promise<Uri>;
+
 	private staleState?: Record<string, StorageExecutionInfo>;
 
 	constructor(
@@ -62,18 +68,23 @@ export class LastCellExecutionTracker
 		@inject(IFileSystem) private readonly fs: IFileSystem,
 	) {
 		super();
+
 		context.globalStorageUri;
+
 		disposables.push(this);
+
 		this.storageFile = Uri.joinPath(
 			this.context.globalStorageUri,
 			"lastExecutedRemoteCell.json",
 		);
 	}
+
 	public activate(): void {
 		this._register(
 			this.serverStorage.onDidRemove(this.onDidRemoveServers, this),
 		);
 	}
+
 	public async getLastTrackedCellExecution(
 		notebook: NotebookDocument,
 		kernel: IKernel,
@@ -81,12 +92,14 @@ export class LastCellExecutionTracker
 		if (notebook.isUntitled) {
 			return;
 		}
+
 		if (
 			!isRemoteConnection(kernel.kernelConnectionMetadata) ||
 			!kernel.session?.id
 		) {
 			return;
 		}
+
 		if (this.staleState && this.staleState[notebook.uri.toString()]) {
 			return this.staleState[notebook.uri.toString()];
 		}
@@ -97,17 +110,21 @@ export class LastCellExecutionTracker
 
 		try {
 			const data = await this.fs.readFile(file);
+
 			store = JSON.parse(data.toString()) as Record<
 				string,
 				StorageExecutionInfo
 			>;
+
 			this.staleState = store;
 		} catch {
 			// Ignore, as this indicates the file does not exist.
 			return;
 		}
+
 		return store[notebook.uri.toString()];
 	}
+
 	public trackCellExecution(cell: NotebookCell, kernel: IKernel) {
 		// For now we are only interested in remote kernel connections.
 		if (
@@ -116,6 +133,7 @@ export class LastCellExecutionTracker
 		) {
 			return;
 		}
+
 		this.executedCells.delete(cell);
 
 		const disposables: IDisposable[] = [];
@@ -134,6 +152,7 @@ export class LastCellExecutionTracker
 					request.metadata.cellId === cell.document.uri.toString()
 				) {
 					const msg_id = request.header.msg_id;
+
 					this.executedCells.set(cell, {
 						msg_id,
 						kernelId: kernel.session?.kernel?.id || "",
@@ -160,8 +179,10 @@ export class LastCellExecutionTracker
 						} catch {
 							// Ignore.
 						}
+
 						this.executedCells.set(cell, info);
 					}
+
 					if (
 						"execution_count" in ioPub.content &&
 						typeof ioPub.content.execution_count === "number" &&
@@ -172,8 +193,11 @@ export class LastCellExecutionTracker
 							ioPub.content.execution_count
 						) {
 							info.executionCount = ioPub.content.execution_count;
+
 							this.executedCells.set(cell, info);
+
 							this.trackLastExecution(cell, kernel, info);
+
 							dispose(disposables);
 						}
 					}
@@ -187,7 +211,9 @@ export class LastCellExecutionTracker
 			if (!session) {
 				return;
 			}
+
 			session.anyMessage.connect(anyMessageHandler);
+
 			disposables.push({
 				dispose: () =>
 					swallowExceptions(() =>
@@ -195,16 +221,19 @@ export class LastCellExecutionTracker
 					),
 			});
 		};
+
 		kernel.onStarted(() => hookUpSession(), disposables);
 
 		if (kernel.session) {
 			hookUpSession();
 		}
 	}
+
 	public deleteTrackedCellExecution(cell: NotebookCell, kernel: IKernel) {
 		if (cell.notebook.isUntitled) {
 			return;
 		}
+
 		if (
 			!isRemoteConnection(kernel.kernelConnectionMetadata) ||
 			!kernel.session?.id
@@ -219,6 +248,7 @@ export class LastCellExecutionTracker
 				const data = await this.getStorageFile().then(() =>
 					this.fs.readFile(this.storageFile),
 				);
+
 				store = JSON.parse(data.toString()) as Record<
 					string,
 					StorageExecutionInfo
@@ -227,11 +257,14 @@ export class LastCellExecutionTracker
 				// Ignore, as this indicates the file does not exist.
 				return;
 			}
+
 			const notebookId = cell.notebook.uri.toString();
 
 			if (store[notebookId].cellIndex === cell.index) {
 				delete store[notebookId];
+
 				this.staleState = store;
+
 				await this.fs.writeFile(
 					this.storageFile,
 					JSON.stringify(store),
@@ -239,6 +272,7 @@ export class LastCellExecutionTracker
 			}
 		});
 	}
+
 	private getStorageFile() {
 		this.ensureStorageExistsPromise =
 			this.ensureStorageExistsPromise ||
@@ -250,6 +284,7 @@ export class LastCellExecutionTracker
 
 		return this.ensureStorageExistsPromise;
 	}
+
 	private trackLastExecution(
 		cell: NotebookCell,
 		kernel: IKernel,
@@ -258,12 +293,14 @@ export class LastCellExecutionTracker
 		if (!info.executionCount || !info.msg_id || !info.startTime) {
 			return;
 		}
+
 		if (
 			!isRemoteConnection(kernel.kernelConnectionMetadata) ||
 			!kernel.session?.id
 		) {
 			return;
 		}
+
 		const storageInfo: StorageExecutionInfo = {
 			cellIndex: cell.index,
 			executionCount: info.executionCount,
@@ -275,6 +312,7 @@ export class LastCellExecutionTracker
 			sessionId: kernel.session?.id,
 			startTime: info.startTime,
 		};
+
 		this.chainedPromises = this.chainedPromises.finally(async () => {
 			let store: Record<string, StorageExecutionInfo> = {};
 
@@ -282,6 +320,7 @@ export class LastCellExecutionTracker
 				const data = await this.getStorageFile().then(() =>
 					this.fs.readFile(this.storageFile),
 				);
+
 				store = JSON.parse(data.toString()) as Record<
 					string,
 					StorageExecutionInfo
@@ -289,17 +328,24 @@ export class LastCellExecutionTracker
 			} catch {
 				// Ignore, as this indicates the file does not exist.
 			}
+
 			const notebookId = cell.notebook.uri.toString();
+
 			store[notebookId] = storageInfo;
+
 			this.removeOldItems(store);
+
 			this.staleState = store;
+
 			await this.fs.writeFile(this.storageFile, JSON.stringify(store));
 		});
 	}
+
 	private onDidRemoveServers(removedServers: JupyterServerProviderHandle[]) {
 		if (removedServers.length === 0) {
 			return;
 		}
+
 		this.chainedPromises = this.chainedPromises.finally(async () => {
 			await this.getStorageFile();
 
@@ -307,6 +353,7 @@ export class LastCellExecutionTracker
 
 			try {
 				const data = await this.fs.readFile(this.storageFile);
+
 				store = JSON.parse(data.toString()) as Record<
 					string,
 					StorageExecutionInfo
@@ -314,11 +361,13 @@ export class LastCellExecutionTracker
 			} catch {
 				// Ignore, as this indicates the file does not exist.
 			}
+
 			let removed = false;
 
 			const removedServerIds = new Set(
 				removedServers.map((s) => generateIdFromRemoteProvider(s)),
 			);
+
 			Object.keys(store).forEach((key) => {
 				const data = store[key];
 
@@ -327,13 +376,16 @@ export class LastCellExecutionTracker
 					Date.now() - data.startTime > MAX_TRACKING_TIME // If its too old, then remove it.
 				) {
 					delete store[key];
+
 					removed = true;
 				}
 			});
 
 			if (removed) {
 				this.removeOldItems(store);
+
 				this.staleState = store;
+
 				await this.fs.writeFile(
 					this.storageFile,
 					JSON.stringify(store),
@@ -341,6 +393,7 @@ export class LastCellExecutionTracker
 			}
 		});
 	}
+
 	private removeOldItems(store: Record<string, StorageExecutionInfo>) {
 		Object.keys(store).forEach((key) => {
 			const data = store[key];

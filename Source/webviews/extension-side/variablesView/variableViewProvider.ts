@@ -45,6 +45,7 @@ export class VariableViewProvider implements IVariableViewProvider {
 
 		return this.activeVariableViewPromise.promise;
 	}
+
 	private activeVariableViewPromise?: Deferred<VariableView>;
 
 	private variableView?: VariableView;

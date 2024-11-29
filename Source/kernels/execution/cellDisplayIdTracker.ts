@@ -28,16 +28,22 @@ export class CellOutputDisplayIdTracker
 			string,
 			{
 				outputContainer: NotebookCellOutput;
+
 				outputItems: NotebookCellOutputItem[];
+
 				cell: NotebookCell;
 			}
 		>
 	>();
+
 	private static cellToDisplayIdMapping = new WeakMap<NotebookCell, string>();
+
 	private static disposables: IDisposable[] = [];
+
 	public static dispose() {
 		dispose(CellOutputDisplayIdTracker.disposables);
 	}
+
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push({
 			dispose: () => {
@@ -45,6 +51,7 @@ export class CellOutputDisplayIdTracker
 			},
 		});
 	}
+
 	public activate(): void {
 		workspace.onDidChangeNotebookDocument((e) => {
 			if (!isJupyterNotebook(e.notebook)) {
@@ -64,6 +71,7 @@ export class CellOutputDisplayIdTracker
 						CellOutputDisplayIdTracker.cellToDisplayIdMapping.delete(
 							change.cell,
 						);
+
 						CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument
 							.get(e.notebook)
 							?.delete(displayIdToDelete);
@@ -92,20 +100,25 @@ export class CellOutputDisplayIdTracker
 				string,
 				{
 					outputContainer: NotebookCellOutput;
+
 					outputItems: NotebookCellOutputItem[];
+
 					cell: NotebookCell;
 				}
 			>();
+
 			CellOutputDisplayIdTracker.displayIdCellOutputMappingPerDocument.set(
 				cell.notebook,
 				mapOfDisplayIdToOutput,
 			);
 		}
+
 		mapOfDisplayIdToOutput.set(displayId, {
 			outputContainer,
 			cell,
 			outputItems,
 		});
+
 		CellOutputDisplayIdTracker.cellToDisplayIdMapping.set(cell, displayId);
 	}
 	/**
@@ -117,7 +130,9 @@ export class CellOutputDisplayIdTracker
 	):
 		| {
 				cell: NotebookCell;
+
 				outputContainer: NotebookCellOutput;
+
 				outputItems: NotebookCellOutputItem[];
 		  }
 		| undefined {

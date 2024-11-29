@@ -71,6 +71,7 @@ type IGdprEventData = {
 	owner: Owner;
 	// We extract the jsdoc comments from IEvenNamePropertyMapping found in in telemetry.ts.
 	// comment: string;
+
 	expiration?: string;
 	/**
 	 * We extract the jsdoc comments from IEvenNamePropertyMapping found in in telemetry.ts.
@@ -190,6 +191,7 @@ type GdprEventDefinition<P> = P extends never | undefined
 					measures:
 						| EventPropertiesData<PickType<P, number | undefined>>
 						| EventPropertiesData<PickType<P, number>>;
+
 					properties: EventPropertiesData<
 						ExcludeType<ExcludeType<P, number>, number | undefined>
 					>;
@@ -216,6 +218,7 @@ type PropertyMeasureDefinition<P> = P extends never
 					measures:
 						| EventPropertiesData<PickType<P, number | undefined>>
 						| EventPropertiesData<PickType<P, number>>;
+
 					properties: EventPropertiesData<
 						ExcludeType<ExcludeType<P, number>, number | undefined>
 					>;
@@ -1292,6 +1295,7 @@ export class IEventNamePropertyMapping {
 	 */
 	[Telemetry.CheckPasswordJupyterHub]: TelemetryEventInfo<{
 		failed: boolean;
+
 		info:
 			| "passwordNotRequired"
 			| "emptyResponseFromLogin"
@@ -1869,6 +1873,7 @@ export class IEventNamePropertyMapping {
 	 */
 	[Telemetry.FailedShowDataViewer]: TelemetryEventInfo<{
 		reason: string;
+
 		fromVariableView: boolean;
 	}> = {
 		owner: "amunger",
@@ -2249,9 +2254,13 @@ export class IEventNamePropertyMapping {
 	};
 	[Telemetry.CreateInteractiveWindow]: TelemetryEventInfo<{
 		hasKernel: boolean;
+
 		hasOwner: boolean;
+
 		mode: string;
+
 		restored: boolean;
+
 		windowCount: number;
 	}> = {
 		owner: "amunger",

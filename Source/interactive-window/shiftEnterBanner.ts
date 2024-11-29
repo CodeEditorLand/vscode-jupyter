@@ -29,9 +29,12 @@ enum InteractiveShiftEnterLabelIndex {
 @injectable()
 export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 	private initialized?: boolean;
+
 	private disabledInCurrentSession: boolean = false;
+
 	private bannerMessage: string =
 		localize.InteractiveShiftEnterBanner.bannerMessage;
+
 	private bannerLabels: string[] = [
 		localize.Common.bannerLabelYes,
 		localize.Common.bannerLabelNo,
@@ -50,6 +53,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 		if (this.initialized) {
 			return;
 		}
+
 		this.initialized = true;
 
 		if (!this.isEnabled()) {
@@ -88,11 +92,13 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 
 				break;
 			}
+
 			case this.bannerLabels[InteractiveShiftEnterLabelIndex.No]: {
 				await this.disableInteractiveShiftEnter();
 
 				break;
 			}
+
 			default: {
 				// Disable for the current session.
 				this.disabledInCurrentSession = true;
@@ -118,6 +124,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 			undefined,
 			ConfigurationTarget.Global,
 		);
+
 		await this.disableBanner();
 	}
 
@@ -129,6 +136,7 @@ export class InteractiveShiftEnterBanner implements IJupyterExtensionBanner {
 			undefined,
 			ConfigurationTarget.Global,
 		);
+
 		await this.disableBanner();
 	}
 

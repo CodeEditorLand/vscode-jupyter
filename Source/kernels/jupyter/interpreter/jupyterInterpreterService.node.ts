@@ -30,11 +30,15 @@ import { JupyterInterpreterStateStore } from "./jupyterInterpreterStateStore";
 @injectable()
 export class JupyterInterpreterService {
 	private _selectedInterpreter?: PythonEnvironment;
+
 	private _onDidChangeInterpreter = new EventEmitter<PythonEnvironment>();
+
 	private getInitialInterpreterPromise:
 		| Promise<PythonEnvironment | undefined>
 		| undefined;
+
 	private getInitialInterpreterPromiseFailed?: boolean;
+
 	public get onDidChangeInterpreter(): Event<PythonEnvironment> {
 		return this._onDidChangeInterpreter.event;
 	}
@@ -54,6 +58,7 @@ export class JupyterInterpreterService {
 			() => {
 				if (this.getInitialInterpreterPromiseFailed) {
 					this.getInitialInterpreterPromise = undefined;
+
 					this.getInitialInterpreterPromiseFailed = false;
 				}
 			},
@@ -92,8 +97,10 @@ export class JupyterInterpreterService {
 				if (result) {
 					this.changeSelectedInterpreterProperty(result);
 				}
+
 				return result;
 			});
+
 			this.getInitialInterpreterPromise.catch(
 				() => (this.getInitialInterpreterPromiseFailed = true),
 			);
@@ -130,6 +137,7 @@ export class JupyterInterpreterService {
 
 				return interpreter;
 			}
+
 			case JupyterInterpreterDependencyResponse.cancel:
 				return;
 
@@ -200,6 +208,7 @@ export class JupyterInterpreterService {
 				await this.setAsSelectedInterpreter(interpreter);
 			}
 		}
+
 		return response;
 	}
 
@@ -211,12 +220,15 @@ export class JupyterInterpreterService {
 		// Make sure that our initial set has happened before we allow a set so that
 		// calculation of the initial interpreter doesn't clobber the existing one
 		await this.setInitialInterpreter();
+
 		this.changeSelectedInterpreterProperty(interpreter);
 	}
 
 	private changeSelectedInterpreterProperty(interpreter: PythonEnvironment) {
 		this._selectedInterpreter = interpreter;
+
 		this._onDidChangeInterpreter.fire(interpreter);
+
 		this.interpreterSelectionState.updateSelectedPythonPath(
 			interpreter.uri,
 		);
@@ -250,6 +262,7 @@ export class JupyterInterpreterService {
 			// For any errors we are ok with just returning undefined for an invalid interpreter
 			noop();
 		}
+
 		return undefined;
 	}
 

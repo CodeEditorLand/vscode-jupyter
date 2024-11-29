@@ -11,7 +11,9 @@ import {
 // This class listens to messages that come from the local Data Explorer window
 export class DataViewerMessageListener implements IWebviewPanelMessageListener {
 	private disposedCallback: () => void;
+
 	private callback: (message: string, payload: any) => void;
+
 	private viewChanged: (panel: IWebviewPanel) => void;
 
 	constructor(

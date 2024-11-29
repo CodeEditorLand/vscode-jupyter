@@ -53,26 +53,32 @@ export function registerTypes(
 		IExtensionSyncActivationService,
 		GlobalActivation,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		WorkspaceActivation,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ExtensionRecommendationService,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ActiveEditorContextService,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ImportTracker,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		EagerlyActivateJupyterUriProviders,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		JupyterServerSelectorCommand,
@@ -80,7 +86,9 @@ export function registerTypes(
 
 	// Import/Export
 	serviceManager.add<INotebookExporter>(INotebookExporter, JupyterExporter);
+
 	serviceManager.add<INotebookImporter>(INotebookImporter, JupyterImporter);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ExportCommandRegistry,
@@ -95,6 +103,7 @@ export function registerTypes(
 		ISurveyBanner,
 		DataScienceSurveyBanner,
 	);
+
 	serviceManager.addBinding(ISurveyBanner, IExtensionSyncActivationService);
 	// Activation Manager
 	serviceManager.add<IExtensionActivationManager>(
@@ -107,6 +116,7 @@ export function registerTypes(
 		IExportedKernelServiceFactory,
 		JupyterKernelServiceFactory,
 	);
+
 	serviceManager.addSingleton<ApiAccessService>(
 		ApiAccessService,
 		ApiAccessService,
@@ -129,6 +139,7 @@ export function registerTypes(
 		IExtensionSyncActivationService,
 		UserJupyterServerUrlProvider,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ExposeUsedAzMLServerHandles,
@@ -144,16 +155,19 @@ export function registerTypes(
 		IJupyterVariablesProvider,
 		JupyterVariablesProvider,
 	);
+
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		KernelVariables,
 		Identifiers.KERNEL_VARIABLES,
 	);
+
 	serviceManager.addSingleton<IKernelVariableRequester>(
 		IKernelVariableRequester,
 		PythonVariablesRequester,
 		Identifiers.PYTHON_VARIABLES_REQUESTER,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		PreWarmActivatedJupyterEnvironmentVariables,

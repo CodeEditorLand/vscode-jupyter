@@ -10,6 +10,7 @@ export function formatErrorForLogging(error: Error | string): string {
 		if (error.message) {
 			message = `Error Message: ${error.message}`;
 		}
+
 		if (error.name && error.message.indexOf(error.name) === -1) {
 			message += `, (${error.name})`;
 		}
@@ -20,6 +21,7 @@ export function formatErrorForLogging(error: Error | string): string {
 			if (innerException.message) {
 				message += `, Inner Error Message: ${innerException.message}`;
 			}
+
 			if (
 				innerException.name &&
 				innerException.message.indexOf(innerException.name) === -1
@@ -28,5 +30,6 @@ export function formatErrorForLogging(error: Error | string): string {
 			}
 		}
 	}
+
 	return message;
 }

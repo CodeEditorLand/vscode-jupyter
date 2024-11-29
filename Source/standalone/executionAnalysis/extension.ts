@@ -25,6 +25,7 @@ export async function activate(
 	}
 
 	const symbolsManager = new SymbolsTracker(referencesProvider);
+
 	context.subscriptions.push(symbolsManager);
 
 	context.subscriptions.push(
@@ -38,6 +39,7 @@ export async function activate(
 				}
 
 				const { notebook, cell: currentCell } = matched;
+
 				await symbolsManager.selectSuccessorCells(
 					notebook,
 					currentCell,
@@ -57,6 +59,7 @@ export async function activate(
 				}
 
 				const { notebook, cell: currentCell } = matched;
+
 				await symbolsManager.runPrecedentCells(notebook, currentCell);
 			},
 		),
@@ -73,6 +76,7 @@ export async function activate(
 				}
 
 				const { notebook, cell: currentCell } = matched;
+
 				await symbolsManager.runSuccessorCells(notebook, currentCell);
 			},
 		),
@@ -89,6 +93,7 @@ export async function activate(
 				}
 
 				const { notebook, cell: currentCell } = matched;
+
 				await symbolsManager.selectPrecedentCells(
 					notebook,
 					currentCell,

@@ -12,10 +12,12 @@ export function registerTypes(serviceManager: IServiceManager) {
 		IExtensionSyncActivationService,
 		NotebookCellBangInstallDiagnosticsProvider,
 	);
+
 	serviceManager.addSingleton<KernelCompletionProvider>(
 		KernelCompletionProvider,
 		KernelCompletionProvider,
 	);
+
 	serviceManager.addBinding(
 		KernelCompletionProvider,
 		IExtensionSyncActivationService,
@@ -25,6 +27,7 @@ export function registerTypes(serviceManager: IServiceManager) {
 		NotebookPythonPathService,
 		NotebookPythonPathService,
 	);
+
 	serviceManager.addBinding(
 		NotebookPythonPathService,
 		IExtensionSyncActivationService,

@@ -30,11 +30,17 @@ import { buildSourceMap } from "./helper";
 export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 	private configs: WeakMap<NotebookDocument, DebugConfiguration> =
 		new WeakMap<NotebookDocument, DebugConfiguration>();
+
 	private readonly debuggerPackage: string;
+
 	private readonly enableDebuggerCode: string;
+
 	private readonly waitForDebugClientCode: string;
+
 	private readonly tracingEnableCode: string;
+
 	private readonly tracingDisableCode: string;
+
 	private debuggingActive: boolean = false;
 
 	constructor(
@@ -48,11 +54,16 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		@inject(IPlatformService) private platform: IPlatformService,
 	) {
 		this.debuggerPackage = "debugpy";
+
 		this.enableDebuggerCode = `import debugpy;debugpy.listen(('localhost', 0))`;
+
 		this.waitForDebugClientCode = `import debugpy;debugpy.wait_for_client()`;
+
 		this.tracingEnableCode = `from debugpy import trace_this_thread;trace_this_thread(True)`;
+
 		this.tracingDisableCode = `from debugpy import trace_this_thread;trace_this_thread(False)`;
 	}
+
 	public async attach(kernel: IKernel): Promise<void> {
 		if (!kernel.session) {
 			throw new Error("Notebook not initialized");
@@ -79,6 +90,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		if (!kernel.session) {
 			return;
 		}
+
 		const notebook = kernel.notebook;
 
 		const config = this.configs.get(notebook);
@@ -88,6 +100,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 
 			// Tell our debug service to shutdown if possible
 			this.debuggingActive = false;
+
 			this.debugService.stop();
 
 			// Disable tracing after we disconnect because we don't want to step through this
@@ -104,6 +117,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		// Make sure that we have an active debugging session at this point
 		if (this.debugService.activeDebugSession && this.debuggingActive) {
 			logger.ci(`Sending debug request for source map`);
+
 			await Promise.all(
 				hashes.map(async (fileHash) => {
 					if (this.debuggingActive) {
@@ -121,6 +135,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		if (!kernel.session?.kernel) {
 			return;
 		}
+
 		executeSilently(kernel.session.kernel, this.tracingEnableCode, {
 			traceErrors: true,
 			traceErrorsMessage:
@@ -133,6 +148,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		if (!kernel.session?.kernel) {
 			return;
 		}
+
 		executeSilently(kernel.session.kernel, this.tracingDisableCode, {
 			traceErrors: true,
 			traceErrorsMessage:
@@ -209,6 +225,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 				...extraConfig,
 			};
 		}
+
 		logger.info("enable debugger attach");
 
 		// Append any specific debugger paths that we have
@@ -223,7 +240,9 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 		};
 
 		const { host, port } = await this.connectToLocal(kernel);
+
 		result.host = host;
+
 		result.port = port;
 
 		if (result.port) {
@@ -234,9 +253,12 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 
 			const clear = () => {
 				this.configs.delete(key);
+
 				disposables.forEach((d) => d.dispose());
 			};
+
 			disposables.push(kernel.onDisposed(clear));
+
 			disposables.push(kernel.onRestarted(clear));
 		}
 
@@ -272,6 +294,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 			if (this.platform.isWindows) {
 				localPath = localPath.replace(/\\/g, "\\\\");
 			}
+
 			extraPaths.push(localPath);
 		}
 
@@ -312,6 +335,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 						},
 					)
 				: [];
+
 			logger.info(
 				`Appending paths: ${getPlainTextOrStreamOutput(result)}`,
 			);
@@ -371,6 +395,7 @@ export class InteractiveWindowDebugger implements IInteractiveWindowDebugger {
 				kernel.kernelConnectionMetadata,
 			);
 		}
+
 		throw new JupyterDebuggerNotInstalledError(
 			DataScience.jupyterDebuggerOutputParseError(this.debuggerPackage),
 			undefined,

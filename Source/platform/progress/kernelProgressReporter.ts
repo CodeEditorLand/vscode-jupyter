@@ -29,27 +29,34 @@ type ProgressReporter = IDisposable & { show?: () => void };
 @injectable()
 export class KernelProgressReporter implements IExtensionSyncActivationService {
 	private static disposables = new Set<IDisposable>();
+
 	private static instance?: KernelProgressReporter;
+
 	private kernelResourceProgressReporter = new Map<
 		string,
 		{
 			title: string;
+
 			pendingProgress: string[];
 			/**
 			 * List of messages displayed in the progress UI.
 			 */
 			progressList: string[];
+
 			reporter?: Progress<{ message?: string; increment?: number }>;
 		} & ProgressReporter
 	>();
 
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(this);
+
 		KernelProgressReporter.instance = this;
 	}
+
 	activate(): void {
 		//
 	}
+
 	public dispose() {
 		dispose(Array.from(KernelProgressReporter.disposables));
 	}
@@ -108,6 +115,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		if (!KernelProgressReporter.instance) {
 			return cb();
 		}
+
 		const progress = KernelProgressReporter.reportProgressInternal(
 			key,
 			title,
@@ -125,10 +133,12 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		resource: Resource,
 		action: ReportableAction,
 	): IDisposable;
+
 	public static reportProgress(
 		resource: Resource,
 		title: string,
 	): IDisposable;
+
 	public static reportProgress(
 		resource: Resource,
 		option: string | ReportableAction,
@@ -148,6 +158,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			progressMessage || "",
 		);
 	}
+
 	private static reportProgressInternal(
 		key: string,
 		title: string,
@@ -155,6 +166,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 		if (!KernelProgressReporter.instance) {
 			return new Disposable(noop);
 		}
+
 		let progressInfo =
 			KernelProgressReporter.instance.kernelResourceProgressReporter.get(
 				key,
@@ -167,6 +179,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 				progressList: [],
 				dispose: noop,
 			};
+
 			KernelProgressReporter.instance!.kernelResourceProgressReporter.set(
 				key,
 				progressInfo,
@@ -175,6 +188,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 
 		if (progressInfo.reporter) {
 			progressInfo.progressList.push(title);
+
 			progressInfo.reporter.report({ message: title });
 		} else {
 			// if we've display this message in the past, then no need to display it again.
@@ -187,6 +201,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 			if (progressInfo.progressList.includes(title)) {
 				return new Disposable(noop);
 			}
+
 			progressInfo.pendingProgress.push(title);
 		}
 		// Unwind the progress messages.
@@ -225,6 +240,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 						KernelProgressReporter.instance!.kernelResourceProgressReporter.delete(
 							key,
 						);
+
 						progressInfo.dispose();
 					}
 				} catch (ex) {
@@ -266,7 +282,9 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 				// Its already visible.
 				return;
 			}
+
 			shownOnce = true;
+
 			window
 				.withProgress(
 					{ location: ProgressLocation.Notification, title },
@@ -279,6 +297,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 						if (!info) {
 							return;
 						}
+
 						info.reporter = progress;
 						// If we have any messages, then report them.
 						while (info.pendingProgress.length > 0) {
@@ -288,9 +307,11 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 								info.progressList.push(message);
 							} else if (message !== title && message) {
 								info.progressList.push(message);
+
 								progress.report({ message });
 							}
 						}
+
 						await raceCancellation(token, deferred.promise);
 
 						if (
@@ -302,6 +323,7 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 								key,
 							);
 						}
+
 						KernelProgressReporter.disposables.delete(disposable);
 					},
 				)
@@ -316,7 +338,9 @@ export class KernelProgressReporter implements IExtensionSyncActivationService {
 				show,
 			},
 		);
+
 		KernelProgressReporter.disposables.add(disposable);
+
 		existingInfo.pendingProgress.push(title);
 
 		if (!initiallyHidden) {

@@ -16,13 +16,17 @@ import { IDebugService } from "../../platform/common/application/types";
 
 export interface ISourceMapMapping {
 	line: number;
+
 	endLine: number;
+
 	runtimeSource: { path: string };
+
 	runtimeLine: number;
 }
 
 export interface ISourceMapRequest {
 	source: { path: string };
+
 	pydevdSourceMaps: ISourceMapMapping[];
 }
 
@@ -64,6 +68,7 @@ export interface IJupyterDebugService extends IDebugService {
 export interface IKernelDebugAdapter extends DebugAdapter {
 	/* These methods make requests via roundtrip to the client */
 	stepIn(threadId: number): Thenable<DebugProtocol.StepInResponse["body"]>;
+
 	stackTrace(
 		args: DebugProtocol.StackTraceArguments,
 	): Thenable<DebugProtocol.StackTraceResponse["body"]>;
@@ -71,7 +76,9 @@ export interface IKernelDebugAdapter extends DebugAdapter {
 	setBreakpoints(
 		args: DebugProtocol.SetBreakpointsArguments,
 	): Thenable<DebugProtocol.SetBreakpointsResponse["body"]>;
+
 	debugInfo(): Thenable<IDebugInfoResponse>;
+
 	disconnect(): Promise<void>;
 
 	/**
@@ -80,6 +87,7 @@ export interface IKernelDebugAdapter extends DebugAdapter {
 	continueDirect(threadId: number): void;
 
 	onDidEndSession: Event<DebugSession>;
+
 	dumpAllCells(): Promise<void>;
 
 	getConfiguration(): IBaseNotebookDebugConfig;
@@ -87,6 +95,7 @@ export interface IKernelDebugAdapter extends DebugAdapter {
 
 export interface IDebuggingManager {
 	readonly onDoneDebugging: Event<void>;
+
 	isDebugging(notebook: NotebookDocument): boolean;
 
 	getDebugMode(notebook: NotebookDocument): KernelDebugMode | undefined;
@@ -108,7 +117,9 @@ export interface INotebookDebuggingManager extends IDebuggingManager {
 		cell: NotebookCell,
 		skipIpykernelCheck?: boolean,
 	): Promise<void>;
+
 	runByLineNext(cell: NotebookCell): void;
+
 	runByLineStop(cell: NotebookCell): void;
 }
 
@@ -158,6 +169,7 @@ export enum KernelDebugMode {
 
 interface IBaseNotebookDebugConfig extends DebugConfiguration {
 	__mode: KernelDebugMode;
+
 	__notebookUri: string;
 }
 
@@ -168,23 +180,28 @@ export type INotebookDebugConfig =
 
 export interface IRunByLineDebugConfig extends IBaseNotebookDebugConfig {
 	__mode: KernelDebugMode.RunByLine;
+
 	__cellIndex: number;
 }
 
 export interface ICellDebugConfig extends IBaseNotebookDebugConfig {
 	__mode: KernelDebugMode.Cell;
+
 	__cellIndex: number;
 }
 
 export interface IInteractiveWindowDebugConfig
 	extends IBaseNotebookDebugConfig {
 	__mode: KernelDebugMode.InteractiveWindow;
+
 	__cellIndex: number;
 }
 
 export interface IDebugLocation {
 	fileName: string;
+
 	lineNumber: number;
+
 	column: number;
 }
 export const IDebugLocationTrackerFactory = Symbol(

@@ -53,8 +53,11 @@ export class DebuggingManager
 	implements IExtensionSyncActivationService, INotebookDebuggingManager
 {
 	private runByLineCells: ContextKey<Uri[]>;
+
 	private runByLineDocuments: ContextKey<Uri[]>;
+
 	private debugDocuments: ContextKey<Uri[]>;
+
 	private notebookToRunByLineController = new Map<
 		NotebookDocument,
 		RunByLineController
@@ -71,15 +74,19 @@ export class DebuggingManager
 		@inject(IServiceContainer) serviceContainer: IServiceContainer,
 	) {
 		super(kernelProvider, controllerRegistration, serviceContainer);
+
 		this.runByLineCells = new ContextKey(EditorContexts.RunByLineCells);
+
 		this.runByLineDocuments = new ContextKey(
 			EditorContexts.RunByLineDocuments,
 		);
+
 		this.debugDocuments = new ContextKey(EditorContexts.DebugDocuments);
 	}
 
 	public override activate() {
 		super.activate();
+
 		this.disposables.push(
 			// factory for kernel debug adapters
 			debug.registerDebugAdapterDescriptorFactory(
@@ -102,8 +109,11 @@ export class DebuggingManager
 
 	protected override onDidStopDebugging(notebook: NotebookDocument) {
 		super.onDidStopDebugging(notebook);
+
 		this.notebookToRunByLineController.delete(notebook);
+
 		this.updateRunByLineContextKeys();
+
 		this.updateDebugContextKey();
 	}
 
@@ -111,23 +121,29 @@ export class DebuggingManager
 		const rblCellUris: Uri[] = [];
 
 		const rblDocumentUris: Uri[] = [];
+
 		this.notebookToRunByLineController.forEach((controller) => {
 			rblCellUris.push(controller.debugCell.document.uri);
+
 			rblDocumentUris.push(controller.debugCell.notebook.uri);
 		});
 
 		this.runByLineCells.set(rblCellUris).catch(noop);
+
 		this.runByLineDocuments.set(rblDocumentUris).catch(noop);
 	}
 
 	private updateDebugContextKey() {
 		const debugDocumentUris = new ResourceSet();
+
 		this.notebookToDebugAdapter.forEach((_, notebook) =>
 			debugDocumentUris.add(notebook.uri),
 		);
+
 		this.notebookInProgress.forEach((notebook) =>
 			debugDocumentUris.add(notebook.uri),
 		);
+
 		this.debugDocuments
 			.set(Array.from(debugDocumentUris.values()))
 			.catch(noop);
@@ -183,6 +199,7 @@ export class DebuggingManager
 			sendTelemetryEvent(DebuggingTelemetry.endedSession, undefined, {
 				reason: "withKeybinding",
 			});
+
 			controller.stop();
 		}
 	}
@@ -224,6 +241,7 @@ export class DebuggingManager
 		session: DebugSession,
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const config = session.configuration;
+
 		assertIsDebugConfig(config);
 
 		const notebookUri = config.__notebookUri;
@@ -263,6 +281,7 @@ export class DebuggingManager
 
 		try {
 			this.notebookInProgress.add(notebook);
+
 			this.updateDebugContextKey();
 
 			return await this.doCreateDebugAdapterDescriptor(
@@ -272,6 +291,7 @@ export class DebuggingManager
 			);
 		} finally {
 			this.notebookInProgress.delete(notebook);
+
 			this.updateDebugContextKey();
 		}
 	}
@@ -305,6 +325,7 @@ export class DebuggingManager
 					this.kernelProvider.getKernelExecution(kernel!),
 					this.configurationService,
 				);
+
 				adapter.addDebuggingDelegates([
 					rblController,
 					new RestartController(
@@ -314,7 +335,9 @@ export class DebuggingManager
 						this.serviceContainer,
 					),
 				]);
+
 				this.notebookToRunByLineController.set(notebook, rblController);
+
 				this.updateRunByLineContextKeys();
 			} else if (
 				config.__mode === KernelDebugMode.Cell &&
@@ -327,6 +350,7 @@ export class DebuggingManager
 					cell,
 					this.kernelProvider.getKernelExecution(kernel!),
 				);
+
 				adapter.addDebuggingDelegates([
 					controller,
 					new RestartController(
@@ -339,6 +363,7 @@ export class DebuggingManager
 			}
 
 			this.trackDebugAdapter(notebook, adapter);
+
 			this.updateDebugContextKey();
 
 			return new DebugAdapterInlineImplementation(adapter);

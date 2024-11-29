@@ -26,6 +26,7 @@ export class PlotSaveHandler extends PlotSaveHandlerBase {
 		const svgXml = Buffer.from(
 			output.items.find((item) => item.mime === svgMimeType)!.data,
 		).toString();
+
 		await saveSvgToPdf(svgXml, this.fsNode, target);
 	}
 }

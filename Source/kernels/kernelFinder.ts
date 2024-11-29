@@ -23,36 +23,51 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 	private readonly _onDidChangeRegistrations = this._register(
 		new EventEmitter<{
 			added: IContributedKernelFinder[];
+
 			removed: IContributedKernelFinder[];
 		}>(),
 	);
+
 	onDidChangeRegistrations = this._onDidChangeRegistrations.event;
+
 	private _finders: IContributedKernelFinder<KernelConnectionMetadata>[] = [];
+
 	private connectionFinderMapping: Map<string, IContributedKernelFinder> =
 		new Map<string, IContributedKernelFinder>();
 
 	private _onDidChangeKernels = this._register(new EventEmitter<void>());
+
 	onDidChangeKernels: Event<void> = this._onDidChangeKernels.event;
+
 	private _status: "idle" | "discovering" = "idle";
+
 	public get status() {
 		return this._status;
 	}
+
 	public set status(value) {
 		if (this._status != value) {
 			this._status = value;
+
 			this._onDidChangeStatus.fire();
 		}
 	}
+
 	private readonly _onDidChangeStatus = this._register(
 		new EventEmitter<void>(),
 	);
+
 	public get onDidChangeStatus(): Event<void> {
 		return this._onDidChangeStatus.event;
 	}
+
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		super();
+
 		disposables.push(this);
+
 		this._register(this._onDidChangeStatus);
+
 		this._register(this._onDidChangeRegistrations);
 	}
 
@@ -80,11 +95,14 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 			if (removeIndex >= 0) {
 				this._finders.splice(removeIndex, 1);
 			}
+
 			disposables.dispose();
+
 			updateStatus();
 
 			// Notify that kernels have changed
 			this._onDidChangeKernels.fire();
+
 			this._onDidChangeRegistrations.fire({
 				added: [],
 				removed: [finder],
@@ -92,13 +110,16 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 		};
 
 		disposables.add(finder.onDidChangeStatus(updateStatus, this));
+
 		disposables.add(
 			finder.onDidChangeKernels(() => this._onDidChangeKernels.fire()),
 		);
+
 		disposables.add(finder.onDidDispose(() => disposeKernel()));
 
 		// Registering a new kernel finder should notify of possible kernel changes
 		this._onDidChangeKernels.fire();
+
 		this._onDidChangeRegistrations.fire({ added: [finder], removed: [] });
 
 		// Register a disposable so kernel finders can remove themselves from the list if they are disposed
@@ -134,10 +155,13 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 							connection.kernelSpec.specFile,
 						);
 					}
+
 					kernels.push(connection);
+
 					this.connectionFinderMapping.set(connection.id, finder);
 				});
 			});
+
 		this._finders
 			.filter(
 				(finder) =>
@@ -157,7 +181,9 @@ export class KernelFinder extends DisposableBase implements IKernelFinder {
 					) {
 						return;
 					}
+
 					kernels.push(connection);
+
 					this.connectionFinderMapping.set(connection.id, finder);
 				});
 			});

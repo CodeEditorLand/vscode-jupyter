@@ -37,6 +37,7 @@ export async function chainWithPendingUpdates(
 	if (document.isClosed) {
 		return true;
 	}
+
 	const pendingUpdates = pendingCellUpdates.has(notebook)
 		? pendingCellUpdates.get(notebook)!
 		: Promise.resolve();
@@ -55,12 +56,14 @@ export async function chainWithPendingUpdates(
 			if (isPromise(result)) {
 				await result;
 			}
+
 			await workspace.applyEdit(edit).then(
 				(result) => deferred.resolve(result),
 				(ex) => deferred.reject(ex),
 			);
 		})
 		.catch(noop);
+
 	pendingCellUpdates.set(notebook, aggregatedPromise);
 
 	return deferred.promise;

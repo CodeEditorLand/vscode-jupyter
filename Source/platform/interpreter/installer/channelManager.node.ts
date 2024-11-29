@@ -73,10 +73,12 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 				// If none supported, try next priority group
 				currentPri = mi.priority;
 			}
+
 			if (await mi.isSupported(interpreter)) {
 				supportedInstallers.push(mi);
 			}
 		}
+
 		return supportedInstallers;
 	}
 
@@ -102,6 +104,7 @@ export class InstallationChannelManager implements IInstallationChannelManager {
 				: platform.isMac
 					? "MacOS"
 					: "Linux";
+
 			void env.openExternal(
 				Uri.parse(
 					`https://www.bing.com/search?q=Install Pip ${osName} ${

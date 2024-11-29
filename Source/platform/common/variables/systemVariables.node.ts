@@ -13,10 +13,15 @@ import { AbstractSystemVariables } from "./systemVariables";
  */
 export class SystemVariables extends AbstractSystemVariables {
 	private _workspaceFolder: string;
+
 	private _workspaceFolderName: string;
+
 	private _filePath: string | undefined;
+
 	private _lineNumber: number | undefined;
+
 	private _selectedText: string | undefined;
+
 	private _execPath: string;
 
 	constructor(file: Uri | undefined, rootFolder: Uri | undefined) {
@@ -25,15 +30,19 @@ export class SystemVariables extends AbstractSystemVariables {
 		const workspaceFolder = file
 			? workspace.getWorkspaceFolder(file)
 			: undefined;
+
 		this._workspaceFolder = workspaceFolder
 			? workspaceFolder.uri.fsPath
 			: rootFolder?.fsPath || __dirname;
+
 		this._workspaceFolderName = path.basename(this._workspaceFolder);
+
 		this._filePath = file ? file.fsPath : undefined;
 
 		if (window && window.activeTextEditor) {
 			this._lineNumber =
 				window.activeTextEditor.selection.anchor.line + 1;
+
 			this._selectedText = window.activeTextEditor.document.getText(
 				new Range(
 					window.activeTextEditor.selection.start,
@@ -41,7 +50,9 @@ export class SystemVariables extends AbstractSystemVariables {
 				),
 			);
 		}
+
 		this._execPath = process.execPath;
+
 		Object.keys(process.env).forEach((key) => {
 			(this as any as Record<string, string | undefined>)[`env:${key}`] =
 				(this as any as Record<string, string | undefined>)[

@@ -15,11 +15,13 @@ export class ExposeUsedAzMLServerHandles
 		@inject(IJupyterServerUriStorage)
 		private readonly uriStorage: IJupyterServerUriStorage,
 	) {}
+
 	activate(): void {
 		commands.registerCommand("jupyter.getUsedAzMLServerHandles", () => {
 			const usedItems: { id: string; handle: string }[] = [];
 
 			const items = this.uriStorage.all;
+
 			items.forEach((item) => {
 				if (
 					item.provider.extensionId.toLowerCase() ===

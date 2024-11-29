@@ -23,6 +23,7 @@ import { sendTelemetryEvent } from "../../../telemetry";
 
 type ApiExtensionInfo = {
 	extensionId: string;
+
 	allowed: "yes" | "no";
 }[];
 
@@ -49,14 +50,17 @@ export class ApiAccessService {
 		string,
 		Promise<{ extensionId: string; accessAllowed: boolean }>
 	>();
+
 	private promiseChain = new PromiseChain();
 
 	constructor(
 		@inject(IMemento) @named(GLOBAL_MEMENTO) private globalState: Memento,
 		@inject(IExtensionContext) private context: IExtensionContext,
 	) {}
+
 	public async getAccessInformation(info: {
 		extensionId: string;
+
 		displayName: string;
 	}): Promise<{ extensionId: string; accessAllowed: boolean }> {
 		const publisherId =
@@ -85,6 +89,7 @@ export class ApiAccessService {
 					displayName && info.extensionId
 						? `${displayName} (${info.extensionId})`
 						: info.extensionId || publisherId;
+
 				window
 					.showErrorMessage(
 						DataScience.thanksForUsingJupyterKernelApiPleaseRegisterWithUs(
@@ -93,6 +98,7 @@ export class ApiAccessService {
 					)
 					.then(noop, noop);
 			}
+
 			if (
 				!PublishersAllowedWithPrompts.has(publisherId) ||
 				!publisherId ||
@@ -115,12 +121,14 @@ export class ApiAccessService {
 					`Please contact the Jupyter Extension to get access to the Kernel API. Publisher ${publisherId}`,
 				)
 				.then(noop, noop);
+
 			logger.error(
 				`Publisher ${publisherId} is not allowed to access the Kernel API.`,
 			);
 
 			return { extensionId: info.extensionId, accessAllowed: false };
 		}
+
 		const extensionPermissions = this.globalState.get<
 			ApiExtensionInfo | undefined
 		>(API_ACCESS_GLOBAL_KEY);
@@ -140,6 +148,7 @@ export class ApiAccessService {
 				accessAllowed: extensionPermission.allowed === "yes",
 			};
 		}
+
 		if (this.extensionAccess.get(info.extensionId)) {
 			return this.extensionAccess.get(info.extensionId)!;
 		}
@@ -158,6 +167,7 @@ export class ApiAccessService {
 			);
 
 			const allow = selection === Common.bannerLabelYes;
+
 			this.promiseChain
 				.chainFinally(async () => {
 					let extensionPermissions = [
@@ -166,9 +176,11 @@ export class ApiAccessService {
 							[],
 						),
 					];
+
 					extensionPermissions = extensionPermissions.filter(
 						(item) => item.extensionId !== info.extensionId,
 					);
+
 					extensionPermissions.push({
 						allowed: allow ? "yes" : "no",
 						extensionId: info.extensionId,
@@ -180,6 +192,7 @@ export class ApiAccessService {
 					);
 				})
 				.then(noop, noop);
+
 			sendTelemetryEvent(Telemetry.JupyterKernelApiAccess, undefined, {
 				extensionId: info.extensionId,
 				allowed: allow ? "yes" : "no",

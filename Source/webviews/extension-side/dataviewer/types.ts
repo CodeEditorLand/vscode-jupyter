@@ -54,18 +54,23 @@ export namespace DataViewerMessages {
 
 export interface IGetRowsRequest {
 	start: number;
+
 	end: number;
+
 	sliceExpression?: string;
 }
 
 export interface IGetRowsResponse {
 	rows: IRowsResponse;
+
 	start: number;
+
 	end: number;
 }
 
 export interface IGetSliceRequest {
 	slice: string | undefined;
+
 	source: SliceOperationSource;
 }
 
@@ -87,15 +92,25 @@ export type IDataViewerMapping = {
 
 export interface IDataFrameInfo {
 	columns?: { key: string; type: ColumnType }[];
+
 	indexColumn?: string;
+
 	rowCount?: number;
+
 	shape?: number[];
+
 	originalVariableShape?: number[];
+
 	dataDimensionality?: number;
+
 	sliceExpression?: string;
+
 	maximumRowChunkSize?: number;
+
 	type?: string;
+
 	originalVariableType?: string;
+
 	name?: string;
 	/**
 	 * The name of the file that this variable was declared in.
@@ -135,6 +150,7 @@ export interface IDataViewerFactory {
 		dataProvider: IDataViewerDataProvider,
 		title: string,
 	): Promise<IDataViewer>;
+
 	readonly activeViewer: IDataViewer | undefined;
 }
 
@@ -142,14 +158,20 @@ export const IDataViewer = Symbol("IDataViewer");
 
 export interface IDataViewer extends IDisposable {
 	readonly active: boolean;
+
 	readonly kernel?: IKernel | undefined;
+
 	readonly title: string;
+
 	readonly onDidDisposeDataViewer: Event<IDataViewer>;
+
 	readonly onDidChangeDataViewerViewState: Event<void>;
+
 	showData(
 		dataProvider: IDataViewerDataProvider,
 		title: string,
 	): Promise<void>;
+
 	refreshData(): Promise<void>;
 }
 

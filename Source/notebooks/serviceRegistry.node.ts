@@ -46,47 +46,58 @@ export function registerTypes(
 	isDevMode: boolean,
 ) {
 	registerControllerTypes(serviceManager, isDevMode);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		LiveKernelSwitcher,
 	);
+
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
 		NotebookCommandListener,
 	);
+
 	serviceManager.addSingleton<INotebookEditorProvider>(
 		INotebookEditorProvider,
 		NotebookEditorProvider,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		RemoteKernelControllerWatcher,
 	);
+
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
 		NotebookTracebackFormatter,
 	);
+
 	serviceManager.addSingleton<IJupyterDebugService>(
 		IJupyterDebugService,
 		JupyterDebugService,
 		Identifiers.RUN_BY_LINE_DEBUGSERVICE,
 	);
+
 	serviceManager.addSingleton<NotebookIPyWidgetCoordinator>(
 		NotebookIPyWidgetCoordinator,
 		NotebookIPyWidgetCoordinator,
 	);
+
 	serviceManager.addBinding(
 		NotebookIPyWidgetCoordinator,
 		IExtensionSyncActivationService,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		RemoteKernelConnectionHandler,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		InterpreterPackageTracker,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		InstallPythonControllerCommands,
@@ -96,10 +107,12 @@ export function registerTypes(
 		NotebookCellLanguageService,
 		NotebookCellLanguageService,
 	);
+
 	serviceManager.addBinding(
 		NotebookCellLanguageService,
 		IExtensionSyncActivationService,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		EmptyNotebookCellLanguageService,
@@ -112,30 +125,36 @@ export function registerTypes(
 		undefined,
 		[IExtensionSyncActivationService],
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		DebuggerVariableRegistration,
 	);
+
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		DebuggerVariables,
 		Identifiers.DEBUGGER_VARIABLES,
 	);
+
 	serviceManager.addSingleton<IJupyterDebugService>(
 		IJupyterDebugService,
 		MultiplexingDebugService,
 		Identifiers.MULTIPLEXING_DEBUGSERVICE,
 	);
+
 	serviceManager.addSingleton<IDebugLocationTracker>(
 		IDebugLocationTracker,
 		DebugLocationTrackerFactory,
 		undefined,
 		[IDebugLocationTrackerFactory],
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		CommandRegistry,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		CellOutputMimeTypeTracker,
@@ -143,11 +162,13 @@ export function registerTypes(
 
 	// File export/import
 	serviceManager.addSingleton<IFileConverter>(IFileConverter, FileConverter);
+
 	serviceManager.addSingleton<ExportInterpreterFinder>(
 		ExportInterpreterFinder,
 		ExportInterpreterFinder,
 	);
 
 	serviceManager.addSingleton<IExportBase>(IExportBase, ExportBase);
+
 	serviceManager.addSingleton<IExportUtil>(IExportUtil, ExportUtil);
 }

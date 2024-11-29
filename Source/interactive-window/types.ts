@@ -23,7 +23,9 @@ import { IFileGeneratedCodes } from "./editor-integration/types";
 
 export type INativeInteractiveWindow = {
 	notebookUri: Uri;
+
 	inputUri: Uri;
+
 	notebookEditor: NotebookEditor;
 };
 
@@ -31,9 +33,13 @@ export const IInteractiveWindowDebugger = Symbol("IInteractiveWindowDebugger");
 
 export interface IInteractiveWindowDebugger {
 	attach(kernel: IKernel): Promise<void>;
+
 	detach(kernel: IKernel): Promise<void>;
+
 	enable(kernel: IKernel): void;
+
 	disable(kernel: IKernel): void;
+
 	updateSourceMaps(generatedCodes: IFileGeneratedCodes[]): Promise<void>;
 }
 
@@ -87,6 +93,7 @@ export const IInteractiveControllerHelper = Symbol(
 export interface IInteractiveControllerHelper {
 	onControllerSelected: Event<{
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}>;
 
@@ -103,6 +110,7 @@ export interface IInteractiveControllerHelper {
 	getRegisteredController(
 		metadata: KernelConnectionMetadata,
 	): IVSCodeNotebookController | undefined;
+
 	createKernel(
 		metadata: KernelConnectionMetadata,
 		controller: NotebookController,
@@ -122,17 +130,29 @@ export interface IInteractiveBase extends Disposable {
 
 export interface IInteractiveWindow extends IInteractiveBase {
 	readonly onDidChangeViewState: Event<void>;
+
 	readonly owner: Resource;
+
 	readonly submitters: Uri[];
+
 	readonly notebookUri?: Uri;
+
 	readonly inputUri?: Uri;
+
 	readonly notebookDocument?: NotebookDocument;
+
 	closed: Event<void>;
+
 	ensureInitialized(): Promise<void>;
+
 	addCode(code: string, file: Uri, line: number): Promise<boolean>;
+
 	debugCode(code: string, file: Uri, line: number): Promise<boolean>;
+
 	expandAllCells(): Promise<void>;
+
 	collapseAllCells(): Promise<void>;
+
 	scrollToCell(id: string): void;
 
 	exportAs(): void;
@@ -142,8 +162,11 @@ export interface IInteractiveWindow extends IInteractiveBase {
 
 export interface IInteractiveWindowCache {
 	owner: string;
+
 	mode: InteractiveWindowMode;
+
 	uriString: string;
+
 	inputBoxUriString: string;
 }
 
@@ -153,6 +176,7 @@ export const IInteractiveWindowDebuggingManager = Symbol(
 
 export interface IInteractiveWindowDebuggingManager extends IDebuggingManager {
 	start(notebook: NotebookDocument, cell: NotebookCell): Promise<void>;
+
 	updateSourceMaps(
 		editor: NotebookEditor,
 		generatedCodes: IFileGeneratedCodes[],

@@ -115,25 +115,31 @@ export class DataViewerCommandRegistry
 			);
 		}
 	}
+
 	activate() {
 		this.registerCommandsIfTrusted();
 	}
+
 	private registerCommandsIfTrusted() {
 		if (!workspace.isTrusted) {
 			return;
 		}
+
 		this.registerCommand(Commands.ShowDataViewer, this.delegateDataViewer);
+
 		this.registerCommand(
 			Commands.ShowJupyterDataViewer,
 			this.delegateDataViewer,
 		);
 	}
+
 	private registerCommand<
 		E extends keyof ICommandNameArgumentTypeMapping,
 		U extends ICommandNameArgumentTypeMapping[E],
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	>(command: E, callback: (...args: U) => any) {
 		const disposable = commands.registerCommand(command, callback, this);
+
 		this.disposables.push(disposable);
 	}
 
@@ -147,6 +153,7 @@ export class DataViewerCommandRegistry
 
 		if (!variable) {
 			logger.error("Variable info could not be retreived");
+
 			sendTelemetryEvent(Telemetry.FailedShowDataViewer, undefined, {
 				reason: "no variable info",
 				fromVariableView: false,
@@ -154,6 +161,7 @@ export class DataViewerCommandRegistry
 
 			return;
 		}
+
 		return this.dataViewerDelegator.showContributedDataViewer(
 			variable,
 			false,
@@ -270,6 +278,7 @@ export class DataViewerCommandRegistry
 						jupyterVariableDataProvider,
 						title,
 					);
+
 					sendTelemetryEvent(
 						EventName.OPEN_DATAVIEWER_FROM_VARIABLE_WINDOW_SUCCESS,
 					);
@@ -283,7 +292,9 @@ export class DataViewerCommandRegistry
 					undefined,
 					e,
 				);
+
 				logger.error(e);
+
 				this.errorHandler.handleError(e).then(noop, noop);
 			}
 		} else {
@@ -311,7 +322,9 @@ export class DataViewerCommandRegistry
 				}
 			} catch (e) {
 				logger.error(e);
+
 				sendTelemetryEvent(Telemetry.FailedShowDataViewer);
+
 				window
 					.showErrorMessage(DataScience.showDataViewerFail)
 					.then(noop, noop);
@@ -330,6 +343,7 @@ export class DataViewerCommandRegistry
 		if (activeJupyterNotebookKernel) {
 			return activeJupyterNotebookKernel;
 		}
+
 		const interactiveWindowDoc = this.getActiveInteractiveWindowDocument();
 
 		const activeInteractiveWindowKernel = interactiveWindowDoc
@@ -339,6 +353,7 @@ export class DataViewerCommandRegistry
 		if (activeInteractiveWindowKernel) {
 			return activeInteractiveWindowKernel;
 		}
+
 		const activeDataViewer = this.dataViewerFactory?.activeViewer;
 
 		return activeDataViewer
@@ -355,6 +370,7 @@ export class DataViewerCommandRegistry
 		if (!interactiveWindow) {
 			return;
 		}
+
 		return workspace.notebookDocuments.find(
 			(notebookDocument) =>
 				notebookDocument === interactiveWindow?.notebookDocument,
@@ -383,9 +399,11 @@ export class DataViewerCommandRegistry
 			logger.info(
 				"Found debugAdapterPython on Debug Configuration to use",
 			);
+
 			pythonPath = debugConfiguration.debugAdapterPython;
 		} else if (debugConfiguration.pythonPath) {
 			logger.info("Found pythonPath on Debug Configuration to use");
+
 			pythonPath = debugConfiguration.pythonPath;
 		}
 

@@ -21,25 +21,32 @@ export abstract class BaseJupyterSessionConnection<
 	public get id() {
 		return this.session.id;
 	}
+
 	public get path() {
 		return this.session.path;
 	}
+
 	public get name() {
 		return this.session.name;
 	}
+
 	public get type() {
 		return this.session.type;
 	}
+
 	public get serverSettings() {
 		return this.session.serverSettings;
 	}
+
 	public get model() {
 		return this.session.model;
 	}
+
 	public readonly propertyChanged = new Signal<
 		this,
 		"path" | "name" | "type"
 	>(this);
+
 	kernelChanged = new Signal<
 		this,
 		IChangedArgs<
@@ -48,6 +55,7 @@ export abstract class BaseJupyterSessionConnection<
 			"kernel"
 		>
 	>(this);
+
 	statusChanged = new Signal<this, Kernel.Status>(this);
 	/**
 	 * The kernel connectionStatusChanged signal, proxied from the current
@@ -77,16 +85,24 @@ export abstract class BaseJupyterSessionConnection<
 		protected readonly session: S,
 	) {
 		super();
+
 		session.propertyChanged.connect(this.onPropertyChanged, this);
+
 		session.kernelChanged.connect(this.onKernelChanged, this);
+
 		session.statusChanged.connect(this.onStatusChanged, this);
+
 		session.connectionStatusChanged.connect(
 			this.onConnectionStatusChanged,
 			this,
 		);
+
 		session.iopubMessage.connect(this.onIOPubMessage, this);
+
 		session.unhandledMessage.connect(this.onUnhandledMessage, this);
+
 		session.pendingInput.connect(this.onPendingInput, this);
+
 		session.anyMessage.connect(this.onAnyMessage, this);
 
 		this._register({
@@ -95,43 +111,56 @@ export abstract class BaseJupyterSessionConnection<
 					this.onPropertyChanged,
 					this,
 				);
+
 				this.session.kernelChanged.disconnect(
 					this.onKernelChanged,
 					this,
 				);
+
 				this.session.statusChanged.disconnect(
 					this.onStatusChanged,
 					this,
 				);
+
 				this.session.connectionStatusChanged.disconnect(
 					this.onConnectionStatusChanged,
 					this,
 				);
+
 				this.session.iopubMessage.disconnect(this.onIOPubMessage, this);
+
 				this.session.unhandledMessage.disconnect(
 					this.onUnhandledMessage,
 					this,
 				);
+
 				this.session.pendingInput.disconnect(this.onPendingInput, this);
+
 				this.session.anyMessage.disconnect(this.onAnyMessage, this);
 			},
 		});
 	}
+
 	public get kernel(): Kernel.IKernelConnection | null {
 		if (this.isDisposed || !this.session.kernel) {
 			return null;
 		}
+
 		return this.session.kernel;
 	}
 
 	public disposed = new Signal<this, void>(this);
+
 	protected readonly didShutdown = this._register(new EventEmitter<void>());
+
 	public get onDidShutdown() {
 		return this.didShutdown.event;
 	}
+
 	public get kernelId(): string | undefined {
 		return this.session?.kernel?.id || "";
 	}
+
 	protected _onDidKernelSocketChange = this._register(
 		new EventEmitter<void>(),
 	);
@@ -139,34 +168,49 @@ export abstract class BaseJupyterSessionConnection<
 	public get onDidKernelSocketChange() {
 		return this._onDidKernelSocketChange.event;
 	}
+
 	public abstract readonly status: KernelMessage.Status;
+
 	public override dispose() {
 		if (this.isDisposed) {
 			return;
 		}
+
 		super.dispose();
+
 		this.statusChanged.emit("dead");
+
 		this.disposed.emit();
+
 		Signal.disconnectAll(this);
 	}
+
 	abstract shutdown(): Promise<void>;
+
 	abstract waitForIdle(
 		timeout: number,
 		token: CancellationToken,
 	): Promise<void>;
+
 	public async restart(): Promise<void> {
 		await this.session.kernel?.restart();
+
 		this.initializeKernelSocket();
+
 		logger.info(`Restarted ${this.session?.kernel?.id}`);
 	}
+
 	private previousKernelSocketInformation?: {
 		kernel: Kernel.IKernelConnection;
+
 		socket: IKernelSocket | undefined;
 	};
+
 	protected initializeKernelSocket() {
 		if (!this.session.kernel) {
 			throw new Error("Kernel not initialized in Session");
 		}
+
 		const newKernelSocketInformation = {
 			kernel: this.session.kernel,
 			options: {
@@ -195,6 +239,7 @@ export abstract class BaseJupyterSessionConnection<
 		}
 
 		this.previousKernelSocketInformation = newKernelSocketInformation;
+
 		this.session.kernel?.connectionStatusChanged.disconnect(
 			this.onKernelConnectionStatusHandler,
 			this,
@@ -205,12 +250,14 @@ export abstract class BaseJupyterSessionConnection<
 			this.onKernelConnectionStatusHandler,
 			this,
 		);
+
 		this._onDidKernelSocketChange.fire();
 	}
 
 	private onPropertyChanged(_: unknown, value: "path" | "name" | "type") {
 		this.propertyChanged.emit(value);
 	}
+
 	private onKernelChanged(
 		_: unknown,
 		value: IChangedArgs<
@@ -221,43 +268,56 @@ export abstract class BaseJupyterSessionConnection<
 	) {
 		this.kernelChanged.emit(value);
 	}
+
 	private onStatusChanged(_: unknown, value: Kernel.Status) {
 		this.statusChanged.emit(value);
 
 		const status = this.status;
+
 		logger.ci(`Server Status = ${status}`);
 	}
+
 	private onConnectionStatusChanged(
 		_: unknown,
 		value: Kernel.ConnectionStatus,
 	) {
 		this.connectionStatusChanged.emit(value);
 	}
+
 	private onIOPubMessage(_: unknown, value: KernelMessage.IIOPubMessage) {
 		this.iopubMessage.emit(value);
 	}
+
 	private onUnhandledMessage(_: unknown, value: KernelMessage.IMessage) {
 		logger.warn(`Unhandled message found: ${value.header.msg_type}`);
+
 		this.unhandledMessage.emit(value);
 	}
+
 	private onAnyMessage(_: unknown, value: Kernel.IAnyMessageArgs) {
 		this.anyMessage.emit(value);
 	}
+
 	private onPendingInput(_: unknown, value: boolean) {
 		this.pendingInput.emit(value);
 	}
+
 	public setPath(value: string) {
 		return this.session.setPath(value);
 	}
+
 	public setName(value: string) {
 		return this.session.setName(value);
 	}
+
 	public setType(value: string) {
 		return this.session.setType(value);
 	}
+
 	public changeKernel(options: Partial<Kernel.IModel>) {
 		return this.session.changeKernel(options);
 	}
+
 	private onKernelConnectionStatusHandler(
 		_: unknown,
 		kernelConnection: Kernel.ConnectionStatus,

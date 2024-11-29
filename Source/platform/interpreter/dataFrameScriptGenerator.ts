@@ -26,6 +26,7 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 		@inject(IFileSystem) private readonly fs: IFileSystem,
 		@inject(IExtensionContext) private readonly context: IExtensionContext,
 	) {}
+
 	public async generateCodeToGetDataFrameInfo(options: {
 		isDebugging: boolean;
 
@@ -52,11 +53,14 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 			};
 		}
 	}
+
 	public async generateCodeToGetDataFrameRows(options: {
 		isDebugging: boolean;
 
 		variableName: string;
+
 		startIndex: number;
+
 		endIndex: number;
 	}) {
 		const initializeCode = await this.getContentsOfDataFrameScript();
@@ -79,10 +83,12 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 	}
 
 	static contentsOfDataFrameScript: string | undefined;
+
 	private async getContentsOfDataFrameScript() {
 		if (DataFrameScriptGenerator.contentsOfDataFrameScript) {
 			return DataFrameScriptGenerator.contentsOfDataFrameScript;
 		}
+
 		const scriptPath = joinPath(
 			this.context.extensionUri,
 			"pythonFiles",
@@ -92,6 +98,7 @@ export class DataFrameScriptGenerator implements IDataFrameScriptGenerator {
 		);
 
 		const contents = await this.fs.readFile(scriptPath);
+
 		DataFrameScriptGenerator.contentsOfDataFrameScript = contents;
 
 		return contents;

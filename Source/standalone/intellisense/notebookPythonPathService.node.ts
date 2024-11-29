@@ -77,6 +77,7 @@ export class NotebookPythonPathService
 
 	private async reset() {
 		this._isEnabled = undefined;
+
 		await this.activate();
 	}
 
@@ -90,6 +91,7 @@ export class NotebookPythonPathService
 			this.extensionChangeHandler
 		) {
 			this.extensionChangeHandler.dispose();
+
 			this.extensionChangeHandler = undefined;
 
 			await this.reset();
@@ -132,17 +134,21 @@ export class NotebookPythonPathService
 			if (!kernel) {
 				return;
 			}
+
 			const disposables: Disposable[] = [];
 
 			if (!kernel.startedAtLeastOnce) {
 				const kernelStarted = new Promise((resolve) =>
 					kernel!.onStarted(resolve, undefined, disposables),
 				);
+
 				await raceTimeout(5_000, undefined, kernelStarted);
 			}
+
 			if (!kernel.startedAtLeastOnce) {
 				return;
 			}
+
 			const execution = this.kernelProvider.getKernelExecution(kernel);
 
 			const code = `
@@ -170,7 +176,9 @@ del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 			) {
 				return;
 			}
+
 			let text = (output.text || "").toString();
+
 			text = text.substring(text.indexOf("EXECUTABLE"));
 
 			const items = text
@@ -182,6 +190,7 @@ del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 			if (!executable || !(await fs.pathExists(executable))) {
 				return;
 			}
+
 			logger.debug(
 				`Remote Interpreter for Pylance for Notebook URI "${getDisplayPath(notebook.uri)}" is ${getDisplayPath(
 					executable,
@@ -201,6 +210,7 @@ del _VSCODE_os, _VSCODE_sys, _VSCODE_builtins
 
 			return "";
 		}
+
 		logger.debug(
 			`Interpreter for Pylance for Notebook URI "${getDisplayPath(notebook.uri)}" is ${getDisplayPath(
 				interpreter.uri,

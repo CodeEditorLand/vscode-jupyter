@@ -6,6 +6,7 @@ import { createDeferred } from "../../../platform/common/utils/async";
 
 export class IWDebugger extends Debugger {
 	private readonly _ready = createDeferred<void>();
+
 	public readonly ready = this._ready.promise;
 
 	public resolve() {

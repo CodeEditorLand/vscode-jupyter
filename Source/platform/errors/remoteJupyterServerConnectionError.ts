@@ -21,7 +21,9 @@ export class RemoteJupyterServerConnectionError extends BaseError {
 		readonly url: string,
 		public readonly serverProviderHandle: {
 			id: string;
+
 			handle: string;
+
 			extensionId: string;
 		},
 		public readonly originalError: Error,
@@ -33,6 +35,7 @@ export class RemoteJupyterServerConnectionError extends BaseError {
 				originalError.message || originalError.toString(),
 			),
 		);
+
 		this.baseUrl = getBaseUrl(url);
 	}
 }

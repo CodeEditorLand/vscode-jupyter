@@ -11,6 +11,7 @@ def __VSCODE_inject_module():
 
     def __VSCODE_send_chat_message__(function, data, callback):
         requests = {}
+
         try:
             requests = __VSCODE_send_chat_message__.__requests
         except Exception:
@@ -29,6 +30,7 @@ def __VSCODE_inject_module():
 
     def __VSCODE_on_chat_message(id, data):
         requests = {}
+
         try:
             requests = __VSCODE_send_chat_message__.__requests
         except Exception:
@@ -90,8 +92,10 @@ export function escapeStringToEmbedInPythonCode(
 	if (typeof value !== "string") {
 		return value;
 	}
+
 	for (const [toEscape, replacement] of replacements) {
 		value = value.replace(toEscape, replacement);
 	}
+
 	return value;
 }

@@ -57,12 +57,19 @@ export class DebuggerVariables
 	implements IConditionalJupyterVariables, DebugAdapterTracker
 {
 	static dataFrameScriptContents?: string;
+
 	private refreshEventEmitter = new EventEmitter<void>();
+
 	private lastKnownVariables: IJupyterVariable[] = [];
+
 	private importedGetVariableInfoScriptsIntoKernel = new Set<string>();
+
 	private watchedNotebooks = new Map<string, Disposable[]>();
+
 	private debuggingStarted = false;
+
 	private currentVariablesReference = 0;
+
 	private currentSeqNumsForVariables = new Set<Number>();
 
 	constructor(
@@ -81,6 +88,7 @@ export class DebuggerVariables
 		private readonly kernelProvider: IKernelProvider,
 	) {
 		super(undefined);
+
 		this.debuggingManager.onDoneDebugging(
 			() => this.refreshEventEmitter.fire(),
 			this,
@@ -112,6 +120,7 @@ export class DebuggerVariables
 		if (kernel) {
 			this.watchKernel(kernel);
 		}
+
 		const execution =
 			kernel && this.kernelProvider.getKernelExecution(kernel);
 
@@ -149,6 +158,7 @@ export class DebuggerVariables
 					});
 				}
 			};
+
 			this.lastKnownVariables.sort(comparer);
 
 			const startPos = request.startIndex ? request.startIndex : 0;
@@ -156,20 +166,26 @@ export class DebuggerVariables
 			const chunkSize = request.pageSize
 				? request.pageSize
 				: MaximumRowChunkSizeForDebugger;
+
 			result.pageStartIndex = startPos;
 
 			// Do one at a time. All at once doesn't work as they all have to wait for each other anyway
 			for (
 				let i = startPos;
+
 				i < startPos + chunkSize && i < this.lastKnownVariables.length;
+
 				i += 1
 			) {
 				const fullVariable = !this.lastKnownVariables[i].truncated
 					? this.lastKnownVariables[i]
 					: await this.getFullVariable(this.lastKnownVariables[i]);
+
 				this.lastKnownVariables[i] = fullVariable;
+
 				result.pageResponse.push(fullVariable);
 			}
+
 			result.totalCount = this.lastKnownVariables.length;
 		}
 
@@ -191,6 +207,7 @@ export class DebuggerVariables
 			) {
 				sendTelemetryEvent(Telemetry.RunByLineVariableHover);
 			}
+
 			return result;
 		}
 	}
@@ -209,6 +226,7 @@ export class DebuggerVariables
 			// No active server just return the unchanged target variable
 			return targetVariable;
 		}
+
 		if (isRefresh) {
 			targetVariable = await this.getFullVariable(targetVariable);
 		}
@@ -352,6 +370,7 @@ export class DebuggerVariables
 
 			if (newVariablesReference !== this.currentVariablesReference) {
 				this.currentVariablesReference = newVariablesReference;
+
 				this.currentSeqNumsForVariables.clear();
 			}
 		} else if (
@@ -380,8 +399,11 @@ export class DebuggerVariables
 		} else if (message.type === "event" && message.event === "terminated") {
 			// When the debugger exits, make sure the variables are cleared
 			this.lastKnownVariables = [];
+
 			this.topMostFrameId = 0;
+
 			this.debuggingStarted = false;
+
 			this.refreshEventEmitter.fire();
 
 			const key = this.debugService.activeDebugSession?.id;
@@ -397,16 +419,21 @@ export class DebuggerVariables
 
 		if (key && !this.watchedNotebooks.has(key)) {
 			const disposables: Disposable[] = [];
+
 			disposables.push(
 				kernel.onRestarted(this.resetImport.bind(this, key)),
 			);
+
 			disposables.push(
 				kernel.onDisposed(() => {
 					this.resetImport(key);
+
 					disposables.forEach((d) => d.dispose());
+
 					this.watchedNotebooks.delete(key);
 				}),
 			);
+
 			this.watchedNotebooks.set(key, disposables);
 		}
 	}
@@ -422,8 +449,11 @@ export class DebuggerVariables
 		initializeCode,
 	}: {
 		code: string;
+
 		initializeCode?: string;
+
 		cleanupCode?: string;
+
 		frameId?: number;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	}): Promise<any> {
@@ -435,6 +465,7 @@ export class DebuggerVariables
 				context: "repl",
 				format: { rawString: true },
 			};
+
 			logger.debug(
 				`Evaluating in debugger : ${this.debugService.activeDebugSession.id}: ${code}`,
 			);
@@ -449,6 +480,7 @@ export class DebuggerVariables
 						},
 					);
 				}
+
 				const results =
 					await this.debugService.activeDebugSession.customRequest(
 						"evaluate",
@@ -477,8 +509,10 @@ export class DebuggerVariables
 				}
 			}
 		}
+
 		throw Error("Debugger is not active, cannot evaluate.");
 	}
+
 	public async getFullVariable(
 		variable: IJupyterVariable,
 	): Promise<IJupyterVariable> {
@@ -537,18 +571,23 @@ export class DebuggerVariables
 				if (!v.name || !v.type || !v.value) {
 					return false;
 				}
+
 				if (exclusionList && exclusionList.includes(v.type)) {
 					return false;
 				}
+
 				if (v.name.startsWith("_")) {
 					return false;
 				}
+
 				if (KnownExcludedVariables.has(v.name)) {
 					return false;
 				}
+
 				if (v.type === "NoneType") {
 					return false;
 				}
+
 				return true;
 			},
 		);

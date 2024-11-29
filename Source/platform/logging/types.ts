@@ -8,12 +8,19 @@ export type Arguments = unknown[];
 
 export interface ILogger {
 	error(message: string, ...data: Arguments): void;
+
 	warn(message: string, ...data: Arguments): void;
+
 	info(message: string, ...data: Arguments): void;
+
 	debug(message: string, ...data: Arguments): void;
+
 	trace(message: string, ...data: Arguments): void;
+
 	ci(msg: () => [message: string, ...args: string[]] | string): void;
+
 	ci(message: string, ...args: string[]): void;
+
 	ci(arg1: any, ...args: Arguments): void;
 }
 

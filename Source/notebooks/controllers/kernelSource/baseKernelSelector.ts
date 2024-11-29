@@ -73,17 +73,23 @@ function updateKernelQuickPickWithNewItems<T extends CompoundQuickPickItem>(
 			activeItems.length = 0;
 		}
 	}
+
 	quickPick.items = items;
+
 	quickPick.activeItems = activeItems;
 }
 
 export type CreateAndSelectItemFromQuickPick = (options: {
 	title: string;
+
 	items: CompoundQuickPickItem[];
+
 	buttons: QuickInputButton[];
+
 	onDidTriggerButton: (e: QuickInputButton) => void;
 }) => {
 	quickPick: QuickPick<CompoundQuickPickItem>;
+
 	selection: Promise<CompoundQuickPickItem>;
 };
 
@@ -97,11 +103,14 @@ class SomeOtherActionError extends Error {}
 
 export class BaseKernelSelector extends DisposableBase implements IDisposable {
 	protected readonly displayDataProvider: IConnectionDisplayDataProvider;
+
 	protected readonly recommendedItems: (
 		| QuickPickItem
 		| ConnectionQuickPickItem
 	)[] = [];
+
 	protected existingItems = new Set<ConnectionQuickPickItem>();
+
 	protected quickPickItems: (QuickPickItem | ConnectionQuickPickItem)[] = [];
 
 	constructor(
@@ -109,11 +118,13 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		protected readonly token: CancellationToken,
 	) {
 		super();
+
 		this.displayDataProvider =
 			ServiceContainer.instance.get<IConnectionDisplayDataProvider>(
 				IConnectionDisplayDataProvider,
 			);
 	}
+
 	public async selectKernel(
 		quickPickFactory: CreateAndSelectItemFromQuickPick,
 	): Promise<
@@ -139,15 +150,20 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		if (this.token.isCancellationRequested) {
 			return;
 		}
+
 		const items = this.provider.kernels.map((connection) =>
 			this.connectionToQuickPick(connection),
 		);
+
 		this.quickPickItems.push({
 			kind: QuickPickItemKind.Separator,
 			label: DataScience.kernelCategoryForJupyterKernel,
 		});
+
 		items.sort((a, b) => a.label.localeCompare(b.label));
+
 		this.quickPickItems.push(...items);
+
 		this.existingItems = new Set(items);
 
 		return this.selectKernelImplInternal(
@@ -155,6 +171,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			quickPickToBeUpdated,
 		);
 	}
+
 	private async selectKernelImplInternal(
 		quickPickFactory: CreateAndSelectItemFromQuickPick,
 		quickPickToBeUpdated: {
@@ -182,20 +199,26 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			onDidTriggerButton: async (e) => {
 				if (e === refreshButton) {
 					const buttons = quickPick.buttons;
+
 					quickPick.buttons = buttons
 						.filter((btn) => btn !== refreshButton)
 						.concat(refreshingButton);
+
 					await this.provider.refresh().catch(noop);
+
 					quickPick.buttons = buttons;
 				}
 			},
 		});
+
 		quickPickToBeUpdated.quickPick = quickPick;
 
 		if (this.provider.status === "discovering") {
 			quickPick.busy = true;
 		}
+
 		let timeout: NodeJS.Timer | undefined;
+
 		this._register(
 			this.provider.onDidChangeStatus(() => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -225,13 +248,16 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		);
 
 		this.updateRecommended(quickPick);
+
 		this.updateQuickPickItems(quickPick);
+
 		this._register(
 			this.provider.onDidChangeRecommended(
 				() => this.updateRecommended(quickPick),
 				this,
 			),
 		);
+
 		this._register(
 			this.provider.onDidChange(
 				() => this.updateQuickPickItems(quickPick),
@@ -261,15 +287,18 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 						quickPickToBeUpdated,
 					);
 				}
+
 				throw ex;
 			}
 		}
+
 		if (result && "connection" in result) {
 			return { selection: "controller", connection: result.connection };
 		} else if (result && "error" in result) {
 			throw InputFlowAction.back;
 		}
 	}
+
 	protected updateQuickPickItems(
 		quickPick: QuickPick<CompoundQuickPickItem>,
 	) {
@@ -287,7 +316,9 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			.map((item) => this.connectionToQuickPick(item));
 
 		this.updateQuickPickWithLatestConnection(quickPick);
+
 		this.removeMissingKernels(quickPick);
+
 		this.updateRecommended(quickPick);
 
 		items.sort((a, b) => a.label.localeCompare(b.label));
@@ -304,6 +335,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		);
 
 		const oldItemCount = currentItemsInCategory.size;
+
 		items.forEach((item) => {
 			const existingItem = currentItemIdsInCategory.get(
 				item.connection.id,
@@ -312,11 +344,14 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			if (existingItem) {
 				currentItemsInCategory.delete(existingItem);
 			}
+
 			currentItemsInCategory.add(item);
 		});
 
 		const newItems = Array.from(currentItemsInCategory);
+
 		newItems.sort((a, b) => a.label.localeCompare(b.label));
+
 		this.quickPickItems.splice(
 			indexOfExistingCategory + 1,
 			oldItemCount,
@@ -325,6 +360,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 
 		this.rebuildQuickPickItems(quickPick);
 	}
+
 	private rebuildQuickPickItems(quickPick: QuickPick<CompoundQuickPickItem>) {
 		let recommendedItem = this.recommendedItems.find((item) =>
 			isKernelPickItem(item),
@@ -371,6 +407,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			recommendedItem,
 		);
 	}
+
 	private removeMissingKernels(quickPick: QuickPick<CompoundQuickPickItem>) {
 		const currentConnections = quickPick.items
 			.filter((item) => isKernelPickItem(item))
@@ -385,15 +422,19 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 
 		if (removedIds.length) {
 			const itemsRemoved: CompoundQuickPickItem[] = [];
+
 			this.existingItems.forEach((item) => {
 				if (removedIds.includes(item.connection.id)) {
 					this.existingItems.delete(item);
+
 					itemsRemoved.push(item);
 				}
 			});
+
 			this.quickPickItems = this.quickPickItems.filter(
 				(item) => !itemsRemoved.includes(item),
 			);
+
 			this.rebuildQuickPickItems(quickPick);
 		}
 	}
@@ -404,12 +445,14 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 
 			return;
 		}
+
 		if (!this.recommendedItems.length) {
 			this.recommendedItems.push(<QuickPickItem>{
 				label: DataScience.recommendedItemCategoryInQuickPick,
 				kind: QuickPickItemKind.Separator,
 			});
 		}
+
 		const recommendedItem = this.connectionToQuickPick(
 			this.provider.recommended,
 			true,
@@ -420,6 +463,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		} else {
 			this.recommendedItems.push(recommendedItem);
 		}
+
 		this.rebuildQuickPickItems(quickPick);
 	}
 	/**
@@ -434,37 +478,46 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		const kernels = new Map<string, KernelConnectionMetadata>(
 			this.provider.kernels.map((kernel) => [kernel.id, kernel]),
 		);
+
 		this.recommendedItems.concat(this.quickPickItems).forEach((item) => {
 			if (!isKernelPickItem(item) || !kernels.has(item.connection.id)) {
 				return;
 			}
+
 			const kernel = kernels.get(item.connection.id);
 
 			if (!kernel) {
 				return;
 			}
+
 			item.label = this.connectionToQuickPick(
 				kernel,
 				item.isRecommended,
 			).label;
+
 			item.tooltip = this.connectionToQuickPick(
 				kernel,
 				item.isRecommended,
 			).tooltip;
+
 			item.detail = this.connectionToQuickPick(
 				kernel,
 				item.isRecommended,
 			).detail;
+
 			item.description = this.connectionToQuickPick(
 				kernel,
 				item.isRecommended,
 			).description;
+
 			item.isRecommended = this.connectionToQuickPick(
 				kernel,
 				item.isRecommended,
 			).isRecommended;
+
 			item.connection = kernel; // Possible some other information since then has changed, hence keep the connection up to date.
 		});
+
 		this.rebuildQuickPickItems(quickPick);
 	}
 
@@ -481,13 +534,17 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 			connection: KernelConnectionMetadata,
 		) => {
 			info.label = `${icon}${e.label}`;
+
 			info.detail = e.detail;
+
 			info.description = e.description;
 
 			this.quickPickItems.forEach((q) => {
 				if ("connection" in q && q.connection.id === connection.id) {
 					q.label = e.label;
+
 					q.detail = e.detail;
+
 					q.description = e.description;
 				}
 			});
@@ -504,6 +561,7 @@ export class BaseKernelSelector extends DisposableBase implements IDisposable {
 		};
 
 		setData(info, displayData, connection);
+
 		this._register(
 			displayData.onDidChange((e) => setData(info, e, connection), this),
 		);

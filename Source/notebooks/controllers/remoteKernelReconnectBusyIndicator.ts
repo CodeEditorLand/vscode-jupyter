@@ -19,6 +19,7 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 	) {
 		super();
 	}
+
 	public initialize() {
 		const kernel = this.kernel;
 
@@ -31,13 +32,16 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 		) {
 			return;
 		}
+
 		if (kernel.status !== "busy" && kernel.status !== "unknown") {
 			return;
 		}
+
 		if (!controller.createNotebookExecution) {
 			// Older version of VS Code will not have this API, e.g. older insiders.
 			return;
 		}
+
 		this._register(
 			workspace.onDidCloseNotebookDocument((e) => {
 				if (e === notebook) {
@@ -45,6 +49,7 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 				}
 			}, this),
 		);
+
 		this._register(
 			controller.onDidChangeSelectedNotebooks((e) => {
 				if (e.notebook === notebook && e.selected === false) {
@@ -52,6 +57,7 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 				}
 			}, this),
 		);
+
 		this._register(
 			kernel.onStatusChanged((status) => {
 				if (status !== "busy" && status !== "unknown") {
@@ -61,7 +67,9 @@ export class RemoteKernelReconnectBusyIndicator extends DisposableBase {
 		);
 
 		const execution = controller.createNotebookExecution(notebook);
+
 		execution.start();
+
 		this._register(new Disposable(() => execution.end()));
 	}
 }

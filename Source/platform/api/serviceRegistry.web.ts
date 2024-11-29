@@ -10,6 +10,7 @@ export function registerTypes(serviceManager: IServiceManager): void {
 		IPythonApiProvider,
 		OldPythonApiProvider,
 	);
+
 	serviceManager.addSingleton<IPythonExtensionChecker>(
 		IPythonExtensionChecker,
 		PythonExtensionChecker,

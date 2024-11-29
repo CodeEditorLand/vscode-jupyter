@@ -21,7 +21,9 @@ import { noop } from "../../platform/common/utils/misc";
 @injectable()
 export class GlobalActivation implements IExtensionSyncActivationService {
 	public isDisposed: boolean = false;
+
 	private changeHandler: IDisposable | undefined;
+
 	private startTime: number = Date.now();
 
 	constructor(
@@ -52,12 +54,14 @@ export class GlobalActivation implements IExtensionSyncActivationService {
 	public async dispose() {
 		if (this.changeHandler) {
 			this.changeHandler.dispose();
+
 			this.changeHandler = undefined;
 		}
 	}
 
 	private computeZmqAvailable() {
 		const zmqContext = new ContextKey(EditorContexts.ZmqAvailable);
+
 		zmqContext
 			.set(this.rawSupported ? this.rawSupported.isSupported : false)
 			.then(noop, noop);

@@ -29,6 +29,7 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 	implements IStartupCodeProvider, IExtensionSyncActivationService
 {
 	public priority = StartupCodePriority.Debugging;
+
 	private addRunCellHookContents?: Promise<string>;
 
 	constructor(
@@ -43,6 +44,7 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 	activate(): void {
 		this.registry.register(this, InteractiveWindowView);
 	}
+
 	async getCode(kernel: IKernel): Promise<string[]> {
 		if (!isPythonKernelConnection(kernel.kernelConnectionMetadata)) {
 			return [];
@@ -56,6 +58,7 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 			if (useNewDebugger) {
 				return [];
 			}
+
 			if (!isLocalConnection(kernel.kernelConnectionMetadata)) {
 				return [];
 			}
@@ -79,6 +82,7 @@ export class InteractiveWindowDebuggingStartupCodeProvider
 				),
 			);
 		}
+
 		const addRunCellHook = await this.addRunCellHookContents;
 
 		return splitLines(addRunCellHook, { trim: false });

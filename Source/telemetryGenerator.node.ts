@@ -40,16 +40,20 @@ const errorsByOwners: Record<string, Record<string, EventProblem>> = {};
  */
 class TypeScriptLanguageServiceHost implements ts.LanguageServiceHost {
 	private readonly _files: string[];
+
 	private readonly _compilerOptions: ts.CompilerOptions;
 
 	constructor(files: string[], compilerOptions: ts.CompilerOptions) {
 		this._files = files;
+
 		this._compilerOptions = compilerOptions;
 	}
+
 	readFile(path: string, encoding?: string | undefined): string | undefined {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return fs.readFileSync(path, { encoding } as any).toString();
 	}
+
 	fileExists(path: string): boolean {
 		return fs.existsSync(path);
 	}
@@ -59,15 +63,19 @@ class TypeScriptLanguageServiceHost implements ts.LanguageServiceHost {
 	getCompilationSettings(): ts.CompilerOptions {
 		return this._compilerOptions;
 	}
+
 	getScriptFileNames(): string[] {
 		return this._files;
 	}
+
 	getScriptVersion(_fileName: string): string {
 		return "1";
 	}
+
 	getProjectVersion(): string {
 		return "1";
 	}
+
 	getScriptSnapshot(fileName: string): ts.IScriptSnapshot {
 		if (this._files.includes(fileName)) {
 			return ts.ScriptSnapshot.fromString(
@@ -77,15 +85,19 @@ class TypeScriptLanguageServiceHost implements ts.LanguageServiceHost {
 			return ts.ScriptSnapshot.fromString("");
 		}
 	}
+
 	getScriptKind(_fileName: string): ts.ScriptKind {
 		return ts.ScriptKind.TS;
 	}
+
 	getCurrentDirectory(): string {
 		return "";
 	}
+
 	getDefaultLibFileName(_options: ts.CompilerOptions): string {
 		return "defaultLib:lib.d.ts";
 	}
+
 	isDefaultLibFileName(fileName: string): boolean {
 		return fileName === this.getDefaultLibFileName(this._compilerOptions);
 	}
@@ -99,6 +111,7 @@ function findNode(
 	let found: ts.Node | undefined;
 
 	let lastFoundNode: ts.Node | undefined;
+
 	sourceFile.forEachChild(visit);
 
 	function visit(node: ts.Node) {
@@ -115,30 +128,41 @@ function findNode(
 		) {
 			lastFoundNode = node;
 		}
+
 		ts.forEachChild(node, visit);
 	}
+
 	return found || lastFoundNode;
 }
 
 type TelemetryProperty = {
 	name: string;
+
 	descriptions: string[] | string;
+
 	type?: string;
+
 	possibleValues?: { value: string; comment?: string | string[] }[];
+
 	isNullable?: boolean;
+
 	gdpr: IPropertyDataNonMeasurement | IPropertyDataMeasurement;
 };
 
 type TelemetryPropertyGroup = {
 	description?: string[];
+
 	properties: TelemetryProperty[];
 };
 type TelemetryEntry = {
 	name: string;
 
 	constantName: string;
+
 	description: string;
+
 	gdpr: IEventData;
+
 	propertyGroups: TelemetryPropertyGroup[];
 };
 
@@ -163,6 +187,7 @@ function computePropertiesForLiteralType(
 
 			let possibleValues: {
 				value: string;
+
 				comment?: string | string[];
 			}[] = [];
 
@@ -183,6 +208,7 @@ function computePropertiesForLiteralType(
 						?.some((d) => d.kind === ts.SyntaxKind.EnumDeclaration);
 
 					const enumName = type.getSymbol()?.escapedName;
+
 					type.types.forEach((t) => {
 						if (t.isLiteral()) {
 							const value = t.value.toString();
@@ -203,6 +229,7 @@ function computePropertiesForLiteralType(
 									`Enum Member: ${enumName}.${t.symbol.escapedName}`,
 								);
 							}
+
 							if (
 								declaration &&
 								Array.isArray(declaration.jsDoc) &&
@@ -210,10 +237,12 @@ function computePropertiesForLiteralType(
 							) {
 								comment.push(declaration.jsDoc[0].comment);
 							}
+
 							possibleValues.push({ value, comment });
 						}
 					});
 				}
+
 				const mType = m.type;
 
 				if (
@@ -226,13 +255,16 @@ function computePropertiesForLiteralType(
 					// Support comments in union string literals.
 					const newPossibleValues: {
 						value: string;
+
 						comment?: string | string[];
 					}[] = [];
+
 					mType.types.forEach((t) => {
 						if (t.kind === ts.SyntaxKind.LiteralType) {
 							const value = t.getText();
 
 							const comment = getCommentForUnions(t);
+
 							newPossibleValues.push({ value, comment });
 						} else if (
 							t.kind === ts.SyntaxKind.NullKeyword ||
@@ -247,6 +279,7 @@ function computePropertiesForLiteralType(
 								value: "true",
 								comment: "",
 							});
+
 							newPossibleValues.push({
 								value: "false",
 								comment: "",
@@ -266,6 +299,7 @@ function computePropertiesForLiteralType(
 			} else {
 				typeValue = m.type?.getText() ? m.type?.getText() : "";
 			}
+
 			const isNullable =
 				m
 					.getChildren()
@@ -307,6 +341,7 @@ function computePropertiesForLiteralType(
 						] as any
 					)[name] = gdprEntry as any;
 				}
+
 				if (
 					"measures" in
 						gdprEntryOfCurrentlyComputingTelemetryEventName[1] &&
@@ -334,11 +369,13 @@ function computePropertiesForLiteralType(
 						] as any
 					)[name] = gdprEntry as any;
 				}
+
 				if (gdprEntry) {
 					const comment = (descriptions || [])
 						.join(" ")
 						.split(/\r?\n/)
 						.join();
+
 					gdprEntry.comment = (gdprEntry.comment || "").trim();
 
 					if (gdprEntry.comment) {
@@ -357,6 +394,7 @@ function computePropertiesForLiteralType(
 							descriptions.push(gdprEntry.comment);
 						}
 					}
+
 					if (
 						!gdprEntry.comment
 							.split(/\r?\n/)
@@ -392,11 +430,13 @@ function computePropertiesForLiteralType(
 							eventConstantName: "",
 							problems: [],
 						});
+
 					eventIssues.problems.push(
 						`Gdpr entry for ${name} not found.`,
 					);
 				}
 			}
+
 			properties.push({
 				name,
 				descriptions,
@@ -419,6 +459,7 @@ function comptePropertyGroupsFromReferenceNode(
 	if (t.typeName.getText() === "Partial" && t.typeArguments?.length) {
 		return computePropertyForType(t.typeArguments[0], typeChecker);
 	}
+
 	const type = typeChecker.getTypeAtLocation(t);
 
 	if (
@@ -438,6 +479,7 @@ function comptePropertyGroupsFromReferenceNode(
 					.declarations[0] as unknown as any,
 				typeChecker,
 			);
+
 			props.forEach((prop) => (prop.isNullable = true));
 
 			return props;
@@ -456,7 +498,9 @@ function comptePropertyGroupsFromReferenceNode(
 						item.symbol.declarations[0],
 						typeChecker,
 					);
+
 					props.forEach((prop) => (prop.isNullable = true));
+
 					allProps.push(...props);
 				}
 			});
@@ -470,6 +514,7 @@ function comptePropertyGroupsFromReferenceNode(
 	if (symbol && symbol.declarations?.length === 1) {
 		return computePropertyForType(symbol.declarations[0], typeChecker);
 	}
+
 	return [];
 }
 function comptePropertyGroupsForIntersectionTypes(
@@ -477,6 +522,7 @@ function comptePropertyGroupsForIntersectionTypes(
 	typeChecker: ts.TypeChecker,
 ) {
 	const properties: TelemetryProperty[] = [];
+
 	type.types.forEach((t) =>
 		properties.push(...computePropertyForType(t, typeChecker)),
 	);
@@ -497,6 +543,7 @@ function computePropertyForType(
 		return computePropertiesForLiteralType(type, typeChecker);
 	} else if (ts.isUnionTypeNode(type)) {
 		const props: TelemetryProperty[] = [];
+
 		type.types.forEach((t) => {
 			props.push(...computePropertyForType(t, typeChecker));
 		});
@@ -509,6 +556,7 @@ function computePropertyForType(
 	} else if (ts.isTypeAliasDeclaration(type)) {
 		return computePropertyForType(type.type, typeChecker);
 	}
+
 	return [];
 }
 function getCommentForUnions(t: ts.TypeNode) {
@@ -523,6 +571,7 @@ function getCommentForUnions(t: ts.TypeNode) {
 				? line.trim().replace("/**", "")
 				: line;
 		}
+
 		if (commentLines.length === index + 1) {
 			// Last time, remove trailing `*/`
 			return line.trim().endsWith("*/")
@@ -597,6 +646,7 @@ function generateDocumentationForCommonTypes(fileNames: string[]): void {
 		if (!isNodeExported(node)) {
 			return;
 		}
+
 		if (ts.isModuleDeclaration(node)) {
 			// This is a namespace, visit its children
 			ts.forEachChild(node, visit.bind(undefined, sourceFile));
@@ -613,6 +663,7 @@ function generateDocumentationForCommonTypes(fileNames: string[]): void {
 					typeof prop.descriptions === "string"
 						? prop.descriptions
 						: (prop.descriptions || []).join(" ");
+
 				commonPropertyComments.set(
 					prop.name,
 					comment.split(/\n?\r/).join(" "),
@@ -662,6 +713,7 @@ function generateDocumentation(fileNames: string[]): void {
 		if (!isNodeExported(node)) {
 			return;
 		}
+
 		if (ts.isModuleDeclaration(node)) {
 			// This is a namespace, visit its children
 			ts.forEachChild(node, visit.bind(undefined, sourceFile));
@@ -720,6 +772,7 @@ function generateDocumentation(fileNames: string[]): void {
 										defs[0].textSpan.start,
 										defs[0].textSpan.length,
 									);
+
 									refNode?.parent
 										?.getChildren()
 										?.forEach((c) => {
@@ -734,6 +787,7 @@ function generateDocumentation(fileNames: string[]): void {
 
 							constantName = name;
 						}
+
 						gdprEntryOfCurrentlyComputingTelemetryEventName = [
 							name,
 							GDPRData[
@@ -744,9 +798,11 @@ function generateDocumentation(fileNames: string[]): void {
 						if (entries.has(name)) {
 							return;
 						}
+
 						let jsDocNode: ts.JSDoc | undefined;
 
 						let stopSearching = false;
+
 						m.getChildren().forEach((c) => {
 							if (
 								stopSearching ||
@@ -756,6 +812,7 @@ function generateDocumentation(fileNames: string[]): void {
 
 								return;
 							}
+
 							if (
 								stopSearching ||
 								c.kind === ts.SyntaxKind.ColonToken
@@ -764,8 +821,10 @@ function generateDocumentation(fileNames: string[]): void {
 
 								return;
 							}
+
 							if (ts.isJSDoc(c)) {
 								jsDocNode = c;
+
 								stopSearching = true;
 							}
 						});
@@ -781,6 +840,7 @@ function generateDocumentation(fileNames: string[]): void {
 							gdprEntryOfCurrentlyComputingTelemetryEventName[1]
 								.comment || ""
 						).trim();
+
 						gdprEntryOfCurrentlyComputingTelemetryEventName[1].comment =
 							`${currentGdprComment}${
 								currentGdprComment.length === 0 ||
@@ -798,6 +858,7 @@ function generateDocumentation(fileNames: string[]): void {
 								type,
 								typeChecker,
 							);
+
 							groups.push({ properties });
 						} else if (ts.isUnionTypeNode(type)) {
 							type.types.forEach((t) => {
@@ -807,6 +868,7 @@ function generateDocumentation(fileNames: string[]): void {
 								);
 
 								const comment = getCommentForUnions(t);
+
 								groups.push({
 									description: comment || [],
 									properties,
@@ -820,6 +882,7 @@ function generateDocumentation(fileNames: string[]): void {
 								);
 
 							const comment = getCommentForUnions(type);
+
 							groups.push({ description: comment, properties });
 						} else if (ts.isIntersectionTypeNode(type)) {
 							const properties =
@@ -829,6 +892,7 @@ function generateDocumentation(fileNames: string[]): void {
 								);
 
 							const comment = getCommentForUnions(type);
+
 							groups.push({ description: comment, properties });
 						} else if (
 							type.kind === ts.SyntaxKind.UndefinedKeyword ||
@@ -844,6 +908,7 @@ function generateDocumentation(fileNames: string[]): void {
 						const propertyGroups = groups.filter(
 							(group) => group.properties.length,
 						);
+
 						entries.set(name, {
 							name,
 							description,
@@ -870,6 +935,7 @@ function generateDocumentation(fileNames: string[]): void {
 	if (1 + 1 === 0) {
 		generateTelemetryCSV(values);
 	}
+
 	generateTelemetryGdpr(values);
 
 	if (Object.keys(errorsByOwners).length) {
@@ -878,13 +944,16 @@ function generateDocumentation(fileNames: string[]): void {
 
 			const eventProblems: Record<string, EventProblem> =
 				errorsByOwners[owner];
+
 			Object.keys(eventProblems).forEach((eventName) => {
 				const problems: EventProblem = eventProblems[eventName];
+
 				console.error(
 					colors.red(
 						`    ${eventName} (${problems.eventConstantName}):`,
 					),
 				);
+
 				problems.problems.forEach((error, index) => {
 					console.error(colors.red(`        ${index + 1}. ${error}`));
 				});
@@ -896,6 +965,7 @@ function generateDocumentation(fileNames: string[]): void {
 }
 function generateTelemetryCSV(output: TelemetryEntry[]) {
 	const entries: {}[] = [];
+
 	output.forEach((o) => {
 		if (o.propertyGroups.length === 0) {
 			// an event without any properties.
@@ -918,11 +988,13 @@ function generateTelemetryCSV(output: TelemetryEntry[]) {
 				propertyIsNullable: "",
 			});
 		}
+
 		o.propertyGroups.forEach((og) => {
 			const groupDescription =
 				typeof og.description === "string"
 					? og.description
 					: (og.description || []).join("\n");
+
 			og.properties
 				.sort((a, b) => a.name.localeCompare(b.name))
 				.forEach((p) => {
@@ -968,6 +1040,7 @@ function generateTelemetryCSV(output: TelemetryEntry[]) {
 	const parser = new Parser({ fields });
 
 	const csv = parser.parse(entries);
+
 	fs.writeFileSync("./TELEMETRY.csv", csv);
 }
 
@@ -980,16 +1053,21 @@ const gdprHeader = `// Copyright (c) Microsoft Corporation.
 
 function generateTelemetryGdpr(output: TelemetryEntry[]) {
 	const file = "./src/gdpr.ts";
+
 	fs.writeFileSync(file, "");
+
 	fs.appendFileSync(file, gdprHeader);
 
 	const gdpr = "__GDPR__FRAGMENT__";
+
 	fs.appendFileSync(file, `/* ${gdpr}\n`);
+
 	fs.appendFileSync(file, `   "F1" : {\n`);
 
 	const commonFields = ['     "${include}": ['];
 
 	const fieldListForFile: string[] = [];
+
 	Object.keys(CommonProperties).forEach((key) => {
 		const entry = (CommonProperties as any)[key] as
 			| IPropertyDataMeasurement
@@ -1000,6 +1078,7 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 		const jsDocComment = commonPropertyComments.get(key) || "";
 
 		let comment = (entry.comment || "").split(/\r?\n/).join(" ").trim();
+
 		comment =
 			`${comment}${comment.length === 0 || comment.endsWith(".") ? "" : ". "}${jsDocComment}`.trim();
 
@@ -1016,13 +1095,20 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 			isMeasurement: isMeasurement,
 			comment: comment,
 		};
+
 		fieldListForFile.push(`      "${key}": ${JSON.stringify(json)}`);
 	});
+
 	commonFields.push('       "${F1}"\n');
+
 	commonFields.push("     ]");
+
 	fs.appendFileSync(file, `${fieldListForFile.join(",\n")}\n`);
+
 	fs.appendFileSync(file, `   }\n`);
+
 	fs.appendFileSync(file, ` */\n`);
+
 	fs.appendFileSync(file, "\n");
 
 	output.forEach((item, index) => {
@@ -1059,10 +1145,12 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 				: {};
 
 		const entries: string[] = [];
+
 		Object.keys(properties).forEach((key) => {
 			if (key in CommonProperties) {
 				return;
 			}
+
 			const prop = properties[key];
 
 			const json: Record<string, string> = {
@@ -1075,12 +1163,15 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 			if (prop.expiration) {
 				json.expiration = prop.expiration;
 			}
+
 			entries.push(`     "${key}": ${JSON.stringify(json)},`);
 		});
+
 		Object.keys(measures).forEach((key) => {
 			if (key in CommonProperties) {
 				return;
 			}
+
 			const prop = measures[key];
 
 			const json: Record<string, string | boolean> = {
@@ -1094,14 +1185,17 @@ function generateTelemetryGdpr(output: TelemetryEntry[]) {
 			if (prop.expiration) {
 				json.expiration = prop.expiration;
 			}
+
 			entries.push(`     "${key}": ${JSON.stringify(json)},`);
 		});
+
 		fs.appendFileSync(
 			file,
 			`${header.join("\n")}\n${entries.join("\n")}${entries.length ? "\n" : ""}${commonFields.join(
 				"\n",
 			)}\n${footer.join("\n")}`.trim(),
 		);
+
 		fs.appendFileSync(file, `\n`);
 	});
 }

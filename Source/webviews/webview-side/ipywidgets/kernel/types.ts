@@ -18,7 +18,9 @@ export type ScriptLoader = {
 		moduleVersion: string,
 		error: any,
 	): void;
+
 	loadWidgetScript(moduleName: string, moduleVersion: string): Promise<void>;
+
 	successHandler(
 		className: string,
 		moduleName: string,
@@ -48,6 +50,7 @@ export interface IJupyterLabWidgetManager {
 		this,
 		KernelMessage.IIOPubMessage
 	>;
+
 	dispose(): void;
 	/**
 	 * Close all widgets and empty the widget state.
@@ -92,6 +95,7 @@ export interface IJupyterLabWidgetManager {
 		notebook: INotebookModel,
 		options?: {
 			loadKernel: false;
+
 			loadNotebook: boolean;
 		},
 	): Promise<void>;

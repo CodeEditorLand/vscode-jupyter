@@ -28,6 +28,7 @@ import { sendTelemetryEvent, Telemetry } from "../../telemetry";
 
 export interface IJupyterPasswordConnectInfo {
 	requiresPassword: boolean;
+
 	requestHeaders?: Record<string, string>;
 }
 
@@ -54,11 +55,16 @@ export class JupyterPasswordConnect {
 			this.disposables,
 		);
 	}
+
 	public getPasswordConnectionInfo(options: {
 		url: string;
+
 		isTokenEmpty: boolean;
+
 		handle: string;
+
 		validationErrorMessage?: string;
+
 		disposables?: IDisposable[];
 	}): Promise<IJupyterPasswordConnectInfo> {
 		if (!options.url || options.url.length < 1) {
@@ -88,12 +94,15 @@ export class JupyterPasswordConnect {
 				) {
 					// If we fail to get a valid password connect info, don't save the value
 					logger.warn(`Password for ${newUrl} was invalid.`);
+
 					this.savedConnectInfo.delete(options.handle);
 				}
 
 				return value;
 			});
+
 			result.catch(() => this.savedConnectInfo.delete(options.handle));
+
 			result
 				.finally(() => {
 					if (disposeOnDone) {
@@ -101,6 +110,7 @@ export class JupyterPasswordConnect {
 					}
 				})
 				.catch(noop);
+
 			this.savedConnectInfo.set(options.handle, result);
 		}
 
@@ -120,8 +130,11 @@ export class JupyterPasswordConnect {
 	 */
 	private async getJupyterConnectionInfo(options: {
 		url: string;
+
 		isTokenEmpty: boolean;
+
 		validationErrorMessage?: string;
+
 		disposables: IDisposable[];
 	}): Promise<IJupyterPasswordConnectInfo> {
 		let xsrfCookie: string | undefined;
@@ -139,14 +152,23 @@ export class JupyterPasswordConnect {
 			// Get password first
 			if (requiresPassword && options.isTokenEmpty) {
 				const input = window.createInputBox();
+
 				options.disposables.push(input);
+
 				input.title = DataScience.jupyterSelectPasswordTitle;
+
 				input.placeholder = DataScience.jupyterSelectPasswordPrompt;
+
 				input.ignoreFocusOut = true;
+
 				input.password = true;
+
 				input.validationMessage = options.validationErrorMessage || "";
+
 				input.show();
+
 				input.buttons = [QuickInputButtons.Back];
+
 				userPassword = await new Promise<string>((resolve, reject) => {
 					input.onDidTriggerButton(
 						(e) => {
@@ -157,16 +179,19 @@ export class JupyterPasswordConnect {
 						this,
 						options.disposables,
 					);
+
 					input.onDidChangeValue(
 						() => (input.validationMessage = ""),
 						this,
 						options.disposables,
 					);
+
 					input.onDidAccept(
 						() => resolve(input.value),
 						this,
 						options.disposables,
 					);
+
 					input.onDidHide(
 						() => reject(InputFlowAction.cancel),
 						this,
@@ -195,12 +220,15 @@ export class JupyterPasswordConnect {
 						xsrfCookie,
 						userPassword || "",
 					);
+
 					sessionCookieName = sessionResult.sessionCookieName;
+
 					sessionCookieValue = sessionResult.sessionCookieValue;
 				} else {
 					// Special case for Kubeflow, see https://github.com/microsoft/vscode-jupyter/issues/8441
 					// get xsrf cookie with session cookie
 					sessionCookieName = "authservice_session";
+
 					sessionCookieValue = userPassword;
 
 					xsrfCookie = await this.getXSRFToken(
@@ -271,6 +299,7 @@ export class JupyterPasswordConnect {
 
 		if (sessionCookie != "") {
 			tokenUrl = new URL("tree", addTrailingSlash(url)).toString();
+
 			headers = {
 				Connection: "keep-alive",
 				Cookie: sessionCookie,
@@ -310,6 +339,7 @@ export class JupyterPasswordConnect {
 			if (response.url.toLowerCase().includes("/login?")) {
 				return true;
 			}
+
 			if (response.url.toLowerCase().includes("/lab?")) {
 				return false;
 			}
@@ -317,6 +347,7 @@ export class JupyterPasswordConnect {
 		// This is most likely not a Jupyter Lab server
 		// A jupyter server will redirect if you ask for the tree when a login is required
 		const treeUrl = new URL("tree?", addTrailingSlash(url)).toString();
+
 		response = await this.makeRequest(treeUrl, {
 			method: "get",
 			redirect: "manual",
@@ -330,6 +361,7 @@ export class JupyterPasswordConnect {
 
 			return false;
 		}
+
 		return response.status !== 200;
 	}
 
@@ -368,6 +400,7 @@ export class JupyterPasswordConnect {
 
 				if (value === enableOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
+
 					await this.configService.updateSetting(
 						"allowUnauthorizedRemoteConnection",
 						true,
@@ -383,6 +416,7 @@ export class JupyterPasswordConnect {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
 				}
 			}
+
 			throw e;
 		}
 	}
@@ -399,6 +433,7 @@ export class JupyterPasswordConnect {
 		password: string,
 	): Promise<{
 		sessionCookieName: string | undefined;
+
 		sessionCookieValue: string | undefined;
 	}> {
 		let sessionCookieName: string | undefined;
@@ -406,7 +441,9 @@ export class JupyterPasswordConnect {
 		let sessionCookieValue: string | undefined;
 		// Create the form params that we need
 		const postParams = new URLSearchParams();
+
 		postParams.append("_xsrf", xsrfCookie);
+
 		postParams.append("password", password);
 
 		const response = await this.makeRequest(
@@ -434,6 +471,7 @@ export class JupyterPasswordConnect {
 
 				if (cookie) {
 					sessionCookieName = cookie[0];
+
 					sessionCookieValue = cookie[1];
 				}
 			}
@@ -457,6 +495,7 @@ export class JupyterPasswordConnect {
 				const cookieKey = value.substring(0, value.indexOf("="));
 
 				const cookieVal = value.substring(value.indexOf("=") + 1);
+
 				cookieList.set(cookieKey, cookieVal);
 			});
 		}
@@ -482,5 +521,6 @@ export function addTrailingSlash(url: string): string {
 	if (newUrl[newUrl.length - 1] !== "/") {
 		newUrl = `${newUrl}/`;
 	}
+
 	return newUrl;
 }

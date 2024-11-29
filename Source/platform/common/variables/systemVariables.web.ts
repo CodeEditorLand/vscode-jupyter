@@ -14,8 +14,11 @@ import { AbstractSystemVariables } from "./systemVariables";
  */
 export class SystemVariables extends AbstractSystemVariables {
 	private _workspaceFolder: string;
+
 	private _filePath: string | undefined;
+
 	private _lineNumber: number | undefined;
+
 	private _selectedText: string | undefined;
 
 	constructor(file: Uri | undefined, rootFolder: string | undefined) {
@@ -24,14 +27,17 @@ export class SystemVariables extends AbstractSystemVariables {
 		const workspaceFolder = file
 			? workspace.getWorkspaceFolder(file)
 			: undefined;
+
 		this._workspaceFolder = workspaceFolder
 			? workspaceFolder.uri.path
 			: rootFolder || "";
+
 		this._filePath = file ? file.path : undefined;
 
 		if (window.activeTextEditor) {
 			this._lineNumber =
 				window.activeTextEditor.selection.anchor.line + 1;
+
 			this._selectedText = window.activeTextEditor.document.getText(
 				new Range(
 					window.activeTextEditor.selection.start,

@@ -57,6 +57,7 @@ const PortFormatString = `kernelLauncherPortStart_{0}.tmp`;
 @injectable()
 export class KernelLauncher implements IKernelLauncher {
 	private static startPortPromise = KernelLauncher.computeStartPort();
+
 	private portChain: Promise<number[]> | undefined;
 
 	constructor(
@@ -94,6 +95,7 @@ export class KernelLauncher implements IKernelLauncher {
 						os.tmpdir(),
 						format(PortFormatString, portStart.toString()),
 					);
+
 					await fsextra.open(filePath, "wx");
 
 					// If that works, we have our port
@@ -103,6 +105,7 @@ export class KernelLauncher implements IKernelLauncher {
 					portStart += 1_000;
 				}
 			}
+
 			logger.trace(
 				`Computed port start for KernelLauncher is : ${result}`,
 			);
@@ -137,6 +140,7 @@ export class KernelLauncher implements IKernelLauncher {
 			cancelToken,
 			this.getKernelConnection(kernelConnectionMetadata),
 		);
+
 		tracker?.stop();
 		// Create a new output channel for this kernel
 		const baseName = resource ? path.basename(resource.fsPath) : "";
@@ -151,6 +155,7 @@ export class KernelLauncher implements IKernelLauncher {
 						"log",
 					)
 				: undefined;
+
 		outputChannel?.clear();
 
 		const portAttributeProvider = ignorePortForwarding(
@@ -176,11 +181,13 @@ export class KernelLauncher implements IKernelLauncher {
 			this.pythonKernelInterruptDaemon,
 			this.platformService,
 		);
+
 		once(kernelProcess.onDidDispose)(
 			() => portAttributeProvider.dispose(),
 			this,
 			this.disposables,
 		);
+
 		once(kernelProcess.exited)(
 			() => outputChannel?.dispose(),
 			this,
@@ -194,6 +201,7 @@ export class KernelLauncher implements IKernelLauncher {
 			);
 		} catch (ex) {
 			await kernelProcess.dispose();
+
 			Cancellation.throwIfCanceled(cancelToken);
 
 			throw ex;
@@ -212,11 +220,17 @@ export class KernelLauncher implements IKernelLauncher {
 							),
 					},
 				);
+
 				UsedPorts.delete(connection.control_port);
+
 				UsedPorts.delete(connection.hb_port);
+
 				UsedPorts.delete(connection.iopub_port);
+
 				UsedPorts.delete(connection.shell_port);
+
 				UsedPorts.delete(connection.stdin_port);
+
 				disposable.dispose();
 			},
 			this,
@@ -243,6 +257,7 @@ export class KernelLauncher implements IKernelLauncher {
 		if (this.portChain) {
 			await this.portChain;
 		}
+
 		this.portChain = this.getConnectionPorts();
 
 		return this.portChain;
@@ -259,6 +274,7 @@ export class KernelLauncher implements IKernelLauncher {
 
 			return KernelLauncher.findNextFreePort(maxPort);
 		}
+
 		ports.forEach((item) => UsedPorts.add(item));
 
 		return ports;
@@ -316,6 +332,7 @@ async function logIPyKernelPath(
 	) {
 		return;
 	}
+
 	const service = await pythonExecFactory.createActivatedEnvironment({
 		interpreter,
 		resource,
@@ -332,6 +349,7 @@ async function logIPyKernelPath(
 	if (token.isCancellationRequested) {
 		return;
 	}
+
 	const displayInterpreterPath = getDisplayPath(interpreter.uri);
 
 	if (output.stdout) {
@@ -353,6 +371,7 @@ async function logIPyKernelPath(
 			);
 		}
 	}
+
 	if (output.stderr) {
 		const formattedOutput = splitLines(output.stderr.trim(), {
 			removeEmptyEntries: true,
@@ -360,6 +379,7 @@ async function logIPyKernelPath(
 		})
 			.map((l, i) => (i === 0 ? l : `    ${l}`))
 			.join("\n");
+
 		logger.warn(
 			`Stderr output when getting ipykernel version & path ${formattedOutput} for ${displayInterpreterPath}`,
 		);

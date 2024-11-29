@@ -28,11 +28,14 @@ export interface IEnvironmentVariablesService {
 		source: EnvironmentVariables,
 		target: EnvironmentVariables,
 	): void;
+
 	appendPythonPath(
 		vars: EnvironmentVariables,
 		...pythonPaths: string[]
 	): void;
+
 	appendPath(vars: EnvironmentVariables, ...paths: string[]): void;
+
 	prependPath(vars: EnvironmentVariables, ...paths: string[]): void;
 	/**
 	 * Special case where it will merge the paths from the two EnvironmentVariables together.
@@ -54,12 +57,17 @@ export interface IStringDictionary<V> {
 
 export interface ISystemVariables {
 	resolve(value: string): string;
+
 	resolve(value: string[]): string[];
+
 	resolve(value: IStringDictionary<string>): IStringDictionary<string>;
+
 	resolve(value: IStringDictionary<string[]>): IStringDictionary<string[]>;
+
 	resolve(
 		value: IStringDictionary<IStringDictionary<string>>,
 	): IStringDictionary<IStringDictionary<string>>;
+
 	resolveAny<T>(value: T): T;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[key: string]: any;

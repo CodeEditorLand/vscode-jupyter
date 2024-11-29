@@ -17,7 +17,9 @@ export class ServiceManager implements IServiceManager {
 	public getContainer() {
 		return this.container;
 	}
+
 	constructor(private readonly container: Container) {}
+
 	public add<T>(
 		serviceIdentifier: identifier<T>,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,6 +42,7 @@ export class ServiceManager implements IServiceManager {
 			});
 		}
 	}
+
 	public addFactory<T>(
 		factoryIdentifier: interfaces.ServiceIdentifier<interfaces.Factory<T>>,
 		factoryMethod: interfaces.FactoryCreator<T>,
@@ -94,6 +97,7 @@ export class ServiceManager implements IServiceManager {
 			this.container.bind<T>(serviceIdentifier).toConstantValue(instance);
 		}
 	}
+
 	public get<T>(
 		serviceIdentifier: identifier<T>,
 		name?: string | number | symbol | undefined,
@@ -102,6 +106,7 @@ export class ServiceManager implements IServiceManager {
 			? this.container.getNamed<T>(serviceIdentifier, name)
 			: this.container.get<T>(serviceIdentifier);
 	}
+
 	public tryGet<T>(
 		serviceIdentifier: identifier<T>,
 		name?: string | number | symbol | undefined,
@@ -114,6 +119,7 @@ export class ServiceManager implements IServiceManager {
 			// This might happen after the container has been destroyed
 		}
 	}
+
 	public getAll<T>(
 		serviceIdentifier: identifier<T>,
 		name?: string | number | symbol | undefined,
@@ -176,6 +182,7 @@ export class ServiceManager implements IServiceManager {
 
 	public dispose() {
 		this.container.unbindAll();
+
 		this.container.unload();
 	}
 }

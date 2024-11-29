@@ -48,12 +48,16 @@ export abstract class DebuggingManagerBase
 	implements IDisposable, IDebuggingManager
 {
 	protected notebookToDebugger = new Map<NotebookDocument, Debugger>();
+
 	protected notebookToDebugAdapter = new Map<
 		NotebookDocument,
 		KernelDebugAdapterBase
 	>();
+
 	protected notebookInProgress = new Set<NotebookDocument>();
+
 	protected readonly disposables: IDisposable[] = [];
+
 	private _doneDebugging = new EventEmitter<void>();
 
 	public constructor(
@@ -73,6 +77,7 @@ export abstract class DebuggingManagerBase
 
 				if (dbg) {
 					await debug.stopDebugging(dbg.session);
+
 					this.onDidStopDebugging(document);
 				}
 			}),
@@ -131,6 +136,7 @@ export abstract class DebuggingManagerBase
 			await debug.startDebugging(undefined, config, options);
 		} catch (err) {
 			logger.error(`Can't start debugging (${err})`);
+
 			window
 				.showErrorMessage(DataScience.cantStartDebugging)
 				.then(noop, noop);
@@ -142,6 +148,7 @@ export abstract class DebuggingManagerBase
 		adapter: KernelDebugAdapterBase,
 	) {
 		this.notebookToDebugAdapter.set(notebook, adapter);
+
 		this.disposables.push(
 			adapter.onDidEndSession(this.endSession.bind(this)),
 		);
@@ -149,12 +156,15 @@ export abstract class DebuggingManagerBase
 
 	protected async endSession(session: DebugSession) {
 		logger.info(`Ending debug session ${session.id}`);
+
 		this._doneDebugging.fire();
 
 		for (const [doc, dbg] of this.notebookToDebugger.entries()) {
 			if (dbg && session.id === dbg.session.id) {
 				this.notebookToDebugger.delete(doc);
+
 				this.notebookToDebugAdapter.delete(doc);
+
 				this.onDidStopDebugging(doc);
 
 				break;
@@ -196,6 +206,7 @@ export abstract class DebuggingManagerBase
 				"jupyterExtension",
 			);
 		}
+
 		return kernel;
 	}
 
@@ -234,6 +245,7 @@ export abstract class DebuggingManagerBase
 
 				break;
 			}
+
 			case IpykernelCheckResult.ControllerNotSelected: {
 				if (allowSelectKernel) {
 					await commands.executeCommand("notebook.selectKernel", {
@@ -260,6 +272,7 @@ export abstract class DebuggingManagerBase
 				if (!controller) {
 					return IpykernelCheckResult.ControllerNotSelected;
 				}
+
 				kernel = this.kernelProvider.getOrCreate(doc, {
 					metadata: controller.connection,
 					controller: controller?.controller,
@@ -276,6 +289,7 @@ export abstract class DebuggingManagerBase
 				) {
 					return IpykernelCheckResult.Ok;
 				}
+
 				if (
 					connection.kind === "connectToLiveRemoteKernel" &&
 					connection.kernelModel.metadata?.debugger
@@ -283,9 +297,11 @@ export abstract class DebuggingManagerBase
 					return IpykernelCheckResult.Ok;
 				}
 			}
+
 			const execution = this.kernelProvider.getKernelExecution(kernel);
 
 			const result = await isUsingIpykernel6OrLater(execution);
+
 			sendTelemetryEvent(DebuggingTelemetry.ipykernel6Status, undefined, {
 				status:
 					result === IpykernelCheckResult.Ok
@@ -297,6 +313,7 @@ export abstract class DebuggingManagerBase
 		} catch (ex) {
 			logger.error("Debugging: Could not check for ipykernel 6", ex);
 		}
+
 		return IpykernelCheckResult.Unknown;
 	}
 
@@ -309,6 +326,7 @@ export abstract class DebuggingManagerBase
 
 		if (response === DataScience.setup) {
 			sendTelemetryEvent(DebuggingTelemetry.clickedOnSetup);
+
 			void env.openExternal(
 				Uri.parse(
 					"https://github.com/microsoft/vscode-jupyter/wiki/Setting-Up-Run-by-Line-and-Debugging-for-Notebooks",

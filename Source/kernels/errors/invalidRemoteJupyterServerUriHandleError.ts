@@ -17,7 +17,9 @@ export class InvalidRemoteJupyterServerUriHandleError extends BaseError {
 	constructor(
 		public readonly serverProviderHandle: {
 			id: string;
+
 			handle: string;
+
 			extensionId: string;
 		},
 	) {

@@ -8,18 +8,22 @@ function valueToLogString(value: unknown, kind: string): string {
 	if (Array.isArray(value)) {
 		return value.map((item) => valueToLogString(item, kind)).join(", ");
 	}
+
 	if (value === undefined) {
 		return "undefined";
 	}
+
 	if (value === null) {
 		return "null";
 	}
+
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		if (value && (value as any).path) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			return `<Uri:${(value as any).path}>`;
 		}
+
 		return JSON.stringify(value);
 	} catch {
 		return `<${kind} cannot be serialized for logging>`;
@@ -32,6 +36,7 @@ export function argsToLogString(args: Arguments): string {
 	if (!args) {
 		return "";
 	}
+
 	try {
 		const argStrings = args.map((item, index) => {
 			const valueString = valueToLogString(item, "argument");

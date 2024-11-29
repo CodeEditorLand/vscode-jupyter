@@ -39,29 +39,35 @@ export class GeneratedCodeStorageManager
 	) {
 		disposables.push(this);
 	}
+
 	dispose() {
 		dispose(this.disposables);
 	}
+
 	activate(): void {
 		this.kernelProvider.onDidCreateKernel(
 			this.onDidCreateKernel,
 			this,
 			this.disposables,
 		);
+
 		this.controllers.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
 			this.disposables,
 		);
 	}
+
 	private onNotebookControllerSelected({
 		notebook,
 	}: {
 		notebook: NotebookDocument;
 	}) {
 		this.storageFactory.get({ notebook })?.clear();
+
 		this.codeGeneratorFactory.get(notebook)?.reset();
 	}
+
 	private onDidCreateKernel(kernel: IKernel) {
 		const notebook = kernel.notebook;
 
@@ -77,6 +83,7 @@ export class GeneratedCodeStorageManager
 		kernel.onRestarted(
 			() => {
 				this.storageFactory.get({ notebook })?.clear();
+
 				this.codeGeneratorFactory.getOrCreate(notebook).reset();
 			},
 			this,

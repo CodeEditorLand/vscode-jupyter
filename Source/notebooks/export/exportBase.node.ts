@@ -69,6 +69,7 @@ export class ExportBase implements IExportBase {
 				sourceDocument.uri,
 				interpreter,
 			);
+
 			await this.fs.writeFile(target, contents);
 
 			return;
@@ -131,6 +132,7 @@ export class ExportBase implements IExportBase {
 
 			return;
 		}
+
 		try {
 			if ((await this.fs.stat(Uri.file(tempTarget.filePath))).size > 1) {
 				await this.fs.copy(Uri.file(tempTarget.filePath), target);

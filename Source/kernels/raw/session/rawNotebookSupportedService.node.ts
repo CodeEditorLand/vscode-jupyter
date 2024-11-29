@@ -39,6 +39,7 @@ export class RawNotebookSupportedService
 		if (typeof this._isSupported === "boolean") {
 			return this._isSupported;
 		}
+
 		if (
 			(
 				process.env.VSC_JUPYTER_NON_RAW_NATIVE_TEST || ""
@@ -46,8 +47,10 @@ export class RawNotebookSupportedService
 		) {
 			return false;
 		}
+
 		try {
 			getZeroMQ();
+
 			this._isSupported = true;
 		} catch (e) {
 			this._isSupported = false;

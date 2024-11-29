@@ -29,7 +29,9 @@ export class KernelApi implements IExtensionSyncActivationService {
 			);
 
 		const disposableStore = new DisposableStore();
+
 		disposables.push(disposableStore);
+
 		disposables.push(
 			commands.registerCommand("jupyter.manageAccessToKernels", () =>
 				manageKernelAccess(disposableStore),
@@ -42,6 +44,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	const accessInfo = await getExtensionAccessListForManagement();
 
 	const quickPickItems: (QuickPickItem & { extensionId: string })[] = [];
+
 	Array.from(accessInfo.entries()).forEach(([extensionId]) => {
 		const displayName =
 			extensions.getExtension(extensionId)?.packageJSON?.displayName;
@@ -49,6 +52,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 		if (!displayName) {
 			return;
 		}
+
 		quickPickItems.push({
 			label: displayName,
 			description: extensionId,
@@ -57,6 +61,7 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	});
 
 	let disposables: IDisposable[] = [];
+
 	toDispose.add({
 		dispose: () => {
 			disposables = dispose(disposables);
@@ -66,20 +71,29 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	const quickPick = window.createQuickPick<
 		QuickPickItem & { extensionId: string }
 	>();
+
 	quickPick.title = l10n.t("Manage Access To Jupyter Kernels");
+
 	quickPick.placeholder = l10n.t(
 		"Choose which extensions can access Jupyter Kernels",
 	);
+
 	quickPick.items = quickPickItems;
+
 	quickPick.selectedItems = quickPickItems.filter(
 		(item) => accessInfo.get(item.extensionId) === true,
 	);
+
 	quickPick.canSelectMany = true;
+
 	quickPick.ignoreFocusOut = false;
 
 	let accepted = false;
+
 	disposables.push(quickPick);
+
 	quickPick.show();
+
 	await Promise.race([
 		toPromise(quickPick.onDidAccept, undefined, disposables).then(
 			() => (accepted = true),
@@ -90,8 +104,10 @@ async function manageKernelAccess(toDispose: DisposableStore) {
 	if (!accepted) {
 		return;
 	}
+
 	await updateListOfExtensionsAllowedToAccessApi(
 		quickPick.selectedItems.map((item) => item.extensionId),
 	);
+
 	disposables = dispose(disposables);
 }

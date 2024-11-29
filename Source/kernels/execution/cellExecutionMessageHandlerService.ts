@@ -19,6 +19,7 @@ import { CellExecutionMessageHandler } from "./cellExecutionMessageHandler";
  */
 export class CellExecutionMessageHandlerService {
 	private readonly disposables: IDisposable[] = [];
+
 	private readonly messageHandlers = new WeakMap<
 		NotebookCell,
 		CellExecutionMessageHandler
@@ -35,6 +36,7 @@ export class CellExecutionMessageHandlerService {
 				if (e.notebook !== this.notebook) {
 					return;
 				}
+
 				e.contentChanges.forEach((change) =>
 					// If the cell is deleted, then dispose the corresponding handler.
 					change.removedCells.forEach((cell) =>
@@ -46,6 +48,7 @@ export class CellExecutionMessageHandlerService {
 			this.disposables,
 		);
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 
@@ -55,14 +58,17 @@ export class CellExecutionMessageHandlerService {
 				.forEach((cell) => this.messageHandlers.get(cell)?.dispose());
 		}
 	}
+
 	public registerListenerForExecution(
 		cell: NotebookCell,
 		options: {
 			kernel: Kernel.IKernelConnection;
+
 			request: Kernel.IShellFuture<
 				KernelMessage.IExecuteRequestMsg,
 				KernelMessage.IExecuteReplyMsg
 			>;
+
 			cellExecution: NotebookCellExecution;
 		},
 	): CellExecutionMessageHandler {
@@ -84,11 +90,14 @@ export class CellExecutionMessageHandlerService {
 
 		return handler;
 	}
+
 	public registerListenerForResumingExecution(
 		cell: NotebookCell,
 		options: {
 			kernel: Kernel.IKernelConnection;
+
 			msg_id: string;
+
 			cellExecution: NotebookCellExecution;
 		},
 	): CellExecutionMessageHandler {

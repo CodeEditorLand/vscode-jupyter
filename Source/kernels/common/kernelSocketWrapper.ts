@@ -11,11 +11,17 @@ import { IKernelSocket } from "../types";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type IWebSocketLike = {
 	onopen: ((this: any, event: any) => void) | null;
+
 	onerror: ((this: any, event: any) => void) | null;
+
 	onclose: ((this: any, event: any) => void) | null;
+
 	onmessage: ((this: any, event: any) => void) | null;
+
 	emit(event: string | symbol, ...args: any[]): boolean;
+
 	send(data: any, a2: any): void;
+
 	close(): void;
 };
 
@@ -57,24 +63,33 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 ) {
 	return class BaseKernelSocket extends SuperClass implements IKernelSocket {
 		private receiveHooks: ((data: WebSocketWS.Data) => Promise<void>)[];
+
 		private sendHooks: ((
 			data: any,
 			cb?: (err?: Error) => void,
 		) => Promise<void>)[];
+
 		private msgChain: Promise<any>;
+
 		private sendChain: Promise<any>;
+
 		private _onAnyMessage = new EventEmitter<{
 			msg: string;
+
 			direction: "send";
 		}>();
+
 		public onAnyMessage = this._onAnyMessage.event;
 
 		constructor(...rest: any[]) {
 			super(...rest);
 			// Make sure the message chain is initialized
 			this.msgChain = Promise.resolve();
+
 			this.sendChain = Promise.resolve();
+
 			this.receiveHooks = [];
+
 			this.sendHooks = [];
 		}
 
@@ -130,18 +145,21 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 		public override emit(event: string | symbol, ...args: any[]): boolean {
 			if (event === "unexpected-response" && args.length === 2) {
 				const response: Record<string, any> | undefined = args[1];
+
 				logger.error(
 					`Error in websocket: (${response?.statusCode}) ${response?.statusMessage}, ${response?.path}, Headers = ${JSON.stringify(
 						response?.headers,
 					)}`,
 				);
 			}
+
 			if (event === "error") {
 				logger.error(
 					`Error in websocket`,
 					args.length ? args[0] : undefined,
 				);
 			}
+
 			return this.handleEvent(
 				(ev, ...args) => super.emit(ev, ...args),
 				event,
@@ -152,6 +170,7 @@ export function KernelSocketWrapper<T extends ClassType<IWebSocketLike>>(
 		public addReceiveHook(hook: (data: WebSocketWS.Data) => Promise<void>) {
 			this.receiveHooks.push(hook);
 		}
+
 		public removeReceiveHook(
 			hook: (data: WebSocketWS.Data) => Promise<void>,
 		) {

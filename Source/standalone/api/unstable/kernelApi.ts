@@ -41,6 +41,7 @@ export class JupyterKernelServiceFactory
 	implements IExportedKernelServiceFactory
 {
 	private readonly chainedApiAccess = new PromiseChain();
+
 	private readonly extensionApi = new Map<string, IExportedKernelService>();
 
 	constructor(
@@ -58,6 +59,7 @@ export class JupyterKernelServiceFactory
 		@inject(IServiceContainer)
 		private readonly serviceContainer: IServiceContainer,
 	) {}
+
 	public async getService() {
 		const info = this.extensions.determineExtensionFromCallStack();
 
@@ -68,6 +70,7 @@ export class JupyterKernelServiceFactory
 		if (!accessInfo.accessAllowed) {
 			return;
 		}
+
 		if (this.extensionApi.get(accessInfo.extensionId)) {
 			return this.extensionApi.get(accessInfo.extensionId);
 		}
@@ -81,6 +84,7 @@ export class JupyterKernelServiceFactory
 			this.controllerRegistration,
 			this.serviceContainer,
 		);
+
 		this.extensionApi.set(accessInfo.extensionId, service);
 
 		return service;
@@ -93,20 +97,25 @@ export class JupyterKernelServiceFactory
 class JupyterKernelService implements IExportedKernelService {
 	private readonly _onDidChangeKernelSpecifications =
 		new EventEmitter<void>();
+
 	private readonly _onDidChangeKernels = new EventEmitter<void>();
+
 	private readonly translatedConnections = new WeakMap<
 		Readonly<IKernelKernelConnectionMetadata>,
 		KernelConnectionMetadata
 	>();
+
 	public get onDidChangeKernelSpecifications(): Event<void> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
 			pemUsed: "onDidChangeKernelSpecifications",
 		});
+
 		logger.debug(`API called from ${this.callingExtensionId}`);
 
 		return this._onDidChangeKernelSpecifications.event;
 	}
+
 	public get onDidChangeKernels(): Event<void> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
@@ -115,11 +124,15 @@ class JupyterKernelService implements IExportedKernelService {
 
 		return this._onDidChangeKernels.event;
 	}
+
 	private _status: "idle" | "discovering";
+
 	public get status() {
 		return this._status;
 	}
+
 	private readonly _onDidChangeStatus = new EventEmitter<void>();
+
 	public get onDidChangeStatus(): Event<void> {
 		return this._onDidChangeStatus.event;
 	}
@@ -138,14 +151,17 @@ class JupyterKernelService implements IExportedKernelService {
 		@inject(IServiceContainer) private serviceContainer: IServiceContainer,
 	) {
 		this._status = this.kernelFinder.status;
+
 		this.kernelFinder.onDidChangeStatus(
 			() => {
 				this._status = this.kernelFinder.status;
+
 				this._onDidChangeStatus.fire();
 			},
 			this,
 			disposables,
 		);
+
 		this.kernelProvider.onDidDisposeKernel(
 			(e) => {
 				logger.ci(
@@ -153,11 +169,13 @@ class JupyterKernelService implements IExportedKernelService {
 						e.kernelConnectionMetadata.id
 					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} disposed`,
 				);
+
 				this._onDidChangeKernels.fire();
 			},
 			this,
 			disposables,
 		);
+
 		this.kernelProvider.onDidStartKernel(
 			(e) => {
 				logger.ci(
@@ -165,11 +183,13 @@ class JupyterKernelService implements IExportedKernelService {
 						e.kernelConnectionMetadata.id
 					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} started`,
 				);
+
 				this._onDidChangeKernels.fire();
 			},
 			this,
 			disposables,
 		);
+
 		this.thirdPartyKernelProvider.onDidDisposeKernel(
 			(e) => {
 				logger.ci(
@@ -177,11 +197,13 @@ class JupyterKernelService implements IExportedKernelService {
 						e.kernelConnectionMetadata.id
 					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} disposed`,
 				);
+
 				this._onDidChangeKernels.fire();
 			},
 			this,
 			disposables,
 		);
+
 		this.thirdPartyKernelProvider.onDidStartKernel(
 			(e) => {
 				logger.ci(
@@ -189,17 +211,20 @@ class JupyterKernelService implements IExportedKernelService {
 						e.kernelConnectionMetadata.id
 					}, ${e.kernelConnectionMetadata.interpreter?.uri.toString()} started`,
 				);
+
 				this._onDidChangeKernels.fire();
 			},
 			this,
 			disposables,
 		);
+
 		this.controllerRegistration.onDidChange(
 			() => this._onDidChangeKernelSpecifications.fire(),
 			this,
 			disposables,
 		);
 	}
+
 	async getKernelSpecifications(): Promise<KernelConnectionMetadata[]> {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
 			extensionId: this.callingExtensionId,
@@ -210,8 +235,10 @@ class JupyterKernelService implements IExportedKernelService {
 			this.translateKernelConnectionMetadataToExportedType(item),
 		);
 	}
+
 	getActiveKernels(): {
 		metadata: KernelConnectionMetadata;
+
 		uri: Uri | undefined;
 	}[] {
 		sendTelemetryEvent(Telemetry.JupyterKernelApiUsage, undefined, {
@@ -221,11 +248,14 @@ class JupyterKernelService implements IExportedKernelService {
 
 		const kernels: {
 			metadata: KernelConnectionMetadata;
+
 			uri: Uri | undefined;
+
 			id: string;
 		}[] = [];
 
 		const kernelsAlreadyListed = new Set<string>();
+
 		this.kernelProvider.kernels
 			.filter(
 				(item) =>
@@ -242,6 +272,7 @@ class JupyterKernelService implements IExportedKernelService {
 				if (kernel && kernel.session?.kernel?.id) {
 					kernelsAlreadyListed.add(kernel.session.kernel.id);
 				}
+
 				kernels.push({
 					metadata:
 						this.translateKernelConnectionMetadataToExportedType(
@@ -251,6 +282,7 @@ class JupyterKernelService implements IExportedKernelService {
 					id: item.id,
 				});
 			});
+
 		this.thirdPartyKernelProvider.kernels
 			.filter(
 				(item) =>
@@ -267,6 +299,7 @@ class JupyterKernelService implements IExportedKernelService {
 				if (kernel && kernel.session?.kernel?.id) {
 					kernelsAlreadyListed.add(kernel.session.kernel.id);
 				}
+
 				kernels.push({
 					metadata:
 						this.translateKernelConnectionMetadataToExportedType(
@@ -276,19 +309,23 @@ class JupyterKernelService implements IExportedKernelService {
 					id: item.id,
 				});
 			});
+
 		this.controllerRegistration.registered.forEach((item) => {
 			if (item.controller.notebookType !== JupyterNotebookView) {
 				return;
 			}
+
 			if (item.connection.kind !== "connectToLiveRemoteKernel") {
 				return;
 			}
+
 			if (
 				!item.connection.kernelModel.id ||
 				kernelsAlreadyListed.has(item.connection.kernelModel.id)
 			) {
 				return;
 			}
+
 			kernels.push({
 				metadata: item.connection as KernelConnectionMetadata,
 				uri: undefined,
@@ -298,9 +335,11 @@ class JupyterKernelService implements IExportedKernelService {
 
 		return kernels;
 	}
+
 	getKernel(uri: Uri):
 		| {
 				metadata: KernelConnectionMetadata;
+
 				connection: Session.ISessionConnection;
 		  }
 		| undefined {
@@ -322,6 +361,7 @@ class JupyterKernelService implements IExportedKernelService {
 			};
 		}
 	}
+
 	async startKernel(
 		spec: KernelConnectionMetadata,
 		uri: Uri,
@@ -333,6 +373,7 @@ class JupyterKernelService implements IExportedKernelService {
 
 		return this.startOrConnect(spec, uri);
 	}
+
 	async connect(
 		spec: ActiveKernel,
 		uri: Uri,
@@ -344,6 +385,7 @@ class JupyterKernelService implements IExportedKernelService {
 
 		return this.startOrConnect(spec, uri);
 	}
+
 	private async startOrConnect(
 		spec: KernelConnectionMetadata | ActiveKernel,
 		uri: Uri,
@@ -355,6 +397,7 @@ class JupyterKernelService implements IExportedKernelService {
 		if (!connection) {
 			throw new Error("Not found");
 		}
+
 		const kernel = await KernelConnector.connectToKernel(
 			connection,
 			this.serviceContainer,
@@ -367,8 +410,10 @@ class JupyterKernelService implements IExportedKernelService {
 		if (!kernel?.session) {
 			throw new Error("Not found");
 		}
+
 		return wrapKernelSession(kernel.session);
 	}
+
 	private translateKernelConnectionMetadataToExportedType(
 		connection: Readonly<IKernelKernelConnectionMetadata>,
 	): KernelConnectionMetadata {
@@ -382,8 +427,10 @@ class JupyterKernelService implements IExportedKernelService {
 			const translatedConnection = Object.freeze(
 				BaseKernelConnectionMetadata.fromJSON(connection.toJSON()),
 			) as KernelConnectionMetadata;
+
 			this.translatedConnections.set(connection, translatedConnection);
 		}
+
 		return this.translatedConnections.get(connection)!;
 	}
 }

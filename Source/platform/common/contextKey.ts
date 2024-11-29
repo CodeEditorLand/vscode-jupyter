@@ -12,6 +12,7 @@ export class ContextKey<T extends ContextKeyValue = boolean> {
 	public get value(): T | undefined {
 		return this.lastValue;
 	}
+
 	private lastValue?: T;
 
 	constructor(private name: string) {}
@@ -20,7 +21,9 @@ export class ContextKey<T extends ContextKeyValue = boolean> {
 		if (this.lastValue === value) {
 			return;
 		}
+
 		this.lastValue = value;
+
 		await commands.executeCommand("setContext", this.name, this.lastValue);
 	}
 }

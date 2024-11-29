@@ -21,6 +21,7 @@ export function getZeroMQ(): typeof import("zeromq") {
 		const zmq: typeof import("zeromq") = require(zeromqModuleName);
 		// We do not want to block the process from exiting if there are any pending messages.
 		zmq.context.blocky = false;
+
 		sendZMQTelemetry(false).catch(noop);
 
 		return zmq;
@@ -34,7 +35,9 @@ export function getZeroMQ(): typeof import("zeromq") {
 					"zeromqold",
 				),
 			);
+
 			logger.info("ZMQ loaded via fallback mechanism.");
+
 			sendZMQTelemetry(false, true, e.message || e.toString()).catch(
 				noop,
 			);
@@ -47,6 +50,7 @@ export function getZeroMQ(): typeof import("zeromq") {
 				e.message || e.toString(),
 				e2.message || e2.toString(),
 			).catch(noop);
+
 			logger.warn(`Exception while attempting zmq :`, e.message || e); // No need to display the full stack (when this fails we know why if fails, hence a stack is not useful)
 			logger.warn(
 				`Exception while attempting zmq (fallback) :`,
@@ -79,6 +83,7 @@ async function getLocalZmqBinaries() {
 			// We're in dev mode.
 			return;
 		}
+
 		const filesPromises = await fs.readdir(zmqFolder).then((folders) =>
 			folders.map(async (folder) => {
 				const folderPath = path.join(zmqFolder, folder);
@@ -92,6 +97,7 @@ async function getLocalZmqBinaries() {
 							files.map((file) => path.join(folderPath, file)),
 						);
 				}
+
 				return [];
 			}),
 		);
@@ -122,6 +128,7 @@ async function sendZMQTelemetry(
 	if (telemetrySentOnce) {
 		return;
 	}
+
 	telemetrySentOnce = true;
 
 	const [distro, zmqBinaries] = await Promise.all([
@@ -130,6 +137,7 @@ async function sendZMQTelemetry(
 	]);
 
 	const platformInfo = getPlatformInfo();
+
 	sendTelemetryEvent(Telemetry.ZMQSupport, undefined, {
 		distro_id: distro.id,
 		distro_version_id: distro.version_id,
@@ -140,6 +148,7 @@ async function sendZMQTelemetry(
 		armv: platformInfo.armv,
 		zmqarch: platformInfo.zmqarch,
 	});
+
 	sendTelemetryEvent(Telemetry.ZMQSupportFailure, undefined, {
 		distro_id: distro.id,
 		distro_version_id: distro.version_id,

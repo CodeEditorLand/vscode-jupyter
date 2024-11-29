@@ -118,15 +118,20 @@ export abstract class DataScienceErrorHandler
 		@optional()
 		private readonly interpreterService: IInterpreterService | undefined,
 	) {}
+
 	private handledErrors = new WeakSet<Error>();
+
 	private handledKernelErrors = new WeakSet<Error>();
+
 	public async handleError(err: Error): Promise<void> {
 		logger.warn("DataScience Error", err);
+
 		err = WrappedError.unwrap(err);
 
 		if (this.handledErrors.has(err)) {
 			return;
 		}
+
 		this.handledErrors.add(err);
 
 		if (err instanceof JupyterInstallError) {
@@ -168,21 +173,25 @@ export abstract class DataScienceErrorHandler
 				err,
 				undefined,
 			);
+
 			window.showErrorMessage(message).then(noop, noop);
 		} else if (err instanceof RemoteJupyterServerUriProviderError) {
 			const message = await this.handleJupyterServerUriProviderError(
 				err,
 				undefined,
 			);
+
 			window.showErrorMessage(message).then(noop, noop);
 		} else {
 			// Some errors have localized and/or formatted error messages.
 			const message = getCombinedErrorMessage(
 				err.message || err.toString(),
 			);
+
 			window.showErrorMessage(message).then(noop, noop);
 		}
 	}
+
 	public async getErrorMessageForDisplayInCell(
 		error: Error,
 		errorContext: KernelAction,
@@ -193,6 +202,7 @@ export abstract class DataScienceErrorHandler
 		if (!isCancellationError(error)) {
 			logger.error(`Error in execution (get message for cell)`, error);
 		}
+
 		if (error instanceof KernelDeadError) {
 			// When we get this we've already asked the user to restart the kernel,
 			// No need to display errors in each cell.
@@ -326,6 +336,7 @@ export abstract class DataScienceErrorHandler
 						) || error.message
 					);
 				}
+
 				const messageParts = [failureInfo.message];
 
 				if (failureInfo.moreInfoLink) {
@@ -335,6 +346,7 @@ export abstract class DataScienceErrorHandler
 						),
 					);
 				}
+
 				if (
 					isLocalConnection(error.kernelConnectionMetadata) &&
 					failureInfo.reason ===
@@ -348,6 +360,7 @@ export abstract class DataScienceErrorHandler
 						resource,
 					);
 				}
+
 				return messageParts.join("\n");
 			}
 		} else if (error instanceof RemoteJupyterServerConnectionError) {
@@ -373,6 +386,7 @@ export abstract class DataScienceErrorHandler
 
 		return getUserFriendlyErrorMessage(error, errorContext);
 	}
+
 	private async handleJupyterServerUriProviderError(
 		error: RemoteJupyterServerUriProviderError,
 		errorContext?: KernelAction,
@@ -392,6 +406,7 @@ export abstract class DataScienceErrorHandler
 			errorContext,
 		);
 	}
+
 	private async handleJupyterServerConnectionError(
 		error: RemoteJupyterServerConnectionError,
 		errorContext?: KernelAction,
@@ -412,6 +427,7 @@ export abstract class DataScienceErrorHandler
 			errorContext,
 		);
 	}
+
 	private async handleJupyterServerProviderConnectionError(
 		serverHandle: JupyterServerProviderHandle,
 		collection: JupyterServerCollection,
@@ -426,9 +442,11 @@ export abstract class DataScienceErrorHandler
 			if (!servers) {
 				return true;
 			}
+
 			if (!servers.find((s) => s.id === serverHandle.handle)) {
 				await this.serverUriStorage.remove(serverHandle).catch(noop);
 			}
+
 			return true;
 		} catch (_ex) {
 			return false;
@@ -436,6 +454,7 @@ export abstract class DataScienceErrorHandler
 			token.dispose();
 		}
 	}
+
 	public async handleKernelError(
 		err: Error,
 		errorContext: KernelAction,
@@ -446,6 +465,7 @@ export abstract class DataScienceErrorHandler
 		if (!isCancellationError(err)) {
 			logger.warn(`Kernel Error, context = ${errorContext}`, err);
 		}
+
 		err = WrappedError.unwrap(err);
 
 		// Jupyter kernels, non zmq actually do the dependency install themselves
@@ -458,6 +478,7 @@ export abstract class DataScienceErrorHandler
 				`Jupyter Kernel Dependency Error, reason=${err.reason}`,
 				err,
 			);
+
 			this.sendKernelTelemetry(err, errorContext, resource, err.category);
 
 			if (
@@ -532,6 +553,7 @@ export abstract class DataScienceErrorHandler
 			) {
 				return KernelInterpreterDependencyResponse.selectDifferentKernel;
 			}
+
 			const baseUrl =
 				err instanceof RemoteJupyterServerConnectionError
 					? err.baseUrl
@@ -579,13 +601,16 @@ export abstract class DataScienceErrorHandler
 					// Wait until all of the remote controllers associated with this server have been removed.
 					return KernelInterpreterDependencyResponse.cancel;
 				}
+
 				case DataScience.changeRemoteJupyterConnectionButtonText: {
 					return KernelInterpreterDependencyResponse.cancel;
 				}
+
 				case DataScience.selectDifferentKernel: {
 					return KernelInterpreterDependencyResponse.selectDifferentKernel;
 				}
 			}
+
 			return KernelInterpreterDependencyResponse.cancel;
 		} else if (err instanceof JupyterSelfCertsError) {
 			this.sendKernelTelemetry(err, errorContext, resource, err.category);
@@ -593,6 +618,7 @@ export abstract class DataScienceErrorHandler
 			const enableOption: string = DataScience.jupyterSelfCertEnable;
 
 			const closeOption: string = DataScience.jupyterSelfCertClose;
+
 			window
 				.showErrorMessage(
 					DataScience.jupyterSelfCertFail(err.message),
@@ -602,6 +628,7 @@ export abstract class DataScienceErrorHandler
 				.then((value) => {
 					if (value === enableOption) {
 						sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
+
 						this.configuration
 							.updateSetting(
 								"allowUnauthorizedRemoteConnection",
@@ -629,6 +656,7 @@ export abstract class DataScienceErrorHandler
 				resource,
 				KernelFailureReason.pythonEnvironmentMissing,
 			);
+
 			window
 				.showErrorMessage(
 					DataScience.failedToStartKernelDueToMissingPythonEnv(
@@ -640,6 +668,7 @@ export abstract class DataScienceErrorHandler
 					),
 				)
 				.then(noop, noop);
+
 			this.interpreterService.refreshInterpreters(true).catch(noop);
 
 			return KernelInterpreterDependencyResponse.failed;
@@ -691,6 +720,7 @@ export abstract class DataScienceErrorHandler
 				sysPrefix,
 				files.map((f) => f.uri),
 			);
+
 			this.sendKernelTelemetry(
 				err,
 				errorContext,
@@ -710,9 +740,11 @@ export abstract class DataScienceErrorHandler
 					getUserFriendlyErrorMessage(err, errorContext),
 				).catch(noop);
 			}
+
 			return KernelInterpreterDependencyResponse.failed;
 		}
 	}
+
 	private sendKernelTelemetry(
 		err: Error,
 		errorContext: KernelAction,
@@ -722,6 +754,7 @@ export abstract class DataScienceErrorHandler
 		if (this.handledKernelErrors.has(err)) {
 			return;
 		}
+
 		this.handledKernelErrors.add(err);
 
 		if (errorContext === "start") {
@@ -737,10 +770,12 @@ export abstract class DataScienceErrorHandler
 			);
 		}
 	}
+
 	protected abstract addErrorMessageIfPythonArePossiblyOverridingPythonModules(
 		_messages: string[],
 		_resource: Resource,
 	): Promise<void>;
+
 	protected abstract getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
 		_resource: Resource,
 	): Promise<{ uri: Uri; type: "file" | "__init__" }[]>;
@@ -752,7 +787,9 @@ export abstract class DataScienceErrorHandler
 		if (!message.includes(Commands.ViewJupyterOutput)) {
 			message = `${message} \n${DataScience.viewJupyterLogForFurtherInfo}`;
 		}
+
 		const buttons = moreInfoLink ? [Common.learnMore] : [];
+
 		await window.showErrorMessage(message, ...buttons).then((selection) => {
 			if (selection === Common.learnMore && moreInfoLink) {
 				void env.openExternal(Uri.parse(moreInfoLink));
@@ -798,6 +835,7 @@ function getUserFriendlyErrorMessage(
 		// hence add a descriptive prefix (message), that provides more context to the user.
 		errorMessageSuffix = typeof error === "string" ? error : error.message;
 	}
+
 	return getCombinedErrorMessage(errorPrefix, errorMessageSuffix);
 }
 function doesErrorHaveMarkdownLinks(message: string) {
@@ -811,6 +849,7 @@ function getCombinedErrorMessage(prefix: string = "", message: string = "") {
 	if (prefix && message.startsWith(prefix.substring(0, prefix.length - 1))) {
 		prefix = "";
 	}
+
 	const errorMessage = [prefix, message]
 		.map((line) => line.trim())
 		.filter((line) => line.length > 0)
@@ -825,6 +864,7 @@ function getCombinedErrorMessage(prefix: string = "", message: string = "") {
 			DataScience.viewJupyterLogForFurtherInfo
 		}`;
 	}
+
 	return errorMessage;
 }
 function getIPyKernelMissingErrorMessageForCell(
@@ -837,6 +877,7 @@ function getIPyKernelMissingErrorMessageForCell(
 	) {
 		return;
 	}
+
 	const displayNameOfKernel =
 		getPythonEnvDisplayName(kernelConnection.interpreter) ||
 		getFilePath(kernelConnection.interpreter.uri);
@@ -872,6 +913,7 @@ function getIPyKernelMissingErrorMessageForCell(
 			getFilePath(kernelConnection.interpreter.uri),
 		)} -m pip install ${ipyKernelModuleName} -U --user --force-reinstall`;
 	}
+
 	const message =
 		DataScience.libraryRequiredToLaunchJupyterKernelNotInstalledInterpreter(
 			displayNameOfKernel,

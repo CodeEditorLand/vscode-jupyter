@@ -86,6 +86,7 @@ function fixupOutput(output: nbformat.IOutput): nbformat.IOutput {
 		default:
 			return output;
 	}
+
 	const result = { ...output };
 
 	for (const k of Object.keys(output)) {
@@ -94,6 +95,7 @@ function fixupOutput(output: nbformat.IOutput): nbformat.IOutput {
 			delete (result as any)[k];
 		}
 	}
+
 	return result;
 }
 
@@ -115,6 +117,7 @@ export function pruneCell(cell: nbformat.ICell): nbformat.ICell {
 	} else if (result.cell_type) {
 		// Clean outputs from code cells
 		const cellResult = result as nbformat.ICodeCell;
+
 		cellResult.outputs = cellResult.outputs
 			? (cellResult.outputs as nbformat.IOutput[]).map(fixupOutput)
 			: [];
@@ -129,6 +132,7 @@ export function translateKernelLanguageToMonaco(language: string): string {
 	if (language.length === 2 && language.endsWith("#")) {
 		return `${language.substring(0, 1)}sharp`;
 	}
+
 	return jupyterLanguageToMonacoLanguageMapping.get(language) || language;
 }
 
@@ -172,6 +176,7 @@ export type NotebookMetadata = nbformat.INotebookMetadata & {
 			hash?: string;
 		};
 	};
+
 	widgets?: {
 		[WIDGET_STATE_MIMETYPE]?: {
 			state: Record<
@@ -181,12 +186,17 @@ export type NotebookMetadata = nbformat.INotebookMetadata & {
 						| "@jupyter-widgets/base"
 						| "@jupyter-widgets/controls"
 						| string;
+
 					model_module_version: string;
+
 					model_name: string;
+
 					state: {};
 				}
 			>;
+
 			version_major: number;
+
 			version_minor: number;
 		};
 	};
@@ -204,6 +214,7 @@ export function getNotebookMetadata(
 
 export function getNotebookFormat(document: NotebookDocument): {
 	nbformat: number | undefined;
+
 	nbformat_minor: number | undefined;
 } {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -221,6 +232,7 @@ export async function updateNotebookMetadata(
 	metadata: NotebookMetadata,
 ) {
 	const edit = new WorkspaceEdit();
+
 	edit.set(document.uri, [
 		NotebookEdit.updateNotebookMetadata(
 			sortObjectPropertiesRecursively({
@@ -229,6 +241,7 @@ export async function updateNotebookMetadata(
 			}),
 		),
 	]);
+
 	await workspace.applyEdit(edit);
 }
 
@@ -255,8 +268,10 @@ export function concatMultilineString(str: nbformat.MultilineString): string {
 				result = result.concat(s);
 			}
 		}
+
 		return result;
 	}
+
 	return str.toString();
 }
 
@@ -267,6 +282,7 @@ export function splitMultilineString(
 	if (Array.isArray(source)) {
 		return source as string[];
 	}
+
 	const str = source.toString();
 
 	if (str.length > 0) {
@@ -278,10 +294,12 @@ export function splitMultilineString(
 				if (i < arr.length - 1) {
 					return `${s}\n`;
 				}
+
 				return s;
 			})
 			.filter((s) => s.length > 0); // Skip last one if empty (it's the only one that could be length 0)
 	}
+
 	return [];
 }
 
@@ -309,9 +327,12 @@ function fixCarriageReturn(txt: string) {
 		var base = txt.match(/^(.*)\r+/m)![1];
 
 		var insert = txt.match(/\r+(.*)$/m)![1];
+
 		insert = insert + base.slice(insert.length, base.length);
+
 		txt = txt.replace(/\r+.*$/m, "\r").replace(/^.*\r/m, insert);
 	}
+
 	return txt;
 }
 
@@ -357,12 +378,14 @@ export function parseForComments(
 			if (insideMultilineQuote === isMultilineQuote) {
 				insideMultilineQuote = undefined;
 			}
+
 			foundNonCommentLine(l, pos);
 			// Not inside quote, see if inside a comment
 		} else if (insideMultilineComment) {
 			if (insideMultilineComment === isMultilineComment) {
 				insideMultilineComment = undefined;
 			}
+
 			if (insideMultilineComment) {
 				foundCommentLine(l, pos);
 			}
@@ -372,13 +395,16 @@ export function parseForComments(
 			const beginQuote = trim.indexOf(isMultilineQuote);
 
 			const endQuote = trim.lastIndexOf(isMultilineQuote);
+
 			insideMultilineQuote =
 				endQuote !== beginQuote ? undefined : isMultilineQuote;
+
 			foundNonCommentLine(l, pos);
 			// Not starting a quote, might be starting a comment
 		} else if (isMultilineComment) {
 			// See if this line ends the comment too or not
 			const endIndex = trim.indexOf(isMultilineComment, 3);
+
 			insideMultilineComment =
 				endIndex >= 0 ? undefined : isMultilineComment;
 
@@ -397,6 +423,7 @@ export function parseForComments(
 				foundNonCommentLine(l, pos);
 			}
 		}
+
 		pos += 1;
 	}
 }
@@ -404,6 +431,7 @@ export function parseForComments(
 // Strip out comment lines from code
 export function stripComments(str: string): string {
 	let result: string = "";
+
 	parseForComments(
 		splitLines(str, { trim: false, removeEmptyEntries: false }),
 		(_s) => {
@@ -429,6 +457,7 @@ export function appendLineFeed(
 
 function extractComments(lines: string[]): string[] {
 	const result: string[] = [];
+
 	parseForComments(
 		lines,
 		(s) => result.push(s),
@@ -451,6 +480,7 @@ export function removeLinesFromFrontAndBackNoConcat(lines: string[]): string[] {
 	let lastNonEmptyLine = lines.length;
 
 	let firstNonEmptyLine = -1;
+
 	lines.forEach((l, i) => {
 		if (l.trim()) {
 			lastNonEmptyLine = i;
@@ -521,6 +551,7 @@ function doSortObjectPropertiesRecursively(obj: any): any {
 	if (Array.isArray(obj)) {
 		return obj.map(sortObjectPropertiesRecursively);
 	}
+
 	if (
 		obj !== undefined &&
 		obj !== null &&
@@ -541,6 +572,7 @@ function doSortObjectPropertiesRecursively(obj: any): any {
 				}, {}) as any
 		);
 	}
+
 	return obj;
 }
 
@@ -549,6 +581,8 @@ export async function disposeAsync(
 	disposables: IDisposable[] = [],
 ): Promise<void> {
 	const promise = toPromise(disposable.onDidDispose, undefined, disposables);
+
 	disposable.dispose();
+
 	await promise;
 }

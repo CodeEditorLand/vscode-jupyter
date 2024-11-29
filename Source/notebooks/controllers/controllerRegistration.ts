@@ -54,47 +54,65 @@ export class ControllerRegistration
 {
 	// Promise to resolve when we have loaded our controllers
 	private controllersPromise: Promise<void>;
+
 	private registeredControllers = new Map<
 		string,
 		IVSCodeNotebookController
 	>();
+
 	private changeEmitter =
 		new EventEmitter<IVSCodeNotebookControllerUpdateEvent>();
+
 	private registeredMetadatas = new Map<string, KernelConnectionMetadata>();
+
 	public get onDidChange(): Event<IVSCodeNotebookControllerUpdateEvent> {
 		return this.changeEmitter.event;
 	}
+
 	public get registered(): IVSCodeNotebookController[] {
 		return [...this.registeredControllers.values()];
 	}
+
 	public get all(): KernelConnectionMetadata[] {
 		return this.metadatas;
 	}
+
 	private get metadatas(): KernelConnectionMetadata[] {
 		return [...this.registeredMetadatas.values()];
 	}
+
 	public get onControllerSelected(): Event<{
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}> {
 		return this.selectedEmitter.event;
 	}
+
 	public get onControllerSelectionChanged(): Event<{
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
+
 		selected: boolean;
 	}> {
 		return this.selectionChangedEmitter.event;
 	}
+
 	private selectedEmitter = new EventEmitter<{
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}>();
+
 	private selectionChangedEmitter = new EventEmitter<{
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
+
 		selected: boolean;
 	}>();
+
 	private selectedControllers = new WeakMap<
 		NotebookDocument,
 		IVSCodeNotebookController
@@ -113,6 +131,7 @@ export class ControllerRegistration
 		private readonly serverUriStorage: IJupyterServerUriStorage,
 		@inject(IKernelFinder) private readonly kernelFinder: IKernelFinder,
 	) {}
+
 	activate(): void {
 		// Make sure to reload whenever we do something that changes state
 		this.kernelFinder.onDidChangeKernels(
@@ -120,9 +139,11 @@ export class ControllerRegistration
 			this,
 			this.disposables,
 		);
+
 		this.kernelFinder.registered.forEach((finder) =>
 			this.monitorDeletionOfConnections(finder),
 		);
+
 		this.kernelFinder.onDidChangeRegistrations(
 			(e) =>
 				e.added.forEach((finder) =>
@@ -131,42 +152,51 @@ export class ControllerRegistration
 			this,
 			this.disposables,
 		);
+
 		this.pythonEnvFilter.onDidChange(
 			this.onDidChangeFilter,
 			this,
 			this.disposables,
 		);
+
 		this.serverUriStorage.onDidChange(
 			this.onDidChangeFilter,
 			this,
 			this.disposables,
 		);
+
 		this.serverUriStorage.onDidChange(
 			this.onDidChangeUri,
 			this,
 			this.disposables,
 		);
+
 		this.serverUriStorage.onDidRemove(
 			this.onDidRemoveServers,
 			this,
 			this.disposables,
 		);
+
 		this.loadControllers();
 	}
+
 	private loadControllers() {
 		this.controllersPromise = this.loadControllersImpl();
+
 		sendKernelListTelemetry(this.registered.map((v) => v.connection));
 
 		logger.ci(
 			`Providing notebook controllers with length ${this.registered.length}.`,
 		);
 	}
+
 	public get loaded() {
 		return this.controllersPromise;
 	}
 
 	private async loadControllersImpl() {
 		const connections = this.kernelFinder.kernels;
+
 		this.createNotebookControllers(connections);
 
 		// Look for any controllers that we have disposed (no longer found when fetching)
@@ -197,11 +227,13 @@ export class ControllerRegistration
 				if (!this.canControllerBeDisposed(controller)) {
 					return false;
 				}
+
 				if (!connectionIsStillValid) {
 					logger.debug(
 						`Controller ${controller.connection.kind}:'${controller.id}' for view = '${controller.viewType}' is no longer a valid`,
 					);
 				}
+
 				return !connectionIsStillValid;
 			},
 		);
@@ -210,9 +242,11 @@ export class ControllerRegistration
 			logger.warn(
 				`Disposing old controller ${controller.connection.kind}:'${controller.id}' for view = '${controller.viewType}'`,
 			);
+
 			controller.dispose(); // This should remove it from the registered list
 		});
 	}
+
 	private createNotebookControllers(
 		kernelConnections: KernelConnectionMetadata[],
 	) {
@@ -233,6 +267,7 @@ export class ControllerRegistration
 			}
 		}
 	}
+
 	private async monitorDeletionOfConnections(
 		finder: IContributedKernelFinder,
 	) {
@@ -241,6 +276,7 @@ export class ControllerRegistration
 				const deletedConnections = new Set(
 					(connections || []).map((c) => c.id),
 				);
+
 				this.registered
 					.filter((item) =>
 						deletedConnections.has(item.connection.id),
@@ -249,12 +285,14 @@ export class ControllerRegistration
 						logger.warn(
 							`Deleting controller ${controller.id} as it is associated with a connection that has been deleted ${controller.connection.kind}:${controller.id}`,
 						);
+
 						controller.dispose();
 					});
 			},
 			this,
 			this.disposables,
 		);
+
 		this.kernelFinder.onDidChangeRegistrations((e) => {
 			if (e.removed.includes(finder)) {
 				eventHandler.dispose();
@@ -279,6 +317,7 @@ export class ControllerRegistration
 					logger.warn(
 						`Deleting controller ${c.id} as it is associated with a connection that has been removed`,
 					);
+
 					c.dispose();
 				}
 			});
@@ -297,13 +336,16 @@ export class ControllerRegistration
 			this.addOrUpdate(c, [JupyterNotebookView, InteractiveWindowView]),
 		);
 	}
+
 	private batchAdd(
 		metadatas: KernelConnectionMetadata[],
 		types: ("jupyter-notebook" | "interactive")[],
 	) {
 		const addedList: IVSCodeNotebookController[] = [];
+
 		metadatas.forEach((metadata) => {
 			const { added } = this.addImpl(metadata, types, false);
+
 			addedList.push(...added);
 		});
 
@@ -311,7 +353,9 @@ export class ControllerRegistration
 			this.changeEmitter.fire({ added: addedList, removed: [] });
 		}
 	}
+
 	private _activeInterpreterControllerIds = new Set<string>();
+
 	trackActiveInterpreterControllers(
 		controllers: IVSCodeNotebookController[],
 	) {
@@ -319,17 +363,20 @@ export class ControllerRegistration
 			this._activeInterpreterControllerIds.add(controller.id),
 		);
 	}
+
 	private canControllerBeDisposed(controller: IVSCodeNotebookController) {
 		return (
 			!this._activeInterpreterControllerIds.has(controller.id) &&
 			!this.isControllerAttachedToADocument(controller)
 		);
 	}
+
 	public getSelected(
 		document: NotebookDocument,
 	): IVSCodeNotebookController | undefined {
 		return this.selectedControllers.get(document);
 	}
+
 	addOrUpdate(
 		metadata: KernelConnectionMetadata,
 		types: ("jupyter-notebook" | "interactive")[],
@@ -338,17 +385,20 @@ export class ControllerRegistration
 
 		return added.concat(existing);
 	}
+
 	addImpl(
 		metadata: KernelConnectionMetadata,
 		types: ("jupyter-notebook" | "interactive")[],
 		triggerChangeEvent: boolean,
 	): {
 		added: IVSCodeNotebookController[];
+
 		existing: IVSCodeNotebookController[];
 	} {
 		const added: IVSCodeNotebookController[] = [];
 
 		const existing: IVSCodeNotebookController[] = [];
+
 		logger.ci(
 			`Create Controller for ${metadata.kind} and id '${metadata.id}' for view ${types.join(", ")}`,
 		);
@@ -383,6 +433,7 @@ export class ControllerRegistration
 
 						return false;
 					}
+
 					logger.ci(
 						`Existing controller not found for '${id}', hence creating a new one`,
 					);
@@ -418,12 +469,15 @@ export class ControllerRegistration
 					);
 					// Hook up to if this NotebookController is selected or de-selected
 					const controllerDisposables: IDisposable[] = [];
+
 					controller.onDidDispose(
 						() => {
 							logger.trace(
 								`Deleting controller '${controller.id}' associated with view ${viewType} from registration as it was disposed`,
 							);
+
 							this.registeredControllers.delete(controller.id);
+
 							controllerDisposables.forEach((d) => d.dispose());
 							// Note to self, registered metadatas survive disposal.
 							// This is so we don't have to recompute them when we switch back
@@ -434,16 +488,21 @@ export class ControllerRegistration
 					);
 					// We are disposing as documents are closed, but do this as well
 					this.disposables.push(controller);
+
 					this.registeredControllers.set(controller.id, controller);
+
 					added.push(controller);
+
 					controller.onNotebookControllerSelectionChanged(
 						(e) => {
 							if (!e.selected) {
 								return;
 							}
+
 							logger.ci(
 								`Controller ${e.controller?.id} selected for ${e.notebook.uri.toString()}`,
 							);
+
 							this.selectedControllers.set(
 								e.notebook,
 								e.controller,
@@ -454,6 +513,7 @@ export class ControllerRegistration
 						this,
 						controllerDisposables,
 					);
+
 					controller.onNotebookControllerSelectionChanged(
 						(e) =>
 							this.selectionChangedEmitter.fire({
@@ -479,13 +539,16 @@ export class ControllerRegistration
 
 				return { added, existing };
 			}
+
 			logger.error(
 				`Failed to create notebook controller for ${metadata.id}`,
 				ex,
 			);
 		}
+
 		return { added, existing };
 	}
+
 	get(
 		metadata: KernelConnectionMetadata,
 		notebookType: "jupyter-notebook" | "interactive",

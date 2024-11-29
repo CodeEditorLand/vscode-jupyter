@@ -37,6 +37,7 @@ export class PreWarmActivatedJupyterEnvironmentVariables
 		private readonly rawNotebookSupported: IRawNotebookSupportedService,
 		@inject(CondaService) private readonly condaService: CondaService,
 	) {}
+
 	public activate() {
 		// Don't prewarm global interpreter if running with ZMQ
 		if (!this.rawNotebookSupported.isSupported) {
@@ -45,15 +46,19 @@ export class PreWarmActivatedJupyterEnvironmentVariables
 					this.preWarmInterpreterVariables().catch(noop),
 				),
 			);
+
 			this.preWarmInterpreterVariables().catch(noop);
+
 			this.apiProvider.onDidActivatePythonExtension(
 				this.preWarmInterpreterVariables,
 				this,
 				this.disposables,
 			);
 		}
+
 		if (this.extensionChecker.isPythonExtensionInstalled) {
 			this.condaService.getCondaFile().catch(noop);
+
 			this.condaService.getCondaVersion().catch(noop);
 		}
 	}
@@ -62,12 +67,14 @@ export class PreWarmActivatedJupyterEnvironmentVariables
 		if (!this.extensionChecker.isPythonExtensionActive) {
 			return;
 		}
+
 		const interpreter =
 			await this.jupyterInterpreterService.getSelectedInterpreter();
 
 		if (!interpreter) {
 			return;
 		}
+
 		this.activationService
 			.getActivatedEnvironmentVariables(undefined, interpreter)
 			.catch(noop);

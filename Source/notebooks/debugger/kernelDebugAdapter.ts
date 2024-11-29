@@ -26,15 +26,20 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			const norm = path.normalize(
 				(response as IDumpCellResponse).sourcePath,
 			);
+
 			this.fileToCell.set(norm, cell.document.uri);
+
 			this.cellToFile.set(cell.document.uri.toString(), norm);
 		} catch (err) {
 			logger.error(err);
 		}
 	}
+
 	protected translateRealLocationToDebuggerLocation(location: {
 		source?: DebugProtocol.Source;
+
 		line?: number;
+
 		endLine?: number;
 	}): void {
 		const source = location.source;

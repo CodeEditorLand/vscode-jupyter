@@ -5,9 +5,11 @@ declare module "@nteract/transform-model-debug" {
 		constructor(...args: any[]);
 
 		forceUpdate(callback: any): void;
+
 		render(): any;
 
 		setState(partialState: any, callback: any): void;
+
 		shouldComponentUpdate(): any;
 	}
 }

@@ -34,6 +34,7 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 		executer: TExecuter,
 		token: CancellationToken,
 	): Promise<string | undefined>;
+
 	protected abstract _doInstall(
 		executer: TExecuter,
 		tokenSource: CancellationTokenSource,
@@ -114,12 +115,16 @@ export abstract class BaseDataViewerDependencyImplementation<TExecuter>
 
 					return;
 				}
+
 				sendTelemetryEvent(Telemetry.PandasTooOld);
 				// Warn user that we cannot start because pandas is too old.
 				const versionStr = `${pandasVersion.major}.${pandasVersion.minor}.${pandasVersion.build}`;
+
 				await this.promptInstall(executer, tokenSource, versionStr);
 			}
+
 			sendTelemetryEvent(Telemetry.PandasNotInstalled);
+
 			await this.promptInstall(executer, tokenSource);
 		} finally {
 			tokenSource.dispose();

@@ -124,6 +124,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 				logger.debug(
 					`Updating Kernel Environment for ${kernel.id} for interpreter ${kernel.interpreter.id}`,
 				);
+
 				await this.updateKernelEnvironment(
 					resource,
 					kernel,
@@ -192,6 +193,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 			// Add extra metadata onto the contents. We'll use this
 			// when searching for kernels later to remove duplicates.
 			contents.metadata = contents.metadata || {};
+
 			contents.metadata = {
 				...contents.metadata,
 				vscode: {
@@ -217,6 +219,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 		logger.info(
 			`RegisterKernel for ${kernel.id} into ${getDisplayPath(kernelSpecFilePath)}`,
 		);
+
 		logger.debug(
 			`RegisterKernel for ${kernel.id} into ${getDisplayPath(kernelSpecFilePath)} with contents ${JSON.stringify(
 				contents,
@@ -247,11 +250,13 @@ export class JupyterKernelService implements IJupyterKernelService {
 				"*.*[^json]",
 				originalSpecDir,
 			);
+
 			await Promise.all(
 				otherFiles.map(async (f) => {
 					const oldPath = path.join(originalSpecDir, f);
 
 					const newPath = path.join(newSpecDir, f);
+
 					await this.fs.copy(Uri.file(oldPath), Uri.file(newPath));
 				}),
 			);
@@ -259,6 +264,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 
 		return kernelSpecFilePath.fsPath;
 	}
+
 	private async updateKernelEnvironment(
 		resource: Resource,
 		kernelConnection: LocalKernelConnectionMetadata,
@@ -294,6 +300,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 
 				return;
 			}
+
 			const uri = Uri.file(kernelSpecFilePath);
 
 			try {
@@ -316,6 +323,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 								specModel.argv[0]
 							}' to '${getDisplayPath(interpreter.uri)}'`,
 						);
+
 						specModel.argv[0] = interpreter.uri.fsPath;
 					}
 
@@ -347,6 +355,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 					uri,
 					JSON.stringify(specModel, undefined, 2),
 				);
+
 				logger.debug(
 					`Updated kernel spec for ${kernelConnection.id} with environment variables for ${getDisplayPath(
 						uri,
@@ -363,6 +372,7 @@ export class JupyterKernelService implements IJupyterKernelService {
 				if (cancelToken?.isCancellationRequested) {
 					return;
 				}
+
 				logger.error(
 					`Failed to update kernel spec for ${
 						kernelConnection.id

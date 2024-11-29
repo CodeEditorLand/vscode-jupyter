@@ -47,9 +47,11 @@ export class PreferredKernelConnectionService {
 	private readonly disposables: IDisposable[] = [];
 
 	constructor(private readonly jupyterConnection: JupyterConnection) {}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	public async findPreferredRemoteKernelConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
@@ -62,6 +64,7 @@ export class PreferredKernelConnectionService {
 			false,
 		);
 	}
+
 	private async findPreferredRemoteKernelConnectionImpl(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
@@ -91,6 +94,7 @@ export class PreferredKernelConnectionService {
 			if (kernelFinder.status === "idle") {
 				return;
 			}
+
 			const liveKernelMatchingId = await new Promise<
 				LiveRemoteKernelConnectionMetadata | undefined
 			>((resolve) =>
@@ -105,6 +109,7 @@ export class PreferredKernelConnectionService {
 						if (kernel) {
 							resolve(kernel);
 						}
+
 						if (
 							kernelFinder.status === "idle" ||
 							cancelToken.isCancellationRequested
@@ -176,6 +181,7 @@ export class PreferredKernelConnectionService {
 			findExactMatch!,
 		) as Promise<RemoteKernelConnectionMetadata | undefined>;
 	}
+
 	public async findPreferredLocalKernelSpecConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
@@ -188,6 +194,7 @@ export class PreferredKernelConnectionService {
 			false,
 		) as Promise<LocalKernelSpecConnectionMetadata | undefined>;
 	}
+
 	private async findPreferredKernelSpecConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
@@ -224,6 +231,7 @@ export class PreferredKernelConnectionService {
 			if (!language) {
 				return;
 			}
+
 			return kernelFinder.kernels.filter(
 				(item) =>
 					(item.kind === "startUsingLocalKernelSpec" ||
@@ -246,6 +254,7 @@ export class PreferredKernelConnectionService {
 				// Too many matches.
 				return;
 			}
+
 			return found[0];
 		}
 		// Possible we haven't discovered everything yet, hence wait for a match.
@@ -267,6 +276,7 @@ export class PreferredKernelConnectionService {
 					if (cancelToken.isCancellationRequested) {
 						return resolve(undefined);
 					}
+
 					const found = findMatchBasedOnKernelNameOrLanguage();
 
 					if (Array.isArray(found) && found.length) {
@@ -274,6 +284,7 @@ export class PreferredKernelConnectionService {
 							// Too many matches.
 							return resolve(undefined);
 						}
+
 						return resolve(found[0]);
 					}
 
@@ -286,6 +297,7 @@ export class PreferredKernelConnectionService {
 			),
 		).finally(() => dispose(disposables));
 	}
+
 	public async findPreferredPythonKernelConnection(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
@@ -297,6 +309,7 @@ export class PreferredKernelConnectionService {
 			cancelToken,
 		);
 	}
+
 	private async findPreferredPythonKernelConnectionImpl(
 		notebook: NotebookDocument,
 		kernelFinder: IContributedKernelFinder<KernelConnectionMetadata>,
@@ -332,10 +345,12 @@ export class PreferredKernelConnectionService {
 		if (!activeInterpreter) {
 			return;
 		}
+
 		const findMatchingActiveInterpreterKernel = () => {
 			if (cancelToken.isCancellationRequested) {
 				return;
 			}
+
 			return kernelFinder.kernels
 				.filter((item) => item.kind === "startUsingPythonInterpreter")
 				.map((k) => k as PythonKernelConnectionMetadata)
@@ -357,6 +372,7 @@ export class PreferredKernelConnectionService {
 					this,
 					this.disposables,
 				);
+
 				kernelFinder.onDidChangeKernels(
 					() =>
 						(findPythonEnvClosesToNotebook(
@@ -396,6 +412,7 @@ function findPythonEnvClosesToNotebook(
 	if (localEnvNextToNbFile) {
 		return localEnvNextToNbFile;
 	}
+
 	if (defaultFolder) {
 		return findLocalPythonEnv(defaultFolder, kernelFinder);
 	}
@@ -427,6 +444,7 @@ function findLocalPythonEnv(
 	if (venv) {
 		return venv;
 	}
+
 	const conda = localEnvs.find(
 		(e) =>
 			getEnvironmentType(e.interpreter) === EnvironmentType.Conda &&
@@ -436,6 +454,7 @@ function findLocalPythonEnv(
 	if (conda) {
 		return conda;
 	}
+
 	const anyVenv = localEnvs.find(
 		(e) =>
 			getPythonEnvironmentName(e.interpreter)?.toLowerCase() === ".venv",
@@ -444,5 +463,6 @@ function findLocalPythonEnv(
 	if (anyVenv) {
 		return anyVenv;
 	}
+
 	return localEnvs.length ? localEnvs[0] : undefined;
 }

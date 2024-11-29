@@ -28,11 +28,13 @@ export class ServiceContainer implements IServiceContainer {
 	public static get instance(): IServiceContainer {
 		return ServiceContainer._instance;
 	}
+
 	private static _instance: IServiceContainer;
 
 	constructor(private container: Container) {
 		ServiceContainer._instance = this;
 	}
+
 	public get<T>(
 		serviceIdentifier: interfaces.ServiceIdentifier<T>,
 		name?: string | number | symbol,
@@ -41,6 +43,7 @@ export class ServiceContainer implements IServiceContainer {
 			? this.container.getNamed<T>(serviceIdentifier, name)
 			: this.container.get<T>(serviceIdentifier);
 	}
+
 	public getAll<T>(
 		serviceIdentifier: string | symbol | Newable<T> | Abstract<T>,
 		name?: string | number | symbol | undefined,
@@ -49,6 +52,7 @@ export class ServiceContainer implements IServiceContainer {
 			? this.container.getAllNamed<T>(serviceIdentifier, name)
 			: this.container.getAll<T>(serviceIdentifier);
 	}
+
 	public tryGet<T>(
 		serviceIdentifier: interfaces.ServiceIdentifier<T>,
 		name?: string | number | symbol | undefined,

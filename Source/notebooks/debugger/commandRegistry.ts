@@ -29,6 +29,7 @@ export class CommandRegistry
 		this.disposables.push(
 			commands.registerCommand(Commands.RunByLine, this.runByLine, this),
 		);
+
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RunByLineNext,
@@ -36,6 +37,7 @@ export class CommandRegistry
 				this,
 			),
 		);
+
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RunByLineStop,
@@ -43,6 +45,7 @@ export class CommandRegistry
 				this,
 			),
 		);
+
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.RunAndDebugCell,
@@ -54,6 +57,7 @@ export class CommandRegistry
 
 	private async runByLine(cell: NotebookCell | undefined) {
 		sendTelemetryEvent(DebuggingTelemetry.clickedRunByLine);
+
 		cell ??= this.getCellFromActiveEditor();
 
 		if (!cell) {
@@ -88,6 +92,7 @@ export class CommandRegistry
 
 	private async runAndDebugCell(cell: NotebookCell | undefined) {
 		sendTelemetryEvent(DebuggingTelemetry.clickedRunAndDebugCell);
+
 		cell ??= this.getCellFromActiveEditor();
 
 		if (!cell) {

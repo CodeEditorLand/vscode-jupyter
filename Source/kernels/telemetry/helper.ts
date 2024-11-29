@@ -30,13 +30,17 @@ export type ContextualTelemetryProps = {
 	 * Doesn't really apply to Interactive Window, as we always pick the current interpreter.
 	 */
 	isPreferredKernel?: boolean;
+
 	kernelConnection: KernelConnectionMetadata;
+
 	startFailed: boolean;
+
 	kernelDied: boolean;
 	/**
 	 * When we start local Python kernels, this property indicates whether the interpreter matches the kernel. If not this means we've started the wrong interpreter or the mapping is wrong.
 	 */
 	interpreterMatchesKernel: boolean;
+
 	actionSource: KernelActionSource;
 	/**
 	 * Whether the user executed a cell.
@@ -61,6 +65,7 @@ export async function trackKernelResourceInformation(
 	if (!resource) {
 		return;
 	}
+
 	const key = getComparisonKey(resource);
 
 	const [currentData, context] = trackedInfo.get(key) || [
@@ -90,12 +95,15 @@ export async function trackKernelResourceInformation(
 	if (typeof information.capturedEnvVars === "boolean") {
 		currentData.capturedEnvVars = information.capturedEnvVars;
 	}
+
 	if (information.userExecutedCell) {
 		currentData.userExecutedCell = true;
 	}
+
 	if (typeof information.disableUI === "boolean") {
 		currentData.disableUI = information.disableUI;
 	}
+
 	const kernelConnection = information.kernelConnection;
 
 	if (kernelConnection) {
@@ -107,8 +115,10 @@ export async function trackKernelResourceInformation(
 			newKernelConnectionId
 		) {
 			currentData.userExecutedCell = information.userExecutedCell;
+
 			currentData.disableUI = information.disableUI;
 		}
+
 		if (
 			context.previouslySelectedKernelConnectionId &&
 			context.previouslySelectedKernelConnectionId !==
@@ -118,6 +128,7 @@ export async function trackKernelResourceInformation(
 				Date.now().toString(),
 			);
 		}
+
 		let language: string | undefined;
 
 		switch (kernelConnection.kind) {
@@ -140,6 +151,7 @@ export async function trackKernelResourceInformation(
 			default:
 				break;
 		}
+
 		const kernelSpecHash =
 			"kernelSpec" in kernelConnection &&
 			kernelConnection.kernelSpec.specFile
@@ -147,6 +159,7 @@ export async function trackKernelResourceInformation(
 						kernelConnection.kernelSpec.specFile,
 					)
 				: Promise.resolve("");
+
 		currentData.kernelLanguage = language;
 		[currentData.kernelId, currentData.kernelSpecHash] = await Promise.all([
 			getTelemetrySafeHashedString(kernelConnection.id),
@@ -164,6 +177,7 @@ export async function trackKernelResourceInformation(
 					resource,
 					interpreter,
 				);
+
 			currentData.pythonEnvironmentType = getEnvironmentType(interpreter);
 
 			const [pythonEnvironmentPath, version] = await Promise.all([
@@ -172,7 +186,9 @@ export async function trackKernelResourceInformation(
 				),
 				getVersion(interpreter),
 			]);
+
 			currentData.pythonEnvironmentPath = pythonEnvironmentPath;
+
 			pythonEnvironmentsByHash.set(
 				currentData.pythonEnvironmentPath,
 				interpreter,

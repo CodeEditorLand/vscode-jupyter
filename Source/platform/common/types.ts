@@ -36,6 +36,7 @@ export type Resource = Uri | undefined;
 
 export interface IPersistentState<T> {
 	readonly value: T;
+
 	updateValue(value: T): Promise<void>;
 }
 
@@ -56,6 +57,7 @@ export interface IPersistentStateFactory {
 		defaultValue?: T,
 		expiryDurationMs?: number,
 	): IPersistentState<T>;
+
 	createWorkspacePersistentState<T>(
 		key: string,
 		defaultValue?: T,
@@ -71,53 +73,101 @@ export interface IRandom {
 
 export interface IJupyterSettings {
 	readonly experiments: IExperiments;
+
 	readonly allowUnauthorizedRemoteConnection: boolean;
+
 	readonly jupyterInterruptTimeout: number;
+
 	readonly jupyterLaunchTimeout: number;
+
 	readonly jupyterLaunchRetries: number;
+
 	readonly notebookFileRoot: string;
+
 	readonly useDefaultConfigForJupyter: boolean;
+
 	readonly enablePythonKernelLogging: boolean;
+
 	readonly sendSelectionToInteractiveWindow: boolean;
+
 	readonly normalizeSelectionForInteractiveWindow: boolean;
+
 	readonly splitRunFileIntoCells: boolean;
+
 	readonly markdownRegularExpression: string;
+
 	readonly codeRegularExpression: string;
+
 	readonly errorBackgroundColor: string;
+
 	readonly variableExplorerExclude: string;
+
 	readonly decorateCells: "currentCell" | "allCells" | "disabled";
+
 	readonly enableCellCodeLens: boolean;
+
 	askForLargeDataFrames: boolean;
+
 	readonly enableAutoMoveToNextCell: boolean;
+
 	readonly askForKernelRestart: boolean;
+
 	readonly codeLenses: string;
+
 	readonly debugCodeLenses: string;
+
 	readonly debugpyDistPath: string;
+
 	readonly stopOnFirstLineWhileDebugging: boolean;
+
 	readonly magicCommandsAsComments: boolean;
+
 	readonly pythonExportMethod: "direct" | "commentMagics" | "nbconvert";
+
 	readonly stopOnError: boolean;
+
 	readonly addGotoCodeLenses: boolean;
+
 	readonly runStartupCommands: string | string[];
+
 	readonly debugJustMyCode: boolean;
+
 	readonly defaultCellMarker: string;
+
 	readonly verboseLogging: boolean;
+
 	readonly themeMatplotlibPlots: boolean;
+
 	readonly disableJupyterAutoStart: boolean;
+
 	readonly development: boolean;
+
 	readonly jupyterCommandLineArguments: string[];
+
 	readonly widgetScriptSources: WidgetCDNs[];
+
 	readonly interactiveWindowMode: InteractiveWindowMode;
+
 	readonly pythonCellFolding: boolean;
+
 	readonly interactiveWindowViewColumn: InteractiveWindowViewColumn;
+
 	readonly disableZMQSupport: boolean;
+
 	readonly forceIPyKernelDebugger?: boolean;
+
 	readonly showVariableViewWhenDebugging: boolean;
+
 	readonly newCellOnRunLast: boolean;
+
 	readonly logKernelOutputSeparately: boolean;
+
 	readonly poetryPath: string;
+
 	readonly excludeUserSitePackages: boolean;
+
 	readonly enableExtendedPythonKernelCompletions: boolean;
+
 	readonly formatStackTraces: boolean;
 	/**
 	 * Trigger characters for Jupyter completion, per language.
@@ -125,11 +175,13 @@ export interface IJupyterSettings {
 	 * TODO: in debt to merge the two settings.
 	 */
 	readonly completionTriggerCharacters?: Record<string, string[]>;
+
 	readonly interactiveReplNotebook: boolean;
 }
 
 export interface IWatchableJupyterSettings extends IJupyterSettings {
 	readonly onDidChange: Event<void>;
+
 	createSystemVariables(resource: Resource): ISystemVariables;
 }
 
@@ -158,12 +210,14 @@ export const IConfigurationService = Symbol("IConfigurationService");
 
 export interface IConfigurationService {
 	getSettings(resource?: Uri): IWatchableJupyterSettings;
+
 	updateSetting(
 		setting: string,
 		value?: {},
 		resource?: Uri,
 		configTarget?: ConfigurationTarget,
 	): Promise<void>;
+
 	updateSectionSetting(
 		section: string,
 		setting: string,
@@ -211,6 +265,7 @@ export const IExtensions = Symbol("IExtensions");
 export interface IExtensions {
 	determineExtensionFromCallStack(stack?: string): {
 		extensionId: string;
+
 		displayName: string;
 	};
 }
@@ -219,18 +274,23 @@ export const IJupyterExtensionBanner = Symbol("IJupyterExtensionBanner");
 
 export interface IJupyterExtensionBanner {
 	isEnabled(type: BannerType): boolean;
+
 	showBanner(type: BannerType): Promise<void>;
 }
 
 export type DeprecatedSettingAndValue = {
 	setting: string;
+
 	values?: {}[];
 };
 
 export type DeprecatedFeatureInfo = {
 	doNotDisplayPromptStateKey: string;
+
 	message: string;
+
 	moreInfoUrl: string;
+
 	commands?: CommandIds[];
 
 	setting?: DeprecatedSettingAndValue;
@@ -242,8 +302,11 @@ export const IFeaturesManager = Symbol("IFeaturesManager");
 
 export interface IFeaturesManager extends Disposable {
 	readonly features: IFeatureSet;
+
 	readonly onDidChangeFeatures: Event<void>;
+
 	initialize(): void;
+
 	registerDeprecation(deprecatedInfo: DeprecatedFeatureInfo): void;
 }
 
@@ -291,6 +354,7 @@ export const IExperimentService = Symbol("IExperimentService");
 
 export interface IExperimentService {
 	activate(): Promise<void>;
+
 	inExperiment(experimentName: Experiments): boolean;
 
 	getExperimentValue<T extends boolean | number | string>(
@@ -310,6 +374,7 @@ export interface IDataScienceCommandListener {
 
 export interface IDisplayOptions {
 	disableUI: boolean;
+
 	onDidChangeDisableUI: Event<void>;
 }
 
@@ -322,6 +387,7 @@ export interface IDisplayOptions {
 // provide cells for the CodeWatcher to use.
 export interface ICellRange {
 	range: Range;
+
 	cell_type: string;
 }
 
@@ -344,7 +410,9 @@ type ScriptCode = {
 
 export type ParentOptions = {
 	root: string;
+
 	propertyChain: (string | number)[];
+
 	startIndex: number;
 };
 
@@ -354,18 +422,23 @@ export interface IVariableScriptGenerator {
 
 		variableName: string;
 	}): Promise<ScriptCode>;
+
 	generateCodeToGetVariableProperties(options: {
 		isDebugging: boolean;
 
 		variableName: string;
+
 		stringifiedAttributeNameList: string;
 	}): Promise<ScriptCode>;
+
 	generateCodeToGetVariableTypes(options: {
 		isDebugging: boolean;
 	}): Promise<ScriptCode>;
+
 	generateCodeToGetAllVariableDescriptions(
 		parentOptions: ParentOptions | undefined,
 	): Promise<string>;
+
 	generateCodeToGetVariableValueSummary(
 		variableName: string,
 	): Promise<string>;
@@ -378,11 +451,14 @@ export interface IDataFrameScriptGenerator {
 
 		variableName: string;
 	}): Promise<ScriptCode>;
+
 	generateCodeToGetDataFrameRows(options: {
 		isDebugging: boolean;
 
 		variableName: string;
+
 		startIndex: number;
+
 		endIndex: number;
 	}): Promise<ScriptCode>;
 }

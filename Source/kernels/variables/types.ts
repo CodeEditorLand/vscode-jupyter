@@ -17,21 +17,37 @@ import { IKernel } from "../types";
 // Changes here may need to be reflected there as well
 export interface IJupyterVariable {
 	name: string;
+
 	value: string | undefined;
+
 	executionCount?: number;
+
 	supportsDataExplorer: boolean;
+
 	type: string;
+
 	fullType?: string;
+
 	size: number;
+
 	shape: string;
+
 	dataDimensionality?: number;
+
 	count: number;
+
 	truncated: boolean;
+
 	columns?: { key: string; type: string }[];
+
 	rowCount?: number;
+
 	indexColumn?: string;
+
 	maximumRowChunkSize?: number;
+
 	fileName?: Uri;
+
 	frameId?: number;
 }
 
@@ -99,19 +115,28 @@ export interface IConditionalJupyterVariables extends IJupyterVariables {
 // Request for variables
 export interface IJupyterVariablesRequest {
 	executionCount: number;
+
 	refreshCount: number;
+
 	sortColumn: string;
+
 	sortAscending: boolean;
+
 	startIndex: number;
+
 	pageSize: number;
 }
 
 // Response to a request
 export interface IJupyterVariablesResponse {
 	executionCount: number;
+
 	totalCount: number;
+
 	pageStartIndex: number;
+
 	pageResponse: IJupyterVariable[];
+
 	refreshCount: number;
 }
 
@@ -133,7 +158,9 @@ export interface IVariableDescription extends Variable {
 
 export interface IRichVariableResult {
 	variable: Variable & { summary?: string };
+
 	hasNamedChildren: boolean;
+
 	indexedChildrenCount: number;
 }
 

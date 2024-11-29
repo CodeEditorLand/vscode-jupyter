@@ -24,5 +24,6 @@ export type InterpreterId = string;
  */
 export interface PythonEnvironment {
 	id: InterpreterId;
+
 	uri: Uri;
 }

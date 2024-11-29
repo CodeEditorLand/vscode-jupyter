@@ -21,6 +21,7 @@ export interface IIPyWidgetMessageDispatcher extends IDisposable {
 	postMessage: Event<IPyWidgetMessage>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	receiveMessage(message: IPyWidgetMessage): void;
+
 	initialize(): void;
 }
 
@@ -37,6 +38,7 @@ export type WidgetScriptSource = {
 	 * Resource Uri (not using Uri type as this needs to be sent from extension to UI).
 	 */
 	scriptUri?: string;
+
 	requestId?: string;
 };
 

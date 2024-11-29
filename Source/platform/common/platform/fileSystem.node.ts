@@ -27,6 +27,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 
 	constructor() {
 		super();
+
 		this.globFiles = promisify(glob);
 	}
 
@@ -53,6 +54,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 				if (err) {
 					return reject(err);
 				}
+
 				resolve({
 					filePath: filename,
 					dispose: cleanUp,
@@ -72,6 +74,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 		if (cwd) {
 			options = { ...options, cwd };
 		}
+
 		if (dot) {
 			options = { ...options, dot };
 		}
@@ -134,6 +137,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 			return super.exists(filename, fileType);
 		}
 	}
+
 	override async createDirectory(uri: Uri): Promise<void> {
 		if (isLocalFile(uri)) {
 			await fs.ensureDir(getFilePath(uri));
@@ -141,12 +145,14 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 			await this.vscfs.createDirectory(uri);
 		}
 	}
+
 	override async writeFile(
 		uri: Uri,
 		text: string | Uint8Array,
 	): Promise<void> {
 		if (isLocalFile(uri)) {
 			const filename = getFilePath(uri);
+
 			await fs.ensureDir(path.dirname(filename));
 
 			return fs.writeFile(
@@ -162,6 +168,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 			);
 		}
 	}
+
 	override async copy(
 		source: Uri,
 		destination: Uri,
@@ -173,6 +180,7 @@ export class FileSystem extends FileSystemBase implements IFileSystemNode {
 				typeof options?.overwrite == undefined
 					? true
 					: options?.overwrite;
+
 			await fs.copy(getFilePath(source), getFilePath(destination), {
 				overwrite,
 			});

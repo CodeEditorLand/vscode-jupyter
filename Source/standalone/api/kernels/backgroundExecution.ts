@@ -20,6 +20,7 @@ export async function execCodeInBackgroundThread<T>(
 	token: CancellationToken,
 ) {
 	const counter = executionCounters.get(kernel) || 0;
+
 	executionCounters.set(kernel, counter + 1);
 
 	const api = createKernelApiForExtension(JVSC_EXTENSION_ID, kernel);
@@ -62,6 +63,7 @@ del __jupyter_exec_background__
 `.trim();
 
 	const disposables = new DisposableStore();
+
 	disposables.add(token.onCancellationRequested(() => disposables.dispose()));
 
 	const promise = raceCancellation(
@@ -72,6 +74,7 @@ del __jupyter_exec_background__
 					if (token.isCancellationRequested) {
 						return resolve(undefined);
 					}
+
 					const metadata = getNotebookCellOutputMetadata(output);
 
 					if (
@@ -80,6 +83,7 @@ del __jupyter_exec_background__
 					) {
 						return;
 					}
+
 					const result = output.items.find(
 						(item) => item.mime === mimeFinalResult,
 					);
@@ -106,6 +110,7 @@ del __jupyter_exec_background__
 	).finally(() => {
 		kernel.session &&
 			unTrackDisplayDataForExtension(kernel.session, displayId);
+
 		disposables.dispose();
 	});
 
@@ -113,11 +118,13 @@ del __jupyter_exec_background__
 		if (token.isCancellationRequested) {
 			return;
 		}
+
 		const metadata = getNotebookCellOutputMetadata(output);
 
 		if (!metadata?.transient?.display_id) {
 			continue;
 		}
+
 		const dummyMessage = output.items.find((item) => item.mime === mime);
 
 		if (dummyMessage) {
@@ -145,9 +152,11 @@ del __jupyter_exec_background__
 			}
 		}
 	}
+
 	if (token.isCancellationRequested) {
 		return;
 	}
+
 	if (!displayId) {
 		logger.warn("Failed to get display id for completions");
 

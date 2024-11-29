@@ -64,6 +64,7 @@ export class CommandRegistry implements IExtensionSyncActivationService {
 		if (!workspace.isTrusted) {
 			return;
 		}
+
 		this.exportCommand?.register();
 	}
 }

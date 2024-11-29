@@ -12,6 +12,7 @@ See:
 
 interface IError {
 	name: string;
+
 	message: string;
 
 	toString(): string;
@@ -19,7 +20,9 @@ interface IError {
 
 interface INodeJSError extends IError {
 	code: string;
+
 	stack?: string;
+
 	stackTraceLimit: number;
 
 	captureStackTrace(): void;
@@ -55,6 +58,7 @@ namespace vscErrors {
 		if (!known.includes(err.name)) {
 			return undefined;
 		}
+
 		return err.name === expectedName;
 	}
 
@@ -65,11 +69,17 @@ namespace vscErrors {
 
 interface ISystemError extends INodeJSError {
 	errno: number;
+
 	syscall: string;
+
 	info?: string;
+
 	path?: string;
+
 	address?: string;
+
 	dest?: string;
+
 	port?: string;
 }
 
@@ -79,6 +89,7 @@ function isSystemError(err: Error, expectedCode: string): boolean | undefined {
 	if (!code) {
 		return undefined;
 	}
+
 	return code === expectedCode;
 }
 
@@ -89,5 +100,6 @@ export function isFileNotFoundError(err: Error): boolean | undefined {
 	if (matched !== undefined) {
 		return matched;
 	}
+
 	return isSystemError(err, "ENOENT");
 }

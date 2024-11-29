@@ -79,9 +79,11 @@ export class ExportBase implements IExportBase {
 			// trace error
 			return;
 		}
+
 		if (!kernel.session) {
 			await kernel.start(new DisplayOptions(false));
 		}
+
 		if (!kernel.session?.kernel) {
 			return;
 		}
@@ -93,9 +95,11 @@ export class ExportBase implements IExportBase {
 		if (!isRemoteConnection(kernelConnectionMetadata)) {
 			return;
 		}
+
 		if (resource) {
 			return;
 		}
+
 		const kernelConnection = kernel.session.kernel;
 
 		const connection = await this.jupyterConnection.createConnectionInfo(
@@ -138,6 +142,7 @@ export class ExportBase implements IExportBase {
 		if (!backingFile) {
 			return;
 		}
+
 		await contentsManager
 			.save(backingFile!.filePath, {
 				content: JSON.parse(contents),
@@ -154,6 +159,7 @@ export class ExportBase implements IExportBase {
 				type: "file",
 				ext: fileExt,
 			});
+
 			tempTarget = tempFile.path;
 
 			const filePath = `${pwd}/${backingFile.filePath}`;
@@ -185,6 +191,7 @@ export class ExportBase implements IExportBase {
 				);
 
 				const buffer = await bytes.arrayBuffer();
+
 				await this.fs.writeFile(target!, new Uint8Array(buffer));
 			} else {
 				const content = await contentsManager.get(tempTarget, {
@@ -192,17 +199,22 @@ export class ExportBase implements IExportBase {
 					format: "text",
 					content: true,
 				});
+
 				await this.fs.writeFile(target!, content.content as string);
 			}
 		} finally {
 			if (tempTarget) {
 				await contentsManager.delete(tempTarget);
 			}
+
 			await backingFile.dispose();
+
 			await contentsManager.delete(backingFile.filePath).catch(noop);
+
 			contentsManager.dispose();
 		}
 	}
+
 	public async createBackingFile(
 		resource: Resource,
 		contentsManager: ContentsManager,
@@ -224,6 +236,7 @@ export class ExportBase implements IExportBase {
 			backingFile = await contentsManager.newUntitled(backingFileOptions);
 
 			const backingFileDir = path.dirname(backingFile.path);
+
 			backingFile = await contentsManager.rename(
 				backingFile.path,
 				backingFileDir.length && backingFileDir !== "."
@@ -243,6 +256,7 @@ export class ExportBase implements IExportBase {
 			};
 		}
 	}
+
 	async getContents(
 		file: string,
 		format: Contents.FileFormat,
@@ -261,7 +275,9 @@ export class ExportBase implements IExportBase {
 		contentType = contentType || "";
 
 		const sliceSize = 512;
+
 		b64Data = b64Data.replace(/^[^,]+,/, "");
+
 		b64Data = b64Data.replace(/\s/g, "");
 
 		const byteCharacters = atob(b64Data);
@@ -270,7 +286,9 @@ export class ExportBase implements IExportBase {
 
 		for (
 			let offset = 0;
+
 			offset < byteCharacters.length;
+
 			offset += sliceSize
 		) {
 			const slice = byteCharacters.slice(offset, offset + sliceSize);
@@ -282,6 +300,7 @@ export class ExportBase implements IExportBase {
 			}
 
 			const byteArray = new Uint8Array(byteNumbers);
+
 			byteArrays.push(byteArray);
 		}
 
@@ -319,6 +338,7 @@ export class ExportBase implements IExportBase {
 		if (!kernel.session?.kernel) {
 			throw new SessionDisposedError();
 		}
+
 		const outputs = await executeSilently(
 			kernel.session.kernel,
 			`import os;os.getcwd();`,

@@ -3,10 +3,15 @@
 
 export interface ITestData {
 	columns: { id: string; name: string; type: string }[];
+
 	primaryKeys: string[];
+
 	rows: {}[];
+
 	loadingRows: {}[];
+
 	dataDimensionality: number | undefined;
+
 	originalVariableShape: number[] | undefined;
 }
 

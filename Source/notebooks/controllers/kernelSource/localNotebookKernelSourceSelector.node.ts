@@ -51,6 +51,7 @@ export class LocalNotebookKernelSourceSelector
 	implements ILocalNotebookKernelSourceSelector
 {
 	private localDisposables: IDisposable[] = [];
+
 	private cancellationTokenSource: CancellationTokenSource | undefined;
 
 	constructor(
@@ -62,6 +63,7 @@ export class LocalNotebookKernelSourceSelector
 		@inject(JupyterConnection)
 		private readonly jupyterConnection: JupyterConnection,
 	) {}
+
 	public async selectLocalKernel(
 		notebook: NotebookDocument,
 	): Promise<LocalKernelConnectionMetadata | undefined> {
@@ -72,9 +74,13 @@ export class LocalNotebookKernelSourceSelector
 		) {
 			return;
 		}
+
 		this.localDisposables.forEach((d) => d.dispose());
+
 		this.localDisposables = [];
+
 		this.cancellationTokenSource?.cancel();
+
 		this.cancellationTokenSource?.dispose();
 
 		this.cancellationTokenSource = new CancellationTokenSource();
@@ -106,6 +112,7 @@ export class LocalNotebookKernelSourceSelector
 			) {
 				throw new CancellationError();
 			}
+
 			if (this.cancellationTokenSource.token.isCancellationRequested) {
 				dispose(state.disposables);
 
@@ -121,6 +128,7 @@ export class LocalNotebookKernelSourceSelector
 			dispose(state.disposables);
 		}
 	}
+
 	private selectKernelFromKernelFinder(
 		source: IContributedKernelFinder<KernelConnectionMetadata>,
 		token: CancellationToken,
@@ -134,6 +142,7 @@ export class LocalNotebookKernelSourceSelector
 			this.pythonEnvFilter,
 			this.jupyterConnection,
 		);
+
 		state.disposables.push(provider);
 
 		return this.selectKernel(provider, token, multiStep, state);
@@ -150,7 +159,9 @@ export class LocalNotebookKernelSourceSelector
 		if (token.isCancellationRequested) {
 			return;
 		}
+
 		const selector = new BaseKernelSelector(provider, token);
+
 		state.disposables.push(selector);
 
 		const quickPickFactory: CreateAndSelectItemFromQuickPick = (

@@ -38,13 +38,21 @@ import {
 
 export type JupyterServerInfo = {
 	base_url: string;
+
 	notebook_dir: string;
+
 	hostname: string;
+
 	password: boolean;
+
 	pid: number;
+
 	port: number;
+
 	secure: boolean;
+
 	token: string;
+
 	url: string;
 };
 
@@ -58,6 +66,7 @@ export const IJupyterServerHelper = Symbol("JupyterServerHelper");
 
 export interface IJupyterServerHelper {
 	isJupyterServerSupported(cancelToken?: CancellationToken): Promise<boolean>;
+
 	startServer(
 		resource: Resource,
 		cancelToken?: CancellationToken,
@@ -68,6 +77,7 @@ export interface IJupyterServerHelper {
 	): Promise<PythonEnvironment | undefined>;
 
 	getJupyterServerError(): Promise<string>;
+
 	refreshCommands(): Promise<void>;
 }
 
@@ -79,8 +89,11 @@ export interface IJupyterKernel {
 	 * @memberof IJupyterKernel
 	 */
 	id?: string;
+
 	name: string;
+
 	lastActivityTime: Date | string;
+
 	numberOfConnections: number;
 }
 
@@ -205,16 +218,23 @@ export interface IJupyterServerUriStorage {
 	 * the data has been successfully loaded into memory.
 	 */
 	readonly onDidLoad: Event<void>;
+
 	readonly onDidChange: Event<void>;
+
 	readonly onDidRemove: Event<JupyterServerProviderHandle[]>;
+
 	readonly onDidAdd: Event<IJupyterServerUriEntry>;
+
 	readonly all: readonly IJupyterServerUriEntry[];
 	/**
 	 * Updates MRU list marking this server as the most recently used.
 	 */
 	update(serverProviderHandle: JupyterServerProviderHandle): Promise<void>;
+
 	remove(serverProviderHandle: JupyterServerProviderHandle): Promise<void>;
+
 	clear(): Promise<void>;
+
 	add(
 		serverProviderHandle: JupyterServerProviderHandle,
 		options?: { time: number },
@@ -223,6 +243,7 @@ export interface IJupyterServerUriStorage {
 
 export interface IBackupFile {
 	dispose: () => Promise<unknown>;
+
 	filePath: string;
 }
 
@@ -269,6 +290,7 @@ export interface IJupyterRequestCreator {
 		allowUnauthorized?: boolean,
 		getAuthHeaders?: () => Record<string, string>,
 	): ClassType<WebSocket>;
+
 	wrapWebSocketCtor(
 		websocketCtor: ClassType<WebSocketIsomorphic>,
 	): ClassType<WebSocketIsomorphic>;
@@ -327,6 +349,7 @@ export interface IRemoteKernelFinder
 	extends IContributedKernelFinder<RemoteKernelConnectionMetadata>,
 		IQuickPickItemProvider<RemoteKernelConnectionMetadata> {
 	kind: ContributedKernelFinderKind.Remote;
+
 	serverProviderHandle: JupyterServerProviderHandle;
 }
 
@@ -337,13 +360,17 @@ export const IJupyterServerProviderRegistry = Symbol(
 export interface IJupyterServerProviderRegistry {
 	onDidChangeCollections: Event<{
 		added: JupyterServerCollection[];
+
 		removed: JupyterServerCollection[];
 	}>;
+
 	activateThirdPartyExtensionAndFindCollection(
 		extensionId: string,
 		id: string,
 	): Promise<JupyterServerCollection | undefined>;
+
 	readonly jupyterCollections: readonly JupyterServerCollection[];
+
 	createJupyterServerCollection(
 		extensionId: string,
 		id: string,

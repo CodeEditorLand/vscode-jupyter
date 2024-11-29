@@ -52,6 +52,7 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 			interpreterService,
 		);
 	}
+
 	protected override async addErrorMessageIfPythonArePossiblyOverridingPythonModules(
 		messages: string[],
 		resource: Resource,
@@ -89,14 +90,17 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 			} else {
 				files = `${fileLinks.slice(0, -1).join(", ")} ${Common.and} ${fileLinks.slice(-1)}`;
 			}
+
 			messages.push(
 				DataScience.filesPossiblyOverridingPythonModulesMayHavePreventedKernelFromStarting(
 					files,
 				),
 			);
+
 			messages.push(
 				DataScience.listOfFilesWithLinksThatMightNeedToBeRenamed(files),
 			);
+
 			messages.push(
 				Common.clickHereForMoreInfoWithHtml(
 					JupyterKernelStartFailureOverrideReservedName,
@@ -104,6 +108,7 @@ export class DataScienceErrorHandlerNode extends DataScienceErrorHandler {
 			);
 		}
 	}
+
 	protected override async getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
 		resource: Resource,
 	): Promise<{ uri: Uri; type: "file" | "__init__" }[]> {

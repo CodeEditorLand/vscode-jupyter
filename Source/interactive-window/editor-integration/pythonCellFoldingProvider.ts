@@ -73,6 +73,7 @@ export class PythonCellFoldingProvider
 			if (token.isCancellationRequested || codeLenses.length == 0) {
 				return undefined;
 			}
+
 			return codeLenses.map((codeLens) => {
 				return new FoldingRange(
 					codeLens.range.start.line,
@@ -81,6 +82,7 @@ export class PythonCellFoldingProvider
 				);
 			});
 		}
+
 		return undefined;
 	}
 }

@@ -13,6 +13,7 @@ export function sendKernelListTelemetry(kernels: KernelConnectionMetadata[]) {
 		kernelInterpreterCount: 0,
 		kernelLiveCount: 0,
 	};
+
 	kernels.forEach((item) => {
 		switch (item.kind) {
 			case "connectToLiveRemoteKernel":
@@ -22,12 +23,14 @@ export function sendKernelListTelemetry(kernels: KernelConnectionMetadata[]) {
 
 			case "startUsingRemoteKernelSpec":
 				counters.localKernelSpecCount += 1;
+
 				counters.kernelSpecCount += 1;
 
 				break;
 
 			case "startUsingLocalKernelSpec":
 				counters.remoteKernelSpecCount += 1;
+
 				counters.kernelSpecCount += 1;
 
 				break;
@@ -37,9 +40,11 @@ export function sendKernelListTelemetry(kernels: KernelConnectionMetadata[]) {
 
 				break;
 			}
+
 			default:
 				break;
 		}
 	});
+
 	sendTelemetryEvent(Telemetry.KernelCount, { ...counters });
 }

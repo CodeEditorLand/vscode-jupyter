@@ -20,6 +20,7 @@ export namespace CommonEffects {
 	): IMainState {
 		// Read in the loc strings
 		const locJSON: LocalizedMessages = JSON.parse(arg.payload.data);
+
 		storeLocStrings(locJSON);
 
 		return arg.prevState;
@@ -46,6 +47,7 @@ export namespace CommonEffects {
 				element.innerHTML,
 			);
 		}
+
 		return arg.prevState;
 	}
 }

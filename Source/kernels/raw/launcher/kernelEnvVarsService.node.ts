@@ -86,9 +86,11 @@ export class KernelEnvironmentVariablesService {
 					return undefined;
 				});
 		}
+
 		if (token?.isCancellationRequested) {
 			return;
 		}
+
 		let [customEnvVars, interpreterEnv] = await Promise.all([
 			this.customEnvVars
 				.getCustomEnvironmentVariables(
@@ -118,6 +120,7 @@ export class KernelEnvironmentVariablesService {
 		if (token?.isCancellationRequested) {
 			return;
 		}
+
 		await trackKernelResourceInformation(resource, {
 			capturedEnvVars: Object.keys(interpreterEnv || {}).length > 0,
 		});
@@ -134,11 +137,14 @@ export class KernelEnvironmentVariablesService {
 		// upper case all of the keys
 		if (process.platform === "win32") {
 			mergedVars = {};
+
 			Object.keys(process.env).forEach((k) => {
 				mergedVars[k.toUpperCase()] = process.env[k];
 			});
 		}
+
 		kernelEnv = kernelEnv || {};
+
 		customEnvVars = customEnvVars || {};
 
 		// Keep a list of the kernelSpec variables that need to be substituted.
@@ -151,6 +157,7 @@ export class KernelEnvironmentVariablesService {
 				substituteEnvVars(key, value, process.env) !== value
 			) {
 				kernelSpecVariablesRequiringSubstitution[key] = value;
+
 				delete kernelEnv[key];
 			}
 		}
@@ -171,8 +178,10 @@ export class KernelEnvironmentVariablesService {
 				logger.info(
 					`Adding env Variable PYTHONNOUSERSITE to ${getDisplayPath(interpreter?.uri)}`,
 				);
+
 				mergedVars.PYTHONNOUSERSITE = "True";
 			}
+
 			if (isPythonKernel) {
 				mergedVars.PYDEVD_IPYTHON_COMPATIBLE_DEBUGGING = "1";
 			}
@@ -210,17 +219,20 @@ function substituteEnvVars(
 	let invalid = false;
 
 	let replacement = value;
+
 	replacement = replacement.replace(
 		SUBST_REGEX,
 		(match, substName, bogus, offset, orig) => {
 			if (offset > 0 && orig[offset - 1] === "\\") {
 				return match;
 			}
+
 			if ((bogus && bogus !== "") || !substName || substName === "") {
 				invalid = true;
 
 				return match;
 			}
+
 			return globalVars[substName] || "";
 		},
 	);
@@ -229,6 +241,7 @@ function substituteEnvVars(
 		logger.debug(
 			`${key} value in kernelSpec updated from ${value} to ${replacement}`,
 		);
+
 		value = replacement;
 	}
 

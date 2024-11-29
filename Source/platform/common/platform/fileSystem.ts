@@ -99,6 +99,7 @@ export class FileSystem implements IFileSystem {
 			if (isFileNotFoundError(err)) {
 				return false;
 			}
+
 			logger.error(`stat() failed for "${filename}"`, err);
 
 			return false;
@@ -107,10 +108,12 @@ export class FileSystem implements IFileSystem {
 		if (fileType === undefined) {
 			return true;
 		}
+
 		if (fileType === vscode.FileType.Unknown) {
 			// FileType.Unknown == 0, hence do not use bitwise operations.
 			return stat.type === vscode.FileType.Unknown;
 		}
+
 		return (stat.type & fileType) === fileType;
 	}
 

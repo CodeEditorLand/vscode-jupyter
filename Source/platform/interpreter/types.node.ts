@@ -13,12 +13,15 @@ import { PythonEnvironment } from "../pythonEnvironments/info";
 
 export type ExecutionFactoryCreationOptions = {
 	resource?: Uri;
+
 	interpreter: PythonEnvironment | Environment;
 };
 
 export type ExecutionFactoryCreateWithEnvironmentOptions = {
 	resource?: Uri;
+
 	interpreter: PythonEnvironment | Environment;
+
 	allowEnvironmentFetchExceptions?: boolean;
 };
 
@@ -28,6 +31,7 @@ export interface IPythonExecutionFactory {
 	create(
 		options: ExecutionFactoryCreationOptions,
 	): Promise<IPythonExecutionService>;
+
 	createActivatedEnvironment(
 		options: ExecutionFactoryCreateWithEnvironmentOptions,
 	): Promise<IPythonExecutionService>;
@@ -36,10 +40,12 @@ export const IPythonExecutionService = Symbol("IPythonExecutionService");
 
 export interface IPythonExecutionService {
 	isModuleInstalled(moduleName: string): Promise<boolean>;
+
 	execObservable(
 		args: string[],
 		options: SpawnOptions,
 	): ObservableExecutionResult<string>;
+
 	execModuleObservable(
 		moduleName: string,
 		args: string[],
@@ -50,6 +56,7 @@ export interface IPythonExecutionService {
 		args: string[],
 		options: SpawnOptions,
 	): Promise<ExecutionResult<string>>;
+
 	execModule(
 		moduleName: string,
 		args: string[],

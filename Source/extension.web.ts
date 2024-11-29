@@ -54,9 +54,11 @@ import { registerTypes as registerWebviewTypes } from "./webviews/extension-side
 
 class StopWatch {
 	private started = Date.now();
+
 	public get elapsedTime() {
 		return Date.now() - this.started;
 	}
+
 	public reset() {
 		this.started = Date.now();
 	}
@@ -119,10 +121,12 @@ export async function activate(
 	setIsCodeSpace(env.uiKind == UIKind.Web);
 
 	setIsWebExtension(true);
+
 	context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
 
 	try {
 		const [api, ready] = activateUnsafe(context, standardOutputChannel);
+
 		await ready;
 		// Send the "success" telemetry only if activation did not fail.
 		// Otherwise Telemetry is send via the error handler.
@@ -133,7 +137,9 @@ export async function activate(
 		// We want to completely handle the error
 		// before notifying VS Code.
 		durations.endActivateTime = stopWatch.elapsedTime;
+
 		handleError(ex, durations, stopWatch);
+
 		logger.error("Failed to active the Jupyter Extension", ex);
 		// Disable this, as we don't want Python extension or any other extensions that depend on this to fall over.
 		// Return a dummy object, to ensure other extension do not fall over.
@@ -192,6 +198,7 @@ function activateUnsafe(
 		);
 
 		activatedServiceContainer = serviceContainer;
+
 		initializeTelemetryGlobals(() => Promise.resolve(new Map()));
 
 		const activationPromise = activateLegacy(
@@ -245,17 +252,24 @@ async function activateLegacy(
 			.executeCommand("setContext", "jupyter.development", true)
 			.then(noop, noop);
 	}
+
 	commands
 		.executeCommand("setContext", "jupyter.webExtension", true)
 		.then(noop, noop);
 
 	// Register the rest of the types (platform is first because it's needed by others)
 	registerPlatformTypes(serviceManager);
+
 	registerNotebookTypes(serviceManager, isDevMode);
+
 	registerKernelTypes(serviceManager, isDevMode);
+
 	registerInteractiveTypes(serviceManager);
+
 	registerTerminalTypes(serviceManager);
+
 	registerStandaloneTypes(context, serviceManager, isDevMode);
+
 	registerWebviewTypes(serviceManager);
 
 	await postActivateLegacy(context, serviceContainer);

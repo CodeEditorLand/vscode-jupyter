@@ -28,6 +28,7 @@ function getFullFilePath(file?: Uri) {
 	) {
 		return path.basename(file.fsPath);
 	}
+
 	return file?.fsPath;
 }
 /**
@@ -36,9 +37,13 @@ function getFullFilePath(file?: Uri) {
 @injectable()
 export class CondaService {
 	private isAvailable: boolean | undefined;
+
 	private _file?: Uri;
+
 	private _version?: SemVer;
+
 	private _previousVersionCall?: Promise<SemVer | undefined>;
+
 	private _previousFileCall?: Promise<Uri | undefined>;
 
 	constructor(
@@ -54,14 +59,18 @@ export class CondaService {
 		if (this._version) {
 			return this._version;
 		}
+
 		if (this._previousVersionCall) {
 			return this._previousVersionCall;
 		}
+
 		const promise = async () => {
 			const latestInfo = this.getCondaVersionFromPython();
+
 			latestInfo
 				.then((version) => {
 					this._version = version;
+
 					this.updateCache().catch(noop);
 				})
 				.catch(noop);
@@ -69,34 +78,43 @@ export class CondaService {
 			const cachedInfo = createDeferredFromPromise(
 				this.getCachedInformation(),
 			);
+
 			await Promise.race([cachedInfo.promise, latestInfo]);
 
 			if (cachedInfo.completed && cachedInfo.value?.version) {
 				return (this._version = cachedInfo.value.version);
 			}
+
 			return latestInfo;
 		};
+
 		this._previousVersionCall = promise();
 
 		return this._previousVersionCall;
 	}
+
 	async getCondaFile() {
 		if (this._file) {
 			return getFullFilePath(this._file);
 		}
+
 		if (this._previousFileCall) {
 			return this._previousFileCall.then(getFullFilePath);
 		}
+
 		const promise = async () => {
 			const latestInfo = this.pythonApi
 				.getApi()
 				.then((api) =>
 					api.getCondaFile ? api.getCondaFile() : undefined,
 				);
+
 			latestInfo
 				.then((file) => {
 					logger.trace(`Conda file is ${file}`);
+
 					this._file = file ? Uri.file(file) : undefined;
+
 					this.updateCache().catch(noop);
 				})
 				.catch(noop);
@@ -104,13 +122,16 @@ export class CondaService {
 			const cachedInfo = createDeferredFromPromise(
 				this.getCachedInformation(),
 			);
+
 			await Promise.race([cachedInfo.promise, latestInfo]);
 
 			if (cachedInfo.completed && cachedInfo.value?.file) {
 				return (this._file = cachedInfo.value.file);
 			}
+
 			return latestInfo.then((v) => (v ? Uri.file(v) : undefined));
 		};
+
 		this._previousFileCall = promise();
 
 		return this._previousFileCall.then(getFullFilePath);
@@ -123,18 +144,22 @@ export class CondaService {
 		if (typeof this.isAvailable === "boolean") {
 			return this.isAvailable;
 		}
+
 		return this.getCondaVersion()
 
 			.then((version) => (this.isAvailable = version !== undefined)) // eslint-disable-line no-return-assign
 			.catch(() => (this.isAvailable = false)); // eslint-disable-line no-return-assign
 	}
+
 	private async updateCache() {
 		if (!this._file || !this._version) {
 			return;
 		}
+
 		const fileHash = this._file.fsPath.toLowerCase().endsWith("conda")
 			? ""
 			: await this.fs.getFileHash(this._file);
+
 		await this.globalState.update(CACHEKEY_FOR_CONDA_INFO, {
 			version: this._version.raw,
 			file: this._file.fsPath,
@@ -156,6 +181,7 @@ export class CondaService {
 		if (!cachedInfo) {
 			return;
 		}
+
 		const fileHash = cachedInfo.file.toLowerCase().endsWith("conda")
 			? ""
 			: await this.fs.getFileHash(Uri.file(cachedInfo.file));
@@ -167,6 +193,7 @@ export class CondaService {
 			};
 		}
 	}
+
 	private async getCondaVersionFromPython(): Promise<SemVer | undefined> {
 		return this.pythonApi
 			.getApi()

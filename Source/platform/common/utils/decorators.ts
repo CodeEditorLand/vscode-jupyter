@@ -32,10 +32,12 @@ export function cache(expiryDurationMs: number) {
 				: "";
 
 		const keyPrefix = `Cache_Method_Output_${className}.${propertyName}`;
+
 		descriptor.value = async function (...args: any) {
 			if (isTestExecution()) {
 				return originalMethod.apply(this, args) as Promise<any>;
 			}
+
 			const key = getCacheKeyFromFunctionArgs(keyPrefix, args);
 
 			const cachedItem = cacheStoreForMethods.get(key);
@@ -45,7 +47,9 @@ export function cache(expiryDurationMs: number) {
 
 				return Promise.resolve(cachedItem.data);
 			}
+
 			const promise = originalMethod.apply(this, args) as Promise<any>;
+
 			promise
 				.then((result) =>
 					cacheStoreForMethods.set(
@@ -93,6 +97,7 @@ export function swallowExceptions(scopeName?: string) {
 						if (isTestExecution()) {
 							return;
 						}
+
 						logger.error(errorMessage, error);
 					});
 				}
@@ -100,6 +105,7 @@ export function swallowExceptions(scopeName?: string) {
 				if (isTestExecution()) {
 					return;
 				}
+
 				logger.error(errorMessage, error);
 			}
 		};
@@ -113,9 +119,11 @@ type PromiseFunction = (...any: any[]) => Promise<any>;
 export type CallInfo = {
 	kind: string; // "Class", etc.
 	name: string;
+
 	methodName: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	args: any[];
+
 	target: Object;
 };
 
@@ -152,6 +160,7 @@ function tracing<T>(
 		} else {
 			log({ elapsed: timer.elapsedTime, returnValue: result });
 		}
+
 		return result;
 	} catch (ex) {
 		log({ elapsed: timer.elapsedTime, err: ex });
@@ -213,6 +222,7 @@ export function testOnlyMethod() {
 					`Function: ${propertyKey} can only be called from test code`,
 				);
 			}
+
 			return originalMethod.apply(this, args);
 		};
 

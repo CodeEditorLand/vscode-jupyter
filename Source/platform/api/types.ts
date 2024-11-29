@@ -12,7 +12,9 @@ export const IPythonApiProvider = Symbol("IPythonApi");
 
 export interface IPythonApiProvider {
 	onDidActivatePythonExtension: Event<void>;
+
 	pythonExtensionHooked: Promise<void>;
+
 	pythonExtensionVersion: SemVer | undefined;
 
 	getApi(): Promise<PythonApi>;
@@ -25,9 +27,13 @@ export const IPythonExtensionChecker = Symbol("IPythonExtensionChecker");
 
 export interface IPythonExtensionChecker {
 	readonly isPythonExtensionInstalled: boolean;
+
 	readonly isPythonExtensionActive: boolean;
+
 	showPythonExtensionInstallRequiredPrompt(): Promise<void>;
+
 	directlyInstallPythonExtension(): Promise<void>;
+
 	onPythonExtensionInstallationStatusChanged: Event<
 		"installed" | "uninstalled"
 	>;
@@ -52,13 +58,16 @@ export enum JupyterProductToInstall {
  */
 export interface IInterpreterStatusbarVisibilityFilter {
 	readonly changed?: Event<void>;
+
 	readonly hidden: boolean;
 }
 
 // Python extension still returns strings for paths
 export type InterpreterInformation_PythonApi = {
 	path: string;
+
 	version?: PythonVersion;
+
 	sysVersion?: string;
 };
 

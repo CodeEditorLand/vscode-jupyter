@@ -73,6 +73,7 @@ export function generateCells(
 		// We have at least one markdown. We might have to split it if there any lines that don't begin
 		// with # or are inside a multiline comment
 		let firstNonMarkdown = -1;
+
 		parseForComments(
 			split,
 			(_s, _i) => noop(),
@@ -115,6 +116,7 @@ export function generateCellRangesFromDocument(
 		if (matcher.isCell(line.text)) {
 			if (cells.length > 0) {
 				const previousCell = cells[cells.length - 1];
+
 				previousCell.range = new Range(
 					previousCell.range.start,
 					document.lineAt(index - 1).range.end,
@@ -132,6 +134,7 @@ export function generateCellRangesFromDocument(
 		const line = document.lineAt(document.lineCount - 1);
 
 		const previousCell = cells[cells.length - 1];
+
 		previousCell.range = new Range(
 			previousCell.range.start,
 			line.range.end,
@@ -173,6 +176,7 @@ export function generateCellsFromNotebookDocument(
 			if (cell.metadata.interactiveWindowCellMarker !== undefined) {
 				code.unshift(cell.metadata.interactiveWindowCellMarker + "\n");
 			}
+
 			const cellData = new NotebookCellData(
 				cell.kind,
 				code.join("\n"),
@@ -184,6 +188,7 @@ export function generateCellsFromNotebookDocument(
 			if (cell.kind === NotebookCellKind.Code) {
 				cellData.outputs = [...cell.outputs];
 			}
+
 			cellData.metadata = getCellMetadata(cell);
 
 			return cellData;

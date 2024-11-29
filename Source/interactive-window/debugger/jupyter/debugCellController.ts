@@ -26,6 +26,7 @@ import { getInteractiveCellMetadata } from "../../helpers";
  */
 export class DebugCellController implements IDebuggingDelegate {
 	private _ready = createDeferred();
+
 	public readonly ready = this._ready.promise;
 
 	private cellDumpInvoked?: boolean;
@@ -66,6 +67,7 @@ export class DebugCellController implements IDebuggingDelegate {
 	}
 
 	private debugCellDumped?: Promise<void>;
+
 	public async willSendRequest(
 		request: DebugProtocol.Request,
 	): Promise<undefined | DebugProtocol.Response> {
@@ -83,8 +85,10 @@ export class DebugCellController implements IDebuggingDelegate {
 					this.debugAdapter,
 				);
 			}
+
 			await this.debugCellDumped;
 		}
+
 		if (
 			request.command === "configurationDone" &&
 			metadata &&
@@ -96,7 +100,9 @@ export class DebugCellController implements IDebuggingDelegate {
 					this.debugAdapter,
 				);
 			}
+
 			await this.debugCellDumped;
+
 			this._ready.resolve();
 		}
 

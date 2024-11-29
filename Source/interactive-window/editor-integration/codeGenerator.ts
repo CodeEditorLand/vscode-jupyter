@@ -38,8 +38,11 @@ import {
 export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 	// Map of file to Map of start line to actual hash
 	private executionCount: number = 0;
+
 	private cellIndexesCounted: Record<number, boolean> = {};
+
 	private disposed?: boolean;
+
 	private disposables: Disposable[] = [];
 
 	constructor(
@@ -55,6 +58,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			this,
 			this.disposables,
 		);
+
 		notebookCellExecutions.onDidChangeNotebookCellExecutionState(
 			this.onDidCellStateChange,
 			this,
@@ -66,13 +70,17 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		if (this.disposed) {
 			return;
 		}
+
 		this.disposed = true;
+
 		this.storage.clear();
+
 		this.disposables.forEach((d) => d.dispose());
 	}
 
 	public reset() {
 		this.storage.clear();
+
 		this.executionCount = 0;
 	}
 
@@ -89,6 +97,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		const { executableLines } = this.extractExecutableLines(metadata);
 		// user added code that we're about to execute, so increase the execution count for the code that we need to generate
 		this.executionCount += 1;
+
 		this.cellIndexesCounted[cellIndex] = true;
 
 		if (
@@ -155,6 +164,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		) {
 			return { lines, executableLines: lines.slice(1) };
 		}
+
 		return { lines, executableLines: lines };
 	}
 
@@ -162,6 +172,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		if (e.state !== NotebookCellExecutionState.Idle) {
 			return;
 		}
+
 		if (
 			e.state !== NotebookCellExecutionState.Idle ||
 			e.cell.notebook !== this.notebook ||
@@ -173,6 +184,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		// A cell executed that we haven't counted yet, likely from the input box, so bump the execution count
 		// Cancelled cells (from earlier cells in the queue) don't have an execution order and shoud not increase the execution count
 		this.executionCount += 1;
+
 		this.cellIndexesCounted[e.cell.index] = true;
 	}
 
@@ -214,6 +226,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		) {
 			firstNonBlankIndex += 1;
 		}
+
 		const firstNonBlankLineIndex = firstNonBlankIndex + trueStartLine;
 
 		// Use the original values however to track edits. This is what we need
@@ -278,6 +291,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		logger.info(
 			`Generated code for ${expectedCount} = ${runtimeFile} with ${stripped.length} lines`,
 		);
+
 		this.storage.store(Uri.parse(metadata.interactive.uristring), hash);
 
 		return hash;
@@ -294,6 +308,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		if (perFile) {
 			// Apply the content changes to the file's cells.
 			const docText = e.document.getText();
+
 			e.contentChanges.forEach((c) => {
 				this.handleContentChange(docText, c, perFile);
 			});
@@ -307,6 +322,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		>,
 	): {
 		stripped: string[];
+
 		trueStartLine: number;
 	} {
 		const lines = splitMultilineString(metadata.interactive.originalSource);
@@ -353,7 +369,9 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 				(nextToLastLine.length === 0 || nextToLastLine === "\n")
 			) {
 				stripped.splice(lastLinePos, 1);
+
 				lastLinePos -= 1;
+
 				nextToLastLinePos -= 1;
 			} else {
 				break;
@@ -371,6 +389,7 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 		for (let i = 0; i < stripped.length; i++) {
 			stripped[i] = stripped[i].replace(/\r\n/g, "\n");
 		}
+
 		return { stripped, trueStartLine };
 	}
 
@@ -401,8 +420,11 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 			} else if (h.startOffset > endChangedOffset) {
 				// This cell is after the text that got replaced. Adjust its start/end lines
 				h.line += lineDiff;
+
 				h.endLine += lineDiff;
+
 				h.startOffset += offsetDiff;
+
 				h.endOffset += offsetDiff;
 			} else if (h.startOffset === endChangedOffset) {
 				// Cell intersects but exactly, might be a replacement or an insertion
@@ -416,8 +438,11 @@ export class CodeGenerator implements IInteractiveWindowCodeGenerator {
 				} else {
 					// Insertion
 					h.line += lineDiff;
+
 					h.endLine += lineDiff;
+
 					h.startOffset += offsetDiff;
+
 					h.endOffset += offsetDiff;
 				}
 			} else {

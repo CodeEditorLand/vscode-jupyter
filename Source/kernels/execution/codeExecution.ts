@@ -25,6 +25,7 @@ function traceExecMessage(
 	if (extensionId === JVSC_EXTENSION_ID) {
 		return;
 	}
+
 	logger.trace(`Execution Id:${executionId}. ${message}.`);
 }
 
@@ -40,48 +41,71 @@ const extensionIdsPerExtension = new Map<string, number>();
  */
 export class CodeExecution implements ICodeExecution, IDisposable {
 	public readonly type = "code";
+
 	public get done(): Promise<void> {
 		return this._done.promise;
 	}
+
 	public get result(): Promise<void> {
 		return this._done.promise;
 	}
+
 	private readonly _onDidEmitOutput = new EventEmitter<NotebookCellOutput>();
+
 	public readonly onDidEmitOutput = this._onDidEmitOutput.event;
+
 	private readonly _onRequestSent = new EventEmitter<void>();
+
 	public readonly onRequestSent = this._onRequestSent.event;
+
 	private readonly _onRequestAcknowledge = new EventEmitter<void>();
+
 	public readonly onRequestAcknowledged = this._onRequestAcknowledge.event;
+
 	private readonly _done = createDeferred<void>();
+
 	private started?: boolean;
 
 	private _completed?: boolean;
+
 	private cancelHandled = false;
+
 	private disposed?: boolean;
+
 	private request:
 		| Kernel.IShellFuture<
 				KernelMessage.IExecuteRequestMsg,
 				KernelMessage.IExecuteReplyMsg
 		  >
 		| undefined;
+
 	private readonly disposables: IDisposable[] = [];
+
 	private session?: IKernelSession;
+
 	private cancelRequested?: boolean;
+
 	public readonly executionId: string;
+
 	private constructor(
 		public readonly code: string,
 		public readonly extensionId: string,
 	) {
 		let executionId = extensionIdsPerExtension.get(extensionId) || 0;
+
 		executionId += 1;
+
 		extensionIdsPerExtension.set(extensionId, executionId);
+
 		this.executionId = `${extensionId}-${executionId}`;
+
 		this.disposables.push(this._onDidEmitOutput);
 	}
 
 	public static fromCode(code: string, extensionId: string) {
 		return new CodeExecution(code, extensionId);
 	}
+
 	public async start(session: IKernelSession) {
 		this.session = session;
 
@@ -94,11 +118,13 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 
 			return;
 		}
+
 		traceExecMessage(
 			this.extensionId,
 			this.executionId,
 			"Start Code execution",
 		);
+
 		logger.ci(`Code Exec contents ${this.code.substring(0, 50)}...`);
 
 		if (
@@ -117,6 +143,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 				this.executionId,
 				"Code has already been started yet CodeExecution.Start invoked again",
 			);
+
 			logger.error(
 				`Code has already been started yet CodeExecution.Start invoked again ${this.executionId}`,
 			);
@@ -139,6 +166,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 		if (this.cancelHandled || this._completed) {
 			return;
 		}
+
 		this.cancelRequested = true;
 
 		if (this.started) {
@@ -162,18 +190,24 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			// This is the only time we cancel the request.
 			// Else never cancel it as there could be background messages coming through (from bg threads).
 			this.request?.dispose();
+
 			await this.request?.done.catch(noop);
 		}
+
 		if (this.cancelHandled || this._completed) {
 			return;
 		}
+
 		traceExecMessage(
 			this.extensionId,
 			this.executionId,
 			"Execution cancelled",
 		);
+
 		this.cancelHandled = true;
+
 		this._done.resolve();
+
 		this.dispose();
 	}
 	/**
@@ -184,6 +218,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 		if (this.disposed) {
 			return;
 		}
+
 		this.disposed = true;
 
 		if (!this._completed) {
@@ -193,16 +228,19 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 				"Execution disposed",
 			);
 		}
+
 		dispose(this.disposables);
 	}
 
 	private async execute(code: string, session: IKernelSession) {
 		if (!session.kernel) {
 			const error = new Error("No kernel available to execute code");
+
 			this._done.resolve();
 
 			throw error;
 		}
+
 		traceExecMessage(
 			this.extensionId,
 			this.executionId,
@@ -213,7 +251,9 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 
 		try {
 			this.started = true;
+
 			this._onRequestSent.fire();
+
 			traceExecMessage(
 				this.extensionId,
 				this.executionId,
@@ -234,7 +274,9 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 				`Code execution failed without request, for exec ${this.executionId}`,
 				ex,
 			);
+
 			this._completed = true;
+
 			this._done.reject(ex);
 
 			return;
@@ -249,6 +291,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			// request.done resolves even before all iopub messages have been sent through.
 			// Solution is to wait for all messages to get processed.
 			const response = await this.request!.done;
+
 			this._completed = true;
 
 			if (response.content.status === "error") {
@@ -257,6 +300,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 					this.executionId,
 					"Executed with errors",
 				);
+
 				this._done.reject(new KernelError(response.content));
 			} else {
 				traceExecMessage(
@@ -264,6 +308,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 					this.executionId,
 					"Executed successfully",
 				);
+
 				this._done.resolve();
 			}
 		} catch (ex) {
@@ -272,6 +317,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 			if (this.cancelHandled) {
 				return;
 			}
+
 			if (!this.disposed && !this.cancelRequested) {
 				// @jupyterlab/services throws a `Canceled` error when the kernel is interrupted.
 				// Or even when the kernel dies when running a cell with the code `os.kill(os.getpid(), 9)`
@@ -280,6 +326,7 @@ export class CodeExecution implements ICodeExecution, IDisposable {
 					ex,
 				);
 			}
+
 			this._done.reject(ex);
 		}
 	}

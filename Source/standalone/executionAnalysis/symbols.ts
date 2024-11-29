@@ -35,7 +35,9 @@ const readDecorationType = vscode.window.createTextEditorDecorationType({
 
 export interface ILocationWithReferenceKind {
 	uri: vscode.Uri;
+
 	range: Range;
+
 	kind?: string;
 }
 
@@ -96,9 +98,11 @@ export class CellAnalysis {
 
 		for (
 			i = virtualCellList.length - 1;
+
 			i >= 0 &&
 			virtualCellList[i].document.uri.toString() !==
 				cell.document.uri.toString();
+
 			i--
 		) {
 			// no-op
@@ -118,6 +122,7 @@ export class CellAnalysis {
 		const cellBitmap: boolean[] = new Array(
 			slicedCellExecution.length,
 		).fill(false);
+
 		cellBitmap[lastExecutionIndex] = true;
 
 		const reversedCellRefs = new Map<string, string[]>(); // key: cell uri fragment, value: cell uri fragment[]
@@ -125,6 +130,7 @@ export class CellAnalysis {
 			const modifications = dependents
 				.filter((item) => item.kind === "write")
 				.map((item) => item.uri.fragment);
+
 			dependents.forEach((dependent) => {
 				const fragment = dependent.uri.fragment;
 
@@ -148,6 +154,7 @@ export class CellAnalysis {
 		}
 
 		const cellFragment = cell.document.uri.fragment;
+
 		this._resolveDependencies(
 			reversedCellRefs,
 			cellBitmap,
@@ -186,12 +193,14 @@ export class CellAnalysis {
 		const cellBitmap: boolean[] = new Array(virtualCellList.length).fill(
 			false,
 		);
+
 		cellBitmap[cellIndex] = true;
 
 		const modificationCellRefs: Map<
 			string,
 			ILocationWithReferenceKindAndSymbol[]
 		> = new Map();
+
 		this._cellRefs.forEach((refs) => {
 			refs.forEach((ref) => {
 				if (ref.kind === "write") {
@@ -200,9 +209,11 @@ export class CellAnalysis {
 
 					const modifiedCellRefs =
 						modificationCellRefs.get(modifiedCellFragment) ?? [];
+
 					modifiedCellRefs.push(
 						...refs.filter((item) => item !== ref),
 					);
+
 					modificationCellRefs.set(
 						modifiedCellFragment,
 						modifiedCellRefs,
@@ -272,8 +283,10 @@ export class CellAnalysis {
 						continue;
 					}
 				}
+
 				if (!cellBitmap[index]) {
 					cellBitmap[index] = true;
+
 					this._resolveDependencies(
 						reversedCellRefs,
 						cellBitmap,
@@ -289,6 +302,7 @@ export class CellAnalysis {
 
 export interface ICellExecution {
 	cell: vscode.NotebookCell;
+
 	executionCount: number;
 }
 
@@ -301,10 +315,13 @@ enum CellExecutionStatus {
 export class NotebookDocumentSymbolTracker {
 	private _pendingRequests: Map<string, vscode.CancellationTokenSource> =
 		new Map();
+
 	private _cellRefs: Map<string, ILocationWithReferenceKindAndSymbol[]> =
 		new Map();
+
 	private _staleCellRefs: Map<string, CellExecutionStatus> = new Map(); // key: cell uri fragment, value: 'stale' | 'fresh' | 'executing'
 	private _cellExecution: ICellExecution[] = [];
+
 	private _disposables: vscode.Disposable[] = [];
 
 	constructor(
@@ -323,6 +340,7 @@ export class NotebookDocumentSymbolTracker {
 							this._pendingRequests.delete(
 								cell.document.uri.fragment,
 							);
+
 							this._cellRefs.delete(cell.document.uri.fragment);
 						});
 
@@ -340,6 +358,7 @@ export class NotebookDocumentSymbolTracker {
 								noop,
 								noop,
 							);
+
 							this._updateCellStatus(
 								change.cell,
 								CellExecutionStatus.Stale,
@@ -393,7 +412,9 @@ export class NotebookDocumentSymbolTracker {
 
 	private async _requestCellSymbolsSync() {
 		const _pendingRequestsKeys = [...this._pendingRequests.keys()];
+
 		this._pendingRequests.forEach((r) => r.cancel());
+
 		this._pendingRequests.clear();
 		// force request cell symbols synchronously
 		for (const key of _pendingRequestsKeys) {
@@ -419,16 +440,19 @@ export class NotebookDocumentSymbolTracker {
 
 	async selectPrecedentCells(cell: vscode.NotebookCell) {
 		const cellRanges = await this.getPrecedentCells(cell);
+
 		this._notebookEditor.selections = cellRanges;
 	}
 
 	async selectSuccessorCells(cell: vscode.NotebookCell) {
 		const cellRanges = await this.getSuccessorCells(cell);
+
 		this._notebookEditor.selections = cellRanges;
 	}
 
 	async runPrecedentCells(cell: vscode.NotebookCell) {
 		const cellRanges = await this.getPrecedentCells(cell);
+
 		await vscode.commands
 			.executeCommand("notebook.cell.execute", {
 				ranges: cellRanges.map((range) => ({
@@ -442,6 +466,7 @@ export class NotebookDocumentSymbolTracker {
 
 	async runSuccessorCells(cell: vscode.NotebookCell) {
 		const cellRanges = await this.getSuccessorCells(cell);
+
 		await vscode.commands
 			.executeCommand("notebook.cell.execute", {
 				ranges: cellRanges.map((range) => ({
@@ -514,6 +539,7 @@ export class NotebookDocumentSymbolTracker {
 
 	async debugSymbols() {
 		const locations: ILocationWithReferenceKind[] = [];
+
 		await this._requestCellSymbolsSync();
 
 		console.log(JSON.stringify(Array.from(this._cellRefs.entries())));
@@ -538,12 +564,14 @@ export class NotebookDocumentSymbolTracker {
 			string,
 			ILocationWithReferenceKind[]
 		>();
+
 		locations.forEach((loc) => {
 			const fragment = loc.uri.fragment;
 
 			if (!locationsByUriFragment.has(fragment)) {
 				locationsByUriFragment.set(fragment, []);
 			}
+
 			locationsByUriFragment.get(fragment)?.push(loc);
 		});
 
@@ -594,6 +622,7 @@ export class NotebookDocumentSymbolTracker {
 				});
 
 				matcheEditor.setDecorations(writeDecorationType, writeRanges);
+
 				matcheEditor.setDecorations(readDecorationType, readRanges);
 			}
 		});
@@ -613,16 +642,19 @@ export class NotebookDocumentSymbolTracker {
 		if (synchronous) {
 			const cancellationTokenSource =
 				new vscode.CancellationTokenSource();
+
 			await this._doRequestCellSymbols(
 				cell,
 				cancellationTokenSource.token,
 			);
+
 			cancellationTokenSource.dispose();
 
 			return;
 		}
 
 		const request = new vscode.CancellationTokenSource();
+
 		this._pendingRequests.set(cell.document.uri.fragment, request);
 
 		// set timeout for 500ms, after which we will send the request
@@ -659,6 +691,7 @@ export class NotebookDocumentSymbolTracker {
 				return symbols;
 			}
 		}
+
 		if (
 			cell.document.lineCount > 1 ||
 			cell.document.lineAt(0).text.length > 0
@@ -727,14 +760,18 @@ export class NotebookDocumentSymbolTracker {
 	dispose() {
 		// clear all pending requests
 		this._pendingRequests.forEach((r) => r.cancel());
+
 		this._pendingRequests.clear();
+
 		this._disposables.forEach((d) => d.dispose());
+
 		this._disposables = [];
 	}
 }
 
 export class SymbolsTracker {
 	private _disposables: vscode.Disposable[] = [];
+
 	private _notebookDocumentSymbolTrackers: Map<
 		string,
 		NotebookDocumentSymbolTracker
@@ -774,6 +811,7 @@ export class SymbolsTracker {
 						)
 					) {
 						tracker.dispose();
+
 						this._notebookDocumentSymbolTrackers.delete(uri);
 					}
 				});
@@ -849,6 +887,7 @@ export class SymbolsTracker {
 
 	dispose() {
 		this._disposables.forEach((d) => d.dispose());
+
 		this._disposables = [];
 	}
 }
@@ -857,6 +896,7 @@ export class ExecutionFixCodeActionsProvider
 	implements vscode.CodeActionProvider
 {
 	constructor(private readonly symbolsTracker: SymbolsTracker) {}
+
 	async provideCodeActions(
 		document: vscode.TextDocument,
 		range: vscode.Range | vscode.Selection,
@@ -921,6 +961,7 @@ export class ExecutionFixCodeActionsProvider
 		if (!match) {
 			return [];
 		}
+
 		const name = match[1];
 
 		const precedentCellsRanges =
@@ -934,6 +975,7 @@ export class ExecutionFixCodeActionsProvider
 				if (!cell) {
 					return false;
 				}
+
 				const symbols = await tracker.getCellSymbolRefs(cell);
 
 				if (!symbols || symbols.length <= 0) {
@@ -967,6 +1009,7 @@ export class ExecutionFixCodeActionsProvider
 				"Run Precedent Cells",
 				vscode.CodeActionKind.QuickFix,
 			);
+
 			action.command = {
 				command: "jupyter.runPrecedentCells",
 				title: "Run Precedent Cells",

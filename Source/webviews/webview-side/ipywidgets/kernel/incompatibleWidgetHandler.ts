@@ -21,6 +21,7 @@ export function warnAboutWidgetVersionsThatAreNotSupported(
 	cdnSupported: boolean,
 	errorDispatcher: (info: {
 		moduleName: typeof qgridModuleName;
+
 		moduleVersion: string;
 	}) => void,
 ) {
@@ -53,5 +54,6 @@ export function warnAboutWidgetVersionsThatAreNotSupported(
 	} catch {
 		return false;
 	}
+
 	errorDispatcher({ moduleName: widgetSource.moduleName, moduleVersion });
 }

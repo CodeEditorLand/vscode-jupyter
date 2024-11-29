@@ -13,6 +13,7 @@ export function parsePythonVersion(raw: string): PythonVersion | undefined {
 	if (!raw || raw.trim().length === 0) {
 		return;
 	}
+
 	const versionParts = (raw || "")
 		.split(".")
 		.map((item) => item.trim())
@@ -24,9 +25,12 @@ export function parsePythonVersion(raw: string): PythonVersion | undefined {
 		versionParts[versionParts.length - 1].indexOf("-") > 0
 	) {
 		const lastPart = versionParts[versionParts.length - 1];
+
 		versionParts[versionParts.length - 1] = lastPart.split("-")[0].trim();
+
 		versionParts.push(lastPart.split("-")[1].trim());
 	}
+
 	while (versionParts.length < 4) {
 		versionParts.push("");
 	}
@@ -36,11 +40,13 @@ export function parsePythonVersion(raw: string): PythonVersion | undefined {
 			? versionParts[index]
 			: "0";
 	}
+
 	if (
 		["alpha", "beta", "candidate", "final"].indexOf(versionParts[3]) === -1
 	) {
 		versionParts.pop();
 	}
+
 	const numberParts = `${versionParts[0]}.${versionParts[1]}.${versionParts[2]}`;
 
 	const rawVersion =

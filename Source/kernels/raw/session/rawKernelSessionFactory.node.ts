@@ -84,11 +84,13 @@ export class RawKernelSessionFactory implements IRawKernelSessionFactory {
 				}),
 			),
 		]);
+
 		cwdTracker?.stop();
 
 		const launchTimeout = this.configService.getSettings(
 			options.resource,
 		).jupyterLaunchTimeout;
+
 		session = new RawSessionConnection(
 			options.resource,
 			this.kernelLauncher,
@@ -214,5 +216,6 @@ async function doComputeLocalWorkingDirectory(
 			workingDir = fileRoot;
 		}
 	}
+
 	return workingDir;
 }

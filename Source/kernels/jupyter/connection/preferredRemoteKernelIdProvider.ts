@@ -18,6 +18,7 @@ export const MaximumKernelIdListSize = 100;
 
 type KernelIdListEntry = {
 	fileHash: string;
+
 	kernelId: string | undefined;
 };
 
@@ -47,6 +48,7 @@ export class PreferredRemoteKernelIdProvider {
 			const fileHash = await this.crypto.createHash(uri.toString());
 
 			const entry = list.find((l) => l.fileHash === fileHash);
+
 			logger.trace(
 				`Preferred Remote kernel for ${getDisplayPath(uri)} is ${entry?.kernelId}`,
 			);
@@ -58,12 +60,14 @@ export class PreferredRemoteKernelIdProvider {
 	public async clearPreferredRemoteKernelId(uri: Uri): Promise<void> {
 		await this.updatePreferredRemoteKernelIdInternal(uri);
 	}
+
 	public async storePreferredRemoteKernelId(
 		uri: Uri,
 		id: string,
 	): Promise<void> {
 		await this.updatePreferredRemoteKernelIdInternal(uri, id);
 	}
+
 	private async updatePreferredRemoteKernelIdInternal(
 		uri: Uri,
 		id?: string,
@@ -86,13 +90,16 @@ export class PreferredRemoteKernelIdProvider {
 		// Always remove old spot (we'll push on the back for new ones)
 		if (index >= 0) {
 			requiresUpdate = true;
+
 			list.splice(index, 1);
 		}
 
 		// If adding a new one, push
 		if (id) {
 			requiresUpdate = true;
+
 			list.push({ fileHash, kernelId: id });
+
 			logger.trace(
 				`Storing Preferred remote kernel for ${getDisplayPath(uri)} is ${id}`,
 			);
@@ -101,8 +108,10 @@ export class PreferredRemoteKernelIdProvider {
 		// Prune list if too big
 		while (list.length > MaximumKernelIdListSize) {
 			requiresUpdate = true;
+
 			list.shift();
 		}
+
 		if (requiresUpdate) {
 			await this.globalMemento.update(ActiveKernelIdList, list);
 		}

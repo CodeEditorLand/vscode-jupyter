@@ -107,9 +107,13 @@ export class JupyterInterpreterSelector {
 			undefined,
 			DataScience.quickPickSelectPythonEnvironmentTitle,
 		);
+
 		selector.placeholder = placeholder;
+
 		selector.selected = findSelectedEnvironment();
+
 		disposables.push(selector);
+
 		disposables.push(token);
 
 		try {
@@ -121,6 +125,7 @@ export class JupyterInterpreterSelector {
 						onDidChangeHandler.dispose();
 					}
 				});
+
 				disposables.push(onDidChangeHandler);
 			}
 
@@ -129,6 +134,7 @@ export class JupyterInterpreterSelector {
 			if (!item || item instanceof InputFlowAction) {
 				return;
 			}
+
 			return item;
 		} catch (ex) {
 			logger.error(

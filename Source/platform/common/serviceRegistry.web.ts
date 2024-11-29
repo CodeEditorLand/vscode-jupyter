@@ -34,41 +34,53 @@ import {
 
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingletonInstance<boolean>(IsWindows, false);
+
 	serviceManager.addSingleton<IExperimentService>(
 		IExperimentService,
 		ExperimentService,
 	);
+
 	serviceManager.addSingleton<IFeaturesManager>(
 		IFeaturesManager,
 		FeatureManager,
 	);
+
 	serviceManager.addSingleton<IPersistentStateFactory>(
 		IPersistentStateFactory,
 		PersistentStateFactory,
 	);
+
 	serviceManager.addSingleton<IExtensions>(IExtensions, Extensions);
+
 	serviceManager.addSingleton<ICryptoUtils>(ICryptoUtils, CryptoUtils);
+
 	serviceManager.addSingleton<IEncryptedStorage>(
 		IEncryptedStorage,
 		EncryptedStorage,
 	);
+
 	serviceManager.addSingleton<IDebugService>(IDebugService, DebugService);
+
 	serviceManager.addSingleton<IAsyncDisposableRegistry>(
 		IAsyncDisposableRegistry,
 		AsyncDisposableRegistry,
 	);
+
 	serviceManager.addSingleton<IMultiStepInputFactory>(
 		IMultiStepInputFactory,
 		MultiStepInputFactory,
 	);
+
 	serviceManager.addSingleton<IDataFrameScriptGenerator>(
 		IDataFrameScriptGenerator,
 		DataFrameScriptGenerator,
 	);
+
 	serviceManager.addSingleton<IVariableScriptGenerator>(
 		IVariableScriptGenerator,
 		VariableScriptGenerator,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		OldCacheCleaner,

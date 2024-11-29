@@ -71,8 +71,11 @@ export const CACHE_KEY_FOR_JUPYTER_KERNEL_PATHS =
 @injectable()
 export class JupyterPaths {
 	private cachedKernelSpecRootPath?: Promise<Uri | undefined>;
+
 	private cachedJupyterKernelPaths?: Promise<Uri[]>;
+
 	private cachedJupyterPaths?: Promise<Uri[]>;
+
 	private cachedDataDirs = new Map<string, Promise<Uri[]>>();
 
 	constructor(
@@ -91,6 +94,7 @@ export class JupyterPaths {
 		this.envVarsProvider.onDidEnvironmentVariablesChange(
 			() => {
 				this.cachedJupyterKernelPaths = undefined;
+
 				this.cachedJupyterPaths = undefined;
 			},
 			this,
@@ -109,6 +113,7 @@ export class JupyterPaths {
 			"jupyter",
 			"kernels",
 		);
+
 		await this.fs.createDirectory(dir);
 
 		return dir;
@@ -123,6 +128,7 @@ export class JupyterPaths {
 		if (cachedRootPath || this.cachedKernelSpecRootPath) {
 			return cachedRootPath || this.cachedKernelSpecRootPath;
 		}
+
 		this.cachedKernelSpecRootPath = (async () => {
 			const userHomeDir = this.platformService.homeDir;
 
@@ -140,11 +146,13 @@ export class JupyterPaths {
 				}
 			}
 		})();
+
 		this.cachedKernelSpecRootPath
 			.then((value) => {
 				logger.trace(
 					`Getting Jupyter KernelSpec Root Path ${value?.toString()}`,
 				);
+
 				this.updateCachedRootPath(value);
 			})
 			.catch(noop);
@@ -169,7 +177,9 @@ export class JupyterPaths {
 			"jupyter",
 			"runtime",
 		);
+
 		await fs.ensureDir(extensionRuntimeDir.fsPath);
+
 		logger.trace(
 			`Using extension runtime directory ${extensionRuntimeDir.fsPath}`,
 		);
@@ -178,6 +188,7 @@ export class JupyterPaths {
 	}
 
 	private runtimeDirIsWritable = false;
+
 	private async getRuntimeDirImpl(): Promise<Uri | undefined> {
 		let runtimeDir: Uri | undefined;
 
@@ -213,6 +224,7 @@ export class JupyterPaths {
 						);
 			}
 		}
+
 		if (!runtimeDir) {
 			logger.error(`Failed to determine Jupyter runtime directory`);
 
@@ -230,8 +242,10 @@ export class JupyterPaths {
 				const tempFile = uriPath.joinPath(runtimeDir, tempFileName);
 				// If this fails, then thats find, at least we know the folder is not writable, even if it exists.
 				await fs.writeFile(tempFile.fsPath, "");
+
 				await fs.unlink(tempFile.fsPath).catch(noop);
 			}
+
 			return runtimeDir;
 		} catch (ex) {
 			logger.error(
@@ -247,6 +261,7 @@ export class JupyterPaths {
 	 */
 	public async getDataDirs(options: {
 		resource: Resource;
+
 		interpreter?: PythonEnvironment;
 	}): Promise<Uri[]> {
 		const key = options.interpreter
@@ -259,6 +274,7 @@ export class JupyterPaths {
 				this.getDataDirsImpl(options.resource, options.interpreter),
 			);
 		}
+
 		return this.cachedDataDirs.get(key)!;
 	}
 
@@ -332,6 +348,7 @@ export class JupyterPaths {
 		if (interpreter) {
 			sysPrefix = await getSysPrefix(interpreter);
 		}
+
 		const possibleEnvJupyterPath = sysPrefix
 			? Uri.joinPath(Uri.file(sysPrefix), "share", "jupyter")
 			: undefined;
@@ -384,14 +401,17 @@ export class JupyterPaths {
 
 		return sortedEntries.map((item) => item[0]);
 	}
+
 	private getJupyterConfigDir() {
 		if (process.env["JUPYTER_CONFIG_DIR"]) {
 			return Uri.file(path.normalize(process.env["JUPYTER_CONFIG_DIR"]));
 		}
+
 		return this.platformService.homeDir
 			? Uri.joinPath(this.platformService.homeDir, ".jupyter")
 			: undefined;
 	}
+
 	private getSystemJupyterPaths() {
 		if (this.platformService.isWindows) {
 			const programData = process.env["PROGRAMDATA"]
@@ -408,13 +428,16 @@ export class JupyterPaths {
 			];
 		}
 	}
+
 	private getJupyterDataDir() {
 		if (process.env["JUPYTER_DATA_DIR"]) {
 			return Uri.file(path.normalize(process.env["JUPYTER_DATA_DIR"]));
 		}
+
 		if (!this.platformService.homeDir) {
 			return;
 		}
+
 		switch (this.platformService.osType) {
 			case OSType.OSX:
 				return Uri.joinPath(
@@ -431,11 +454,13 @@ export class JupyterPaths {
 				if (appData) {
 					return Uri.joinPath(appData, "jupyter");
 				}
+
 				const configDir = this.getJupyterConfigDir();
 
 				if (configDir) {
 					return Uri.joinPath(configDir, "data");
 				}
+
 				return Uri.joinPath(
 					this.platformService.homeDir,
 					"Library",
@@ -456,8 +481,10 @@ export class JupyterPaths {
 			}
 		}
 	}
+
 	private cachedKernelSpecRootPaths?: {
 		promise: Promise<Uri[]>;
+
 		stopWatch: StopWatch;
 	};
 	/**
@@ -473,9 +500,11 @@ export class JupyterPaths {
 		) {
 			return this.cachedKernelSpecRootPaths.promise;
 		}
+
 		const stopWatch = new StopWatch();
 
 		const promise = this.getKernelSpecRootPathsImpl(cancelToken);
+
 		this.cachedKernelSpecRootPaths = { promise, stopWatch };
 
 		const disposable = cancelToken.onCancellationRequested(() => {
@@ -483,10 +512,12 @@ export class JupyterPaths {
 				this.cachedKernelSpecRootPaths = undefined;
 			}
 		}, this);
+
 		promise.finally(() => disposable.dispose()).catch(noop);
 
 		return promise;
 	}
+
 	private async getKernelSpecRootPathsImpl(
 		cancelToken: CancellationToken,
 	): Promise<Uri[]> {
@@ -498,12 +529,14 @@ export class JupyterPaths {
 		if (cancelToken.isCancellationRequested) {
 			return [];
 		}
+
 		if (this.platformService.isWindows) {
 			const winPath = await this.getKernelSpecRootPath();
 
 			if (cancelToken.isCancellationRequested) {
 				return [];
 			}
+
 			if (winPath) {
 				paths.add(winPath);
 			}
@@ -528,6 +561,7 @@ export class JupyterPaths {
 			paths.add(
 				Uri.file(path.join("/", "usr", "share", "jupyter", "kernels")),
 			);
+
 			paths.add(
 				Uri.file(
 					path.join(
@@ -563,6 +597,7 @@ export class JupyterPaths {
 		this.cachedJupyterKernelPaths =
 			this.cachedJupyterKernelPaths ||
 			this.getJupyterPathSubPaths(cancelToken, "kernels");
+
 		this.cachedJupyterKernelPaths.then((value) => {
 			if (value.length > 0) {
 				this.updateCachedPaths(value).then(noop, noop);
@@ -602,6 +637,7 @@ export class JupyterPaths {
 		if (cancelToken?.isCancellationRequested) {
 			return [];
 		}
+
 		const jupyterPathVars = vars.JUPYTER_PATH
 			? vars.JUPYTER_PATH.split(path.delimiter).map((jupyterPath) => {
 					return subDir
@@ -617,6 +653,7 @@ export class JupyterPaths {
 					tryGetRealPath(Uri.file(jupyterPath)),
 				),
 			);
+
 			jupyterPaths.forEach((jupyterPath) => {
 				if (jupyterPath) {
 					paths.add(jupyterPath);

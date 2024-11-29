@@ -38,8 +38,11 @@ import { translateProductToModule } from "./utils";
 
 export type ExecutionInstallArgs = {
 	args: string[];
+
 	exe?: string;
+
 	cwd?: string;
+
 	useShellExec?: boolean;
 };
 
@@ -48,8 +51,11 @@ export type ExecutionInstallArgs = {
  */
 export abstract class ModuleInstaller implements IModuleInstaller {
 	public abstract get priority(): number;
+
 	public abstract get name(): string;
+
 	public abstract get displayName(): string;
+
 	public abstract get type(): ModuleInstallerType;
 
 	constructor(protected serviceContainer: IServiceContainer) {}
@@ -89,9 +95,11 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return;
 		}
+
 		const install = async (
 			progress: Progress<{
 				message?: string | undefined;
+
 				increment?: number | undefined;
 			}>,
 			token: CancellationToken,
@@ -103,6 +111,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 			token.onCancellationRequested(
 				() => {
 					cancelTokenSource.cancel();
+
 					deferred.resolve();
 				},
 				this,
@@ -118,11 +127,14 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
+
 				try {
 					const results = await proc.shellExec(args.args.join(" "), {
 						cwd: args.cwd,
 					});
+
 					logger.debug(results.stdout);
+
 					deferred.resolve();
 				} catch (ex) {
 					deferred.reject(ex);
@@ -140,8 +152,11 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
+
 				const env = { ...process.env };
+
 				environmentService.mergeVariables(envVars || {}, env);
+
 				environmentService.mergePaths(envVars || {}, env);
 
 				const proc = await procFactory.create(undefined);
@@ -149,6 +164,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
+
 				observable = proc.execObservable(args.exe, args.args, {
 					encoding: "utf-8",
 					token,
@@ -163,12 +179,14 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 				if (cancelTokenSource.token.isCancellationRequested) {
 					return;
 				}
+
 				observable = proc.execObservable(args.args, {
 					encoding: "utf-8",
 					token,
 					cwd: args.cwd,
 				});
 			}
+
 			let lastStdErr: string | undefined;
 
 			let couldNotInstallErr: string | undefined;
@@ -183,13 +201,16 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 						const suffix = ticker[counter % 3];
 
 						const trimmedOutput = output.out.trim();
+
 						counter += 1;
 
 						const message =
 							trimmedOutput.length > 28
 								? `${trimmedOutput.substring(0, 28)}${suffix}`
 								: trimmedOutput;
+
 						progress.report({ message });
+
 						logger.debug(output.out);
 
 						if (output.source === "stderr") {
@@ -217,6 +238,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 					this,
 					disposables,
 				);
+
 				observable.out.done
 					.then(
 						() => {
@@ -243,6 +265,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 												!line.startsWith("[notice]"),
 										)
 										.join(EOL);
+
 									deferred.reject(
 										new PackageNotInstalledWindowsLongPathNotEnabledError(
 											productOrModuleName,
@@ -266,6 +289,7 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 					)
 					.finally(() => dispose(disposables));
 			}
+
 			return deferred.promise;
 		};
 
@@ -277,15 +301,18 @@ export abstract class ModuleInstaller implements IModuleInstaller {
 			cancellable: true,
 			title: Products.installingModule(name),
 		};
+
 		await window.withProgress(
 			options,
 			async (progress, token: CancellationToken) =>
 				install(progress, token),
 		);
 	}
+
 	public abstract isSupported(
 		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean>;
+
 	protected abstract getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,

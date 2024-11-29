@@ -29,22 +29,39 @@ export class QuickPickKernelItemProvider
 	implements IQuickPickKernelItemProvider
 {
 	private readonly _onDidRefresh = new EventEmitter<void>();
+
 	onDidRefresh = this._onDidRefresh.event;
+
 	title: string;
+
 	kind: ContributedKernelFinderKind;
+
 	private readonly _onDidChange = new EventEmitter<void>();
+
 	onDidChange = this._onDidChange.event;
+
 	kernels: KernelConnectionMetadata[] = [];
+
 	private readonly _onDidChangeStatus = new EventEmitter<void>();
+
 	onDidChangeStatus = this._onDidChangeStatus.event;
+
 	private readonly _onDidChangeRecommended = new EventEmitter<void>();
+
 	onDidChangeRecommended = this._onDidChangeRecommended.event;
+
 	private readonly _onDidFailToListKernels = new EventEmitter<Error>();
+
 	onDidFailToListKernels = this._onDidFailToListKernels.event;
+
 	status: "discovering" | "idle" = "idle";
+
 	refresh: () => Promise<void>;
+
 	recommended: KernelConnectionMetadata | undefined;
+
 	private readonly disposables: IDisposable[] = [];
+
 	private refreshInvoked?: boolean;
 
 	constructor(
@@ -59,8 +76,11 @@ export class QuickPickKernelItemProvider
 		this.refresh = async () => {
 			this.refreshInvoked = true;
 		};
+
 		this.title = DataScience.kernelPickerSelectKernelTitle;
+
 		this.kind = kind;
+
 		this.disposables.push(this._onDidRefresh);
 
 		if (isPromise(finderPromise)) {
@@ -76,16 +96,20 @@ export class QuickPickKernelItemProvider
 			this.setupFinder(finderPromise);
 		}
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	private setupFinder(finder: IContributedKernelFinder) {
 		this.refresh = async () => finder.refresh();
 
 		if (this.status !== finder.status && !this.refreshInvoked) {
 			this.status = finder.status;
+
 			this._onDidChangeStatus.fire();
 		}
+
 		if (this.refreshInvoked) {
 			finder
 				.refresh()
@@ -111,6 +135,7 @@ export class QuickPickKernelItemProvider
 					),
 				);
 		}
+
 		switch (finder.kind) {
 			case ContributedKernelFinderKind.LocalKernelSpec:
 				this.title = DataScience.kernelPickerSelectLocalKernelSpecTitle;
@@ -130,17 +155,22 @@ export class QuickPickKernelItemProvider
 
 				break;
 		}
+
 		finder.onDidChangeKernels(
 			() => {
 				this.kernels.length = 0;
+
 				this.kernels.push(...this.filteredKernels(finder.kernels));
+
 				this._onDidChange.fire();
 			},
 			this,
 			this.disposables,
 		);
+
 		finder.onDidChangeStatus(() => {
 			this.status = finder.status;
+
 			this._onDidChangeStatus.fire();
 
 			if (
@@ -151,20 +181,28 @@ export class QuickPickKernelItemProvider
 				// Ok we have an error and there are no kernels to be displayed.
 				// Notify the user about this error.
 				this.kernels.length = 0;
+
 				this._onDidFailToListKernels.fire(finder.lastError);
 			}
 		});
+
 		this.kernels.length = 0;
+
 		this.kernels.push(...this.filteredKernels(finder.kernels));
+
 		this._onDidChange.fire();
+
 		this._onDidChangeStatus.fire();
 
 		// We need a cancellation in case the user aborts the quick pick
 		const cancellationToken = new CancellationTokenSource();
+
 		this.disposables.push(new Disposable(() => cancellationToken.cancel()));
+
 		this.disposables.push(cancellationToken);
 
 		const preferred = new PreferredKernelConnectionService(this.connection);
+
 		this.disposables.push(preferred);
 
 		if (finder.kind === ContributedKernelFinderKind.Remote) {
@@ -181,18 +219,21 @@ export class QuickPickKernelItemProvider
 			);
 		}
 	}
+
 	private filteredKernels(kernels: KernelConnectionMetadata[]) {
 		const filter = this.pythonEnvFilter;
 
 		if (!filter) {
 			return kernels;
 		}
+
 		return kernels.filter(
 			(k) =>
 				k.kind !== "startUsingPythonInterpreter" ||
 				!filter!.isPythonEnvironmentExcluded(k.interpreter),
 		);
 	}
+
 	private computePreferredRemoteKernel(
 		finder: IContributedKernelFinder,
 		preferred: PreferredKernelConnectionService,
@@ -206,6 +247,7 @@ export class QuickPickKernelItemProvider
 			)
 			.then((kernel) => {
 				this.recommended = kernel;
+
 				this._onDidChangeRecommended.fire();
 			})
 			.catch((ex) =>
@@ -215,6 +257,7 @@ export class QuickPickKernelItemProvider
 				),
 			);
 	}
+
 	private computePreferredLocalKernel(
 		finder: IContributedKernelFinder,
 		preferred: PreferredKernelConnectionService,
@@ -228,6 +271,7 @@ export class QuickPickKernelItemProvider
 			) {
 				this.recommended = undefined;
 			}
+
 			const preferredMethod =
 				finder.kind === ContributedKernelFinderKind.LocalKernelSpec
 					? preferred.findPreferredLocalKernelSpecConnection.bind(
@@ -242,7 +286,9 @@ export class QuickPickKernelItemProvider
 					if (this.recommended?.id === kernel?.id) {
 						return;
 					}
+
 					this.recommended = kernel;
+
 					this._onDidChangeRecommended.fire();
 				})
 				.catch((ex) =>
@@ -252,7 +298,9 @@ export class QuickPickKernelItemProvider
 					),
 				);
 		};
+
 		computePreferred();
+
 		finder.onDidChangeKernels(computePreferred, this, this.disposables);
 	}
 }

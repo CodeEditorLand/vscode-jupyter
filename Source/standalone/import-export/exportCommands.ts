@@ -51,6 +51,7 @@ export class ExportCommands implements IDisposable {
 		private readonly preferredKernel: PreferredKernelConnectionService,
 		private readonly kernelFinder: IKernelFinder,
 	) {}
+
 	public register() {
 		this.registerCommand(
 			Commands.ExportAsPythonScript,
@@ -62,6 +63,7 @@ export class ExportCommands implements IDisposable {
 					interpreter,
 				),
 		);
+
 		this.registerCommand(
 			Commands.ExportToHTML,
 			(sourceDocument, defaultFileName?, interpreter?) =>
@@ -72,6 +74,7 @@ export class ExportCommands implements IDisposable {
 					interpreter,
 				),
 		);
+
 		this.registerCommand(
 			Commands.ExportToPDF,
 			(sourceDocument, defaultFileName?, interpreter?) =>
@@ -82,6 +85,7 @@ export class ExportCommands implements IDisposable {
 					interpreter,
 				),
 		);
+
 		this.registerCommand(
 			Commands.Export,
 			(sourceDocument, defaultFileName?, interpreter?) =>
@@ -92,6 +96,7 @@ export class ExportCommands implements IDisposable {
 					interpreter,
 				),
 		);
+
 		this.registerCommand(Commands.NativeNotebookExport, (uri) =>
 			this.nativeNotebookExport(uri),
 		);
@@ -107,6 +112,7 @@ export class ExportCommands implements IDisposable {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	>(command: E, callback: (...args: U) => any) {
 		const disposable = commands.registerCommand(command, callback, this);
+
 		this.disposables.push(disposable);
 	}
 
@@ -147,6 +153,7 @@ export class ExportCommands implements IDisposable {
 			} finally {
 				token.dispose();
 			}
+
 			const interpreter =
 				this.controllerRegistration.getSelected(document)?.connection
 					.interpreter || preferredInterpreter;
@@ -217,6 +224,7 @@ export class ExportCommands implements IDisposable {
 			}
 		}
 	}
+
 	private getExportQuickPickItems(
 		sourceDocument: NotebookDocument,
 		defaultFileName?: string,
@@ -240,6 +248,7 @@ export class ExportCommands implements IDisposable {
 							format: ExportFormat.python,
 						},
 					);
+
 					commands
 						.executeCommand(
 							Commands.ExportAsPythonScript,
@@ -264,6 +273,7 @@ export class ExportCommands implements IDisposable {
 								format: ExportFormat.html,
 							},
 						);
+
 						commands
 							.executeCommand(
 								Commands.ExportToHTML,
@@ -285,6 +295,7 @@ export class ExportCommands implements IDisposable {
 								format: ExportFormat.pdf,
 							},
 						);
+
 						commands
 							.executeCommand(
 								Commands.ExportToPDF,

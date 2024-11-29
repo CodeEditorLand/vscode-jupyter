@@ -26,11 +26,17 @@ import { IInteractiveControllerHelper } from "./types";
 
 export class InteractiveWindowController {
 	public kernel: Deferred<IKernel> | undefined;
+
 	public controller: NotebookController | undefined;
+
 	public metadata: KernelConnectionMetadata | undefined;
+
 	private disposables: Disposable[] = [];
+
 	private systemInfoCell: SystemInfoCell | undefined;
+
 	private fileInKernel: Uri | undefined;
+
 	private connectingListener: Disposable;
 
 	constructor(
@@ -43,6 +49,7 @@ export class InteractiveWindowController {
 		controller: IVSCodeNotebookController | undefined,
 	) {
 		this.controller = controller?.controller;
+
 		this.metadata = controller?.connection;
 	}
 
@@ -60,6 +67,7 @@ export class InteractiveWindowController {
 		if (this.kernel) {
 			return this.kernel.promise;
 		}
+
 		if (!this.controller || !this.metadata) {
 			throw new Error("Interactive Window kernel not selected");
 		}
@@ -84,6 +92,7 @@ export class InteractiveWindowController {
 			kernel.onRestarted(
 				async () => {
 					logger.debug("Restart event handled in IW");
+
 					this.fileInKernel = undefined;
 
 					try {
@@ -102,8 +111,11 @@ export class InteractiveWindowController {
 				this,
 				this.disposables,
 			);
+
 			this.fileInKernel = undefined;
+
 			await this.setFileInKernel(kernel);
+
 			this.finishSysInfoMessage(kernel, SysInfoReason.Start);
 
 			return kernel;
@@ -117,6 +129,7 @@ export class InteractiveWindowController {
 				// hence display error where the sysinfo is displayed.
 				await this.finishSysInfoWithFailureMessage(ex);
 			}
+
 			throw ex;
 		}
 	}
@@ -125,12 +138,15 @@ export class InteractiveWindowController {
 		if (this.kernel) {
 			return this.kernel.promise;
 		}
+
 		if (!this.controller || !this.metadata) {
 			throw new Error("Controller not selected");
 		}
 
 		const kernelPromise = createDeferred<IKernel>();
+
 		kernelPromise.promise.catch(noop);
+
 		this.kernel = kernelPromise;
 
 		try {
@@ -143,15 +159,19 @@ export class InteractiveWindowController {
 					this.interactiveWindow.notebookDocument!,
 					this.disposables,
 				);
+
 			this.metadata = kernel.kernelConnectionMetadata;
+
 			this.controller = actualController;
 
 			this.disposables.push(kernel);
+
 			kernelPromise.resolve(kernel);
 
 			return kernel;
 		} catch (ex) {
 			kernelPromise.reject(ex);
+
 			this.disconnect();
 
 			throw ex;
@@ -175,7 +195,9 @@ export class InteractiveWindowController {
 			logger.debug(
 				`Initializing __file__ in setFileInKernel with ${file} for mode ${this.mode}`,
 			);
+
 			this.fileInKernel = file;
+
 			await execution.executeHidden(
 				`__file__ = '${path.replace(/\\/g, "\\\\")}'`,
 			);
@@ -189,6 +211,7 @@ export class InteractiveWindowController {
 			);
 			// Otherwise we need to reset it every time
 			this.fileInKernel = file;
+
 			await execution.executeHidden(
 				`__file__ = '${path.replace(/\\/g, "\\\\")}'`,
 			);
@@ -204,6 +227,7 @@ export class InteractiveWindowController {
 			const controller = this.controllerService.getRegisteredController(
 				this.metadata,
 			);
+
 			controller?.setPendingCellAddition(
 				this.interactiveWindow.notebookDocument,
 				cellAddedPromise,
@@ -215,6 +239,7 @@ export class InteractiveWindowController {
 		return this.controllerService.onControllerSelected(
 			(e: {
 				notebook: NotebookDocument;
+
 				controller: IVSCodeNotebookController;
 			}) => {
 				if (
@@ -228,19 +253,24 @@ export class InteractiveWindowController {
 				// Clear cached kernel when the selected controller for this document changes
 				if (e.controller.id !== this.controller?.id) {
 					const previouslyConnected = !!this.kernel;
+
 					this.disconnect();
+
 					this.controller = e.controller.controller;
+
 					this.metadata = e.controller.connection;
 
 					if (previouslyConnected) {
 						this.startKernel().catch(noop);
 					} else {
 						this.connectingListener?.dispose();
+
 						this.connectingListener = e.controller.onConnecting(
 							() => {
 								this.startKernel().catch(noop);
 							},
 						);
+
 						this.disposables.push(this.connectingListener);
 					}
 				}
@@ -255,6 +285,7 @@ export class InteractiveWindowController {
 
 			return;
 		}
+
 		if (!this.systemInfoCell) {
 			this.systemInfoCell = new SystemInfoCell(
 				this.interactiveWindow,
@@ -281,6 +312,7 @@ export class InteractiveWindowController {
 		reason: SysInfoReason,
 	) {
 		const message = getStartConnectMessage(metadata, reason);
+
 		this.setInfoMessageCell(message);
 	}
 
@@ -289,6 +321,7 @@ export class InteractiveWindowController {
 			kernel.kernelConnectionMetadata,
 			reason,
 		);
+
 		this.systemInfoCell
 			?.updateMessage(message)
 			.catch((error) =>
@@ -296,6 +329,7 @@ export class InteractiveWindowController {
 					`System info message was not updated: "${message}" because of error: ${error}`,
 				),
 			);
+
 		this.systemInfoCell = undefined;
 	}
 
@@ -307,6 +341,7 @@ export class InteractiveWindowController {
 		);
 		// As message is displayed in markdown, ensure linebreaks are formatted accordingly.
 		message = message.split("\n").join("  \n");
+
 		this.systemInfoCell
 			?.updateMessage(message)
 			.catch((error) =>
@@ -314,17 +349,21 @@ export class InteractiveWindowController {
 					`System info message was not updated: "${message}" because of error: ${error}`,
 				),
 			);
+
 		this.systemInfoCell = undefined;
 	}
 
 	private deleteSysInfoCell() {
 		this.systemInfoCell?.deleteCell().then(noop, noop);
+
 		this.systemInfoCell = undefined;
 	}
 
 	public disconnect() {
 		this.disposables.forEach((d) => d.dispose());
+
 		this.disposables = [];
+
 		this.kernel = undefined;
 	}
 }
@@ -345,6 +384,7 @@ export class InteractiveControllerFactory {
 		if (!interactiveWindow.notebookDocument) {
 			throw Error("could not create controller: no notebook document");
 		}
+
 		let controller = this.initialController;
 
 		const selected = this.controllerService.getSelectedController(

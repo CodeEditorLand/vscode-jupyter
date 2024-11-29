@@ -27,8 +27,11 @@ export const ignoreListSettingName = "diagnostics.reservedPythonNames.exclude";
 @injectable()
 export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 	private ignoredFiles = new Set<string>();
+
 	private readonly cachedModules = new Set<string>();
+
 	private pendingUpdate = Promise.resolve();
+
 	private readonly disposables: IDisposable[] = [];
 
 	constructor(
@@ -38,11 +41,13 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 		@inject(IFileSystemNode) private readonly fs: IFileSystemNode,
 	) {
 		disposables.push(this);
+
 		this.cachedModules = new Set(
 			this.cache
 				.get<string[]>(PYTHON_PACKAGES_MEMENTO_KEY, BuiltInModules)
 				.map((item) => item.toLowerCase()),
 		);
+
 		workspace.onDidChangeConfiguration(
 			(e) => {
 				if (
@@ -54,6 +59,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 			this,
 			this.disposables,
 		);
+
 		this.initializeIgnoreList();
 	}
 
@@ -92,10 +98,12 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 					}
 				}),
 		);
+
 		await Promise.all([filePromises, initFilePromises]);
 
 		return problematicFiles;
 	}
+
 	public async isReserved(uri: Uri): Promise<boolean> {
 		// Lets keep it simple and focus only on plain text python files.
 		if (!uri.fsPath.toLowerCase().endsWith(".py")) {
@@ -131,6 +139,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 
 		return this.cachedModules.has(possibleModule);
 	}
+
 	public async addToIgnoreList(uri: Uri) {
 		await this.pendingUpdate;
 
@@ -139,14 +148,17 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 		const filePath = this.platform.isWindows
 			? uri.fsPath.toLowerCase()
 			: uri.fsPath;
+
 		this.initializeIgnoreList();
 
 		const originalSizeOfList = this.ignoredFiles.size;
+
 		this.ignoredFiles.add(filePath);
 
 		if (originalSizeOfList === this.ignoredFiles.size) {
 			return;
 		}
+
 		this.pendingUpdate = this.pendingUpdate.finally(() =>
 			jupyterConfig.update(
 				ignoreListSettingName,
@@ -157,6 +169,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 
 		return this.pendingUpdate;
 	}
+
 	private initializeIgnoreList() {
 		const jupyterConfig = workspace.getConfiguration("jupyter");
 
@@ -168,6 +181,7 @@ export class ReservedNamedProvider implements IReservedPythonNamedProvider {
 		if (this.platform.isWindows) {
 			listInSettings = listInSettings.map((item) => item.toLowerCase());
 		}
+
 		this.ignoredFiles = new Set(listInSettings);
 	}
 }

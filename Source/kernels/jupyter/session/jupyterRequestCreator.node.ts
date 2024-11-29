@@ -36,13 +36,16 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				const authorizationHeader = getAuthHeader!();
 
 				const keys = Object.keys(authorizationHeader);
+
 				keys.forEach((k) =>
 					origHeaders.append(k, authorizationHeader[k].toString()),
 				);
+
 				origHeaders.set("Content-Type", "application/json");
 
 				// Rewrite the 'append' method for the headers to disallow 'authorization' after this point
 				const origAppend = origHeaders.append.bind(origHeaders);
+
 				origHeaders.append = (k, v) => {
 					if (k.toLowerCase() !== "authorization") {
 						origAppend(k, v);
@@ -80,13 +83,16 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 			// since the last connection.
 			if (getAuthHeaders) {
 				const authorizationHeader = getAuthHeaders();
+
 				co_headers = co_headers
 					? { ...co_headers, ...authorizationHeader }
 					: authorizationHeader;
 			}
+
 			if (co_headers) {
 				co = { ...co, headers: co_headers };
 			}
+
 			return co;
 		};
 
@@ -94,6 +100,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 			WebSocketIsomorphic,
 		) {
 			private kernelId: string | undefined;
+
 			private timer: NodeJS.Timeout | number;
 
 			constructor(
@@ -109,12 +116,15 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
+
 				if (this.kernelId) {
 					KernelSocketMap.set(this.kernelId, this);
+
 					this.on("close", () => {
 						if (timer && this.timer !== timer) {
 							clearInterval(timer as any);
 						}
+
 						if (KernelSocketMap.get(this.kernelId!) === this) {
 							KernelSocketMap.delete(this.kernelId!);
 						}
@@ -129,13 +139,16 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				timer = this.timer = setInterval(() => this.ping(noop), 30_000);
 			}
 		}
+
 		return JupyterWebSocket as any;
 	}
+
 	public wrapWebSocketCtor(
 		websocketCtor: ClassType<WebSocketIsomorphic>,
 	): ClassType<WebSocketIsomorphic> {
 		class JupyterWebSocket extends KernelSocketWrapper(websocketCtor) {
 			private kernelId: string | undefined;
+
 			private timer: NodeJS.Timeout | number;
 
 			constructor(
@@ -152,12 +165,15 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
+
 				if (this.kernelId) {
 					KernelSocketMap.set(this.kernelId, this);
+
 					this.on("close", () => {
 						if (timer && this.timer !== timer) {
 							clearInterval(timer as any);
 						}
+
 						if (KernelSocketMap.get(this.kernelId!) === this) {
 							KernelSocketMap.delete(this.kernelId!);
 						}
@@ -172,6 +188,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				timer = this.timer = setInterval(() => this.ping(noop), 30_000);
 			}
 		}
+
 		return JupyterWebSocket as any;
 	}
 

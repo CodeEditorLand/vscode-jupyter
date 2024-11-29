@@ -29,6 +29,7 @@ import {
 @injectable()
 export class PythonExecutionFactory implements IPythonExecutionFactory {
 	private readonly disposables: IDisposableRegistry;
+
 	private readonly fileSystem: IFileSystem;
 
 	constructor(
@@ -41,8 +42,10 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		// Acquire other objects here so that if we are called during dispose they are available.
 		this.disposables =
 			this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry);
+
 		this.fileSystem = this.serviceContainer.get<IFileSystem>(IFileSystem);
 	}
+
 	public async create(
 		options: ExecutionFactoryCreationOptions,
 	): Promise<IPythonExecutionService> {
@@ -56,6 +59,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 			undefined,
 		);
 	}
+
 	public async createActivatedEnvironment(
 		options: ExecutionFactoryCreateWithEnvironmentOptions,
 	): Promise<IPythonExecutionService> {
@@ -69,6 +73,7 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 		if (!workspace.isTrusted) {
 			throw new Error("Workspace not trusted");
 		}
+
 		const envVars =
 			await this.activationHelper.getActivatedEnvironmentVariables(
 				options.resource,
@@ -83,9 +88,11 @@ export class PythonExecutionFactory implements IPythonExecutionFactory {
 				interpreter: options.interpreter,
 			});
 		}
+
 		const processService: IProcessService = new ProcessService({
 			...envVars,
 		});
+
 		this.disposables.push(processService);
 
 		return createPythonService(
@@ -104,6 +111,7 @@ function createPythonService(
 		string,
 		{
 			name: string;
+
 			path: string;
 		},
 	],
@@ -112,6 +120,7 @@ function createPythonService(
 
 	if (conda) {
 		const [condaPath, condaInfo] = conda;
+
 		env = createCondaEnv(
 			condaPath,
 			condaInfo,
@@ -120,6 +129,7 @@ function createPythonService(
 			fs,
 		);
 	}
+
 	const procs = createPythonProcessService(procService, env);
 
 	return {

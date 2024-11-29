@@ -39,16 +39,19 @@ export class BufferDecoder implements IBufferDecoder {
  */
 export class ProcessService implements IProcessService {
 	private processesToKill = new Set<IDisposable>();
+
 	private readonly decoder: IBufferDecoder;
 
 	constructor(private readonly env?: EnvironmentVariables) {
 		this.decoder = new BufferDecoder();
 	}
+
 	public static isAlive(pid?: number): boolean {
 		try {
 			if (!pid) {
 				return false;
 			}
+
 			process.kill(pid, 0);
 
 			return true;
@@ -56,11 +59,13 @@ export class ProcessService implements IProcessService {
 			return false;
 		}
 	}
+
 	public static kill(pid?: number): void {
 		try {
 			if (!pid) {
 				return;
 			}
+
 			if (process.platform === "win32") {
 				// Windows doesn't support SIGTERM, so execute taskkill to kill the process
 				execSync(`taskkill /pid ${pid} /T /F`);
@@ -71,6 +76,7 @@ export class ProcessService implements IProcessService {
 			// Ignore.
 		}
 	}
+
 	public dispose() {
 		this.processesToKill.forEach((p) => {
 			try {
@@ -91,6 +97,7 @@ export class ProcessService implements IProcessService {
 		const proc = spawn(file, args, spawnOptions);
 
 		let procExited = false;
+
 		logger.ci(`Exec observable ${file}, ${args.join(" ")}`);
 
 		const disposables: IDisposable[] = [];
@@ -101,19 +108,24 @@ export class ProcessService implements IProcessService {
 				if (proc && !proc.killed && !procExited) {
 					ProcessService.kill(proc.pid);
 				}
+
 				if (proc) {
 					proc.unref();
 				}
+
 				dispose(disposables);
 			},
 		};
+
 		this.processesToKill.add(disposable);
 
 		const output = createObservable<Output<string>>();
+
 		disposables.push(output);
 
 		const on = (ee: NodeJS.EventEmitter, name: string, fn: Function) => {
 			ee.on(name, fn as any);
+
 			disposables.push({
 				dispose: () => ee.removeListener(name, fn as any) as any,
 			});
@@ -124,6 +136,7 @@ export class ProcessService implements IProcessService {
 				options.token.onCancellationRequested(() => {
 					if (!procExited && !proc.killed) {
 						ProcessService.kill(proc.pid);
+
 						procExited = true;
 					}
 				}),
@@ -141,21 +154,30 @@ export class ProcessService implements IProcessService {
 		};
 
 		on(proc.stdout!, "data", (data: Buffer) => sendOutput("stdout", data));
+
 		on(proc.stderr!, "data", (data: Buffer) => sendOutput("stderr", data));
 
 		proc.once("close", () => {
 			procExited = true;
+
 			output.resolve();
+
 			disposables.forEach((d) => d.dispose());
 		});
+
 		proc.once("exit", () => {
 			procExited = true;
+
 			output.resolve();
+
 			disposables.forEach((d) => d.dispose());
 		});
+
 		proc.once("error", (ex) => {
 			procExited = true;
+
 			output.reject(ex);
+
 			disposables.forEach((d) => d.dispose());
 		});
 
@@ -167,6 +189,7 @@ export class ProcessService implements IProcessService {
 			dispose: disposable.dispose,
 		};
 	}
+
 	public exec(
 		file: string,
 		args: string[],
@@ -185,12 +208,14 @@ export class ProcessService implements IProcessService {
 				}
 			},
 		};
+
 		this.processesToKill.add(disposable);
 
 		const disposables: IDisposable[] = [];
 
 		const on = (ee: NodeJS.EventEmitter, name: string, fn: Function) => {
 			ee.on(name, fn as any);
+
 			disposables.push({
 				dispose: () => ee.removeListener(name, fn as any) as any,
 			});
@@ -203,12 +228,15 @@ export class ProcessService implements IProcessService {
 		}
 
 		const stdoutBuffers: Buffer[] = [];
+
 		on(proc.stdout!, "data", (data: Buffer) => stdoutBuffers.push(data));
 
 		const stderrBuffers: Buffer[] = [];
+
 		on(proc.stderr!, "data", (data: Buffer) => {
 			if (options.mergeStdOutErr) {
 				stdoutBuffers.push(data);
+
 				stderrBuffers.push(data);
 			} else {
 				stderrBuffers.push(data);
@@ -219,6 +247,7 @@ export class ProcessService implements IProcessService {
 			if (deferred.completed) {
 				return;
 			}
+
 			const stderr: string | undefined =
 				stderrBuffers.length === 0
 					? undefined
@@ -228,12 +257,16 @@ export class ProcessService implements IProcessService {
 				deferred.reject(new StdErrError(stderr));
 			} else {
 				const stdout = this.decoder.decode(stdoutBuffers);
+
 				deferred.resolve({ stdout, stderr });
 			}
+
 			disposables.forEach((d) => d.dispose());
 		});
+
 		proc.once("error", (ex) => {
 			deferred.reject(ex);
+
 			disposables.forEach((d) => d.dispose());
 		});
 
@@ -281,6 +314,7 @@ export class ProcessService implements IProcessService {
 				cancelDisposable = options.token.onCancellationRequested(() => {
 					if (proc.exitCode === null && !proc.killed) {
 						reject(new CancellationError());
+
 						ProcessService.kill(proc.pid);
 					}
 				});
@@ -293,6 +327,7 @@ export class ProcessService implements IProcessService {
 					}
 				},
 			};
+
 			this.processesToKill.add(disposable);
 		});
 	}
@@ -310,9 +345,12 @@ export class ProcessService implements IProcessService {
 				execOptions.encoding.length > 0
 					? execOptions.encoding
 					: DEFAULT_ENCODING);
+
 			delete execOptions.encoding;
+
 			execOptions.encoding = encoding;
 		}
+
 		if (
 			!defaultOptions.env ||
 			Object.keys(defaultOptions.env).length === 0

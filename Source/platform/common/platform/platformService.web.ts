@@ -14,10 +14,13 @@ export class PlatformService implements IPlatformService {
 	public get tempDir() {
 		return undefined;
 	}
+
 	public get homeDir() {
 		return undefined;
 	}
+
 	public readonly osType: OSType = OSType.Unknown;
+
 	public get pathVariableName() {
 		return "";
 	}
@@ -25,9 +28,11 @@ export class PlatformService implements IPlatformService {
 	public get isWindows(): boolean {
 		return this.osType === OSType.Windows;
 	}
+
 	public get isMac(): boolean {
 		return this.osType === OSType.OSX;
 	}
+
 	public get isLinux(): boolean {
 		return this.osType === OSType.Linux;
 	}

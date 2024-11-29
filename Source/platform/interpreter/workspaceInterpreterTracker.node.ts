@@ -21,6 +21,7 @@ export class DesktopWorkspaceInterpreterTracker
 	implements IWorkspaceInterpreterTracker
 {
 	private readonly workspaceInterpreters = new Map<string, undefined | Uri>();
+
 	private trackingInterpreters?: boolean;
 
 	constructor(
@@ -31,14 +32,17 @@ export class DesktopWorkspaceInterpreterTracker
 		@inject(IInterpreterService)
 		private readonly interpreterService: IInterpreterService,
 	) {}
+
 	public activate() {
 		this.trackActiveInterpreters();
+
 		extensions.onDidChange(
 			this.trackActiveInterpreters,
 			this,
 			this.disposables,
 		);
 	}
+
 	public isActiveWorkspaceInterpreter(
 		resource: Resource,
 		interpreter?: PythonEnvironment,
@@ -46,6 +50,7 @@ export class DesktopWorkspaceInterpreterTracker
 		if (!interpreter) {
 			return false;
 		}
+
 		const key = getWorkspaceFolderIdentifier(resource);
 
 		const activeInterpreterPath = this.workspaceInterpreters.get(key);
@@ -53,19 +58,24 @@ export class DesktopWorkspaceInterpreterTracker
 		if (!activeInterpreterPath) {
 			return false;
 		}
+
 		return areInterpreterPathsSame(activeInterpreterPath, interpreter.uri);
 	}
+
 	private trackActiveInterpreters() {
 		if (isWebExtension()) {
 			return;
 		}
+
 		if (
 			this.trackingInterpreters ||
 			!this.pythonExtensionChecker.isPythonExtensionActive
 		) {
 			return;
 		}
+
 		this.trackingInterpreters = true;
+
 		this.interpreterService.onDidChangeInterpreter(
 			async () => {
 				const workspaces: Uri[] = Array.isArray(
@@ -73,6 +83,7 @@ export class DesktopWorkspaceInterpreterTracker
 				)
 					? workspace.workspaceFolders.map((item) => item.uri)
 					: [];
+
 				await Promise.all(
 					workspaces.map(async (item) => {
 						try {
@@ -83,6 +94,7 @@ export class DesktopWorkspaceInterpreterTracker
 								await this.interpreterService.getActiveInterpreter(
 									item,
 								);
+
 							this.workspaceInterpreters.set(
 								workspaceId,
 								interpreter?.uri,

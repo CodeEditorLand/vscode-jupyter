@@ -34,12 +34,14 @@ export async function sendTelemetryForPythonKernelExecutable(
 	) {
 		return;
 	}
+
 	if (
 		kernelConnection.kind !== "startUsingLocalKernelSpec" &&
 		kernelConnection.kind !== "startUsingPythonInterpreter"
 	) {
 		return;
 	}
+
 	const stopWatch = new StopWatch();
 
 	try {
@@ -57,6 +59,7 @@ export async function sendTelemetryForPythonKernelExecutable(
 		if (output.name !== "stdout" && output.output_type !== "stream") {
 			return;
 		}
+
 		const sysExecutable = concatMultilineString(output.text)
 			.trim()
 			.toLowerCase();
@@ -65,6 +68,7 @@ export async function sendTelemetryForPythonKernelExecutable(
 			kernelConnection.interpreter.uri,
 			Uri.file(sysExecutable),
 		);
+
 		await trackKernelResourceInformation(resource, {
 			interpreterMatchesKernel: match,
 		});
@@ -88,9 +92,11 @@ function isKernelLaunchedViaLocalPythonProcess(
 	if (connection?.kind === "startUsingPythonInterpreter") {
 		return true;
 	}
+
 	if (connection && !isLocalConnection(connection)) {
 		return false;
 	}
+
 	const kernelSpec = connection
 		? connection.kernelSpec
 		: (kernel as IJupyterKernelSpec);
@@ -114,6 +120,7 @@ export function isKernelLaunchedViaLocalPythonIPyKernel(
 	if (connection?.kind === "startUsingPythonInterpreter") {
 		return true;
 	}
+
 	if (connection && !isLocalConnection(connection)) {
 		return false;
 	}
@@ -128,14 +135,17 @@ export function isKernelLaunchedViaLocalPythonIPyKernel(
 	) {
 		return false;
 	}
+
 	if (!isKernelLaunchedViaLocalPythonProcess(kernel)) {
 		return false;
 	}
+
 	const moduleIndex = kernelSpec.argv.indexOf("-m");
 
 	if (moduleIndex === -1) {
 		return false;
 	}
+
 	const moduleName =
 		kernelSpec.argv.length - 1 >= moduleIndex
 			? kernelSpec.argv[moduleIndex + 1].toLowerCase()

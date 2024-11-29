@@ -19,22 +19,27 @@ import {
  */
 export abstract class BaseProductPathsService implements IProductPathService {
 	protected readonly configService: IConfigurationService;
+
 	protected readonly productInstaller: IInstaller;
 
 	constructor(protected serviceContainer: IServiceContainer) {
 		this.configService = serviceContainer.get<IConfigurationService>(
 			IConfigurationService,
 		);
+
 		this.productInstaller = serviceContainer.get<IInstaller>(IInstaller);
 	}
+
 	public abstract getExecutableNameFromSettings(
 		product: Product,
 		resource?: Uri,
 	): string;
+
 	public isExecutableAModule(product: Product, resource?: Uri): boolean {
 		if (product === Product.kernelspec) {
 			return false;
 		}
+
 		let moduleName: string | undefined;
 
 		try {
@@ -67,6 +72,7 @@ export class DataScienceProductPathService extends BaseProductPathsService {
 	) {
 		super(serviceContainer);
 	}
+
 	public getExecutableNameFromSettings(product: Product, _?: Uri): string {
 		return this.productInstaller.translateProductToModuleName(
 			product,

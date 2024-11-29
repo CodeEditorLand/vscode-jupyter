@@ -42,13 +42,19 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 	public static get onDidChangeInstance(): Event<WidgetManager | undefined> {
 		return WidgetManager._onDidChangeInstance.event;
 	}
+
 	private static _onDidChangeInstance = new EventEmitter<
 		WidgetManager | undefined
 	>();
+
 	public static instance: WidgetManager | undefined;
+
 	private manager?: IJupyterLabWidgetManager;
+
 	private proxyKernel?: Kernel.IKernelConnection;
+
 	private options?: KernelSocketOptions;
+
 	private pendingMessages: { message: string; payload: any }[] = [];
 	/**
 	 * Contains promises related to model_ids that need to be displayed.
@@ -60,6 +66,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 	 * @memberof WidgetManager
 	 */
 	private modelIdsToBeDisplayed = new Map<string, Deferred<void>>();
+
 	private offlineModelIds = new Set<string>();
 
 	constructor(
@@ -106,20 +113,26 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 			);
 		}
 	}
+
 	public dispose(): void {
 		this.proxyKernel?.dispose(); // NOSONAR
 		this.postOffice.removeHandler(this);
+
 		this.clear().catch(noop);
 	}
+
 	public async clear(): Promise<void> {
 		await this.manager?.clear_state();
 	}
+
 	public handleMessage(message: string, payload?: any) {
 		if (message === IPyWidgetMessages.IPyWidgets_kernelOptions) {
 			logMessage("Received IPyWidgetMessages.IPyWidgets_kernelOptions");
+
 			this.initializeKernelAndWidgetManager(payload);
 		} else if (message === IPyWidgetMessages.IPyWidgets_IsReadyRequest) {
 			logMessage("Received IPyWidgetMessages.IPyWidgets_IsReadyRequest");
+
 			this.postOffice.sendMessage<IInteractiveWindowMapping>(
 				IPyWidgetMessages.IPyWidgets_Ready,
 			);
@@ -128,14 +141,19 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 			// Kernel was restarted.
 			this.manager?.dispose(); // NOSONAR
 			this.manager = undefined;
+
 			this.proxyKernel?.dispose(); // NOSONAR
 			this.proxyKernel = undefined;
+
 			WidgetManager.instance = undefined;
+
 			WidgetManager._onDidChangeInstance.fire(undefined);
 		} else if (!this.proxyKernel) {
 			logMessage(`Received some pending message ${message}`);
+
 			this.pendingMessages.push({ message, payload });
 		}
+
 		return true;
 	}
 
@@ -147,15 +165,18 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		notebook: INotebookModel,
 		options?: {
 			loadKernel: false;
+
 			loadNotebook: boolean;
 		},
 	): Promise<void> {
 		if (!notebook) {
 			return;
 		}
+
 		if (!options?.loadNotebook) {
 			return;
 		}
+
 		if (!this.manager) {
 			throw new Error("DS IPyWidgetManager not initialized.");
 		}
@@ -173,9 +194,12 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 
 		if (widgetState) {
 			const deferred = createDeferred<void>();
+
 			deferred.resolve();
+
 			Object.keys(widgetState.state).forEach((modelId) => {
 				this.modelIdsToBeDisplayed.set(modelId, deferred);
+
 				this.offlineModelIds.add(modelId);
 			});
 		}
@@ -192,6 +216,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 	public async renderWidget(
 		data: nbformat.IMimeBundle & {
 			model_id: string;
+
 			version_major: number;
 		},
 		ele: HTMLElement,
@@ -201,6 +226,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 				"application/vnd.jupyter.widget-view+json not in msg.content.data, as msg.content.data is 'undefined'.",
 			);
 		}
+
 		if (!this.manager) {
 			throw new Error("DS IPyWidgetManager not initialized.");
 		}
@@ -225,6 +251,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		logMessage(
 			`Waiting for model to be available before rendering it ${data.model_id}`,
 		);
+
 		await this.modelIdsToBeDisplayed.get(modelId)!.promise;
 
 		const modelPromise = this.manager.get_model(data.model_id);
@@ -244,6 +271,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		if (this.widgetState && this.offlineModelIds.has(modelId)) {
 			model.comm_live = false; // For widgets state in notebooks, there is no live kernel.
 		}
+
 		const view = await this.manager.create_view(model, { el: ele });
 		// This code is only required when loading widgets from notebook,
 		if (this.widgetState) {
@@ -252,6 +280,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return this.manager.display_view(data, view, { node: ele });
 	}
+
 	private initializeKernelAndWidgetManager(
 		options: KernelSocketOptions,
 		widgetState?: NotebookMetadata["widgets"],
@@ -263,13 +292,16 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		) {
 			return;
 		}
+
 		this.options = options;
+
 		this.proxyKernel?.dispose(); // NOSONAR
 		this.proxyKernel = createKernel(
 			options,
 			this.postOffice,
 			this.pendingMessages,
 		);
+
 		this.pendingMessages = [];
 
 		// Dispose any existing managers.
@@ -296,6 +328,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 
 			// Tell the observable about our new manager
 			WidgetManager.instance = this;
+
 			WidgetManager._onDidChangeInstance.fire(this);
 		} catch (ex) {
 			// eslint-disable-next-line no-console
@@ -319,6 +352,7 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 		) {
 			return;
 		}
+
 		const displayMsg = payload as
 			| KernelMessage.IDisplayDataMsg
 			| KernelMessage.IExecuteResultMsg;
@@ -332,17 +366,21 @@ export class WidgetManager implements IIPyWidgetManager, IMessageHandler {
 			const data = displayMsg.content.data[WIDGET_MIMETYPE] as any;
 
 			const modelId = data.model_id;
+
 			logMessage(`Received display data message ${modelId}`);
 
 			let deferred = this.modelIdsToBeDisplayed.get(modelId);
 
 			if (!deferred) {
 				deferred = createDeferred();
+
 				this.modelIdsToBeDisplayed.set(modelId, deferred);
 			}
+
 			if (!this.manager) {
 				throw new Error("DS IPyWidgetManager not initialized");
 			}
+
 			const modelPromise = this.manager.get_model(data.model_id);
 
 			if (modelPromise) {

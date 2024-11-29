@@ -40,6 +40,7 @@ export function compareSubstring(
 			return 1;
 		}
 	}
+
 	const aLen = aEnd - aStart;
 
 	const bLen = bEnd - bStart;
@@ -49,6 +50,7 @@ export function compareSubstring(
 	} else if (aLen > bLen) {
 		return 1;
 	}
+
 	return 0;
 }
 
@@ -91,6 +93,7 @@ export function compareSubstringIgnoreCase(
 		if (isLowerAsciiLetter(codeA)) {
 			codeA -= 32;
 		}
+
 		if (isLowerAsciiLetter(codeB)) {
 			codeB -= 32;
 		}
@@ -160,6 +163,7 @@ export class AmbiguousCharacters {
 			for (let i = 0; i < arr.length; i += 2) {
 				result.set(arr[i], arr[i + 1]);
 			}
+
 			return result;
 		}
 
@@ -172,6 +176,7 @@ export class AmbiguousCharacters {
 			for (const [key, value] of map2) {
 				result.set(key, value);
 			}
+
 			return result;
 		}
 
@@ -182,6 +187,7 @@ export class AmbiguousCharacters {
 			if (!map1) {
 				return map2;
 			}
+
 			const result = new Map<number, number>();
 
 			for (const [key, value] of map1) {
@@ -189,6 +195,7 @@ export class AmbiguousCharacters {
 					result.set(key, value);
 				}
 			}
+
 			return result;
 		}
 
@@ -206,6 +213,7 @@ export class AmbiguousCharacters {
 
 		for (const locale of filteredLocales) {
 			const map = arrayToMap(data[locale]);
+
 			languageSpecificMap = intersectMaps(languageSpecificMap, map);
 		}
 
@@ -225,6 +233,7 @@ export class AmbiguousCharacters {
 			AmbiguousCharacters.ambiguousCharacterData.getValue(),
 		).filter((k) => !k.startsWith("_")),
 	);
+
 	public static getLocales(): string[] {
 		return AmbiguousCharacters._locales.getValue();
 	}
@@ -264,6 +273,7 @@ export class InvisibleCharacters {
 		if (!this._data) {
 			this._data = new Set(InvisibleCharacters.getRawData());
 		}
+
 		return this._data;
 	}
 

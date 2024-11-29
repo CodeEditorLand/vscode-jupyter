@@ -112,23 +112,33 @@ export class VSCodeNotebookController
 {
 	private readonly _onNotebookControllerSelectionChanged = new EventEmitter<{
 		selected: boolean;
+
 		notebook: NotebookDocument;
+
 		controller: VSCodeNotebookController;
 	}>();
+
 	private readonly _onConnecting = new EventEmitter<void>();
+
 	private pendingCellAdditions = new WeakMap<
 		NotebookDocument,
 		Promise<void>
 	>();
+
 	private readonly _onDidDispose = new EventEmitter<void>();
+
 	private readonly disposables: IDisposable[] = [];
+
 	private notebookKernels = new WeakMap<NotebookDocument, IKernel>();
+
 	public readonly controller: NotebookController;
 	/**
 	 * Used purely for testing purposes.
 	 */
 	public static kernelAssociatedWithDocument?: boolean;
+
 	private isDisposed = false;
+
 	private runningCellExecutions = new WeakMap<
 		NotebookDocument,
 		NotebookCellExecution
@@ -155,24 +165,30 @@ export class VSCodeNotebookController
 	get onNotebookControllerSelectionChanged() {
 		return this._onNotebookControllerSelectionChanged.event;
 	}
+
 	get onConnecting() {
 		return this._onConnecting.event;
 	}
+
 	get onDidReceiveMessage() {
 		return this.controller.onDidReceiveMessage;
 	}
+
 	get onDidDispose() {
 		return this._onDidDispose.event;
 	}
+
 	public isAssociatedWithDocument(doc: NotebookDocument) {
 		return this.associatedDocuments.has(doc);
 	}
+
 	private readonly displayData: IConnectionDisplayData;
 
 	private readonly associatedDocuments = new WeakMap<
 		NotebookDocument,
 		Promise<void>
 	>();
+
 	public static create(
 		kernelConnection: KernelConnectionMetadata,
 		id: string,
@@ -227,10 +243,13 @@ export class VSCodeNotebookController
 			kernelConnection.id,
 			kernelConnection.interpreter?.id,
 		);
+
 		disposableRegistry.push(this);
+
 		this.displayData = this.displayDataProvider.getDisplayData(
 			this.connection,
 		);
+
 		this.controller = notebooks.createNotebookController(
 			id,
 			_viewType,
@@ -238,16 +257,20 @@ export class VSCodeNotebookController
 			this.handleExecution.bind(this),
 			this.getRendererScripts(),
 		);
+
 		this.displayData.onDidChange(
 			this.updateDisplayData,
 			this,
 			this.disposables,
 		);
+
 		this.updateDisplayData();
 
 		// Fill in extended info for our controller
 		this.controller.interruptHandler = this.handleInterrupt.bind(this);
+
 		this.controller.supportsExecutionOrder = true;
+
 		this.controller.supportedLanguages =
 			this.languageService.getSupportedLanguages(kernelConnection);
 		// Hook up to see when this NotebookController is selected by the UI
@@ -256,6 +279,7 @@ export class VSCodeNotebookController
 			this,
 			this.disposables,
 		);
+
 		workspace.onDidCloseNotebookDocument(
 			(n) => {
 				this.associatedDocuments.delete(n);
@@ -271,6 +295,7 @@ export class VSCodeNotebookController
 		if (this.restoredConnections.has(notebook)) {
 			return;
 		}
+
 		this.restoredConnections.add(notebook);
 
 		const kernel = await this.connectToKernel(
@@ -284,7 +309,9 @@ export class VSCodeNotebookController
 				this.controller,
 				notebook,
 			);
+
 			this.disposables.push(indicator);
+
 			indicator.initialize();
 		}
 
@@ -327,6 +354,7 @@ export class VSCodeNotebookController
 			if (msg.direction === "send" || resumed) {
 				return;
 			}
+
 			if (
 				getParentHeaderMsgId(msg.msg as KernelMessage.IMessage) ===
 				info.msg_id
@@ -340,7 +368,9 @@ export class VSCodeNotebookController
 				) {
 					return;
 				}
+
 				resumed = true;
+
 				kernelExecution
 					.resumeCellExecution(notebook.cellAt(info.cellIndex), {
 						msg_id: info.msg_id,
@@ -348,11 +378,13 @@ export class VSCodeNotebookController
 						executionCount: info.executionCount,
 					})
 					.catch(noop);
+
 				dispose(localDisposables);
 			}
 		};
 		// Check if we're still getting messages for the previous execution.
 		kernel.session.kernel.anyMessage.connect(anyMessageHandler);
+
 		disposeAnyHandler = new Disposable(() => {
 			swallowExceptions(() =>
 				kernel.session?.kernel?.anyMessage.disconnect(
@@ -360,15 +392,19 @@ export class VSCodeNotebookController
 				),
 			);
 		});
+
 		localDisposables.push(disposeAnyHandler);
+
 		this.disposables.push(disposeAnyHandler);
 	}
+
 	public updateConnection(kernelConnection: KernelConnectionMetadata) {
 		if (kernelConnection.kind !== "connectToLiveRemoteKernel") {
 			this.controller.label =
 				getDisplayNameOrNameOfKernelConnection(kernelConnection);
 		}
 	}
+
 	public asWebviewUri(localResource: Uri): Uri {
 		return this.controller.asWebviewUri(localResource);
 	}
@@ -379,6 +415,7 @@ export class VSCodeNotebookController
 	): Thenable<boolean> {
 		const messageType =
 			message && "message" in message ? message.message : "";
+
 		logger.ci(
 			`${ConsoleForegroundColors.Green}Posting message to Notebook UI ${messageType}`,
 		);
@@ -407,9 +444,11 @@ export class VSCodeNotebookController
 		if (this.isDisposed) {
 			return;
 		}
+
 		const nbDocumentUris = workspace.notebookDocuments
 			.filter((item) => this.associatedDocuments.has(item))
 			.map((item) => item.uri.toString());
+
 		logger.debug(
 			`Disposing controller ${this.id} associated with connection ${this.connection.id} ${
 				nbDocumentUris.length
@@ -417,6 +456,7 @@ export class VSCodeNotebookController
 					: ""
 			}`,
 		);
+
 		logger.ci(
 			`Disposing controller ${this.id} associated with connection ${this.connection.id} ${
 				nbDocumentUris.length
@@ -424,14 +464,22 @@ export class VSCodeNotebookController
 					: ""
 			} called from ${new Error("").stack}`,
 		);
+
 		this.isDisposed = true;
+
 		this._onNotebookControllerSelectionChanged.dispose();
+
 		this._onConnecting.dispose();
+
 		this.controller.dispose();
+
 		this._onDidDispose.fire();
+
 		this._onDidDispose.dispose();
+
 		dispose(this.disposables);
 	}
+
 	private updateDisplayData() {
 		this.controller.label = this.displayData.label;
 		// Do not set descriptions for the live kernels,
@@ -441,6 +489,7 @@ export class VSCodeNotebookController
 			this.connection.kind === "connectToLiveRemoteKernel"
 				? ""
 				: this.displayData.description;
+
 		this.controller.description = description;
 
 		if (this.displayData.serverDisplayName) {
@@ -450,6 +499,7 @@ export class VSCodeNotebookController
 				: this.displayData.serverDisplayName;
 		}
 	}
+
 	private async handleExecution(
 		cells: NotebookCell[],
 		notebook: NotebookDocument,
@@ -457,7 +507,9 @@ export class VSCodeNotebookController
 		if (cells.length < 1) {
 			return;
 		}
+
 		const tracker = getNotebookTelemetryTracker(notebook);
+
 		tracker?.cellExecutionCount(cells.length);
 
 		const telemetryTracker = tracker?.preExecuteCellTelemetry();
@@ -478,6 +530,7 @@ export class VSCodeNotebookController
 
 				return false;
 			}
+
 			return true;
 		});
 		// When we receive a cell execute request, first ensure that the notebook is trusted.
@@ -485,22 +538,28 @@ export class VSCodeNotebookController
 		if (!workspace.isTrusted) {
 			return;
 		}
+
 		logger.debug(
 			`Handle Execution of Cells ${cells.map((c) => c.index)} for ${getDisplayPath(notebook.uri)}`,
 		);
+
 		await initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			notebook.uri,
 			this.connection,
 		);
+
 		telemetryTracker?.stop();
 
 		const queue = this.cellQueue.get(notebook) || [];
+
 		this.cellQueue.set(notebook, queue.concat(cells));
 		// Notebook is trusted. Continue to execute cells
 		await this.executeQueuedCells(notebook);
 	}
+
 	private async onDidChangeSelectedNotebooks(event: {
 		notebook: NotebookDocument;
+
 		selected: boolean;
 	}) {
 		logger.ci(
@@ -527,9 +586,12 @@ export class VSCodeNotebookController
 						event.notebook.uri,
 					)} due to selection of another kernel or closing of the notebook`,
 				);
+
 				kernel.dispose().catch(noop);
 			}
+
 			this.associatedDocuments.delete(event.notebook);
+
 			this._onNotebookControllerSelectionChanged.fire({
 				controller: this,
 				notebook: event.notebook,
@@ -545,21 +607,28 @@ export class VSCodeNotebookController
 		) {
 			return;
 		}
+
 		if (!workspace.isTrusted) {
 			return;
 		}
+
 		getNotebookTelemetryTracker(event.notebook)?.kernelSelected(
 			this.kernelConnection.id,
 			this.kernelConnection.interpreter?.id,
 		);
+
 		void warnWhenUsingOutdatedPython(this.kernelConnection);
 
 		const deferred = createDeferred<void>();
+
 		logger.ci(
 			`Controller ${this.connection.kind}:${this.id} associated with nb ${getDisplayPath(event.notebook.uri)}`,
 		);
+
 		this.associatedDocuments.set(event.notebook, deferred.promise);
+
 		await this.onDidSelectController(event.notebook);
+
 		await this.updateCellLanguages(event.notebook);
 
 		// If this NotebookController was selected, fire off the event
@@ -568,7 +637,9 @@ export class VSCodeNotebookController
 			notebook: event.notebook,
 			selected: event.selected,
 		});
+
 		logger.debug(`Controller selection change completed`);
+
 		deferred.resolve();
 	}
 
@@ -595,11 +666,13 @@ export class VSCodeNotebookController
 		if (!supportedLanguages || supportedLanguages?.length === 0) {
 			return;
 		}
+
 		const isPythonKernel = isPythonKernelConnection(this.kernelConnection);
 
 		const preferredLanguage = isPythonKernel
 			? PYTHON_LANGUAGE
 			: supportedLanguages[0];
+
 		await Promise.all(
 			notebook
 				.getCells()
@@ -618,6 +691,7 @@ export class VSCodeNotebookController
 				}),
 		);
 	}
+
 	private getRendererScripts(): NotebookRendererScript[] {
 		// Only used in tests & while debugging.
 		if (
@@ -645,11 +719,13 @@ export class VSCodeNotebookController
 		logger.debug(
 			`VS Code interrupted kernel for ${getDisplayPath(notebook.uri)}`,
 		);
+
 		notebook
 			.getCells()
 			.forEach((cell) =>
 				traceCellMessage(cell, "Cell cancellation requested"),
 			);
+
 		commands
 			.executeCommand(Commands.InterruptKernel, {
 				notebookEditor: { notebookUri: notebook.uri },
@@ -666,27 +742,33 @@ export class VSCodeNotebookController
 
 		if (!currentExecution || currentExecution.cell === cell) {
 			currentExecution?.end(undefined, undefined);
+
 			currentExecution = CellExecutionCreator.getOrCreate(
 				cell,
 				controller,
 				true,
 			);
+
 			this.runningCellExecutions.set(cell.notebook, currentExecution);
 
 			// When this execution ends, we don't have a current one anymore.
 			const originalEnd = currentExecution.end.bind(currentExecution);
+
 			currentExecution.end = (
 				success: boolean | undefined,
 				endTime?: number | undefined,
 			) => {
 				this.runningCellExecutions.delete(cell.notebook);
+
 				originalEnd(success, endTime);
 			};
 		}
+
 		return currentExecution;
 	}
 
 	private cellQueue = new WeakMap<NotebookDocument, NotebookCell[]>();
+
 	private async executeQueuedCells(doc: NotebookDocument) {
 		if (!this.cellQueue.has(doc)) {
 			return;
@@ -704,6 +786,7 @@ export class VSCodeNotebookController
 				return { cell, exec };
 			},
 		);
+
 		this.cellQueue.delete(doc);
 
 		const firstCell = cellExecs.length ? cellExecs[0].cell : undefined;
@@ -732,7 +815,9 @@ export class VSCodeNotebookController
 			logger.trace(
 				`Connect to Kernel ${getDisplayPath(doc.uri)}. Step 2`,
 			);
+
 			kernel = await this.connectToKernel(doc, new DisplayOptions(false));
+
 			logger.trace(
 				`Connected to Kernel ${getDisplayPath(doc.uri)}. Step 3`,
 			);
@@ -743,6 +828,7 @@ export class VSCodeNotebookController
 			// If the controller changed, then ensure to create a new cell execution object.
 			if (kernel && kernel.controller.id !== controller.id) {
 				controller = kernel.controller;
+
 				cellExecs.forEach(
 					(cellExec) =>
 						(cellExec.exec = this.createCellExecutionIfNecessary(
@@ -751,6 +837,7 @@ export class VSCodeNotebookController
 						)),
 				);
 			}
+
 			currentContext = "execution";
 
 			if (kernel.controller.id === this.id) {
@@ -761,11 +848,14 @@ export class VSCodeNotebookController
 				// Kernel errors would have been handled and displayed
 				return;
 			}
+
 			if (!isCancellationError(ex)) {
 				logger.error(`Error in notebook cell execution`, ex);
 			}
+
 			cellExecs.forEach(({ cell, exec }) => {
 				exec.start();
+
 				exec.clearOutput(cell).then(noop, noop);
 			});
 
@@ -773,6 +863,7 @@ export class VSCodeNotebookController
 				this.serviceContainer.get<IDataScienceErrorHandler>(
 					IDataScienceErrorHandler,
 				);
+
 			ex = WrappedError.unwrap(ex);
 
 			const isCancelled =
@@ -810,8 +901,11 @@ export class VSCodeNotebookController
 							new Disposable(() => cellExecTracker.stop()),
 						);
 					}
+
 					lastCellExecutionTracker.trackCellExecution(cell, kernel);
+
 					logger.trace(`executeCell ${cell.index}. Step 4`);
+
 					await kernelExecution.executeCell(cell);
 
 					// If we complete execution, then there is nothing to be restored.
@@ -827,13 +921,16 @@ export class VSCodeNotebookController
 						// Kernel errors would have been handled and displayed
 						return;
 					}
+
 					if (!isCancellationError(ex)) {
 						logger.error(`Error in cell execution`, ex);
 					}
+
 					const errorHandler =
 						this.serviceContainer.get<IDataScienceErrorHandler>(
 							IDataScienceErrorHandler,
 						);
+
 					ex = WrappedError.unwrap(ex);
 
 					const isCancelled =
@@ -860,6 +957,7 @@ export class VSCodeNotebookController
 		options: IDisplayOptions,
 	): Promise<IKernel> {
 		const tracker = getNotebookTelemetryTracker(doc)?.startKernel();
+
 		this._onConnecting.fire();
 
 		return KernelConnector.connectToNotebookKernel(
@@ -878,6 +976,7 @@ export class VSCodeNotebookController
 		if (this.notebookKernels.get(doc) === kernel) {
 			return;
 		}
+
 		this.notebookKernels.set(doc, kernel);
 
 		const handlerDisposables: IDisposable[] = [];
@@ -905,6 +1004,7 @@ export class VSCodeNotebookController
 			if (!this.associatedDocuments.has(doc)) {
 				return;
 			}
+
 			await updateNotebookDocumentMetadata(
 				doc,
 				kernel.kernelConnectionMetadata,
@@ -919,10 +1019,12 @@ export class VSCodeNotebookController
 		handlerDisposables.push({
 			dispose: () => statusChangeDisposable.dispose(),
 		});
+
 		handlerDisposables.push({
 			dispose: () => kernelDisposedDisposable?.dispose(),
 		});
 	}
+
 	private async onDidSelectController(document: NotebookDocument) {
 		const selectedKernelConnectionMetadata = this.connection;
 
@@ -979,6 +1081,7 @@ export class VSCodeNotebookController
 			controller: this.controller,
 			resourceUri: document.uri, // In the case of interactive window, we cannot pass the Uri of notebook, it must be the Py file or undefined.
 		});
+
 		logger.debug(
 			`KernelProvider switched kernel to id = ${newKernel.kernelConnectionMetadata.id}`,
 		);
@@ -1057,6 +1160,7 @@ export async function warnWhenUsingOutdatedPython(
 				if (selection !== Common.learnMore) {
 					return;
 				}
+
 				return openInBrowser(
 					"https://aka.ms/jupyterUnSupportedPythonKernelVersions",
 				);

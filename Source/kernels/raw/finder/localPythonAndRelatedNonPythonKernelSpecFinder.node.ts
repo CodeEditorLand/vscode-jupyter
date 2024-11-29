@@ -73,13 +73,18 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 	>();
 
 	private _kernelsFromCache: LocalKernelConnectionMetadata[] = [];
+
 	private cachedInformationForPythonInterpreter = new Map<
 		InterpreterId,
 		Promise<LocalKernelConnectionMetadata[]>
 	>();
+
 	private updateCachePromise = Promise.resolve();
+
 	private readonly discoveredKernelSpecFiles = new Set<string>();
+
 	private previousRefresh?: Promise<void>;
+
 	private readonly globalPythonKernelSpecFinder: GlobalPythonKernelSpecFinder;
 
 	constructor(
@@ -104,15 +109,19 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 			this.extensionChecker,
 			trustedKernels,
 		);
+
 		this.disposables.push(this._onDidChangeKernels);
+
 		interpreterService.onDidChangeInterpreters(
 			() => {
 				this.refreshCancellation?.cancel();
+
 				this.refreshData().catch(noop);
 			},
 			this,
 			this.disposables,
 		);
+
 		interpreterService.onDidRemoveInterpreter(
 			async (e) => {
 				// This is a farily destructive operation, hence lets wait a few seconds.
@@ -127,12 +136,15 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 				logger.debug(`Interpreter removed ${e.id}`);
 
 				const deletedKernels: LocalKernelConnectionMetadata[] = [];
+
 				this._kernels.forEach((k) => {
 					if (k.interpreter?.id === e.id) {
 						logger.debug(
 							`Interpreter ${e.id} deleted, hence deleting corresponding kernel ${k.kind}:'${k.id}`,
 						);
+
 						deletedKernels.push(k);
+
 						this._kernels.delete(k.id);
 					}
 				});
@@ -144,6 +156,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 								`${item.kind}:'${item.id}: (interpreter id=${getDisplayPath(item.interpreter?.id)})'`,
 						)}`,
 					);
+
 					this.updateCache().catch(noop);
 				}
 			},
@@ -151,6 +164,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 			this.disposables,
 		);
 	}
+
 	public activate() {
 		this.listKernelsFirstTimeFromMemento(localPythonKernelsCacheKey())
 			.then((kernels) => {
@@ -162,14 +176,18 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 						.filter((item) => !this._kernels.has(item.id))
 						.forEach((item) => {
 							this._kernelsFromCache.push(item);
+
 							this._kernels.set(item.id, item);
 						});
+
 					this._onDidChangeKernels.fire();
 				}
 			})
 			.finally(async () => {
 				this.refreshCancellation?.cancel();
+
 				this.refreshData().catch(noop);
+
 				this.kernelSpecsFromKnownLocations.onDidChangeKernels(
 					() => {
 						// Only refresh if we know there are new global Python kernels that we haven't already seen before.
@@ -188,6 +206,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 							)
 						) {
 							this.refreshCancellation?.cancel();
+
 							this.refreshData().catch(noop);
 						}
 					},
@@ -197,23 +216,34 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 			})
 			.catch(noop);
 	}
+
 	public get kernels(): LocalKernelConnectionMetadata[] {
 		return Array.from(this._kernels.values());
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	private refreshCancellation?: CancellationTokenSource;
+
 	private lastKnownGlobalPythonKernelSpecs: LocalKernelSpecConnectionMetadata[] =
 		[];
+
 	public async refresh() {
 		this.globalPythonKernelSpecFinder.clear();
+
 		this.clearCache();
+
 		this.cachedInformationForPythonInterpreter.clear();
+
 		this.discoveredKernelSpecFiles.clear();
+
 		this.interpreterService.refreshInterpreters(true).catch(noop);
+
 		await this.refreshData(true);
 	}
+
 	public refreshData(forcePythonInterpreterRefresh: boolean = false) {
 		// If we're already discovering, then no need to cancel the existing search process
 		// unless we're forcing a refresh.
@@ -225,7 +255,9 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 		) {
 			return this.previousRefresh;
 		}
+
 		this.refreshCancellation?.cancel();
+
 		this.refreshCancellation?.dispose();
 
 		const cancelToken = (this.refreshCancellation =
@@ -266,8 +298,10 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 							.map((item) => `${item.kind}:'${item.id}'`)
 							.join(", ")}`,
 					);
+
 					kernelConnectionsFoundOnlyInCache.forEach((item) => {
 						this._kernels.delete(item.id);
+
 						deletedKernels.push(item);
 					});
 				}
@@ -289,6 +323,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 					) {
 						return true;
 					}
+
 					return false;
 				});
 
@@ -305,9 +340,11 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 								",",
 							)} and valid interpreter ids include ${Array.from(validInterpreterIds).join(", ")}`,
 					);
+
 					kernelsThatPointToInvalidValidInterpreters.forEach(
 						(item) => {
 							this._kernels.delete(item.id);
+
 							deletedKernels.push(item);
 						},
 					);
@@ -320,6 +357,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 								`${item.kind}:'${item.id}: (interpreter id=${getDisplayPath(item.interpreter?.id)})'`,
 						)}`,
 					);
+
 					await this.updateCache();
 				}
 			}
@@ -334,20 +372,25 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 			.finally(() => {
 				if (cancelToken === this.refreshCancellation) {
 					this.refreshCancellation?.cancel();
+
 					this.refreshCancellation?.dispose();
+
 					this.refreshCancellation = undefined;
 				}
 			});
 
 		this.previousRefresh = promise;
+
 		this.promiseMonitor.push(promise);
 
 		return promise;
 	}
+
 	private async updateCache() {
 		this._onDidChangeKernels.fire();
 
 		const kernels = Array.from(this._kernels.values());
+
 		this.updateCachePromise = this.updateCachePromise.finally(() =>
 			this.writeToMementoCache(kernels, localPythonKernelsCacheKey()),
 		);
@@ -375,13 +418,17 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 						this.extensionChecker,
 						this.kernelSpecFinder,
 					);
+
 					this.disposables.push(finder);
+
 					this.interpreterKernelSpecs.set(interpreter.id, finder);
+
 					finder.onDidChangeKernels(
 						(e) => {
 							e.removed.forEach((item) =>
 								this._kernels.delete(item.id),
 							);
+
 							void this.appendNewKernels(e.added);
 
 							if (!e.added.length && e.removed.length) {
@@ -392,6 +439,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 						this.disposables,
 					);
 				}
+
 				await raceCancellation(
 					cancelToken,
 					[],
@@ -418,6 +466,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 		if (!kernels.length) {
 			return;
 		}
+
 		kernels.forEach((kernel) => {
 			if (isLocalConnection(kernel) && kernel.kernelSpec.specFile) {
 				this._kernelsExcludingCachedItems.set(kernel.id, kernel);
@@ -440,6 +489,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 
 		return this.updateCache();
 	}
+
 	private listGlobalPythonKernelSpecs(
 		includeKernelsRegisteredByUs: boolean,
 	): LocalKernelSpecConnectionMetadata[] {
@@ -456,6 +506,7 @@ export class LocalPythonAndRelatedNonPythonKernelSpecFinder extends LocalKernelS
 
 		return pythonKernelSpecs;
 	}
+
 	private listGlobalPythonKernelSpecsIncludingThoseRegisteredByUs() {
 		return (this.lastKnownGlobalPythonKernelSpecs =
 			this.listGlobalPythonKernelSpecs(true));

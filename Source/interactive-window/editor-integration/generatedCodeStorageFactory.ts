@@ -23,8 +23,10 @@ export class GeneratedCodeStorageFactory
 		if (!this.storages.has(notebook)) {
 			this.storages.set(notebook, new GeneratedCodeStorage());
 		}
+
 		return this.storages.get(notebook)!;
 	}
+
 	get(
 		options: { notebook: NotebookDocument } | { fileUri: Uri },
 	): IGeneratedCodeStore | undefined {

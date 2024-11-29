@@ -17,9 +17,11 @@ export class CommandRegistry
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
 	) {}
+
 	activate() {
 		this.registerCommandsIfTrusted();
 	}
+
 	dispose() {
 		this.disposables.forEach((d) => d.dispose());
 	}
@@ -41,6 +43,7 @@ export class CommandRegistry
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	>(command: E, callback: (...args: U) => any) {
 		const disposable = commands.registerCommand(command, callback, this);
+
 		this.disposables.push(disposable);
 	}
 

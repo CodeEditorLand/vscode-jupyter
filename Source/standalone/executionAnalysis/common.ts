@@ -41,6 +41,7 @@ export namespace Range {
 
 		if (resultStartLineNumber < otherStartLineNumber) {
 			resultStartLineNumber = otherStartLineNumber;
+
 			resultStartColumn = otherStartColumn;
 		} else if (resultStartLineNumber === otherStartLineNumber) {
 			resultStartColumn = Math.max(resultStartColumn, otherStartColumn);
@@ -48,6 +49,7 @@ export namespace Range {
 
 		if (resultEndLineNumber > otherEndLineNumber) {
 			resultEndLineNumber = otherEndLineNumber;
+
 			resultEndColumn = otherEndColumn;
 		} else if (resultEndLineNumber === otherEndLineNumber) {
 			resultEndColumn = Math.min(resultEndColumn, otherEndColumn);
@@ -57,6 +59,7 @@ export namespace Range {
 		if (resultStartLineNumber > resultEndLineNumber) {
 			return false;
 		}
+
 		if (
 			resultStartLineNumber === resultEndLineNumber &&
 			resultStartColumn > resultEndColumn
@@ -105,6 +108,7 @@ export function cellIndexesToRanges(indexes: number[]): vscode.NotebookRange[] {
 				} else {
 					ranges.unshift([num, num + 1]);
 				}
+
 				return ranges;
 			},
 			[[first, first + 1]],
@@ -154,6 +158,7 @@ export function findNotebookAndCell(
 	if (!notebook) {
 		return;
 	}
+
 	const cells = notebook.getCells();
 
 	const currentCell = cells.find(

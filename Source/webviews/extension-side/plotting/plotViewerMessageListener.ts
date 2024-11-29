@@ -11,7 +11,9 @@ import {
 // This class listens to messages that come from the local Plot Viewer window
 export class PlotViewerMessageListener implements IWebviewPanelMessageListener {
 	private disposedCallback: () => void;
+
 	private callback: (message: string, payload: any) => void;
+
 	private viewChanged: (panel: IWebviewPanel) => void;
 
 	constructor(

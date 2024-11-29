@@ -107,6 +107,7 @@ export async function activate(
 				for await (const variable of variables) {
 					resolvedVariables.push(variable);
 				}
+
 				return resolvedVariables;
 			},
 		),

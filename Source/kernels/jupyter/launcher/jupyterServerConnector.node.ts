@@ -30,12 +30,15 @@ export class JupyterServerConnector implements IJupyterServerConnector {
 		if (!options.ui.disableUI) {
 			this.startupUi.disableUI = false;
 		}
+
 		const handler = options.ui.onDidChangeDisableUI(() => {
 			if (!options.ui.disableUI) {
 				this.startupUi.disableUI = false;
+
 				handler.dispose();
 			}
 		});
+
 		options.ui = this.startupUi;
 
 		if (this.extensionChecker.isPythonExtensionInstalled) {
@@ -48,6 +51,7 @@ export class JupyterServerConnector implements IJupyterServerConnector {
 			if (!this.startupUi.disableUI) {
 				await this.extensionChecker.showPythonExtensionInstallRequiredPrompt();
 			}
+
 			throw new PythonExtensionNotInstalledError();
 		}
 	}

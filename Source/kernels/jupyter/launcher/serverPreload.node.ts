@@ -55,6 +55,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 			disposables,
 		);
 	}
+
 	public activate() {
 		// This is the list of things that should cause us to start a local server
 		// 1) Notebook is opened
@@ -82,10 +83,12 @@ export class ServerPreload implements IExtensionSyncActivationService {
 			this.createServerIfNecessary().catch(noop);
 		}
 	}
+
 	private shouldAutoStartStartServer(lastTime?: Date) {
 		if (!lastTime) {
 			return false;
 		}
+
 		const currentTime = new Date();
 
 		const diff = currentTime.getTime() - lastTime.getTime();
@@ -99,6 +102,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 		if (!workspace.isTrusted || this.rawKernelSupport.isSupported) {
 			return;
 		}
+
 		const source = new CancellationTokenSource();
 
 		const ui = new DisplayOptions(true);
@@ -124,6 +128,7 @@ export class ServerPreload implements IExtensionSyncActivationService {
 			logger.error(`Error starting server in serverPreload: `, exc);
 		} finally {
 			ui.dispose();
+
 			source.dispose();
 		}
 	}

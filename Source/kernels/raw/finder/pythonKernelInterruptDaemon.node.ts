@@ -49,6 +49,7 @@ function isBestPythonInterpreterForAnInterruptDaemon(interpreter: {
 	) {
 		return true;
 	}
+
 	return false;
 }
 function isSupportedPythonVersion(interpreter: { id: string }) {
@@ -64,6 +65,7 @@ function isSupportedPythonVersion(interpreter: { id: string }) {
 	) {
 		return true;
 	}
+
 	return false;
 }
 
@@ -75,6 +77,7 @@ type Command =
 
 export type Interrupter = IDisposable & {
 	handle: InterruptHandle;
+
 	interrupt: () => Promise<void>;
 };
 /**
@@ -85,10 +88,12 @@ export type Interrupter = IDisposable & {
 @injectable()
 export class PythonKernelInterruptDaemon {
 	private startupPromise?: Promise<ObservableExecutionResult<string>>;
+
 	private messages = new Map<
 		number,
 		{ command: Command; deferred: Deferred<unknown> }
 	>();
+
 	private requestCounter: number = 0;
 
 	constructor(
@@ -98,6 +103,7 @@ export class PythonKernelInterruptDaemon {
 		private readonly disposableRegistry: IDisposableRegistry,
 		@inject(IExtensionContext) private readonly context: IExtensionContext,
 	) {}
+
 	public async createInterrupter(
 		pythonEnvironment: PythonEnvironment,
 		resource: Resource,
@@ -113,6 +119,7 @@ export class PythonKernelInterruptDaemon {
 			return this.createInterrupterImpl(pythonEnvironment, resource);
 		}
 	}
+
 	private async createInterrupterImpl(
 		pythonEnvironment: PythonEnvironment,
 		resource: Resource,
@@ -169,6 +176,7 @@ export class PythonKernelInterruptDaemon {
 		if (interpreters.length === 0) {
 			return interpreter;
 		}
+
 		return (
 			resolvedPythonEnvToJupyterEnv(
 				interpreters.find(isBestPythonInterpreterForAnInterruptDaemon),
@@ -179,6 +187,7 @@ export class PythonKernelInterruptDaemon {
 			interpreter
 		);
 	}
+
 	private async initializeInterrupter(
 		pythonEnvironment: PythonEnvironment,
 		resource: Resource,
@@ -186,6 +195,7 @@ export class PythonKernelInterruptDaemon {
 		if (this.startupPromise) {
 			return this.startupPromise;
 		}
+
 		const promise = (async () => {
 			const interpreter = await this.getInterpreter(pythonEnvironment);
 
@@ -224,6 +234,7 @@ export class PythonKernelInterruptDaemon {
 						!started
 					) {
 						started = true;
+
 						resolve();
 					} else if (
 						out.source === "stderr" &&
@@ -257,11 +268,13 @@ export class PythonKernelInterruptDaemon {
 										logger.error(
 											`Failed to initialize interrupt daemon for ${id}, ${out.out}`,
 										);
+
 										deferred.deferred.reject(
 											new Error(
 												`Failed to start interrupt daemon ${out.out}`,
 											),
 										);
+
 										this.messages.delete(id);
 									}
 								} catch (ex) {
@@ -294,7 +307,9 @@ export class PythonKernelInterruptDaemon {
 										logger.trace(
 											`Got a response of ${response} for ${command}:${id}`,
 										);
+
 										deferred.deferred.resolve(response);
+
 										this.messages.delete(parseInt(id, 10));
 									} else {
 										logger.error(
@@ -320,6 +335,7 @@ export class PythonKernelInterruptDaemon {
 								),
 							);
 						}
+
 						try {
 							const id = out.out.split(":")[2];
 
@@ -329,6 +345,7 @@ export class PythonKernelInterruptDaemon {
 
 							if (deferred) {
 								deferred.deferred.reject(new Error(out.out));
+
 								this.messages.delete(parseInt(id, 10));
 
 								return;
@@ -341,8 +358,10 @@ export class PythonKernelInterruptDaemon {
 						}
 					}
 				});
+
 				this.disposableRegistry.push(subscription);
 			});
+
 			this.disposableRegistry.push(
 				new Disposable(() =>
 					swallowExceptions(() => proc.proc?.kill()),
@@ -352,27 +371,32 @@ export class PythonKernelInterruptDaemon {
 			// We can remove this later if there are no more flaky test failures.
 			proc.proc?.on("close", () => {
 				logger.ci("Interrupt daemon closed");
+
 				this.startupPromise = undefined;
 			});
 			// Added for logging to see if this process dies.
 			// We can remove this later if there are no more flaky test failures.
 			proc.proc?.on("exit", () => {
 				logger.ci("Interrupt daemon exited");
+
 				this.startupPromise = undefined;
 			});
 
 			return proc;
 		})();
+
 		promise.catch((ex) =>
 			logger.error(
 				`Failed to start interrupt daemon for (${pythonEnvironment.id})`,
 				ex,
 			),
 		);
+
 		this.startupPromise = promise;
 
 		return promise;
 	}
+
 	private async sendCommand(
 		command: Command,
 		pythonEnvironment: PythonEnvironment,
@@ -381,6 +405,7 @@ export class PythonKernelInterruptDaemon {
 		const deferred = createDeferred<unknown>();
 
 		const id = this.requestCounter++;
+
 		this.messages.set(id, { command, deferred });
 
 		const messageToSend =
@@ -399,12 +424,15 @@ export class PythonKernelInterruptDaemon {
 
 			throw new Error("No process or stdin");
 		}
+
 		proc.stdin.write(`${messageToSend}${EOL}`);
+
 		logger.ci(
 			`Sending Interrupt Request id=${id}, Command ${command.command} for ${pythonEnvironment.id}`,
 		);
 
 		const response = await deferred.promise;
+
 		logger.ci(
 			`Got Interrupt Response id=${id}, Command ${command.command} for ${pythonEnvironment.id}`,
 		);
@@ -412,6 +440,7 @@ export class PythonKernelInterruptDaemon {
 		if (command.command === "INITIALIZE_INTERRUPT") {
 			return parseInt(response as string, 10);
 		}
+
 		return;
 	}
 }

@@ -88,6 +88,7 @@ export function isResource(
 	if (!resource) {
 		return true;
 	}
+
 	const uri = resource as Uri;
 
 	return typeof uri.path === "string" && typeof uri.scheme === "string";
@@ -107,6 +108,7 @@ export function isUri(resource?: Uri | any): resource is Uri {
 	if (!resource) {
 		return false;
 	}
+
 	const uri = resource as Uri;
 
 	return typeof uri.path === "string" && typeof uri.scheme === "string";
@@ -130,6 +132,7 @@ function jsonStringifyUriReplacer(_key: string, value: any) {
 	if (isUri(value)) {
 		return value.toString();
 	}
+
 	return value;
 }
 /**
@@ -140,12 +143,15 @@ export function areObjectsWithUrisTheSame(obj1?: unknown, obj2?: unknown) {
 	if (obj1 === obj2) {
 		return true;
 	}
+
 	if (obj1 && !obj2) {
 		return false;
 	}
+
 	if (!obj1 && obj2) {
 		return false;
 	}
+
 	return (
 		JSON.stringify(obj1, jsonStringifyUriReplacer) ===
 		JSON.stringify(obj2, jsonStringifyUriReplacer)

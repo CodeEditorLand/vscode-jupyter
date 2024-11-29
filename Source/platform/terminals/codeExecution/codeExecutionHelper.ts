@@ -29,6 +29,7 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 
 			return;
 		}
+
 		if (activeEditor.document.isUntitled) {
 			window
 				.showErrorMessage(
@@ -38,6 +39,7 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 
 			return;
 		}
+
 		if (activeEditor.document.languageId !== PYTHON_LANGUAGE) {
 			window
 				.showErrorMessage("The active file is not a Python source file")
@@ -45,9 +47,11 @@ export class CodeExecutionHelperBase implements ICodeExecutionHelper {
 
 			return;
 		}
+
 		if (activeEditor.document.isDirty) {
 			await activeEditor.document.save();
 		}
+
 		return activeEditor.document.uri;
 	}
 

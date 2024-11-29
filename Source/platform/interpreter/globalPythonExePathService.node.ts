@@ -46,13 +46,16 @@ export class GlobalPythonExecutablePathService {
 
 		if (!this.userSitePaths.has(executable)) {
 			const promise = this.getUserSitePathImpl(executable);
+
 			promise.catch(() => {
 				if (this.userSitePaths.get(executable) === promise) {
 					this.userSitePaths.delete(executable);
 				}
 			});
+
 			this.userSitePaths.set(executable, promise);
 		}
+
 		return this.userSitePaths.get(executable);
 	}
 	/**
@@ -110,11 +113,13 @@ export class GlobalPythonExecutablePathService {
 			} else {
 				sitePath = Uri.joinPath(outputPath, "bin");
 			}
+
 			if (!sitePath || !this.fs.exists(sitePath)) {
 				throw new Error(
 					`USER_SITE ${sitePath.fsPath} dir does not exist for the interpreter ${getDisplayPath(executable)}`,
 				);
 			}
+
 			logger.trace(
 				`USER_SITE for ${getDisplayPath(executable)} is ${sitePath.fsPath}`,
 			);

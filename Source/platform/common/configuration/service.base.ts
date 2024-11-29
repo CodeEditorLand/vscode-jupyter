@@ -40,6 +40,7 @@ export abstract class BaseConfigurationService
 		) {
 			settingsInfo = JupyterSettings.getSettingsUriAndTarget(resource);
 		}
+
 		const configSection = workspace.getConfiguration(
 			section,
 			settingsInfo.uri,
@@ -58,6 +59,7 @@ export abstract class BaseConfigurationService
 		) {
 			return;
 		}
+
 		await configSection.update(setting, value, configTarget);
 
 		if (configTarget) {
@@ -100,6 +102,7 @@ export abstract class BaseConfigurationService
 				if (!setting && value === undefined) {
 					break; // Both are unset
 				}
+
 				if (setting && value !== undefined) {
 					// Both specified
 					const actual =
@@ -115,6 +118,7 @@ export abstract class BaseConfigurationService
 				}
 				// Wait for settings to get refreshed.
 				await new Promise((resolve) => setTimeout(resolve, 250));
+
 				retries += 1;
 			} while (retries < 20);
 		}

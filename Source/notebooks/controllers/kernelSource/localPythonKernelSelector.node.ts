@@ -44,7 +44,9 @@ import { PythonEnvKernelConnectionCreator } from "../pythonEnvKernelConnectionCr
 
 export class LocalPythonKernelSelector extends DisposableBase {
 	private readonly pythonEnvPicker: BaseProviderBasedQuickPick<Environment>;
+
 	private readonly provider: PythonEnvironmentQuickPickItemProvider;
+
 	private pythonApi?: PythonExtension;
 
 	constructor(
@@ -72,6 +74,7 @@ export class LocalPythonKernelSelector extends DisposableBase {
 				PythonEnvironmentQuickPickItemProvider,
 			)
 			.withFilter((item) => !filter.isPythonEnvironmentExcluded(item));
+
 		this.pythonEnvPicker = this._register(
 			new BaseProviderBasedQuickPick(
 				Promise.resolve(this.provider),
@@ -89,7 +92,9 @@ export class LocalPythonKernelSelector extends DisposableBase {
 			if (creationCommandAdded) {
 				return;
 			}
+
 			creationCommandAdded = true;
+
 			this.pythonEnvPicker.addCommand(
 				{
 					label: `$(add) ${DataScience.createPythonEnvironmentInQuickPick}`,
@@ -101,23 +106,28 @@ export class LocalPythonKernelSelector extends DisposableBase {
 		if (this.provider.items.length) {
 			addCreationCommand();
 		}
+
 		let installPythonCommand = { dispose: noop };
 
 		const onDidChangeHandler = this._register(
 			this.provider.onDidChange(() => {
 				if (this.provider.items.length) {
 					addCreationCommand();
+
 					installPythonCommand.dispose();
+
 					onDidChangeHandler.dispose();
 				}
 			}),
 		);
+
 		this.provider
 			.refresh()
 			.finally(() => {
 				if (this.provider.items.length) {
 					return;
 				}
+
 				installPythonCommand = this.pythonEnvPicker.addCommand(
 					{
 						label: DataScience.installPythonQuickPickTitle,
@@ -145,6 +155,7 @@ export class LocalPythonKernelSelector extends DisposableBase {
 			if (!this.pythonApi || token.isCancellationRequested) {
 				return;
 			}
+
 			this.pythonEnvPicker.recommended = findPreferredPythonEnvironment(
 				this.notebook,
 				this.pythonApi,
@@ -156,13 +167,17 @@ export class LocalPythonKernelSelector extends DisposableBase {
 			if (!api) {
 				return;
 			}
+
 			this.pythonApi = api;
+
 			computePreferredEnv();
+
 			this._register(
 				api.environments.onDidChangeActiveEnvironmentPath(
 					computePreferredEnv,
 				),
 			);
+
 			this._register(
 				api.environments.onDidChangeEnvironments(computePreferredEnv),
 			);
@@ -205,10 +220,12 @@ export class LocalPythonKernelSelector extends DisposableBase {
 							`Failed to install the Python extension`,
 							ex,
 						);
+
 						pythonExtensionNotInstalled.resolve();
 					},
 				);
 		}
+
 		const result = await Promise.race([
 			this.pythonEnvPicker.selectItem(this.token),
 			pythonExtensionNotInstalled.promise,
@@ -217,6 +234,7 @@ export class LocalPythonKernelSelector extends DisposableBase {
 		if (!result || result instanceof InputFlowAction) {
 			return result || InputFlowAction.cancel;
 		}
+
 		const interpreters =
 			ServiceContainer.instance.get<IInterpreterService>(
 				IInterpreterService,
@@ -232,6 +250,7 @@ export class LocalPythonKernelSelector extends DisposableBase {
 		if (!interpreter) {
 			return InputFlowAction.cancel;
 		}
+
 		const spec = await createInterpreterKernelSpec(
 			interpreter,
 			await jupyterPaths.getKernelSpecTempRegistrationFolder(),
@@ -270,11 +289,13 @@ export class LocalPythonKernelSelector extends DisposableBase {
 		if (!result) {
 			return InputFlowAction.cancel;
 		}
+
 		if ("action" in result) {
 			return result.action === "Back"
 				? InputFlowAction.back
 				: InputFlowAction.cancel;
 		}
+
 		const api = await apiProvider.getNewApi();
 
 		return api?.environments.known.find(

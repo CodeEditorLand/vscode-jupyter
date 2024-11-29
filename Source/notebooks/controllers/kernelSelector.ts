@@ -21,6 +21,7 @@ export async function selectKernel(
 			notebookEditor,
 		}) as Promise<boolean>;
 	}
+
 	logger.error(
 		`Unable to select kernel as the Notebook document could not be identified`,
 	);

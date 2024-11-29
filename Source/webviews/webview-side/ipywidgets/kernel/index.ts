@@ -18,6 +18,7 @@ import { IJupyterLabWidgetManagerCtor, INotebookModel } from "./types";
 
 class WidgetManagerComponent {
 	private readonly widgetManager: WidgetManager;
+
 	private readonly scriptManager: ScriptManager;
 
 	constructor(
@@ -26,13 +27,17 @@ class WidgetManagerComponent {
 		widgetState?: NotebookMetadata["widgets"],
 	) {
 		this.scriptManager = new ScriptManager(postOffice);
+
 		this.scriptManager.onWidgetLoadError(this.handleLoadError.bind(this));
+
 		this.scriptManager.onWidgetLoadSuccess(
 			this.handleLoadSuccess.bind(this),
 		);
+
 		this.scriptManager.onWidgetVersionNotSupported(
 			this.handleUnsupportedWidgetVersion.bind(this),
 		);
+
 		this.widgetManager = new WidgetManager(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			undefined as any,
@@ -48,16 +53,22 @@ class WidgetManagerComponent {
 			},
 		});
 	}
+
 	public dispose() {
 		this.widgetManager.dispose();
 	}
+
 	private async handleLoadError(data: {
 		className: string;
+
 		moduleName: string;
+
 		moduleVersion: string;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		error: any;
+
 		timedout?: boolean;
+
 		isOnline: boolean;
 	}) {
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
@@ -71,6 +82,7 @@ class WidgetManagerComponent {
 				error: JSON.stringify(data.error),
 			},
 		);
+
 		console.error(
 			`Failed to to Widget load class ${data.moduleName}${data.className}`,
 			data,
@@ -79,6 +91,7 @@ class WidgetManagerComponent {
 
 	private handleUnsupportedWidgetVersion(data: {
 		moduleName: "qgrid";
+
 		moduleVersion: string;
 	}) {
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
@@ -92,7 +105,9 @@ class WidgetManagerComponent {
 
 	private handleLoadSuccess(data: {
 		className: string;
+
 		moduleName: string;
+
 		moduleVersion: string;
 	}) {
 		this.postOffice.sendMessage<IInteractiveWindowMapping>(
@@ -118,7 +133,9 @@ const renderedWidgets = new Map<
  */
 let stackOfWidgetsRenderStatusByOutputId: {
 	outputId: string;
+
 	container: HTMLElement;
+
 	success?: boolean;
 }[] = [];
 
@@ -126,6 +143,7 @@ export async function renderOutput(
 	outputItem: OutputItem,
 	model: nbformat.IMimeBundle & {
 		model_id: string;
+
 		version_major: number;
 		/**
 		 * This property is only used & added in tests.
@@ -140,6 +158,7 @@ export async function renderOutput(
 			outputId: outputItem.id,
 			container: element,
 		});
+
 		renderIPyWidget(outputItem.id, model, element, logger);
 	} catch (ex) {
 		logger(
@@ -165,6 +184,7 @@ function renderIPyWidget(
 	outputId: string,
 	model: nbformat.IMimeBundle & {
 		model_id: string;
+
 		version_major: number;
 		/**
 		 * This property is only used & added in tests.
@@ -185,6 +205,7 @@ function renderIPyWidget(
 	) {
 		return logger("already rendering");
 	}
+
 	let timeout = 0;
 
 	if (renderedWidgets.has(outputId)) {
@@ -194,6 +215,7 @@ function renderIPyWidget(
 		// Without this, running a cell multiple times with the same widget will result
 		// in the widget not getting rendered.
 		timeout = 100;
+
 		logger(
 			"Widget was already rendering for another container, dispose that widget so we can re-render it",
 		);
@@ -204,6 +226,7 @@ function renderIPyWidget(
 			//
 		}
 	}
+
 	if (container.firstChild) {
 		try {
 			container.removeChild(container.firstChild);
@@ -215,19 +238,26 @@ function renderIPyWidget(
 	new Promise((resolve) => setTimeout(resolve, timeout))
 		.then(() => {
 			const output = document.createElement("div");
+
 			output.className = "cell-output cell-output";
 
 			if (typeof model._vsc_test_cellIndex === "number") {
 				container.className += ` vsc-test-cell-index-${model._vsc_test_cellIndex}`;
 			}
+
 			const ele = document.createElement("div");
+
 			ele.className = "cell-output-ipywidget-background";
+
 			container.appendChild(ele);
+
 			ele.appendChild(output);
+
 			renderedWidgets.set(outputId, {
 				container,
 				modelId: model.model_id,
 			});
+
 			createWidgetView(model, ele)
 				.then((w) => {
 					if (
@@ -236,20 +266,25 @@ function renderIPyWidget(
 						logger(
 							"Widget container changed, hence disposing the widget",
 						);
+
 						w?.dispose();
 
 						return;
 					}
+
 					if (renderedWidgets.has(outputId)) {
 						renderedWidgets.get(outputId)!.widget = w;
 					}
+
 					const disposable = {
 						dispose: () => {
 							// What if we render the same model in two cells.
 							renderedWidgets.delete(outputId);
+
 							w?.dispose();
 						},
 					};
+
 					outputDisposables.set(outputId, disposable);
 					// Keep track of the fact that we have successfully rendered a widget for this outputId.
 					const statusInfo =
@@ -287,6 +322,7 @@ async function getWidgetManager(): Promise<WidgetManager> {
 
 				if (wm) {
 					const oldDispose = wm.dispose.bind(wm);
+
 					wm.dispose = () => {
 						// eslint-disable-next-line , @typescript-eslint/no-explicit-any
 						widgetManagerPromise = undefined;
@@ -296,12 +332,16 @@ async function getWidgetManager(): Promise<WidgetManager> {
 
 					if (resolve) {
 						resolve(wm);
+
 						resolve = undefined;
 					}
+
 					widgetManagerPromise = Promise.resolve(wm);
 				}
 			}
+
 			initializeInstance();
+
 			WidgetManager.onDidChangeInstance(initializeInstance);
 		}
 		// eslint-disable-next-line , @typescript-eslint/no-explicit-any
@@ -309,12 +349,14 @@ async function getWidgetManager(): Promise<WidgetManager> {
 			reInitializeWidgetManager(resolve as any),
 		);
 	}
+
 	return widgetManagerPromise;
 }
 
 async function createWidgetView(
 	widgetData: nbformat.IMimeBundle & {
 		model_id: string;
+
 		version_major: number;
 	},
 	element: HTMLElement,
@@ -343,6 +385,7 @@ async function restoreWidgets(widgetState: NotebookMetadata["widgets"]) {
 			if ((window as any).vscIPyWidgets) {
 				return resolve();
 			}
+
 			setTimeout(tryAgain, 1_000);
 		};
 
@@ -385,6 +428,7 @@ function initialize(
 
 		return;
 	}
+
 	try {
 		// Setup the widget manager
 		const postOffice = new PostOffice(context);
@@ -396,6 +440,7 @@ function initialize(
 		);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(window as any)._mgr = mgr;
+
 		initialized = true;
 	} catch (ex) {
 		// eslint-disable-next-line no-console
@@ -435,16 +480,20 @@ function initializeWidgetManager(widgetState?: NotebookMetadata["widgets"]) {
 			"JupyterLabWidgetManager not defined. Please include/check ipywidgets.js file",
 		);
 	}
+
 	initialize(JupyterLabWidgetManager, capturedContext, widgetState);
 }
 let ipyWidgetVersionResponseHandled = false;
 
 export function activate(context: KernelMessagingApi) {
 	capturedContext = context;
+
 	hookWindowFunctions(context);
+
 	logMessage(
 		`Attempt Initialize IpyWidgets kernel.js : ${JSON.stringify(context)}`,
 	);
+
 	context.onDidReceiveKernelMessage(async (e) => {
 		if (
 			typeof e === "object" &&
@@ -457,10 +506,12 @@ export function activate(context: KernelMessagingApi) {
 			if (ipyWidgetVersionResponseHandled) {
 				return;
 			}
+
 			ipyWidgetVersionResponseHandled = true;
 
 			try {
 				const version = e.payload;
+
 				logMessage(`Loading IPyWidget Version ${version}`);
 				// Load the specific version of the widget scripts
 				const widgets7Promise = new Promise<void>((resolve) => {
@@ -469,6 +520,7 @@ export function activate(context: KernelMessagingApi) {
 						if ((window as any).vscIPyWidgets7) {
 							return resolve();
 						}
+
 						setTimeout(checkIfLoaded, 500);
 					};
 
@@ -481,11 +533,13 @@ export function activate(context: KernelMessagingApi) {
 						if ((window as any).vscIPyWidgets8) {
 							return resolve();
 						}
+
 						setTimeout(checkIfLoaded, 500);
 					};
 
 					setTimeout(checkIfLoaded, 500);
 				});
+
 				await Promise.all([widgets7Promise, widgets8Promise]);
 
 				const unloadWidgets8 = () => {
@@ -510,11 +564,13 @@ export function activate(context: KernelMessagingApi) {
 					unloadWidgets8();
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(window as any).vscIPyWidgets7.load();
+
 					logMessage("Loaded IPYWidgets 7.x from Kernel");
 				} else if (version === 8) {
 					unloadWidgets7();
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(window as any).vscIPyWidgets8.load();
+
 					logMessage("Loaded IPYWidgets 8.x from Kernel");
 				}
 
@@ -526,6 +582,7 @@ export function activate(context: KernelMessagingApi) {
 			}
 		}
 	});
+
 	requestWidgetVersion(context);
 }
 
@@ -533,6 +590,7 @@ function hookWindowFunctions(context: KernelMessagingApi) {
 	if (context.postKernelMessage) {
 		window.alert = (message: string) => {
 			console.log("window.alert", message);
+
 			context.postKernelMessage?.({
 				type: IPyWidgetMessages.IPyWidgets_Window_Alert,
 				message: message.toString(),
@@ -540,6 +598,7 @@ function hookWindowFunctions(context: KernelMessagingApi) {
 
 			throw new Error("window.alert not supported in VS Code Renderers");
 		};
+
 		window.open = (url: string | undefined | URL) => {
 			console.log("window.open", url);
 
@@ -553,6 +612,7 @@ function hookWindowFunctions(context: KernelMessagingApi) {
 					"window.open not supported in VS Code Renderers",
 				);
 			}
+
 			return null;
 		};
 	}

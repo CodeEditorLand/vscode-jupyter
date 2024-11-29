@@ -3,6 +3,7 @@
 
 export type Progress = {
 	action: ReportableAction;
+
 	phase: "started" | "completed";
 };
 

@@ -114,61 +114,82 @@ export class CommandRegistry
 			);
 		}
 	}
+
 	public activate() {
 		this.registerCommandsIfTrusted();
+
 		this.registerCommand(
 			Commands.InsertCellBelowPosition,
 			this.insertCellBelowPosition,
 		);
+
 		this.registerCommand(Commands.InsertCellBelow, this.insertCellBelow);
+
 		this.registerCommand(Commands.InsertCellAbove, this.insertCellAbove);
+
 		this.registerCommand(Commands.DeleteCells, this.deleteCells);
+
 		this.registerCommand(Commands.SelectCell, this.selectCell);
+
 		this.registerCommand(
 			Commands.SelectCellContents,
 			this.selectCellContents,
 		);
+
 		this.registerCommand(
 			Commands.ExtendSelectionByCellAbove,
 			this.extendSelectionByCellAbove,
 		);
+
 		this.registerCommand(
 			Commands.ExtendSelectionByCellBelow,
 			this.extendSelectionByCellBelow,
 		);
+
 		this.registerCommand(Commands.MoveCellsUp, this.moveCellsUp);
+
 		this.registerCommand(Commands.MoveCellsDown, this.moveCellsDown);
+
 		this.registerCommand(
 			Commands.ChangeCellToMarkdown,
 			this.changeCellToMarkdown,
 		);
+
 		this.registerCommand(Commands.ChangeCellToCode, this.changeCellToCode);
+
 		this.registerCommand(
 			Commands.GotoNextCellInFile,
 			this.gotoNextCellInFile,
 		);
+
 		this.registerCommand(
 			Commands.GotoPrevCellInFile,
 			this.gotoPrevCellInFile,
 		);
+
 		this.registerCommand(Commands.AddCellBelow, this.addCellBelow);
+
 		this.registerCommand(
 			Commands.CreateNewNotebook,
 			this.createNewNotebook,
 		);
+
 		this.registerCommand(
 			Commands.LatestExtension,
 			this.openPythonExtensionPage,
 		);
+
 		this.registerCommand(
 			Commands.EnableLoadingWidgetsFrom3rdPartySource,
 			this.enableLoadingWidgetScriptsFromThirdParty,
 		);
+
 		this.registerCommand(
 			Commands.CreateNewInteractive,
 			(connection?: KernelConnectionMetadata) =>
 				this.createNewInteractiveWindow(connection),
 		);
+
 		this.registerCommand(
 			Commands.ImportNotebook,
 			(
@@ -184,6 +205,7 @@ export class CommandRegistry
 				});
 			},
 		);
+
 		this.registerCommand(
 			Commands.ImportNotebookFile,
 			(
@@ -199,6 +221,7 @@ export class CommandRegistry
 				});
 			},
 		);
+
 		commands.registerCommand(
 			Commands.ExportFileAsNotebook,
 			(
@@ -223,6 +246,7 @@ export class CommandRegistry
 				});
 			},
 		);
+
 		this.registerCommand(
 			Commands.ExportFileAndOutputAsNotebook,
 			(
@@ -244,113 +268,148 @@ export class CommandRegistry
 							);
 						}
 					}
+
 					return Promise.resolve();
 				});
 			},
 		);
+
 		this.registerCommand(
 			Commands.ExpandAllCells,
 			async (context?: { notebookEditor: { notebookUri: Uri } }) =>
 				this.expandAllCells(context?.notebookEditor?.notebookUri),
 		);
+
 		this.registerCommand(
 			Commands.CollapseAllCells,
 			async (context?: { notebookEditor: { notebookUri: Uri } }) =>
 				this.collapseAllCells(context?.notebookEditor?.notebookUri),
 		);
+
 		this.registerCommand(Commands.ExportOutputAsNotebook, () =>
 			this.exportCells(),
 		);
+
 		this.registerCommand(
 			Commands.InteractiveExportAsNotebook,
 			(context?: { notebookEditor: { notebookUri: Uri } }) =>
 				this.export(context?.notebookEditor?.notebookUri),
 		);
+
 		this.registerCommand(
 			Commands.InteractiveExportAs,
 			(context?: { notebookEditor: { notebookUri: Uri } }) =>
 				this.exportAs(context?.notebookEditor?.notebookUri),
 		);
+
 		this.registerCommand(Commands.ScrollToCell, (file: Uri, id: string) =>
 			this.scrollToCell(file, id),
 		);
+
 		this.registerCommand(
 			Commands.InteractiveClearAll,
 			this.clearAllCellsInInteractiveWindow,
 		);
+
 		this.registerCommand(
 			Commands.InteractiveGoToCode,
 			this.goToCodeInInteractiveWindow,
 		);
+
 		this.registerCommand(
 			Commands.InteractiveCopyCell,
 			this.copyCellInInteractiveWindow,
 		);
 	}
+
 	public dispose() {
 		this.disposables.forEach((d) => d.dispose());
 	}
+
 	private registerCommandsIfTrusted() {
 		if (!workspace.isTrusted) {
 			return;
 		}
+
 		this.registerCommand(Commands.RunAllCells, this.runAllCells);
+
 		this.registerCommand(Commands.RunCell, this.runCell);
+
 		this.registerCommand(Commands.RunCurrentCell, this.runCurrentCell);
+
 		this.registerCommand(
 			Commands.RunCurrentCellAdvance,
 			this.runCurrentCellAndAdvance,
 		);
+
 		this.registerCommand(
 			Commands.ExecSelectionInInteractiveWindow,
 			(textOrUri: string | undefined | Uri) => {
 				this.runSelectionOrLine(textOrUri).catch(noop);
 			},
 		);
+
 		this.registerCommand(Commands.RunAllCellsAbove, this.runAllCellsAbove);
+
 		this.registerCommand(
 			Commands.RunCellAndAllBelow,
 			this.runCellAndAllBelow,
 		);
+
 		this.registerCommand(
 			Commands.RunAllCellsAbovePalette,
 			this.runAllCellsAboveFromCursor,
 		);
+
 		this.registerCommand(
 			Commands.RunCellAndAllBelowPalette,
 			this.runCellAndAllBelowFromCursor,
 		);
+
 		this.registerCommand(
 			Commands.RunCurrentCellAndAddBelow,
 			this.runCurrentCellAndAddBelow,
 		);
+
 		this.registerCommand(Commands.DebugCell, this.debugCell);
+
 		this.registerCommand(Commands.DebugStepOver, this.debugStepOver);
+
 		this.registerCommand(Commands.DebugContinue, this.debugContinue);
+
 		this.registerCommand(Commands.DebugStop, this.debugStop);
+
 		this.registerCommand(
 			Commands.DebugCurrentCellPalette,
 			this.debugCurrentCellFromCursor,
 		);
+
 		this.registerCommand(Commands.OpenVariableView, this.openVariableView);
+
 		this.registerCommand(Commands.OpenOutlineView, this.openOutlineView);
+
 		this.registerCommand(Commands.RunToLine, this.runToLine);
+
 		this.registerCommand(Commands.RunFromLine, this.runFromLine);
+
 		this.registerCommand(
 			Commands.RunFileInInteractiveWindows,
 			this.runFileInteractive,
 		);
+
 		this.registerCommand(
 			Commands.DebugFileInInteractiveWindows,
 			this.debugFileInteractive,
 		);
 	}
+
 	private registerCommand<
 		E extends keyof ICommandNameArgumentTypeMapping,
 		U extends ICommandNameArgumentTypeMapping[E],
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	>(command: E, callback: (...args: U) => any) {
 		const disposable = commands.registerCommand(command, callback, this);
+
 		this.disposables.push(disposable);
 	}
 
@@ -398,6 +457,7 @@ export class CommandRegistry
 		if (!codeWatcher) {
 			codeWatcher = this.getCurrentCodeWatcher();
 		}
+
 		if (codeWatcher) {
 			return codeWatcher.runAllCells();
 		} else {
@@ -411,6 +471,7 @@ export class CommandRegistry
 		if (!codeWatcher) {
 			codeWatcher = this.getCurrentCodeWatcher();
 		}
+
 		if (codeWatcher) {
 			return codeWatcher.runFileInteractive();
 		} else {
@@ -424,6 +485,7 @@ export class CommandRegistry
 		if (!codeWatcher) {
 			codeWatcher = this.getCurrentCodeWatcher();
 		}
+
 		if (codeWatcher) {
 			return codeWatcher.debugFileInteractive();
 		} else {
@@ -723,6 +785,7 @@ export class CommandRegistry
 				'This command has been deprecated and will eventually be removed, please use ["Create: New Jupyter Notebook"](command:workbench.action.openGlobalKeybindings?%5B%22@command:ipynb.newUntitledIpynb%22%5D) instead.',
 			)
 			.then(noop, noop);
+
 		await commands.executeCommand("ipynb.newUntitledIpynb");
 	}
 
@@ -740,6 +803,7 @@ export class CommandRegistry
 				) {
 					return true;
 				}
+
 				return false;
 			});
 		}
@@ -792,8 +856,10 @@ export class CommandRegistry
 			return result;
 		} catch (err) {
 			logger.error("listenForErrors", err as any);
+
 			this.dataScienceErrorHandler.handleError(err).then(noop, noop);
 		}
+
 		return result;
 	}
 
@@ -820,6 +886,7 @@ export class CommandRegistry
 						ExportFormat.ipynb,
 						file,
 					);
+
 					await this.waitForStatus(
 						async () => {
 							if (uri) {
@@ -827,6 +894,7 @@ export class CommandRegistry
 									await this.jupyterExporter?.serialize(
 										cells,
 									);
+
 								await this.fileSystem.writeFile(
 									uri,
 									notebook || "",
@@ -890,6 +958,7 @@ export class CommandRegistry
 					if (!uri) {
 						return;
 					}
+
 					await this.waitForStatus(
 						async () => {
 							if (uri) {
@@ -897,6 +966,7 @@ export class CommandRegistry
 									await this.jupyterExporter?.serialize(
 										cells,
 									);
+
 								await this.fileSystem.writeFile(
 									uri,
 									notebook || "",
@@ -912,6 +982,7 @@ export class CommandRegistry
 						.then((document) =>
 							window.showNotebookDocument(document),
 						);
+
 					await commands.executeCommand("notebook.execute");
 
 					return uri;
@@ -933,6 +1004,7 @@ export class CommandRegistry
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
 				uri,
 			);
+
 		logger.info(
 			`Expanding all cells in interactive window with uri ${interactiveWindow?.notebookUri}`,
 		);
@@ -947,6 +1019,7 @@ export class CommandRegistry
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
 				uri,
 			);
+
 		logger.info(
 			`Collapsing all cells in interactive window with uri ${interactiveWindow?.notebookUri}`,
 		);
@@ -1016,6 +1089,7 @@ export class CommandRegistry
 		const filtersKey = DataScience.importDialogFilter;
 
 		const filtersObject: { [name: string]: string[] } = {};
+
 		filtersObject[filtersKey] = ["ipynb"];
 
 		const uris = await window.showOpenDialog({
@@ -1098,7 +1172,9 @@ export class CommandRegistry
 		const nbEdit = NotebookEdit.deleteCells(
 			new NotebookRange(0, document.cellCount),
 		);
+
 		edit.set(document.uri, [nbEdit]);
+
 		await workspace.applyEdit(edit);
 	}
 
@@ -1115,6 +1191,7 @@ export class CommandRegistry
 			// If we found the editor change its selection
 			if (editor) {
 				editor.revealRange(new Range(line, 0, line, 0));
+
 				editor.selection = new Selection(
 					new Position(line, 0),
 					new Position(line, 0),
@@ -1135,6 +1212,7 @@ export class CommandRegistry
 					settings.defaultCellMarker,
 				context.document.getText(),
 			].join("\n");
+
 			await env.clipboard.writeText(source);
 		}
 	}

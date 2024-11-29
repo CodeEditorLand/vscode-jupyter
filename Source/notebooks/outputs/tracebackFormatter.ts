@@ -32,6 +32,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 			this.modifyTracebackFrameIPython(cell, traceFrame),
 		);
 	}
+
 	private modifyTracebackFrameIPython(
 		cell: NotebookCell,
 		traceFrame: string,
@@ -48,6 +49,7 @@ export class NotebookTracebackFormatter implements ITracebackFormatter {
 			return traceFrame;
 		}
 	}
+
 	private modifyTracebackFrameIPython8(
 		cell: NotebookCell,
 		traceFrame: string,

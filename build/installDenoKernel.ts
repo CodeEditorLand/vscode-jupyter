@@ -43,6 +43,7 @@ function getUserHomeDir(): string {
 	if (getOSType() === OSType.Windows) {
 		return getEnvironmentVariable("USERPROFILE") || homePath;
 	}
+
 	const homeVar =
 		getEnvironmentVariable("HOME") ||
 		getEnvironmentVariable("HOMEPATH") ||
@@ -83,6 +84,7 @@ function registerKernel() {
 	}
 
 	fs.mkdirpSync(path.dirname(denoKernelSpecPath));
+
 	fs.writeFileSync(
 		denoKernelSpecPath,
 		JSON.stringify(
@@ -102,6 +104,7 @@ function registerKernel() {
 			4,
 		),
 	);
+
 	console.log(`Deno kernel registered at ${denoKernelSpecPath}`);
 }
 

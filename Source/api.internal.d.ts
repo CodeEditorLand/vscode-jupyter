@@ -22,6 +22,7 @@ declare module "./api" {
 		 */
 		readonly serverProvider: JupyterServerProvider;
 	}
+
 	export interface IJupyterUriProvider {
 		/**
 		 * Link to documentation for this provider.

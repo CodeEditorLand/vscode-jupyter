@@ -29,6 +29,7 @@ export class ExportFileOpener {
 	) {
 		if (format === ExportFormat.python) {
 			await this.openPythonFile(uri, openDirectly);
+
 			sendTelemetryEvent(Telemetry.ExportNotebookAs, undefined, {
 				format: format,
 				successful: true,
@@ -36,6 +37,7 @@ export class ExportFileOpener {
 			});
 		} else {
 			const opened = await this.askOpenFile(uri, openDirectly);
+
 			sendTelemetryEvent(Telemetry.ExportNotebookAs, undefined, {
 				format: format,
 				successful: true,
@@ -54,12 +56,14 @@ export class ExportFileOpener {
 			editor = await window.showTextDocument(uri);
 		} else {
 			const contents = await this.fs.readFile(uri);
+
 			await this.fs.delete(uri);
 
 			const doc = await workspace.openTextDocument({
 				language: PYTHON_LANGUAGE,
 				content: contents,
 			});
+
 			editor = await window.showTextDocument(doc);
 		}
 
@@ -95,8 +99,10 @@ export class ExportFileOpener {
 			} else {
 				openInBrowser(uri.toString());
 			}
+
 			return true;
 		}
+
 		return false;
 	}
 }

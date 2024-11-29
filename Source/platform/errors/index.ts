@@ -55,6 +55,7 @@ export async function populateTelemetryWithErrorInfo(
 	if (!stdErr) {
 		return;
 	}
+
 	props.failureSubCategory = props.failureSubCategory || getErrorTags(stdErr);
 
 	const info = getLastFrameFromPythonTraceback(stdErr);
@@ -101,6 +102,7 @@ function serializeStackTrace(ex: Error): string {
 			const lineno = frame.getLineNumber();
 
 			const colno = frame.getColumnNumber();
+
 			trace += `\n\tat ${getCallSite(frame)} ${filename}:${lineno}:${colno}`;
 		} else {
 			trace += "\n\tat <anonymous>";
@@ -120,12 +122,14 @@ function getCallSite(frame: stackTrace.StackFrame) {
 	) {
 		parts.push(frame.getTypeName());
 	}
+
 	if (
 		typeof frame.getMethodName() === "string" &&
 		frame.getMethodName().length > 0
 	) {
 		parts.push(frame.getMethodName());
 	}
+
 	if (
 		typeof frame.getFunctionName() === "string" &&
 		frame.getFunctionName().length > 0
@@ -134,6 +138,7 @@ function getCallSite(frame: stackTrace.StackFrame) {
 			parts.push(frame.getFunctionName());
 		}
 	}
+
 	return parts.join(".");
 }
 
@@ -148,14 +153,17 @@ function isErrorType<T>(error: Error, expectedType: Constructor<T>) {
 
 		return false;
 	}
+
 	if (error instanceof expectedType) {
 		return true;
 	}
+
 	if (
 		error instanceof WrappedError &&
 		error.originalException instanceof expectedType
 	) {
 		return true;
 	}
+
 	return false;
 }

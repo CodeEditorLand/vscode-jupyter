@@ -11,11 +11,15 @@ import { IStringDictionary, ISystemVariables } from "./types";
  */
 export abstract class AbstractSystemVariables implements ISystemVariables {
 	public resolve(value: string): string;
+
 	public resolve(value: string[]): string[];
+
 	public resolve(value: IStringDictionary<string>): IStringDictionary<string>;
+
 	public resolve(
 		value: IStringDictionary<string[]>,
 	): IStringDictionary<string[]>;
+
 	public resolve(
 		value: IStringDictionary<IStringDictionary<string>>,
 	): IStringDictionary<IStringDictionary<string>>;
@@ -72,6 +76,7 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 		const result: IStringDictionary<
 			string | IStringDictionary<string> | string[]
 		> = Object.create(null);
+
 		Object.keys(values).forEach((key) => {
 			const value = values[key];
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,6 +92,7 @@ export abstract class AbstractSystemVariables implements ISystemVariables {
 		const result: IStringDictionary<
 			string | IStringDictionary<string> | string[]
 		> = Object.create(null);
+
 		Object.keys(values).forEach((key) => {
 			const value = values[key];
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any

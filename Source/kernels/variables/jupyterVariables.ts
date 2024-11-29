@@ -37,6 +37,7 @@ export class JupyterVariables implements IJupyterVariables {
 		disposableRegistry.push(
 			debuggerVariables.refreshRequired(this.fireRefresh.bind(this)),
 		);
+
 		disposableRegistry.push(
 			kernelVariables.refreshRequired(this.fireRefresh.bind(this)),
 		);

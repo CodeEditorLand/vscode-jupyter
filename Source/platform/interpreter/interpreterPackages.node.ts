@@ -50,9 +50,13 @@ export class InterpreterPackages implements IInterpreterPackages {
 		string,
 		Deferred<Map<string, string>>
 	>();
+
 	private pendingInterpreterInformation = new Map<string, Promise<void>>();
+
 	private pendingInterpreterBeforeActivation = new Set<InterpreterUri>();
+
 	private static _instance: InterpreterPackages | undefined;
+
 	private readonly interpreterPackages = new Map<
 		string,
 		Promise<Set<string>>
@@ -71,6 +75,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		private readonly disposables: IDisposableRegistry,
 	) {
 		InterpreterPackages._instance = this;
+
 		this.apiProvider.onDidActivatePythonExtension(
 			() =>
 				this.pendingInterpreterBeforeActivation.forEach((item) =>
@@ -80,26 +85,33 @@ export class InterpreterPackages implements IInterpreterPackages {
 			this.disposables,
 		);
 	}
+
 	public static get instance() {
 		return InterpreterPackages._instance;
 	}
+
 	public getPackageVersions(
 		interpreter: PythonEnvironment,
 	): Promise<Map<string, string>> {
 		if (!this.pythonExtensionChecker.isPythonExtensionInstalled) {
 			return Promise.resolve(new Map<string, string>());
 		}
+
 		const key = getComparisonKey(interpreter.uri);
 
 		let deferred = this.interpreterInformation.get(key);
 
 		if (!deferred) {
 			deferred = createDeferred<Map<string, string>>();
+
 			this.interpreterInformation.set(key, deferred);
+
 			this.trackInterpreterPackages(interpreter).catch(noop);
 		}
+
 		return deferred.promise;
 	}
+
 	public async getPackageVersion(
 		interpreter: PythonEnvironment,
 		packageName: string,
@@ -107,6 +119,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		if (!this.pythonExtensionChecker.isPythonExtensionInstalled) {
 			return Promise.resolve(undefined);
 		}
+
 		const packages = await this.getPackageVersions(interpreter);
 
 		const telemetrySafeString = await getTelemetrySafeHashedString(
@@ -116,13 +129,16 @@ export class InterpreterPackages implements IInterpreterPackages {
 		if (!packages.has(telemetrySafeString)) {
 			return;
 		}
+
 		const version = packages.get(telemetrySafeString);
 
 		if (!version) {
 			return;
 		}
+
 		return version === notInstalled ? undefined : version;
 	}
+
 	public trackPackages(
 		interpreterUri: InterpreterUri,
 		ignoreCache?: boolean,
@@ -141,21 +157,26 @@ export class InterpreterPackages implements IInterpreterPackages {
 
 		if (!this.interpreterPackages.has(workspaceKey)) {
 			const promise = this.listPackagesImpl(resource);
+
 			this.interpreterPackages.set(workspaceKey, promise);
+
 			promise.catch((ex) => {
 				if (this.interpreterPackages.get(workspaceKey) === promise) {
 					this.interpreterPackages.delete(workspaceKey)!;
 				}
+
 				logger.warn(
 					`Failed to get list of installed packages for ${workspaceKey}`,
 					ex,
 				);
 			});
 		}
+
 		return this.interpreterPackages
 			.get(workspaceKey)!
 			.then((items) => Array.from(items));
 	}
+
 	private async listPackagesImpl(resource?: Resource): Promise<Set<string>> {
 		const interpreter =
 			await this.interpreterService.getActiveInterpreter(resource);
@@ -163,6 +184,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		if (!interpreter) {
 			return new Set<string>();
 		}
+
 		const service = await this.executionFactory.createActivatedEnvironment({
 			interpreter,
 			resource,
@@ -203,6 +225,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 
 			return;
 		}
+
 		let interpreter: PythonEnvironment;
 
 		if (isResource(interpreterUri)) {
@@ -215,12 +238,15 @@ export class InterpreterPackages implements IInterpreterPackages {
 			if (!activeInterpreter) {
 				return;
 			}
+
 			interpreter = activeInterpreter;
 		} else {
 			interpreter = interpreterUri;
 		}
+
 		this.trackInterpreterPackages(interpreter, ignoreCache).catch(noop);
 	}
+
 	private async trackInterpreterPackages(
 		interpreter: PythonEnvironment,
 		ignoreCache?: boolean,
@@ -232,6 +258,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		}
 
 		const promise = this.getPackageInformation({ interpreter });
+
 		promise
 			.finally(() => {
 				// If this promise was resolved, then remove it from the pending list.
@@ -245,9 +272,11 @@ export class InterpreterPackages implements IInterpreterPackages {
 				}, 300_000);
 
 				const disposable = { dispose: () => clearTimeout(timer) };
+
 				this.disposables.push(disposable);
 			})
 			.catch(noop);
+
 		this.pendingInterpreterInformation.set(key, promise);
 	}
 
@@ -259,6 +288,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 		if (isCondaEnvironmentWithoutPython(interpreter)) {
 			return;
 		}
+
 		const service = await this.executionFactory.createActivatedEnvironment({
 			interpreter,
 		});
@@ -279,6 +309,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 				);
 			}),
 		);
+
 		await Promise.all(
 			output.stdout
 				.split("\n")
@@ -292,6 +323,7 @@ export class InterpreterPackages implements IInterpreterPackages {
 					if (parts.length < 2) {
 						return;
 					}
+
 					const [packageName, rawVersion] = parts;
 
 					if (
@@ -301,7 +333,9 @@ export class InterpreterPackages implements IInterpreterPackages {
 					) {
 						return;
 					}
+
 					const version = getTelemetrySafeVersion(rawVersion);
+
 					packageAndVersions.set(
 						await getTelemetrySafeHashedString(packageName),
 						version || "",
@@ -315,8 +349,10 @@ export class InterpreterPackages implements IInterpreterPackages {
 
 		if (!deferred) {
 			deferred = createDeferred<Map<string, string>>();
+
 			this.interpreterInformation.set(key, deferred);
 		}
+
 		deferred.resolve(packageAndVersions);
 	}
 }

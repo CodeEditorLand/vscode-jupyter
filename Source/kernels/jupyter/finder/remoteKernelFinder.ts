@@ -61,6 +61,7 @@ const REMOTE_KERNEL_REFRESH_INTERVAL = 2_000;
 
 export type CacheDataFormat = {
 	extensionVersion: string;
+
 	data: Record<
 		string,
 		ReturnType<RemoteKernelConnectionMetadata["toJSON"]>[]
@@ -73,43 +74,61 @@ export class RemoteKernelFinder
 	implements IRemoteKernelFinder
 {
 	private _status: "discovering" | "idle" = "idle";
+
 	public get status() {
 		return this._status;
 	}
+
 	private set status(value: typeof this._status) {
 		if (this._status === value) {
 			return;
 		}
+
 		this._status = value;
+
 		this._onDidChangeStatus.fire();
 	}
+
 	private readonly _onDidChangeStatus = new EventEmitter<void>();
+
 	public readonly onDidChangeStatus = this._onDidChangeStatus.event;
+
 	private _lastError?: Error;
+
 	public get lastError() {
 		return this._lastError;
 	}
+
 	private readonly promiseMonitor = new PromiseMonitor();
 	/**
 	 * List of ids of kernels that should be hidden from the kernel picker.
 	 */
 	private readonly kernelIdsToHide = new Set<string>();
+
 	kind: ContributedKernelFinderKind.Remote =
 		ContributedKernelFinderKind.Remote;
+
 	private _cacheUpdateCancelTokenSource: CancellationTokenSource | undefined;
+
 	private cache: RemoteKernelConnectionMetadata[] = [];
+
 	private _onDidChangeKernels = new EventEmitter<{
 		removed?: { id: string }[];
 	}>();
+
 	onDidChangeKernels = this._onDidChangeKernels.event;
+
 	private readonly _onDidChange = new EventEmitter<void>();
+
 	onDidChange = this._onDidChange.event;
 
 	// Track our delay timer for when we update on kernel dispose
 	private kernelDisposeDelayTimer?: Disposable;
 
 	private readonly cacheKey: string;
+
 	private readonly cacheFile: Uri;
+
 	private cachedConnection?: Promise<IJupyterConnection | undefined>;
 
 	/**
@@ -119,12 +138,15 @@ export class RemoteKernelFinder
 	public get kernels(): RemoteKernelConnectionMetadata[] {
 		return this.cache;
 	}
+
 	get items(): RemoteKernelConnectionMetadata[] {
 		return this.kernels;
 	}
+
 	get title(): string {
 		return this.displayName;
 	}
+
 	constructor(
 		readonly id: string,
 		readonly displayName: string,
@@ -138,10 +160,12 @@ export class RemoteKernelFinder
 		private readonly context: IExtensionContext,
 	) {
 		super();
+
 		this.cacheFile = Uri.joinPath(
 			context.globalStorageUri,
 			RemoteKernelSpecCacheFileName,
 		);
+
 		this.cacheKey = generateIdFromRemoteProvider(serverProviderHandle);
 		// When we register, add a disposable to clean ourselves up from the main kernel finder list
 		// Unlike the Local kernel finder universal remote kernel finders will be added on the fly
@@ -153,15 +177,21 @@ export class RemoteKernelFinder
 				this,
 			),
 		);
+
 		this._register(this._onDidChangeKernels);
+
 		this._register(this._onDidChange);
+
 		this._register(this._onDidChangeStatus);
+
 		this._register(this.promiseMonitor);
 	}
 
 	override dispose(): void | undefined {
 		super.dispose();
+
 		this._cacheUpdateCancelTokenSource?.dispose();
+
 		this.kernelDisposeDelayTimer?.dispose();
 	}
 
@@ -222,6 +252,7 @@ export class RemoteKernelFinder
 			this.cachedConnection =
 				this.getRemoteConnectionInfo(displayProgress);
 		}
+
 		return this.cachedConnection
 			.then((connInfo) => {
 				if (connInfo) {
@@ -229,18 +260,21 @@ export class RemoteKernelFinder
 
 					return this.listKernelsFromConnection(connInfo);
 				}
+
 				return Promise.resolve([]);
 			})
 			.catch((ex) => {
 				if (this.isDisposed) {
 					return Promise.reject(ex);
 				}
+
 				if (!ignoreCache) {
 					return this.getListOfKernelsWithCachedConnection(
 						displayProgress,
 						true,
 					);
 				}
+
 				this.cachedConnection = undefined;
 
 				return Promise.reject(ex);
@@ -280,6 +314,7 @@ export class RemoteKernelFinder
 						await this.getListOfKernelsWithCachedConnection(
 							displayProgress,
 						);
+
 					this._lastError = undefined;
 				} catch (ex) {
 					// CancellationError is when user cancels the request, no need to log errors related to that.
@@ -288,7 +323,9 @@ export class RemoteKernelFinder
 							"UniversalRemoteKernelFinder: Failed to get kernels without cache",
 							ex,
 						);
+
 						this._lastError = ex;
+
 						this._onDidChange.fire();
 					}
 				}
@@ -296,16 +333,20 @@ export class RemoteKernelFinder
 
 			await this.writeToCache(kernels);
 		})();
+
 		this.promiseMonitor.push(promise);
+
 		await promise;
 	}
 
 	private async updateCache() {
 		const promise = (async () => {
 			let kernels: RemoteKernelConnectionMetadata[] = [];
+
 			this._cacheUpdateCancelTokenSource?.dispose();
 
 			const updateCacheCancellationToken = new CancellationTokenSource();
+
 			this._cacheUpdateCancelTokenSource = updateCacheCancellationToken;
 
 			try {
@@ -322,6 +363,7 @@ export class RemoteKernelFinder
 				kernels = await this.getFromCache(
 					updateCacheCancellationToken.token,
 				);
+
 				kernels = kernels.filter(
 					(item) => item.kind === "connectToLiveRemoteKernel",
 				);
@@ -333,7 +375,9 @@ export class RemoteKernelFinder
 
 			await this.writeToCache(kernels);
 		})();
+
 		this.promiseMonitor.push(promise);
+
 		await promise;
 	}
 
@@ -350,6 +394,7 @@ export class RemoteKernelFinder
 				),
 			);
 		}
+
 		return this.jupyterConnection
 			.createConnectionInfo(this.serverProviderHandle)
 			.finally(() => dispose(disposables));
@@ -362,6 +407,7 @@ export class RemoteKernelFinder
 			if (cancelToken?.isCancellationRequested) {
 				throw new CancellationError();
 			}
+
 			let results: RemoteKernelConnectionMetadata[] = this.cache;
 
 			// If not in memory, check memento
@@ -379,6 +425,7 @@ export class RemoteKernelFinder
 					}
 				}),
 			);
+
 			await raceCancellation(cancelToken, promise);
 
 			return validValues;
@@ -391,6 +438,7 @@ export class RemoteKernelFinder
 
 		return [];
 	}
+
 	private async getCacheContents(): Promise<
 		RemoteKernelConnectionMetadata[]
 	> {
@@ -402,6 +450,7 @@ export class RemoteKernelFinder
 			if (json.extensionVersion !== this.env.extensionVersion) {
 				return [];
 			}
+
 			const cache = json.data[this.cacheKey] || [];
 
 			if (Array.isArray(cache)) {
@@ -424,6 +473,7 @@ export class RemoteKernelFinder
 
 		try {
 			const sessionManager = JupyterLabHelper.create(connInfo.settings);
+
 			disposables.push({ dispose: () => disposeAsync(sessionManager) });
 
 			// Get running and specs at the same time
@@ -543,6 +593,7 @@ export class RemoteKernelFinder
 					// same object ref, that means this is not really an old item.
 					return;
 				}
+
 				if (
 					latestKernel.kind === "connectToLiveRemoteKernel" &&
 					kernel.kind === "connectToLiveRemoteKernel"
@@ -572,6 +623,7 @@ export class RemoteKernelFinder
 			}
 
 			currentData.data[key] = serialized;
+
 			await this.fs
 				.createDirectory(this.context.globalStorageUri)
 				.then(() =>

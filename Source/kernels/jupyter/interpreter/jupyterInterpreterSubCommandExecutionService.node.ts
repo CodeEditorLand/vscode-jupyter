@@ -75,6 +75,7 @@ export class JupyterInterpreterSubCommandExecutionService
 	public async refreshCommands(): Promise<void> {
 		noop();
 	}
+
 	public async isNotebookSupported(
 		token?: CancellationToken,
 	): Promise<boolean> {
@@ -84,11 +85,13 @@ export class JupyterInterpreterSubCommandExecutionService
 		if (!interpreter) {
 			return false;
 		}
+
 		return this.jupyterDependencyService.areDependenciesInstalled(
 			interpreter,
 			token,
 		);
 	}
+
 	public async getReasonForJupyterNotebookNotBeingSupported(
 		token?: CancellationToken,
 	): Promise<string> {
@@ -106,6 +109,7 @@ export class JupyterInterpreterSubCommandExecutionService
 				return DataScience.selectJupyterInterpreter;
 			}
 		}
+
 		const productsNotInstalled =
 			await this.jupyterDependencyService.getDependenciesNotInstalled(
 				interpreter,
@@ -130,11 +134,13 @@ export class JupyterInterpreterSubCommandExecutionService
 			interpreter,
 		);
 	}
+
 	public async getSelectedInterpreter(
 		token?: CancellationToken,
 	): Promise<PythonEnvironment | undefined> {
 		return this.jupyterInterpreter.getSelectedInterpreter(token);
 	}
+
 	public async startNotebook(
 		notebookArgs: string[],
 		options: SpawnOptions,
@@ -143,6 +149,7 @@ export class JupyterInterpreterSubCommandExecutionService
 			await this.getSelectedInterpreterAndThrowIfNotAvailable(
 				options.token,
 			);
+
 		this.jupyterOutputChannel.appendLine(
 			DataScience.startingJupyterLogMessage(
 				getDisplayPath(interpreter.uri),
@@ -157,6 +164,7 @@ export class JupyterInterpreterSubCommandExecutionService
 		// We should never set token for long running processes.
 		// We don't want the process to die when the token is cancelled.
 		const spawnOptions = { ...options };
+
 		spawnOptions.token = undefined;
 
 		const envVars =
@@ -172,18 +180,22 @@ export class JupyterInterpreterSubCommandExecutionService
 		)
 			.split(path.delimiter)
 			.filter((item) => item.trim().length);
+
 		jupyterDataPaths.push(
 			uriPath.dirname(
 				await this.jupyterPaths.getKernelSpecTempRegistrationFolder(),
 			).fsPath,
 		);
+
 		spawnOptions.env = {
 			...envVars,
 			JUPYTER_PATH: jupyterDataPaths.join(path.delimiter),
 		};
+
 		logger.trace(
 			`Start Jupyter Notebook with JUPYTER_PATH=${jupyterDataPaths.join(path.delimiter)}`,
 		);
+
 		logger.trace(
 			`Start Jupyter Notebook with PYTHONPATH=${envVars["PYTHONPATH"] || ""}`,
 		);
@@ -199,12 +211,14 @@ export class JupyterInterpreterSubCommandExecutionService
 						`${pathVariable}=${envVars[pathVariable]}`,
 				)
 				.join(",");
+
 			logger.trace(
 				`Start Jupyter Notebook with PATH variable. ${pathValues}`,
 			);
 		} else {
 			logger.error(`Start Jupyter Notebook without a PATH variable`);
 		}
+
 		return executionService.execModuleObservable(
 			"jupyter",
 			["notebook"].concat(notebookArgs),
@@ -250,6 +264,7 @@ export class JupyterInterpreterSubCommandExecutionService
 
 			return;
 		}
+
 		return serverInfos;
 	}
 
@@ -271,6 +286,7 @@ export class JupyterInterpreterSubCommandExecutionService
 
 			throw new JupyterInstallError(reason);
 		}
+
 		return interpreter;
 	}
 }

@@ -46,45 +46,55 @@ export class InterpreterPackageTracker
 		@inject(IControllerRegistration)
 		private readonly notebookControllerManager: IControllerRegistration,
 	) {}
+
 	public activate() {
 		this.notebookControllerManager.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
 			this.disposables,
 		);
+
 		this.installer?.onInstalled(
 			this.onDidInstallPackage,
 			this,
 			this.disposables,
 		); // Not supported in Web
 	}
+
 	private async onNotebookControllerSelected(event: {
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}) {
 		if (!event.controller.connection.interpreter) {
 			return;
 		}
+
 		await trackKernelResourceInformation(event.notebook.uri, {
 			kernelConnection: event.controller.connection,
 		});
+
 		await this.packages.trackPackages(
 			event.controller.connection.interpreter,
 		);
 	}
+
 	private async onDidInstallPackage(args: {
 		product: Product;
+
 		resource?: InterpreterUri;
 	}) {
 		if (!this.pythonExtensionChecker.isPythonExtensionActive) {
 			return;
 		}
+
 		if (isResource(args.resource)) {
 			// Get details of active interpreter for the Uri provided.
 			const activeInterpreter =
 				await this.interpreterService.getActiveInterpreter(
 					args.resource,
 				);
+
 			await this.packages.trackPackages(activeInterpreter, true);
 		} else {
 			await this.packages.trackPackages(args.resource, true);

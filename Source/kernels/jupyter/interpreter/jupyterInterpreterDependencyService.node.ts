@@ -49,15 +49,19 @@ function sortProductsInOrderForInstallation(products: Product[]) {
 		if (a === Product.jupyter) {
 			return -1;
 		}
+
 		if (b === Product.jupyter) {
 			return 1;
 		}
+
 		if (a === Product.notebook) {
 			return -1;
 		}
+
 		if (b === Product.notebook) {
 			return 1;
 		}
+
 		return 0;
 	});
 }
@@ -181,6 +185,7 @@ export class JupyterInterpreterDependencyService {
 					: missingProducts,
 				interpreter,
 			);
+
 			sendTelemetryEvent(Telemetry.PythonModuleInstall, undefined, {
 				action: "displayed",
 				moduleName: ProductNames.get(Product.jupyter)!,
@@ -204,6 +209,7 @@ export class JupyterInterpreterDependencyService {
 					) {
 						missingProducts.push(Product.jupyter);
 					}
+
 					const productsToInstall = missingProducts.filter(
 						(product) => product !== Product.kernelspec,
 					);
@@ -234,6 +240,7 @@ export class JupyterInterpreterDependencyService {
 							return JupyterInterpreterDependencyResponse.cancel;
 						}
 					}
+
 					sendTelemetryEvent(Telemetry.UserInstalledJupyter);
 
 					// Check if kernelspec module is something that accessible.
@@ -250,6 +257,7 @@ export class JupyterInterpreterDependencyService {
 					void env.openExternal(
 						Uri.parse(HelpLinks.PythonInteractiveHelpLink),
 					);
+
 					sendTelemetryEvent(Telemetry.UserDidNotInstallJupyter);
 
 					return JupyterInterpreterDependencyResponse.cancel;
@@ -322,6 +330,7 @@ export class JupyterInterpreterDependencyService {
 		if (notInstalled.length > 0) {
 			return notInstalled;
 		}
+
 		if (token?.isCancellationRequested) {
 			return [];
 		}
@@ -334,6 +343,7 @@ export class JupyterInterpreterDependencyService {
 		if (products.length === 0) {
 			this.dependenciesInstalledInInterpreter.add(key);
 		}
+
 		return products;
 	}
 
@@ -389,6 +399,7 @@ export class JupyterInterpreterDependencyService {
 		if (token?.isCancellationRequested) {
 			return JupyterInterpreterDependencyResponse.cancel;
 		}
+
 		const selectionFromError = await window.showErrorMessage(
 			DataScience.jupyterKernelSpecModuleNotFound(interpreter.uri.fsPath),
 			{ modal: true },

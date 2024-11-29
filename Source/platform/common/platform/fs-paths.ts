@@ -33,8 +33,10 @@ export function getFilePath(file: Uri | undefined) {
 		) {
 			return fsPath.slice(1);
 		}
+
 		return fsPath || "";
 	}
+
 	return "";
 }
 
@@ -50,9 +52,11 @@ export function getDisplayPath(
 	if (typeof filename && typeof filename === "string") {
 		fileUri = Uri.file(filename);
 	}
+
 	if (typeof filename && typeof filename !== "string") {
 		fileUri = filename;
 	}
+
 	const relativeToHome = getDisplayPathImpl(fileUri, undefined, homePathUri);
 
 	const workspaceFolderThatOwnsTheFile = workspaceFolders.find(

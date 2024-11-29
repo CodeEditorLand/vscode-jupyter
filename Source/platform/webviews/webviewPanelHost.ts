@@ -20,6 +20,7 @@ export abstract class WebviewPanelHost<IMapping>
 	protected get isDisposed(): boolean {
 		return this.disposed;
 	}
+
 	protected get webPanel(): IWebviewPanel | undefined {
 		if (!this.webview) {
 			return undefined;
@@ -27,10 +28,12 @@ export abstract class WebviewPanelHost<IMapping>
 
 		return this.webview as IWebviewPanel;
 	}
+
 	protected viewState: { visible: boolean; active: boolean } = {
 		visible: false,
 		active: false,
 	};
+
 	private messageListener: IWebviewPanelMessageListener;
 
 	constructor(
@@ -74,6 +77,7 @@ export abstract class WebviewPanelHost<IMapping>
 
 		super.dispose();
 	}
+
 	public get title() {
 		return this._title;
 	}
@@ -122,8 +126,11 @@ export abstract class WebviewPanelHost<IMapping>
 			visible: this.viewState.visible,
 			active: this.viewState.active,
 		};
+
 		this.viewState.visible = visible;
+
 		this.viewState.active = active;
+
 		this.onViewStateChanged({ current, previous });
 	};
 }

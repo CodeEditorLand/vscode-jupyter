@@ -57,7 +57,9 @@ const deprecatedFeatures: DeprecatedFeatureInfo[] = [
 @injectable()
 export class FeatureManager implements IFeaturesManager {
 	private _onDidChangeFeatures = new EventEmitter<void>();
+
 	readonly onDidChangeFeatures = this._onDidChangeFeatures.event;
+
 	private _features: IFeatureSet = {};
 
 	get features(): IFeatureSet {
@@ -66,6 +68,7 @@ export class FeatureManager implements IFeaturesManager {
 
 	set features(newFeatures: IFeatureSet) {
 		this._features = newFeatures;
+
 		this._onDidChangeFeatures.fire();
 	}
 
@@ -108,6 +111,7 @@ export class FeatureManager implements IFeaturesManager {
 				);
 			});
 		}
+
 		if (deprecatedInfo.setting) {
 			this.checkAndNotifyDeprecatedSetting(deprecatedInfo);
 		}
@@ -125,6 +129,7 @@ export class FeatureManager implements IFeaturesManager {
 		if (!notificationPromptEnabled.value) {
 			return;
 		}
+
 		const moreInfo = "Learn more";
 
 		const doNotShowAgain = "Never show again";
@@ -138,21 +143,25 @@ export class FeatureManager implements IFeaturesManager {
 		if (!option) {
 			return;
 		}
+
 		switch (option) {
 			case moreInfo: {
 				openInBrowser(deprecatedInfo.moreInfoUrl);
 
 				break;
 			}
+
 			case doNotShowAgain: {
 				await notificationPromptEnabled.updateValue(false);
 
 				break;
 			}
+
 			default: {
 				throw new Error("Selected option not supported.");
 			}
 		}
+
 		return;
 	}
 
@@ -169,6 +178,7 @@ export class FeatureManager implements IFeaturesManager {
 				if (notify) {
 					return;
 				}
+
 				notify = this.isDeprecatedSettingAndValueUsed(
 					workspace.getConfiguration("jupyter", workspaceFolder.uri),
 					deprecatedInfo.setting!,
@@ -195,6 +205,7 @@ export class FeatureManager implements IFeaturesManager {
 		if (!pythonConfig.has(deprecatedSetting.setting)) {
 			return false;
 		}
+
 		const configValue = pythonConfig.get(deprecatedSetting.setting);
 
 		if (
@@ -204,8 +215,10 @@ export class FeatureManager implements IFeaturesManager {
 			if (Array.isArray(configValue)) {
 				return configValue.length > 0;
 			}
+
 			return true;
 		}
+
 		if (
 			!Array.isArray(deprecatedSetting.values) ||
 			deprecatedSetting.values.length === 0
@@ -213,6 +226,7 @@ export class FeatureManager implements IFeaturesManager {
 			if (configValue === undefined) {
 				return false;
 			}
+
 			if (Array.isArray(configValue)) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return (configValue as any[]).length > 0;
@@ -220,6 +234,7 @@ export class FeatureManager implements IFeaturesManager {
 			// If we have a value in the setting, then return.
 			return true;
 		}
+
 		return (
 			deprecatedSetting.values.indexOf(
 				pythonConfig.get<{}>(deprecatedSetting.setting)!,

@@ -59,6 +59,7 @@ function findPythonEnvironmentClosestToNotebook(
 	if (localEnvNextToNbFile) {
 		return localEnvNextToNbFile;
 	}
+
 	if (defaultFolder) {
 		return findPythonEnvBelongingToFolder(defaultFolder, envs);
 	}

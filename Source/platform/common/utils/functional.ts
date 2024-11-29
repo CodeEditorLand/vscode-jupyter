@@ -14,6 +14,7 @@ export function once<T extends Function>(this: unknown, fn: T): T {
 		}
 
 		didCall = true;
+
 		result = fn.apply(_this, arguments);
 
 		return result;

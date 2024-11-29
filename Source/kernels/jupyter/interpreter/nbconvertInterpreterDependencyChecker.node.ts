@@ -41,6 +41,7 @@ export class NbConvertInterpreterDependencyChecker
 		if (this.nbconvertInstalledInInterpreter.has(interpreter.uri)) {
 			return true;
 		}
+
 		const isInstalled: boolean =
 			!!(await this.installer.isInstalled(
 				Product.nbconvert,
@@ -51,6 +52,7 @@ export class NbConvertInterpreterDependencyChecker
 		if (isInstalled === true) {
 			this.nbconvertInstalledInInterpreter.add(interpreter.uri);
 		}
+
 		return isInstalled;
 	}
 

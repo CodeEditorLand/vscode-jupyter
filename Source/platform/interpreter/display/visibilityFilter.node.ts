@@ -24,6 +24,7 @@ export class InterpreterStatusBarVisibility
 		IExtensionSyncActivationService
 {
 	private _changed = new EventEmitter<void>();
+
 	private _registered = false;
 
 	constructor(
@@ -41,6 +42,7 @@ export class InterpreterStatusBarVisibility
 			disposables,
 		);
 	}
+
 	public activate() {
 		// Tell the python extension about our filter
 		if (this.extensionChecker.isPythonExtensionActive) {
@@ -53,20 +55,25 @@ export class InterpreterStatusBarVisibility
 			);
 		}
 	}
+
 	public get changed(): Event<void> {
 		return this._changed.event;
 	}
+
 	public get hidden() {
 		return window.activeNotebookEditor &&
 			isJupyterNotebook(window.activeNotebookEditor.notebook)
 			? true
 			: false;
 	}
+
 	private registerStatusFilter() {
 		if (this._registered) {
 			return;
 		}
+
 		this._registered = true;
+
 		this.pythonApi
 			.getApi()
 			.then((a) => {

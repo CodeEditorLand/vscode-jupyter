@@ -20,12 +20,14 @@ export function handleLinkClick(
 				anchor = inner[0];
 			}
 		}
+
 		if (!anchor || !anchor.href || anchor.href.startsWith("vscode")) {
 			return;
 		}
 
 		// Don't want a link click to cause a refresh of the webpage
 		ev.stopPropagation();
+
 		ev.preventDefault();
 
 		// Look for a blob link.
@@ -37,19 +39,25 @@ export function handleLinkClick(
 			// Next convert the blob into something that can be sent to the client side.
 			// Just send an inlined base64 image to `linkClick`, such as `data:image/png;base64,xxxxx`
 			const xhr = new XMLHttpRequest();
+
 			xhr.open("GET", anchor.href, true);
+
 			xhr.responseType = "blob";
+
 			xhr.onload = () => {
 				const blob = xhr.response;
 
 				const reader = new FileReader();
+
 				reader.readAsDataURL(blob);
+
 				reader.onload = () => {
 					if (typeof reader.result === "string") {
 						linkClick(reader.result);
 					}
 				};
 			};
+
 			xhr.send();
 		}
 	}

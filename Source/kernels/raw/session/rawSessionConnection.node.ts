@@ -29,42 +29,59 @@ ZMQ Kernel connection can pretend to be a jupyterlab Session
 */
 export class RawSessionConnection implements Session.ISessionConnection {
 	public isDisposed: boolean = false;
+
 	public readonly id: string;
+
 	public readonly path: string;
+
 	public readonly name: string;
+
 	private readonly _kernel: RawKernelConnection;
+
 	public readonly statusChanged = new Signal<this, KernelMessage.Status>(
 		this,
 	);
+
 	public readonly kernelChanged = new Signal<
 		this,
 		Session.ISessionConnection.IKernelChangedArgs
 	>(this);
+
 	public readonly terminated = new Signal<this, void>(this);
+
 	public readonly iopubMessage = new Signal<
 		this,
 		KernelMessage.IIOPubMessage
 	>(this);
+
 	public readonly unhandledMessage = new Signal<this, KernelMessage.IMessage>(
 		this,
 	);
+
 	public readonly anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
+
 	public readonly disposed = new Signal<this, void>(this);
+
 	public readonly connectionStatusChanged = new Signal<
 		this,
 		Kernel.ConnectionStatus
 	>(this);
+
 	public readonly pendingInput = new Signal<this, boolean>(this);
+
 	public readonly propertyChanged = new Signal<
 		this,
 		"path" | "name" | "type"
 	>(this);
+
 	private _didShutDownOnce = false;
+
 	private _isDisposing?: boolean;
 
 	public get connectionStatus() {
 		return this._kernel?.connectionStatus || "disconnected";
 	}
+
 	get serverSettings(): ServerConnection.ISettings {
 		// We do not expect anyone to use this. Hence return a setting thats now expected to work, but at least compiles.
 		const jupyterLab =
@@ -73,6 +90,7 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			wsUrl: "RAW",
 		});
 	}
+
 	get model(): Session.IModel {
 		return {
 			id: this.id,
@@ -85,15 +103,18 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			},
 		};
 	}
+
 	private isTerminating?: boolean;
 
 	get status(): KernelMessage.Status {
 		if (this.isDisposed) {
 			return "dead";
 		}
+
 		if (this.isTerminating) {
 			return "terminating";
 		}
+
 		return this.kernel?.status ?? "unknown";
 	}
 
@@ -115,9 +136,11 @@ export class RawSessionConnection implements Session.ISessionConnection {
 	) {
 		// Unique ID for this session instance
 		this.id = uuid();
+
 		this.name =
 			getNameOfKernelConnection(this.kernelConnectionMetadata) ||
 			"python3";
+
 		this.path =
 			this.resource?.fsPath ||
 			this.kernelConnectionMetadata.interpreter?.uri.fsPath ||
@@ -130,29 +153,40 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			launchTimeout,
 			kernelConnectionMetadata,
 		);
+
 		this._kernel.statusChanged.connect(this.onKernelStatus, this);
+
 		this._kernel.iopubMessage.connect(this.onIOPubMessage, this);
+
 		this._kernel.connectionStatusChanged.connect(
 			this.onKernelConnectionStatus,
 			this,
 		);
+
 		this._kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
+
 		this._kernel.anyMessage.connect(this.onAnyMessage, this);
+
 		this._kernel.disposed.connect(this.onDisposed, this);
+
 		this._kernel.disposed.connect(this.onDisposed, this);
 	}
+
 	public async startKernel(options: {
 		token: CancellationToken;
 	}): Promise<void> {
 		await trackKernelResourceInformation(this.resource, {
 			kernelConnection: this.kernelConnectionMetadata,
 		});
+
 		await this._kernel.start(options.token);
 	}
+
 	public dispose() {
 		this._isDisposing = true;
 		// We want to know who called dispose on us
 		const stacktrace = new Error().stack;
+
 		sendKernelTelemetryEvent(
 			this.resource,
 			Telemetry.RawKernelSessionDisposed,
@@ -163,16 +197,21 @@ export class RawSessionConnection implements Session.ISessionConnection {
 		// Since we're disposing, we don't want to be notified of any more messages, hence this can be done early.
 		try {
 			this._kernel.statusChanged.disconnect(this.onKernelStatus, this);
+
 			this._kernel.iopubMessage.disconnect(this.onIOPubMessage, this);
+
 			this._kernel.connectionStatusChanged.disconnect(
 				this.onKernelConnectionStatus,
 				this,
 			);
+
 			this._kernel.unhandledMessage.disconnect(
 				this.onUnhandledMessage,
 				this,
 			);
+
 			this._kernel.anyMessage.disconnect(this.onAnyMessage, this);
+
 			this._kernel.disposed.disconnect(this.onDisposed, this);
 		} catch {
 			//
@@ -183,8 +222,11 @@ export class RawSessionConnection implements Session.ISessionConnection {
 			.catch(noop)
 			.finally(() => {
 				this._kernel.dispose();
+
 				this.isDisposed = true;
+
 				this.disposed.emit();
+
 				Signal.disconnectAll(this);
 			});
 	}
@@ -193,9 +235,13 @@ export class RawSessionConnection implements Session.ISessionConnection {
 		if (this._didShutDownOnce) {
 			return;
 		}
+
 		this._didShutDownOnce = true;
+
 		this.isTerminating = true;
+
 		this.statusChanged.emit("terminating");
+
 		await this._kernel
 			.shutdown()
 			.catch((ex) =>
@@ -204,31 +250,39 @@ export class RawSessionConnection implements Session.ISessionConnection {
 					ex,
 				),
 			);
+
 		this.isTerminating = false;
 		// Before triggering any status events ensure this is marked as disposed.
 		if (this._isDisposing) {
 			this.isDisposed = true;
 		}
+
 		this.terminated.emit();
+
 		this.statusChanged.emit(this.status);
 	}
+
 	private onKernelStatus(
 		_sender: Kernel.IKernelConnection,
 		state: KernelMessage.Status,
 	) {
 		logger.ci(`RawSession status changed to ${state}`);
+
 		this.statusChanged.emit(state);
 	}
 
 	public setPath(_path: string): Promise<void> {
 		throw new Error("Not yet implemented");
 	}
+
 	public setName(_name: string): Promise<void> {
 		throw new Error("Not yet implemented");
 	}
+
 	public setType(_type: string): Promise<void> {
 		throw new Error("Not yet implemented");
 	}
+
 	public changeKernel(
 		_options: Partial<Kernel.IModel>,
 	): Promise<Kernel.IKernelConnection> {
@@ -241,24 +295,28 @@ export class RawSessionConnection implements Session.ISessionConnection {
 	) {
 		this.iopubMessage.emit(msg);
 	}
+
 	private onAnyMessage(
 		_sender: Kernel.IKernelConnection,
 		msg: Kernel.IAnyMessageArgs,
 	) {
 		this.anyMessage.emit(msg);
 	}
+
 	private onUnhandledMessage(
 		_sender: Kernel.IKernelConnection,
 		msg: KernelMessage.IMessage,
 	) {
 		this.unhandledMessage.emit(msg);
 	}
+
 	private onKernelConnectionStatus(
 		_sender: Kernel.IKernelConnection,
 		state: Kernel.ConnectionStatus,
 	) {
 		this.connectionStatusChanged.emit(state);
 	}
+
 	private onDisposed(_sender: Kernel.IKernelConnection) {
 		this.disposed.emit();
 	}

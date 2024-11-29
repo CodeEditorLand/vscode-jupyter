@@ -54,24 +54,31 @@ class JupyterDebugSession implements DebugSession {
 	) {
 		noop();
 	}
+
 	public get id(): string {
 		return this._id;
 	}
+
 	public get type(): string {
 		return "python";
 	}
+
 	public get name(): string {
 		return this._name;
 	}
+
 	public get workspaceFolder(): WorkspaceFolder | undefined {
 		return undefined;
 	}
+
 	public get configuration(): DebugConfiguration {
 		return this._configuration;
 	}
+
 	public customRequest(command: string, args?: any): Thenable<any> {
 		return this.customRequestHandler(command, args);
 	}
+
 	public getDebugProtocolBreakpoint(
 		_breakpoint: Breakpoint,
 	): Thenable<DebugProtocolBreakpoint | undefined> {
@@ -88,36 +95,52 @@ class JupyterDebugSession implements DebugSession {
 @injectable()
 export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	private socket: net.Socket | undefined;
+
 	private session: DebugSession | undefined;
+
 	private sequence: number = 1;
+
 	private breakpointEmitter: EventEmitter<void> = new EventEmitter<void>();
+
 	private debugAdapterTrackerFactories: DebugAdapterTrackerFactory[] = [];
+
 	private debugAdapterTrackers: DebugAdapterTracker[] = [];
+
 	private sessionChangedEvent: EventEmitter<DebugSession | undefined> =
 		new EventEmitter<DebugSession>();
+
 	private sessionStartedEvent: EventEmitter<DebugSession> =
 		new EventEmitter<DebugSession>();
+
 	private sessionTerminatedEvent: EventEmitter<DebugSession> =
 		new EventEmitter<DebugSession>();
+
 	private sessionCustomEvent: EventEmitter<DebugSessionCustomEvent> =
 		new EventEmitter<DebugSessionCustomEvent>();
+
 	private breakpointsChangedEvent: EventEmitter<BreakpointsChangeEvent> =
 		new EventEmitter<BreakpointsChangeEvent>();
+
 	private _breakpoints: Breakpoint[] = [];
+
 	private _stoppedThreadId: number | undefined;
+
 	private _topFrameId: number | undefined;
+
 	private protocolParser: ProtocolParser;
 
 	constructor(
 		@inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
 	) {
 		disposableRegistry.push(this);
+
 		this.protocolParser = new ProtocolParser();
 	}
 
 	public dispose(): void {
 		if (this.socket) {
 			this.socket.end();
+
 			this.socket = undefined;
 		}
 	}
@@ -125,6 +148,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	public get activeDebugSession(): DebugSession | undefined {
 		return this.session;
 	}
+
 	public get activeDebugConsole(): DebugConsole {
 		return {
 			append(_value: string): void {
@@ -135,26 +159,33 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			},
 		};
 	}
+
 	public get breakpoints(): Breakpoint[] {
 		return this._breakpoints;
 	}
+
 	public get onDidChangeActiveDebugSession(): Event<
 		DebugSession | undefined
 	> {
 		return this.sessionChangedEvent.event;
 	}
+
 	public get onDidStartDebugSession(): Event<DebugSession> {
 		return this.sessionStartedEvent.event;
 	}
+
 	public get onDidReceiveDebugSessionCustomEvent(): Event<DebugSessionCustomEvent> {
 		return this.sessionCustomEvent.event;
 	}
+
 	public get onDidTerminateDebugSession(): Event<DebugSession> {
 		return this.sessionTerminatedEvent.event;
 	}
+
 	public get onDidChangeBreakpoints(): Event<BreakpointsChangeEvent> {
 		return this.breakpointsChangedEvent.event;
 	}
+
 	public registerDebugConfigurationProvider(
 		_debugType: string,
 		_provider: DebugConfigurationProvider,
@@ -201,6 +232,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 				config,
 				this.sendCustomRequest.bind(this),
 			);
+
 			this.sessionChangedEvent.fire(this.session);
 
 			// Create our debug adapter trackers at session start
@@ -212,37 +244,48 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			);
 
 			this.socket = net.createConnection(config.port);
+
 			this.protocolParser.connect(this.socket);
+
 			this.protocolParser.on(
 				"event_stopped",
 				this.onBreakpoint.bind(this),
 			);
+
 			this.protocolParser.on("event_output", this.onOutput.bind(this));
+
 			this.protocolParser.on(
 				"event_terminated",
 				this.sendToTrackers.bind(this),
 			);
+
 			this.socket.on("error", this.onError.bind(this));
+
 			this.socket.on("close", this.onClose.bind(this));
 
 			return this.sendStartSequence(config, this.session.id).then(
 				() => true,
 			);
 		}
+
 		return Promise.resolve(true);
 	}
+
 	public addBreakpoints(breakpoints: Breakpoint[]): void {
 		this._breakpoints = this._breakpoints.concat(breakpoints);
 	}
+
 	public removeBreakpoints(_breakpoints: Breakpoint[]): void {
 		noop();
 	}
+
 	public get onBreakpointHit(): Event<void> {
 		return this.breakpointEmitter.event;
 	}
 
 	public async continue(): Promise<void> {
 		await this.sendMessage("continue", { threadId: 0 });
+
 		this.sendToTrackers({ type: "event", event: "continue" });
 	}
 
@@ -250,11 +293,13 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		await this.sendMessage("stepIn", {
 			threadId: this._stoppedThreadId ? this._stoppedThreadId : 1,
 		});
+
 		this.sendToTrackers({ type: "event", event: "stepIn" });
 	}
 
 	public async getStack(): Promise<DebugProtocol.StackFrame[]> {
 		const deferred = createDeferred<DebugProtocol.StackFrame[]>();
+
 		this.protocolParser.once("response_stackTrace", (args: any) => {
 			this.sendToTrackers(args);
 
@@ -263,9 +308,12 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			const frames = response.body.stackFrames
 				? response.body.stackFrames
 				: [];
+
 			deferred.resolve(frames);
+
 			this._topFrameId = frames[0]?.id;
 		});
+
 		await this.emitMessage("stackTrace", {
 			threadId: this._stoppedThreadId ? this._stoppedThreadId : 1,
 			startFrame: 0,
@@ -282,6 +330,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		const deferred = createDeferred<void>();
 
 		let variablesReference = 0;
+
 		this.protocolParser.once("response_scopes", (args: any) => {
 			this.sendToTrackers(args);
 			// Get locals variables reference
@@ -290,15 +339,19 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 			if (response) {
 				variablesReference = response.body.scopes[0].variablesReference;
 			}
+
 			this.emitMessage("variables", {
 				threadId: this._stoppedThreadId ? this._stoppedThreadId : 1,
 				variablesReference: variablesReference,
 			}).catch(noop);
 		});
+
 		this.protocolParser.once("response_variables", (args: any) => {
 			this.sendToTrackers(args);
+
 			deferred.resolve();
 		});
+
 		await this.emitMessage("scopes", {
 			frameId: this._topFrameId ? this._topFrameId : 1,
 		});
@@ -339,17 +392,23 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		sessionId: string,
 	): Promise<void> {
 		logger.info("Sending debugger initialize...");
+
 		await this.sendInitialize();
 
 		if (this._breakpoints.length > 0) {
 			logger.info("Sending breakpoints");
+
 			await this.sendBreakpoints();
 		}
+
 		logger.info("Sending debugger attach...");
 
 		const attachPromise = this.sendAttach(config, sessionId);
+
 		logger.info("Sending configuration done");
+
 		await this.sendConfigurationDone();
+
 		logger.info("Session started.");
 
 		return attachPromise.then(() => {
@@ -425,16 +484,21 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 		});
 
 		const sequenceNumber = this.sequence;
+
 		this.protocolParser.on(`response_${command}`, (resp: any) => {
 			if (resp.request_seq === sequenceNumber) {
 				this.sendToTrackers(resp);
+
 				logger.info(
 					`Received response from debugger: ${JSON.stringify(args)}`,
 				);
+
 				disposable.dispose();
+
 				response.resolve(resp.body);
 			}
 		});
+
 		this.socket?.on("error", (err) => response.reject(err)); // NOSONAR
 		this.emitMessage(command, args).catch((exc) => {
 			logger.error(
@@ -456,14 +520,18 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 						type: "request",
 						seq: this.sequence,
 					};
+
 					this.sequence += 1;
 
 					const objString = JSON.stringify(obj);
+
 					logger.info(`Sending request to debugger: ${objString}`);
 
 					const message = `Content-Length: ${objString.length}\r\n\r\n${objString}`;
+
 					this.socket.write(message, (_a: any) => {
 						this.sendToTrackers(obj);
+
 						resolve();
 					});
 				}
@@ -476,6 +544,7 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 	private onBreakpoint(args: DebugProtocol.StoppedEvent): void {
 		// Save the current thread id. We use this in our stack trace request
 		this._stoppedThreadId = args.body.threadId;
+
 		this.sendToTrackers(args);
 
 		// Indicate we stopped at a breakpoint
@@ -484,25 +553,34 @@ export class JupyterDebugService implements IJupyterDebugService, IDisposable {
 
 	private onOutput(args: any): void {
 		this.sendToTrackers(args);
+
 		logger.info(JSON.stringify(args));
 	}
 
 	private onError(args: any): void {
 		this.sendToTrackers(args);
+
 		logger.info(JSON.stringify(args));
 	}
 
 	private onClose(): void {
 		if (this.socket) {
 			this.sessionTerminatedEvent.fire(this.activeDebugSession!);
+
 			this.session = undefined;
+
 			this.sessionChangedEvent.fire(undefined);
+
 			this.debugAdapterTrackers.forEach((d) =>
 				d.onExit ? d.onExit(0, undefined) : noop(),
 			);
+
 			this.debugAdapterTrackers = [];
+
 			this.sendDisconnect().catch(noop);
+
 			this.socket.destroy();
+
 			this.socket = undefined;
 		}
 	}

@@ -41,10 +41,13 @@ export async function getExtensionTempDir(
 					`Failed to create temp directory (${dir.fsPath}), falling back to extension dir`,
 					ex,
 				);
+
 				dir = Uri.joinPath(context.extensionUri, "temp");
+
 				await fs.createDirectory(dir);
 			}
 		}
+
 		return dir;
 	}
 }
@@ -52,6 +55,7 @@ export async function getExtensionTempDir(
 export async function deleteTempDirs(context: IExtensionContext) {
 	try {
 		const dirs = await workspace.fs.readDirectory(context.globalStorageUri);
+
 		await Promise.all(
 			dirs
 				.filter(

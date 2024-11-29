@@ -18,22 +18,29 @@ import {
 
 export type NotifyIPyWidgetWidgetVersionNotSupportedAction = {
 	moduleName: "qgrid";
+
 	moduleVersion: string;
 };
 
 export interface ILoadIPyWidgetClassFailureAction {
 	className: string;
+
 	moduleName: string;
+
 	moduleVersion: string;
+
 	isOnline: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	error: any;
+
 	timedout: boolean;
 }
 
 export type LoadIPyWidgetClassLoadAction = {
 	className: string;
+
 	moduleName: string;
+
 	moduleVersion: string;
 };
 
@@ -109,6 +116,7 @@ export enum SysInfoReason {
 
 export interface IShowDataViewer {
 	variable: IJupyterVariable;
+
 	columnSize: number;
 }
 
@@ -127,22 +135,39 @@ export enum SharedMessages {
 
 export type LocalizedMessages = {
 	collapseSingle: string;
+
 	expandSingle: string;
+
 	openExportFileYes: string;
+
 	openExportFileNo: string;
+
 	noRowsInDataViewer: string;
+
 	sliceIndexError: string;
+
 	sliceMismatchedAxesError: string;
+
 	filterRowsTooltip: string;
+
 	fetchingDataViewer: string;
+
 	dataViewerHideFilters: string;
+
 	dataViewerShowFilters: string;
+
 	refreshDataViewer: string;
+
 	clearFilters: string;
+
 	sliceSummaryTitle: string;
+
 	sliceData: string;
+
 	sliceSubmitButton: string;
+
 	sliceDropdownAxisLabel: string;
+
 	sliceDropdownIndexLabel: string;
 
 	variableExplorerNameColumn: string;
@@ -152,103 +177,172 @@ export type LocalizedMessages = {
 	variableExplorerCountColumn: string;
 
 	variableExplorerValueColumn: string;
+
 	collapseVariableExplorerLabel: string;
 
 	variableLoadingValue: string;
+
 	showDataExplorerTooltip: string;
+
 	noRowsInVariableExplorer: string;
+
 	loadingRowsInVariableExplorer: string;
+
 	previousPlot: string;
+
 	nextPlot: string;
+
 	panPlot: string;
+
 	zoomInPlot: string;
+
 	zoomOutPlot: string;
 
 	exportPlot: string;
+
 	deletePlot: string;
+
 	selectedImageListLabel: string;
+
 	selectedImageLabel: string;
+
 	dvDeprecationWarning: string;
 };
 // Map all messages to specific payloads
 export class IInteractiveWindowMapping {
 	public [IPyWidgetMessages.IPyWidgets_kernelOptions]: KernelSocketOptions;
+
 	public [IPyWidgetMessages.IPyWidgets_WidgetScriptSourceRequest]: {
 		moduleName: string;
+
 		moduleVersion: string;
+
 		requestId: string;
 	};
+
 	public [IPyWidgetMessages.IPyWidgets_WidgetScriptSourceResponse]: WidgetScriptSource;
+
 	public [IPyWidgetMessages.IPyWidgets_Ready]: never | undefined;
+
 	public [IPyWidgetMessages.IPyWidgets_IsOnline]: { isOnline: boolean };
+
 	public [IPyWidgetMessages.IPyWidgets_logMessage]: {
 		category: "error" | "verbose";
+
 		message: string;
 	};
+
 	public [IPyWidgetMessages.IPyWidgets_onRestartKernel]: never | undefined;
+
 	public [IPyWidgetMessages.IPyWidgets_onKernelChanged]: never | undefined;
+
 	public [IPyWidgetMessages.IPyWidgets_registerCommTarget]: string;
+
 	public [IPyWidgetMessages.IPyWidgets_binary_msg]:
 		| ((ArrayBuffer | ArrayBufferView)[] | undefined)
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		| { id: string; data: any };
+
 	public [IPyWidgetMessages.IPyWidgets_msg]: { id: string; data: string };
+
 	public [IPyWidgetMessages.IPyWidgets_msg_received]: { id: string };
+
 	public [IPyWidgetMessages.IPyWidgets_iopub_msg_handled]: { id: string };
+
 	public [IPyWidgetMessages.IPyWidgets_RegisterMessageHook]: string;
+
 	public [IPyWidgetMessages.IPyWidgets_ExtensionOperationHandled]: {
 		id: string;
+
 		type: IPyWidgetMessages;
 	};
+
 	public [IPyWidgetMessages.IPyWidgets_RemoveMessageHook]: {
 		hookMsgId: string;
+
 		lastHookedMsgId: string | undefined;
 	};
+
 	public [IPyWidgetMessages.IPyWidgets_MessageHookCall]: {
 		requestId: string;
+
 		parentId: string;
+
 		msg: KernelMessage.IIOPubMessage;
 	};
+
 	public [IPyWidgetMessages.IPyWidgets_MessageHookResult]: {
 		requestId: string;
+
 		parentId: string;
+
 		msgType: string;
+
 		result: boolean;
 	};
+
 	public [IPyWidgetMessages.IPyWidgets_mirror_execute]: {
 		id: string;
+
 		msg: KernelMessage.IExecuteRequestMsg;
 	};
+
 	public [InteractiveWindowMessages.ForceVariableRefresh]: never | undefined;
+
 	public [InteractiveWindowMessages.UpdateVariableViewExecutionCount]: {
 		executionCount: number;
 	};
+
 	public [InteractiveWindowMessages.RestartKernel]: never | undefined;
+
 	public [InteractiveWindowMessages.SettingsUpdated]: string;
+
 	public [InteractiveWindowMessages.Started]: never | undefined;
+
 	public [InteractiveWindowMessages.Activate]: never | undefined;
+
 	public [InteractiveWindowMessages.ShowDataViewer]: IShowDataViewer;
+
 	public [InteractiveWindowMessages.GetVariablesRequest]: IJupyterVariablesRequest;
+
 	public [InteractiveWindowMessages.GetVariablesResponse]: IJupyterVariablesResponse;
+
 	public [InteractiveWindowMessages.VariableExplorerToggle]: boolean;
+
 	public [InteractiveWindowMessages.SetVariableExplorerHeight]: IVariableExplorerHeight;
+
 	public [InteractiveWindowMessages.VariableExplorerHeightResponse]: IVariableExplorerHeight;
+
 	public [InteractiveWindowMessages.OpenLink]: string | undefined;
+
 	public [InteractiveWindowMessages.SavePng]: string | undefined;
+
 	public [InteractiveWindowMessages.VariablesComplete]: never | undefined;
+
 	public [SharedMessages.UpdateSettings]: string;
+
 	public [SharedMessages.LocInit]: string;
+
 	public [InteractiveWindowMessages.IPyWidgetLoadSuccess]: LoadIPyWidgetClassLoadAction;
+
 	public [InteractiveWindowMessages.IPyWidgetLoadFailure]: ILoadIPyWidgetClassFailureAction;
+
 	public [InteractiveWindowMessages.IPyWidgetWidgetVersionNotSupported]: NotifyIPyWidgetWidgetVersionNotSupportedAction;
+
 	public [InteractiveWindowMessages.ConvertUriForUseInWebViewRequest]: Uri;
+
 	public [InteractiveWindowMessages.ConvertUriForUseInWebViewResponse]: {
 		request: Uri;
+
 		response: Uri;
 	};
+
 	public [InteractiveWindowMessages.IPyWidgetRenderFailure]: Error;
+
 	public [InteractiveWindowMessages.IPyWidgetUnhandledKernelMessage]: KernelMessage.IMessage;
+
 	public [InteractiveWindowMessages.GetHTMLByIdRequest]: string;
+
 	public [InteractiveWindowMessages.GetHTMLByIdResponse]: string;
 }
 

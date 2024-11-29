@@ -8,6 +8,7 @@ import type { IExtensionApi } from "./standalone/api";
 
 let realEntryPoint: {
 	activate: typeof activate;
+
 	deactivate: typeof deactivate;
 };
 

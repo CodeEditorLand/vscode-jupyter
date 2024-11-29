@@ -21,6 +21,7 @@ export class JupyterHubPasswordConnect {
 		private readonly agentCreator: IJupyterRequestAgentCreator | undefined,
 		private readonly requestCreator: IJupyterRequestCreator,
 	) {}
+
 	public async isJupyterHub(url: string): Promise<boolean> {
 		try {
 			// See this for the different REST endpoints:
@@ -58,6 +59,7 @@ export class JupyterHubPasswordConnect {
 			// Ensure we get a valid JSON with a version in it.
 			try {
 				const json = await response.json();
+
 				logger.trace(
 					`JupyterHub version is ${json && json.version} for url ${url}`,
 				);
@@ -66,6 +68,7 @@ export class JupyterHubPasswordConnect {
 			} catch {
 				//
 			}
+
 			return false;
 		} catch (ex) {
 			logger.debug(
@@ -128,6 +131,7 @@ export class JupyterHubPasswordConnect {
 
 				if (value === enableOption) {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageEnabled);
+
 					await this.configService.updateSetting(
 						"allowUnauthorizedRemoteConnection",
 						true,
@@ -143,6 +147,7 @@ export class JupyterHubPasswordConnect {
 					sendTelemetryEvent(Telemetry.SelfCertsMessageClose);
 				}
 			}
+
 			throw e;
 		}
 	}
@@ -154,5 +159,6 @@ function addTrailingSlash(url: string): string {
 	if (newUrl[newUrl.length - 1] !== "/") {
 		newUrl = `${newUrl}/`;
 	}
+
 	return newUrl;
 }

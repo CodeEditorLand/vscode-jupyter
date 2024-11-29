@@ -12,9 +12,11 @@ export class NotebookInteractiveWindow extends InteractiveWindow {
 		if (!this.editor?.replOptions) {
 			this.editor = await this.showInteractiveEditor();
 		}
+
 		if (!this.editor?.replOptions) {
 			throw new Error("Interactive editor not found");
 		}
+
 		return this.editor.replOptions.appendIndex;
 	}
 }

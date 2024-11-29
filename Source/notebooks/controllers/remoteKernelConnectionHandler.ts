@@ -36,30 +36,36 @@ export class RemoteKernelConnectionHandler
 		@inject(PreferredRemoteKernelIdProvider)
 		private readonly preferredRemoteKernelIdProvider: PreferredRemoteKernelIdProvider,
 	) {}
+
 	activate(): void {
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
 			this.disposables,
 		);
+
 		this.controllers.onControllerSelectionChanged(
 			this.onNotebookControllerSelectionChanged,
 			this,
 			this.disposables,
 		);
 	}
+
 	private onNotebookControllerSelectionChanged({
 		selected,
 		notebook,
 		controller,
 	}: {
 		selected: boolean;
+
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}) {
 		if (notebook.isClosed) {
 			return;
 		}
+
 		if (
 			controller.connection.kind === "connectToLiveRemoteKernel" &&
 			controller.connection.kernelModel.id
@@ -78,16 +84,19 @@ export class RemoteKernelConnectionHandler
 				);
 			}
 		}
+
 		if (isLocalConnection(controller.connection)) {
 			this.preferredRemoteKernelIdProvider
 				.clearPreferredRemoteKernelId(notebook.uri)
 				.catch(noop);
 		}
 	}
+
 	private onDidStartKernel(kernel: IKernel) {
 		if (!kernel.resourceUri) {
 			return;
 		}
+
 		const resource = kernel.resourceUri;
 
 		if (
@@ -96,6 +105,7 @@ export class RemoteKernelConnectionHandler
 		) {
 			return;
 		}
+
 		const serverId = kernel.kernelConnectionMetadata.serverProviderHandle;
 
 		const storeKernelInfo = () => {
@@ -105,9 +115,11 @@ export class RemoteKernelConnectionHandler
 				logger.debug(
 					`Updating preferred kernel for remote notebook ${kernelId}`,
 				);
+
 				this.preferredRemoteKernelIdProvider
 					.storePreferredRemoteKernelId(resource, kernelId)
 					.catch(noop);
+
 				this.liveKernelTracker.trackKernelIdAsUsed(
 					resource,
 					serverId,
@@ -115,7 +127,9 @@ export class RemoteKernelConnectionHandler
 				);
 			}
 		};
+
 		storeKernelInfo();
+
 		kernel.onDidKernelSocketChange(storeKernelInfo, this, this.disposables);
 	}
 }

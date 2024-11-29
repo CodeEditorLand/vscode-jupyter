@@ -27,27 +27,39 @@ import { ScriptLoader } from "./types";
 
 export class ScriptManager extends EventEmitter {
 	public readonly widgetsRegisteredInRequireJs = new Set<string>();
+
 	private readonly disposables: IDisposable[] = [];
+
 	private baseUrl?: string;
+
 	private readonly widgetSourceRequests = new Map<
 		string,
 		{
 			deferred: Deferred<void>;
+
 			timer: NodeJS.Timeout | number | undefined;
+
 			explicitlyRequested: boolean;
+
 			source?: "cdn" | "local" | "remote";
+
 			requestId: string;
 		}
 	>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private previousKernelOptions?: any;
+
 	private readonly registeredWidgetSources = new Map<
 		string,
 		WidgetScriptSource
 	>();
+
 	private readonly widgetModulesFailedToLoad = new Set<string>();
+
 	private timedoutWaitingForWidgetsToGetLoaded?: boolean;
+
 	private readonly isOnline = createDeferred<boolean>();
+
 	private widgetsCanLoadFromCDN: boolean = false;
 	// Total time to wait for a script to load. This includes ipywidgets making a request to extension for a Uri of a widget,
 	// then extension replying back with the Uri (max 5 seconds round trip time).
@@ -61,10 +73,13 @@ export class ScriptManager extends EventEmitter {
 		cdnIsReachable = isCDNReachable(),
 	) {
 		super();
+
 		this.isOnline.promise.catch(noop);
+
 		cdnIsReachable
 			.then((isOnline) => {
 				this.isOnline.resolve(isOnline);
+
 				this.postOffice.sendMessage<IInteractiveWindowMapping>(
 					IPyWidgetMessages.IPyWidgets_IsOnline,
 					{
@@ -83,6 +98,7 @@ export class ScriptManager extends EventEmitter {
 					const settings = JSON.parse(
 						payload,
 					) as IJupyterExtraSettings;
+
 					this.widgetsCanLoadFromCDN =
 						settings.widgetScriptSources.length > 0;
 				} else if (
@@ -105,6 +121,7 @@ export class ScriptManager extends EventEmitter {
 							this.clearWidgetModuleScriptSource(moduleName);
 						},
 					);
+
 					this.widgetModulesFailedToLoad.clear();
 				} else if (
 					type === IPyWidgetMessages.IPyWidgets_BaseUrlResponse
@@ -118,6 +135,7 @@ export class ScriptManager extends EventEmitter {
 						document.body.dataset.baseUrl = baseUrl.endsWith("/")
 							? baseUrl
 							: `${baseUrl}/`;
+
 						logMessage(`data-base-url set to ${baseUrl}`);
 					}
 				} else if (
@@ -134,7 +152,9 @@ export class ScriptManager extends EventEmitter {
 						logMessage(
 							`Received IPyWidgets_kernelOptions in ScriptManager with new kernel options`,
 						);
+
 						this.previousKernelOptions = payload;
+
 						this.clear();
 					}
 				} else if (
@@ -143,15 +163,19 @@ export class ScriptManager extends EventEmitter {
 					logMessage(
 						`Received IPyWidgets_onKernelChanged in ScriptManager`,
 					);
+
 					this.clear();
 				}
+
 				return true;
 			},
 		});
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	public getScriptLoader(): ScriptLoader {
 		return {
 			widgetsRegisteredInRequireJs: this.widgetsRegisteredInRequireJs,
@@ -179,31 +203,41 @@ export class ScriptManager extends EventEmitter {
 			) => this.handleLoadSuccess(className, moduleName, moduleVersion),
 		};
 	}
+
 	public onWidgetLoadSuccess(
 		listener: (data: {
 			className: string;
+
 			moduleName: string;
+
 			moduleVersion: string;
 		}) => void,
 	): this {
 		return this.on("onWidgetLoadSuccess", listener);
 	}
+
 	public onWidgetLoadError(
 		listener: (data: {
 			className: string;
+
 			moduleName: string;
+
 			moduleVersion: string;
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			error: any;
+
 			timedout?: boolean;
+
 			isOnline: boolean;
 		}) => void,
 	): this {
 		return this.on("onWidgetLoadError", listener);
 	}
+
 	public onWidgetVersionNotSupported(
 		listener: (data: {
 			moduleName: "qgrid";
+
 			moduleVersion: string;
 		}) => void,
 	): this {
@@ -266,6 +300,7 @@ export class ScriptManager extends EventEmitter {
 					console.error(
 						`Timeout waiting to get widget source for ${moduleName}, ${moduleVersion}`,
 					);
+
 					this.handleLoadError(
 						"<class>",
 						moduleName,
@@ -277,10 +312,13 @@ export class ScriptManager extends EventEmitter {
 					).catch(() => {
 						// Do nothing with errors
 					});
+
 					request.deferred.resolve();
+
 					this.timedoutWaitingForWidgetsToGetLoaded = true;
 				}
 			}, timeoutTime);
+
 			this.disposables.push({
 				dispose() {
 					try {
@@ -293,6 +331,7 @@ export class ScriptManager extends EventEmitter {
 					}
 				},
 			});
+
 			this.widgetSourceRequests.set(moduleName, request);
 		}
 		// Whether we have the scripts or not, send message to extension.
@@ -348,8 +387,11 @@ export class ScriptManager extends EventEmitter {
 
 	private clearWidgetModuleScriptSource(moduleName: string) {
 		this.widgetSourceRequests.delete(moduleName);
+
 		this.registeredWidgetSources.delete(moduleName);
+
 		this.widgetsRegisteredInRequireJs.delete(moduleName);
+
 		undefineModule(moduleName);
 	}
 	/**
@@ -358,6 +400,7 @@ export class ScriptManager extends EventEmitter {
 	 */
 	private clear() {
 		this.widgetSourceRequests.clear();
+
 		this.registeredWidgetSources.clear();
 	}
 	/**
@@ -393,7 +436,9 @@ export class ScriptManager extends EventEmitter {
 					currentRegistration.source !== "cdn")
 			) {
 				registerScripts(this.baseUrl, [source]);
+
 				this.registeredWidgetSources.set(source.moduleName, source);
+
 				this.widgetsRegisteredInRequireJs.add(source.moduleName);
 			}
 
@@ -409,29 +454,37 @@ export class ScriptManager extends EventEmitter {
 					requestId: source.requestId || "",
 					explicitlyRequested: false,
 				};
+
 				this.widgetSourceRequests.set(source.moduleName, request);
 			}
+
 			if (source.requestId && source.requestId === request!.requestId) {
 				request.source = source.source;
+
 				request.deferred.resolve();
 			} else if (!source.requestId) {
 				request.source = source.source;
+
 				request.deferred.resolve();
 			}
+
 			if (request.deferred.completed && request.timer !== undefined) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				clearTimeout(request.timer as any); // This is to make this work on Node and Browser
 			}
 		});
 	}
+
 	private registerScriptSourceInRequirejs(source?: WidgetScriptSource) {
 		if (!source) {
 			logMessage("No widget script source");
 
 			return;
 		}
+
 		this.registerScriptSourcesInRequirejs([source]);
 	}
+
 	private async handleLoadError(
 		className: string,
 		moduleName: string,
@@ -443,6 +496,7 @@ export class ScriptManager extends EventEmitter {
 		this.widgetModulesFailedToLoad.add(moduleName);
 
 		const isOnline = await isCDNReachable();
+
 		this.emit("onWidgetLoadError", {
 			className,
 			moduleName,

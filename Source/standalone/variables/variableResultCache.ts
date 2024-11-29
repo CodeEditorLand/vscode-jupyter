@@ -5,11 +5,13 @@ import { VariablesResult } from "vscode";
 
 export class VariableResultCacheBase<T> {
 	private cache = new Map<string, T>();
+
 	private executionCount = 0;
 
 	getResults(executionCount: number, cacheKey: string): T | undefined {
 		if (this.executionCount !== executionCount) {
 			this.cache.clear();
+
 			this.executionCount = executionCount;
 		}
 
@@ -19,6 +21,7 @@ export class VariableResultCacheBase<T> {
 	setResults(executionCount: number, cacheKey: string, results: T) {
 		if (this.executionCount < executionCount) {
 			this.cache.clear();
+
 			this.executionCount = executionCount;
 		} else if (this.executionCount > executionCount) {
 			// old results, don't cache

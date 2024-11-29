@@ -56,6 +56,7 @@ export function isSysInfoCell(cell: NotebookCell) {
 
 export class SystemInfoCell {
 	private sysInfoCellPromise: Promise<NotebookCell>;
+
 	private isDeleted = false;
 
 	constructor(
@@ -87,18 +88,22 @@ export class SystemInfoCell {
 
 	private async createCell(message: string) {
 		let addedCellIndex: number | undefined;
+
 		await chainWithPendingUpdates(this.notebookDocument, async (edit) => {
 			const markdownCell = new NotebookCellData(
 				NotebookCellKind.Markup,
 				message,
 				MARKDOWN_LANGUAGE,
 			);
+
 			markdownCell.metadata = { isInteractiveWindowMessageCell: true };
+
 			addedCellIndex = await this.interactiveWindow.getAppendIndex();
 
 			const nbEdit = NotebookEdit.insertCells(addedCellIndex, [
 				markdownCell,
 			]);
+
 			edit.set(this.notebookDocument.uri, [nbEdit]);
 		});
 
@@ -107,6 +112,7 @@ export class SystemInfoCell {
 
 	public async updateMessage(newMessage: string) {
 		const cell = await this.sysInfoCellPromise;
+
 		await chainWithPendingUpdates(this.notebookDocument, (edit) => {
 			if (cell.index >= 0) {
 				if (!this.isDeleted && isSysInfoCell(cell)) {
@@ -134,12 +140,14 @@ export class SystemInfoCell {
 		this.isDeleted = true;
 
 		const cell = await this.sysInfoCellPromise;
+
 		await chainWithPendingUpdates(this.notebookDocument, (edit) => {
 			if (cell.index >= 0) {
 				if (isSysInfoCell(cell)) {
 					const nbEdit = NotebookEdit.deleteCells(
 						new NotebookRange(cell.index, cell.index + 1),
 					);
+
 					edit.set(this.notebookDocument.uri, [nbEdit]);
 
 					return;

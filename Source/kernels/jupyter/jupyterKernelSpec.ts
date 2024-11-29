@@ -11,12 +11,19 @@ import { IJupyterKernelSpec } from "../types";
  */
 export class JupyterKernelSpec implements IJupyterKernelSpec {
 	public name: string;
+
 	public originalName?: string;
+
 	public language: string;
+
 	public executable: string;
+
 	public readonly env: NodeJS.ProcessEnv | undefined;
+
 	public display_name: string;
+
 	public argv: string[];
+
 	public interrupt_mode?: "message" | "signal";
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,13 +41,18 @@ export class JupyterKernelSpec implements IJupyterKernelSpec {
 			| "registeredByNewVersionOfExtForCustomKernelSpec",
 	) {
 		this.name = specModel.name;
+
 		this.argv = specModel.argv;
+
 		this.language = specModel.language;
+
 		this.executable =
 			specModel.argv && specModel.argv.length > 0
 				? specModel.argv[0]
 				: "";
+
 		this.display_name = specModel.display_name;
+
 		this.metadata = specModel.metadata;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this.env = specModel.env as any; // JSONObject, but should match

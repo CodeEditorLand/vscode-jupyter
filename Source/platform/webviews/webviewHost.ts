@@ -33,6 +33,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	protected abstract get owningResource(): Resource;
 
 	protected abstract get title(): string;
+
 	protected webview?: IWebview;
 
 	protected disposed = false;
@@ -82,10 +83,12 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	public dispose() {
 		if (!this.disposed) {
 			this.disposed = true;
+
 			this._disposables.forEach((item) => item.dispose());
 		}
 
 		this.webviewInit = undefined;
+
 		this._onDidDisposeWebviewPanel.fire();
 	}
 
@@ -96,6 +99,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 	private getHTMLById(id: string): Promise<string> {
 		if (!this.activeHTMLRequest) {
 			this.activeHTMLRequest = createDeferred<string>();
+
 			this.postMessageInternal(
 				InteractiveWindowMessages.GetHTMLByIdRequest,
 				id,
@@ -144,6 +148,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		const dsSettings = JSON.stringify(
 			await this.generateDataScienceExtraSettings(),
 		);
+
 		this.postMessageInternal(
 			SharedMessages.UpdateSettings,
 			dsSettings,
@@ -154,6 +159,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		if (!this.webview) {
 			throw new Error("asWebViewUri called too early");
 		}
+
 		return this.webview?.asWebviewUri(localResource);
 	}
 
@@ -177,8 +183,10 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 				// Webview has returned HTML, resolve the request and clear it
 				if (this.activeHTMLRequest) {
 					this.activeHTMLRequest.resolve(payload);
+
 					this.activeHTMLRequest = undefined;
 				}
+
 				break;
 
 			default:
@@ -355,6 +363,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 			selectedImageLabel: localize.WebViews.selectedImageLabel,
 			dvDeprecationWarning: localize.WebViews.dvDeprecationWarning,
 		};
+
 		this.postMessageInternal(
 			SharedMessages.LocInit,
 			JSON.stringify(locStrings),
@@ -385,6 +394,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 
 		// On started, resend our init data.
 		this.sendLocStrings().catch(noop);
+
 		this.onDataScienceSettingsChanged().catch(noop);
 	}
 
@@ -401,6 +411,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 		if (workspaceConfig) {
 			return workspaceConfig.get(section, defaultValue);
 		}
+
 		return defaultValue;
 	}
 
@@ -435,6 +446,7 @@ export abstract class WebviewHost<IMapping> implements IDisposable {
 
 			if (newSettings) {
 				const dsSettings = JSON.stringify(newSettings);
+
 				this.postMessageInternal(
 					SharedMessages.UpdateSettings,
 					dsSettings,

@@ -70,6 +70,7 @@ export class ExtensionRecommendationService
 	implements IExtensionSyncActivationService, IDisposable
 {
 	private readonly disposables: IDisposable[] = [];
+
 	private recommendedInSession = new Set<string>();
 
 	constructor(
@@ -82,6 +83,7 @@ export class ExtensionRecommendationService
 	) {
 		disposables.push(this);
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
@@ -92,6 +94,7 @@ export class ExtensionRecommendationService
 			this,
 			this.disposables,
 		);
+
 		this.controllerManager.onControllerSelected(
 			this.onNotebookControllerSelected,
 			this,
@@ -103,6 +106,7 @@ export class ExtensionRecommendationService
 		if (!isJupyterNotebook(notebook)) {
 			return;
 		}
+
 		const language = getLanguageInNotebookMetadata(
 			getNotebookMetadata(notebook),
 		);
@@ -123,15 +127,18 @@ export class ExtensionRecommendationService
 		) {
 			return;
 		}
+
 		if (isPythonKernelConnection(controller.connection)) {
 			return;
 		}
+
 		const language = getKernelConnectionLanguage(controller.connection);
 
 		if (language) {
 			this.recommendExtensionForLanguage(language).catch(noop);
 		}
 	}
+
 	private async recommendExtensionForLanguage(language: string) {
 		const extensionId = extensionsThatSupportJupyterKernelLanguages.get(
 			language.toLowerCase(),
@@ -140,11 +147,13 @@ export class ExtensionRecommendationService
 		if (!extensionId || extensions.getExtension(extensionId)) {
 			return;
 		}
+
 		const extensionInfo = knownExtensionsToRecommend.get(extensionId);
 
 		if (!extensionInfo) {
 			return;
 		}
+
 		if (
 			this.globalMemento
 				.get<string[]>(mementoKeyToNeverPromptExtensionAgain, [])
@@ -153,12 +162,14 @@ export class ExtensionRecommendationService
 		) {
 			return;
 		}
+
 		this.recommendedInSession.add(extensionId);
 
 		const message = DataScience.recommendExtensionForNotebookLanguage(
 			`[${extensionInfo.displayName}](${extensionInfo.extensionLink})`,
 			language,
 		);
+
 		sendTelemetryEvent(Telemetry.RecommendExtension, undefined, {
 			extensionId,
 			action: "displayed",
@@ -177,12 +188,14 @@ export class ExtensionRecommendationService
 					extensionId,
 					action: "ok",
 				});
+
 				commands
 					.executeCommand("extension.open", extensionId)
 					.then(noop, noop);
 
 				break;
 			}
+
 			case Common.bannerLabelNo: {
 				sendTelemetryEvent(Telemetry.RecommendExtension, undefined, {
 					extensionId,
@@ -191,6 +204,7 @@ export class ExtensionRecommendationService
 
 				break;
 			}
+
 			case Common.doNotShowAgain: {
 				sendTelemetryEvent(Telemetry.RecommendExtension, undefined, {
 					extensionId,
@@ -204,13 +218,16 @@ export class ExtensionRecommendationService
 
 				if (!list.includes(extensionId)) {
 					list.push(extensionId);
+
 					await this.globalMemento.update(
 						mementoKeyToNeverPromptExtensionAgain,
 						list,
 					);
 				}
+
 				break;
 			}
+
 			default:
 				sendTelemetryEvent(Telemetry.RecommendExtension, undefined, {
 					extensionId,

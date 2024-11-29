@@ -35,8 +35,11 @@ export class DataScienceCodeLensProvider
 	implements IDataScienceCodeLensProvider, IDisposable
 {
 	private totalExecutionTimeInMs: number = 0;
+
 	private totalGetCodeLensCalls: number = 0;
+
 	private activeCodeWatchers: ICodeWatcher[] = [];
+
 	private didChangeCodeLenses: vscode.EventEmitter<void> =
 		new vscode.EventEmitter<void>();
 
@@ -51,17 +54,21 @@ export class DataScienceCodeLensProvider
 		@inject(IDebugService) private debugService: IDebugService,
 	) {
 		disposableRegistry.push(this);
+
 		disposableRegistry.push(
 			vscode.workspace.onDidGrantWorkspaceTrust(() => {
 				this.activeCodeWatchers = dispose(this.activeCodeWatchers);
+
 				this.didChangeCodeLenses.fire();
 			}),
 		);
+
 		disposableRegistry.push(
 			this.debugService.onDidChangeActiveDebugSession(
 				this.onChangeDebugSession.bind(this),
 			),
 		);
+
 		disposableRegistry.push(
 			vscode.workspace.onDidCloseTextDocument(
 				this.onDidCloseTextDocument.bind(this),
@@ -132,6 +139,7 @@ export class DataScienceCodeLensProvider
 
 		if (index >= 0) {
 			const codewatcher = this.activeCodeWatchers.splice(index, 1);
+
 			codewatcher[0].dispose();
 		}
 	}
@@ -140,7 +148,9 @@ export class DataScienceCodeLensProvider
 		const stopWatch = new StopWatch();
 
 		const codeLenses = this.getCodeLens(document);
+
 		this.totalExecutionTimeInMs += stopWatch.elapsedTime;
+
 		this.totalGetCodeLensCalls += 1;
 
 		// Don't provide any code lenses if we have not enabled data science
@@ -176,6 +186,7 @@ export class DataScienceCodeLensProvider
 			} catch {
 				//
 			}
+
 			if (
 				debugLocation &&
 				(urlPath.isEqual(
@@ -200,6 +211,7 @@ export class DataScienceCodeLensProvider
 					if (lens.command) {
 						return debugCellList.includes(lens.command.command);
 					}
+
 					return false;
 				});
 			} else {
@@ -215,6 +227,7 @@ export class DataScienceCodeLensProvider
 				if (lens.command) {
 					return !debugCellList.includes(lens.command.command);
 				}
+
 				return false;
 			});
 		}
@@ -268,8 +281,11 @@ export class DataScienceCodeLensProvider
 	private createNewCodeWatcher(document: vscode.TextDocument): ICodeWatcher {
 		const newCodeWatcher =
 			this.serviceContainer.get<ICodeWatcher>(ICodeWatcher);
+
 		newCodeWatcher.setDocument(document);
+
 		newCodeWatcher.codeLensUpdated(this.onWatcherUpdated.bind(this));
+
 		this.activeCodeWatchers.push(newCodeWatcher);
 
 		return newCodeWatcher;

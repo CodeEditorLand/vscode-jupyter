@@ -60,6 +60,7 @@ export class ConfigMigration {
 				),
 			);
 		}
+
 		migratedSettings.push(this.migrateIntellisenseSettings());
 
 		try {
@@ -86,6 +87,7 @@ export class ConfigMigration {
 			) {
 				return;
 			}
+
 			if (
 				newDetails?.globalValue &&
 				newDetails.globalValue[PYTHON_LANGUAGE]
@@ -93,10 +95,13 @@ export class ConfigMigration {
 				// Already migrated or user already provided a value in the new setting.
 				return;
 			}
+
 			if (typeof oldDetails?.globalValue === "string") {
 				const newValue =
 					newDetails.globalValue || newDetails.defaultValue || {};
+
 				newValue[PYTHON_LANGUAGE] = oldDetails.globalValue.split("");
+
 				await this.jupyterConfig
 					.update(newSetting, newValue, ConfigurationTarget.Global)
 					.then(noop, handleSettingMigrationFailure);
@@ -128,6 +133,7 @@ export class ConfigMigration {
 					ConfigurationTarget.Workspace,
 				);
 			}
+
 			migratedSettings.push(
 				promise.then(
 					() =>
@@ -140,6 +146,7 @@ export class ConfigMigration {
 				),
 			);
 		}
+
 		if (oldDetails?.workspaceFolderValue !== undefined) {
 			let promise: Thenable<void> = Promise.resolve();
 
@@ -150,6 +157,7 @@ export class ConfigMigration {
 					ConfigurationTarget.WorkspaceFolder,
 				);
 			}
+
 			migratedSettings.push(
 				promise.then(
 					() =>
@@ -162,6 +170,7 @@ export class ConfigMigration {
 				),
 			);
 		}
+
 		if (oldDetails?.globalValue !== undefined) {
 			let promise: Thenable<void> = Promise.resolve();
 
@@ -172,6 +181,7 @@ export class ConfigMigration {
 					ConfigurationTarget.Global,
 				);
 			}
+
 			migratedSettings.push(
 				promise.then(
 					() =>

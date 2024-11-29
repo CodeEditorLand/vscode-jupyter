@@ -40,10 +40,13 @@ import {
 
 type CodeLensCacheData = {
 	cachedDocumentVersion: number | undefined;
+
 	cachedExecutionCounts: Set<number>;
 
 	documentLenses: CodeLens[];
+
 	cellRanges: ICellRange[];
+
 	gotoCellLens: CodeLens[];
 };
 
@@ -87,10 +90,15 @@ const scrollToCellFormat = localize.DataScience.scrollToCellTitleFormatMessage;
 @injectable()
 export class CodeLensFactory implements ICodeLensFactory {
 	private updateEvent: EventEmitter<void> = new EventEmitter<void>();
+
 	private notebookData = new Map<string, PerNotebookData>();
+
 	private codeLensCache = new Map<string, CodeLensCacheData>();
+
 	private totalCodeLensUpdateTimeInMs: number = 0;
+
 	private codeLensUpdateCount: number = 0;
+
 	private maxCellCount: number = 0;
 
 	constructor(
@@ -110,19 +118,23 @@ export class CodeLensFactory implements ICodeLensFactory {
 			this,
 			disposables,
 		);
+
 		workspace.onDidGrantWorkspaceTrust(
 			() => this.codeLensCache.clear(),
 			this,
 			disposables,
 		);
+
 		this.configService
 			.getSettings(undefined)
 			.onDidChange(this.onChangedSettings, this, disposables);
+
 		notebookCellExecutions.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
 			disposables,
 		);
+
 		kernelProvider.onDidDisposeKernel(
 			(kernel) => {
 				this.notebookData.delete(kernel.notebook.uri.toString());
@@ -177,7 +189,9 @@ export class CodeLensFactory implements ICodeLensFactory {
 				cellRanges: [],
 				gotoCellLens: [],
 			};
+
 			needUpdate = true;
+
 			this.codeLensCache.set(key, cache);
 		}
 
@@ -187,8 +201,11 @@ export class CodeLensFactory implements ICodeLensFactory {
 
 			// Because we have all new ranges, we need to recompute ALL of our code lenses.
 			cache.documentLenses = [];
+
 			cache.gotoCellLens = [];
+
 			cache.cachedDocumentVersion = document.version;
+
 			needUpdate = true;
 		}
 
@@ -200,7 +217,9 @@ export class CodeLensFactory implements ICodeLensFactory {
 			documentCounts.find((n) => !cache?.cachedExecutionCounts.has(n))
 		) {
 			cache.gotoCellLens = [];
+
 			cache.cachedExecutionCounts = new Set<number>(documentCounts);
+
 			needUpdate = true;
 		}
 
@@ -213,6 +232,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 			updated = true;
 			// Enumerate the possible commands for the document based code lenses
 			const commands = this.enumerateCommands(document.uri);
+
 			logger.debug(
 				`CodeLensFactory: Generating new code lenses for version ${document.version} of document ${
 					document.uri
@@ -221,6 +241,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 
 			// Then iterate over all of the cell ranges and generate code lenses for each enabled command
 			let firstCell = true;
+
 			cache.cellRanges.forEach((r) => {
 				commands.forEach((c) => {
 					const codeLens = this.createCodeLens(
@@ -234,6 +255,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						cache!.documentLenses.push(codeLens);
 					}
 				});
+
 				firstCell = false;
 			});
 		} else {
@@ -277,7 +299,9 @@ export class CodeLensFactory implements ICodeLensFactory {
 
 		if (updated) {
 			this.totalCodeLensUpdateTimeInMs += stopWatch.elapsedTime;
+
 			this.codeLensUpdateCount += 1;
+
 			this.maxCellCount = Math.max(
 				this.maxCellCount,
 				cache.cellRanges.length,
@@ -286,23 +310,27 @@ export class CodeLensFactory implements ICodeLensFactory {
 
 		return cache;
 	}
+
 	private getDocumentExecutionCounts(key: string): number[] {
 		return [...this.notebookData.values()]
 			.map((d) => d.documentExecutionCounts.get(key))
 			.filter((n) => n !== undefined) as number[];
 	}
+
 	private onDidChangeNotebookCellExecutionState(
 		e: NotebookCellExecutionStateChangeEvent,
 	) {
 		if (this.replTracker.isForReplEditor(e.cell.notebook)) {
 			return;
 		}
+
 		if (
 			e.state !== NotebookCellExecutionState.Idle ||
 			!e.cell.executionSummary?.executionOrder
 		) {
 			return;
 		}
+
 		const metadata = getInteractiveCellMetadata(e.cell);
 
 		let data = this.notebookData.get(e.cell.notebook.uri.toString());
@@ -312,20 +340,25 @@ export class CodeLensFactory implements ICodeLensFactory {
 				cellExecutionCounts: new Map<string, number>(),
 				documentExecutionCounts: new Map<string, number>(),
 			};
+
 			this.notebookData.set(e.cell.notebook.uri.toString(), data);
 		}
+
 		if (data !== undefined && metadata !== undefined) {
 			data.cellExecutionCounts.set(
 				metadata.id,
 				e.cell.executionSummary.executionOrder,
 			);
+
 			data.documentExecutionCounts.set(
 				metadata.interactive.uristring,
 				e.cell.executionSummary.executionOrder,
 			);
+
 			this.updateEvent.fire();
 		}
 	}
+
 	private onClosedDocument(doc: TextDocument) {
 		this.codeLensCache.delete(doc.uri.toString());
 
@@ -336,6 +369,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 	private onChangedSettings() {
 		// When config settings change, refresh our code lenses.
 		this.codeLensCache.clear();
+
 		this.cellRangeCache.clear();
 
 		// Force an update so that code lenses are recomputed now and not during execution.
@@ -391,11 +425,13 @@ export class CodeLensFactory implements ICodeLensFactory {
 				Commands.RunCellAndAllBelowPalette,
 			];
 		}
+
 		if (commandsToBeDisabled) {
 			fullCommandList = fullCommandList.filter(
 				(item) => !commandsToBeDisabled.includes(item),
 			);
 		}
+
 		return fullCommandList;
 	}
 
@@ -439,6 +475,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 				if (cell_type !== "code") {
 					break;
 				}
+
 				return this.generateCodeLens(
 					range,
 					Commands.DebugCell,
@@ -457,6 +494,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 				if (cell_type !== "code") {
 					break;
 				}
+
 				return this.generateCodeLens(
 					range,
 					Commands.DebugStepOver,
@@ -469,6 +507,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 				if (cell_type !== "code") {
 					break;
 				}
+
 				return this.generateCodeLens(
 					range,
 					Commands.DebugContinue,
@@ -481,6 +520,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 				if (cell_type !== "code") {
 					break;
 				}
+
 				return this.generateCodeLens(
 					range,
 					Commands.DebugStop,
@@ -528,6 +568,7 @@ export class CodeLensFactory implements ICodeLensFactory {
 						[document.uri, range.start.line, range.start.character],
 					);
 				}
+
 			case Commands.RunCellAndAllBelowPalette:
 			case Commands.RunCellAndAllBelow:
 				return this.generateCodeLens(

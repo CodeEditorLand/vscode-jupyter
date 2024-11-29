@@ -94,11 +94,17 @@ export class KernelDependencyService implements IKernelDependencyService {
 		installWithoutPrompting,
 	}: {
 		resource: Resource;
+
 		kernelConnection: KernelConnectionMetadata;
+
 		ui: IDisplayOptions;
+
 		token: CancellationToken;
+
 		ignoreCache?: boolean;
+
 		cannotChangeKernels?: boolean;
+
 		installWithoutPrompting?: boolean;
 	}): Promise<KernelInterpreterDependencyResponse> {
 		if (
@@ -131,6 +137,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			if (alreadyInstalled) {
 				return KernelInterpreterDependencyResponse.ok;
 			}
+
 			if (token?.isCancellationRequested) {
 				return KernelInterpreterDependencyResponse.cancel;
 			}
@@ -159,8 +166,10 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 			const disposable = token.onCancellationRequested(() => {
 				cancelTokenSource.cancel();
+
 				disposable.dispose();
 			});
+
 			promise = KernelProgressReporter.wrapAndReportProgress(
 				resource,
 				DataScience.installingMissingDependencies,
@@ -176,6 +185,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 							return result;
 						}
 					}
+
 					return this.runInstaller(
 						resource,
 						kernelConnection.interpreter!,
@@ -186,12 +196,15 @@ export class KernelDependencyService implements IKernelDependencyService {
 					);
 				},
 			);
+
 			promise
 				.finally(() => {
 					disposable.dispose();
+
 					cancelTokenSource.dispose();
 				})
 				.catch(noop);
+
 			this.installPromises.set(key, promise);
 		}
 
@@ -217,6 +230,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			// Don't need to cache anymore
 			this.installPromises.delete(key);
 		}
+
 		return dependencyResponse;
 	}
 	@debugDecorator("Are Dependencies Installed")
@@ -253,9 +267,11 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 			return true;
 		}
+
 		const installedPromise = this.installer
 			.isInstalled(Product.ipykernel, kernelConnection.interpreter)
 			.then((installed) => installed === true);
+
 		installedPromise.then((installed) => {
 			if (installed) {
 				trackPackageInstalledIntoInterpreter(
@@ -286,6 +302,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 		if (ui.disableUI) {
 			return KernelInterpreterDependencyResponse.uiHidden;
 		}
+
 		const interpreterType = getEnvironmentType(interpreter);
 
 		const [isModulePresent, isPipAvailableForNonConda] = await Promise.all([
@@ -302,6 +319,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return KernelInterpreterDependencyResponse.cancel;
 		}
+
 		const messageFormat = isModulePresent
 			? DataScience.libraryRequiredToLaunchJupyterKernelNotInstalledInterpreterAndRequiresUpdate
 			: DataScience.libraryRequiredToLaunchJupyterKernelNotInstalledInterpreter;
@@ -327,6 +345,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 		const resourceHash = resource
 			? await getTelemetrySafeHashedString(resource.toString())
 			: undefined;
+
 		sendKernelTelemetryEvent(
 			resource,
 			Telemetry.PythonModuleInstall,
@@ -354,6 +373,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			// https://github.com/microsoft/vscode-jupyter/issues/6135
 			options.push(selectKernelOption);
 		}
+
 		options.push(moreInfoOption);
 
 		try {
@@ -371,6 +391,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 					},
 				);
 			}
+
 			let selection;
 
 			do {
@@ -423,6 +444,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 
 				return KernelInterpreterDependencyResponse.cancel;
 			}
+
 			if (selection === selectKernelOption) {
 				sendKernelTelemetryEvent(
 					resource,
@@ -496,6 +518,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 					return KernelInterpreterDependencyResponse.failed; // Happens when errors in pip or conda.
 				}
 			}
+
 			sendKernelTelemetryEvent(
 				resource,
 				Telemetry.PythonModuleInstall,
@@ -512,6 +535,7 @@ export class KernelDependencyService implements IKernelDependencyService {
 			return KernelInterpreterDependencyResponse.cancel;
 		} catch (ex) {
 			logger.error(`Failed to install ${productNameForTelemetry}`, ex);
+
 			sendKernelTelemetryEvent(
 				resource,
 				Telemetry.PythonModuleInstall,

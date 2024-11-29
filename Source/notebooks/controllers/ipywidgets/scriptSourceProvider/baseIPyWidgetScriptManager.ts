@@ -52,6 +52,7 @@ export async function extractRequireConfigFromWidgetEntry(
 		if (!patternUsedToRegisterRequireConfig) {
 			break;
 		}
+
 		indexOfRequireConfig = contents.indexOf(
 			patternUsedToRegisterRequireConfig,
 		);
@@ -69,6 +70,7 @@ export async function extractRequireConfigFromWidgetEntry(
 			if (!patternUsedToRegisterRequireConfig) {
 				break;
 			}
+
 			indexOfRequireConfig = contents.indexOf(
 				patternUsedToRegisterRequireConfig,
 			);
@@ -99,6 +101,7 @@ export async function extractRequireConfigFromWidgetEntry(
 
 		return;
 	}
+
 	const startBracket = contents.indexOf("{", indexOfRequireConfig);
 
 	let configStr = contents.substring(startBracket, endBracket);
@@ -106,6 +109,7 @@ export async function extractRequireConfigFromWidgetEntry(
 	// We cannot eval as thats dangerous, and we cannot use JSON.parse either as it not JSON.
 	// Lets just extract what we need.
 	configStr = stripComments(configStr, { language: "javascript" });
+
 	configStr = splitLines(configStr, {
 		trim: true,
 		removeEmptyEntries: true,
@@ -143,6 +147,7 @@ export async function extractRequireConfigFromWidgetEntry(
 				.replace(/\\n/g, "")
 				.trim(),
 		).trim();
+
 		requireConfig[key] = value.startsWith("http")
 			? Uri.parse(value)
 			: Uri.joinPath(baseUrl, value);
@@ -158,6 +163,7 @@ export async function extractRequireConfigFromWidgetEntry(
 
 		return;
 	}
+
 	sendTelemetryEvent(
 		Telemetry.IPyWidgetExtensionJsInfo,
 		{ requireEntryPointCount: Object.keys(requireConfig).length },
@@ -177,6 +183,7 @@ export abstract class BaseIPyWidgetScriptManager
 	implements IIPyWidgetScriptManager
 {
 	protected readonly disposables: IDisposable[] = [];
+
 	private widgetModuleMappings?: Promise<Record<string, Uri> | undefined>;
 
 	constructor(protected readonly kernel: IKernel) {
@@ -185,23 +192,31 @@ export abstract class BaseIPyWidgetScriptManager
 		// This is expected, jupyter nb/lab and other parts of Jupyter recommend users to restart kernels after installing python packages.
 		kernel.onRestarted(this.onKernelRestarted, this, this.disposables);
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	abstract getBaseUrl(): Promise<Uri | undefined>;
+
 	protected abstract getWidgetEntryPoints(): Promise<
 		{ uri: Uri; widgetFolderName: string }[]
 	>;
+
 	protected abstract getWidgetScriptSource(source: Uri): Promise<string>;
+
 	protected abstract getNbExtensionsParentPath(): Promise<Uri | undefined>;
+
 	public async getWidgetModuleMappings(): Promise<
 		Record<string, Uri> | undefined
 	> {
 		if (!this.widgetModuleMappings) {
 			this.widgetModuleMappings = this.getWidgetModuleMappingsImpl();
 		}
+
 		return this.widgetModuleMappings;
 	}
+
 	protected onKernelRestarted() {
 		this.widgetModuleMappings = undefined;
 	}
@@ -233,8 +248,10 @@ export abstract class BaseIPyWidgetScriptManager
 				if (isCI) {
 					message += `with contents ${contents}`;
 				}
+
 				logger.warn(message);
 			}
+
 			return config;
 		} catch (ex) {
 			logger.error(
@@ -243,6 +260,7 @@ export abstract class BaseIPyWidgetScriptManager
 			);
 		}
 	}
+
 	private async getWidgetModuleMappingsImpl(): Promise<
 		Record<string, Uri> | undefined
 	> {
@@ -256,6 +274,7 @@ export abstract class BaseIPyWidgetScriptManager
 		if (!baseUrl) {
 			return;
 		}
+
 		const widgetConfigs = await Promise.all(
 			entryPoints.map((entry) =>
 				this.getConfigFromWidget(
@@ -273,10 +292,14 @@ export abstract class BaseIPyWidgetScriptManager
 		// Exclude entries that are not required (widgets that we have already bundled with our code).
 		if (config && Object.keys(config).length) {
 			delete config["jupyter-js-widgets"];
+
 			delete config["@jupyter-widgets/base"];
+
 			delete config["@jupyter-widgets/controls"];
+
 			delete config["@jupyter-widgets/output"];
 		}
+
 		sendTelemetryEvent(
 			Telemetry.DiscoverIPyWidgetNamesPerf,
 			{ duration: stopWatch.elapsedTime },

@@ -13,7 +13,10 @@
 // but we may change it to match the format of sys.version_info.
 export type PythonVersion = {
 	raw: string;
+
 	major: number;
+
 	minor: number;
+
 	patch: number;
 };

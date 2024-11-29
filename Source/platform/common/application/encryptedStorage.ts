@@ -50,6 +50,7 @@ export class EncryptedStorage implements IEncryptedStorage {
 			);
 		}
 	}
+
 	public async retrieve(
 		service: string,
 		key: string,
@@ -61,6 +62,7 @@ export class EncryptedStorage implements IEncryptedStorage {
 		) {
 			return this.testingState.get(`${service}#${key}`);
 		}
+
 		try {
 			// eslint-disable-next-line
 			const val = await this.extensionContext.secrets.get(

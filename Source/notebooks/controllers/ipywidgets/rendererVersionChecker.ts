@@ -28,17 +28,22 @@ import { noop } from "../../../platform/common/utils/misc";
 @injectable()
 export class RendererVersionChecker implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
+
 	static messageDisplayed: boolean = false;
 
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(this);
 	}
+
 	dispose(): void {
 		dispose(this.disposables);
 	}
+
 	activate(): void {
 		const delayer = new Delayer<void>(1_000);
+
 		this.disposables.push(delayer);
+
 		workspace.onDidChangeNotebookDocument(
 			(e) => {
 				void delayer.trigger(() => this.onDidChangeNotebookDocument(e));
@@ -47,10 +52,12 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 			this.disposables,
 		);
 	}
+
 	private onDidChangeNotebookDocument(e: NotebookDocumentChangeEvent) {
 		if (!isJupyterNotebook(e.notebook)) {
 			return;
 		}
+
 		if (
 			!e.cellChanges.some(
 				(c) =>
@@ -66,6 +73,7 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 		) {
 			return;
 		}
+
 		this.checkRendererExtensionVersion();
 	}
 	/**
@@ -83,6 +91,7 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 
 			return;
 		}
+
 		const version = rendererExtension.packageJSON.version;
 
 		if (!version) {
@@ -90,6 +99,7 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 
 			return;
 		}
+
 		const parts = version.split(".");
 
 		const major = parseInt(parts[0], 10);
@@ -102,11 +112,14 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 			this.displayUpdateMessage();
 		}
 	}
+
 	private displayNotInstalledMessage() {
 		if (RendererVersionChecker.messageDisplayed) {
 			return;
 		}
+
 		RendererVersionChecker.messageDisplayed = true;
+
 		window
 			.showInformationMessage(
 				DataScience.rendererExtensionRequired,
@@ -122,11 +135,14 @@ export class RendererVersionChecker implements IExtensionSyncActivationService {
 			})
 			.then(noop, noop);
 	}
+
 	public displayUpdateMessage() {
 		if (RendererVersionChecker.messageDisplayed) {
 			return;
 		}
+
 		RendererVersionChecker.messageDisplayed = true;
+
 		window
 			.showInformationMessage(
 				DataScience.rendererExtension1015Required,

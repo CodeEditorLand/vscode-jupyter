@@ -14,13 +14,17 @@ import { IPlotSaveHandler } from "./types";
 
 export type OpenImageInPlotViewer = {
 	type: "openImageInPlotViewer";
+
 	outputId: string;
+
 	mimeType: string;
 };
 
 export type SaveImageAs = {
 	type: "saveImageAs";
+
 	outputId: string;
+
 	mimeType: string;
 };
 
@@ -40,24 +44,30 @@ export class RendererCommunication
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	public activate() {
 		this.activateImpl().catch(noop);
 	}
+
 	public async activateImpl() {
 		const ext = extensions.getExtension(RendererExtension);
 
 		if (!ext) {
 			return;
 		}
+
 		if (!ext.isActive) {
 			await ext.activate();
 		}
+
 		const api = ext.exports as {
 			onDidReceiveMessage: Event<{
 				editor: NotebookEditor;
+
 				message: OpenImageInPlotViewer | SaveImageAs;
 			}>;
 		};
+
 		api.onDidReceiveMessage(
 			({ editor, message }) => {
 				const document =
@@ -66,6 +76,7 @@ export class RendererCommunication
 				if (!document) {
 					return;
 				}
+
 				if (message.type === "saveImageAs") {
 					this.plotSaveHandler
 						.savePlot(document, message.outputId, message.mimeType)

@@ -14,10 +14,12 @@ export function registerTypes(
 		IExtensionSyncActivationService,
 		NotebookCellBangInstallDiagnosticsProvider,
 	);
+
 	serviceManager.addSingleton<KernelCompletionProvider>(
 		KernelCompletionProvider,
 		KernelCompletionProvider,
 	);
+
 	serviceManager.addBinding(
 		KernelCompletionProvider,
 		IExtensionSyncActivationService,

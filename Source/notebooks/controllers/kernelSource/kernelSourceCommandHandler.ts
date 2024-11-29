@@ -63,10 +63,12 @@ export class KernelSourceCommandHandler
 	implements IExtensionSyncActivationService
 {
 	private localDisposables: IDisposable[] = [];
+
 	private readonly providerMappings = new Map<
 		string,
 		{ disposables: IDisposable[]; provider: JupyterServerCollection }
 	>();
+
 	private kernelSpecsSourceRegistered = false;
 
 	constructor(
@@ -81,9 +83,11 @@ export class KernelSourceCommandHandler
 	) {
 		disposables.push(this);
 	}
+
 	public dispose() {
 		dispose(this.localDisposables);
 	}
+
 	activate(): void {
 		if (!isWebExtension()) {
 			this.localDisposables.push(
@@ -105,6 +109,7 @@ export class KernelSourceCommandHandler
 					},
 				),
 			);
+
 			this.localDisposables.push(
 				notebooks.registerKernelSourceActionProvider(
 					InteractiveWindowView,
@@ -128,6 +133,7 @@ export class KernelSourceCommandHandler
 			let kernelSpecActions: NotebookKernelSourceAction[] = [];
 
 			const kernelSpecActionChangeEmitter = new EventEmitter<void>();
+
 			this.localDisposables.push(
 				notebooks.registerKernelSourceActionProvider(
 					JupyterNotebookView,
@@ -165,6 +171,7 @@ export class KernelSourceCommandHandler
 					)
 				) {
 					this.kernelSpecsSourceRegistered = true;
+
 					kernelSpecActions = [
 						{
 							label: DataScience.localKernelSpecs,
@@ -180,11 +187,13 @@ export class KernelSourceCommandHandler
 			};
 
 			registerKernelSpecsSource();
+
 			this.kernelFinder.onDidChangeKernels(
 				() => registerKernelSpecsSource(),
 				this,
 				this.localDisposables,
 			);
+
 			this.localDisposables.push(
 				commands.registerCommand(
 					"jupyter.kernel.selectLocalKernelSpec",
@@ -195,6 +204,7 @@ export class KernelSourceCommandHandler
 					this,
 				),
 			);
+
 			this.localDisposables.push(
 				commands.registerCommand(
 					"jupyter.kernel.selectLocalPythonEnvironment",
@@ -206,6 +216,7 @@ export class KernelSourceCommandHandler
 				),
 			);
 		}
+
 		this.localDisposables.push(
 			commands.registerCommand(
 				"jupyter.kernel.selectJupyterServerKernel",
@@ -218,13 +229,16 @@ export class KernelSourceCommandHandler
 			ServiceContainer.instance.get<IJupyterServerProviderRegistry>(
 				IJupyterServerProviderRegistry,
 			);
+
 		uriRegistration.onDidChangeCollections(
 			this.registerUriCommands,
 			this,
 			this.localDisposables,
 		);
+
 		this.registerUriCommands();
 	}
+
 	private registerUriCommands() {
 		const uriRegistration =
 			ServiceContainer.instance.get<IJupyterServerProviderRegistry>(
@@ -232,17 +246,20 @@ export class KernelSourceCommandHandler
 			);
 
 		const existingItems = new Set<string>();
+
 		uriRegistration.jupyterCollections.map((collection) => {
 			const id = `${collection.extensionId}:${collection.id}`;
 
 			if (collection.id === TestingKernelPickerProviderId) {
 				return;
 			}
+
 			existingItems.add(id);
 
 			if (this.providerMappings.has(id)) {
 				return;
 			}
+
 			const providerItemNb = notebooks.registerKernelSourceActionProvider(
 				JupyterNotebookView,
 				{
@@ -296,20 +313,26 @@ export class KernelSourceCommandHandler
 					},
 				},
 			);
+
 			this.localDisposables.push(providerItemNb);
+
 			this.localDisposables.push(providerItemIW);
+
 			this.providerMappings.set(id, {
 				disposables: [providerItemNb, providerItemIW],
 				provider: collection,
 			});
 		});
+
 		this.providerMappings.forEach(({ disposables }, id) => {
 			if (!existingItems.has(id)) {
 				dispose(disposables);
+
 				this.providerMappings.delete(id);
 			}
 		});
 	}
+
 	private async onSelectLocalKernel(
 		kind:
 			| ContributedKernelFinderKind.LocalKernelSpec
@@ -321,6 +344,7 @@ export class KernelSourceCommandHandler
 		if (!notebook) {
 			return;
 		}
+
 		if (kind === ContributedKernelFinderKind.LocalPythonEnvironment) {
 			const selector =
 				ServiceContainer.instance.get<ILocalPythonNotebookKernelSourceSelector>(
@@ -341,6 +365,7 @@ export class KernelSourceCommandHandler
 			return this.getSelectedController(notebook, kernel);
 		}
 	}
+
 	private async onSelectRemoteKernel(
 		extensionId: string,
 		providerId: string,
@@ -354,9 +379,11 @@ export class KernelSourceCommandHandler
 				window.activeTextEditor.document.uri,
 			)?.notebook;
 		}
+
 		if (!notebook) {
 			return;
 		}
+
 		const id = `${extensionId}:${providerId}`;
 
 		const provider = this.providerMappings.get(id)?.provider;
@@ -364,6 +391,7 @@ export class KernelSourceCommandHandler
 		if (!provider) {
 			return;
 		}
+
 		const selector =
 			ServiceContainer.instance.get<IRemoteNotebookKernelSourceSelector>(
 				IRemoteNotebookKernelSourceSelector,
@@ -373,6 +401,7 @@ export class KernelSourceCommandHandler
 
 		return this.getSelectedController(notebook, kernel);
 	}
+
 	private async getSelectedController(
 		notebook: NotebookDocument,
 		kernel?: KernelConnectionMetadata,
@@ -380,6 +409,7 @@ export class KernelSourceCommandHandler
 		if (!kernel) {
 			return;
 		}
+
 		const controllers = this.controllerRegistration.addOrUpdate(kernel, [
 			notebook.notebookType as
 				| typeof JupyterNotebookView
@@ -393,6 +423,7 @@ export class KernelSourceCommandHandler
 
 			return;
 		}
+
 		initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 			notebook.uri,
 			kernel,
@@ -406,6 +437,7 @@ export class KernelSourceCommandHandler
 				),
 			)
 			.catch(noop);
+
 		controllers
 			.find((item) => item.viewType === notebook.notebookType)
 			?.controller.updateNotebookAffinity(
@@ -414,10 +446,12 @@ export class KernelSourceCommandHandler
 			);
 
 		const controller = controllers[0];
+
 		await this.onControllerSelected(notebook, controller);
 
 		return controller.controller.id;
 	}
+
 	private async onControllerSelected(
 		notebook: NotebookDocument,
 		controller: IVSCodeNotebookController,
@@ -436,10 +470,13 @@ export class KernelSourceCommandHandler
 
 			try {
 				const token = new CancellationTokenSource();
+
 				disposables.push(token);
 
 				const ui = new DisplayOptions(false);
+
 				disposables.push(ui);
+
 				await this.kernelDependency.installMissingDependencies({
 					resource: notebook.uri,
 					kernelConnection: controller.connection,

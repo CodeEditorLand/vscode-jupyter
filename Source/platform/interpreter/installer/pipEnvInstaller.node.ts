@@ -32,6 +32,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 	) {
 		super(serviceContainer);
 	}
+
 	public get name(): string {
 		return "pipenv";
 	}
@@ -43,6 +44,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 	public get displayName() {
 		return pipenvName;
 	}
+
 	public get priority(): number {
 		return 10;
 	}
@@ -75,6 +77,7 @@ export class PipEnvInstaller extends ModuleInstaller {
 			return getEnvironmentType(resource) === EnvironmentType.Pipenv;
 		}
 	}
+
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,

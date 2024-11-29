@@ -51,6 +51,7 @@ export class PythonEnvFilterCompletionProvider
 				"[",
 			),
 		);
+
 		this.disposableRegistry.push(
 			languages.registerCompletionItemProvider(
 				{ language: "jsonc" },
@@ -107,6 +108,7 @@ export class PythonEnvFilterCompletionProvider
 		if (path.basename(document.uri.fsPath) !== "settings.json") {
 			return false;
 		}
+
 		const location = getLocation(
 			document.getText(),
 			document.offsetAt(position),
@@ -118,6 +120,7 @@ export class PythonEnvFilterCompletionProvider
 			location.path.length === 2
 		);
 	}
+
 	private getCurrentItemsInList(
 		document: TextDocument,
 		position: Position,
@@ -134,6 +137,7 @@ export class PythonEnvFilterCompletionProvider
 			if (!settingsNode) {
 				return [];
 			}
+
 			const items = getNodeValue(settingsNode) as string[];
 
 			return Array.isArray(items) ? items : [];

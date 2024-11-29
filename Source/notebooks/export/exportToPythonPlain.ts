@@ -22,15 +22,19 @@ import { IExport } from "./types";
 // Handles exporting a NotebookDocument to python without using nbconvert
 export class ExportToPythonPlain implements IExport {
 	private readonly fs: IFileSystem;
+
 	private readonly configuration: IConfigurationService;
+
 	private platform: IPlatformService;
 
 	constructor() {
 		this.fs = ServiceContainer.instance.get<IFileSystem>(IFileSystem);
+
 		this.configuration =
 			ServiceContainer.instance.get<IConfigurationService>(
 				IConfigurationService,
 			);
+
 		this.platform =
 			ServiceContainer.instance.get<IPlatformService>(IPlatformService);
 	}
@@ -54,6 +58,7 @@ export class ExportToPythonPlain implements IExport {
 		}
 
 		const contents = this.exportDocument(sourceDocument);
+
 		await this.writeFile(target, contents);
 	}
 

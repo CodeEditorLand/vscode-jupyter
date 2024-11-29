@@ -22,6 +22,7 @@ function convertVSCodeOutputToExecuteResultOrDisplayData(
 ):
 	| (nbformat.IMimeBundle & {
 			model_id: string;
+
 			version_major: number;
 			/**
 			 * This property is only used & added in tests.
@@ -40,6 +41,7 @@ function convertVSCodeOutputToExecuteResultOrDisplayData(
 class FallbackRenderer extends Error {
 	constructor() {
 		super();
+
 		this.name = "vscode.fallbackToNextRenderer";
 	}
 }
@@ -59,6 +61,7 @@ async function getRendererFunction() {
 			if (renderOutputFunc) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(window as any).ipywidgetsKernel.initialize();
+
 				resolve(renderOutputFunc);
 			} else {
 				setTimeout(getRendererFuncImpl, 100);
@@ -79,12 +82,14 @@ export const activate: ActivationFunction = (context) => {
 				category,
 			});
 		}
+
 		if (category === "error") {
 			console.error(message);
 		}
 	};
 
 	logger("Jupyter IPyWidget Renderer Activated");
+
 	hookupTestScripts(context);
 
 	const modelAvailabilityResponse = new Map<
@@ -94,21 +99,27 @@ export const activate: ActivationFunction = (context) => {
 
 	const rendererInitPromise = createDeferred<{
 		version?: 7 | 8;
+
 		widgetState?: NotebookMetadata["widgets"];
+
 		widgetStateLoaded: boolean;
+
 		kernelSelected: boolean;
 	}>();
 
 	if (context.postMessage) {
 		context.postMessage({ command: "ipywidget-renderer-loaded" });
 	}
+
 	if (context.onDidReceiveMessage) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		context.onDidReceiveMessage(async (e: any) => {
 			if (e.command === "query-widget-state" && e.model_id) {
 				modelAvailabilityResponse.get(e.model_id)?.resolve(e);
+
 				modelAvailabilityResponse.delete(e.model_id);
 			}
+
 			if (e.command === "ipywidget-renderer-init") {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const ipywidgetsKernel = (window as any).ipywidgetsKernel;
@@ -121,6 +132,7 @@ export const activate: ActivationFunction = (context) => {
 							if ((window as any).vscIPyWidgets7) {
 								return resolve();
 							}
+
 							setTimeout(checkIfLoaded, 500);
 						};
 
@@ -133,11 +145,13 @@ export const activate: ActivationFunction = (context) => {
 							if ((window as any).vscIPyWidgets8) {
 								return resolve();
 							}
+
 							setTimeout(checkIfLoaded, 500);
 						};
 
 						setTimeout(checkIfLoaded, 500);
 					});
+
 					await Promise.all([widgets7Promise, widgets8Promise]);
 
 					const unloadWidgets8 = () => {
@@ -162,16 +176,20 @@ export const activate: ActivationFunction = (context) => {
 						unloadWidgets8();
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						(window as any).vscIPyWidgets7.load();
+
 						logger("Loaded IPYWidgets 7.x", "info");
 					} else if (e.version === 8) {
 						unloadWidgets7();
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						(window as any).vscIPyWidgets8.load();
+
 						logger("Loaded IPYWidgets 8.x", "info");
 					}
 				}
+
 				if (e.widgetState && ipywidgetsKernel && e.version) {
 					await ipywidgetsKernel.restoreWidgets(e.widgetState);
+
 					rendererInitPromise.resolve(
 						Object.assign({}, e, { widgetStateLoaded: true }),
 					);
@@ -195,17 +213,22 @@ export const activate: ActivationFunction = (context) => {
 		if (!context.postMessage) {
 			return { hasWidgetState: false, kernelSelected: false };
 		}
+
 		const deferred =
 			modelAvailabilityResponse.get(model_id) ||
 			createDeferred<{
 				hasWidgetState: boolean;
+
 				kernelSelected: boolean;
 			}>();
+
 		modelAvailabilityResponse.set(model_id, deferred);
+
 		context.postMessage({ command: "query-widget-state", model_id });
 
 		return deferred.promise;
 	}
+
 	return {
 		/**
 		 * It is possible for another Widget to get rendered in the same OutputItem.
@@ -255,6 +278,7 @@ export const activate: ActivationFunction = (context) => {
 
 					throw new FallbackRenderer();
 				}
+
 				if (!kernelSelected) {
 					logger(
 						`No Kernel selected, hence not rendering widget output ${outputItem.id}`,
@@ -263,10 +287,12 @@ export const activate: ActivationFunction = (context) => {
 
 					throw new FallbackRenderer();
 				}
+
 				if (renderOutputFunc) {
 					logger(
 						`Rendering ${outputItem.id} widget renderer found *************`,
 					);
+
 					element.className =
 						(element.className || "") +
 						" cell-output-ipywidget-background";
@@ -279,6 +305,7 @@ export const activate: ActivationFunction = (context) => {
 						doesKernelHaveWidgetState,
 					);
 				}
+
 				throw new FallbackRenderer();
 			} catch (ex) {
 				logErrorMessage(
@@ -320,8 +347,10 @@ function hookupTestScripts(context: RendererContext<unknown>) {
 				message: "Hook not registered",
 			});
 		}
+
 		return;
 	}
+
 	anyWindow.widgetEntryPoint.initialize(context);
 }
 function sendRenderOutputItem(
@@ -338,11 +367,13 @@ function sendRenderOutputItem(
 	) {
 		return;
 	}
+
 	if (context.postMessage) {
 		context.postMessage({
 			command: "log",
 			message: "rendering output",
 		});
 	}
+
 	anyWindow.widgetEntryPoint.renderOutputItem(outputItem, element);
 }

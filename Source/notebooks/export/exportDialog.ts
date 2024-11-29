@@ -34,18 +34,21 @@ export class ExportDialog {
 		switch (format) {
 			case ExportFormat.python:
 				fileExtensions = PythonExtensions;
+
 				extension = ".py";
 
 				break;
 
 			case ExportFormat.pdf:
 				extension = ".pdf";
+
 				fileExtensions = PDFExtensions;
 
 				break;
 
 			case ExportFormat.html:
 				extension = ".html";
+
 				fileExtensions = HTMLExtensions;
 
 				break;
@@ -54,6 +57,7 @@ export class ExportDialog {
 				extension = ".ipynb";
 
 				const filtersKey = localize.DataScience.exportDialogFilter;
+
 				fileExtensions[filtersKey] = ["ipynb"];
 
 				break;

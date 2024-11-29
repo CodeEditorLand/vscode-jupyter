@@ -10,6 +10,7 @@ const format = require("format-util") as typeof import("format-util");
 
 export class OutputChannelLogger implements ILogger {
 	private readonly homeReplaceRegEx?: RegExp;
+
 	private readonly userNameReplaceRegEx?: RegExp;
 
 	constructor(
@@ -18,8 +19,10 @@ export class OutputChannelLogger implements ILogger {
 		userNameRegEx?: RegExp,
 	) {
 		this.homeReplaceRegEx = homeRegEx;
+
 		this.userNameReplaceRegEx = userNameRegEx;
 	}
+
 	private format(
 		level: string | undefined,
 		message: string,
@@ -32,12 +35,14 @@ export class OutputChannelLogger implements ILogger {
 		if (this.homeReplaceRegEx) {
 			logMessage = logMessage.replace(this.homeReplaceRegEx, "~");
 		}
+
 		if (this.userNameReplaceRegEx) {
 			logMessage = logMessage.replace(
 				this.userNameReplaceRegEx,
 				"<username>",
 			);
 		}
+
 		return logMessage;
 	}
 

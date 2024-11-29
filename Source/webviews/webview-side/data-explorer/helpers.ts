@@ -25,6 +25,7 @@ export function preselectedSliceExpression(shape: number[]) {
 
 					return "0";
 				}
+
 				return ":";
 			})
 			.join(", ") +
@@ -64,6 +65,7 @@ export function validateSliceExpression(
 					) {
 						hasOutOfRangeIndex = { shapeIndex, value };
 					}
+
 					return value;
 				}
 			});
@@ -98,6 +100,7 @@ export function validateSliceExpression(
 			);
 		}
 	}
+
 	return "";
 }
 

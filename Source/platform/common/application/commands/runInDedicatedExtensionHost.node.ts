@@ -22,6 +22,7 @@ export class RunInDedicatedExtensionHostCommandHandler
 			this,
 		);
 	}
+
 	private async updateAffinity() {
 		const affinity = workspace
 			.getConfiguration("extensions")

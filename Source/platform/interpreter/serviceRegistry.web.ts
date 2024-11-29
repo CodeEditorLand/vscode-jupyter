@@ -12,10 +12,12 @@ export function registerTypes(serviceManager: IServiceManager) {
 		IExtensionSyncActivationService,
 		PythonEnvFilterSettingMigration,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		PythonFilterUICommandDeprecation,
 	);
+
 	serviceManager.addSingleton<PythonEnvironmentFilter>(
 		PythonEnvironmentFilter,
 		PythonEnvironmentFilter,

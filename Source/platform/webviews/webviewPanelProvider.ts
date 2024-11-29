@@ -102,6 +102,7 @@ class WebviewPanel extends Webview implements IWebviewPanel {
 		this.disposableRegistry.push(
 			webviewHost.onDidDispose(() => {
 				this.webviewHost = undefined;
+
 				this.panelOptions.listener.dispose();
 			}),
 		);
@@ -148,6 +149,7 @@ export class WebviewPanelProvider implements IWebviewPanelProvider {
 		if (Array.isArray(options.additionalPaths)) {
 			additionalRootPaths.push(...options.additionalPaths);
 		}
+
 		return new WebviewPanel(
 			this.fs,
 			this.disposableRegistry,

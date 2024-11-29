@@ -27,9 +27,11 @@ class WebviewView extends Webview implements IWebviewView {
 			return this.webviewHost.visible;
 		}
 	}
+
 	public get onDidChangeVisibility(): Event<void> {
 		return this._onDidChangeVisibility.event;
 	}
+
 	private readonly _onDidChangeVisibility = new EventEmitter<void>();
 
 	constructor(
@@ -52,6 +54,7 @@ class WebviewView extends Webview implements IWebviewView {
 		this.disposableRegistry.push(
 			webviewHost.onDidDispose(() => {
 				this.webviewHost = undefined;
+
 				this.panelOptions.listener.dispose();
 			}),
 		);

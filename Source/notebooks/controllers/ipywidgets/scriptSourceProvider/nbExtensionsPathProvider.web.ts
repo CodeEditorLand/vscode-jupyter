@@ -18,6 +18,7 @@ export class NbExtensionsPathProvider implements INbExtensionsPathProvider {
 			case "startUsingRemoteKernelSpec": {
 				return Uri.parse(kernel.kernelConnectionMetadata.baseUrl);
 			}
+
 			default: {
 				// Not possible a possible code path in web.
 				return;

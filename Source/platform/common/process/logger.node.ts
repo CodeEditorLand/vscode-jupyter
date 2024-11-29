@@ -37,5 +37,6 @@ export function logProcess(
 			`    > ${Logging.currentWorkingDirectory} ${getDisplayPath(options.cwd.toString())}`,
 		);
 	}
+
 	logger.info(message.join("\n"));
 }

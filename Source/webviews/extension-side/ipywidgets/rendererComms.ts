@@ -31,6 +31,7 @@ type WidgetData = {
 
 type QueryWidgetStateCommand = {
 	command: "query-widget-state";
+
 	model_id: string;
 };
 type RendererLoadedCommand = { command: "ipywidget-renderer-loaded" };
@@ -45,33 +46,42 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		@inject(IControllerRegistration)
 		private readonly controllers: IControllerRegistration,
 	) {}
+
 	private readonly widgetOutputsPerNotebook = new WeakMap<
 		NotebookDocument,
 		Set<string>
 	>();
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	activate() {
 		const comms = notebooks.createRendererMessaging(
 			"jupyter-ipywidget-renderer",
 		);
+
 		comms.onDidReceiveMessage(
 			this.onDidReceiveMessage.bind(this, comms),
 			this,
 			this.disposables,
 		);
+
 		this.kernelProvider.onDidStartKernel(
 			this.onDidStartKernel,
 			this,
 			this.disposables,
 		);
 	}
+
 	private onDidStartKernel(e: IKernel) {
 		this.hookupKernel(e);
+
 		e.onStarted(() => this.hookupKernel(e), this, this.disposables);
+
 		e.onRestarted(() => this.hookupKernel(e), this, this.disposables);
 	}
+
 	private hookupKernel(kernel: IKernel) {
 		this.widgetOutputsPerNotebook.delete(kernel.notebook);
 
@@ -105,11 +115,14 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 				this.trackModelId(kernel.notebook, msg);
 			}
 		};
+
 		iopubMessage.connect(handler);
+
 		this.disposables.push(
 			new Disposable(() => iopubMessage.disconnect(handler)),
 		);
 	}
+
 	private trackModelId(
 		notebook: NotebookDocument,
 		msg: {
@@ -133,10 +146,12 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 					new Set<string>();
 
 				set.add(widgetData.model_id);
+
 				this.widgetOutputsPerNotebook.set(notebook, set);
 			}
 		}
 	}
+
 	private onDidReceiveMessage(
 		comms: NotebookRendererMessaging,
 		{
@@ -144,6 +159,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 			message,
 		}: {
 			editor: NotebookEditor;
+
 			message: QueryWidgetStateCommand | RendererLoadedCommand;
 		},
 	) {
@@ -154,6 +170,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		) {
 			this.queryWidgetState(comms, editor, message);
 		}
+
 		if (
 			message &&
 			typeof message === "object" &&
@@ -162,6 +179,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 			this.sendWidgetVersionAndState(comms, editor);
 		}
 	}
+
 	private queryWidgetState(
 		comms: NotebookRendererMessaging,
 		editor: NotebookEditor,
@@ -174,6 +192,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		const kernelSelected = !!this.controllers.getSelected(editor.notebook);
 
 		const hasWidgetState = !!availableModels?.has(message.model_id);
+
 		comms
 			.postMessage(
 				{
@@ -186,6 +205,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 			)
 			.then(noop, noop);
 	}
+
 	private sendWidgetVersionAndState(
 		comms: NotebookRendererMessaging,
 		editor: NotebookEditor,
@@ -212,6 +232,7 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		//                 : 7
 		//             : undefined;
 		// }
+
 		const version = kernel?.ipywidgetsVersion; // || versionInWidgetState;
 
 		if (kernel?.ipywidgetsVersion) {
@@ -227,7 +248,9 @@ export class IPyWidgetRendererComms implements IExtensionSyncActivationService {
 		//         `IPyWidget version in Kernel is ${kernel?.ipywidgetsVersion} and in widget state is ${versionInWidgetState}.}`
 		//     );
 		// }
+
 		const kernelSelected = !!this.controllers.getSelected(editor.notebook);
+
 		comms
 			.postMessage(
 				{

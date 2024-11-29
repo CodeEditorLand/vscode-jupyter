@@ -27,7 +27,9 @@ export class DebugLocationTrackerFactory
 		DebugAdapterTrackerFactory
 {
 	private activeTrackers = new WeakMap<DebugSession, DebugLocationTracker>();
+
 	private activeTrackersById = new Map<string, DebugLocationTracker>();
+
 	private updatedEmitter: EventEmitter<void> = new EventEmitter<void>();
 
 	constructor(
@@ -44,21 +46,27 @@ export class DebugLocationTrackerFactory
 		session: DebugSession,
 	): DebugAdapterTracker {
 		const result = new DebugLocationTracker(session.id);
+
 		this.activeTrackers.set(session, result);
+
 		this.activeTrackersById.set(session.id, result);
+
 		result.sessionEnded(
 			() => {
 				this.activeTrackers.delete(session);
+
 				this.activeTrackersById.delete(session.id);
 			},
 			this,
 			this.disposableRegistry,
 		);
+
 		result.debugLocationUpdated(
 			this.onLocationUpdated,
 			this,
 			this.disposableRegistry,
 		);
+
 		this.onLocationUpdated();
 
 		return result;

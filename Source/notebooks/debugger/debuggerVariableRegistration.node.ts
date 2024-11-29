@@ -36,6 +36,7 @@ export class DebuggerVariableRegistration
 		@named(Identifiers.DEBUGGER_VARIABLES)
 		private debugVariables: DebugAdapterTracker,
 	) {}
+
 	public activate() {
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
@@ -43,18 +44,21 @@ export class DebuggerVariableRegistration
 				this,
 			),
 		);
+
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				"debugpy",
 				this,
 			),
 		);
+
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				pythonKernelDebugAdapter,
 				this,
 			),
 		);
+
 		this.disposables.push(
 			this.debugService.registerDebugAdapterTrackerFactory(
 				pythonIWKernelDebugAdapter,

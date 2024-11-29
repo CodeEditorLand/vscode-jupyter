@@ -71,6 +71,7 @@ export async function resolveCompletionItem(
 		// Except for Python.
 		return item;
 	}
+
 	if (
 		kernelsThatDoNotSupportCompletionResolveOrAreTooSlowToReply.has(kernel)
 	) {
@@ -85,6 +86,7 @@ export async function resolveCompletionItem(
 	) {
 		return item;
 	}
+
 	const message = createInspectRequestMessage(
 		originalCompletionItem || item,
 		document,
@@ -108,6 +110,7 @@ export async function resolveCompletionItem(
 			content?.found
 		) {
 			const documentation = getDocumentation(content);
+
 			item.documentation = convertDocumentationToMarkdown(
 				documentation,
 				monacoLanguage,
@@ -117,8 +120,10 @@ export async function resolveCompletionItem(
 		if (ex instanceof CancellationError) {
 			return item;
 		}
+
 		if (ex instanceof RequestTimedoutError) {
 			consolidatedToken.cancel();
+
 			handleKernelRequestTimeout(kernel, monacoLanguage, kernelId);
 		}
 	} finally {
@@ -132,9 +137,11 @@ function getDocumentation(content: KernelMessage.IInspectReply) {
 	if (!content || content.status !== "ok" || !content.found) {
 		return ";";
 	}
+
 	if (!content.data || typeof content.data !== "object") {
 		return "";
 	}
+
 	return "text/plain" in content.data
 		? stripAnsi(content.data["text/plain"] as string)
 		: "";
@@ -149,18 +156,22 @@ function handleKernelRequestTimeout(
 	if (isPythonKernelConnection(kernel.kernelConnectionMetadata)) {
 		return;
 	}
+
 	if (
 		kernelsThatDoNotSupportCompletionResolveOrAreTooSlowToReply.has(kernel)
 	) {
 		return;
 	}
+
 	kernelsThatDoNotSupportCompletionResolveOrAreTooSlowToReply.add(kernel);
+
 	logger.warn(
 		`Failed to inspect code in kernel ${getDisplayNameOrNameOfKernelConnection(kernel.kernelConnectionMetadata)}`,
 	);
 
 	if (!telemetrySentForUnableToResolveCompletion.has(kernel)) {
 		telemetrySentForUnableToResolveCompletion.add(kernel);
+
 		sendTelemetryEvent(
 			Telemetry.KernelCodeCompletionCannotResolve,
 			undefined,
@@ -213,6 +224,7 @@ function getCachedResult(
 	if (!kernel.session?.kernel) {
 		return;
 	}
+
 	const cacheKey = JSON.stringify(message);
 
 	const cache = cachedKernelInspectRequests.get(kernel.session.kernel);
@@ -228,19 +240,23 @@ function cachedResult(
 	if (!kernel.session?.kernel) {
 		return;
 	}
+
 	if (content.status !== "ok" || !content.found) {
 		return;
 	}
+
 	const cacheKey = JSON.stringify(message);
 
 	const cache =
 		cachedKernelInspectRequests.get(kernel.session.kernel) ||
 		new Map<string, KernelMessage.IInspectReplyMsg["content"]>();
+
 	cachedKernelInspectRequests.set(kernel.session.kernel, cache);
 	// If we have more than 100 items in the cache, clear it.
 	if (cache.size > 100) {
 		cache.clear();
 	}
+
 	cache.set(cacheKey, content);
 }
 
@@ -281,6 +297,7 @@ function shoudlSendInspectRequest(kernel: IKernel) {
 
 		return false;
 	}
+
 	if (
 		times.maxTime > maxTimeWaitingForResolveCompletion &&
 		Date.now() - times.lastRequestTime < 30_000
@@ -293,6 +310,7 @@ function shoudlSendInspectRequest(kernel: IKernel) {
 
 		return false;
 	}
+
 	return true;
 }
 
@@ -303,9 +321,11 @@ async function waitForKernelToBeReady(
 	if (!kernel.session?.kernel) {
 		return;
 	}
+
 	if (!doesKernelHaveTooManyPendingRequests(kernel)) {
 		return;
 	}
+
 	logger.info(
 		`Too many pending requests ${getPendingRequestCount(kernel)} for kernel ${
 			kernel.id
@@ -315,6 +335,7 @@ async function waitForKernelToBeReady(
 	const kernelConnection = kernel.session.kernel;
 
 	const disposables = new DisposableStore();
+
 	await raceCancellation(
 		token,
 		new Promise<void>((resolve) => {
@@ -322,25 +343,32 @@ async function waitForKernelToBeReady(
 				if (token.isCancellationRequested) {
 					return;
 				}
+
 				if (!doesKernelHaveTooManyPendingRequests(kernel)) {
 					resolve();
+
 					dispose(disposables);
 
 					return;
 				}
 				// Perhaps we have some async code.
 				const timeout = setTimeout(statusChangeHandler, 100);
+
 				disposables.add({ dispose: () => clearTimeout(timeout) });
 			};
+
 			disposables.add(
 				once(token.onCancellationRequested)(() => {
 					resolve();
+
 					kernelConnection.statusChanged.disconnect(
 						statusChangeHandler,
 					);
 				}),
 			);
+
 			kernelConnection.statusChanged.connect(statusChangeHandler);
+
 			disposables.add({
 				dispose: () => {
 					kernelConnection.statusChanged.disconnect(
@@ -356,17 +384,21 @@ function trackCompletionTime(kernel: IKernel, elapsedTime: number) {
 	if (!kernel.session?.kernel) {
 		return;
 	}
+
 	const times = timeToInspectRequest.get(kernel.session.kernel) || {
 		maxTime: 0,
 		lastRequestTime: 0,
 		numberOfTimesMaxedOut: 0,
 	};
+
 	times.maxTime = Math.max(times.maxTime, elapsedTime);
+
 	times.lastRequestTime = Date.now();
 
 	if (elapsedTime > maxTimeWaitingForResolveCompletion) {
 		times.numberOfTimesMaxedOut += 1;
 	}
+
 	timeToInspectRequest.set(kernel.session.kernel, times);
 }
 
@@ -383,6 +415,7 @@ async function sendInspectRequest(
 	if (!kernel.session?.kernel) {
 		return;
 	}
+
 	const cachedValue = getCachedResult(kernel, message);
 
 	if (cachedValue) {
@@ -405,6 +438,7 @@ async function sendInspectRequest(
 	const stopWatch = new StopWatch();
 
 	const codeForLogging = splitLines(message.code).reverse()[0].slice(-50);
+
 	logger.trace(`Inspecting code ${codeForLogging}`);
 
 	const request = isPythonKernelConnection(kernel.kernelConnectionMetadata)
@@ -418,7 +452,9 @@ async function sendInspectRequest(
 		if (!kernel.session?.kernel) {
 			return;
 		}
+
 		cachedResult(kernel, message, content);
+
 		trackCompletionTime(kernel, stopWatch.elapsedTime);
 
 		const log =
@@ -435,6 +471,7 @@ async function sendInspectRequest(
 				`Inspected code ${codeForLogging} in ${stopWatch.elapsedTime}ms`,
 			);
 		}
+
 		return content;
 	});
 }
@@ -475,15 +512,18 @@ function doesKernelHaveTooManyPendingRequests(kernel: IKernel) {
 	if (!kernel.session?.kernel) {
 		return false;
 	}
+
 	return getPendingRequestCount(kernel) >= maxPendingKernelRequests;
 }
 function getPendingRequestCount(kernel: IKernel) {
 	if (!kernel.session?.kernel) {
 		return 0;
 	}
+
 	if (!pendingInspectRequests.has(kernel.session?.kernel)) {
 		pendingInspectRequests.set(kernel.session?.kernel, { count: 0 });
 	}
+
 	return pendingInspectRequests.get(kernel.session?.kernel)?.count || 0;
 }
 
@@ -491,10 +531,13 @@ function incrementPendingCounter(kernel: IKernel) {
 	if (!kernel.session?.kernel) {
 		return { dispose: noop };
 	}
+
 	const counter = pendingInspectRequests.get(kernel.session?.kernel) || {
 		count: 0,
 	};
+
 	pendingInspectRequests.set(kernel.session?.kernel, counter);
+
 	counter.count += 1;
 
 	return {

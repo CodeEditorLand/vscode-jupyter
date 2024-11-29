@@ -27,6 +27,7 @@ import { isJustMyCodeNotification } from "./debugCellController";
  */
 export class RunByLineController implements IDebuggingDelegate {
 	private lastPausedThreadId: number | undefined;
+
 	private lastPausePosition: Position | undefined;
 
 	constructor(
@@ -41,6 +42,7 @@ export class RunByLineController implements IDebuggingDelegate {
 	public continue(): void {
 		if (typeof this.lastPausedThreadId !== "number") {
 			logger.debug(`No paused thread, can't do RBL`);
+
 			this.stop();
 
 			return;
@@ -53,6 +55,7 @@ export class RunByLineController implements IDebuggingDelegate {
 		logger.ci(`RunbylineController::stop()`);
 		// When debugpy gets stuck, running a cell fixes it and allows us to start another debugging session
 		this.execution.executeHidden("pass").then(noop, noop);
+
 		this.debugAdapter.disconnect().then(noop, noop);
 	}
 
@@ -153,6 +156,7 @@ export class RunByLineController implements IDebuggingDelegate {
 		});
 
 		const lineList: number[] = [];
+
 		parseForComments(
 			textLines,
 			() => noop(),
@@ -162,6 +166,7 @@ export class RunByLineController implements IDebuggingDelegate {
 				}
 			},
 		);
+
 		lineList.sort();
 
 		// Don't send the SetBreakpointsRequest or open the variable view if there are no code lines
@@ -169,6 +174,7 @@ export class RunByLineController implements IDebuggingDelegate {
 			const initialBreakpoint: DebugProtocol.SourceBreakpoint = {
 				line: lineList[0] + 1,
 			};
+
 			await this.debugAdapter.setBreakpoints({
 				source: {
 					name: path.basename(this.debugCell.notebook.uri.path),

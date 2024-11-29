@@ -59,6 +59,7 @@ function convertPythonDocumentationToMarkdown(
 	let hasNonEmptyContent = false;
 
 	let startedCodeBlockInTheMiddle = false;
+
 	lines.map((line, index) => {
 		if (index === 0) {
 			const signature = ["Signature:", "Init signature:"].find(
@@ -68,15 +69,19 @@ function convertPythonDocumentationToMarkdown(
 
 			if (signature) {
 				codeBlockStarted = true;
+
 				line = line.substring(signature.length).trim();
+
 				markdownStringLines.push("```python");
 
 				if (line.trim().length) {
 					// Code block starts in the next line.
 					// E.g df.align
 					markdownStringLines.push(line);
+
 					hasNonEmptyContent = true;
 				}
+
 				return;
 			}
 		}
@@ -98,15 +103,20 @@ function convertPythonDocumentationToMarkdown(
 
 			return;
 		}
+
 		const possibleSection = sectionHeaders.find((section) =>
 			line.trim().toLowerCase().startsWith(section.toLowerCase()),
 		);
 
 		if (possibleSection && !processedSections.has(possibleSection)) {
 			currentSection = possibleSection.toLowerCase();
+
 			processedSections.add(possibleSection);
+
 			headersStarted = true;
+
 			lastHeaderIndex = index;
+
 			foundStringFrom = false;
 
 			if (codeBlockStarted) {
@@ -115,7 +125,9 @@ function convertPythonDocumentationToMarkdown(
 				// E.g. df.align
 				markdownStringLines.push("```", "----------");
 			}
+
 			codeBlockStarted = false;
+
 			startedCodeBlockInTheMiddle = false;
 
 			// Sometimes docstrings are single line,
@@ -129,10 +141,13 @@ function convertPythonDocumentationToMarkdown(
 
 			if (docStringContents.length) {
 				markdownStringLines.push(docStringContents);
+
 				hasNonEmptyContent = true;
 			}
+
 			return;
 		}
+
 		if (foundStringFrom) {
 			return;
 		}
@@ -148,12 +163,16 @@ function convertPythonDocumentationToMarkdown(
 		) {
 			// Possible next line is also empty or has similar characters.
 			lastHeaderIndex = index;
+
 			foundStringFrom = false;
+
 			codeBlockStarted = false;
+
 			startedCodeBlockInTheMiddle = false;
 
 			return;
 		}
+
 		if (currentSection === "parameters" || currentSection === "see also") {
 			// Every line that is not indented is a parameter entry.
 			// hence those can be setup as bullet points.
@@ -168,10 +187,12 @@ function convertPythonDocumentationToMarkdown(
 			} else {
 				markdownStringLines.push(line);
 			}
+
 			hasNonEmptyContent = hasNonEmptyContent || line.trim().length > 0;
 
 			return;
 		}
+
 		if (currentSection === "options:") {
 			// Every line that starts with '-'
 			// E.g. %%timeit
@@ -186,10 +207,12 @@ function convertPythonDocumentationToMarkdown(
 			} else {
 				markdownStringLines.push(line);
 			}
+
 			hasNonEmptyContent = hasNonEmptyContent || line.trim().length > 0;
 
 			return;
 		}
+
 		if (currentSection === "returns") {
 			// Every line that is not indented is a return type.
 			// hence those can be setup as bullet points.
@@ -202,17 +225,21 @@ function convertPythonDocumentationToMarkdown(
 			} else {
 				markdownStringLines.push(line);
 			}
+
 			hasNonEmptyContent = hasNonEmptyContent || line.trim().length > 0;
 
 			return;
 		}
+
 		if (
 			currentSection === "examples" &&
 			!codeBlockStarted &&
 			(lastHeaderIndex + 1 === index || lastHeaderIndex + 2 === index)
 		) {
 			foundStringFrom = false;
+
 			codeBlockStarted = true;
+
 			hasNonEmptyContent = hasNonEmptyContent || line.trim().length > 0;
 
 			return markdownStringLines.push("```python", line);
@@ -225,12 +252,16 @@ function convertPythonDocumentationToMarkdown(
 			line.trim().endsWith("):")
 		) {
 			codeBlockStarted = true;
+
 			startedCodeBlockInTheMiddle = true;
+
 			markdownStringLines.push("```python", line);
+
 			hasNonEmptyContent = hasNonEmptyContent || line.trim().length > 0;
 
 			return;
 		}
+
 		if (
 			codeBlockStarted &&
 			startedCodeBlockInTheMiddle &&
@@ -239,11 +270,14 @@ function convertPythonDocumentationToMarkdown(
 			line.substring(0, 1) !== "\t"
 		) {
 			codeBlockStarted = false;
+
 			startedCodeBlockInTheMiddle = false;
 
 			return markdownStringLines.push(line, "```");
 		}
+
 		hasNonEmptyContent = hasNonEmptyContent || line.trim().length > 0;
+
 		markdownStringLines.push(line);
 	});
 
@@ -294,6 +328,7 @@ function convertJuliaDocumentationToMarkdown(
 				(lines[index] = line.trim().length ? line.substring(2) : line),
 		);
 	}
+
 	lines.map((line, index) => {
 		if (
 			line.trim() ===
@@ -308,7 +343,9 @@ function convertJuliaDocumentationToMarkdown(
 		// Or first line after a new signature starts
 		if (!signatureFound) {
 			currentSection = "signature";
+
 			codeBlockStarted = true;
+
 			signatureFound = true;
 
 			if (line.trim().length) {
@@ -319,16 +356,20 @@ function convertJuliaDocumentationToMarkdown(
 				return markdownStringLines.push("```julia");
 			}
 		}
+
 		if (currentSection === "signature") {
 			if (line.trim() === "") {
 				// End of the signature
 				currentSection = "";
+
 				codeBlockStarted = false;
+
 				foundNonEmptyCode = false;
 				// End the previous code block
 				markdownStringLines.push("```");
 			}
 		}
+
 		const possibleSection = juliaSectionHeaders.find((section) =>
 			line.trim().toLowerCase().startsWith(section.header.toLowerCase()),
 		);
@@ -342,12 +383,14 @@ function convertJuliaDocumentationToMarkdown(
 		) {
 			lines[index + 1] = ""; // Ignore the next line
 			currentSection = possibleSection.section.toLowerCase();
+
 			processedSections.add(possibleSection.header);
 
 			if (codeBlockStarted) {
 				// End the previous code block
 				markdownStringLines.push("```");
 			}
+
 			codeBlockStarted = false;
 
 			markdownStringLines.push(`## ${possibleSection.section}`);
@@ -365,8 +408,10 @@ function convertJuliaDocumentationToMarkdown(
 			) {
 				currentSection = "";
 			}
+
 			return;
 		}
+
 		if (currentSection === "examples:" && !codeBlockStarted) {
 			codeBlockStarted = true;
 
@@ -378,6 +423,7 @@ function convertJuliaDocumentationToMarkdown(
 				return markdownStringLines.push("```julia");
 			}
 		}
+
 		if (currentSection === "note:") {
 			markdownStringLines.push(
 				line.trim() ? line.trim().substring(1) : "",
@@ -385,6 +431,7 @@ function convertJuliaDocumentationToMarkdown(
 
 			return;
 		}
+
 		if (
 			codeBlockStarted &&
 			!foundNonEmptyCode &&
@@ -392,6 +439,7 @@ function convertJuliaDocumentationToMarkdown(
 		) {
 			return;
 		}
+
 		markdownStringLines.push(line);
 	});
 
@@ -424,6 +472,7 @@ function convertRDocumentationToMarkdown(
 	let codeBlockStarted = false;
 
 	let foundNonEmptyCode = false;
+
 	lines.map((line) => {
 		// For some reason R docstrings have a lot of `_` in them.
 		// Thats great, we can use that to identify sections.
@@ -443,12 +492,16 @@ function convertRDocumentationToMarkdown(
 				// End the previous code block
 				markdownStringLines.push("```");
 			}
+
 			codeBlockStarted = false;
+
 			currentSection = possibleSection.trim().toLowerCase();
+
 			markdownStringLines.push(`## ${possibleSection}`);
 
 			return;
 		}
+
 		if (
 			(currentSection === "examples" ||
 				currentSection === "examples:" ||
@@ -466,6 +519,7 @@ function convertRDocumentationToMarkdown(
 				return markdownStringLines.push("```r");
 			}
 		}
+
 		if (currentSection === "note:") {
 			markdownStringLines.push(
 				line.trim() ? line.trim().substring(1) : "",
@@ -473,6 +527,7 @@ function convertRDocumentationToMarkdown(
 
 			return;
 		}
+
 		if (
 			codeBlockStarted &&
 			!foundNonEmptyCode &&

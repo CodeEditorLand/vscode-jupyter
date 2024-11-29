@@ -28,20 +28,31 @@ export interface IKernelLauncher {
 
 export interface IKernelConnection {
 	iopub_port: number;
+
 	shell_port: number;
+
 	stdin_port: number;
+
 	control_port: number;
+
 	signature_scheme: "hmac-sha256";
+
 	hb_port: number;
+
 	ip: string;
+
 	key: string;
+
 	transport: "tcp" | "ipc";
+
 	kernel_name?: string;
 }
 
 export interface IKernelProcess extends ObservableDisposable {
 	readonly pid?: number;
+
 	readonly connection: Readonly<IKernelConnection>;
+
 	readonly kernelConnectionMetadata: Readonly<
 		LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata
 	>;
@@ -50,7 +61,9 @@ export interface IKernelProcess extends ObservableDisposable {
 	 */
 	readonly exited: Event<{
 		exitCode?: number;
+
 		reason?: string;
+
 		stderr: string;
 	}>;
 	/**

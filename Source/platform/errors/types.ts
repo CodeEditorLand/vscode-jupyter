@@ -8,6 +8,7 @@
  */
 export abstract class BaseError extends Error {
 	public stdErr?: string;
+
 	public isJupyterError = true;
 
 	constructor(
@@ -58,6 +59,7 @@ export class WrappedError extends BaseError {
 		) {
 			err = err.originalException;
 		}
+
 		return err;
 	}
 }
@@ -66,6 +68,7 @@ export function getErrorCategory(error?: Error): ErrorCategory {
 	if (!error) {
 		return "unknown";
 	}
+
 	return error instanceof BaseError ? error.category : "unknown";
 }
 

@@ -57,6 +57,7 @@ export class JupyterConnection {
 				`Unable to get resolved server information for ${serverId.extensionId}:${serverId.id}:${serverId.handle}`,
 			);
 		}
+
 		const serverUri: IJupyterServerUri = {
 			baseUrl: server.connectionInformation!.baseUrl.toString(true),
 			displayName: server.label,
@@ -105,6 +106,7 @@ export class JupyterConnection {
 				);
 			}
 		}
+
 		const connection = createJupyterConnectionInfo(
 			provider,
 			serverUri,
@@ -118,6 +120,7 @@ export class JupyterConnection {
 			// Attempt to list the running kernels. It will return empty if there are none, but will
 			// throw if can't connect.
 			sessionManager = JupyterLabHelper.create(connection.settings);
+
 			await Promise.all([
 				sessionManager.getRunningKernels(),
 				sessionManager.getKernelSpecs(),
@@ -184,6 +187,7 @@ export class JupyterConnection {
 			if (!collection) {
 				return;
 			}
+
 			const servers = await Promise.resolve(
 				collection.serverProvider.provideJupyterServers(token.token),
 			);
@@ -207,12 +211,15 @@ export class JupyterConnection {
 					//
 				}
 			}
+
 			if (!server) {
 				return;
 			}
+
 			if (server.connectionInformation) {
 				return server;
 			}
+
 			const resolvedServer = await Promise.resolve(
 				collection.serverProvider.resolveJupyterServer(
 					server,
@@ -223,10 +230,12 @@ export class JupyterConnection {
 			if (!resolvedServer?.connectionInformation) {
 				return;
 			}
+
 			const serverInfo: ReadWrite<JupyterServer> = Object.assign(
 				{},
 				server,
 			);
+
 			serverInfo.connectionInformation =
 				resolvedServer.connectionInformation;
 
@@ -235,6 +244,7 @@ export class JupyterConnection {
 			if (ex instanceof BaseError) {
 				throw ex;
 			}
+
 			throw new RemoteJupyterServerUriProviderError(provider, ex);
 		} finally {
 			token.dispose();

@@ -66,9 +66,11 @@ import { registerTypes as registerWebviewTypes } from "./webviews/extension-side
 
 class StopWatch {
 	private started = Date.now();
+
 	public get elapsedTime() {
 		return Date.now() - this.started;
 	}
+
 	public reset() {
 		this.started = Date.now();
 	}
@@ -121,15 +123,19 @@ export async function activate(
 	setIsCodeSpace(env.uiKind == UIKind.Web);
 
 	setIsWebExtension(false);
+
 	context.subscriptions.push({ dispose: () => (Exiting.isExiting = true) });
 
 	try {
 		const [api, ready] = activateUnsafe(context, standardOutputChannel);
+
 		await ready;
 		// Send the "success" telemetry only if activation did not fail.
 		// Otherwise Telemetry is send via the error handler.
 		durations.endActivateTime = stopWatch.elapsedTime;
+
 		sendStartupTelemetry(durations, stopWatch);
+
 		deleteOldTempDirs(context).catch(noop);
 
 		return api;
@@ -137,7 +143,9 @@ export async function activate(
 		// We want to completely handle the error
 		// before notifying VS Code.
 		durations.endActivateTime = stopWatch.elapsedTime;
+
 		handleError(ex, durations, stopWatch);
+
 		logger.error("Failed to active the Jupyter Extension", ex);
 		// Disable this, as we don't want Python extension or any other extensions that depend on this to fall over.
 		// Return a dummy object, to ensure other extension do not fall over.
@@ -174,6 +182,7 @@ export function deactivate(): Thenable<void> {
 	}
 
 	deactivateExecutionAnalysis();
+
 	deactivateChat();
 
 	return Promise.resolve();
@@ -197,7 +206,9 @@ function activateUnsafe(
 			context,
 			standardOutputChannel,
 		);
+
 		activatedServiceContainer = serviceContainer;
+
 		initializeTelemetryGlobals((interpreter) =>
 			serviceContainer
 				.get<IInterpreterPackages>(IInterpreterPackages)
@@ -216,6 +227,7 @@ function activateUnsafe(
 		//===============================================
 		// dynamically load standalone plugins
 		activateExecutionAnalysis(context).then(noop, noop);
+
 		activateChat(context).then(noop, noop);
 
 		const api = buildApi(
@@ -281,6 +293,7 @@ async function activateLegacy(
 			workspace
 				.getConfiguration("jupyter")
 				.get<boolean>("development", false));
+
 	serviceManager.addSingletonInstance<boolean>(IsDevMode, isDevMode);
 
 	if (isDevMode) {
@@ -288,6 +301,7 @@ async function activateLegacy(
 			.executeCommand("setContext", "jupyter.development", true)
 			.then(noop, noop);
 	}
+
 	commands
 		.executeCommand("setContext", "jupyter.webExtension", false)
 		.then(noop, noop);
@@ -297,10 +311,15 @@ async function activateLegacy(
 
 	// Register the rest of the types (platform is first because it's needed by others)
 	registerPlatformTypes(serviceManager);
+
 	registerKernelTypes(serviceManager, isDevMode);
+
 	registerNotebookTypes(serviceManager, isDevMode);
+
 	registerInteractiveTypes(serviceManager);
+
 	registerStandaloneTypes(context, serviceManager, isDevMode);
+
 	registerWebviewTypes(serviceManager);
 
 	await postActivateLegacy(context, serviceContainer);

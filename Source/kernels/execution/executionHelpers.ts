@@ -23,5 +23,6 @@ export function handleTensorBoardDisplayDataOutput(data: nbformat.IMimeBundle) {
 			);
 		}
 	}
+
 	return data;
 }

@@ -90,6 +90,7 @@ function createTestLogger() {
         const log4js = require('log4js') as typeof import('log4js');
 
         const logFilePath = path.isAbsolute(logFileEnv) ? logFileEnv : path.join(EXTENSION_ROOT_DIR, logFileEnv);
+
         log4js.configure({
             appenders: { reduxLogger: { type: 'file', filename: logFilePath } },
             categories: { default: { appenders: ['reduxLogger'], level: 'debug' } }
@@ -152,6 +153,7 @@ function createTestMiddleware(
 		if (action.type !== "action.postOutgoingMessage") {
 			sendMessage(`DISPATCHED_ACTION_${action.type}`, {});
 		}
+
 		return res;
 	};
 }
@@ -180,6 +182,7 @@ function createMiddleWare(
 	if (typeof forceTestMiddleware !== "undefined") {
 		forceOnTestMiddleware = forceTestMiddleware();
 	}
+
 	const testMiddleware =
 		forceOnTestMiddleware || testMode || isUITest
 			? createTestMiddleware(transformLoad)
@@ -201,7 +204,9 @@ function createMiddleWare(
             if ('main' in rootState && typeof rootState.main === 'object') {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const main = (rootState.main = ({ ...rootState.main } as any) as Partial<IMainState>);
+
                 main.rootCss = reduceLogMessage;
+
                 main.rootStyle = reduceLogMessage;
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 main.settings = reduceLogMessage as any;
@@ -214,13 +219,16 @@ function createMiddleWare(
             if (!action) {
                 return action;
             }
+
             return action;
         },
         logger: testMode ? createTestLogger() : window.console
     });
     */
 	const results: Redux.Middleware<{}, IStore>[] = [];
+
 	results.push(queueableActions);
+
 	results.push(updateContext);
 
 	if (testMiddleware) {
@@ -234,6 +242,7 @@ export interface IStore {
 	main: IMainState;
 
 	variables: IVariableState;
+
 	post: {};
 }
 
@@ -294,8 +303,10 @@ export function createStore<M>(
 			// Double check this is one of our messages. React will actually post messages here too during development
 			if (isAllowedMessage(message)) {
 				const basePayload: BaseReduxActionPayload = { data: payload };
+
 				store.dispatch({ type: message, payload: basePayload });
 			}
+
 			return true;
 		},
 	});

@@ -12,6 +12,7 @@ export function buildSourceMap(
 		source: { path: getFilePath(fileHash.uri) },
 		pydevdSourceMaps: [],
 	};
+
 	sourceMapRequest.pydevdSourceMaps = fileHash.generatedCodes.map(
 		(generatedCode) => {
 			return {

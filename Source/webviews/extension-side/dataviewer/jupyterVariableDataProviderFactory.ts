@@ -27,6 +27,7 @@ export class JupyterVariableDataProviderFactory
 			this.serviceContainer.get<IJupyterVariableDataProvider>(
 				IJupyterVariableDataProvider,
 			);
+
 		jupyterVariableDataProvider.setDependencies(variable, kernel);
 
 		return jupyterVariableDataProvider;

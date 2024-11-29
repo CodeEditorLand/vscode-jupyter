@@ -49,9 +49,11 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 		@inject(IExtensionContext)
 		private readonly extensionContext: IExtensionContext,
 	) {}
+
 	public activate(): void {
 		this.removeOldCachedItems().then(noop, noop);
 	}
+
 	async removeOldCachedItems(): Promise<void> {
 		await Promise.all(
 			[await this.getUriAccountKey()]
@@ -71,11 +73,13 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 					key.startsWith("LAST_EXECUTED_CELL_") &&
 					!key.startsWith("LAST_EXECUTED_CELL_V2_"),
 			);
+
 		await Promise.all(
 			workspaceStateKeysToRemove.map((key) =>
 				this.workspaceState.update(key, undefined),
 			),
 		);
+
 		await Promise.all(
 			GlobalMementoKeyPrefixesToRemove.map((keyPrefix) =>
 				this.globalState
@@ -88,6 +92,7 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 					),
 			).flat(),
 		);
+
 		await this.extensionContext.secrets
 			.delete(
 				`${Settings.JupyterServerRemoteLaunchService}.remote-uri-list`,
@@ -108,6 +113,7 @@ export class OldCacheCleaner implements IExtensionSyncActivationService {
 				"SHA-512",
 			);
 		}
+
 		return env.machineId; // Global key when no folder or workspace file
 	}
 }

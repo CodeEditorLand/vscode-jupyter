@@ -45,6 +45,7 @@ export class VariableView
 	protected get owningResource(): Resource {
 		return undefined;
 	}
+
 	constructor(
 		configuration: IConfigurationService,
 		provider: IWebviewViewProvider,
@@ -76,21 +77,25 @@ export class VariableView
 			this,
 			this.disposables,
 		);
+
 		this.notebookWatcher.onDidChangeActiveNotebook(
 			this.activeNotebookChanged,
 			this,
 			this.disposables,
 		);
+
 		this.notebookWatcher.onDidRestartActiveNotebook(
 			this.activeNotebookRestarted,
 			this,
 			this.disposables,
 		);
+
 		this.variables.refreshRequired(
 			this.sendRefreshMessage,
 			this,
 			this.disposables,
 		);
+
 		window.onDidChangeActiveTextEditor(
 			this.activeTextEditorChanged,
 			this,
@@ -112,6 +117,7 @@ export class VariableView
 				}),
 			);
 		}
+
 		this.handleVisibilityChanged();
 	}
 
@@ -152,6 +158,7 @@ export class VariableView
 		handler: (args: M[T]) => void,
 	) {
 		const args = payload as M[T];
+
 		handler.bind(this)(args);
 	}
 
@@ -164,6 +171,7 @@ export class VariableView
 		if (this.webviewView) {
 			visible = this.webviewView.visible;
 		}
+
 		context.set(visible).catch(noop);
 
 		// I've we've been made visible, make sure that we are updated
@@ -207,6 +215,7 @@ export class VariableView
 		response: IJupyterVariablesResponse,
 	) {
 		const variableViewers = this.dataViewerDelegator.getVariableViewers();
+
 		response.pageResponse.forEach((variable) => {
 			variable.supportsDataExplorer = variableViewers.some((d) =>
 				d.jupyterVariableViewers.dataTypes.includes(variable.type),
@@ -234,6 +243,7 @@ export class VariableView
 				InteractiveWindowMessages.GetVariablesResponse,
 				this.postProcessSupportsDataExplorer(response),
 			).catch(noop);
+
 			sendTelemetryEvent(Telemetry.VariableExplorerVariableCount, {
 				variableCount: response.totalCount,
 			});

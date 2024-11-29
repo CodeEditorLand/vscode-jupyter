@@ -8,6 +8,7 @@ import { LocationWithReferenceKind, noop, PylanceExtension } from "./common";
 
 export interface ILanguageServerFolder {
 	path: string;
+
 	version: string; // SemVer, in string form to avoid cross-extension type issues.
 }
 
@@ -40,11 +41,15 @@ export interface INotebookLanguageClient {
 
 export interface LSExtensionApi {
 	languageServerFolder?(): Promise<ILanguageServerFolder>;
+
 	client?: {
 		isEnabled(): boolean;
+
 		start(): Promise<void>;
+
 		stop(): Promise<void>;
 	};
+
 	notebook?: INotebookLanguageClient;
 }
 
@@ -52,7 +57,9 @@ export interface PythonApi {
 	readonly pylance?: {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		createClient(...args: any[]): BaseLanguageClient;
+
 		start(client: BaseLanguageClient): Promise<void>;
+
 		stop(client: BaseLanguageClient): Promise<void>;
 	};
 }
@@ -85,6 +92,7 @@ export async function activatePylance(): Promise<
 			.then(async (client) => {
 				if (!client) {
 					console.error("Could not start Pylance");
+
 					reject();
 
 					return;
@@ -95,6 +103,7 @@ export async function activatePylance(): Promise<
 				}
 
 				_client = client.notebook;
+
 				resolve(client.notebook);
 			})
 			.then(noop, noop);

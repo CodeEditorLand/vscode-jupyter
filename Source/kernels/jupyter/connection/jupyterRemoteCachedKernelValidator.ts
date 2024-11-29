@@ -26,6 +26,7 @@ export class JupyterRemoteCachedKernelValidator
 		@inject(IJupyterServerProviderRegistry)
 		private readonly providerRegistration: IJupyterServerProviderRegistry,
 	) {}
+
 	public async isValid(
 		kernel: LiveRemoteKernelConnectionMetadata,
 	): Promise<boolean> {
@@ -33,6 +34,7 @@ export class JupyterRemoteCachedKernelValidator
 		if (!this.liveKernelConnectionTracker.wasKernelUsed(kernel)) {
 			return false;
 		}
+
 		const collection =
 			await this.providerRegistration.jupyterCollections.find(
 				(c) =>
@@ -47,6 +49,7 @@ export class JupyterRemoteCachedKernelValidator
 
 			return false;
 		}
+
 		const token = new CancellationTokenSource();
 
 		try {
@@ -57,6 +60,7 @@ export class JupyterRemoteCachedKernelValidator
 			if (!servers) {
 				return false;
 			}
+
 			if (
 				servers
 					.map((s) => s.id)

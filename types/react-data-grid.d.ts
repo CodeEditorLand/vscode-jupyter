@@ -11,26 +11,39 @@
 declare namespace AdazzleReactDataGrid {
 	interface ExcelColumn {
 		editable: boolean;
+
 		name: any;
+
 		key: string;
+
 		width: number;
+
 		resizeable: boolean;
+
 		filterable: boolean;
 	}
 
 	interface EditorBaseProps {
 		value: any;
+
 		column: ExcelColumn;
+
 		height: number;
+
 		onBlur: () => void;
+
 		onCommit: () => void;
+
 		onCommitCancel: () => void;
+
 		rowData: any;
+
 		rowMetaData: any;
 	}
 
 	interface SelectionParams<T> {
 		rowIdx: number;
+
 		row: T;
 	}
 
@@ -224,6 +237,7 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		onCellDeSelected?: (coordinates: {
 			rowIdx: number;
+
 			idx: number;
 		}) => void;
 
@@ -237,12 +251,18 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		rowSelection?: {
 			showCheckbox?: boolean;
+
 			enableShiftSelect?: boolean;
+
 			onRowsSelected?: (rows: Array<SelectionParams<T>>) => void;
+
 			onRowsDeselected?: (rows: Array<SelectionParams<T>>) => void;
+
 			selectBy?: {
 				indexes?: Array<number>;
+
 				keys?: { rowKey: string; values: Array<any> };
+
 				isSelectedKey?: string;
 			};
 		};
@@ -267,6 +287,7 @@ declare namespace AdazzleReactDataGrid {
 		 * @param row object behind the row
 		 */
 		onRowClick?: (rowIdx: number, row: T) => void;
+
 		onRowDoubleClick?: (rowIdx: number, row: T) => void;
 
 		/**
@@ -291,14 +312,18 @@ declare namespace AdazzleReactDataGrid {
 
 	type ActionButton = {
 		icon: string;
+
 		callback: () => void;
 	};
 
 	type ActionMenu = {
 		icon: string;
+
 		actions: {
 			icon: string;
+
 			text: string;
+
 			callback: () => void;
 		}[];
 	};
@@ -575,6 +600,7 @@ declare namespace AdazzleReactDataGrid {
 		 */
 		openCellEditor(rowIdx: number, idx: number): void;
 	}
+
 	export namespace ReactDataGrid {
 		// Useful types
 		export import Column = AdazzleReactDataGrid.Column;
@@ -626,16 +652,27 @@ declare namespace AdazzleReactDataGrid {
 declare namespace AdazzleReactDataGridPlugins {
 	interface AutoCompleteEditorProps {
 		onCommit?: () => void;
+
 		options?: Array<{ id: any; title: string }>;
+
 		label?: any;
+
 		value?: any;
+
 		height?: number;
+
 		valueParams?: string[];
+
 		column?: AdazzleReactDataGrid.ExcelColumn;
+
 		resultIdentifier?: string;
+
 		search?: string;
+
 		onKeyDown?: () => void;
+
 		onFocus?: () => void;
+
 		editorDisplayValue?: (
 			column: AdazzleReactDataGrid.ExcelColumn,
 			value: any,
@@ -644,7 +681,9 @@ declare namespace AdazzleReactDataGridPlugins {
 
 	interface AutoCompleteTokensEditorProps {
 		options: Array<string | { id: number; caption: string }>;
+
 		column?: AdazzleReactDataGrid.ExcelColumn;
+
 		value?: any[];
 	}
 
@@ -653,8 +692,11 @@ declare namespace AdazzleReactDataGridPlugins {
 			| string
 			| {
 					id: string;
+
 					title: string;
+
 					value: string;
+
 					text: string;
 			  }
 		>;
@@ -662,27 +704,39 @@ declare namespace AdazzleReactDataGridPlugins {
 
 	export namespace Editors {
 		export class AutoComplete extends React.Component<AutoCompleteEditorProps> {}
+
 		export class AutoCompleteTokensEditor extends React.Component<AutoCompleteTokensEditorProps> {}
+
 		export class DropDownEditor extends React.Component<DropDownEditorProps> {}
 
 		// TODO: refine types for these addons
 		export class SimpleTextEditor extends React.Component<any> {}
+
 		export class CheckboxEditor extends React.Component<any> {}
 	}
+
 	export namespace Filters {
 		export class NumericFilter extends React.Component<any> {}
+
 		export class AutoCompleteFilter extends React.Component<any> {}
+
 		export class MultiSelectFilter extends React.Component<any> {}
+
 		export class SingleSelectFilter extends React.Component<any> {}
 	}
+
 	export namespace Formatters {
 		export class ImageFormatter extends React.Component<any> {}
+
 		export class DropDownFormatter extends React.Component<any> {}
 	}
+
 	export class Toolbar extends React.Component<any> {}
+
 	export namespace DraggableHeader {
 		export class DraggableContainer extends React.Component<any> {}
 	}
+
 	export namespace Data {
 		export const Selectors: {
 			getRows: (state: object) => object[];
@@ -694,13 +748,18 @@ declare namespace AdazzleReactDataGridPlugins {
 	// https://github.com/vkbansal/react-contextmenu/issues/10
 	export namespace Menu {
 		export class ContextMenu extends React.Component<any> {}
+
 		export class MenuHeader extends React.Component<any> {}
+
 		export class MenuItem extends React.Component<any> {}
+
 		export class SubMenu extends React.Component<any> {}
+
 		export const monitor: {
 			getItem(): any;
 
 			getPosition(): any;
+
 			hideMenu(): void;
 		};
 
@@ -753,11 +812,17 @@ declare module "react-data-grid-addons" {
 		interface Window {
 			ReactDataGridPlugins: {
 				Editors: typeof Editors;
+
 				Filters: typeof Filters;
+
 				Formatters: typeof Formatters;
+
 				Toolbar: typeof Toolbar;
+
 				Menu: typeof Menu;
+
 				Data: typeof Data;
+
 				DraggableHeader: typeof DraggableHeader;
 			};
 		}

@@ -27,7 +27,9 @@ import { IActiveNotebookChangedEvent, INotebookWatcher } from "./types";
 
 type KernelStateEventArgs = {
 	notebook: NotebookDocument;
+
 	state: KernelState;
+
 	cell?: NotebookCell;
 };
 
@@ -43,14 +45,17 @@ export class NotebookWatcher implements INotebookWatcher {
 	public get onDidChangeActiveNotebook(): Event<IActiveNotebookChangedEvent> {
 		return this._onDidChangeActiveNotebook.event;
 	}
+
 	public get onDidFinishExecutingActiveNotebook(): Event<{
 		executionCount: number;
 	}> {
 		return this._onDidFinisheExecutingActiveNotebook.event;
 	}
+
 	public get onDidRestartActiveNotebook(): Event<void> {
 		return this._onDidRestartActiveNotebook.event;
 	}
+
 	public get activeKernel(): IKernel | undefined {
 		const activeNotebook = window.activeNotebookEditor?.notebook;
 
@@ -62,6 +67,7 @@ export class NotebookWatcher implements INotebookWatcher {
 		if (activeJupyterNotebookKernel) {
 			return activeJupyterNotebookKernel;
 		}
+
 		const interactiveWindowDoc = this.getActiveInteractiveWindowDocument();
 
 		const activeInteractiveWindowKernel = interactiveWindowDoc
@@ -71,6 +77,7 @@ export class NotebookWatcher implements INotebookWatcher {
 		if (activeInteractiveWindowKernel) {
 			return activeInteractiveWindowKernel;
 		}
+
 		const activeDataViewer = this.dataViewerFactory.activeViewer;
 
 		return activeDataViewer
@@ -91,9 +98,11 @@ export class NotebookWatcher implements INotebookWatcher {
 	private readonly _onDidFinisheExecutingActiveNotebook = new EventEmitter<{
 		executionCount: number;
 	}>();
+
 	private readonly _onDidChangeActiveNotebook = new EventEmitter<{
 		executionCount?: number;
 	}>();
+
 	private readonly _onDidRestartActiveNotebook = new EventEmitter<void>();
 
 	// Keep track of the execution count for any notebook
@@ -115,11 +124,13 @@ export class NotebookWatcher implements INotebookWatcher {
 			this,
 			this.disposables,
 		);
+
 		workspace.onDidCloseNotebookDocument(
 			this.notebookEditorClosed,
 			this,
 			this.disposables,
 		);
+
 		this.kernelProvider.onDidRestartKernel(
 			(kernel) => {
 				this.handleRestart({
@@ -130,12 +141,14 @@ export class NotebookWatcher implements INotebookWatcher {
 			this,
 			this.disposables,
 		);
+
 		notebookCellExecutions.onDidChangeNotebookCellExecutionState(
 			this.onDidChangeNotebookCellExecutionState,
 			this,
 			this.disposables,
 		);
 	}
+
 	private getActiveInteractiveWindowDocument() {
 		const interactiveWindow =
 			this.interactiveWindowProvider.getActiveOrAssociatedInteractiveWindow();
@@ -143,6 +156,7 @@ export class NotebookWatcher implements INotebookWatcher {
 		if (!interactiveWindow) {
 			return;
 		}
+
 		return workspace.notebookDocuments.find(
 			(notebookDocument) =>
 				notebookDocument === interactiveWindow?.notebookDocument,
@@ -229,6 +243,7 @@ export class NotebookWatcher implements INotebookWatcher {
 			const executionCount = this._executionCountTracker.get(
 				editor.notebook,
 			);
+
 			executionCount && (changeEvent.executionCount = executionCount);
 		}
 

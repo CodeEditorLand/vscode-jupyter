@@ -54,6 +54,7 @@ export namespace Iterable {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -130,6 +131,7 @@ export namespace Iterable {
 		for (const element of iterable) {
 			value = reducer(value, element);
 		}
+
 		return value;
 	}
 

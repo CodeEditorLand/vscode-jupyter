@@ -6,30 +6,49 @@ import { getDefaultSettings } from "../react-common/settingsReactSide";
 
 export type IMainState = {
 	busy: boolean;
+
 	skipNextScroll?: boolean;
+
 	submittedText: boolean;
+
 	rootStyle?: string;
+
 	rootCss?: string;
+
 	font: IFont;
+
 	vscodeThemeName?: string;
+
 	baseTheme: string;
+
 	knownDark: boolean;
+
 	currentExecutionCount: number;
+
 	debugging: boolean;
+
 	dirty: boolean;
+
 	isAtBottom: boolean;
+
 	loadTotal?: number;
+
 	skipDefault?: boolean;
+
 	testMode?: boolean;
+
 	codeTheme: string;
 
 	settings?: IJupyterExtraSettings;
+
 	focusPending: number;
+
 	loaded: boolean;
 };
 
 export interface IFont {
 	size: number;
+
 	family: string;
 }
 

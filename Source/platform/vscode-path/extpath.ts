@@ -29,10 +29,12 @@ export function toPosixPath(osPath: string) {
 	if (osPath.indexOf("/") === -1) {
 		osPath = toSlashes(osPath);
 	}
+
 	if (/^[a-zA-Z]:(\/|$)/.test(osPath)) {
 		// starts with a drive letter
 		osPath = "/" + osPath;
 	}
+
 	return osPath;
 }
 
@@ -64,6 +66,7 @@ export function getRoot(path: string, sep: string = posix.sep): string {
 						break;
 					}
 				}
+
 				if (
 					start !== pos &&
 					!isPathSeparator(path.charCodeAt(pos + 1))

@@ -52,7 +52,9 @@ import {
 // Helper interface for the set_next_input execute reply payload
 interface ISetNextInputPayload {
 	replace: boolean;
+
 	source: "set_next_input";
+
 	text: string;
 }
 
@@ -64,7 +66,9 @@ type DisplayData = nbformat.IDisplayData & {
 };
 type WidgetData = {
 	version_major: number;
+
 	version_minor: number;
+
 	model_id: string;
 };
 
@@ -83,6 +87,7 @@ export function getParentHeaderMsgId(
 	if (msg.parent_header && "msg_id" in msg.parent_header) {
 		return msg.parent_header.msg_id;
 	}
+
 	return undefined;
 }
 
@@ -116,16 +121,24 @@ export class CellExecutionMessageHandler implements IDisposable {
 	private clearOutputOnNextUpdateToOutput?: boolean;
 
 	private execution?: NotebookCellExecution;
+
 	private readonly _onErrorHandlingIOPubMessage = new EventEmitter<{
 		error: Error;
+
 		msg: KernelMessage.IIOPubMessage;
 	}>();
+
 	public readonly onErrorHandlingExecuteRequestIOPubMessage =
 		this._onErrorHandlingIOPubMessage.event;
+
 	private temporaryExecution?: NotebookCellExecution;
+
 	private previousResultsToRestore?: NotebookCellExecutionSummary;
+
 	private cellHasErrorsInOutput?: boolean;
+
 	private disposed?: boolean;
+
 	private startTime?: number;
 
 	public get hasErrorOutput() {
@@ -139,6 +152,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 	 */
 	private lastUsedStreamOutput?: {
 		stream: "stdout" | "stderr";
+
 		output: NotebookCellOutput;
 	};
 	/**
@@ -171,15 +185,20 @@ export class CellExecutionMessageHandler implements IDisposable {
 		 */
 		clearOutputOnNextUpdateToOutput?: boolean;
 	}[] = [];
+
 	private commIdsMappedToParentWidgetModel = new Map<string, string>();
+
 	private readonly disposables: IDisposable[] = [];
+
 	private readonly prompts = new Set<CancellationTokenSource>();
 	/**
 	 * List of comm_ids Jupyter sent back when this cell was first executed
 	 * or for any subsequent requests as a result of outputs sending custom messages.
 	 */
 	private readonly ownedCommIds = new Set<string>();
+
 	private readonly commIdsMappedToWidgetOutputModels = new Set<string>();
+
 	private static readonly outputsOwnedByWidgetModel = new Map<
 		string,
 		Set<string>
@@ -189,13 +208,19 @@ export class CellExecutionMessageHandler implements IDisposable {
 	 * or for any subsequent requests as a result of outputs sending custom messages.
 	 */
 	private readonly ownedRequestMsgIds = new Set<string>();
+
 	private readonly _completed = createDeferred<void>();
+
 	public get completed() {
 		return this._completed.promise;
 	}
+
 	private gotIdleIOPubStatus = false;
+
 	private gotShellReply = false;
+
 	private streamsReAttachedToExecutingCell = false;
+
 	private endAbnormallyTimeout?: NodeJS.Timeout | number;
 
 	constructor(
@@ -214,13 +239,17 @@ export class CellExecutionMessageHandler implements IDisposable {
 		executionMessageId: string,
 	) {
 		this._completed.promise.catch(noop);
+
 		this.executeRequestMessageId = executionMessageId;
+
 		this.ownedRequestMsgIds.add(executionMessageId);
+
 		workspace.onDidChangeNotebookDocument(
 			(e) => {
 				if (!isJupyterNotebook(e.notebook)) {
 					return;
 				}
+
 				const thisCellChange = e.cellChanges.find(
 					({ cell }) => cell === this.cell,
 				);
@@ -228,20 +257,24 @@ export class CellExecutionMessageHandler implements IDisposable {
 				if (!thisCellChange) {
 					return;
 				}
+
 				if (thisCellChange.outputs?.length === 0) {
 					// keep track of the fact that user has cleared the output.
 					this.clearLastUsedStreamOutput();
+
 					this.cellHasErrorsInOutput = false;
 				}
 			},
 			this,
 			this.disposables,
 		);
+
 		this.execution = cellExecution;
 		// We're in all messages.
 		// When using the `interact` function in Python, we can get outputs from comm messages even before execution has completed.
 		// See https://github.com/microsoft/vscode-jupyter/issues/9503 for more information on why we need to monitor anyMessage and iopubMessage signals.
 		this.kernel.anyMessage.connect(this.onKernelAnyMessage, this);
+
 		this.kernel.iopubMessage.connect(this.onKernelIOPubMessage, this);
 
 		if (request) {
@@ -251,6 +284,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					request.dispose();
 				}
 			};
+
 			request.onReply = (msg) => {
 				// Cell has been deleted or the like.
 				if (this.cell.document.isClosed) {
@@ -258,12 +292,16 @@ export class CellExecutionMessageHandler implements IDisposable {
 
 					return;
 				}
+
 				this.handleReply(msg);
 			};
+
 			request.onStdin = this.handleInputRequest.bind(this);
+
 			request.done
 				.finally(() => {
 					this.completedExecution = true;
+
 					this.endCellExecution();
 				})
 				.catch(noop);
@@ -277,10 +315,15 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (this.disposed) {
 			return;
 		}
+
 		this.disposed = true;
+
 		traceCellMessage(this.cell, "Execution Message Handler disposed");
+
 		dispose(this.disposables);
+
 		this.prompts.forEach((item) => item.dispose());
+
 		this.prompts.clear();
 		// Assume you have a long running cell, then reload vscode, next this cell continues running.
 		// Next you interrupt this cell, next this class will get disposed
@@ -291,9 +334,13 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (this.request) {
 			this.clearLastUsedStreamOutput();
 		}
+
 		this.execution = undefined;
+
 		this.kernel.anyMessage.disconnect(this.onKernelAnyMessage, this);
+
 		this.kernel.iopubMessage.disconnect(this.onKernelIOPubMessage, this);
+
 		this._onErrorHandlingIOPubMessage.dispose();
 	}
 	/**
@@ -304,6 +351,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 	 */
 	private endCellExecution() {
 		this.prompts.forEach((item) => item.dispose());
+
 		this.prompts.clear();
 		// Assume you have a long running cell, then reload vscode, next this cell continues running.
 		// Next you interrupt this cell, next this class will get disposed
@@ -314,9 +362,12 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (this.request) {
 			this.clearLastUsedStreamOutput();
 		}
+
 		this.execution = undefined;
+
 		this._completed.resolve();
 	}
+
 	private onKernelAnyMessage(
 		_: unknown,
 		{ direction, msg }: Kernel.IAnyMessageArgs,
@@ -338,6 +389,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			) {
 				this.gotIdleIOPubStatus = true;
 			}
+
 			if (
 				msg.channel === "shell" &&
 				parentMsgId === this.executeRequestMessageId
@@ -398,8 +450,10 @@ export class CellExecutionMessageHandler implements IDisposable {
 				if (this.endAbnormallyTimeout) {
 					clearTimeout(this.endAbnormallyTimeout);
 				}
+
 				return this.endCellExecution();
 			}
+
 			if (
 				!this.completedExecution &&
 				(gotMessageThatIndicatesEndOfCellExecution || gotANewMessage)
@@ -409,9 +463,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 				if (this.endAbnormallyTimeout) {
 					clearTimeout(this.endAbnormallyTimeout);
 				}
+
 				this.endAbnormallyTimeout = setTimeout(
 					() => {
 						this.completedExecution = true;
+
 						this.endAbnormallyTimeout = undefined;
 
 						return this.endCellExecution();
@@ -420,9 +476,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 					// However its very likely we will get a valid response to end the previous request, hence lets wait 1s for that response to come back.
 					isResponseToInterruptRequest ? 1000 : 100,
 				);
+
 				this.disposables.push(
 					new Disposable(() => {
 						clearTimeout(this.endAbnormallyTimeout);
+
 						this.endAbnormallyTimeout = undefined;
 					}),
 				);
@@ -435,6 +493,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (direction !== "send" || !this.completedExecution) {
 			return;
 		}
+
 		if (
 			jupyterLab.KernelMessage.isCommMsgMsg(msg) &&
 			this.ownedCommIds.has(msg.content.comm_id)
@@ -444,6 +503,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.ownedRequestMsgIds.add(msg.header.msg_id);
 		}
 	}
+
 	private onKernelIOPubMessage(
 		_: unknown,
 		msg: KernelMessage.IIOPubMessage<KernelMessage.IOPubMessageType>,
@@ -466,6 +526,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		) {
 			return;
 		}
+
 		try {
 			this.handleIOPub(msg);
 		} catch (ex) {
@@ -482,6 +543,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			}
 		}
 	}
+
 	private clearLastUsedStreamOutput() {
 		this.lastUsedStreamOutput = undefined;
 	}
@@ -510,10 +572,12 @@ export class CellExecutionMessageHandler implements IDisposable {
 		this.previousResultsToRestore = {
 			...(this.cell.executionSummary || {}),
 		};
+
 		this.temporaryExecution = CellExecutionCreator.getOrCreate(
 			this.cell,
 			this.controller,
 		);
+
 		this.temporaryExecution?.start();
 
 		if (
@@ -523,18 +587,22 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.temporaryExecution.executionOrder =
 				this.previousResultsToRestore.executionOrder;
 		}
+
 		return this.temporaryExecution;
 	}
+
 	private endTemporaryTask() {
 		if (this.previousResultsToRestore?.executionOrder && this.execution) {
 			this.execution.executionOrder =
 				this.previousResultsToRestore.executionOrder;
 		}
+
 		if (this.previousResultsToRestore && this.temporaryExecution) {
 			if (this.previousResultsToRestore.executionOrder) {
 				this.temporaryExecution.executionOrder =
 					this.previousResultsToRestore.executionOrder;
 			}
+
 			this.temporaryExecution.end(
 				this.previousResultsToRestore.success,
 				this.previousResultsToRestore.timing?.endTime,
@@ -543,9 +611,12 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// Undefined for not success or failure
 			this.temporaryExecution?.end(undefined);
 		}
+
 		this.previousResultsToRestore = undefined;
+
 		this.temporaryExecution = undefined;
 	}
+
 	private handleIOPub(msg: KernelMessage.IIOPubMessage) {
 		if (!this.startTime) {
 			// Set the start time after we get some kind of a response to the execution request.
@@ -559,7 +630,9 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// } catch {
 			//     //
 			// }
+
 			this.execution?.start(this.startTime);
+
 			logger.debug(
 				`Kernel acknowledged execution of cell ${this.cell.index} @ ${this.startTime}`,
 			);
@@ -579,6 +652,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// Status is handled by the result promise. While it is running we are active. Otherwise we're stopped.
 			// So ignore status messages.
 			const statusMsg = msg as KernelMessage.IStatusMsg;
+
 			this.handleStatusMessage(statusMsg);
 		} else if (jupyterLab.KernelMessage.isStreamMsg(msg)) {
 			this.handleStreamMessage(msg as KernelMessage.IStreamMsg);
@@ -611,6 +685,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.execution.executionOrder = msg.content.execution_count;
 		}
 	}
+
 	private handleCommOpen(msg: KernelMessage.ICommOpenMsg) {
 		this.ownedCommIds.add(msg.content.comm_id);
 		// Check if this is a message for an Output Widget,
@@ -626,9 +701,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 			this.commIdsMappedToWidgetOutputModels.add(msg.content.comm_id);
 		}
 	}
+
 	private handleCommMsg(msg: KernelMessage.ICommMsgMsg) {
 		const data = msg.content.data as Partial<{
 			method: "update";
+
 			state: { msg_id: string } | { children: string[] };
 		}>;
 
@@ -677,6 +754,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// are in fact children of another output (comm).
 			// We need to keep track of this so that we know who the common parent is.
 			const IPY_MODEL_PREFIX = "IPY_MODEL_";
+
 			data.state.children.forEach((item) => {
 				if (typeof item !== "string") {
 					return logger.warn(
@@ -684,14 +762,18 @@ export class CellExecutionMessageHandler implements IDisposable {
 						item,
 					);
 				}
+
 				if (!item.startsWith(IPY_MODEL_PREFIX)) {
 					return logger.warn(
 						`Came across a comm update message a child that start start with ${IPY_MODEL_PREFIX}`,
 						item,
 					);
 				}
+
 				const commId = item.substring(IPY_MODEL_PREFIX.length);
+
 				this.ownedCommIds.add(commId);
+
 				this.commIdsMappedToParentWidgetModel.set(
 					commId,
 					msg.content.comm_id,
@@ -699,6 +781,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			});
 		}
 	}
+
 	private clearOutputIfNecessary(
 		execution: NotebookCellExecution | undefined,
 	): {
@@ -706,14 +789,19 @@ export class CellExecutionMessageHandler implements IDisposable {
 	} {
 		if (this.clearOutputOnNextUpdateToOutput) {
 			traceCellMessage(this.cell, "Clear cell output");
+
 			this.clearLastUsedStreamOutput();
+
 			execution?.clearOutput().then(noop, noop);
+
 			this.clearOutputOnNextUpdateToOutput = false;
 
 			return { previousValueOfClearOutputOnNextUpdateToOutput: true };
 		}
+
 		return { previousValueOfClearOutputOnNextUpdateToOutput: false };
 	}
+
 	private addToCellData(
 		output:
 			| ExecuteResult
@@ -737,18 +825,22 @@ export class CellExecutionMessageHandler implements IDisposable {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(widgetData as any)["_vsc_test_cellIndex"] = this.cell.index;
 			}
+
 			if (widgetData && "model_id" in widgetData) {
 				const modelIds =
 					CellExecutionMessageHandler.modelIdsOwnedByCells.get(
 						this.cell,
 					) || new Set<string>();
+
 				modelIds.add(widgetData.model_id);
+
 				CellExecutionMessageHandler.modelIdsOwnedByCells.set(
 					this.cell,
 					modelIds,
 				);
 			}
 		}
+
 		const cellOutput = cellOutputToVSCCellOutput(output);
 
 		const displayId =
@@ -763,6 +855,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (this.cell.document.isClosed) {
 			return;
 		}
+
 		traceCellMessage(
 			this.cell,
 			() =>
@@ -786,6 +879,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		}
 
 		this.clearLastUsedStreamOutput();
+
 		traceCellMessage(this.cell, "Append output in addToCellData");
 		// If the output belongs to a widget, then add the output to that specific widget (i.e. just below the widget).
 		let outputShouldBeAppended = true;
@@ -824,9 +918,11 @@ export class CellExecutionMessageHandler implements IDisposable {
 				outputShouldBeAppended = false;
 			}
 		}
+
 		if (outputShouldBeAppended) {
 			task?.appendOutput([cellOutput]).then(noop, noop);
 		}
+
 		this.endTemporaryTask();
 	}
 
@@ -847,6 +943,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// These are plain text mimetypes that can be rendered by the Jupyter Lab widget manager.
 			return true;
 		}
+
 		if (mime === WIDGET_MIMETYPE) {
 			const data: WidgetData = JSON.parse(
 				new TextDecoder().decode(outputItem.data),
@@ -859,8 +956,10 @@ export class CellExecutionMessageHandler implements IDisposable {
 			) {
 				return false;
 			}
+
 			return true;
 		}
+
 		if (mime.startsWith("application/vnd")) {
 			// Custom vendored mimetypes cannot be rendered by the widget manager, it relies on the output renderers.
 			return false;
@@ -903,6 +1002,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (!commId) {
 			return;
 		}
+
 		const outputToAppend =
 			"outputToAppend" in options ? options.outputToAppend : undefined;
 
@@ -924,11 +1024,13 @@ export class CellExecutionMessageHandler implements IDisposable {
 
 			return;
 		}
+
 		const widgetOutput = cell.outputs.find((output) => {
 			return output.items.find((outputItem) => {
 				if (outputItem.mime !== WIDGET_MIMETYPE) {
 					return false;
 				}
+
 				try {
 					const value = JSON.parse(
 						new TextDecoder().decode(outputItem.data),
@@ -938,6 +1040,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				} catch (ex) {
 					logger.warn(`Failed to deserialize the widget data`, ex);
 				}
+
 				return false;
 			});
 		});
@@ -945,6 +1048,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		if (!widgetOutput) {
 			return;
 		}
+
 		const outputsOwnedByWidgetModel =
 			CellExecutionMessageHandler.outputsOwnedByWidgetModel.get(
 				expectedModelId,
@@ -968,6 +1072,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				this.outputsAreSpecificToAWidget.length - 1
 			].clearOutputOnNextUpdateToOutput = false;
 		}
+
 		const newOutputs = cell.outputs.slice().filter((item) => {
 			if (clearWidgetOutput) {
 				// If we're supposed to clear the output, then clear all of the output that's
@@ -1020,17 +1125,21 @@ export class CellExecutionMessageHandler implements IDisposable {
 		} else {
 			task?.replaceOutput(newOutput, cell).then(noop, noop);
 		}
+
 		return { outputAdded: true };
 	}
+
 	private async handleInputRequest(msg: KernelMessage.IStdinMessage) {
 		// Ask the user for input
 		if (msg.content && "prompt" in msg.content) {
 			const cancelToken = new CancellationTokenSource();
+
 			this.prompts.add(cancelToken);
 
 			const hasPassword =
 				msg.content.password !== null &&
 				(msg.content.password as boolean);
+
 			await window
 				.showInputBox(
 					{
@@ -1085,6 +1194,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 						payload as unknown as ISetNextInputPayload,
 					);
 				}
+
 				if (payload.data && payload.data.hasOwnProperty("text/plain")) {
 					this.addToCellData(
 						{
@@ -1130,14 +1240,18 @@ export class CellExecutionMessageHandler implements IDisposable {
 				payload.text,
 				this.cell.document.languageId,
 			);
+
 			cellData.outputs = [];
+
 			cellData.metadata = {};
 
 			const nbEdit = NotebookEdit.insertCells(this.cell.index + 1, [
 				cellData,
 			]);
+
 			edit.set(this.cell.notebook.uri, [nbEdit]);
 		}
+
 		workspace.applyEdit(edit).then(noop, noop);
 	}
 
@@ -1153,6 +1267,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			`Kernel switching to ${msg.content.execution_state}`,
 		);
 	}
+
 	private handleStreamMessage(msg: KernelMessage.IStreamMsg) {
 		if (
 			getParentHeaderMsgId(msg) &&
@@ -1201,6 +1316,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				};
 			}
 		}
+
 		this.streamsReAttachedToExecutingCell = true;
 
 		// Clear output if waiting for a clear
@@ -1214,10 +1330,12 @@ export class CellExecutionMessageHandler implements IDisposable {
 				name: msg.content.name,
 				text: msg.content.text,
 			});
+
 			traceCellMessage(
 				this.cell,
 				`Append output items '${msg.content.text.substring(0, 100)}`,
 			);
+
 			task
 				?.appendOutputItems(
 					output.items,
@@ -1233,11 +1351,14 @@ export class CellExecutionMessageHandler implements IDisposable {
 				name: msg.content.name,
 				text,
 			});
+
 			this.lastUsedStreamOutput = { output, stream: msg.content.name };
+
 			traceCellMessage(
 				this.cell,
 				`Replace output with '${text.substring(0, 100)}'`,
 			);
+
 			task?.replaceOutput([output]).then(noop, noop);
 		} else {
 			// Create a new output
@@ -1250,13 +1371,17 @@ export class CellExecutionMessageHandler implements IDisposable {
 				name: msg.content.name,
 				text,
 			});
+
 			this.lastUsedStreamOutput = { output, stream: msg.content.name };
+
 			traceCellMessage(
 				this.cell,
 				`Append new output '${text.substring(0, 100)}'`,
 			);
+
 			task?.appendOutput([output]).then(noop, noop);
 		}
+
 		this.endTemporaryTask();
 	}
 
@@ -1268,6 +1393,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			transient: msg.content.transient as any, // NOSONAR
 		};
+
 		this.addToCellData(output, msg);
 	}
 
@@ -1287,12 +1413,15 @@ export class CellExecutionMessageHandler implements IDisposable {
 				}
 			} else {
 				const task = this.execution || this.createTemporaryTask();
+
 				this.updateJupyterOutputWidgetWithOutput(
 					{ clearOutput: true },
 					task,
 				);
+
 				this.endTemporaryTask();
 			}
+
 			return;
 		}
 
@@ -1305,18 +1434,24 @@ export class CellExecutionMessageHandler implements IDisposable {
 			// In such circumstances, create a temporary task & use that to update the output (only cell execution tasks can update cell output).
 			// Clear all outputs and start over again.
 			const task = this.execution || this.createTemporaryTask();
+
 			this.clearLastUsedStreamOutput();
+
 			task?.clearOutput().then(noop, noop);
+
 			this.endTemporaryTask();
 		}
 	}
 
 	private handleError(msg: KernelMessage.IErrorMsg) {
 		let traceback = msg.content.traceback;
+
 		logger.ci(`Traceback for error ${traceback}`);
+
 		this.formatters.forEach((formatter) => {
 			traceback = formatter.format(this.cell, traceback);
 		});
+
 		logger.ci(`Traceback for error after formatting ${traceback}`);
 
 		const output: nbformat.IError = {
@@ -1344,6 +1479,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		}
 
 		this.addToCellData(output, msg);
+
 		this.cellHasErrorsInOutput = true;
 	}
 
@@ -1382,6 +1518,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 
 			return;
 		}
+
 		const outputToBeUpdated = CellOutputDisplayIdTracker.getMappedOutput(
 			this.cell.notebook,
 			displayId,
@@ -1396,6 +1533,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 
 			return;
 		}
+
 		if (outputToBeUpdated.cell.document.isClosed) {
 			logger.warn(
 				"Update display data message received, but output cell is closed",
@@ -1404,6 +1542,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 
 			return;
 		}
+
 		const output = translateCellDisplayOutput(
 			new NotebookCellOutput(
 				outputToBeUpdated.outputItems,
@@ -1442,12 +1581,16 @@ export class CellExecutionMessageHandler implements IDisposable {
 				)
 			) {
 				outputMetadataHasChanged = true;
+
 				allAllOutputItemsSame = false;
 			}
+
 			if (allAllOutputItemsSame) {
 				for (
 					let index = 0;
+
 					index < outputToBeUpdated.outputItems.length;
+
 					index++
 				) {
 					if (
@@ -1462,6 +1605,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					}
 				}
 			}
+
 			if (allAllOutputItemsSame) {
 				// If everything is still the same, then there's nothing to update.
 				logger.trace(
@@ -1476,6 +1620,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 		// This message could have come from a background thread.
 		// In such circumstances, create a temporary task & use that to update the output (only cell execution tasks can update cell output).
 		const task = this.execution || this.createTemporaryTask();
+
 		traceCellMessage(
 			this.cell,
 			`Replace output items in display data ${newOutput.items.length}`,
@@ -1500,11 +1645,14 @@ export class CellExecutionMessageHandler implements IDisposable {
 				) {
 					return newOutput;
 				}
+
 				return o;
 			});
+
 			task
 				?.replaceOutput(newOutputs, outputToBeUpdated.cell)
 				.then(noop, noop);
+
 			CellOutputDisplayIdTracker.trackOutputByDisplayId(
 				outputToBeUpdated.cell,
 				displayId,
@@ -1518,6 +1666,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 					outputToBeUpdated.outputContainer,
 				)
 				.then(noop, noop);
+
 			CellOutputDisplayIdTracker.trackOutputByDisplayId(
 				outputToBeUpdated.cell,
 				// Though the items have been replaced, the output container is still the same, hence keep track of the last output object.
@@ -1526,6 +1675,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 				newOutput.items,
 			);
 		}
+
 		this.endTemporaryTask();
 	}
 }

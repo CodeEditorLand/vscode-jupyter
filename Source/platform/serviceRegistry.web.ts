@@ -30,29 +30,36 @@ import { WebviewViewProvider } from "./webviews/webviewViewProvider";
 
 export function registerTypes(serviceManager: IServiceManager) {
 	serviceManager.addSingleton<IFileSystem>(IFileSystem, FileSystem);
+
 	serviceManager.addSingleton<IWorkspaceService>(
 		IWorkspaceService,
 		WorkspaceService,
 	);
+
 	serviceManager.addSingleton<IApplicationEnvironment>(
 		IApplicationEnvironment,
 		ApplicationEnvironment,
 	);
+
 	serviceManager.addSingleton<IConfigurationService>(
 		IConfigurationService,
 		ConfigurationService,
 	);
+
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
 		OutputCommandListener,
 	);
+
 	serviceManager.addSingleton<ProgressReporter>(
 		ProgressReporter,
 		ProgressReporter,
 	);
 
 	registerCommonTypes(serviceManager);
+
 	registerApiTypes(serviceManager);
+
 	registerInterpreterTypes(serviceManager);
 
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
@@ -69,6 +76,7 @@ export function registerTypes(serviceManager: IServiceManager) {
 		IWebviewViewProvider,
 		WebviewViewProvider,
 	);
+
 	serviceManager.add<IWebviewPanelProvider>(
 		IWebviewPanelProvider,
 		WebviewPanelProvider,

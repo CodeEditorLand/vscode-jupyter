@@ -41,8 +41,10 @@ export class DataViewerChecker {
 			if (result === dontAskAgain) {
 				await this.disableAskForLargeData();
 			}
+
 			return result === yes;
 		}
+
 		return true;
 	}
 
@@ -65,6 +67,7 @@ export class DataViewerChecker {
 
 		if (settings) {
 			settings.askForLargeDataFrames = false;
+
 			this.configuration
 				.updateSetting(
 					"askForLargeDataFrames",

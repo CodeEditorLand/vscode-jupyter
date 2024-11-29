@@ -72,6 +72,7 @@ async function isLocalPoetryEnvironment(
 	if (path.basename(envDir) !== localPoetryEnvDirName) {
 		return false;
 	}
+
 	const project = path.dirname(envDir);
 
 	if (!hasValidPyprojectToml(project)) {
@@ -99,9 +100,11 @@ export async function isPoetryEnvironment(
 	if (await isGlobalPoetryEnvironment(interpreterPath)) {
 		return true;
 	}
+
 	if (await isLocalPoetryEnvironment(interpreterPath)) {
 		return true;
 	}
+
 	return false;
 }
 
@@ -144,9 +147,11 @@ export class Poetry {
 			// This check is not expensive and may change during a session, so we need not cache it.
 			return undefined;
 		}
+
 		if (Poetry.poetryPromise.get(cwd) === undefined || isTestExecution()) {
 			Poetry.poetryPromise.set(cwd, Poetry.locate(cwd));
 		}
+
 		return Poetry.poetryPromise.get(cwd);
 	}
 
@@ -197,6 +202,7 @@ export class Poetry {
 
 				return poetry;
 			}
+
 			logger.debug(`Failed to find poetry for ${cwd}: ${poetryPath}`);
 		}
 
@@ -251,6 +257,7 @@ export class Poetry {
 				if (line.endsWith(activated)) {
 					line = line.slice(0, -activated.length);
 				}
+
 				const folder = line.trim();
 
 				return (await pathExists(folder)) ? folder : undefined;
@@ -284,6 +291,7 @@ export class Poetry {
 		if (!result) {
 			return undefined;
 		}
+
 		return result.stdout.trim();
 	}
 
@@ -299,6 +307,7 @@ export class Poetry {
 		if (!result) {
 			return undefined;
 		}
+
 		return result.stdout.trim();
 	}
 
@@ -316,7 +325,9 @@ export class Poetry {
 			if (/^[a-z]:/.test(this.cwd)) {
 				// Replace first character by the upper case version of the character.
 				const a = this.cwd.split(":");
+
 				a[0] = a[0].toUpperCase();
+
 				this.cwd = a.join(":");
 			}
 		}
@@ -337,8 +348,10 @@ export class Poetry {
 			} else {
 				logger.error(ex);
 			}
+
 			return undefined;
 		});
+
 		logger.debug(
 			`Time taken to run ${command} in ms`,
 			stopWatch.elapsedTime,
@@ -369,6 +382,7 @@ export async function isPoetryEnvironmentRelatedToFolder(
 	if (!pathToEnv) {
 		return false;
 	}
+
 	return isParentPath(interpreterPath, pathToEnv);
 }
 
@@ -384,6 +398,7 @@ function hasValidPyprojectToml(folder: string): boolean {
 	if (!pathExistsSync(pyprojectToml)) {
 		return false;
 	}
+
 	const content = readFileSync(pyprojectToml);
 
 	if (!content.includes("[tool.poetry]")) {

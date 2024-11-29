@@ -24,6 +24,7 @@ export class PlotViewHandler {
 		if (notebook.isClosed) {
 			return;
 		}
+
 		const outputItem = getOutputItem(notebook, outputId, svgMimeType);
 
 		let svgString: string | undefined;
@@ -43,6 +44,7 @@ export class PlotViewHandler {
 		} else {
 			svgString = new TextDecoder().decode(outputItem.data);
 		}
+
 		if (svgString) {
 			await this.plotViewProvider.showPlot(svgString);
 		}
@@ -59,6 +61,7 @@ function getOutputItem(
 			if (output.id !== outputId) {
 				continue;
 			}
+
 			return output.items.find((item) => item.mime === mimeType);
 		}
 	}
@@ -85,6 +88,7 @@ function convertPngToSvg(pngOutput: NotebookCellOutputItem): string {
 
 export function getPngDimensions(buffer: Uint8Array): {
 	width: number;
+
 	height: number;
 } {
 	// Verify this is a PNG

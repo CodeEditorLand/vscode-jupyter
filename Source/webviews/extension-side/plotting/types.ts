@@ -22,16 +22,22 @@ export namespace PlotViewerMessages {
 
 export interface IExportPlotRequest {
 	svg: string;
+
 	png: string;
 }
 
 // Map all messages to specific payloads
 export class IPlotViewerMapping {
 	public [PlotViewerMessages.Started]: never | undefined;
+
 	public [PlotViewerMessages.UpdateSettings]: string;
+
 	public [PlotViewerMessages.SendPlot]: string;
+
 	public [PlotViewerMessages.CopyPlot]: string;
+
 	public [PlotViewerMessages.ExportPlot]: IExportPlotRequest;
+
 	public [PlotViewerMessages.RemovePlot]: number;
 }
 
@@ -44,7 +50,10 @@ export const IPlotViewer = Symbol("IPlotViewer");
 
 export interface IPlotViewer extends IDisposable {
 	closed: Event<IPlotViewer>;
+
 	removed: Event<number>;
+
 	addPlot(imageHtml: string): Promise<void>;
+
 	show(): Promise<void>;
 }

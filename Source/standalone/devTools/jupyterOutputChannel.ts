@@ -21,6 +21,7 @@ export function getJupyterOutputChannel(
 		localize.DataScience.jupyterServerConsoleOutputChannel,
 		"log",
 	);
+
 	disposables.push(jupyterServerOutputChannel);
 
 	const handler: ProxyHandler<IOutputChannel> = {
@@ -35,6 +36,7 @@ export function getJupyterOutputChannel(
 						formatMessageAndLog(...args);
 					};
 				}
+
 				if (propKey === "appendLine") {
 					return (
 						...args: Parameters<IOutputChannel["appendLine"]>
@@ -45,6 +47,7 @@ export function getJupyterOutputChannel(
 					};
 				}
 			}
+
 			return method;
 		},
 	};

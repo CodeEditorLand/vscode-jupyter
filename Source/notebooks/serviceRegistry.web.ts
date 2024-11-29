@@ -41,46 +41,57 @@ export function registerTypes(
 	isDevMode: boolean,
 ) {
 	registerControllerTypes(serviceManager, isDevMode);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		LiveKernelSwitcher,
 	);
+
 	serviceManager.addSingleton<INotebookEditorProvider>(
 		INotebookEditorProvider,
 		NotebookEditorProvider,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		RemoteKernelControllerWatcher,
 	);
+
 	serviceManager.addSingleton<ITracebackFormatter>(
 		ITracebackFormatter,
 		NotebookTracebackFormatter,
 	);
+
 	serviceManager.addSingleton<NotebookIPyWidgetCoordinator>(
 		NotebookIPyWidgetCoordinator,
 		NotebookIPyWidgetCoordinator,
 	);
+
 	serviceManager.addBinding(
 		NotebookIPyWidgetCoordinator,
 		IExtensionSyncActivationService,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		RemoteKernelConnectionHandler,
 	);
+
 	serviceManager.addSingleton<IDataScienceCommandListener>(
 		IDataScienceCommandListener,
 		NotebookCommandListener,
 	);
+
 	serviceManager.addSingleton<NotebookCellLanguageService>(
 		NotebookCellLanguageService,
 		NotebookCellLanguageService,
 	);
+
 	serviceManager.addBinding(
 		NotebookCellLanguageService,
 		IExtensionSyncActivationService,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		EmptyNotebookCellLanguageService,
@@ -92,32 +103,39 @@ export function registerTypes(
 		undefined,
 		[IExtensionSyncActivationService],
 	);
+
 	serviceManager.addSingleton<IJupyterDebugService>(
 		IJupyterDebugService,
 		MultiplexingDebugService,
 		Identifiers.MULTIPLEXING_DEBUGSERVICE,
 	);
+
 	serviceManager.addSingleton<IDebugLocationTracker>(
 		IDebugLocationTracker,
 		DebugLocationTrackerFactory,
 		undefined,
 		[IDebugLocationTrackerFactory],
 	);
+
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		DebuggerVariables,
 		Identifiers.DEBUGGER_VARIABLES,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		CommandRegistry,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		CellOutputMimeTypeTracker,
 	);
 
 	serviceManager.addSingleton<IExportBase>(IExportBase, ExportBase);
+
 	serviceManager.addSingleton<IFileConverter>(IFileConverter, FileConverter);
+
 	serviceManager.addSingleton<IExportUtil>(IExportUtil, ExportUtil);
 }

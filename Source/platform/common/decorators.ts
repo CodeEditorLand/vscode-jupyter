@@ -13,9 +13,11 @@ function createDecorator(
 
 		if (typeof descriptor.value === "function") {
 			fnKey = "value";
+
 			fn = descriptor.value;
 		} else if (typeof descriptor.get === "function") {
 			fnKey = "get";
+
 			fn = descriptor.get;
 		}
 
@@ -34,6 +36,7 @@ export function memoize(_target: any, key: string, descriptor: any) {
 
 	if (typeof descriptor.value === "function") {
 		fnKey = "value";
+
 		fn = descriptor.value;
 
 		if (fn!.length !== 0) {
@@ -43,6 +46,7 @@ export function memoize(_target: any, key: string, descriptor: any) {
 		}
 	} else if (typeof descriptor.get === "function") {
 		fnKey = "get";
+
 		fn = descriptor.get;
 	}
 
@@ -51,6 +55,7 @@ export function memoize(_target: any, key: string, descriptor: any) {
 	}
 
 	const memoizeKey = `$memoize$${key}`;
+
 	descriptor[fnKey!] = function (...args: any[]) {
 		if (!this.hasOwnProperty(memoizeKey)) {
 			Object.defineProperty(this, memoizeKey, {
@@ -90,11 +95,13 @@ export function debounce<T>(
 
 			if (reducer) {
 				this[resultKey] = reducer(this[resultKey], ...args);
+
 				args = [this[resultKey]];
 			}
 
 			this[timerKey] = setTimeout(() => {
 				fn.apply(this, args);
+
 				this[resultKey] = initialValueProvider
 					? initialValueProvider()
 					: undefined;
@@ -123,6 +130,7 @@ export function throttle<T>(
 					? initialValueProvider()
 					: undefined;
 			}
+
 			if (this[lastRunKey] === null || this[lastRunKey] === undefined) {
 				this[lastRunKey] = -Number.MAX_VALUE;
 			}
@@ -139,16 +147,22 @@ export function throttle<T>(
 
 			if (nextTime <= Date.now()) {
 				this[lastRunKey] = Date.now();
+
 				fn.apply(this, [this[resultKey]]);
+
 				this[resultKey] = initialValueProvider
 					? initialValueProvider()
 					: undefined;
 			} else {
 				this[pendingKey] = true;
+
 				this[timerKey] = setTimeout(() => {
 					this[pendingKey] = false;
+
 					this[lastRunKey] = Date.now();
+
 					fn.apply(this, [this[resultKey]]);
+
 					this[resultKey] = initialValueProvider
 						? initialValueProvider()
 						: undefined;

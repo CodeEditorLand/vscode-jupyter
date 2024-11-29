@@ -104,10 +104,12 @@ export class DisposableStore implements IDisposable {
 	static DISABLE_DISPOSED_WARNING = false;
 
 	private readonly _toDispose = new Set<IDisposable>();
+
 	private _isDisposed = false;
 
 	constructor(...disposables: IDisposable[]) {
 		disposables.forEach((disposable) => this.add(disposable));
+
 		trackDisposable(this);
 	}
 
@@ -122,6 +124,7 @@ export class DisposableStore implements IDisposable {
 		}
 
 		this._isDisposed = true;
+
 		this.clear();
 	}
 
@@ -154,6 +157,7 @@ export class DisposableStore implements IDisposable {
 		if (!o) {
 			return o;
 		}
+
 		if ((o as unknown as DisposableStore) === this) {
 			throw new Error("Cannot register a disposable on itself!");
 		}
@@ -181,6 +185,7 @@ export class DisposableStore implements IDisposable {
  */
 export abstract class DisposableBase implements IDisposable {
 	protected readonly _store = new DisposableStore();
+
 	private _isDisposed: boolean = false;
 
 	public get isDisposed(): boolean {
@@ -189,11 +194,13 @@ export abstract class DisposableBase implements IDisposable {
 
 	constructor(...disposables: IDisposable[]) {
 		disposables.forEach((disposable) => this._store.add(disposable));
+
 		trackDisposable(this);
 	}
 
 	public dispose(): void {
 		this._store.dispose();
+
 		this._isDisposed = true;
 	}
 
@@ -204,6 +211,7 @@ export abstract class DisposableBase implements IDisposable {
 		if ((o as unknown as DisposableBase) === this) {
 			throw new Error("Cannot register a disposable on itself!");
 		}
+
 		return this._store.add(o);
 	}
 }
@@ -215,17 +223,22 @@ export abstract class DisposableBase implements IDisposable {
  */
 export abstract class ObservableDisposable extends DisposableBase {
 	private readonly _onDidDispose: EventEmitter<void>;
+
 	public readonly onDidDispose: Event<void>;
 
 	constructor() {
 		super();
+
 		this._onDidDispose = new EventEmitter<void>();
+
 		this.onDidDispose = this._onDidDispose.event;
 	}
 
 	override dispose() {
 		super.dispose();
+
 		this._onDidDispose.fire();
+
 		this._onDidDispose.dispose();
 	}
 }
@@ -247,6 +260,7 @@ export class DisposableMap<K, V extends IDisposable = IDisposable>
 	implements IDisposable
 {
 	private readonly _store = new Map<K, V>();
+
 	private _isDisposed = false;
 	/**
 	 * Disposes of all stored values and mark this object as disposed.
@@ -255,6 +269,7 @@ export class DisposableMap<K, V extends IDisposable = IDisposable>
 	 */
 	dispose(): void {
 		this._isDisposed = true;
+
 		this.clearAndDisposeAll();
 	}
 
@@ -302,6 +317,7 @@ export class DisposableMap<K, V extends IDisposable = IDisposable>
 	 */
 	deleteAndDispose(key: K): void {
 		this._store.get(key)?.dispose();
+
 		this._store.delete(key);
 	}
 
@@ -325,6 +341,7 @@ export class RefCountedDisposable {
 		if (--this._counter === 0) {
 			this._disposable.dispose();
 		}
+
 		return this;
 	}
 }
@@ -347,6 +364,7 @@ export abstract class ReferenceCollection<T> {
 				counter: 0,
 				object: this.createReferencedObject(key, ...args),
 			};
+
 			this.references.set(key, reference);
 		}
 
@@ -355,6 +373,7 @@ export abstract class ReferenceCollection<T> {
 		const dispose = once(() => {
 			if (reference && --reference.counter === 0) {
 				this.destroyReferencedObject(key, reference.object);
+
 				this.references.delete(key);
 			}
 		});
@@ -365,5 +384,6 @@ export abstract class ReferenceCollection<T> {
 	}
 
 	protected abstract createReferencedObject(key: string, ...args: any[]): T;
+
 	protected abstract destroyReferencedObject(key: string, object: T): void;
 }

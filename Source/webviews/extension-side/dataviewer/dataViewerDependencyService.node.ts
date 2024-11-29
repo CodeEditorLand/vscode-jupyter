@@ -20,6 +20,7 @@ export class DataViewerDependencyService
 	implements IDataViewerDependencyService
 {
 	private withKernel: IDataViewerDependencyService;
+
 	private withInterpreter: IDataViewerDependencyService;
 
 	constructor(
@@ -28,6 +29,7 @@ export class DataViewerDependencyService
 		@inject(IInterpreterService) interpreterService: IInterpreterService,
 	) {
 		this.withKernel = new KernelDataViewerDependencyImplementation();
+
 		this.withInterpreter =
 			new InterpreterDataViewerDependencyImplementation(
 				installer,

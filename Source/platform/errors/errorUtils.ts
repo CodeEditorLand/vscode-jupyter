@@ -51,6 +51,7 @@ export function getTelemetrySafeErrorMessageFromPythonTraceback(
 	if (reversedLines.length === 0) {
 		return;
 	}
+
 	const lastLine = reversedLines[0];
 
 	const message = lastLine.match(pythonErrorMessageRegExp)
@@ -83,6 +84,7 @@ export function getLastTwoLinesFromPythonTracebackWithErrorMessage(
 	if (!traceback) {
 		return;
 	}
+
 	const reversedLines = traceback
 		.trim()
 		.split("\n")
@@ -133,6 +135,7 @@ export function getLastFrameFromPythonTraceback(
 	if (!lastFrame) {
 		return;
 	}
+
 	const file = lastFrame.substring(0, lastFrame.lastIndexOf(".py")) + ".py";
 
 	const parts = file.replace(/\\/g, "/").split("/");
@@ -149,6 +152,7 @@ export function getLastFrameFromPythonTraceback(
 	if (reversedParts.length < 2) {
 		return;
 	}
+
 	return {
 		fileName: reversedParts[0],
 		folderName: reversedParts[1],
@@ -268,7 +272,9 @@ export type ImportErrorFailure = BaseFailure<
 		 * What is being imported from the module.
 		 */
 		name?: string;
+
 		moduleName: string;
+
 		fileName?: string;
 	}
 >;
@@ -358,6 +364,7 @@ export function analyzeKernelErrors(
 			telemetrySafeTags: ["deadSession"],
 		};
 	}
+
 	if (
 		stdErr.includes("ImportError: No module named 'win32api'".toLowerCase())
 	) {
@@ -378,6 +385,7 @@ export function analyzeKernelErrors(
 			telemetrySafeTags: ["win32api"],
 		};
 	}
+
 	if (
 		stdErr.includes("ImportError: DLL load failed".toLowerCase()) &&
 		stdErr.includes("win32api")
@@ -395,6 +403,7 @@ export function analyzeKernelErrors(
 			telemetrySafeTags: ["dll.load.failed", "win32api"],
 		};
 	}
+
 	if (stdErr.includes("ImportError: DLL load failed".toLowerCase())) {
 		/*
         import xyz
@@ -416,6 +425,7 @@ export function analyzeKernelErrors(
 			telemetrySafeTags: ["dll.load.failed"],
 		};
 	}
+
 	if (
 		stdErr.includes(
 			"AssertionError: Couldn't find Class NSProcessInfo".toLowerCase(),
@@ -441,6 +451,7 @@ export function analyzeKernelErrors(
 			telemetrySafeTags: ["oldipython"],
 		};
 	}
+
 	if (
 		stdErr.includes("NotImplementedError".toLowerCase()) &&
 		stdErr.includes("asyncio".toLowerCase()) &&
@@ -479,6 +490,7 @@ export function analyzeKernelErrors(
 			// force re-installing ipykernel worked.
 			tags.push("zmq.backend.cython");
 		}
+
 		if (
 			stdErr.includes("zmq".toLowerCase()) &&
 			stdErr.includes("cython".toLowerCase()) &&
@@ -599,10 +611,14 @@ export function analyzeKernelErrors(
 
 		if (moduleName.split("'").length > 2) {
 			fileName = moduleName.split("'").slice(-2)[0] || "";
+
 			fileName = fileName ? `${fileName}.py` : "";
+
 			folderName = fileName ? fileName : "";
+
 			moduleName = moduleName.split("'")[1] || moduleName;
 		}
+
 		const modulesInCwd = filesInCwd
 			.filter(
 				(file) => path.basename(file).toLowerCase() === "__init__.py",
@@ -705,6 +721,7 @@ export function analyzeKernelErrors(
 			};
 		}
 	}
+
 	if (error instanceof JupyterConnectError) {
 		// Get the last error message in the stack trace.
 		let errorMessage = splitLines(stdErrOrStackTrace)
@@ -727,6 +744,7 @@ export function analyzeKernelErrors(
 		})
 			.reverse()
 			.find((item) => item.toLowerCase().includes("error: "));
+
 		pythonError =
 			pythonError ||
 			splitLines(error.stdErr || "", {
@@ -738,12 +756,15 @@ export function analyzeKernelErrors(
 
 		if (stdErr.includes(errorMessageDueToOutdatedTraitlets.toLowerCase())) {
 			reason = KernelFailureReason.jupyterStartFailureOutdatedTraitlets;
+
 			errorMessage =
 				DataScience.failedToStartJupyterDueToOutdatedTraitlets(
 					kernelDisplayName || "",
 					pythonError || "",
 				);
+
 			telemetrySafeTags.push("outdated.traitlets");
+
 			link = "https://aka.ms/kernelFailuresJupyterTrailtletsOutdated";
 		} else {
 			errorMessage = pythonError
@@ -752,8 +773,10 @@ export function analyzeKernelErrors(
 						pythonError,
 					)
 				: DataScience.failedToStartJupyter(kernelDisplayName || "");
+
 			link = undefined;
 		}
+
 		if (errorMessage) {
 			return {
 				reason,
@@ -779,10 +802,13 @@ function extractModuleAndFileFromImportError(errorLine: string) {
 
 	if (matches && matches[0].length > 2) {
 		moduleName = matches[0];
+
 		moduleName = moduleName.substring(1, moduleName.length - 1);
 	}
+
 	if (fileMatches && fileMatches[0].length > 2) {
 		fileName = fileMatches[0];
+
 		fileName = fileName.substring(1, fileName.length - 1);
 	}
 
@@ -808,6 +834,7 @@ function isBuiltInModuleOverwritten(
 	if (workspaceFolders.length === 0) {
 		return;
 	}
+
 	if (!fileName) {
 		return;
 	}

@@ -21,6 +21,7 @@ function getScriptsToBeRegistered(scripts: WidgetScriptSource[]) {
 		) {
 			return false;
 		}
+
 		return true;
 	});
 }
@@ -53,7 +54,9 @@ function getRequireJs() {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const requireJsFunc = (window as any).requirejs as {
 		config: Function;
+
 		define: Function;
+
 		undef: Function;
 	};
 
@@ -62,6 +65,7 @@ function getRequireJs() {
 
 		throw new Error("Requirejs not found");
 	}
+
 	return requireJsFunc;
 }
 function registerScriptsInRequireJs(
@@ -77,12 +81,14 @@ function registerScriptsInRequireJs(
 	if (baseUrl) {
 		config.baseUrl = baseUrl;
 	}
+
 	registerCustomScripts();
 
 	scripts.forEach((script) => {
 		logMessage(
 			`Registering IPyWidget ${script.moduleName} found in ${script.scriptUri}.`,
 		);
+
 		scriptsAlreadyRegisteredInRequireJs.set(
 			script.moduleName,
 			script.scriptUri,
@@ -111,6 +117,7 @@ export function registerScripts(
 
 	const validScriptsToRegister =
 		getScriptsWithAValidScriptUriToBeRegistered(scriptsToRegister);
+
 	registerScriptsInRequireJs(baseUrl, validScriptsToRegister);
 }
 

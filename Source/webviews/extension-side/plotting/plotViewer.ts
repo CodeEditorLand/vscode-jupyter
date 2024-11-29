@@ -35,6 +35,7 @@ export class PlotViewer
 {
 	private closedEvent: EventEmitter<IPlotViewer> =
 		new EventEmitter<IPlotViewer>();
+
 	private removedEvent: EventEmitter<number> = new EventEmitter<number>();
 
 	constructor(
@@ -103,6 +104,7 @@ export class PlotViewer
 
 	public override dispose() {
 		super.dispose();
+
 		this.removedEvent.dispose();
 
 		if (this.closedEvent) {
@@ -153,7 +155,9 @@ export class PlotViewer
 		logger.info("exporting plot...");
 
 		const filtersObject: Record<string, string[]> = {};
+
 		filtersObject[localize.DataScience.pngFilter] = ["png"];
+
 		filtersObject[localize.DataScience.svgFilter] = ["svg"];
 
 		// Ask the user what file to save to
@@ -171,6 +175,7 @@ export class PlotViewer
 						const buffer = base64ToUint8Array(
 							payload.png.replace("data:image/png;base64", ""),
 						);
+
 						await this.fs.writeFile(file, buffer);
 
 						break;
@@ -185,6 +190,7 @@ export class PlotViewer
 			}
 		} catch (e) {
 			logger.error(e);
+
 			window
 				.showErrorMessage(
 					localize.DataScience.exportImageFailed(e.toString()),

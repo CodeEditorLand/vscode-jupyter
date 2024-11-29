@@ -21,6 +21,7 @@ import { IJupyterCommand, IJupyterCommandFactory } from "../types.node";
  */
 class InterpreterJupyterCommand implements IJupyterCommand {
 	protected interpreterPromise: Promise<PythonEnvironment>;
+
 	private pythonLauncher: Promise<IPythonExecutionService>;
 
 	constructor(
@@ -30,6 +31,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 		private readonly _interpreter: PythonEnvironment,
 	) {
 		this.interpreterPromise = Promise.resolve(this._interpreter);
+
 		this.pythonLauncher = this.interpreterPromise.then(
 			async (interpreter) => {
 				return pythonExecutionFactory.createActivatedEnvironment({
@@ -38,6 +40,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 			},
 		);
 	}
+
 	public interpreter(): Promise<PythonEnvironment | undefined> {
 		return this.interpreterPromise;
 	}
@@ -53,6 +56,7 @@ class InterpreterJupyterCommand implements IJupyterCommand {
 		const newArgs = [...this.args, ...args];
 
 		const moduleName = newArgs[1];
+
 		newArgs.shift(); // Remove '-m'
 		newArgs.shift(); // Remove module name
 		return launcher.execModule(moduleName, newArgs, newOptions);
@@ -146,6 +150,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 
 				throw exception;
 			}
+
 			return output;
 		};
 
@@ -180,6 +185,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 				innerEx,
 			);
 		}
+
 		return defaultAction();
 	}
 
@@ -205,6 +211,7 @@ export class InterpreterJupyterKernelSpecCommand extends InterpreterJupyterComma
 			{ ...options, throwOnStdErr: true },
 		);
 	}
+
 	private async getKernelSpecVersion(
 		interpreter: PythonEnvironment,
 		options: SpawnOptions,
@@ -258,6 +265,7 @@ export class JupyterCommandFactory implements IJupyterCommandFactory {
 				interpreter,
 			);
 		}
+
 		return new InterpreterJupyterCommand(
 			moduleName,
 			args,

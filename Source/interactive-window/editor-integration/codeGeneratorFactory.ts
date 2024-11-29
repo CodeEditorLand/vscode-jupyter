@@ -36,6 +36,7 @@ export class CodeGeneratorFactory
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
 	) {}
+
 	public activate(): void {
 		workspace.onDidCloseNotebookDocument(
 			this.onDidCloseNotebook,
@@ -43,6 +44,7 @@ export class CodeGeneratorFactory
 			this.disposables,
 		);
 	}
+
 	public getOrCreate(
 		notebook: NotebookDocument,
 	): IInteractiveWindowCodeGenerator {
@@ -51,23 +53,28 @@ export class CodeGeneratorFactory
 		if (existing) {
 			return existing;
 		}
+
 		const codeGenerator = new CodeGenerator(
 			this.configService,
 			this.storageFactory.getOrCreate(notebook),
 			notebook,
 			this.disposables,
 		);
+
 		this.codeGenerators.set(notebook, codeGenerator);
 
 		return codeGenerator;
 	}
+
 	public get(
 		notebook: NotebookDocument,
 	): IInteractiveWindowCodeGenerator | undefined {
 		return this.codeGenerators.get(notebook);
 	}
+
 	private onDidCloseNotebook(notebook: NotebookDocument): void {
 		this.codeGenerators.get(notebook)?.dispose();
+
 		this.codeGenerators.delete(notebook);
 	}
 }

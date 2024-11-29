@@ -41,9 +41,11 @@ export class JupyterSessionWrapper
 		if (this.isDisposed) {
 			return "dead";
 		}
+
 		if (this.session?.kernel) {
 			return this.session.kernel.status;
 		}
+
 		logger.ci(
 			`Kernel status not started because real session is ${
 				this.session ? "defined" : "undefined"
@@ -52,6 +54,7 @@ export class JupyterSessionWrapper
 
 		return "unknown";
 	}
+
 	private restartToken?: CancellationTokenSource;
 
 	constructor(
@@ -67,14 +70,18 @@ export class JupyterSessionWrapper
 				: "remoteJupyter",
 			session,
 		);
+
 		this.initializeKernelSocket();
 	}
 
 	public override dispose() {
 		this.restartToken?.cancel();
+
 		this.restartToken?.dispose();
+
 		void this.shutdownImplementation(false).finally(() => super.dispose());
 	}
+
 	public async waitForIdle(
 		timeout: number,
 		token: CancellationToken,
@@ -89,28 +96,35 @@ export class JupyterSessionWrapper
 			);
 		} catch (ex) {
 			logger.ci(`Error waiting for idle`, ex);
+
 			await this.shutdown().catch(noop);
 
 			throw ex;
 		}
 	}
+
 	public override async restart(): Promise<void> {
 		const disposables: IDisposable[] = [];
 
 		const token = new CancellationTokenSource();
+
 		this.restartToken = token;
 
 		const ui = new DisplayOptions(false);
+
 		disposables.push(ui);
+
 		disposables.push(token);
 
 		try {
 			await this.validateLocalKernelDependencies(token.token, ui);
+
 			await super.restart();
 		} finally {
 			dispose(disposables);
 		}
 	}
+
 	private async validateLocalKernelDependencies(
 		token: CancellationToken,
 		ui: DisplayOptions,
@@ -122,6 +136,7 @@ export class JupyterSessionWrapper
 		) {
 			return;
 		}
+
 		if (token.isCancellationRequested) {
 			throw new CancellationError();
 		}
@@ -143,26 +158,31 @@ export class JupyterSessionWrapper
 
 	public override async shutdown(): Promise<void> {
 		this.restartToken?.cancel();
+
 		this.restartToken?.dispose();
 
 		return this.shutdownImplementation(true);
 	}
 
 	private isShuttingDown = false;
+
 	private async shutdownImplementation(shutdownEvenIfRemote?: boolean) {
 		if (this.isDisposed || this.isShuttingDown) {
 			return;
 		}
+
 		this.isShuttingDown = true;
 		// We are only interested in our stack, not in VS Code or others.
 		const stack = (new Error().stack || "")
 			.split("\n")
 			.filter((l) => l.includes(JVSC_EXTENSION_ID));
+
 		logger.trace(
 			`Shutdown session - current session, called from \n ${stack.map((l) => `    ${l}`).join("\n")}`,
 		);
 
 		const kernelIdForLogging = `${this.session.kernel?.id}, ${this.kernelConnectionMetadata.id}`;
+
 		logger.debug(`shutdownSession ${kernelIdForLogging} - start`);
 
 		try {
@@ -171,6 +191,7 @@ export class JupyterSessionWrapper
 					logger.debug(
 						`Session can be shutdown ${this.kernelConnectionMetadata.id}`,
 					);
+
 					suppressShutdownErrors(this.session.kernel);
 					// Shutdown may fail if the process has been killed
 					if (!this.session.isDisposed) {
@@ -197,6 +218,7 @@ export class JupyterSessionWrapper
 					`Session cannot be shutdown ${this.kernelConnectionMetadata.id}`,
 				);
 			}
+
 			try {
 				// If session.shutdown didn't work, just dispose
 				if (!this.session.isDisposed) {
@@ -205,15 +227,19 @@ export class JupyterSessionWrapper
 			} catch (e) {
 				logger.warn("Failures in disposing the session", e);
 			}
+
 			super.dispose();
+
 			logger.trace("Shutdown session -- complete");
 		} catch (e) {
 			logger.warn("Failures in disposing the session", e);
 		}
+
 		logger.debug(
 			`shutdownSession ${kernelIdForLogging} - shutdown complete`,
 		);
 	}
+
 	private canShutdownSession(): boolean {
 		if (isLocalConnection(this.kernelConnectionMetadata)) {
 			return true;

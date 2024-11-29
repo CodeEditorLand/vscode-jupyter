@@ -60,10 +60,15 @@ export class DataViewer
 		| IDataViewerDataProvider
 		| IJupyterVariableDataProvider
 		| undefined;
+
 	private rowsTimer: StopWatch | undefined;
+
 	private pendingRowsCount: number = 0;
+
 	private dataFrameInfoPromise: Promise<IDataFrameInfo> | undefined;
+
 	private currentSliceExpression: string | undefined;
+
 	private sentDataViewerSliceDimensionalityTelemetry = false;
 
 	public get active() {
@@ -83,6 +88,7 @@ export class DataViewer
 	}
 
 	private _onDidDisposeDataViewer = new EventEmitter<IDataViewer>();
+
 	private _onDidChangeDataViewerViewState = new EventEmitter<void>();
 
 	constructor(
@@ -112,6 +118,7 @@ export class DataViewer
 			localize.DataScience.dataExplorerTitle,
 			globalMemento.get(PREFERRED_VIEWGROUP) ?? ViewColumn.One,
 		);
+
 		this.onDidDispose(this.dataViewerDisposed, this);
 	}
 
@@ -143,6 +150,7 @@ export class DataViewer
 				);
 
 				const slice = preselectedSliceExpression(dataFrameInfo.shape);
+
 				dataFrameInfo = await this.getDataFrameInfo(slice);
 			}
 
@@ -193,9 +201,11 @@ export class DataViewer
 				const newSlice = preselectedSliceExpression(
 					dataFrameInfo.shape,
 				);
+
 				dataFrameInfo = await this.getDataFrameInfo(newSlice);
 			}
 		}
+
 		logger.info(
 			`Refreshing data viewer for variable ${dataFrameInfo.name}`,
 		);
@@ -212,6 +222,7 @@ export class DataViewer
 		if (this.dataProvider) {
 			// Call dispose on the data provider
 			this.dataProvider.dispose();
+
 			this.dataProvider = undefined;
 		}
 	}
@@ -230,6 +241,7 @@ export class DataViewer
 				this.webPanel?.viewColumn,
 			);
 		}
+
 		this._onDidChangeDataViewerViewState.fire();
 	}
 
@@ -257,6 +269,7 @@ export class DataViewer
 
 			case DataViewerMessages.RefreshDataViewer:
 				this.refreshData().catch(noop);
+
 				void sendTelemetryEvent(Telemetry.RefreshDataViewer);
 
 				break;
@@ -303,8 +316,10 @@ export class DataViewer
 			this.dataFrameInfoPromise = this.dataProvider
 				? this.dataProvider.getDataFrameInfo(sliceExpression, isRefresh)
 				: Promise.resolve({});
+
 			this.currentSliceExpression = sliceExpression;
 		}
+
 		return this.dataFrameInfoPromise;
 	}
 
@@ -335,6 +350,7 @@ export class DataViewer
 			if (this.dataProvider) {
 				const allRows =
 					await this.dataProvider.getAllRows(sliceExpression);
+
 				this.pendingRowsCount = 0;
 
 				return this.postMessage(
@@ -355,6 +371,7 @@ export class DataViewer
 						payload.shape.length,
 					);
 				}
+
 				sendTelemetryEvent(
 					Telemetry.DataViewerSliceOperation,
 					undefined,
@@ -384,6 +401,7 @@ export class DataViewer
 					),
 					request.sliceExpression,
 				);
+
 				this.pendingRowsCount = Math.max(
 					0,
 					this.pendingRowsCount - rows.length,
@@ -407,6 +425,7 @@ export class DataViewer
 
 				const actionTitle =
 					localize.DataScience.pythonInteractiveHelpLink;
+
 				window
 					.showErrorMessage(
 						localize.DataScience.jupyterDataRateExceeded,
@@ -420,9 +439,12 @@ export class DataViewer
 							);
 						}
 					}, noop);
+
 				this.dispose();
 			}
+
 			logger.error(e);
+
 			this.errorHandler.handleError(e).then(noop, noop);
 		} finally {
 			this.sendElapsedTimeTelemetry();
@@ -444,6 +466,7 @@ export class DataViewer
 			sendTelemetryEvent(Telemetry.DataViewerDataDimensionality, {
 				numberOfDimensions,
 			});
+
 			this.sentDataViewerSliceDimensionalityTelemetry = true;
 		}
 	}

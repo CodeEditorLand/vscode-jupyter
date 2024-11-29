@@ -47,6 +47,7 @@ export class DataViewerDelegator {
 			} else if (variableViewers.length === 1) {
 				const command =
 					variableViewers[0].jupyterVariableViewers.command;
+
 				logger.info(
 					`Showing data viewer with command ${command} for variable ${JSON.stringify(
 						{
@@ -65,6 +66,7 @@ export class DataViewerDelegator {
 				if (thirdPartyViewers.length === 1) {
 					const command =
 						thirdPartyViewers[0].jupyterVariableViewers.command;
+
 					logger.info(
 						`Showing data viewer viewer with command ${command} for variable ${JSON.stringify(
 							{
@@ -80,7 +82,9 @@ export class DataViewerDelegator {
 				const quickPick = window.createQuickPick<
 					QuickPickItem & { command: string }
 				>();
+
 				quickPick.title = localize.DataScience.selectExternalDataViewer;
+
 				quickPick.items = variableViewers.map((d) => {
 					return {
 						label: d.jupyterVariableViewers.title,
@@ -90,11 +94,13 @@ export class DataViewerDelegator {
 						command: d.jupyterVariableViewers.command,
 					};
 				});
+
 				quickPick.onDidAccept(async () => {
 					const item = quickPick.selectedItems[0];
 
 					if (item) {
 						quickPick.hide();
+
 						logger.info(
 							`Showing data viewer viewer with command ${item.command} for variable ${JSON.stringify(
 								{
@@ -107,14 +113,17 @@ export class DataViewerDelegator {
 						return commands.executeCommand(item.command, variable);
 					}
 				});
+
 				quickPick.show();
 			}
 		} catch (e) {
 			logger.error(e);
+
 			sendTelemetryEvent(Telemetry.FailedShowDataViewer, undefined, {
 				reason: "exception",
 				fromVariableView,
 			});
+
 			window
 				.showErrorMessage(localize.DataScience.showDataViewerFail)
 				.then(noop, noop);
@@ -123,6 +132,7 @@ export class DataViewerDelegator {
 
 	private getMatchingExternalVariableViewers(variable: IJupyterVariable): {
 		extension: Extension<unknown>;
+
 		jupyterVariableViewers: IVariableViewer;
 	}[] {
 		const variableViewers = this.getVariableViewers();
@@ -138,6 +148,7 @@ export class DataViewerDelegator {
 
 	public getVariableViewers(): {
 		extension: Extension<unknown>;
+
 		jupyterVariableViewers: IVariableViewer;
 	}[] {
 		const variableViewers = extensions.all
@@ -157,6 +168,7 @@ export class DataViewerDelegator {
 						}),
 					);
 				}
+
 				return [];
 			})
 			.flat();

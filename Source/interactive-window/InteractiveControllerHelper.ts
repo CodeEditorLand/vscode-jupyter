@@ -64,6 +64,7 @@ export class InteractiveControllerHelper
 
 	public readonly onControllerSelected: Event<{
 		notebook: NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}>;
 
@@ -99,6 +100,7 @@ export class InteractiveControllerHelper
 				return controller;
 			}
 		}
+
 		if (!this.interpreterService) {
 			return;
 		}
@@ -170,6 +172,7 @@ export class InteractiveControllerHelper
 				`Controller ${kernel.controller.id} not found or not yet created`,
 			);
 		}
+
 		const actualController = found.controller;
 
 		if (this.interpreterService) {
@@ -224,6 +227,7 @@ async function createActiveInterpreterController(
 
 		const controller = controllers[0]; // Should only create one because only one view type
 		registration.trackActiveInterpreterControllers(controllers);
+
 		logger.ci(
 			`Active Interpreter Controller ${controller.connection.kind}:${
 				controller.id

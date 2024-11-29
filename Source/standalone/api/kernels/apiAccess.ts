@@ -39,6 +39,7 @@ export function registerChangeHandler(handler: () => void) {
 }
 export function clearApiAccess() {
 	extensionApiAccess.clear();
+
 	extensionsTriedAccessingApi.clear();
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	updatePromise = Promise.resolve();
@@ -51,25 +52,31 @@ export async function requestApiAccess(
 	if (!workspace.isTrusted) {
 		return { accessAllowed: false };
 	}
+
 	if (extensionId === JVSC_EXTENSION_ID) {
 		// Our own extension can use this API (used in tests)
 		return { accessAllowed: true };
 	}
+
 	let apiAccess = extensionApiAccess.get(extensionId);
 
 	if (!apiAccess) {
 		apiAccess = requestKernelAccessImpl(extensionId);
+
 		extensionApiAccess.set(extensionId, apiAccess);
+
 		void apiAccess.then(({ result }) => {
 			if (
 				(result === "learnMore" || result === "cancelled") &&
 				extensionApiAccess.get(extensionId) === apiAccess
 			) {
 				extensionApiAccess.delete(extensionId);
+
 				extensionsTriedAccessingApi.add(extensionId);
 			}
 		});
 	}
+
 	return apiAccess.then(({ result }) => ({
 		accessAllowed: result === "allowed",
 	}));
@@ -83,6 +90,7 @@ async function requestKernelAccessImpl(
 	if (accessInfo.get(extensionId) === true) {
 		return { result: "allowed" };
 	}
+
 	if (accessInfo.get(extensionId) === false) {
 		logger.warn(
 			`Kernel API access already revoked for extension ${extensionId}`,
@@ -90,6 +98,7 @@ async function requestKernelAccessImpl(
 
 		return { result: "denied" };
 	}
+
 	const displayName =
 		extensions.getExtension(extensionId)?.packageJSON?.displayName;
 
@@ -100,6 +109,7 @@ async function requestKernelAccessImpl(
 
 		return { result: "denied" };
 	}
+
 	const allow = l10n.t("Allow");
 
 	const deny = l10n.t("Deny");
@@ -131,6 +141,7 @@ async function requestKernelAccessImpl(
 			result === allow,
 		);
 	}
+
 	switch (result) {
 		case allow:
 			return { result: "allowed" };
@@ -145,6 +156,7 @@ async function requestKernelAccessImpl(
 
 			return { result: "denied" };
 		}
+
 		default:
 			return { result: "cancelled" };
 	}
@@ -165,9 +177,11 @@ export async function getExtensionAccessListForManagement() {
 			},
 		),
 	]);
+
 	extensionsWithoutAccess.forEach((extensionId) =>
 		extensions.set(extensionId, false),
 	);
+
 	extensionsTriedAccessingApi.forEach((extensionId) =>
 		extensions.set(extensionId, extensions.get(extensionId) === true),
 	);
@@ -195,6 +209,7 @@ async function getAccessForExtensionsFromStore(
 			ServiceContainer.instance.get<IDisposableRegistry>(
 				IDisposableRegistry,
 			);
+
 		disposables.push(
 			context.secrets.onDidChange((e) => {
 				e.key === apiAccessSecretKey
@@ -207,6 +222,7 @@ async function getAccessForExtensionsFromStore(
 	if (cachedAccessInfo && !ignoreCache) {
 		return cachedAccessInfo;
 	}
+
 	let json: string | undefined = "";
 
 	try {
@@ -215,6 +231,7 @@ async function getAccessForExtensionsFromStore(
 		if (!json || json.length === 0) {
 			return new Map<string, boolean>();
 		}
+
 		cachedAccessInfo = new Map<string, boolean>(
 			Object.entries(JSON.parse(json)),
 		);
@@ -238,6 +255,7 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 			Array.from(extensionApiAccess.entries()).map(
 				async ([extensionId, promise]) => {
 					const access = await promise;
+
 					access.result =
 						extensionIds.includes(extensionId) === true
 							? "allowed"
@@ -245,6 +263,7 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 				},
 			),
 		);
+
 		cachedAccessInfo = new Map(
 			extensionIds.map((extensionId) => [extensionId, true]),
 		);
@@ -255,11 +274,13 @@ export async function updateListOfExtensionsAllowedToAccessApi(
 		if (context.extensionMode === ExtensionMode.Test) {
 			return;
 		}
+
 		try {
 			await context.secrets.store(
 				apiAccessSecretKey,
 				JSON.stringify(Object.fromEntries(cachedAccessInfo)),
 			);
+
 			onDidChange.fire();
 		} catch (ex) {
 			logger.error(
@@ -281,11 +302,13 @@ async function updateIndividualExtensionAccessInStore(
 		if (context.extensionMode === ExtensionMode.Test) {
 			return;
 		}
+
 		const apiAccess = await getAccessForExtensionsFromStore(true);
 
 		if (accessAllowed === apiAccess.get(extensionId)) {
 			return;
 		}
+
 		apiAccess.set(extensionId, accessAllowed);
 
 		try {
@@ -293,6 +316,7 @@ async function updateIndividualExtensionAccessInStore(
 				apiAccessSecretKey,
 				JSON.stringify(Object.fromEntries(apiAccess)),
 			);
+
 			onDidChange.fire();
 		} catch (ex) {
 			logger.error(

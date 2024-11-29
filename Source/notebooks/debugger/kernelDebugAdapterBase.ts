@@ -62,14 +62,23 @@ export abstract class KernelDebugAdapterBase
 	implements DebugAdapter, IKernelDebugAdapter, IDisposable
 {
 	protected readonly fileToCell = new Map<string, Uri>();
+
 	private readonly sendMessage = new EventEmitter<DebugProtocolMessage>();
+
 	private readonly endSession = new EventEmitter<DebugSession>();
+
 	private readonly configuration: INotebookDebugConfig;
+
 	protected readonly disposables: IDisposable[] = [];
+
 	private delegates: IDebuggingDelegate[] = [];
+
 	onDidSendMessage: Event<DebugProtocolMessage> = this.sendMessage.event;
+
 	onDidEndSession: Event<DebugSession> = this.endSession.event;
+
 	public readonly debugCell: NotebookCell | undefined;
+
 	private disconnected: boolean = false;
 
 	constructor(
@@ -83,8 +92,11 @@ export abstract class KernelDebugAdapterBase
 		logger.ci(`Creating kernel debug adapter for debugging notebooks`);
 
 		const configuration = this.session.configuration;
+
 		assertIsDebugConfig(configuration);
+
 		this.configuration = configuration;
+
 		this.debugCell = notebookDocument.cellAt(configuration.__cellIndex!);
 
 		this.addDebuggingDelegates([new ResetKernelController(this)]);
@@ -93,6 +105,7 @@ export abstract class KernelDebugAdapterBase
 			this.onIOPubMessage,
 			this,
 		);
+
 		this.disposables.push(
 			new Disposable(() =>
 				this.jupyterSession.kernel?.iopubMessage.disconnect(
@@ -109,17 +122,21 @@ export abstract class KernelDebugAdapterBase
 				this,
 				this.disposables,
 			);
+
 			this.kernel.addHook(
 				"interruptCompleted",
 				() => this.disconnect(),
 				this,
 				this.disposables,
 			);
+
 			this.disposables.push(
 				this.kernel.onDisposed(() => {
 					if (!this.disconnected) {
 						debug.stopDebugging(this.session).then(noop, noop);
+
 						this.disconnect().catch(noop);
+
 						sendTelemetryEvent(
 							DebuggingTelemetry.endedSession,
 							undefined,
@@ -146,6 +163,7 @@ export abstract class KernelDebugAdapterBase
 							undefined,
 							{ reason: "normally" },
 						);
+
 						this.disconnect().catch(noop);
 					}
 				},
@@ -169,6 +187,7 @@ export abstract class KernelDebugAdapterBase
 				this.disposables,
 			),
 		);
+
 		this.disposables.push(
 			this.debugService.onDidTerminateDebugSession((e) => {
 				if (e === this.session || e === this.session) {
@@ -250,6 +269,7 @@ export abstract class KernelDebugAdapterBase
 
 					if (response) {
 						this.trace("response", JSON.stringify(response));
+
 						this.sendMessage.fire(response);
 
 						return;
@@ -281,6 +301,7 @@ export abstract class KernelDebugAdapterBase
 		if (!this.jupyterSession.kernel) {
 			throw new SessionDisposedError();
 		}
+
 		this.jupyterSession.kernel.requestDebug({
 			seq: 0,
 			type: "request",
@@ -315,6 +336,7 @@ export abstract class KernelDebugAdapterBase
 					logger.error(`Failed to disconnect debug session`, e);
 				}
 			}
+
 			this.endSession.fire(this.session);
 		}
 	}
@@ -344,6 +366,7 @@ export abstract class KernelDebugAdapterBase
 			}),
 		);
 	}
+
 	protected abstract dumpCell(index: number): Promise<void>;
 
 	private lookupCellByLongName(sourcePath: string) {
@@ -459,7 +482,9 @@ export abstract class KernelDebugAdapterBase
 	protected translateDebuggerLocationToRealLocation(
 		location: {
 			source?: DebugProtocol.Source;
+
 			line?: number;
+
 			endLine?: number;
 		},
 		source?: DebugProtocol.Source,
@@ -473,6 +498,7 @@ export abstract class KernelDebugAdapterBase
 
 			if (mapping) {
 				source.name = path.basename(mapping.path);
+
 				source.path = mapping.toString();
 			}
 		}
@@ -481,13 +507,16 @@ export abstract class KernelDebugAdapterBase
 	protected abstract translateRealLocationToDebuggerLocation(
 		location: {
 			source?: DebugProtocol.Source;
+
 			line?: number;
+
 			endLine?: number;
 		},
 		source?: DebugProtocol.Source,
 	): void;
 
 	protected abstract getDumpFilesForDeletion(): string[];
+
 	private async deleteDumpedFiles(): Promise<void> {
 		const fileValues = this.getDumpFilesForDeletion();
 		// Need to have our Jupyter Session and some dumpCell files to delete

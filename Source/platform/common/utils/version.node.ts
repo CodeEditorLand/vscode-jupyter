@@ -13,5 +13,6 @@ export function parseVersion(raw: string): semver.SemVer {
 		// TODO: Raise an exception instead?
 		return new semver.SemVer("0.0.0");
 	}
+
 	return ver;
 }

@@ -83,6 +83,7 @@ export class ReplNotebookTrackerService implements IReplNotebookTrackerService {
 					IInteractiveWindowProvider,
 				);
 		}
+
 		return (
 			this.interactiveWindowProvider.getInteractiveWindowWithNotebook(
 				notebook.uri,
@@ -119,8 +120,11 @@ export class InteractiveWindowProvider
 	private readonly _onDidChangeActiveInteractiveWindow = new EventEmitter<
 		IInteractiveWindow | undefined
 	>();
+
 	private lastActiveInteractiveWindow: IInteractiveWindow | undefined;
+
 	private pendingCreations: Promise<void> | undefined;
+
 	private _windows: InteractiveWindow[] = [];
 
 	constructor(
@@ -141,6 +145,7 @@ export class InteractiveWindowProvider
 		private readonly controllerHelper: IInteractiveControllerHelper,
 	) {
 		this.notebookEditorProvider.registerEmbedNotebookProvider(this);
+
 		this.restoreWindows();
 	}
 
@@ -150,6 +155,7 @@ export class InteractiveWindowProvider
 			string,
 			TabInputInteractiveWindow | TabInputNotebook
 		>();
+
 		window.tabGroups.all.forEach((group) => {
 			group.tabs.forEach((tab) => {
 				const input = tab.input;
@@ -209,6 +215,7 @@ export class InteractiveWindowProvider
 				result.notifyConnectionReset().catch(noop);
 
 				this._windows.push(result);
+
 				sendTelemetryEvent(
 					Telemetry.CreateInteractiveWindow,
 					{ windowCount: this._windows.length },
@@ -223,8 +230,11 @@ export class InteractiveWindowProvider
 				const handler = result.closed(
 					this.onInteractiveWindowClosed.bind(this, result),
 				);
+
 				this.disposables.push(result);
+
 				this.disposables.push(handler);
+
 				this.disposables.push(
 					result.onDidChangeViewState(
 						this.raiseOnDidChangeActiveInteractiveWindow.bind(this),
@@ -322,6 +332,7 @@ export class InteractiveWindowProvider
 					NotebookControllerAffinity.Preferred,
 				);
 			}
+
 			logger.debug(
 				`Interactive Window Editor Created: ${editor.notebook.uri.toString()} with input box: ${inputUri.toString()}`,
 			);
@@ -349,7 +360,9 @@ export class InteractiveWindowProvider
 						editor,
 						inputUri,
 					);
+
 			this._windows.push(result);
+
 			sendTelemetryEvent(
 				Telemetry.CreateInteractiveWindow,
 				{ windowCount: this._windows.length },
@@ -360,6 +373,7 @@ export class InteractiveWindowProvider
 					restored: false,
 				},
 			);
+
 			this._updateWindowCache();
 
 			// This is the last interactive window at the moment (as we're about to create it)
@@ -369,8 +383,11 @@ export class InteractiveWindowProvider
 			const handler = result.closed(
 				this.onInteractiveWindowClosed.bind(this, result),
 			);
+
 			this.disposables.push(result);
+
 			this.disposables.push(handler);
+
 			this.disposables.push(
 				result.onDidChangeViewState(
 					this.raiseOnDidChangeActiveInteractiveWindow.bind(this),
@@ -382,6 +399,7 @@ export class InteractiveWindowProvider
 			creationInProgress.resolve();
 		}
 	}
+
 	private async createEditor(
 		preferredController: IVSCodeNotebookController | undefined,
 		resource: Resource,
@@ -424,6 +442,7 @@ export class InteractiveWindowProvider
 				"Failed to request creation of interactive window from VS Code.",
 			);
 		}
+
 		return [inputUri, notebookEditor];
 	}
 
@@ -456,6 +475,7 @@ export class InteractiveWindowProvider
 				extension: JVSC_EXTENSION_ID,
 			});
 		}
+
 		const inputUri = notebookDocument.cellAt(editor.replOptions.appendIndex)
 			.document.uri;
 
@@ -514,7 +534,9 @@ export class InteractiveWindowProvider
 
 			if (response === questions[0]) {
 				result = "perFile";
+
 				this._windows[0].changeMode(result);
+
 				await this.configService.updateSetting(
 					"interactiveWindow.creationMode",
 					result,
@@ -523,8 +545,10 @@ export class InteractiveWindowProvider
 				);
 			}
 		}
+
 		return result;
 	}
+
 	private _updateWindowCache() {
 		const windowCache = this._windows.map(
 			(iw) =>
@@ -534,6 +558,7 @@ export class InteractiveWindowProvider
 					inputBoxUriString: iw.inputUri.toString(),
 				}) as IInteractiveWindowCache,
 		);
+
 		this.workspaceMemento
 			.update(InteractiveWindowCacheKey, windowCache)
 			.then(noop, noop);
@@ -566,12 +591,14 @@ export class InteractiveWindowProvider
 			if (!owner && !w.owner && !connection) {
 				return true;
 			}
+
 			if (owner && w.owner && this.fs.arePathsSame(owner, w.owner)) {
 				return (
 					!connection ||
 					w.kernelConnectionMetadata?.id === connection.id
 				);
 			}
+
 			return false;
 		});
 	}
@@ -583,6 +610,7 @@ export class InteractiveWindowProvider
 		this.lastActiveInteractiveWindow = this.activeWindow
 			? this.activeWindow
 			: this.lastActiveInteractiveWindow;
+
 		this._onDidChangeActiveInteractiveWindow.fire(this.activeWindow);
 	}
 
@@ -590,13 +618,17 @@ export class InteractiveWindowProvider
 		logger.debug(
 			`Closing interactive window: ${interactiveWindow.notebookUri?.toString()}`,
 		);
+
 		interactiveWindow.dispose();
+
 		this._windows = this._windows.filter((w) => w !== interactiveWindow);
+
 		this._updateWindowCache();
 
 		if (this.lastActiveInteractiveWindow === interactiveWindow) {
 			this.lastActiveInteractiveWindow = this._windows[0];
 		}
+
 		this.raiseOnDidChangeActiveInteractiveWindow();
 	}
 
@@ -606,9 +638,11 @@ export class InteractiveWindowProvider
 		if (this.activeWindow) {
 			return this.activeWindow;
 		}
+
 		if (window.activeTextEditor === undefined) {
 			return;
 		}
+
 		const textDocumentUri = window.activeTextEditor.document.uri;
 
 		if (textDocumentUri.scheme !== NotebookCellScheme) {
@@ -624,6 +658,7 @@ export class InteractiveWindowProvider
 		} else {
 			const mode =
 				this.configService.getSettings(resource).interactiveWindowMode;
+
 			notebook = this.getExisting(resource, mode)?.notebookDocument;
 		}
 
@@ -655,6 +690,7 @@ export class InteractiveWindowProvider
 			targetInteractiveWindow =
 				this.getActiveOrAssociatedInteractiveWindow();
 		}
+
 		return targetInteractiveWindow;
 	}
 

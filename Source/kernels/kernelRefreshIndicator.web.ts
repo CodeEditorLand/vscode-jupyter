@@ -20,6 +20,7 @@ import { IKernelFinder } from "./types";
 @injectable()
 export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
+
 	private refreshedOnceBefore?: boolean;
 
 	constructor(
@@ -28,9 +29,11 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	) {
 		disposables.push(this);
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	public activate() {
 		this.startRefresh();
 	}
@@ -39,6 +42,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 		if (this.refreshedOnceBefore) {
 			return;
 		}
+
 		if (this.kernelFinder.status === "discovering") {
 			return this.displayProgressIndicator();
 		}
@@ -58,8 +62,10 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			this.disposables,
 		);
 	}
+
 	private displayProgressIndicator() {
 		const id = Date.now().toString();
+
 		logger.debug(`Start refreshing Kernel Picker (${id})`);
 
 		const taskNb =
@@ -70,14 +76,18 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 		const taskIW = notebooks.createNotebookControllerDetectionTask(
 			InteractiveWindowView,
 		);
+
 		this.disposables.push(taskNb);
+
 		this.disposables.push(taskIW);
 
 		this.kernelFinder.onDidChangeStatus(
 			() => {
 				if (this.kernelFinder.status === "idle") {
 					logger.debug(`End refreshing Kernel Picker (${id})`);
+
 					taskNb.dispose();
+
 					taskIW.dispose();
 				}
 			},

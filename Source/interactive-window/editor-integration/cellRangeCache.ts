@@ -25,10 +25,12 @@ import { ICellRangeCache } from "./types";
 @injectable()
 export class CellRangeCache implements ICellRangeCache {
 	private cachedOwnsSetting: boolean;
+
 	private cache = new Map<
 		vscode.Uri,
 		{ version: number; ranges: ICellRange[] }
 	>();
+
 	private disposables: IDisposable[] = [];
 
 	constructor(
@@ -39,17 +41,21 @@ export class CellRangeCache implements ICellRangeCache {
 			this.configService.getSettings(
 				undefined,
 			).sendSelectionToInteractiveWindow;
+
 		vscode.workspace.onDidChangeConfiguration(
 			this.onSettingChanged,
 			this,
 			this.disposables,
 		);
+
 		vscode.window.onDidChangeActiveTextEditor(
 			this.onChangedActiveTextEditor,
 			this,
 			this.disposables,
 		);
+
 		this.onChangedActiveTextEditor();
+
 		vscode.workspace.onDidCloseTextDocument(
 			this.onClosedDocument,
 			this,
@@ -67,6 +73,7 @@ export class CellRangeCache implements ICellRangeCache {
 		const settings = this.configService.getSettings(document.uri);
 
 		const ranges = generateCellRangesFromDocument(document, settings);
+
 		this.cache.set(document.uri, { version: document.version, ranges });
 
 		this.updateContextKeys(document);
@@ -90,6 +97,7 @@ export class CellRangeCache implements ICellRangeCache {
 		) {
 			// set the context to false so our command doesn't run for other files
 			const hasCellsContext = new ContextKey(EditorContexts.HasCodeCells);
+
 			hasCellsContext
 				.set(false)
 				.catch((ex) =>
@@ -98,6 +106,7 @@ export class CellRangeCache implements ICellRangeCache {
 						ex,
 					),
 				);
+
 			this.updateContextKeys(false);
 		} else {
 			this.updateContextKeys(activeEditor.document);
@@ -113,7 +122,9 @@ export class CellRangeCache implements ICellRangeCache {
 			)
 		) {
 			const settings = this.configService.getSettings(undefined);
+
 			this.cachedOwnsSetting = settings.sendSelectionToInteractiveWindow;
+
 			this.updateContextKeys();
 		}
 	}
@@ -128,6 +139,7 @@ export class CellRangeCache implements ICellRangeCache {
 		} else {
 			const document =
 				documentOrOverride ?? vscode.window.activeTextEditor?.document;
+
 			hasCodeCells = document
 				? this.getCellRanges(document).length > 0
 				: false;
@@ -136,6 +148,7 @@ export class CellRangeCache implements ICellRangeCache {
 		new ContextKey(EditorContexts.OwnsSelection)
 			.set(this.cachedOwnsSetting || hasCodeCells)
 			.catch(noop);
+
 		new ContextKey(EditorContexts.HasCodeCells)
 			.set(hasCodeCells)
 			.catch(noop);

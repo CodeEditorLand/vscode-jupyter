@@ -24,7 +24,9 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	public get postMessage(): Event<IPyWidgetMessage> {
 		return this._postMessageEmitter.event;
 	}
+
 	private _postMessageEmitter = new EventEmitter<IPyWidgetMessage>();
+
 	private readonly disposables: IDisposable[] = [];
 
 	constructor(
@@ -41,9 +43,11 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	public dispose() {
 		while (this.disposables.length) {
 			const disposable = this.disposables.shift();
+
 			disposable?.dispose(); // NOSONAR
 		}
 	}
+
 	public initialize() {
 		return this.baseMulticaster.initialize();
 	}
@@ -51,13 +55,16 @@ class IPyWidgetMessageDispatcherWithOldMessages
 	public receiveMessage(message: IPyWidgetMessage) {
 		this.baseMulticaster.receiveMessage(message);
 	}
+
 	private raisePostMessage(message: IPyWidgetMessage) {
 		// Send all of the old messages the notebook may not have received.
 		// Also send them in the same order.
 		this.oldMessages.forEach((oldMessage) => {
 			this._postMessageEmitter.fire(oldMessage);
 		});
+
 		this.oldMessages = [];
+
 		this._postMessageEmitter.fire(message);
 	}
 }
@@ -89,11 +96,14 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		NotebookDocument,
 		IPyWidgetMessageDispatcher
 	>();
+
 	private readonly messagesPerNotebook = new WeakMap<
 		NotebookDocument,
 		IPyWidgetMessage[]
 	>();
+
 	private disposed = false;
+
 	private disposables: IDisposable[] = [];
 
 	constructor(
@@ -117,6 +127,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 			this.disposables.shift()?.dispose(); // NOSONAR
 		}
 	}
+
 	public create(document: NotebookDocument): IIPyWidgetMessageDispatcher {
 		let baseDispatcher = this.messageDispatchers.get(document);
 
@@ -125,6 +136,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 				this.kernelProvider,
 				document,
 			);
+
 			this.messageDispatchers.set(document, baseDispatcher);
 
 			// Capture all messages so we can re-play messages that others missed.
@@ -145,22 +157,28 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		if (document && this.messagesPerNotebook.get(document)) {
 			messages = this.messagesPerNotebook.get(document) || [];
 		}
+
 		const dispatcher = new IPyWidgetMessageDispatcherWithOldMessages(
 			baseDispatcher,
 			messages,
 		);
+
 		this.disposables.push(dispatcher);
 
 		return dispatcher;
 	}
+
 	private trackDisposingOfKernels(kernel: IKernel) {
 		if (this.disposed) {
 			return;
 		}
+
 		const notebook = kernel.notebook;
 
 		const item = this.messageDispatchers.get(notebook);
+
 		this.messageDispatchers.delete(notebook);
+
 		item?.dispose(); // NOSONAR
 	}
 
@@ -174,6 +192,7 @@ export class IPyWidgetMessageDispatcherFactory implements IDisposable {
 		if (!document) {
 			return;
 		}
+
 		this.messagesPerNotebook.set(
 			document,
 			this.messagesPerNotebook.get(document) || [],

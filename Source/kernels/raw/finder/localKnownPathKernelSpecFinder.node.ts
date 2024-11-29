@@ -65,28 +65,36 @@ export class LocalKnownPathKernelSpecFinder
 	) {
 		super(fs, extensionChecker, memento, disposables, env, jupyterPaths);
 	}
+
 	activate(): void {
 		this.listKernelsFirstTimeFromMemento(localKernelSpecsCacheKey())
 			.then((kernels) => {
 				// If we found kernels even before the cache was restored, then ignore the cached data.
 				if (this._kernels.size === 0 && kernels.length) {
 					kernels.forEach((k) => this._kernels.set(k.id, k));
+
 					this._onDidChangeKernels.fire();
 				}
 			})
 			.catch(noop);
+
 		this.refresh().then(noop, noop);
 	}
+
 	public get kernels(): LocalKernelSpecConnectionMetadata[] {
 		return Array.from(this._kernels.values());
 	}
+
 	public dispose(): void | undefined {
 		this._onDidChangeKernels.dispose();
 	}
+
 	public async refresh() {
 		this.clearCache();
+
 		await this.refreshData();
 	}
+
 	private async refreshData() {
 		const cancellation = new CancellationTokenSource();
 
@@ -103,6 +111,7 @@ export class LocalKnownPathKernelSpecFinder
 			localKernelSpecsCacheKey(),
 		);
 	}
+
 	private async listKernelSpecs(
 		cancelToken: CancellationToken,
 	): Promise<LocalKernelSpecConnectionMetadata[]> {
@@ -112,6 +121,7 @@ export class LocalKnownPathKernelSpecFinder
 			if (cancelToken.isCancellationRequested) {
 				return [];
 			}
+
 			const oldSortedKernels = Array.from(this._kernels.values()).sort(
 				(a, b) => a.id.localeCompare(b.id),
 			);
@@ -132,6 +142,7 @@ export class LocalKnownPathKernelSpecFinder
 				logger.debug(
 					`Local kernel spec connection deleted ${deletedKernels.map((item) => `${item.kind}:'${item.id}'`)}`,
 				);
+
 				deletedKernels.forEach((k) => this._kernels.delete(k.id));
 			}
 
@@ -143,16 +154,20 @@ export class LocalKnownPathKernelSpecFinder
 					JSON.stringify(newSortedKernels)
 			) {
 				this._onDidChangeKernels.fire();
+
 				this.writeKernelsToMemento();
 			}
+
 			return newKernelSpecs;
 		};
 
 		const promise = fn();
+
 		this.promiseMonitor.push(promise);
 
 		return promise;
 	}
+
 	private async findKernelSpecs(
 		cancelToken: CancellationToken,
 	): Promise<LocalKernelSpecConnectionMetadata[]> {
@@ -163,6 +178,7 @@ export class LocalKnownPathKernelSpecFinder
 		if (cancelToken.isCancellationRequested) {
 			return [];
 		}
+
 		const searchResults = await Promise.all(
 			paths.map((kernelPath) =>
 				this.kernelSpecFinder.findKernelSpecsInPaths(
@@ -199,6 +215,7 @@ export class LocalKnownPathKernelSpecFinder
 					if (!kernelSpec || cancelToken.isCancellationRequested) {
 						return;
 					}
+
 					sendKernelSpecTelemetry(kernelSpec, "local");
 
 					if (kernelSpec.metadata?.originalSpecFile) {
@@ -209,16 +226,20 @@ export class LocalKnownPathKernelSpecFinder
 						) {
 							return;
 						}
+
 						originalSpecFiles.add(
 							kernelSpec.metadata.originalSpecFile,
 						);
 					}
+
 					if (kernelSpec.specFile) {
 						if (originalSpecFiles.has(kernelSpec.specFile)) {
 							return;
 						}
+
 						originalSpecFiles.add(kernelSpec.specFile);
 					}
+
 					const existing = byDisplayName.get(kernelSpec.display_name);
 
 					const item = LocalKernelSpecConnectionMetadata.create({
@@ -241,11 +262,14 @@ export class LocalKnownPathKernelSpecFinder
 							)
 						) {
 							this._kernels.set(item.id, item);
+
 							this._onDidChangeKernels.fire();
+
 							this.writeKernelsToMemento();
 						}
 					} else if (!existing) {
 						unique.push(item);
+
 						byDisplayName.set(kernelSpec.display_name, kernelSpec);
 
 						if (
@@ -255,7 +279,9 @@ export class LocalKnownPathKernelSpecFinder
 							)
 						) {
 							this._kernels.set(item.id, item);
+
 							this._onDidChangeKernels.fire();
+
 							this.writeKernelsToMemento();
 						}
 					} else {

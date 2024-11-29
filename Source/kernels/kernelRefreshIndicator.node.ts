@@ -24,6 +24,7 @@ import { IKernelFinder } from "./types";
 @injectable()
 export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	private refreshedOnceBefore: boolean = false;
+
 	private readonly disposables: IDisposable[] = [];
 
 	constructor(
@@ -36,14 +37,17 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 	) {
 		disposables.push(this);
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	public activate() {
 		if (this.extensionChecker.isPythonExtensionInstalled) {
 			this.startRefreshWithPython();
 		} else {
 			this.startRefreshWithoutPython();
+
 			this.extensionChecker.onPythonExtensionInstallationStatusChanged(
 				() => {
 					if (this.extensionChecker.isPythonExtensionInstalled) {
@@ -55,14 +59,17 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			);
 		}
 	}
+
 	private startRefreshWithoutPython() {
 		if (this.refreshedOnceBefore) {
 			return;
 		}
+
 		this.refreshedOnceBefore = true;
 
 		const displayProgress = () => {
 			const id = Date.now().toString();
+
 			logger.debug(`Start refreshing Kernel Picker (${id})`);
 
 			const taskNb =
@@ -73,14 +80,18 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			const taskIW = notebooks.createNotebookControllerDetectionTask(
 				InteractiveWindowView,
 			);
+
 			this.disposables.push(taskNb);
+
 			this.disposables.push(taskIW);
 
 			this.kernelFinder.onDidChangeStatus(
 				() => {
 					if (this.kernelFinder.status === "idle") {
 						logger.debug(`End refreshing Kernel Picker (${id})`);
+
 						taskNb.dispose();
+
 						taskIW.dispose();
 					}
 				},
@@ -108,13 +119,16 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			this.disposables,
 		);
 	}
+
 	private startRefreshWithPython() {
 		if (this.refreshedOnceBefore) {
 			return;
 		}
+
 		this.refreshedOnceBefore = true;
 
 		let refreshedInterpreters = false;
+
 		window.onDidChangeActiveNotebookEditor(
 			(e) => {
 				if (
@@ -123,18 +137,23 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 					isJupyterNotebook(e.notebook)
 				) {
 					refreshedInterpreters = true;
+
 					logger.debug(`Start refreshing Interpreter Kernel Picker`);
+
 					this.interpreterService.refreshInterpreters().catch(noop);
 				}
 			},
 			this,
 			this.disposables,
 		);
+
 		workspace.onDidOpenNotebookDocument(
 			(e) => {
 				if (!refreshedInterpreters && isJupyterNotebook(e)) {
 					refreshedInterpreters = true;
+
 					logger.debug(`Start refreshing Interpreter Kernel Picker`);
+
 					this.interpreterService.refreshInterpreters().catch(noop);
 				}
 			},
@@ -150,8 +169,11 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 			if (kernelProgress && !kernelProgress.isDisposed) {
 				return kernelProgress;
 			}
+
 			id = Date.now().toString();
+
 			logger.debug(`Start refreshing Kernel Picker (${id})`);
+
 			kernelProgress = new DisposableStore(
 				notebooks.createNotebookControllerDetectionTask(
 					JupyterNotebookView,
@@ -160,6 +182,7 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 					InteractiveWindowView,
 				),
 			);
+
 			this.disposables.push(kernelProgress);
 
 			return kernelProgress;
@@ -167,14 +190,17 @@ export class KernelRefreshIndicator implements IExtensionSyncActivationService {
 
 		if (this.kernelFinder.status === "idle") {
 			logger.debug(`End refreshing Kernel Picker (${id})`);
+
 			kernelProgress?.dispose();
 		} else {
 			createProgressIndicator();
 		}
+
 		this.kernelFinder.onDidChangeStatus(
 			() => {
 				if (this.kernelFinder.status === "idle") {
 					logger.debug(`End refreshing Kernel Picker (${id})`);
+
 					kernelProgress?.dispose();
 				} else {
 					createProgressIndicator();

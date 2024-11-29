@@ -60,6 +60,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 		@named(JUPYTER_OUTPUT_CHANNEL)
 		private readonly jupyterOutputChannel: IOutputChannel,
 	) {}
+
 	public dispose() {
 		while (this.disposables.length > 0) {
 			const disposable = this.disposables.shift();
@@ -73,6 +74,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			}
 		}
 	}
+
 	public async start(
 		resource: Resource,
 		useDefaultConfig: boolean,
@@ -96,6 +98,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 		try {
 			// Generate a temp dir with a unique GUID, both to match up our started server and to easily clean up after
 			const tempDirPromise = this.generateTempDir();
+
 			tempDirPromise
 				.then((dir) => this.disposables.push(dir))
 				.catch(noop);
@@ -129,6 +132,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 					"exit",
 					(c: number | null) => (exitCode = c),
 				);
+
 				launchResult.out.onDidChange((out) =>
 					this.jupyterOutputChannel.append(out.out),
 				);
@@ -147,6 +151,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 
 			// Wait for the connection information on this result
 			logger.debug("Waiting for Jupyter Notebook");
+
 			starter = new JupyterConnectionWaiter(
 				launchResult,
 				Uri.file(tempDir.path),
@@ -178,14 +183,17 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 					if (launchResult.proc) {
 						launchResult.proc.on("exit", () => {
 							UsedPorts.delete(port);
+
 							disposable.dispose();
 						});
 					}
+
 					UsedPorts.add(port);
 				}
 			} catch (ex) {
 				logger.error(`Parsing failed ${connection.baseUrl}`, ex);
 			}
+
 			dispose(disposables);
 
 			return connection;
@@ -219,6 +227,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			}
 		} finally {
 			progress.dispose();
+
 			starter?.dispose();
 		}
 	}
@@ -230,7 +239,9 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 	): Promise<string[]> {
 		// Parallelize as much as possible.
 		const promisedArgs: Promise<string>[] = [];
+
 		promisedArgs.push(Promise.resolve("--no-browser"));
+
 		promisedArgs.push(
 			Promise.resolve(this.getNotebookDirArgument(workingDirectory)),
 		);
@@ -292,6 +303,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 				workingDirectory,
 			);
 		}
+
 		return this.generateCustomArguments(customCommandLine);
 	}
 
@@ -326,7 +338,9 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			tempDir.path,
 			"jupyter_notebook_config.py",
 		);
+
 		await this.fs.writeFile(Uri.file(configFile), "");
+
 		logger.debug(`Generating custom default config at ${configFile}`);
 
 		// Create extra args based on if we have a config or not
@@ -354,6 +368,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			}
 			// We definitely need an ip address.
 			args.push("--ip");
+
 			args.push("127.0.0.1");
 
 			// Now see if we need --allow-root.
@@ -365,6 +380,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 						if (stdout && stdout.toString().includes("(root)")) {
 							args.push("--allow-root");
 						}
+
 						resolve(args);
 					},
 				);
@@ -373,8 +389,10 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 			return args;
 		}
 	}
+
 	private async generateTempDir(): Promise<TemporaryDirectory> {
 		const resultDir = Uri.file(path.join(os.tmpdir(), uuid()));
+
 		await this.fs.createDirectory(resultDir);
 
 		return {
@@ -388,6 +406,7 @@ export class JupyterServerStarter implements IJupyterServerStarter {
 				while (count < 10) {
 					try {
 						await this.fs.delete(resultDir);
+
 						count = 10;
 					} catch {
 						count += 1;

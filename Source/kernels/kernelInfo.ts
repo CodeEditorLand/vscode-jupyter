@@ -15,6 +15,7 @@ import {
 
 type CachedKernelInfo = {
 	id: string;
+
 	info:
 		| KernelMessage.IReplyErrorContent
 		| KernelMessage.IReplyAbortContent
@@ -53,8 +54,10 @@ export async function getKernelInfo(
 	if (!session.kernel) {
 		return;
 	}
+
 	if (session.kernel?.info) {
 		promises.push(session.kernel.info);
+
 		session.kernel.info
 			.then((content) =>
 				cacheKernelInfo(
@@ -73,7 +76,9 @@ export async function getKernelInfo(
 	const kernelInfoPromise = session.kernel
 		.requestKernelInfo()
 		.then((item) => item?.content);
+
 	promises.push(kernelInfoPromise);
+
 	kernelInfoPromise
 		.then((content) =>
 			cacheKernelInfo(
@@ -96,6 +101,7 @@ export async function getKernelInfo(
 			promises.push(sleep(5_000).then(() => defaultResponse));
 		}
 	}
+
 	const content = await Promise.race(promises);
 
 	if (content === defaultResponse) {
@@ -105,6 +111,7 @@ export async function getKernelInfo(
 	} else {
 		logger.trace("Got Kernel info");
 	}
+
 	return content;
 }
 
@@ -120,10 +127,12 @@ async function cacheKernelInfo(
 	if (!info || !isRemoteConnection(kernelConnection)) {
 		return;
 	}
+
 	const kernelInfos = storage
 		.get<CachedKernelInfo[]>(KEY, [])
 		.filter((item) => Date.now() - item.age < CACHE_EXPIRY_IN_MS)
 		.filter((item) => item.id !== kernelConnection.id);
+
 	kernelInfos.push({
 		id: kernelConnection.id,
 		age: Date.now(),
@@ -139,6 +148,7 @@ function getCacheKernelInfo(
 	if (!isRemoteConnection(kernelConnection)) {
 		return;
 	}
+
 	return storage
 		.get<CachedKernelInfo[]>(KEY, [])
 		.find((item) => item.id === kernelConnection.id)?.info;

@@ -40,6 +40,7 @@ export async function deleteOldTempDirs(context: IExtensionContext) {
 		.catch(() => []);
 
 	const currentTempDir = getCurrentTempDirName(context);
+
 	await Promise.all(
 		dirs
 			.filter(
@@ -51,6 +52,7 @@ export async function deleteOldTempDirs(context: IExtensionContext) {
 					context.globalStorageUri,
 					dir,
 				).fsPath;
+
 				logger.info(`Deleting old temp dir ${dirToDelete}`);
 
 				return fs.remove(dirToDelete);

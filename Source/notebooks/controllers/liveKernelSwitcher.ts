@@ -32,6 +32,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		@inject(PreferredRemoteKernelIdProvider)
 		private readonly preferredRemoteKernelIdProvider: PreferredRemoteKernelIdProvider,
 	) {}
+
 	public activate() {
 		// Listen to notebook open events. If we open a notebook that had a remote kernel started on it, reset it
 		workspace.onDidOpenNotebookDocument(
@@ -49,6 +50,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		if (!isJupyterNotebook(notebook)) {
 			return;
 		}
+
 		const preferredRemote =
 			await this.preferredRemoteKernelIdProvider.getPreferredRemoteKernelId(
 				notebook,
@@ -57,6 +59,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 		if (!preferredRemote) {
 			return;
 		}
+
 		const findAndSelectRemoteController = () => {
 			const active = this.controllerRegistration.getSelected(notebook);
 
@@ -70,6 +73,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 
 				return true;
 			}
+
 			return false;
 		};
 
@@ -90,6 +94,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 			this,
 			this.disposables,
 		);
+
 		this.controllerRegistration.onControllerSelected(
 			(e) => {
 				if (e.notebook === notebook) {
@@ -126,6 +131,7 @@ export class LiveKernelSwitcher implements IExtensionSyncActivationService {
 						return true;
 					}
 				}
+
 				return false;
 			},
 			2000,

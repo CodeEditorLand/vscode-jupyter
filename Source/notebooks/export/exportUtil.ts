@@ -39,14 +39,18 @@ export abstract class ExportUtilBase implements IExportUtil {
 				c.document.getText(),
 				c.document.languageId,
 			);
+
 			data.metadata = c.metadata;
+
 			data.mime = c.mime;
+
 			data.outputs = [...c.outputs];
 
 			return data;
 		});
 
 		const notebookData = new NotebookData(cellData);
+
 		notebookData.metadata = JSON.parse(JSON.stringify(document.metadata));
 
 		return serializerApi.exports.exportNotebook(notebookData);

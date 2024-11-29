@@ -33,18 +33,29 @@ import {
 
 export type IVariableState = {
 	currentExecutionCount: number;
+
 	visible: boolean;
+
 	sortColumn: string;
+
 	sortAscending: boolean;
 
 	variables: IJupyterVariable[];
+
 	pageSize: number;
+
 	containerHeight: number;
+
 	gridHeight: number;
+
 	refreshCount: number;
+
 	showVariablesOnDebug: boolean;
+
 	viewHeight: number;
+
 	requestInProgress: boolean;
+
 	isWeb: boolean;
 };
 
@@ -66,6 +77,7 @@ function handleRequest(
 		arg.payload.data.executionCount !== undefined
 			? arg.payload.data.executionCount
 			: arg.prevState.currentExecutionCount;
+
 	postActionToExtension(arg, InteractiveWindowMessages.GetVariablesRequest, {
 		executionCount: newExecutionCount,
 		sortColumn: arg.payload.data.sortColumn,
@@ -171,6 +183,7 @@ function handleVariableExplorerHeightResponse(
 			};
 		}
 	}
+
 	return {
 		...arg.prevState,
 	};
@@ -188,6 +201,7 @@ function setVariableViewHeight(
 			viewHeight: viewHeight,
 		};
 	}
+
 	return {
 		...arg.prevState,
 	};
@@ -216,6 +230,7 @@ function setVariableExplorerHeight(
 			gridHeight: gridHeight,
 		};
 	}
+
 	return {
 		...arg.prevState,
 	};
@@ -356,6 +371,7 @@ function handleRefresh(arg: VariableReducerArg): IVariableState {
 			prevState: arg.prevState,
 		});
 	}
+
 	return {
 		...arg.prevState,
 		variables: [],
@@ -373,6 +389,7 @@ function handleDebugStart(
 			visible: true,
 		};
 	}
+
 	return arg.prevState;
 }
 

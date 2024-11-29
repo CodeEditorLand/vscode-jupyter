@@ -73,20 +73,30 @@ export class CommonMessageCoordinator {
 
 		return this.postEmitter.event;
 	}
+
 	private ipyWidgetMessageDispatcher?: IIPyWidgetMessageDispatcher;
+
 	private ipyWidgetScriptSource?: IPyWidgetScriptSource;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private readonly postEmitter = new EventEmitter<{
 		message: string;
+
 		payload: any;
 	}>();
+
 	private disposables: IDisposableRegistry;
+
 	private jupyterOutput: IOutputChannel;
+
 	private readonly configService: IConfigurationService;
+
 	private readonly attachedWebviews = new WeakSet<IWebviewCommunication>();
+
 	private modulesForWhichWeHaveDisplayedWidgetErrorMessage =
 		new Set<string>();
+
 	private queuedMessages: { type: string; payload: unknown }[] = [];
+
 	private readyMessageReceived?: boolean;
 
 	public constructor(
@@ -95,18 +105,22 @@ export class CommonMessageCoordinator {
 	) {
 		this.disposables =
 			this.serviceContainer.get<IDisposableRegistry>(IDisposableRegistry);
+
 		this.jupyterOutput = this.serviceContainer.get<IOutputChannel>(
 			IOutputChannel,
 			STANDARD_OUTPUT_CHANNEL,
 		);
+
 		this.configService = this.serviceContainer.get<IConfigurationService>(
 			IConfigurationService,
 		);
+
 		this.initialize();
 	}
 
 	public dispose() {
 		this.cachedMessages = [];
+
 		this.ipyWidgetMessageDispatcher?.dispose(); // NOSONAR
 		this.ipyWidgetScriptSource?.dispose(); // NOSONAR
 	}
@@ -115,6 +129,7 @@ export class CommonMessageCoordinator {
 		if (this.attachedWebviews.has(webview)) {
 			return;
 		}
+
 		this.attachedWebviews.add(webview);
 		// New webview, make sure to initialize.
 
@@ -147,7 +162,9 @@ export class CommonMessageCoordinator {
 
 						return;
 					}
+
 					this.sendPendingWebViewMessages(webview);
+
 					webview
 						.postMessage({ type: e.message, payload: e.payload })
 						.then(noop, noop);
@@ -184,6 +201,7 @@ export class CommonMessageCoordinator {
 						disposables,
 					);
 				}
+
 				const kernel = await kernelPromise.promise;
 
 				if (kernel) {
@@ -205,6 +223,7 @@ export class CommonMessageCoordinator {
 												kernel.ipywidgetsVersion,
 											);
 										}
+
 										dispose(disposables);
 									}
 								},
@@ -219,15 +238,18 @@ export class CommonMessageCoordinator {
 						}
 					}
 				}
+
 				if (disposables.length) {
 					this.disposables.push(...disposables);
 				}
 			}
 			// IPyWidgets scripts will not be loaded if we're unable to determine the version of IPyWidgets.
 			const version = await deferred.promise;
+
 			logger.trace(
 				`Version of IPyWidgets ${version} determined after ${stopWatch.elapsedTime / 1000}s`,
 			);
+
 			webview
 				.postMessage({
 					type: IPyWidgetMessages.IPyWidgets_Reply_Widget_Version,
@@ -235,11 +257,13 @@ export class CommonMessageCoordinator {
 				})
 				.then(noop, noop);
 		};
+
 		webview.onDidReceiveMessage(
 			async (m) => {
 				logger.ci(
 					`${ConsoleForegroundColors.Green}Widget Coordinator received ${m.type}`,
 				);
+
 				this.onMessage(webview, m.type, m.payload);
 
 				if (
@@ -248,17 +272,22 @@ export class CommonMessageCoordinator {
 				) {
 					await sendIPyWidgetsVersion();
 				}
+
 				if (m.type === IPyWidgetMessages.IPyWidgets_Window_Alert) {
 					void window.showInformationMessage(m.message);
 				}
+
 				if (m.type === IPyWidgetMessages.IPyWidgets_Window_Open) {
 					void env.openExternal(Uri.parse(m.url));
 				}
+
 				if (m.type === IPyWidgetMessages.IPyWidgets_Ready) {
 					logger.trace(
 						"Web view is ready to receive widget messages",
 					);
+
 					this.readyMessageReceived = true;
+
 					this.sendPendingWebViewMessages(webview);
 				}
 			},
@@ -315,10 +344,12 @@ export class CommonMessageCoordinator {
 		}); // NOSONAR
 		this.getIPyWidgetScriptSource().onMessage(message, payload);
 	}
+
 	private sendPendingWebViewMessages(webview: IWebviewCommunication) {
 		if (!this.readyMessageReceived) {
 			return;
 		}
+
 		while (this.queuedMessages.length) {
 			webview.postMessage(this.queuedMessages.shift()!).then(noop, noop);
 		}
@@ -327,6 +358,7 @@ export class CommonMessageCoordinator {
 	private initialize() {
 		// First hook up the widget script source that will listen to messages even before we start sending messages.
 		this.getIPyWidgetScriptSource().initialize();
+
 		this.getIPyWidgetMessageDispatcher().initialize();
 	}
 
@@ -364,6 +396,7 @@ export class CommonMessageCoordinator {
 					payload.moduleName,
 					payload.moduleVersion,
 				);
+
 				window.showErrorMessage(errorMessage).then(noop, noop);
 			} else if (
 				!cdnsEnabled &&
@@ -374,10 +407,12 @@ export class CommonMessageCoordinator {
 				const moreInfo = Common.moreInfo;
 
 				const enableDownloads = DataScience.enableCDNForWidgetsButton;
+
 				errorMessage = DataScience.enableCDNForWidgetsSetting(
 					payload.moduleName,
 					payload.moduleVersion,
 				);
+
 				window
 					.showErrorMessage(
 						errorMessage,
@@ -403,6 +438,7 @@ export class CommonMessageCoordinator {
 						}
 					}, noop);
 			}
+
 			logger.error(
 				`Widget load failure ${errorMessage}`,
 				widgetScriptSources,
@@ -426,10 +462,12 @@ export class CommonMessageCoordinator {
 		await commands.executeCommand(
 			Commands.EnableLoadingWidgetsFrom3rdPartySource,
 		);
+
 		await webview.postMessage({
 			type: IPyWidgetMessages.IPyWidgets_AttemptToDownloadFailedWidgetsAgain,
 		});
 	}
+
 	private async sendUnsupportedWidgetVersionFailureTelemetry(
 		payload: NotifyIPyWidgetWidgetVersionNotSupportedAction,
 	) {
@@ -448,9 +486,11 @@ export class CommonMessageCoordinator {
 			// do nothing on failure
 		}
 	}
+
 	private sendRenderFailureTelemetry(payload: Error) {
 		try {
 			logger.error("Error rendering a widget: ", payload);
+
 			sendTelemetryEvent(Telemetry.IPyWidgetRenderFailure);
 		} catch {
 			// Do nothing on a failure
@@ -464,18 +504,22 @@ export class CommonMessageCoordinator {
 				// Special case errors, strip ansi codes from tracebacks so they print better.
 				if (msg.header.msg_type === "error") {
 					const errorMsg = msg as KernelMessage.IErrorMsg;
+
 					errorMsg.content.traceback =
 						errorMsg.content.traceback.map(stripAnsi);
 				}
+
 				logger.trace(
 					`Unhandled widget kernel message: ${msg.header.msg_type} ${msg.content}`,
 				);
+
 				this.jupyterOutput.appendLine(
 					DataScience.unhandledMessage(
 						msg.header.msg_type,
 						JSON.stringify(msg.content),
 					),
 				);
+
 				sendTelemetryEvent(
 					Telemetry.IPyWidgetUnhandledMessage,
 					undefined,
@@ -486,6 +530,7 @@ export class CommonMessageCoordinator {
 			}
 		}
 	}
+
 	private getIPyWidgetMessageDispatcher() {
 		if (!this.ipyWidgetMessageDispatcher) {
 			this.ipyWidgetMessageDispatcher = this.serviceContainer
@@ -493,6 +538,7 @@ export class CommonMessageCoordinator {
 					IPyWidgetMessageDispatcherFactory,
 				)
 				.create(this.document);
+
 			this.disposables.push(
 				this.ipyWidgetMessageDispatcher.postMessage(
 					this.cacheOrSend,
@@ -500,6 +546,7 @@ export class CommonMessageCoordinator {
 				),
 			);
 		}
+
 		return this.ipyWidgetMessageDispatcher;
 	}
 
@@ -521,10 +568,12 @@ export class CommonMessageCoordinator {
 					CDNWidgetScriptSourceProvider,
 				),
 			);
+
 			this.disposables.push(
 				this.ipyWidgetScriptSource.postMessage(this.cacheOrSend, this),
 			);
 		}
+
 		return this.ipyWidgetScriptSource;
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -535,12 +584,16 @@ export class CommonMessageCoordinator {
 			logger.ci(
 				`${ConsoleForegroundColors.Green}Queuing messages (no listeners)`,
 			);
+
 			this.cachedMessages.push(data);
 
 			return;
 		}
+
 		this.cachedMessages.forEach((item) => this.postEmitter.fire(item));
+
 		this.cachedMessages = [];
+
 		this.postEmitter.fire(data);
 	}
 }

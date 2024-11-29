@@ -59,8 +59,11 @@ export const IModuleInstaller = Symbol("IModuleInstaller");
 
 export interface IModuleInstaller {
 	readonly name: string;
+
 	readonly displayName: string;
+
 	readonly priority: number;
+
 	readonly type: ModuleInstallerType;
 	/**
 	 * Installs a module
@@ -96,6 +99,7 @@ export interface IModuleInstaller {
 		cancelTokenSource: CancellationTokenSource,
 		flags?: ModuleInstallFlags,
 	): Promise<void>;
+
 	isSupported(resource?: InterpreterUri | Environment): Promise<boolean>;
 }
 
@@ -118,6 +122,7 @@ export interface IInstallationChannelManager {
 	getInstallationChannels(
 		interpreter: PythonEnvironment,
 	): Promise<IModuleInstaller[]>;
+
 	showNoInstallersMessage(interpreter: PythonEnvironment): void;
 }
 export const IProductService = Symbol("IProductService");
@@ -129,6 +134,7 @@ export const IProductPathService = Symbol("IProductPathService");
 
 export interface IProductPathService {
 	getExecutableNameFromSettings(product: Product, resource?: Uri): string;
+
 	isExecutableAModule(product: Product, resource?: Uri): boolean;
 }
 
@@ -145,8 +151,10 @@ export const IInstaller = Symbol("IInstaller");
 export interface IInstaller {
 	readonly onInstalled: Event<{
 		product: Product;
+
 		resource?: InterpreterUri;
 	}>;
+
 	install(
 		product: Product,
 		resource: InterpreterUri,
@@ -154,10 +162,12 @@ export interface IInstaller {
 		reInstallAndUpdate?: boolean,
 		installPipIfRequired?: boolean,
 	): Promise<InstallerResponse>;
+
 	isInstalled(
 		product: Product,
 		resource: InterpreterUri | Environment,
 	): Promise<boolean | undefined>;
+
 	translateProductToModuleName(
 		product: Product,
 		purpose: ModuleNamePurpose,

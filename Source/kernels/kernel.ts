@@ -116,6 +116,7 @@ export function shouldMessageBeMirroredWithRenderer(
 	if (code.includes(widgetVersionOutPrefix)) {
 		return false;
 	}
+
 	return true;
 }
 
@@ -147,11 +148,15 @@ type Hook = (...args: unknown[]) => Promise<void>;
  */
 abstract class BaseKernel implements IBaseKernel {
 	protected readonly disposables: IDisposable[] = [];
+
 	private _ipywidgetsVersion?: 7 | 8;
+
 	public get ipywidgetsVersion() {
 		return this._ipywidgetsVersion;
 	}
+
 	private _onIPyWidgetVersionResolved = new EventEmitter<7 | 8 | undefined>();
+
 	public get onIPyWidgetVersionResolved() {
 		return this._onIPyWidgetVersionResolved.event;
 	}
@@ -159,50 +164,65 @@ abstract class BaseKernel implements IBaseKernel {
 	get onStatusChanged(): Event<KernelMessage.Status> {
 		return this._onStatusChanged.event;
 	}
+
 	get onRestarted(): Event<void> {
 		return this._onRestarted.event;
 	}
+
 	get onStarted(): Event<void> {
 		return this._onStarted.event;
 	}
+
 	get onPostInitialized(): Event<void> {
 		return this._onPostInitialized.event;
 	}
+
 	get onDisposed(): Event<void> {
 		return this._onDisposed.event;
 	}
+
 	get creator(): KernelActionSource {
 		return this._creator;
 	}
+
 	get startedAtLeastOnce() {
 		return this._startedAtLeastOnce;
 	}
+
 	get userStartedKernel() {
 		return !this.startupUI.disableUI;
 	}
+
 	private _info?: KernelMessage.IInfoReplyMsg["content"];
+
 	private _startedAtLeastOnce?: boolean;
 
 	get info(): KernelMessage.IInfoReplyMsg["content"] | undefined {
 		return this._info;
 	}
+
 	get status(): KernelMessage.Status {
 		if (this._jupyterSessionPromise && !this._session) {
 			return "starting";
 		}
+
 		return (
 			this._session?.status ?? (this.isKernelDead ? "dead" : "unknown")
 		);
 	}
+
 	get disposed(): boolean {
 		return this._disposed === true || this._session?.isDisposed === true;
 	}
+
 	get disposing(): boolean {
 		return this._disposing === true;
 	}
+
 	get onDidKernelSocketChange(): Event<void> {
 		return this._onDidKernelSocketChange.event;
 	}
+
 	private _session?: IKernelSession;
 	/**
 	 * If the session died, then ensure the status is set to `dead`.
@@ -211,31 +231,52 @@ abstract class BaseKernel implements IBaseKernel {
 	 * If a jupyter kernel dies after it has started, then status is set to `dead`.
 	 */
 	private isKernelDead?: boolean;
+
 	public get session(): IKernelSession | undefined {
 		return this._session;
 	}
+
 	private _disposed?: boolean;
+
 	private _disposing?: boolean;
+
 	private _ignoreJupyterSessionDisposedErrors?: boolean;
+
 	private _postInitializedOnStart?: boolean;
+
 	private readonly _onDidKernelSocketChange = new EventEmitter<void>();
+
 	private readonly _onStatusChanged =
 		new EventEmitter<KernelMessage.Status>();
+
 	private readonly _onRestarted = new EventEmitter<void>();
+
 	private readonly _onStarted = new EventEmitter<void>();
+
 	private readonly _onPostInitialized = new EventEmitter<void>();
+
 	private readonly _onDisposed = new EventEmitter<void>();
+
 	private _jupyterSessionPromise?: Promise<IKernelSession>;
+
 	private readonly hookedSessionForEvents = new WeakSet<IKernelSession>();
+
 	private hooks = new Map<KernelHooks, Set<Hook>>();
+
 	private startCancellation = new CancellationTokenSource();
+
 	private startupUI = new DisplayOptions(true);
+
 	private disposingPromise?: Promise<void>;
+
 	private _interruptPromise?: Promise<InterruptResult>;
+
 	private _restartPromise?: Promise<void>;
+
 	public get restarting() {
 		return this._restartPromise || Promise.resolve();
 	}
+
 	constructor(
 		public readonly id: string,
 		public readonly uri: Uri,
@@ -248,16 +289,23 @@ abstract class BaseKernel implements IBaseKernel {
 		private readonly workspaceMemento: Memento,
 	) {
 		this.disposables.push(this._onStatusChanged);
+
 		this.disposables.push(this._onRestarted);
+
 		this.disposables.push(this._onStarted);
+
 		this.disposables.push(this._onDisposed);
+
 		this.disposables.push(this._onIPyWidgetVersionResolved);
+
 		this.disposables.push(this._onDidKernelSocketChange);
+
 		trackKernelResourceInformation(this.resourceUri, {
 			kernelConnection: this.kernelConnectionMetadata,
 			actionSource: this.creator,
 			disableUI: this.startupUI.disableUI,
 		}).catch(noop);
+
 		this.startupUI.onDidChangeDisableUI(() => {
 			if (!this.startupUI.disableUI) {
 				trackKernelResourceInformation(this.resourceUri, {
@@ -277,8 +325,11 @@ abstract class BaseKernel implements IBaseKernel {
 		const eventHook =
 			this.hooks.get(event) ||
 			new Set<(...args: unknown[]) => Promise<void>>();
+
 		this.hooks.set(event, eventHook);
+
 		cb = thisArgs ? cb.bind(thisArgs) : cb;
+
 		eventHook.add(cb);
 
 		const disposable = {
@@ -290,22 +341,28 @@ abstract class BaseKernel implements IBaseKernel {
 		if (disposables) {
 			disposables.push(disposable);
 		}
+
 		return disposable;
 	}
+
 	public async start(options?: IDisplayOptions): Promise<IKernelSession> {
 		// Possible this cancellation was cancelled previously.
 		if (this.startCancellation.token.isCancellationRequested) {
 			this.startCancellation.dispose();
+
 			this.startCancellation = new CancellationTokenSource();
 		}
+
 		return this.startJupyterSession(options).then((result) => {
 			// If we started and the UI is no longer disabled (ie., a user executed a cell)
 			// then we can signal that the kernel was created and can be used by third-party extensions.
 			// We also only want to fire off a single event here.
 			if (!options?.disableUI && !this._postInitializedOnStart) {
 				this._onPostInitialized.fire();
+
 				this._postInitializedOnStart = true;
 			}
+
 			return result;
 		});
 	}
@@ -319,6 +376,7 @@ abstract class BaseKernel implements IBaseKernel {
 				(h) => h(),
 			),
 		);
+
 		logger.info(
 			`Interrupt requested ${getDisplayPath(this.resourceUri || this.uri)}`,
 		);
@@ -329,11 +387,14 @@ abstract class BaseKernel implements IBaseKernel {
 			const session = this._jupyterSessionPromise
 				? await this._jupyterSessionPromise.catch(() => undefined)
 				: undefined;
+
 			logger.info("Interrupt kernel execution");
 
 			if (!session) {
 				logger.info("No kernel session to interrupt");
+
 				this._interruptPromise = undefined;
+
 				result = InterruptResult.Success;
 			} else {
 				// Interrupt the active execution
@@ -379,20 +440,25 @@ abstract class BaseKernel implements IBaseKernel {
 			}
 		}
 	}
+
 	public async dispose(): Promise<void> {
 		logger.info(
 			`Dispose Kernel '${getDisplayPath(this.uri)}' associated with '${getDisplayPath(this.resourceUri)}'`,
 		);
+
 		this._disposing = true;
 
 		if (this.disposingPromise) {
 			return this.disposingPromise;
 		}
+
 		this._ignoreJupyterSessionDisposedErrors = true;
+
 		this.startCancellation.cancel();
 
 		const disposeImpl = async () => {
 			const promises: Promise<void>[] = [];
+
 			promises.push(
 				Promise.all(
 					Array.from(
@@ -402,40 +468,53 @@ abstract class BaseKernel implements IBaseKernel {
 					.then(noop)
 					.catch(noop),
 			);
+
 			this._session = this._session
 				? this._session
 				: this._jupyterSessionPromise
 					? await this._jupyterSessionPromise.catch(() => undefined)
 					: undefined;
+
 			this._jupyterSessionPromise = undefined;
 
 			if (this._session) {
 				promises.push(disposeAsync(this._session, this.disposables));
+
 				this._session = undefined;
 			}
+
 			this._disposed = true;
+
 			this._onDisposed.fire();
+
 			this._onStatusChanged.fire("dead");
 
 			try {
 				await Promise.all(promises);
 			} finally {
 				this.startCancellation.dispose();
+
 				dispose(this.disposables);
 			}
 		};
+
 		this.disposingPromise = disposeImpl();
+
 		await this.disposingPromise;
 	}
+
 	public async restart(): Promise<void> {
 		try {
 			const resourceType = getResourceType(this.resourceUri);
+
 			logger.info(`Restart requested ${getDisplayPath(this.uri)}`);
+
 			await Promise.all(
 				Array.from(
 					this.hooks.get("willRestart") || new Set<Hook>(),
 				).map((h) => h(this._jupyterSessionPromise)),
 			);
+
 			this.startCancellation.cancel(); // Cancel any pending starts.
 			this.startCancellation.dispose();
 
@@ -456,11 +535,13 @@ abstract class BaseKernel implements IBaseKernel {
 					if (!this._restartPromise) {
 						// Just use the internal session. Pending cells should have been canceled by the caller
 						this._restartPromise = session.restart();
+
 						this._restartPromise
 							// Done restarting, clear restart promise
 							.finally(() => (this._restartPromise = undefined))
 							.catch(noop);
 					}
+
 					await this._restartPromise;
 
 					// Re-create the cancel token as we cancelled this earlier in this method.
@@ -470,6 +551,7 @@ abstract class BaseKernel implements IBaseKernel {
 					// Or possible the previously pending start was cancelled above.
 					await this.start(new DisplayOptions(false));
 				}
+
 				sendKernelTelemetryEvent(
 					this.resourceUri,
 					Telemetry.NotebookRestart,
@@ -478,10 +560,13 @@ abstract class BaseKernel implements IBaseKernel {
 				);
 			} catch (ex) {
 				logger.error(`Restart failed ${getDisplayPath(this.uri)}`, ex);
+
 				this._ignoreJupyterSessionDisposedErrors = true;
 				// If restart fails, kill the associated session.
 				const session = this._session;
+
 				this._session = undefined;
+
 				this._jupyterSessionPromise = undefined;
 				// If we get a kernel promise failure, then restarting timed out. Just shutdown and restart the entire server.
 				// Note, this code might not be necessary, as such an error is thrown only when interrupting a kernel times out.
@@ -496,6 +581,7 @@ abstract class BaseKernel implements IBaseKernel {
 				if (session) {
 					await disposeAsync(session, this.disposables);
 				}
+
 				this._ignoreJupyterSessionDisposedErrors = false;
 
 				throw ex;
@@ -524,6 +610,7 @@ abstract class BaseKernel implements IBaseKernel {
 			).catch(noop);
 		}
 	}
+
 	protected async startJupyterSession(
 		options: IDisplayOptions = new DisplayOptions(false),
 	): Promise<IKernelSession> {
@@ -532,6 +619,7 @@ abstract class BaseKernel implements IBaseKernel {
 		if (!options.disableUI) {
 			this.startupUI.disableUI = false;
 		}
+
 		options.onDidChangeDisableUI(() => {
 			if (!options.disableUI && this.startupUI.disableUI) {
 				this.startupUI.disableUI = false;
@@ -558,17 +646,21 @@ abstract class BaseKernel implements IBaseKernel {
 				this.disposables,
 			);
 		}
+
 		if (this.disposing) {
 			throw new CancellationError();
 		}
+
 		Cancellation.throwIfCanceled(this.startCancellation.token);
 
 		if (!this._jupyterSessionPromise) {
 			const stopWatch = new StopWatch();
+
 			this._jupyterSessionPromise = this.createJupyterSession();
 
 			try {
 				const session = await this._jupyterSessionPromise;
+
 				sendKernelTelemetryEvent(
 					this.resourceUri,
 					Telemetry.PerceivedJupyterStartupNotebook,
@@ -584,11 +676,13 @@ abstract class BaseKernel implements IBaseKernel {
 				);
 				// If we fail also clear the promise.
 				this.startCancellation.cancel();
+
 				this._jupyterSessionPromise = undefined;
 
 				throw ex;
 			}
 		}
+
 		return this._jupyterSessionPromise;
 	}
 
@@ -614,7 +708,9 @@ abstract class BaseKernel implements IBaseKernel {
 
 		const statusChangedHandler = (_: unknown, e: KernelMessage.Status) =>
 			restartHandler(e);
+
 		session.statusChanged.connect(statusChangedHandler);
+
 		disposables.push(
 			new Disposable(() =>
 				swallowExceptions(() =>
@@ -633,6 +729,7 @@ abstract class BaseKernel implements IBaseKernel {
 				session.kernel.interrupt(),
 			).catch((exc) => {
 				logger.warn(`Error during interrupt: ${exc}`);
+
 				restarted.resolve(true);
 			});
 		}
@@ -652,6 +749,7 @@ abstract class BaseKernel implements IBaseKernel {
 					this,
 					disposables,
 				);
+
 				this.onStatusChanged(
 					() =>
 						this.status === "dead"
@@ -663,6 +761,7 @@ abstract class BaseKernel implements IBaseKernel {
 					disposables,
 				);
 			}
+
 			try {
 				// Wait for all of the pending cells to finish or the timeout to fire
 				return await raceTimeout(
@@ -715,17 +814,20 @@ abstract class BaseKernel implements IBaseKernel {
 		const telemetryTracker = notebook
 			? getNotebookTelemetryTracker(notebook)?.jupyterSessionTelemetry()
 			: undefined;
+
 		await trackKernelResourceInformation(this.resourceUri, {
 			kernelConnection: this.kernelConnectionMetadata,
 			actionSource: this.creator,
 			// This means the user is actually running something against the kernel (deliberately).
 			userExecutedCell: !this.startupUI.disableUI,
 		});
+
 		telemetryTracker?.stop();
 
 		if (this.disposing) {
 			throw new CancellationError();
 		}
+
 		Cancellation.throwIfCanceled(this.startCancellation.token);
 
 		let disposables: Disposable[] = [];
@@ -734,8 +836,11 @@ abstract class BaseKernel implements IBaseKernel {
 			logger.info(
 				`Starting Kernel ${getKernelStartupLogMessage(this, this.startupUI)}`,
 			);
+
 			this.createProgressIndicator(disposables);
+
 			this.isKernelDead = false;
+
 			this._onStatusChanged.fire("starting");
 
 			const session = await this.sessionCreator.create({
@@ -749,15 +854,21 @@ abstract class BaseKernel implements IBaseKernel {
 			if (this.disposing) {
 				throw new CancellationError();
 			}
+
 			Cancellation.throwIfCanceled(this.startCancellation.token);
+
 			await this.initializeAfterStart(session);
 
 			if (this.disposing) {
 				throw new CancellationError();
 			}
+
 			this.sendKernelStartedTelemetry();
+
 			this._session = session;
+
 			this._onStarted.fire();
+
 			logger.info(`Kernel successfully started`);
 
 			return session;
@@ -778,6 +889,7 @@ abstract class BaseKernel implements IBaseKernel {
 					ex,
 				);
 			}
+
 			Cancellation.throwIfCanceled(this.startCancellation.token);
 
 			if (ex instanceof JupyterConnectError) {
@@ -798,8 +910,11 @@ abstract class BaseKernel implements IBaseKernel {
 			dispose(disposables);
 		}
 	}
+
 	private uiWasDisabledWhenKernelStartupTelemetryWasLastSent?: boolean;
+
 	private startTelemetrySent?: boolean;
+
 	protected sendKernelStartedTelemetry(): void {
 		if (
 			this.uiWasDisabledWhenKernelStartupTelemetryWasLastSent &&
@@ -814,12 +929,14 @@ abstract class BaseKernel implements IBaseKernel {
 			// Last time we sent kernel telemetry event, it was sent indicating the fact that the ui was disabled,
 			// Now we need to send the event `Telemetry.NotebookStart` again indicating the fact that the ui is enabled & that the kernel was started successfully based on a user action.
 		}
+
 		if (this.startTelemetrySent && !this.startupUI.disableUI) {
 			return;
 		}
 
 		this.uiWasDisabledWhenKernelStartupTelemetryWasLastSent =
 			this.startupUI.disableUI === true;
+
 		this.startTelemetrySent = true;
 		// The corresponding failure telemetry property for the `Telemetry.NotebookStart` event will be sent in the Error Handler,
 		// after we analyze the error.
@@ -845,6 +962,7 @@ abstract class BaseKernel implements IBaseKernel {
 			),
 			this.startupUI.disableUI,
 		);
+
 		disposables.push(progressReporter);
 
 		if (this.startupUI.disableUI) {
@@ -858,6 +976,7 @@ abstract class BaseKernel implements IBaseKernel {
 					) {
 						return;
 					}
+
 					if (progressReporter.show) {
 						progressReporter.show();
 					}
@@ -885,6 +1004,7 @@ abstract class BaseKernel implements IBaseKernel {
 					(h) => h(session, this.startCancellation.token).catch(noop),
 				),
 			);
+
 			logger.trace(
 				`Started running kernel initialization for ${getDisplayPath(this.uri)}`,
 			);
@@ -894,11 +1014,14 @@ abstract class BaseKernel implements IBaseKernel {
 
 				return;
 			}
+
 			if (!this.hookedSessionForEvents.has(session)) {
 				this.hookedSessionForEvents.add(session);
+
 				session.onDidKernelSocketChange((e) =>
 					this._onDidKernelSocketChange.fire(e),
 				);
+
 				session.onDidDispose(() => {
 					logger.ci(
 						`Kernel got disposed as a result of session.onDisposed (1) ${getDisplayPath(
@@ -914,12 +1037,15 @@ abstract class BaseKernel implements IBaseKernel {
 						);
 
 						const isActiveSessionDead = this._session === session;
+
 						this._jupyterSessionPromise = undefined;
+
 						this._session = undefined;
 
 						// If the active session died, then kernel is dead.
 						if (isActiveSessionDead) {
 							this.isKernelDead = true;
+
 							this._onStatusChanged.fire("dead");
 						}
 					}
@@ -929,7 +1055,9 @@ abstract class BaseKernel implements IBaseKernel {
 					_: unknown,
 					status: KernelMessage.Status,
 				) => this._onStatusChanged.fire(status);
+
 				session.statusChanged.connect(statusChangeHandler);
+
 				this.disposables.push(
 					new Disposable(() =>
 						swallowExceptions(() =>
@@ -982,6 +1110,7 @@ abstract class BaseKernel implements IBaseKernel {
 
 				// Gather all of the startup code at one time and execute as one cell
 				const startupCode = await this.gatherInternalStartupCode();
+
 				await this.executeSilently(session, startupCode, {
 					traceErrors: true,
 					traceErrorsMessage:
@@ -1001,6 +1130,7 @@ abstract class BaseKernel implements IBaseKernel {
 
 			try {
 				logger.debug("Requesting Kernel info");
+
 				this._info = await getKernelInfo(
 					session,
 					this.kernelConnectionMetadata,
@@ -1009,6 +1139,7 @@ abstract class BaseKernel implements IBaseKernel {
 			} catch (ex) {
 				logger.warn("Failed to request KernelInfo", ex);
 			}
+
 			kernelInfo?.stop();
 
 			const kernelIdle = tracker?.kernelIdle();
@@ -1020,14 +1151,17 @@ abstract class BaseKernel implements IBaseKernel {
 				logger.trace(
 					"End running kernel initialization, now waiting for idle",
 				);
+
 				await session.waitForIdle(
 					this.kernelSettings.launchTimeout,
 					this.startCancellation.token,
 				);
+
 				logger.trace(
 					"End running kernel initialization, session is idle",
 				);
 			}
+
 			kernelIdle?.stop();
 		} finally {
 			postInitialization?.stop();
@@ -1044,12 +1178,14 @@ abstract class BaseKernel implements IBaseKernel {
 			// There are very few kernels that support IPyWidgets, however IPyWidgets 8 is very new
 			// & it is unlikely that others have supported this new version.
 			this._ipywidgetsVersion == WIDGET_VERSION_NON_PYTHON_KERNELS;
+
 			this._onIPyWidgetVersionResolved.fire(
 				WIDGET_VERSION_NON_PYTHON_KERNELS,
 			);
 
 			return;
 		}
+
 		const determineVersionImpl = async () => {
 			const codeToDetermineIPyWidgetsVersion = dedent`
         try:
@@ -1084,9 +1220,11 @@ abstract class BaseKernel implements IBaseKernel {
 					: isVersion8
 						? 8
 						: undefined);
+
 				logger.trace(`Determined IPyWidgets Version as ${newVersion}`);
 				// If user does not have ipywidgets installed, then this event will never get fired.
 				this._ipywidgetsVersion == newVersion;
+
 				this._onIPyWidgetVersionResolved.fire(newVersion);
 			} else {
 				logger.warn(
@@ -1095,6 +1233,7 @@ abstract class BaseKernel implements IBaseKernel {
 				);
 			}
 		};
+
 		await determineVersionImpl();
 
 		// If we do not have the version of IPyWidgets, its possible the user has not installed it.
@@ -1107,6 +1246,7 @@ abstract class BaseKernel implements IBaseKernel {
 					if (msg.direction === "send") {
 						return;
 					}
+
 					const message = msg.msg;
 
 					if (
@@ -1163,6 +1303,7 @@ abstract class BaseKernel implements IBaseKernel {
 					`__vsc_ipynb_file__ = "${file.replace(/\\/g, "\\\\")}"`,
 				);
 			}
+
 			if (!this.kernelSettings.enableExtendedPythonKernelCompletions) {
 				result.push(CodeSnippets.DisableJedi);
 			}
@@ -1227,6 +1368,7 @@ abstract class BaseKernel implements IBaseKernel {
 
 			return splitLines(cleanedUp, { trim: false });
 		}
+
 		return [];
 	}
 
@@ -1238,6 +1380,7 @@ abstract class BaseKernel implements IBaseKernel {
 		if (code.join("").trim().length === 0) {
 			return;
 		}
+
 		if (!session.kernel) {
 			logger.trace(
 				`Not executing startup as there is no session, code: ${code}`,
@@ -1245,6 +1388,7 @@ abstract class BaseKernel implements IBaseKernel {
 
 			return;
 		}
+
 		return executeSilently(session.kernel, code.join("\n"), errorOptions);
 	}
 }
@@ -1253,6 +1397,7 @@ export class ThirdPartyKernel extends BaseKernel implements IThirdPartyKernel {
 	public override get creator(): "3rdPartyExtension" {
 		return "3rdPartyExtension";
 	}
+
 	constructor(
 		uri: Uri,
 		resourceUri: Resource,
@@ -1324,6 +1469,7 @@ function wrapPythonStartupBlock(
 
 	// Add the try except
 	inputCode.unshift(`try:`);
+
 	inputCode.push(`except:`, `    print('${pythonMessage}')`);
 
 	return inputCode;
@@ -1340,12 +1486,14 @@ export function getPlainTextOrStreamOutput(outputs: nbformat.IOutput[]) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			return concatMultilineString((data as any)["text/plain"]);
 		}
+
 		if (outputs[0].output_type === "stream") {
 			const stream = outputs[0] as nbformat.IStream;
 
 			return concatMultilineString(stream.text);
 		}
 	}
+
 	return;
 }
 
@@ -1360,6 +1508,7 @@ function getKernelStartupLogMessage(
 
 	if (interpreter) {
 		info.push(`Python Path: ${getDisplayPath(interpreter.uri)}`);
+
 		info.push(interpreter ? getEnvironmentType(interpreter) : "");
 
 		const version = getCachedVersion(interpreter);

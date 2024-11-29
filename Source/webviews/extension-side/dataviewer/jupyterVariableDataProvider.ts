@@ -25,7 +25,9 @@ export class JupyterVariableDataProvider
 	implements IJupyterVariableDataProvider
 {
 	private initialized: boolean = false;
+
 	private _kernel: IKernel | undefined;
+
 	private variable: IJupyterVariable | undefined;
 
 	constructor(
@@ -73,6 +75,7 @@ export class JupyterVariableDataProvider
 				default:
 					normalizedType = ColumnType.String;
 			}
+
 			return {
 				key: column.key,
 				type: normalizedType,
@@ -94,6 +97,7 @@ export class JupyterVariableDataProvider
 				`Could not parse IJupyterVariable with malformed shape: ${shape}`,
 			);
 		}
+
 		return undefined;
 	}
 
@@ -103,6 +107,7 @@ export class JupyterVariableDataProvider
 
 	public setDependencies(variable: IJupyterVariable, kernel?: IKernel): void {
 		this._kernel = kernel;
+
 		this.variable = variable;
 	}
 
@@ -111,6 +116,7 @@ export class JupyterVariableDataProvider
 		isRefresh?: boolean,
 	): Promise<IDataFrameInfo> {
 		let dataFrameInfo: IDataFrameInfo = {};
+
 		await this.ensureInitialized();
 
 		let variable = this.variable;
@@ -124,6 +130,7 @@ export class JupyterVariableDataProvider
 					isRefresh,
 				);
 			}
+
 			dataFrameInfo = {
 				columns: variable.columns
 					? JupyterVariableDataProvider.getNormalizedColumns(
@@ -141,14 +148,17 @@ export class JupyterVariableDataProvider
 				fileName: getFilePath(variable.fileName),
 			};
 		}
+
 		if (isRefresh) {
 			this.variable = variable;
 		}
+
 		return dataFrameInfo;
 	}
 
 	public async getAllRows(sliceExpression?: string) {
 		let allRows: IRowsResponse = [];
+
 		await this.ensureInitialized();
 
 		if (this.variable && this.variable.rowCount) {
@@ -159,13 +169,16 @@ export class JupyterVariableDataProvider
 				this._kernel,
 				sliceExpression,
 			);
+
 			allRows = dataFrameRows.data;
 		}
+
 		return allRows;
 	}
 
 	public async getRows(start: number, end: number, sliceExpression?: string) {
 		let rows: IRowsResponse = [];
+
 		await this.ensureInitialized();
 
 		if (this.variable && this.variable.rowCount) {
@@ -176,8 +189,10 @@ export class JupyterVariableDataProvider
 				this._kernel,
 				sliceExpression,
 			);
+
 			rows = dataFrameRows.data;
 		}
+
 		return rows;
 	}
 
@@ -197,6 +212,7 @@ export class JupyterVariableDataProvider
 								this._kernel,
 				);
 			}
+
 			this.variable = await this.variableManager.getDataFrameInfo(
 				this.variable,
 				this._kernel,

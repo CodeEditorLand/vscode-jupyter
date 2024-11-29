@@ -81,5 +81,6 @@ export function buildApi(
 		(api as any).serviceManager = serviceManager;
 		/* eslint-enable @typescript-eslint/no-explicit-any */
 	}
+
 	return api;
 }

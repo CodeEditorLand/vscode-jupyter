@@ -40,6 +40,7 @@ export namespace Transfer {
 				arg.payload.data.href,
 			);
 		}
+
 		return arg.prevState;
 	}
 

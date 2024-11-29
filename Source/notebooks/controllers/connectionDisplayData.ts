@@ -18,13 +18,17 @@ export class ConnectionDisplayData
 	implements IDisposable, IConnectionDisplayData
 {
 	private readonly _onDidChange = new EventEmitter<ConnectionDisplayData>();
+
 	public readonly onDidChange = this._onDidChange.event;
+
 	public get description(): string | undefined {
 		return this.getDescription?.() || this._description;
 	}
+
 	public set description(value: string | undefined) {
 		this._description = value;
 	}
+
 	constructor(
 		public label: string,
 		private _description: string | undefined,
@@ -33,9 +37,11 @@ export class ConnectionDisplayData
 		public serverDisplayName?: string,
 		private readonly getDescription?: () => string,
 	) {}
+
 	dispose(): void | undefined {
 		this._onDidChange.dispose();
 	}
+
 	public triggerChange() {
 		this._onDidChange.fire(this);
 	}
@@ -69,6 +75,7 @@ export function getKernelConnectionCategorySync(
 			) {
 				return DataScience.kernelCategoryForJupyterKernel;
 			}
+
 			switch (getEnvironmentType(kernelConnection.interpreter)) {
 				case EnvironmentType.Conda:
 					return isCondaEnvironmentWithoutPython(
@@ -95,6 +102,7 @@ export function getKernelConnectionCategorySync(
 					return DataScience.kernelCategoryForGlobal;
 			}
 		}
+
 		default:
 			return "";
 	}

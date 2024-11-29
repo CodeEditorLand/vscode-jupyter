@@ -11,6 +11,7 @@ export function registerTypes(serviceManager: IServiceManager) {
 		IPlatformService,
 		PlatformService,
 	);
+
 	initializeExternalDependencies(
 		serviceManager.get<IServiceContainer>(IServiceContainer),
 	);

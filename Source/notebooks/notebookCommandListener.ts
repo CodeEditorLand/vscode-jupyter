@@ -67,16 +67,19 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 				() => this.removeAllCells(),
 			),
 		);
+
 		this.disposableRegistry.push(
 			commands.registerCommand(Commands.NotebookEditorRunAllCells, () =>
 				this.runAllCells(),
 			),
 		);
+
 		this.disposableRegistry.push(
 			commands.registerCommand(Commands.NotebookEditorAddCellBelow, () =>
 				this.addCellBelow(),
 			),
 		);
+
 		this.disposableRegistry.push(
 			// TODO: if contributed anywhere, add context support
 			commands.registerCommand(
@@ -99,6 +102,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 				},
 			),
 		);
+
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.InterruptKernel,
@@ -106,6 +110,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 					this.interruptKernel(context?.notebookEditor?.notebookUri),
 			),
 		);
+
 		this.disposableRegistry.push(
 			commands.registerCommand(
 				Commands.RestartKernelAndRunAllCells,
@@ -142,9 +147,11 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		if (!document) {
 			return;
 		}
+
 		const defaultLanguage = this.languageService.getPreferredLanguage(
 			getNotebookMetadata(document),
 		);
+
 		chainWithPendingUpdates(document, (edit) => {
 			const nbEdit = NotebookEdit.replaceCells(
 				new NotebookRange(0, document.cellCount),
@@ -156,9 +163,11 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 					),
 				],
 			);
+
 			edit.set(document.uri, [nbEdit]);
 		}).then(noop, noop);
 	}
+
 	private async interruptKernel(notebookUri: Uri | undefined): Promise<void> {
 		const uri =
 			notebookUri ??
@@ -171,6 +180,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		if (document === undefined) {
 			return;
 		}
+
 		logger.debug(
 			`Command interrupted kernel for ${getDisplayPath(document.uri)}`,
 		);
@@ -182,11 +192,13 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
 			return;
 		}
+
 		await this.wrapKernelMethod("interrupt", kernel);
 	}
 
 	private async restartKernelAndRunAllCells(notebookUri: Uri | undefined) {
 		await this.restartKernel(notebookUri);
+
 		this.runAllCells();
 	}
 
@@ -195,6 +207,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
 		if (activeNBE) {
 			await this.restartKernel(activeNBE.notebook.uri);
+
 			commands
 				.executeCommand("notebook.cell.execute", {
 					ranges: [{ start: 0, end: activeNBE.selection.end }],
@@ -242,6 +255,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 
 				if (response === dontAskAgain) {
 					await this.disableAskForRestart(document.uri);
+
 					this.wrapKernelMethod("restart", kernel).catch(noop);
 				} else if (response === yes) {
 					this.wrapKernelMethod("restart", kernel).catch(noop);
@@ -256,6 +270,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		IKernel,
 		Promise<void>
 	>();
+
 	private async wrapKernelMethod(
 		currentContext: "interrupt" | "restart",
 		kernel: IKernel,
@@ -267,6 +282,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		if (pendingPromise) {
 			return pendingPromise;
 		}
+
 		const promise = (async () => {
 			// Get currently executing cell and controller
 			const currentCell =
@@ -310,6 +326,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 				}
 			}
 		})();
+
 		promise
 			.finally(() => {
 				if (this.pendingRestartInterrupt.get(kernel) === promise) {
@@ -317,6 +334,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 				}
 			})
 			.catch(noop);
+
 		this.pendingRestartInterrupt.set(kernel, promise);
 
 		return promise;
@@ -326,6 +344,7 @@ export class NotebookCommandListener implements IDataScienceCommandListener {
 		if (this.kernelInterruptedDontAskToRestart) {
 			return false;
 		}
+
 		const settings = this.configurationService.getSettings(notebookUri);
 
 		return settings && settings.askForKernelRestart === true;

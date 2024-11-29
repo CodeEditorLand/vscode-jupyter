@@ -152,6 +152,7 @@ export class ExtUri implements IExtUri {
 		if (uri1 === uri2) {
 			return 0;
 		}
+
 		return strCompare(
 			this.getComparisonKey(uri1, ignoreFragment),
 			this.getComparisonKey(uri2, ignoreFragment),
@@ -166,9 +167,11 @@ export class ExtUri implements IExtUri {
 		if (uri1 === uri2) {
 			return true;
 		}
+
 		if (!uri1 || !uri2) {
 			return false;
 		}
+
 		return (
 			this.getComparisonKey(uri1, ignoreFragment) ===
 			this.getComparisonKey(uri2, ignoreFragment)
@@ -210,6 +213,7 @@ export class ExtUri implements IExtUri {
 						base.fragment === parentCandidate.fragment)
 				);
 			}
+
 			if (isEqualAuthority(base.authority, parentCandidate.authority)) {
 				return (
 					extpath.isEqualOrParent(
@@ -224,6 +228,7 @@ export class ExtUri implements IExtUri {
 				);
 			}
 		}
+
 		return false;
 	}
 
@@ -249,6 +254,7 @@ export class ExtUri implements IExtUri {
 		if (resource.path.length === 0) {
 			return resource;
 		}
+
 		let dirname;
 
 		if (resource.scheme === Schemas.file) {
@@ -264,9 +270,11 @@ export class ExtUri implements IExtUri {
 				console.error(
 					`dirname("${resource.toString})) resulted in a relative path`,
 				);
+
 				dirname = "/"; // If a URI contains an authority component, then the path component must either be empty or begin with a CharCode.Slash ("/") character
 			}
 		}
+
 		return resource.with({
 			path: dirname,
 		});
@@ -276,6 +284,7 @@ export class ExtUri implements IExtUri {
 		if (!resource.path.length) {
 			return resource;
 		}
+
 		let normalizedPath: string;
 
 		if (resource.scheme === Schemas.file) {
@@ -285,6 +294,7 @@ export class ExtUri implements IExtUri {
 		} else {
 			normalizedPath = paths.posix.normalize(resource.path);
 		}
+
 		return resource.with({
 			path: normalizedPath,
 		});
@@ -297,6 +307,7 @@ export class ExtUri implements IExtUri {
 		) {
 			return undefined;
 		}
+
 		if (from.scheme === Schemas.file) {
 			const relativePath = paths.relative(
 				originalFSPath(from),
@@ -305,6 +316,7 @@ export class ExtUri implements IExtUri {
 
 			return isWindows ? extpath.toSlashes(relativePath) : relativePath;
 		}
+
 		let fromPath = from.path || "/",
 			toPath = to.path || "/";
 
@@ -314,7 +326,9 @@ export class ExtUri implements IExtUri {
 
 			for (
 				const len = Math.min(fromPath.length, toPath.length);
+
 				i < len;
+
 				i++
 			) {
 				if (fromPath.charCodeAt(i) !== toPath.charCodeAt(i)) {
@@ -326,8 +340,10 @@ export class ExtUri implements IExtUri {
 					}
 				}
 			}
+
 			fromPath = toPath.substr(0, i) + fromPath.substr(i);
 		}
+
 		return paths.posix.relative(fromPath, toPath);
 	}
 
@@ -340,6 +356,7 @@ export class ExtUri implements IExtUri {
 				path: newURI.path,
 			});
 		}
+
 		path = extpath.toPosixPath(path); // we allow path to be a windows path
 		return base.with({
 			path: paths.posix.resolve(base.path, path),
@@ -385,6 +402,7 @@ export class ExtUri implements IExtUri {
 				path: resource.path.substr(0, resource.path.length - 1),
 			});
 		}
+
 		return resource;
 	}
 
@@ -393,6 +411,7 @@ export class ExtUri implements IExtUri {
 
 		if (resource.scheme === Schemas.file) {
 			const fsp = originalFSPath(resource);
+
 			isRootSep =
 				fsp !== undefined &&
 				fsp.length === extpath.getRoot(fsp).length &&
@@ -401,12 +420,15 @@ export class ExtUri implements IExtUri {
 			sep = "/";
 
 			const p = resource.path;
+
 			isRootSep =
 				p.length === 1 && p.charCodeAt(p.length - 1) === CharCode.Slash;
 		}
+
 		if (!isRootSep && !hasTrailingPathSeparator(resource, sep)) {
 			return resource.with({ path: resource.path + "/" });
 		}
+
 		return resource;
 	}
 }
@@ -508,6 +530,7 @@ export namespace DataUri {
 			dataUri.path.indexOf(";") + 1,
 			dataUri.path.lastIndexOf(";"),
 		);
+
 		meta.split(";").forEach((property) => {
 			const [key, value] = property.split(":");
 

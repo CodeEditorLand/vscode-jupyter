@@ -22,8 +22,11 @@ export class RemoteWidgetScriptSourceProvider
 	implements IWidgetScriptSourceProvider
 {
 	id = "remote";
+
 	public static validUrls = new Map<string, boolean>();
+
 	private readonly kernelConnection: RemoteKernelConnectionMetadata;
+
 	private readonly scriptManager: IIPyWidgetScriptManager;
 
 	constructor(
@@ -40,12 +43,16 @@ export class RemoteWidgetScriptSourceProvider
 				"Invalid usage of this class, can only be used with remtoe kernels",
 			);
 		}
+
 		this.kernelConnection = kernel.kernelConnectionMetadata;
+
 		this.scriptManager = scriptManagerFactory.getOrCreate(kernel);
 	}
+
 	public dispose() {
 		// Noop.
 	}
+
 	public async getBaseUrl() {
 		return Uri.parse(this.kernelConnection.baseUrl);
 	}
@@ -72,8 +79,10 @@ export class RemoteWidgetScriptSourceProvider
 				source: "remote",
 			};
 		}
+
 		return found || { moduleName };
 	}
+
 	public async getWidgetScriptSources(): Promise<
 		Readonly<WidgetScriptSource[]>
 	> {
@@ -93,6 +102,7 @@ export class RemoteWidgetScriptSourceProvider
 
 			return sources;
 		}
+
 		return [];
 	}
 }

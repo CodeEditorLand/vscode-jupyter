@@ -19,7 +19,9 @@ import { sendActivationTelemetry } from "../../platform/telemetry/envFileTelemet
 @injectable()
 export class WorkspaceActivation implements IExtensionSyncActivationService {
 	public readonly activatedWorkspaces = new Set<string>();
+
 	private readonly disposables: IDisposable[] = [];
+
 	private docOpenedHandler?: IDisposable;
 
 	constructor(
@@ -28,7 +30,9 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 
 	public activate() {
 		this.addHandlers();
+
 		this.addRemoveDocOpenedHandlers();
+
 		this.activateWorkspace(this.getActiveResource()).catch(noop);
 	}
 
@@ -38,6 +42,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 		if (editor && !editor.document.isUntitled) {
 			return editor.document.uri;
 		}
+
 		return Array.isArray(workspace.workspaceFolders) &&
 			workspace.workspaceFolders.length > 0
 			? workspace.workspaceFolders[0].uri
@@ -51,6 +56,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 		if (this.activatedWorkspaces.has(key)) {
 			return;
 		}
+
 		this.activatedWorkspaces.add(key);
 
 		await sendActivationTelemetry(this.fileSystem, resource);
@@ -60,15 +66,19 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 		if (doc.languageId !== PYTHON_LANGUAGE) {
 			return;
 		}
+
 		const key = this.getWorkspaceKey(doc.uri);
 		// If we have opened a doc that does not belong to workspace, then do nothing.
 		if (key === "" || (workspace.workspaceFolders || []).length === 0) {
 			return;
 		}
+
 		if (this.activatedWorkspaces.has(key)) {
 			return;
 		}
+
 		const folder = workspace.getWorkspaceFolder(doc.uri);
+
 		this.activateWorkspace(folder ? folder.uri : undefined).catch(noop);
 	}
 
@@ -80,6 +90,7 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 			),
 		);
 	}
+
 	protected addRemoveDocOpenedHandlers() {
 		if (this.hasMultipleWorkspaces()) {
 			if (!this.docOpenedHandler) {
@@ -88,13 +99,17 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 					this,
 				);
 			}
+
 			return;
 		}
+
 		if (this.docOpenedHandler) {
 			this.docOpenedHandler.dispose();
+
 			this.docOpenedHandler = undefined;
 		}
 	}
+
 	protected onWorkspaceFoldersChanged() {
 		//If an activated workspace folder was removed, delete its key
 		const workspaceKeys = (workspace.workspaceFolders || [])!.map(
@@ -112,11 +127,14 @@ export class WorkspaceActivation implements IExtensionSyncActivationService {
 				this.activatedWorkspaces.delete(folder);
 			}
 		}
+
 		this.addRemoveDocOpenedHandlers();
 	}
+
 	protected hasMultipleWorkspaces() {
 		return (workspace.workspaceFolders || []).length > 1;
 	}
+
 	protected getWorkspaceKey(resource: Resource) {
 		return getWorkspaceFolderIdentifier(resource, "");
 	}

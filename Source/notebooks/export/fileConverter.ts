@@ -47,6 +47,7 @@ export abstract class FileConverterBase implements IFileConverter {
 			// Open the source as a NotebookDocument, note that this doesn't actually show an editor, and we don't need
 			// a specific close action as VS Code owns the lifetime
 			const nbDoc = await workspace.openNotebookDocument(source);
+
 			await this.exportImpl(
 				ExportFormat.python,
 				nbDoc,
@@ -108,6 +109,7 @@ export abstract class FileConverterBase implements IFileConverter {
 			if (!target) {
 				return;
 			}
+
 			await this.performExport(
 				format,
 				sourceDocument,
@@ -117,6 +119,7 @@ export abstract class FileConverterBase implements IFileConverter {
 			);
 		} catch (e) {
 			logger.error("Export failed", e);
+
 			sendTelemetryEvent(Telemetry.ExportNotebookAsFailed, undefined, {
 				format: format,
 			});

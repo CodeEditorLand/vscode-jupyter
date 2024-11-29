@@ -48,19 +48,24 @@ export class JupyterInterpreterStateStore {
 			this.memento.get<boolean>(keySelected, false)
 		);
 	}
+
 	public get selectedPythonPath(): Uri | undefined {
 		if (this._interpreterPath) {
 			return this._interpreterPath;
 		}
+
 		const memento = this.memento.get<string | undefined>(key, undefined);
 
 		if (memento) {
 			return Uri.parse(memento);
 		}
 	}
+
 	public updateSelectedPythonPath(value: Uri | undefined) {
 		this._interpreterPath = value;
+
 		this.memento.update(key, value?.toString()).then(noop, noop);
+
 		this.memento.update(keySelected, true).then(noop, noop);
 	}
 }
@@ -85,12 +90,14 @@ export class MigrateJupyterInterpreterStateService
 	// Migrate the interpreter path selected for Jupyter server from the Python extension's globalState memento
 	public activate() {
 		this.activateBackground().catch(noop);
+
 		this.api.onDidActivatePythonExtension(
 			this.activateBackground,
 			this,
 			this.disposables,
 		);
 	}
+
 	public async activateBackground() {
 		// Migrate in the background.
 		// Python extension will not activate unless Jupyter activates, and here we're waiting for Python.
@@ -99,16 +106,20 @@ export class MigrateJupyterInterpreterStateService
 			await this.migrateSettings();
 		}
 	}
+
 	private async migrateSettings() {
 		if (this.settingsMigrated) {
 			return;
 		}
+
 		this.settingsMigrated = true;
 
 		const api = await this.api.getApi();
 
 		const data = api.getInterpreterPathSelectedForJupyterServer();
+
 		await this.memento.update(key, data);
+
 		await this.memento.update(keySelected, true);
 	}
 }

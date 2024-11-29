@@ -22,7 +22,9 @@ export async function trackPackageInstalledIntoInterpreter(
 	if (isResource(interpreter)) {
 		return;
 	}
+
 	const key = `${await getInterpreterHash(interpreter)}#${ProductNames.get(product)}`;
+
 	await memento.update(key, true);
 }
 export async function clearInstalledIntoInterpreterMemento(
@@ -31,6 +33,7 @@ export async function clearInstalledIntoInterpreterMemento(
 	interpreterPath: Uri,
 ) {
 	const key = `${await getInterpreterHash({ uri: interpreterPath })}#${ProductNames.get(product)}`;
+
 	await memento.update(key, undefined);
 }
 export async function isModulePresentInEnvironmentCache(

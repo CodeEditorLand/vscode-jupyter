@@ -77,6 +77,7 @@ class NotebookExecutionReferenceCollection extends ReferenceCollection<NotebookE
 	) {
 		super();
 	}
+
 	public dispose() {
 		this.disposeExistingExecution();
 	}
@@ -89,22 +90,27 @@ class NotebookExecutionReferenceCollection extends ReferenceCollection<NotebookE
 			this.existingExecutions = this.controller.createNotebookExecution(
 				this.notebook,
 			);
+
 			this.existingExecutions.start();
 		}
+
 		return this.existingExecutions;
 	}
+
 	protected override destroyReferencedObject(
 		_key: string,
 		_object: NotebookExecution,
 	): void {
 		this.disposeExistingExecution();
 	}
+
 	private disposeExistingExecution() {
 		try {
 			this.existingExecutions?.end();
 		} catch {
 			//
 		}
+
 		this.existingExecutions = undefined;
 	}
 }
@@ -118,17 +124,26 @@ class NotebookExecutionReferenceCollection extends ReferenceCollection<NotebookE
  */
 class KernelExecutionProgressIndicator {
 	private readonly controllerDisplayName: string;
+
 	private readonly notebook?: NotebookDocument;
+
 	private deferred?: Deferred<void>;
+
 	private disposable?: IDisposable;
+
 	private eventHandler: IDisposable;
+
 	private readonly title: string;
+
 	private displayInProgress?: boolean;
+
 	private shouldDisplayProgress?: boolean;
+
 	private static notificationsPerExtension = new WeakMap<
 		IKernel,
 		Set<string>
 	>();
+
 	private executionRefCountedDisposableFactory?: NotebookExecutionReferenceCollection;
 
 	constructor(
@@ -146,25 +161,32 @@ class KernelExecutionProgressIndicator {
 		const extensionDisplayName =
 			extensions.getExtension(extensionId)?.packageJSON?.displayName ||
 			extensionId;
+
 		this.notebook = workspace.notebookDocuments.find(
 			(n) => n.uri.toString() === kernel.resourceUri?.toString(),
 		);
+
 		this.controllerDisplayName = getDisplayNameOrNameOfKernelConnection(
 			kernel.kernelConnectionMetadata,
 		);
+
 		this.title = l10n.t(
 			`Executing code in {0} from {1}`,
 			this.controllerDisplayName,
 			extensionDisplayName,
 		);
+
 		this.eventHandler = window.onDidChangeVisibleNotebookEditors(
 			this.showProgressImpl,
 			this,
 		);
 	}
+
 	dispose() {
 		this.eventHandler.dispose();
+
 		this.disposable?.dispose();
+
 		this.executionRefCountedDisposableFactory?.dispose();
 	}
 
@@ -174,17 +196,23 @@ class KernelExecutionProgressIndicator {
 
 		if (this.deferred && !this.deferred.completed) {
 			const oldDeferred = this.deferred;
+
 			this.deferred = createDeferred<void>();
+
 			oldDeferred.resolve();
 		} else {
 			this.deferred = createDeferred<void>();
+
 			this.showProgress().catch(noop);
 		}
+
 		return (this.disposable = new Disposable(() => {
 			execution?.dispose();
+
 			this.deferred?.resolve();
 		}));
 	}
+
 	private async showProgress() {
 		// Give a grace period of 1000ms to avoid displaying progress indicators too aggressively.
 		// Clearly some extensions can take a while, see here https://github.com/microsoft/vscode-jupyter/issues/15613
@@ -198,15 +226,20 @@ class KernelExecutionProgressIndicator {
 		) {
 			return;
 		}
+
 		this.shouldDisplayProgress = true;
+
 		await Promise.all([this.showProgressImpl(), this.waitUntilCompleted()]);
+
 		this.shouldDisplayProgress = false;
 	}
+
 	private async showProgressImpl() {
 		const notifiedExtensions =
 			KernelExecutionProgressIndicator.notificationsPerExtension.get(
 				this.kernel,
 			) || new Set();
+
 		KernelExecutionProgressIndicator.notificationsPerExtension.set(
 			this.kernel,
 			notifiedExtensions,
@@ -215,11 +248,13 @@ class KernelExecutionProgressIndicator {
 		if (notifiedExtensions.has(this.extensionId)) {
 			return;
 		}
+
 		notifiedExtensions.add(this.extensionId);
 
 		if (!this.notebook || !this.shouldDisplayProgress) {
 			return;
 		}
+
 		if (
 			!window.visibleNotebookEditors.some(
 				(e) => e.notebook === this.notebook,
@@ -227,13 +262,17 @@ class KernelExecutionProgressIndicator {
 		) {
 			return;
 		}
+
 		this.displayInProgress = true;
+
 		await window.withProgress(
 			{ location: ProgressLocation.Notification, title: this.title },
 			async () => this.waitUntilCompleted(),
 		);
+
 		this.displayInProgress = false;
 	}
+
 	private async waitUntilCompleted() {
 		let deferred = this.deferred;
 
@@ -284,24 +323,31 @@ class KernelAPIAccessRevoked extends Error {
  */
 class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 	private readonly progress: KernelExecutionProgressIndicator;
+
 	private readonly _api: Kernel;
+
 	public readonly language: string;
 
 	get status(): KernelStatus {
 		return this.kernel.status;
 	}
+
 	private readonly _onDidChangeStatus = this._register(
 		new EventEmitter<KernelStatus>(),
 	);
+
 	public get onDidChangeStatus(): Event<KernelStatus> {
 		return this._onDidChangeStatus.event;
 	}
+
 	private readonly _onDidReceiveDisplayUpdate = this._register(
 		new EventEmitter<NotebookCellOutput>(),
 	);
+
 	public get onDidReceiveDisplayUpdate(): Event<NotebookCellOutput> {
 		return this._onDidReceiveDisplayUpdate.event;
 	}
+
 	private accessAllowed?: Promise<boolean>;
 
 	constructor(
@@ -311,6 +357,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		controller?: NotebookController,
 	) {
 		super();
+
 		this.progress = this._register(
 			new KernelExecutionProgressIndicator(
 				extensionId,
@@ -318,17 +365,21 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 				controller,
 			),
 		);
+
 		this._register(once(kernel.onDisposed)(() => this.progress.dispose()));
+
 		this.language =
 			kernel.kernelConnectionMetadata.kind === "connectToLiveRemoteKernel"
 				? PYTHON_LANGUAGE
 				: kernel.kernelConnectionMetadata.kernelSpec.language ||
 					PYTHON_LANGUAGE;
+
 		this._register(
 			this.kernel.onStatusChanged(() =>
 				this._onDidChangeStatus.fire(this.kernel.status),
 			),
 		);
+
 		this._register(
 			execution.onDidReceiveDisplayUpdate((output) => {
 				const session = this.kernel.session;
@@ -351,6 +402,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		);
 		// Plain object returned to 3rd party extensions that cannot be modified or messed with.
 		const that = this;
+
 		this._api = Object.freeze({
 			language: this.language,
 			get status() {
@@ -384,6 +436,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			) => this.executeChatCode(code, handlers, token),
 		});
 	}
+
 	static createApiKernel(
 		extensionId: string,
 		kernel: IKernel,
@@ -396,6 +449,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			execution,
 			controller,
 		);
+
 		ServiceContainer.instance
 			.get<IDisposableRegistry>(IDisposableRegistry)
 			.push(wrapper);
@@ -407,12 +461,15 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		if (this.extensionId === JVSC_EXTENSION_ID) {
 			return;
 		}
+
 		if (!this.accessAllowed) {
 			this.accessAllowed = this.doCheckAccess();
+
 			this._register(
 				registerChangeHandler(() => (this.accessAllowed = undefined)),
 			);
 		}
+
 		const accessAllowed = await this.accessAllowed;
 
 		if (!accessAllowed) {
@@ -425,6 +482,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		const access = await requestApiAccess(this.extensionId);
 
 		const accessAllowed = access.accessAllowed;
+
 		sendTelemetryEvent(Telemetry.NewJupyterKernelsApiUsage, undefined, {
 			extensionId: this.extensionId,
 			pemUsed: "getKernel",
@@ -448,6 +506,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			yield output;
 		}
 	}
+
 	async *executeChatCode(
 		code: string,
 		handlers: Record<
@@ -465,11 +524,13 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 				`Proposed API is not supported for extension ${this.extensionId}`,
 			);
 		}
+
 		if (!isPythonKernelConnection(this.kernel.kernelConnectionMetadata)) {
 			throw new Error(
 				"Chat code execution is only supported for Python kernels",
 			);
 		}
+
 		for await (const output of this.executeCodeInternal(
 			code,
 			handlers,
@@ -509,6 +570,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		const stopwatch = new StopWatch();
 
 		const mimeTypes = new Set<string>();
+
 		sendApiTelemetry(
 			this.extensionId,
 			this.kernel,
@@ -518,12 +580,15 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 
 		if (this.kernel.disposed) {
 			properties.failed = true;
+
 			sendApiExecTelemetry(this.kernel, measures, properties).catch(noop);
 
 			throw new Error("Kernel is disposed");
 		}
+
 		if (!this.kernel.session?.kernel) {
 			properties.failed = true;
+
 			sendApiExecTelemetry(this.kernel, measures, properties).catch(noop);
 
 			if (
@@ -532,17 +597,22 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			) {
 				throw new Error("Kernel is dead or terminating");
 			}
+
 			throw new Error(
 				"Kernel connection not available to execute 3rd party code",
 			);
 		}
 
 		const disposables: IDisposable[] = [];
+
 		disposables.push({
 			dispose: () => {
 				measures.duration = stopwatch.elapsedTime;
+
 				properties.mimeTypes = Array.from(mimeTypes).join(",");
+
 				completed = true;
+
 				sendApiExecTelemetry(this.kernel, measures, properties).catch(
 					noop,
 				);
@@ -561,6 +631,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		events.started.event(
 			() => {
 				properties.requestSent = true;
+
 				measures.requestSentAfter = stopwatch.elapsedTime;
 
 				if (
@@ -573,9 +644,11 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			this,
 			disposables,
 		);
+
 		events.executionAcknowledged.event(
 			() => {
 				properties.requestAcknowledged = true;
+
 				measures.requestAcknowledgedAfter = stopwatch.elapsedTime;
 			},
 			this,
@@ -587,11 +660,16 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 				if (completed) {
 					return;
 				}
+
 				properties.cancelled = true;
+
 				measures.cancelledAfter = stopwatch.elapsedTime;
+
 				properties.cancelledBeforeRequestSent = !properties.requestSent;
+
 				properties.cancelledBeforeRequestAcknowledged =
 					!properties.requestAcknowledged;
+
 				logger.debug(
 					`Code execution cancelled by extension ${this.extensionId}`,
 				);
@@ -612,6 +690,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 					this.kernel.session,
 					output,
 				);
+
 				output.items.forEach((output) => mimeTypes.add(output.mime));
 
 				if (handlers && hasChatOutput(output)) {
@@ -633,11 +712,13 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 			dispose(disposables);
 		}
 	}
+
 	async *handleChatOutput(
 		output: NotebookCellOutput,
 		kernelExecution: INotebookKernelExecution,
 		events: {
 			started: EventEmitter<void>;
+
 			executionAcknowledged: EventEmitter<void>;
 		},
 		mimeTypes: Set<string>,
@@ -652,10 +733,12 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		if (!chatOutput) {
 			return;
 		}
+
 		type Metadata = {
 			id: string;
 
 			function: string;
+
 			dataIsNone: boolean;
 		};
 
@@ -674,6 +757,7 @@ class WrappedKernelPerExtension extends DisposableBase implements Kernel {
 		if (!handler) {
 			throw new Error(`Chat Function ${functionId} not found`);
 		}
+
 		const result = await handler(data);
 
 		// Send the result back to the chat window.
@@ -716,6 +800,7 @@ async function sendApiTelemetry(
 	executionCount: number,
 ) {
 	const kernelId = await getTelemetrySafeHashedString(kernel.id);
+
 	sendTelemetryEvent(
 		Telemetry.NewJupyterKernelApiUsage,
 		{ executionCount },
@@ -726,24 +811,37 @@ async function sendApiExecTelemetry(
 	kernel: IKernel,
 	measures: {
 		executionCount: number;
+
 		requestSentAfter: number;
+
 		requestAcknowledgedAfter: number;
+
 		cancelledAfter: number;
+
 		duration: number;
 	},
 	properties: {
 		kernelId: string;
+
 		extensionId: string;
+
 		requestSent: boolean;
+
 		cancelled: boolean;
+
 		requestAcknowledged: boolean;
+
 		cancelledBeforeRequestSent: boolean;
+
 		cancelledBeforeRequestAcknowledged: boolean;
+
 		mimeTypes: string;
+
 		failed: boolean;
 	},
 ) {
 	properties.kernelId = await getTelemetrySafeHashedString(kernel.id);
+
 	sendTelemetryEvent(
 		Telemetry.NewJupyterKernelApiExecution,
 		measures,

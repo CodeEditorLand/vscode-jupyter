@@ -42,6 +42,7 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 		if (!lineText.includes(delimiter)) {
 			continue;
 		}
+
 		const matches: RegExpMatchArray | null = lineText
 			.split(delimiter)[1]
 			.trim()
@@ -53,6 +54,7 @@ builtins.print("${delimiter}" + ipykernel.__version__ + "${delimiter}")`;
 			if (Number(majorVersion) >= 6) {
 				return IpykernelCheckResult.Ok;
 			}
+
 			return IpykernelCheckResult.Outdated;
 		}
 	}
@@ -92,7 +94,9 @@ export function getMessageSourceAndHookIt(
 	sourceHook: (
 		location: {
 			source?: DebugProtocol.Source;
+
 			line?: number;
+
 			endLine?: number;
 		},
 		source?: DebugProtocol.Source,
@@ -124,6 +128,7 @@ export function getMessageSourceAndHookIt(
 				default:
 					break;
 			}
+
 			break;
 
 		case "request":
@@ -147,9 +152,12 @@ export function getMessageSourceAndHookIt(
 							source: args.source,
 							line: originalLine,
 						};
+
 						sourceHook(objForSource);
+
 						args.source = objForSource.source;
 					}
+
 					break;
 
 				case "breakpointLocations":
@@ -177,6 +185,7 @@ export function getMessageSourceAndHookIt(
 				default:
 					break;
 			}
+
 			break;
 
 		case "response":
@@ -198,7 +207,9 @@ export function getMessageSourceAndHookIt(
 							response as DebugProtocol.LoadedSourcesResponse
 						).body.sources.forEach((source) => {
 							const fakeObj = { source };
+
 							sourceHook(fakeObj);
+
 							source.path = fakeObj.source.path;
 						});
 
@@ -235,6 +246,7 @@ export function getMessageSourceAndHookIt(
 						break;
 				}
 			}
+
 			break;
 	}
 }
@@ -264,6 +276,7 @@ export async function cellDebugSetup(
 	// remove this if when https://github.com/microsoft/debugpy/issues/706 is fixed and ipykernel ships it
 	// executing this code restarts debugpy and fixes https://github.com/microsoft/vscode-jupyter/issues/7251
 	const code = "import debugpy\ndebugpy.debug_this_thread()";
+
 	await execution.executeHidden(code);
 
 	await debugAdapter.dumpAllCells();

@@ -25,6 +25,7 @@ export class PythonExtensionRestartNotification
 		@inject(IKernelProvider)
 		private readonly kernelProvider: IKernelProvider,
 	) {}
+
 	activate(): void {
 		this.extensionChecker.onPythonExtensionInstallationStatusChanged(
 			this.onPythonExtensionInstallationStatusChanged,

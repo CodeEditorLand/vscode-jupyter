@@ -37,7 +37,9 @@ export class JupyterServerHelper
 	implements IJupyterServerHelper
 {
 	private usablePythonInterpreter: PythonEnvironment | undefined;
+
 	private cache?: Promise<IJupyterConnection>;
+
 	private _isDisposing = false;
 
 	constructor(
@@ -59,11 +61,13 @@ export class JupyterServerHelper
 			| undefined,
 	) {
 		super();
+
 		this.disposableRegistry.push(
 			this.interpreterService.onDidChangeInterpreter(() =>
 				this.onSettingsChanged(),
 			),
 		);
+
 		this.disposableRegistry.push(this);
 
 		workspace.onDidChangeConfiguration(
@@ -103,11 +107,13 @@ export class JupyterServerHelper
 		if (this.isDisposed || this._isDisposing) {
 			throw new Error("Notebook server is disposed");
 		}
+
 		if (!this.cache) {
 			const promise = (this.cache = this.startJupyterWithRetry(
 				resource,
 				cancelToken,
 			));
+
 			promise.catch((ex) => {
 				logger.error(`Failed to start the Jupyter Server`, ex);
 
@@ -119,6 +125,7 @@ export class JupyterServerHelper
 
 		return this.cache;
 	}
+
 	public async refreshCommands(): Promise<void> {
 		await this.jupyterInterpreterService?.refreshCommands();
 	}
@@ -155,6 +162,7 @@ export class JupyterServerHelper
 				),
 			);
 		}
+
 		return this.usablePythonInterpreter;
 	}
 
@@ -208,13 +216,16 @@ export class JupyterServerHelper
 						if (this.isDisposed || this._isDisposing) {
 							throw err;
 						}
+
 						throw err;
 					} else {
 						throw err;
 					}
 				}
+
 				throw lastTryError;
 			}
+
 			throw new Error("Max number of attempts reached");
 		};
 
@@ -249,6 +260,7 @@ export class JupyterServerHelper
 			// In desktop mode this must be defined, in web this code path never gets executed.
 			throw new Error("Notebook Starter cannot be undefined");
 		}
+
 		return this.notebookStarter.start(
 			resource,
 			useDefaultConfig,

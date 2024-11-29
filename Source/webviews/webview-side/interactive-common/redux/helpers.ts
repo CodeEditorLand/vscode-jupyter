@@ -68,10 +68,12 @@ export function postActionToExtension(
 		type: CommonActionType.PostOutgoingMessage,
 		payload: { payload: newPayload, type: message },
 	};
+
 	originalReducerArg.queueAction(action);
 }
 export function unwrapPostableAction(action: Redux.AnyAction): {
 	type: keyof IInteractiveWindowMapping;
+
 	payload?: BaseReduxActionPayload<{}>;
 } {
 	// Unwrap the payload that was created in `createPostableAction`.

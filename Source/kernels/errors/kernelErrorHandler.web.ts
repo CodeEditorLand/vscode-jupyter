@@ -17,6 +17,7 @@ export class DataScienceErrorHandlerWeb extends DataScienceErrorHandler {
 	) {
 		//
 	}
+
 	protected override async getFilesInWorkingDirectoryThatCouldPotentiallyOverridePythonModules(
 		_resource: Resource,
 	) {

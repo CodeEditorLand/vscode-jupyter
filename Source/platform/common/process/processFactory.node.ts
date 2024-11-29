@@ -33,6 +33,7 @@ export class ProcessServiceFactory implements IProcessServiceFactory {
 		if (!workspace.isTrusted) {
 			throw new Error("Workspace not trusted");
 		}
+
 		const customEnvVars = await this.envVarsService.getEnvironmentVariables(
 			resource,
 			"RunNonPythonCode",

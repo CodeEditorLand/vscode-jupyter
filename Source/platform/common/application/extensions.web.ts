@@ -17,6 +17,7 @@ import { DataScience } from "../utils/localize";
 export class Extensions implements IExtensions {
 	public determineExtensionFromCallStack(stack?: string): {
 		extensionId: string;
+
 		displayName: string;
 	} {
 		stack = stack || new Error().stack;
@@ -42,6 +43,7 @@ export class Extensions implements IExtensions {
 					(item) =>
 						item && !item.toLowerCase().startsWith(jupyterExtRoot),
 				) as string[];
+
 			parseStack(new Error("Ex")).forEach((item) => {
 				const fileName = item.getFileName();
 
@@ -67,11 +69,13 @@ export class Extensions implements IExtensions {
 					};
 				}
 			}
+
 			logger.error(
 				`Unable to determine the caller of the extension API for trace stack.`,
 				stack,
 			);
 		}
+
 		return {
 			extensionId: unknownExtensionId,
 			displayName: DataScience.unknownPackage,

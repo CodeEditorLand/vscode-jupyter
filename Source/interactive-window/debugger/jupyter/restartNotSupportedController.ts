@@ -37,6 +37,7 @@ export class RestartNotSupportedController implements IDebuggingDelegate {
 				"restart",
 				"Showing warning for unsupported restart request",
 			);
+
 			window
 				.showWarningMessage(DataScience.restartNotSupported, {
 					modal: true,

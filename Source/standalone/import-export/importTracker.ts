@@ -80,12 +80,16 @@ const testExecution = isTestExecution();
 @injectable()
 export class ImportTracker implements IExtensionSyncActivationService {
 	private pendingChecks = new ResourceMap<IDisposable>();
+
 	private disposables = new DisposableStore();
+
 	private sentMatches = new Set<string>();
+
 	private readonly processedNotebookCells = new WeakMap<
 		NotebookCell,
 		number
 	>();
+
 	private isTelemetryDisabled: boolean;
 
 	constructor(
@@ -93,20 +97,25 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		delay = 1_000,
 	) {
 		disposables.push(this.disposables);
+
 		this.disposables.add(
 			new Disposable(() => dispose(this.pendingChecks.values())),
 		);
+
 		this.isTelemetryDisabled = isTelemetryDisabled();
+
 		this.disposables.add(
 			workspace.onDidOpenNotebookDocument((t) =>
 				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
 			),
 		);
+
 		this.disposables.add(
 			workspace.onDidCloseNotebookDocument((t) =>
 				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
 			),
 		);
+
 		this.disposables.add(
 			workspace.onDidSaveNotebookDocument((t) =>
 				this.onOpenedOrClosedNotebookDocument(t, "onOpenCloseOrSave"),
@@ -114,6 +123,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		);
 
 		const delayer = this.disposables.add(new Delayer<void>(delay));
+
 		this.disposables.add(
 			notebookCellExecutions.onDidChangeNotebookCellExecutionState(
 				(e) => {
@@ -131,6 +141,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 				this,
 			),
 		);
+
 		this.disposables.add(
 			onDidChangeTelemetryEnablement(
 				(enabled) => (this.isTelemetryDisabled = enabled),
@@ -149,7 +160,9 @@ export class ImportTracker implements IExtensionSyncActivationService {
 
 		for (
 			let lineIndex = 0;
+
 			lineIndex < Math.min(MAX_DOCUMENT_LINES, document.lineCount);
+
 			lineIndex++
 		) {
 			const line = document.lineAt(lineIndex);
@@ -158,6 +171,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 				lines.push(line.text.trim());
 			}
 		}
+
 		return lines;
 	}
 
@@ -168,6 +182,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		if (!isJupyterNotebook(e) || this.isTelemetryDisabled) {
 			return;
 		}
+
 		this.scheduleCheck(
 			e.uri,
 			this.checkNotebookDocument.bind(this, e, when),
@@ -181,6 +196,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		if (currentTimeout) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			currentTimeout.dispose();
+
 			this.pendingChecks.delete(file);
 		}
 
@@ -191,6 +207,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		} else {
 			// Wait five seconds to make sure we don't already have this document pending.
 			const timeout = setTimeout(check, 5000);
+
 			this.pendingChecks.set(
 				file,
 				new Disposable(() => clearTimeout(timeout)),
@@ -205,6 +222,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		if (!isJupyterNotebook(e) || this.isTelemetryDisabled) {
 			return;
 		}
+
 		await Promise.all(
 			e
 				.getCells()
@@ -224,6 +242,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 		) {
 			return;
 		}
+
 		try {
 			this.processedNotebookCells.set(cell, cell.document.version);
 
@@ -231,6 +250,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 				cell.notebook.notebookType === JupyterNotebookView
 					? "notebook"
 					: "interactive";
+
 			await this.sendTelemetryForImports(
 				this.getDocumentLines(cell.document),
 				resourceType,
@@ -253,6 +273,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 				if (!s.includes("import") && !s.includes("from")) {
 					continue;
 				}
+
 				const match = s ? ImportRegEx.exec(s) : null;
 
 				if (match !== null && match.groups !== undefined) {
@@ -273,6 +294,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 			// Don't care about failures since this is just telemetry.
 			noop();
 		}
+
 		return packageNames;
 	}
 
@@ -288,10 +310,12 @@ export class ImportTracker implements IExtensionSyncActivationService {
 				if (this.sentMatches.has(key)) {
 					return;
 				}
+
 				this.sentMatches.add(key);
 				// Hash the package name so that we will never accidentally see a
 				// user's private package name.
 				const hash = await getTelemetrySafeHashedString(packageName);
+
 				sendTelemetryEvent(EventName.HASHED_PACKAGE_NAME, undefined, {
 					hashedNamev2: hash,
 					resourceType,

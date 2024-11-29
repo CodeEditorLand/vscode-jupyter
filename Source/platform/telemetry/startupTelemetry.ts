@@ -10,9 +10,13 @@ import { EventName } from "./constants";
 
 export const startupDurations: {
 	workspaceFolderCount: number;
+
 	totalActivateTime: number;
+
 	codeLoadingTime: number;
+
 	startActivateTime: number;
+
 	endActivateTime: number;
 } = {
 	codeLoadingTime: 0,
@@ -25,9 +29,13 @@ export const startupDurations: {
 export function sendStartupTelemetry(
 	durations: {
 		workspaceFolderCount: number;
+
 		totalActivateTime: number;
+
 		codeLoadingTime: number;
+
 		startActivateTime: number;
+
 		endActivateTime: number;
 	},
 	stopWatch: {
@@ -40,9 +48,13 @@ export function sendStartupTelemetry(
 
 	try {
 		durations.endActivateTime = stopWatch.elapsedTime;
+
 		durations.totalActivateTime = stopWatch.elapsedTime;
+
 		Object.assign(startupDurations, durations);
+
 		updateActivationTelemetryProps(durations);
+
 		sendTelemetryEvent(EventName.EXTENSION_LOAD, durations);
 	} catch (ex) {
 		logger.error("sendStartupTelemetry() failed.", ex);
@@ -53,8 +65,11 @@ export function sendErrorTelemetry(
 	ex: Error,
 	durations: {
 		workspaceFolderCount: number;
+
 		totalActivateTime: number;
+
 		endActivateTime: number;
+
 		codeLoadingTime: number;
 	},
 	stopWatch: {
@@ -64,10 +79,15 @@ export function sendErrorTelemetry(
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let props: any = {};
+
 		durations.endActivateTime = stopWatch.elapsedTime;
+
 		durations.totalActivateTime = stopWatch.elapsedTime;
+
 		Object.assign(startupDurations, durations);
+
 		updateActivationTelemetryProps(durations);
+
 		sendTelemetryEvent(EventName.EXTENSION_LOAD, durations, props, ex);
 	} catch (exc2) {
 		logger.error("sendErrorTelemetry() failed.", exc2);
@@ -84,5 +104,6 @@ function updateActivationTelemetryProps(durations: {
 	// be able to partially populate as much as possible instead
 	// (through granular try-catch statements).
 	const workspaceFolderCount = workspace.workspaceFolders?.length ?? 0;
+
 	durations.workspaceFolderCount = workspaceFolderCount;
 }

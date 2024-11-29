@@ -134,6 +134,7 @@ export interface ICommandNameArgumentTypeMapping {
 					ranges: { start: number; end: number }[];
 
 					document?: Uri;
+
 					autoReveal?: boolean;
 				},
 		  ]; // TODO update this
@@ -153,7 +154,9 @@ export interface ICommandNameArgumentTypeMapping {
 				// Open a specific notebook with a specific kernel.
 				| {
 						notebookEditor: NotebookEditor;
+
 						id: string;
+
 						extension: string;
 				  },
 		  ]
@@ -173,6 +176,7 @@ export interface ICommandNameArgumentTypeMapping {
 			ranges: { start: number; end: number }[];
 
 			document?: Uri;
+
 			autoReveal?: boolean;
 		},
 	];
@@ -181,6 +185,7 @@ export interface ICommandNameArgumentTypeMapping {
 			ranges: { start: number; end: number }[];
 
 			document?: Uri;
+
 			autoReveal?: boolean;
 		},
 	];

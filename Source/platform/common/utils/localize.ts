@@ -580,23 +580,28 @@ export namespace DataScience {
 			if (numberOfConnections === 0) {
 				return "";
 			}
+
 			if (numberOfConnections === 1) {
 				return l10n.t("1 connection");
 			}
+
 			return l10n.t("{0} connections", numberOfConnections.toString());
 		}
+
 		if (numberOfConnections === 0) {
 			return l10n.t(
 				"Last activity {0}",
 				fromNow(time, true, false, false),
 			);
 		}
+
 		if (numberOfConnections === 1) {
 			return l10n.t(
 				"Last activity {0}, 1 connection",
 				fromNow(time, true, false, false),
 			);
 		}
+
 		return l10n.t(
 			"Last activity {0}, {1} connections",
 			fromNow(time, true, false, false),
@@ -755,6 +760,7 @@ export namespace DataScience {
 	export const jupyterGetVariablesBadResults = l10n.t(
 		"Failed to fetch variable info from the Jupyter Server.",
 	);
+
 	l10n.t(
 		"Failure to create an 'Interactive' window. Try reinstalling the Python Extension.",
 	);

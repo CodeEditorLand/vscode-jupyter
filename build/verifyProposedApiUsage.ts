@@ -47,11 +47,13 @@ async function verifyProposedApiUsage() {
 
 		return;
 	}
+
 	const modifiedPackageJson = getModifiedPackageJson();
 
 	if (!modifiedPackageJson) {
 		return;
 	}
+
 	const currentPackageJson = await getPackageJsonInMainBranch("main");
 
 	const currentApiProposals = new Set(
@@ -71,6 +73,7 @@ async function verifyProposedApiUsage() {
 	if (!newApiProposalsAdded.length) {
 		return;
 	}
+
 	if (
 		newApiProposalsAdded.length &&
 		currentEngineVersion !== modifiedEngineVersion
@@ -79,6 +82,7 @@ async function verifyProposedApiUsage() {
 	}
 
 	error(`Solution 1: Update engines.vscode package.json.`);
+
 	error(
 		`Solution 2: Add the comment '${commentThatWillIgnoreVerification}' to the PR body & push a new commit.`,
 	);

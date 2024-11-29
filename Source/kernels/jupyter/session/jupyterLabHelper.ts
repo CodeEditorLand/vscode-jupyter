@@ -34,44 +34,58 @@ import { IJupyterKernel } from "../types";
 
 export class JupyterLabHelper extends ObservableDisposable {
 	public sessionManager: SessionManager;
+
 	public kernelSpecManager: KernelSpecManager;
+
 	public kernelManager: KernelManager;
+
 	public contentsManager: ContentsManager;
+
 	private _jupyterlab?: typeof import("@jupyterlab/services");
+
 	private get jupyterlab(): typeof import("@jupyterlab/services") {
 		if (!this._jupyterlab) {
 			// eslint-disable-next-line @typescript-eslint/no-require-imports
 			this._jupyterlab = require("@jupyterlab/services");
 		}
+
 		return this._jupyterlab!;
 	}
+
 	private constructor(
 		private readonly serverSettings: ServerConnection.ISettings,
 	) {
 		super();
+
 		this.kernelSpecManager = new this.jupyterlab.KernelSpecManager({
 			serverSettings: this.serverSettings,
 		});
+
 		this.kernelManager = new this.jupyterlab.KernelManager({
 			serverSettings: this.serverSettings,
 		});
+
 		this.sessionManager = new this.jupyterlab.SessionManager({
 			serverSettings: this.serverSettings,
 			kernelManager: this.kernelManager,
 		});
+
 		this.contentsManager = new this.jupyterlab.ContentsManager({
 			serverSettings: this.serverSettings,
 		});
 	}
+
 	public static create(serverSettings: ServerConnection.ISettings) {
 		return new JupyterLabHelper(serverSettings);
 	}
 
 	private _isDisposing = false;
+
 	public override dispose() {
 		if (this.isDisposed || this._isDisposing) {
 			return;
 		}
+
 		this._isDisposing = true;
 		(async () => {
 			logger.trace(`Disposing Jupyter Lab Helper`);
@@ -79,8 +93,10 @@ export class JupyterLabHelper extends ObservableDisposable {
 			try {
 				if (this.contentsManager) {
 					logger.trace("SessionManager - dispose contents manager");
+
 					this.contentsManager.dispose();
 				}
+
 				if (this.sessionManager && !this.sessionManager.isDisposed) {
 					logger.trace(
 						"ShutdownSessionAndConnection - dispose session manager",
@@ -91,9 +107,11 @@ export class JupyterLabHelper extends ObservableDisposable {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					this.sessionManager.dispose(); // Note, shutting down all will kill all kernels on the same connection. We don't want that.
 				}
+
 				if (!this.kernelManager?.isDisposed) {
 					this.kernelManager?.dispose();
 				}
+
 				if (!this.kernelSpecManager?.isDisposed) {
 					this.kernelSpecManager?.dispose();
 				}
@@ -111,6 +129,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 		if (!this.sessionManager) {
 			return [];
 		}
+
 		await raceTimeout(10_000, this.sessionManager.ready).catch(noop);
 		// Not refreshing will result in `running` returning an empty iterator.
 		await this.sessionManager.refreshRunning();
@@ -123,6 +142,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 
 		while (session) {
 			sessions.push(session);
+
 			session = iterator.next().value;
 		}
 
@@ -158,6 +178,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 				if (dup.has(item.id)) {
 					return false;
 				}
+
 				dup.add(item.id);
 
 				return true;
@@ -172,6 +193,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 		) {
 			throw new SessionDisposedError();
 		}
+
 		try {
 			const stopWatch = new StopWatch();
 
@@ -183,6 +205,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 						this.kernelSpecManager?.specs?.kernelspecs || {},
 					)}.`,
 				);
+
 				sendTelemetryEvent(
 					Telemetry.JupyterKernelSpecEnumeration,
 					undefined,
@@ -195,6 +218,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 				// back to a default. This may not exist, but it's likely.
 				return [await createInterpreterKernelSpec()];
 			}
+
 			const telemetryProperties = {
 				wasSessionManagerReady: this.sessionManager.isReady,
 				wasSpecsManagerReady: specsManager.isReady,
@@ -217,11 +241,13 @@ export class JupyterLabHelper extends ObservableDisposable {
 
 			// Wait for the session to be ready
 			await raceTimeout(10_000, this.sessionManager.ready);
+
 			telemetryProperties.sessionManagerReady =
 				this.sessionManager.isReady;
 			// Ask the session manager to refresh its list of kernel specs. This might never
 			// come back so only wait for ten seconds.
 			await raceTimeout(10_000, specsManager.refreshSpecs());
+
 			telemetryProperties.specsManagerReady = specsManager.isReady;
 
 			let telemetrySent = false;
@@ -236,7 +262,9 @@ export class JupyterLabHelper extends ObservableDisposable {
 				const promise = createDeferred();
 
 				const resolve = promise.resolve.bind(promise);
+
 				specsManager.specsChanged.connect(resolve);
+
 				disposables.push(
 					new Disposable(() =>
 						specsManager.specsChanged.disconnect(resolve),
@@ -249,11 +277,14 @@ export class JupyterLabHelper extends ObservableDisposable {
 					specsManager.refreshSpecs(),
 					this.sessionManager.ready,
 				]);
+
 				await raceTimeout(10_000, allPromises);
+
 				telemetryProperties.waitedForChangeEvent = true;
 
 				if (!promise.completed) {
 					telemetrySent = true;
+
 					sendTelemetryEvent(
 						Telemetry.JupyterKernelSpecEnumeration,
 						undefined,
@@ -269,6 +300,7 @@ export class JupyterLabHelper extends ObservableDisposable {
 						},
 					);
 				}
+
 				dispose(disposables);
 			}
 
@@ -276,11 +308,13 @@ export class JupyterLabHelper extends ObservableDisposable {
 
 			if (Object.keys(kernelspecs || {}).length) {
 				const specs: IJupyterKernelSpec[] = [];
+
 				Object.entries(kernelspecs).forEach(([_key, value]) => {
 					if (value) {
 						specs.push(new JupyterKernelSpec(value));
 					}
 				});
+
 				sendTelemetryEvent(
 					Telemetry.JupyterKernelSpecEnumeration,
 					{ duration: stopWatch.elapsedTime },

@@ -29,10 +29,14 @@ import { InteractiveCellMetadata } from "../../editor-integration/types";
  */
 export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	private readonly debugLocationTracker?: DebugAdapterTracker;
+
 	private readonly cellToDebugFileSortedInReverseOrderByLineNumber: {
 		debugFilePath: string;
+
 		interactiveWindow: Uri;
+
 		lineOffset: number;
+
 		metadata: InteractiveCellMetadata;
 	}[] = [];
 
@@ -63,6 +67,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			if (this.debugLocationTracker.onWillStartSession) {
 				this.debugLocationTracker.onWillStartSession();
 			}
+
 			this.onDidSendMessage(
 				(msg) => {
 					if (this.debugLocationTracker?.onDidSendMessage) {
@@ -72,6 +77,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 				this,
 				this.disposables,
 			);
+
 			this.onDidEndSession(
 				() => {
 					if (this.debugLocationTracker?.onWillStopSession) {
@@ -97,12 +103,14 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		) {
 			this.debugLocationTracker.onWillReceiveMessage(message);
 		}
+
 		if (
 			message.type === "response" &&
 			this.debugLocationTracker?.onDidSendMessage
 		) {
 			this.debugLocationTracker.onDidSendMessage(message);
 		}
+
 		return super.handleClientMessageAsync(message);
 	}
 
@@ -115,6 +123,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		if (!metadata) {
 			throw new Error("Not an interactive window cell");
 		}
+
 		try {
 			const code = (
 				metadata.generatedCode?.code || cell.document.getText()
@@ -128,6 +137,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			const norm = path.normalize(
 				(response as IDumpCellResponse).sourcePath,
 			);
+
 			this.fileToCell.set(
 				norm,
 				Uri.parse(metadata.interactive.uristring),
@@ -145,6 +155,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 				numberOfStrippedLines =
 					metadata.generatedCode.firstNonBlankLineIndex;
 			}
+
 			this.cellToDebugFileSortedInReverseOrderByLineNumber.push({
 				debugFilePath: norm,
 				interactiveWindow: Uri.parse(metadata.interactive.uristring),
@@ -172,7 +183,9 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	protected override translateDebuggerLocationToRealLocation(
 		location: {
 			source?: DebugProtocol.Source;
+
 			line?: number;
+
 			endLine?: number;
 		},
 		source?: DebugProtocol.Source,
@@ -193,11 +206,13 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		}
 
 		source.name = path.basename(cell.interactiveWindow.path);
+
 		source.path = cell.interactiveWindow.toString();
 
 		if (typeof location?.endLine === "number") {
 			location.endLine = location.endLine + (cell.lineOffset || 0);
 		}
+
 		if (typeof location?.line === "number") {
 			location.line = location.line + (cell.lineOffset || 0);
 		}
@@ -206,12 +221,15 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 	protected override translateRealLocationToDebuggerLocation(
 		location: {
 			source?: DebugProtocol.Source;
+
 			line?: number;
+
 			endLine?: number;
 		},
 		source?: DebugProtocol.Source,
 	) {
 		const startLine = location.line;
+
 		source = location?.source ?? source;
 
 		if (!source || !source.path || typeof startLine !== "number") {
@@ -232,6 +250,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		if (typeof location?.endLine === "number") {
 			location.endLine = location.endLine - (cell.lineOffset || 0);
 		}
+
 		if (typeof location?.line === "number") {
 			location.line = location.line - (cell.lineOffset || 0);
 		}
@@ -243,6 +262,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 		if (request.command === "setBreakpoints") {
 			const args =
 				request.arguments as DebugProtocol.SetBreakpointsArguments;
+
 			delete args.lines; // deprecated, we will only use breakpoints
 			if (
 				args.source.path !==
@@ -263,6 +283,7 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 				if (currentCellBps.length) {
 					const clonedRequest: DebugProtocol.SetBreakpointsRequest =
 						JSON.parse(JSON.stringify(request));
+
 					clonedRequest.arguments.breakpoints = currentCellBps;
 
 					setBreakpointsResponses.push(
@@ -289,7 +310,9 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					cellForBp.metadata.interactive.lineIndex !== currentCellLine
 				) {
 					sendIfNeeded();
+
 					currentCellLine = cellForBp.metadata.interactive.lineIndex;
+
 					currentCellBps = [bp];
 				} else if (cellForBp) {
 					currentCellBps.push(bp);
@@ -303,12 +326,14 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 					);
 				}
 			}
+
 			sendIfNeeded();
 
 			const responses = await Promise.all(setBreakpointsResponses);
 
 			const newResponse: DebugProtocol.SetBreakpointsResponse =
 				JSON.parse(JSON.stringify(responses[0]));
+
 			responses.slice(1).forEach((response) => {
 				newResponse.body.breakpoints =
 					newResponse.body.breakpoints.concat(
@@ -317,8 +342,11 @@ export class KernelDebugAdapter extends KernelDebugAdapterBase {
 			});
 
 			newResponse.command = "setBreakpoints";
+
 			newResponse.type = "response";
+
 			newResponse.success = true;
+
 			newResponse.request_seq = request.seq;
 
 			return newResponse;

@@ -14,7 +14,9 @@ import { IPlotViewer, IPlotViewerProvider } from "./types";
 @injectable()
 export class PlotViewerProvider implements IPlotViewerProvider, IDisposable {
 	private currentViewer: IPlotViewer | undefined;
+
 	private currentViewerClosed: IDisposable | undefined;
+
 	private imageList: string[] = [];
 
 	constructor(
@@ -36,6 +38,7 @@ export class PlotViewerProvider implements IPlotViewerProvider, IDisposable {
 		const imagesToSend = this.currentViewer ? [imageHtml] : this.imageList;
 
 		const viewer = await this.getOrCreate();
+
 		await Promise.all(imagesToSend.map(viewer.addPlot));
 	}
 
@@ -44,11 +47,15 @@ export class PlotViewerProvider implements IPlotViewerProvider, IDisposable {
 		if (!this.currentViewer) {
 			this.currentViewer =
 				this.serviceContainer.get<IPlotViewer>(IPlotViewer);
+
 			this.currentViewerClosed = this.currentViewer.closed(
 				this.closedViewer,
 			);
+
 			this.currentViewer.removed(this.removedPlot);
+
 			sendTelemetryEvent(Telemetry.OpenPlotViewer);
+
 			await this.currentViewer.show();
 		}
 
@@ -59,8 +66,10 @@ export class PlotViewerProvider implements IPlotViewerProvider, IDisposable {
 		if (this.currentViewer) {
 			this.currentViewer = undefined;
 		}
+
 		if (this.currentViewerClosed) {
 			this.currentViewerClosed.dispose();
+
 			this.currentViewerClosed = undefined;
 		}
 	};

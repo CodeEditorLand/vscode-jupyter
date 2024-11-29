@@ -46,6 +46,7 @@ import { JupyterPaths } from "./jupyterPaths.node";
 
 export type KernelSpecFileWithContainingInterpreter = {
 	interpreter?: PythonEnvironment;
+
 	kernelSpecFile: Uri;
 };
 
@@ -58,6 +59,7 @@ export const oldKernelsSpecFolderName = "__old_vscode_kernelspecs";
  */
 export class LocalKernelSpecFinder implements IDisposable {
 	private _oldKernelSpecsFolder?: string;
+
 	private findKernelSpecsInPathCache = new Map<string, Promise<Uri[]>>();
 
 	public get oldKernelSpecsFolder() {
@@ -66,18 +68,22 @@ export class LocalKernelSpecFinder implements IDisposable {
 			this.globalState.get<string>("OLD_KERNEL_SPECS_FOLDER__", "")
 		);
 	}
+
 	private set oldKernelSpecsFolder(value: string) {
 		this._oldKernelSpecsFolder = value;
+
 		this.globalState
 			.update("OLD_KERNEL_SPECS_FOLDER__", value)
 			.then(noop, noop);
 	}
+
 	private cache?: KernelSpecFileWithContainingInterpreter[];
 	// Store any json file that we have loaded from disk before
 	private pathToKernelSpec = new Map<
 		string,
 		Promise<IJupyterKernelSpec | undefined>
 	>();
+
 	private readonly disposables: IDisposable[] = [];
 
 	constructor(
@@ -91,10 +97,13 @@ export class LocalKernelSpecFinder implements IDisposable {
 			);
 		}
 	}
+
 	public clearCache() {
 		this.pathToKernelSpec.clear();
+
 		this.findKernelSpecsInPathCache.clear();
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
@@ -110,6 +119,7 @@ export class LocalKernelSpecFinder implements IDisposable {
 		if (specPath.fsPath.includes(oldKernelsSpecFolderName)) {
 			return;
 		}
+
 		const key = getComparisonKey(specPath);
 		// If we have not already loaded this kernel spec, then load it
 		if (!this.pathToKernelSpec.has(key)) {
@@ -134,6 +144,7 @@ export class LocalKernelSpecFinder implements IDisposable {
 				if (kernelSpec && !shouldDeleteKernelSpec) {
 					return kernelSpec;
 				}
+
 				if (kernelSpec?.specFile && shouldDeleteKernelSpec) {
 					// If this kernelSpec was registered by us and is in the global kernels folder,
 					// then remove it.
@@ -144,13 +155,16 @@ export class LocalKernelSpecFinder implements IDisposable {
 				if (this.pathToKernelSpec.get(key) === promise) {
 					this.pathToKernelSpec.delete(key);
 				}
+
 				this.cache = this.cache?.filter((itemPath) =>
 					uriPath.isEqual(itemPath.kernelSpecFile, specPath),
 				);
 
 				return undefined;
 			});
+
 			this.pathToKernelSpec.set(key, promise);
+
 			promise
 				.finally(() => {
 					if (
@@ -176,6 +190,7 @@ export class LocalKernelSpecFinder implements IDisposable {
 			path.dirname(path.dirname(kernelSpecFile)),
 			oldKernelsSpecFolderName,
 		);
+
 		this.oldKernelSpecsFolder = destinationFolder;
 
 		const destinationFile = path.join(
@@ -183,11 +198,15 @@ export class LocalKernelSpecFinder implements IDisposable {
 			kernelSpecFolderName,
 			path.basename(kernelSpecFile),
 		);
+
 		await this.fs.createDirectory(Uri.file(path.dirname(destinationFile)));
+
 		await this.fs
 			.copy(Uri.file(kernelSpecFile), Uri.file(destinationFile))
 			.catch(noop);
+
 		await this.fs.delete(Uri.file(kernelSpecFile));
+
 		logger.trace(
 			`Old KernelSpec '${kernelSpecFile}' deleted and backup stored in ${destinationFolder}`,
 		);
@@ -214,11 +233,13 @@ export class LocalKernelSpecFinder implements IDisposable {
 		if (previousPromise) {
 			return previousPromise;
 		}
+
 		const promise = (async () => {
 			if (await this.fs.exists(kernelSearchPath)) {
 				if (cancelToken.isCancellationRequested) {
 					return [];
 				}
+
 				const files = await this.fs.searchLocal(
 					`**/kernel.json`,
 					kernelSearchPath.fsPath,
@@ -232,6 +253,7 @@ export class LocalKernelSpecFinder implements IDisposable {
 				return [];
 			}
 		})();
+
 		this.findKernelSpecsInPathCache.set(cacheKey, promise);
 
 		const disposable = cancelToken.onCancellationRequested(() => {
@@ -239,6 +261,7 @@ export class LocalKernelSpecFinder implements IDisposable {
 				this.findKernelSpecsInPathCache.delete(cacheKey);
 			}
 		});
+
 		promise
 			.finally(() => {
 				if (
@@ -247,13 +270,16 @@ export class LocalKernelSpecFinder implements IDisposable {
 				) {
 					this.findKernelSpecsInPathCache.delete(cacheKey);
 				}
+
 				disposable.dispose();
 			})
 			.catch(noop);
+
 		promise.catch((ex) => {
 			if (this.findKernelSpecsInPathCache.get(cacheKey) === promise) {
 				this.findKernelSpecsInPathCache.delete(cacheKey);
 			}
+
 			logger.warn(
 				`Failed to search for kernels in ${getDisplayPath(kernelSearchPath)} with an error`,
 				ex,
@@ -269,9 +295,13 @@ export interface ILocalKernelFinder<
 		| PythonKernelConnectionMetadata,
 > {
 	readonly status: "discovering" | "idle";
+
 	onDidChangeStatus: Event<void>;
+
 	onDidChangeKernels: Event<void>;
+
 	refresh(): Promise<void>;
+
 	readonly kernels: T[];
 }
 /**
@@ -287,21 +317,31 @@ export abstract class LocalKernelSpecFinderBase<
 	protected readonly disposables: IDisposable[] = [];
 
 	private _status: "discovering" | "idle" = "idle";
+
 	public get status() {
 		return this._status;
 	}
+
 	private set status(value: typeof this._status) {
 		if (this._status === value) {
 			return;
 		}
+
 		this._status = value;
+
 		this._onDidChangeStatus.fire();
 	}
+
 	protected readonly promiseMonitor = new PromiseMonitor();
+
 	private readonly _onDidChangeStatus = new EventEmitter<void>();
+
 	public readonly onDidChangeStatus = this._onDidChangeStatus.event;
+
 	protected readonly _onDidChangeKernels = new EventEmitter<void>();
+
 	public readonly onDidChangeKernels = this._onDidChangeKernels.event;
+
 	protected readonly kernelSpecFinder: LocalKernelSpecFinder;
 
 	constructor(
@@ -313,27 +353,36 @@ export abstract class LocalKernelSpecFinderBase<
 		protected readonly jupyterPaths: JupyterPaths,
 	) {
 		disposables.push(this);
+
 		this.disposables.push(this.promiseMonitor);
+
 		this.promiseMonitor.onStateChange(() => {
 			this.status = this.promiseMonitor.isComplete
 				? "idle"
 				: "discovering";
 		});
+
 		this.kernelSpecFinder = new LocalKernelSpecFinder(
 			fs,
 			memento,
 			jupyterPaths,
 		);
+
 		this.disposables.push(this.kernelSpecFinder);
+
 		this.disposables.push(
 			new Disposable(() => dispose(Array.from(this.timeouts.values()))),
 		);
 	}
+
 	public clearCache() {
 		this.kernelSpecFinder.clearCache();
 	}
+
 	public abstract dispose(): void | undefined;
+
 	abstract refresh(): Promise<void>;
+
 	abstract get kernels(): T[];
 
 	protected async listKernelsFirstTimeFromMemento(
@@ -373,6 +422,7 @@ export abstract class LocalKernelSpecFinderBase<
 
 			// Validate
 			const validValues: T[] = [];
+
 			await Promise.all(
 				kernels.map(async (item) => {
 					if (await this.isValidCachedKernel(item)) {
@@ -388,7 +438,9 @@ export abstract class LocalKernelSpecFinderBase<
 
 		return promise;
 	}
+
 	private timeouts = new Map<string, IDisposable>();
+
 	protected writeToMementoCache(values: T[], cacheKey: string) {
 		this.timeouts.get(cacheKey)?.dispose();
 		// This can get called very quickly and very often.
@@ -401,10 +453,12 @@ export abstract class LocalKernelSpecFinderBase<
 				}),
 			);
 		}, 500);
+
 		this.timeouts.set(cacheKey, {
 			dispose: () => once(clearTimeout)(timer),
 		});
 	}
+
 	protected async isValidCachedKernel(
 		kernel: LocalKernelConnectionMetadata,
 	): Promise<boolean> {
@@ -441,6 +495,7 @@ export async function loadKernelSpec(
 	if (specPath.fsPath.includes(oldKernelsSpecFolderName)) {
 		return;
 	}
+
 	let kernelJson: ReadWrite<IJupyterKernelSpec>;
 
 	try {
@@ -449,12 +504,14 @@ export async function loadKernelSpec(
 		//         interpreter?.uri ? `for ${getDisplayPath(interpreter.uri)}` : ''
 		//     }`
 		// );
+
 		kernelJson = JSON.parse(await fs.readFile(specPath));
 	} catch (ex) {
 		logger.error(`Failed to parse kernelspec ${specPath}`, ex);
 
 		return;
 	}
+
 	if (cancelToken.isCancellationRequested) {
 		return;
 	}
@@ -463,6 +520,7 @@ export async function loadKernelSpec(
 	// from an interpreter location (like a conda environment). Modify the name to make sure it fits
 	// the kernel instead
 	// kernelJson.originalName = kernelJson.name;
+
 	kernelJson.name = interpreter
 		? await getInterpreterKernelSpecName(interpreter)
 		: kernelJson.name;
@@ -502,20 +560,26 @@ export async function loadKernelSpec(
 			kernelJson.name = `${kernelJson.name}.${argv.join("#")}`;
 		}
 	}
+
 	const metadata =
 		(kernelJson.metadata as ReadWrite<typeof kernelJson.metadata>) || {};
+
 	metadata.vscode = metadata.vscode || {};
 
 	if (!metadata.vscode.originalSpecFile) {
 		metadata.vscode.originalSpecFile = specPath.fsPath;
 	}
+
 	if (!metadata.vscode.originalDisplayName) {
 		metadata.vscode.originalDisplayName = kernelJson.display_name;
 	}
+
 	if (metadata.originalSpecFile) {
 		metadata.vscode.originalSpecFile = metadata.originalSpecFile;
+
 		delete metadata.originalSpecFile;
 	}
+
 	kernelJson.metadata = metadata;
 
 	// Some registered kernel specs do not have a name, in this case use the last part of the path

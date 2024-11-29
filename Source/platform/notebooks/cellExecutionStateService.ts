@@ -65,6 +65,7 @@ export namespace notebookCellExecutions {
 				if (e.notebook !== cell.notebook) {
 					return;
 				}
+
 				const currentCellChange = e.cellChanges.find(
 					(c) => c.cell === cell,
 				);
@@ -74,6 +75,7 @@ export namespace notebookCellExecutions {
 						?.executionOrder === executionOrder
 				) {
 					disposable.dispose();
+
 					eventEmitter.fire({
 						cell,
 						state: NotebookCellExecutionState.Idle,

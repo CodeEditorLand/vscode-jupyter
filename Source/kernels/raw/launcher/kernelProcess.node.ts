@@ -101,14 +101,17 @@ export class TcpPortUsage {
 		timeOutMs: number,
 	): Promise<void> {
 		const tcpPortUsed = (await import("tcp-port-used")).default;
+
 		await tcpPortUsed.waitUntilFree(port, retryTimeMs, timeOutMs);
 	}
+
 	public static async waitUntilUsed(
 		port: number,
 		retryTimeMs: number,
 		timeOutMs: number,
 	): Promise<void> {
 		const tcpPortUsed = (await import("tcp-port-used")).default;
+
 		await tcpPortUsed.waitUntilUsed(port, retryTimeMs, timeOutMs);
 	}
 }
@@ -119,25 +122,33 @@ export class KernelProcess
 	implements IKernelProcess
 {
 	private _pid?: number;
+
 	private _disposingPromise?: Promise<void>;
+
 	public get pid() {
 		return this._pid;
 	}
+
 	public get exited(): Event<{
 		exitCode?: number;
+
 		reason?: string;
+
 		stderr: string;
 	}> {
 		return this.exitEvent.event;
 	}
+
 	public get kernelConnectionMetadata(): Readonly<
 		LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata
 	> {
 		return this._kernelConnectionMetadata;
 	}
+
 	public get connection(): Readonly<IKernelConnection> {
 		return this._connection;
 	}
+
 	private get isPythonKernel(): boolean {
 		return (
 			isPythonKernelConnection(this.kernelConnectionMetadata) &&
@@ -146,6 +157,7 @@ export class KernelProcess
 			)
 		);
 	}
+
 	public get canInterrupt() {
 		if (
 			this._kernelConnectionMetadata.kernelSpec.interrupt_mode ===
@@ -153,19 +165,30 @@ export class KernelProcess
 		) {
 			return false;
 		}
+
 		return true;
 	}
+
 	private _process?: ChildProcess;
+
 	private exitEvent = new EventEmitter<{
 		exitCode?: number;
+
 		reason?: string;
+
 		stderr: string;
 	}>();
+
 	private launchedOnce?: boolean;
+
 	private connectionFile?: Uri;
+
 	private _launchKernelSpec?: ReadWrite<IJupyterKernelSpec>;
+
 	private interrupter?: Interrupter;
+
 	private exitEventFired = false;
+
 	private readonly _kernelConnectionMetadata: Readonly<
 		LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata
 	>;
@@ -188,8 +211,10 @@ export class KernelProcess
 		private readonly platform: IPlatformService,
 	) {
 		super();
+
 		this._kernelConnectionMetadata = kernelConnectionMetadata;
 	}
+
 	public async interrupt(): Promise<void> {
 		if (!this.canInterrupt) {
 			throw new Error(
@@ -230,6 +255,7 @@ export class KernelProcess
 		if (this.launchedOnce) {
 			throw new Error("Kernel has already been launched.");
 		}
+
 		this.launchedOnce = true;
 
 		const tracker = getNotebookTelemetryTracker(this.resource);
@@ -237,7 +263,9 @@ export class KernelProcess
 		const connectionTracker = tracker?.updateConnection();
 		// Update our connection arguments in the kernel spec
 		await this.updateConnectionArgs();
+
 		connectionTracker?.stop();
+
 		Cancellation.throwIfCanceled(cancelToken);
 
 		const spawnTracker = tracker?.spawn();
@@ -246,6 +274,7 @@ export class KernelProcess
 			workingDirectory,
 			cancelToken,
 		);
+
 		spawnTracker?.stop();
 
 		const proc = exeObs.proc;
@@ -253,6 +282,7 @@ export class KernelProcess
 		if (cancelToken.isCancellationRequested) {
 			throw new CancellationError();
 		}
+
 		logger.debug(`Kernel process ${proc?.pid}.`);
 
 		let stderr = "";
@@ -260,10 +290,12 @@ export class KernelProcess
 		let providedExitCode: number | null;
 
 		const deferred = createDeferred();
+
 		deferred.promise.catch(noop);
 
 		if (proc) {
 			const pid = proc.pid;
+
 			proc.on("exit", (exitCode) => {
 				exitCode = exitCode || providedExitCode;
 
@@ -274,6 +306,7 @@ export class KernelProcess
 
 					return;
 				}
+
 				logger.debug(
 					`KernelProcess Exited ${pid}, Exit Code - ${exitCode}`,
 					stderr,
@@ -288,10 +321,13 @@ export class KernelProcess
 							) || stderr,
 						stderr,
 					});
+
 					this.exitEventFired = true;
 				}
+
 				if (!cancelToken.isCancellationRequested) {
 					logger.ci(`KernelProcessExitedError raised`, stderr);
+
 					deferred.reject(
 						new KernelProcessExitedError(
 							exitCode || -1,
@@ -303,6 +339,7 @@ export class KernelProcess
 			});
 
 			let sawKernelConnectionFile = false;
+
 			proc.stdout?.on("data", (data: Buffer | string) => {
 				let output = (data || "").toString();
 				// Strip unwanted stuff from the output, else it just chews up unnecessary space.
@@ -316,11 +353,13 @@ export class KernelProcess
 						output = output.trimStart();
 					}
 				}
+
 				if (output.includes(kernelOutputWithConnectionFile)) {
 					sawKernelConnectionFile = true;
 				}
 
 				logger.debug(`Kernel output ${pid}: ${output}`);
+
 				this.sendToOutput(output);
 			});
 
@@ -329,6 +368,7 @@ export class KernelProcess
 				// Hence log only using traceLevel = verbose.
 				// But only useful if daemon doesn't start for any reason.
 				const output = stripUnwantedMessages((data || "").toString());
+
 				stderr += output;
 
 				if (
@@ -347,6 +387,7 @@ export class KernelProcess
 					)
 				) {
 					logger.debug(`KernelProcess error ${pid}: ${output}`);
+
 					this.sendToOutput(output);
 				}
 			});
@@ -358,7 +399,9 @@ export class KernelProcess
 
 				return;
 			}
+
 			logger.error("Kernel died", error, stderr);
+
 			deferred.reject(error);
 		});
 
@@ -371,6 +414,7 @@ export class KernelProcess
 			if (deferred.rejected) {
 				await deferred.promise;
 			}
+
 			const doNotWaitForZmqPortsToGetUsed = ServiceContainer.instance
 				.get<IExperimentService>(IExperimentService)
 				.inExperiment(Experiments.DoNotWaitForZmqPortsToBeUsed);
@@ -424,6 +468,7 @@ export class KernelProcess
 							);
 						}
 					});
+
 			await raceCancellationError(
 				cancelToken,
 				portsUsed,
@@ -466,6 +511,7 @@ export class KernelProcess
 				const errorMessage =
 					getErrorMessageFromPythonTraceback(stdErrToLog) ||
 					stdErrToLog.substring(0, 100);
+
 				logger.ci(
 					`KernelDiedError raised`,
 					errorMessage,
@@ -490,11 +536,15 @@ export class KernelProcess
 		if (this._disposingPromise) {
 			return;
 		}
+
 		if (this.isDisposed) {
 			return;
 		}
+
 		const pid = this._process?.pid;
+
 		logger.debug(`Dispose Kernel process ${pid}.`);
+
 		this._disposingPromise = (async () => {
 			await raceTimeout(
 				1_000, // Wait for a max of 1s, we don't want to delay killing the kernel process.
@@ -503,6 +553,7 @@ export class KernelProcess
 
 			try {
 				this.interrupter?.dispose();
+
 				this._process?.kill(); // NOSONAR
 				if (!this.exitEventFired) {
 					this.exitEvent.fire({ stderr: "" });
@@ -510,6 +561,7 @@ export class KernelProcess
 			} catch (ex) {
 				logger.error(`Error disposing kernel process ${pid}`, ex);
 			}
+
 			if (this.connectionFile) {
 				await this.fileSystem
 					.delete(this.connectionFile)
@@ -520,8 +572,10 @@ export class KernelProcess
 						),
 					);
 			}
+
 			logger.debug(`Disposed Kernel process ${pid}.`);
 		})();
+
 		void this._disposingPromise.finally(() => super.dispose()).catch(noop);
 	}
 
@@ -532,11 +586,13 @@ export class KernelProcess
 		if (!pid || !ProcessService.isAlive(pid)) {
 			return;
 		}
+
 		try {
 			if (this.platform.isWindows) {
 				const windir = process.env["WINDIR"] || "C:\\Windows";
 
 				const TASK_KILL = path.join(windir, "System32", "taskkill.exe");
+
 				await new ProcessService().exec(TASK_KILL, [
 					"/F",
 					"/T",
@@ -556,6 +612,7 @@ export class KernelProcess
 								ProcessService.kill(procId),
 							);
 						}
+
 						resolve();
 					});
 				});
@@ -581,6 +638,7 @@ export class KernelProcess
 		if (!kernelSpec) {
 			throw new Error("KernelSpec cannot be empty in KernelProcess.ts");
 		}
+
 		if (!Array.isArray(kernelSpec.argv)) {
 			logger.error("KernelSpec.argv in KernelProcess is undefined");
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -592,6 +650,7 @@ export class KernelProcess
 				argv: [...kernelSpec.argv],
 			};
 		}
+
 		return this._launchKernelSpec!;
 	}
 
@@ -624,6 +683,7 @@ export class KernelProcess
 		const runtimeDir = await this.jupyterPaths.getRuntimeDir();
 
 		const connectionFileName = `kernel-v3${crypto.randomBytes(20).toString("hex")}.json`;
+
 		this.connectionFile = Uri.joinPath(runtimeDir, connectionFileName);
 
 		// Python kernels are special. Handle the extra arguments.
@@ -635,6 +695,7 @@ export class KernelProcess
 			this.launchKernelSpec.argv.push(
 				...this.addPythonConnectionArgs(this.connectionFile),
 			);
+
 			await this.fileSystem.writeFile(
 				this.connectionFile,
 				JSON.stringify(this._connection),
@@ -705,6 +766,7 @@ export class KernelProcess
 		const connectionFileValue = connectionFile.fsPath.includes(" ")
 			? `"${connectionFile.fsPath}"` // Quoted for spaces in file paths.
 			: connectionFile.fsPath;
+
 		newConnectionArgs.push(`--f=${connectionFileValue}`);
 
 		return newConnectionArgs;
@@ -715,6 +777,7 @@ export class KernelProcess
 		@ignoreLogging() cancelToken: CancellationToken,
 	) {
 		let exeObs: ObservableExecutionResult<string>;
+
 		logger.debug(
 			`Launching kernel ${this.kernelConnectionMetadata.id} for ${getDisplayPath(
 				this.resource,
@@ -775,6 +838,7 @@ export class KernelProcess
 
 					// See the code ProcessPollingWindows inside of ipykernel for it listening to this event handle.
 					env.JPY_INTERRUPT_EVENT = `${handle}`;
+
 					logger.ci(
 						`Got interrupt handle kernel id ${handle} for interpreter ${this._kernelConnectionMetadata.interpreter.id}`,
 					);
@@ -785,6 +849,7 @@ export class KernelProcess
 					);
 				}
 			}
+
 			Cancellation.throwIfCanceled(cancelToken);
 
 			// The kernelspec argv could be something like [python, main.py, --something, --something-else, -f,{connection_file}]
@@ -792,15 +857,18 @@ export class KernelProcess
 			if (this.jupyterSettings.enablePythonKernelLogging) {
 				args.push("--debug");
 			}
+
 			exeObs = executionService.execObservable(args, {
 				cwd: wdExists ? workingDirectory : process.cwd(),
 				env,
 			});
+
 			Cancellation.throwIfCanceled(cancelToken);
 		} else {
 			// If we are not python just use the ProcessExecutionFactory
 			// First part of argument is always the executable.
 			const executable = this.launchKernelSpec.argv[0];
+
 			logger.info(
 				`Launching Raw Kernel ${this.launchKernelSpec.display_name} # ${executable}`,
 			);
@@ -818,9 +886,11 @@ export class KernelProcess
 					cancelToken,
 				),
 			]);
+
 			Cancellation.throwIfCanceled(cancelToken);
 			// The first argument is sliced because it is the executable command.
 			const args = this.launchKernelSpec.argv.slice(1);
+
 			exeObs = executionService.execObservable(executable, args, {
 				env,
 				cwd: workingDirectory,
@@ -830,7 +900,9 @@ export class KernelProcess
 		if (!exeObs.proc) {
 			throw new Error("KernelProcess failed to launch");
 		}
+
 		this._process = exeObs.proc;
+
 		this._pid = exeObs.proc.pid;
 
 		return exeObs;
@@ -844,6 +916,7 @@ export class KernelProcess
 					this.resource,
 				);
 		}
+
 		return this.interrupter.handle;
 	}
 }
@@ -892,5 +965,6 @@ function stripUnwantedMessages(output: string) {
 			.join(os.EOL)
 			.trimStart();
 	}
+
 	return output;
 }

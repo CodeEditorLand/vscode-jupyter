@@ -34,6 +34,7 @@ export class Activation implements IExtensionSyncActivationService {
 		@inject(IPythonExtensionChecker)
 		private readonly extensionChecker: IPythonExtensionChecker,
 	) {}
+
 	public activate() {
 		this.disposables.push(
 			workspace.onDidOpenNotebookDocument(
@@ -41,6 +42,7 @@ export class Activation implements IExtensionSyncActivationService {
 				this,
 			),
 		);
+
 		this.disposables.push(
 			this.jupyterInterpreterService.onDidChangeInterpreter(
 				this.onDidChangeInterpreter,
@@ -53,7 +55,9 @@ export class Activation implements IExtensionSyncActivationService {
 		if (!isJupyterNotebook(e)) {
 			return;
 		}
+
 		this.notebookOpened = true;
+
 		sendTelemetryEvent(Telemetry.OpenNotebookAll, getNotebookFormat(e));
 
 		if (

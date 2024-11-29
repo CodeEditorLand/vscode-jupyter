@@ -76,5 +76,6 @@ export function getNormalizedInterpreterPath(
 			? Uri.file(fsPath.replace("/bin/python", "/python"))
 			: Uri.file(fsPath);
 	}
+
 	return Uri.file(fsPath);
 }

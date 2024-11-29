@@ -36,9 +36,13 @@ export class HoverProvider
 	implements IExtensionSyncActivationService, vscode.HoverProvider
 {
 	private runFiles = new Set<string>();
+
 	private hoverProviderRegistration: vscode.Disposable | undefined;
+
 	private stopWatch = new StopWatch();
+
 	private delayer = new Delayer<void>(300);
+
 	private onDidChangeNotebookCellExecutionStateHandler: vscode.Disposable;
 
 	constructor(
@@ -54,6 +58,7 @@ export class HoverProvider
 		@inject(IReplNotebookTrackerService)
 		private readonly replTracker: IReplNotebookTrackerService,
 	) {}
+
 	public activate() {
 		this.onDidChangeNotebookCellExecutionStateHandler =
 			notebookCellExecutions.onDidChangeNotebookCellExecutionState(
@@ -65,20 +70,24 @@ export class HoverProvider
 						.catch(noop),
 				this,
 			);
+
 		this.kernelProvider.onDidRestartKernel(
 			() => this.runFiles.clear(),
 			this,
 			this.disposables,
 		);
 	}
+
 	public dispose() {
 		this.delayer.dispose();
+
 		this.onDidChangeNotebookCellExecutionStateHandler.dispose();
 
 		if (this.hoverProviderRegistration) {
 			this.hoverProviderRegistration.dispose();
 		}
 	}
+
 	private async onDidChangeNotebookCellExecutionState(
 		e: NotebookCellExecutionStateChangeEvent,
 	): Promise<void> {
@@ -86,6 +95,7 @@ export class HoverProvider
 			if (this.replTracker.isForReplEditor(e.cell.notebook)) {
 				return;
 			}
+
 			const size = this.runFiles.size;
 
 			const metadata = getInteractiveCellMetadata(e.cell);
@@ -93,6 +103,7 @@ export class HoverProvider
 			if (metadata !== undefined) {
 				this.runFiles.add(metadata.interactive.uristring);
 			}
+
 			if (size !== this.runFiles.size) {
 				this.initializeHoverProvider();
 				// Once we have created the hover provider, no need to listen to this event anymore
@@ -116,6 +127,7 @@ export class HoverProvider
 			300,
 			this.getVariableHover(document, position, token),
 		);
+
 		sendTelemetryEvent(
 			Telemetry.InteractiveFileTooltipsPerf,
 			{ duration: this.stopWatch.elapsedTime },
@@ -184,6 +196,7 @@ export class HoverProvider
 				}
 			}
 		}
+
 		return;
 	}
 
@@ -196,7 +209,9 @@ export class HoverProvider
 		if (!notebookUri) {
 			return [];
 		}
+
 		const kernels = new Set<IKernel>();
+
 		vscode.workspace.notebookDocuments
 			.filter((item) => notebookUri?.toString() === item.uri.toString())
 			.forEach((item) => {

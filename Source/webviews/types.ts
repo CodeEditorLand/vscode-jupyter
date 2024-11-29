@@ -17,6 +17,7 @@ type BaseDataWithPayload<T> = {
 	 * whether this is a message that needs to be sent out to extension (from reducer).
 	 */
 	messageDirection?: "incoming" | "outgoing";
+
 	data: T;
 };
 

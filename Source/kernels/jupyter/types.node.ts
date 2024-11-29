@@ -14,6 +14,7 @@ import { JupyterServerInfo } from "./types";
 
 export interface IJupyterCommand {
 	interpreter(): Promise<PythonEnvironment | undefined>;
+
 	exec(
 		args: string[],
 		options: SpawnOptions,

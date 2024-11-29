@@ -26,16 +26,20 @@ export class RawJupyterSessionWrapper
 	implements IRawKernelSession
 {
 	private terminatingStatus?: KernelMessage.Status;
+
 	public get status(): KernelMessage.Status {
 		if (this.terminatingStatus && !this.isDisposed) {
 			return this.terminatingStatus;
 		}
+
 		if (this.isDisposed) {
 			return "dead";
 		}
+
 		if (this.session.kernel) {
 			return this.session.kernel.status;
 		}
+
 		logger.ci(
 			`Real kernel is ${this.session.kernel ? "defined" : "undefined"}`,
 		);
@@ -51,8 +55,10 @@ export class RawJupyterSessionWrapper
 		super("localRaw", session);
 		// Dispose the latest version of session, don't register `this.session`
 		this._register(new Disposable(() => this.session.dispose()));
+
 		this.initializeKernelSocket();
 	}
+
 	public override dispose() {
 		void this.shutdown().finally(() => super.dispose());
 	}
@@ -71,6 +77,7 @@ export class RawJupyterSessionWrapper
 			);
 		} catch (ex) {
 			logger.ci(`Error waiting for idle`, ex);
+
 			await this.shutdown().catch(noop);
 
 			throw ex;
@@ -78,22 +85,32 @@ export class RawJupyterSessionWrapper
 	}
 
 	private shutdownInProgress = false;
+
 	public async shutdown(): Promise<void> {
 		if (this.isDisposed || this.shutdownInProgress) {
 			return;
 		}
+
 		this.shutdownInProgress = true;
+
 		this.terminatingStatus = "terminating";
+
 		this.statusChanged.emit("terminating");
 
 		const kernelIdForLogging = `${this.session.kernel?.id}, ${this.kernelConnectionMetadata?.id}`;
+
 		logger.debug(
 			`Shutdown session ${kernelIdForLogging} - start called from ${new Error("").stack}`,
 		);
+
 		suppressShutdownErrors(this.session.kernel);
+
 		await raceTimeout(1000, this.session.shutdown().catch(noop));
+
 		this.didShutdown.fire();
+
 		this.dispose();
+
 		logger.debug(
 			`Shutdown session ${kernelIdForLogging} - shutdown complete`,
 		);

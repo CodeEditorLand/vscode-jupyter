@@ -42,6 +42,7 @@ function isTelemetrySupported(): boolean {
 		if (vsc === undefined) {
 			return false;
 		}
+
 		return getTelemetryReporter() !== undefined;
 	} catch {
 		return false;
@@ -67,11 +68,13 @@ export function onDidChangeTelemetryEnablement(
 		if (!e.affectsConfiguration("telemetry")) {
 			return;
 		}
+
 		const settings = workspace
 			.getConfiguration("telemetry")
 			.inspect<boolean>("enableTelemetry")!;
 
 		const enabled = settings.globalValue === false ? true : false;
+
 		handler(enabled);
 	});
 }
@@ -89,6 +92,7 @@ export function setSharedProperty<
 	if (isUnitTestExecution() && propertyName.startsWith("ds_")) {
 		return;
 	}
+
 	if (value === undefined) {
 		delete (sharedProperties as any)[propertyName];
 	} else {
@@ -111,6 +115,7 @@ export function getTelemetryReporter(): TelemetryReporter {
 	if (telemetryReporter) {
 		return telemetryReporter;
 	}
+
 	const TelemetryReporrerClass = require("@vscode/extension-telemetry")
 		.default as typeof TelemetryReporter;
 
@@ -119,10 +124,12 @@ export function getTelemetryReporter(): TelemetryReporter {
 
 function sanitizeProperties(eventName: string, data: Record<string, any>) {
 	let customProperties: Record<string, string> = {};
+
 	Object.getOwnPropertyNames(data).forEach((prop) => {
 		if (data[prop] === undefined || data[prop] === null) {
 			return;
 		}
+
 		try {
 			// If there are any errors in serializing one property, ignore that and move on.
 			// Else nothing will be sent.
@@ -168,6 +175,7 @@ export function sendTelemetryEvent<
 	) {
 		return;
 	}
+
 	sendTelemetryEventInternal(
 		eventName as any,
 		// Because of exactOptionalPropertyTypes we have to cast.
@@ -228,13 +236,16 @@ function sendTelemetryEventInternal<
 		customProperties = {};
 		// Add shared properties to telemetry props (we may overwrite existing ones).
 		Object.assign(customProperties, sharedProperties);
+
 		Object.assign(customProperties, properties || {});
+
 		populateTelemetryWithErrorInfo(customProperties, ex)
 			.then(() => {
 				customProperties = sanitizeProperties(
 					eventNameSent,
 					customProperties,
 				);
+
 				reporter.sendTelemetryEvent(
 					eventNameSent,
 					customProperties,
@@ -322,6 +333,7 @@ export function capturePerfTelemetry<
 			const key = `${eventName.toString()}${JSON.stringify(props)}`;
 
 			const firstTime = !timesSeenThisEventWithSameProperties.has(key);
+
 			timesSeenThisEventWithSameProperties.add(key);
 
 			// eslint-disable-next-line no-invalid-this, @typescript-eslint/no-use-before-define,
@@ -342,6 +354,7 @@ export function capturePerfTelemetry<
 						if (firstTime) {
 							(propsToSend as any)["firstTime"] = firstTime;
 						}
+
 						sendTelemetryEvent(
 							eventName,
 							stopWatch
@@ -357,6 +370,7 @@ export function capturePerfTelemetry<
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						const failedProps: P[E] = { ...props } as any;
 						(failedProps as any).failed = true;
+
 						sendTelemetryEvent(
 							eventName as any,
 							stopWatch

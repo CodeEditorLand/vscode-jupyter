@@ -11,10 +11,13 @@ import { noop } from "../../platform/common/utils/misc";
  */
 export class CellMatcher {
 	public codeExecRegEx: RegExp;
+
 	public markdownExecRegEx: RegExp;
 
 	private codeMatchRegEx: RegExp;
+
 	private markdownMatchRegEx: RegExp;
+
 	private defaultCellMarker: string;
 
 	constructor(settings?: IJupyterSettings) {
@@ -22,14 +25,18 @@ export class CellMatcher {
 			settings ? settings.codeRegularExpression : undefined,
 			RegExpValues.PythonCellMarker,
 		);
+
 		this.markdownMatchRegEx = this.createRegExp(
 			settings ? settings.markdownRegularExpression : undefined,
 			RegExpValues.PythonMarkdownCellMarker,
 		);
+
 		this.codeExecRegEx = new RegExp(`${this.codeMatchRegEx.source}(.*)`);
+
 		this.markdownExecRegEx = new RegExp(
 			`${this.markdownMatchRegEx.source}(.*)`,
 		);
+
 		this.defaultCellMarker = settings?.defaultCellMarker
 			? settings.defaultCellMarker
 			: "# %%";
@@ -71,6 +78,7 @@ export class CellMatcher {
 		) {
 			return lines.slice(1).join("\n");
 		}
+
 		return code;
 	}
 
@@ -82,6 +90,7 @@ export class CellMatcher {
 		) {
 			return lines.slice(1);
 		}
+
 		return lines;
 	}
 

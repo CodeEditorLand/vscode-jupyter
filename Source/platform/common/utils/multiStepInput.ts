@@ -25,7 +25,9 @@ import { noop } from "./misc";
 
 export class InputFlowAction extends Error {
 	public static back = new InputFlowAction("back");
+
 	public static cancel = new InputFlowAction("cancel");
+
 	public static resume = new InputFlowAction("resume");
 }
 
@@ -36,26 +38,42 @@ export type InputStep<T extends any> = (
 
 export interface IQuickPickParameters<T extends QuickPickItem> {
 	title?: string;
+
 	step?: number;
+
 	totalSteps?: number;
+
 	items: T[];
+
 	activeItem?: T;
+
 	placeholder: string;
+
 	buttons?: QuickInputButton[];
+
 	onDidTriggerButton?: (e: QuickInputButton) => void;
+
 	matchOnDescription?: boolean;
+
 	matchOnDetail?: boolean;
+
 	acceptFilterBoxTextAsSelection?: boolean;
+
 	startBusy?: boolean;
+
 	stopBusy?: Event<void>;
+
 	validate?(selection: T | QuickPick<T>): Promise<string | undefined>;
+
 	shouldResume?(): Promise<boolean>;
 	/**
 	 * Displays a back button on the first step which allows one to go back to the calling code,
 	 * Will return InputFlowAction.back
 	 */
 	supportBackInFirstStep?: boolean;
+
 	onDidTriggerItemButton?(e: QuickPickItemButtonEvent<T>): void;
+
 	onDidChangeItems?: Event<T[]>;
 	/**
 	 * Whether to close the quick pick when the user clicks outside the quickpick.
@@ -66,14 +84,23 @@ export interface IQuickPickParameters<T extends QuickPickItem> {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface InputBoxParameters {
 	title: string;
+
 	password?: boolean;
+
 	step?: number;
+
 	totalSteps?: number;
+
 	value: string;
+
 	prompt: string;
+
 	buttons?: QuickInputButton[];
+
 	validate(value: string): Promise<string | undefined>;
+
 	validationMessage?: string;
+
 	shouldResume?(): Promise<boolean>;
 }
 
@@ -89,6 +116,7 @@ type MultiStepInputInputBoxResponseType<P> =
  */
 export interface IMultiStepInput<S> {
 	run(start: InputStep<S>, state: S): Promise<InputFlowAction | undefined>;
+
 	showQuickPick<T extends QuickPickItem, P extends IQuickPickParameters<T>>({
 		title,
 		step,
@@ -99,6 +127,7 @@ export interface IMultiStepInput<S> {
 		buttons,
 		shouldResume,
 	}: P): Promise<MultiStepInputQuickPicResponseType<T, P>>;
+
 	showLazyLoadQuickPick<
 		T extends QuickPickItem,
 		P extends IQuickPickParameters<T>,
@@ -113,8 +142,10 @@ export interface IMultiStepInput<S> {
 		shouldResume,
 	}: P): {
 		quickPick: QuickPick<T>;
+
 		selection: Promise<MultiStepInputQuickPicResponseType<T, P>>;
 	};
+
 	showInputBox<P extends InputBoxParameters>({
 		title,
 		step,
@@ -130,7 +161,9 @@ export interface IMultiStepInput<S> {
 
 export class MultiStepInput<S> implements IMultiStepInput<S> {
 	private current?: QuickInput;
+
 	private steps: InputStep<S>[] = [];
+
 	public run(start: InputStep<S>, state: S) {
 		return this.stepThrough(start, state);
 	}
@@ -167,6 +200,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		ignoreFocusOut,
 	}: P): {
 		quickPick: QuickPick<T>;
+
 		selection: Promise<MultiStepInputQuickPicResponseType<T, P>>;
 	} {
 		const disposables: Disposable[] = [];
@@ -175,15 +209,22 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 			createDeferred<MultiStepInputQuickPicResponseType<T, P>>();
 
 		const input = window.createQuickPick<T>();
+
 		input.title = title;
+
 		input.step = step;
+
 		input.totalSteps = totalSteps;
+
 		input.placeholder = placeholder;
+
 		input.ignoreFocusOut = ignoreFocusOut ?? true;
+
 		input.items = items;
 
 		if (stopBusy) {
 			input.busy = startBusy ?? false;
+
 			stopBusy(
 				() => {
 					if (input.enabled) {
@@ -194,8 +235,10 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				disposables,
 			);
 		}
+
 		if (onDidChangeItems) {
 			input.keepScrollPosition = true;
+
 			onDidChangeItems(
 				(newItems) => {
 					input.items = newItems;
@@ -204,6 +247,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				disposables,
 			);
 		}
+
 		if (onDidTriggerItemButton) {
 			input.onDidTriggerItemButton(
 				(e) => onDidTriggerItemButton(e),
@@ -211,7 +255,9 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				disposables,
 			);
 		}
+
 		input.matchOnDescription = matchOnDescription || false;
+
 		input.matchOnDetail = matchOnDetail || false;
 
 		if (activeItem) {
@@ -219,12 +265,14 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 		} else {
 			input.activeItems = [];
 		}
+
 		input.buttons = [
 			...(this.steps.length > 1 || supportBackInFirstStep
 				? [QuickInputButtons.Back]
 				: []),
 			...(buttons || []),
 		];
+
 		disposables.push(
 			input.onDidTriggerButton((item) => {
 				if (item === QuickInputButtons.Back) {
@@ -244,6 +292,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 
 				if (itemLabel && validate && selectedItems.length) {
 					input.enabled = false;
+
 					input.busy = true;
 
 					const message = await validate(selectedItems[0]);
@@ -253,9 +302,12 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 						// No validation allowed on a quick pick. Have to put up a dialog instead
 						await window.showErrorMessage(message, { modal: true });
 					}
+
 					input.enabled = true;
+
 					input.busy = false;
 				}
+
 				if (resolvable) {
 					deferred.resolve(selectedItems[0]);
 				}
@@ -283,21 +335,28 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 							deferred.resolve(<any>input.value);
 						} else {
 							input.enabled = false;
+
 							input.busy = true;
 							// No validation allowed on a quick pick. Have to put up a dialog instead
 							await window.showErrorMessage(validationMessage);
+
 							input.enabled = true;
+
 							input.busy = false;
 						}
 					}
 				}),
 			);
 		}
+
 		if (this.current) {
 			this.current.dispose();
 		}
+
 		this.current = input;
+
 		this.current.show();
+
 		deferred.promise.finally(() => dispose(disposables)).catch(noop);
 
 		return { quickPick: input, selection: deferred.promise };
@@ -321,21 +380,32 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 			return await new Promise<MultiStepInputInputBoxResponseType<P>>(
 				(resolve, reject) => {
 					const input = window.createInputBox();
+
 					input.title = title;
+
 					input.step = step;
+
 					input.totalSteps = totalSteps;
+
 					input.password = password ? true : false;
+
 					input.value = value || "";
+
 					input.prompt = prompt;
+
 					input.validationMessage = validationMessage || "";
+
 					input.ignoreFocusOut = true;
+
 					input.validationMessage = validationMessage || "";
+
 					input.buttons = [
 						...(this.steps.length > 1
 							? [QuickInputButtons.Back]
 							: []),
 						...(buttons || []),
 					];
+
 					disposables.push(
 						input.onDidTriggerButton((item) => {
 							if (item === QuickInputButtons.Back) {
@@ -346,7 +416,9 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 						}),
 						input.onDidAccept(async () => {
 							const inputValue = input.value;
+
 							input.enabled = false;
+
 							input.busy = true;
 
 							const validationMessage =
@@ -354,6 +426,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 
 							if (!validationMessage) {
 								input.validationMessage = "";
+
 								resolve(inputValue);
 							} else {
 								input.validationMessage = validationMessage;
@@ -361,7 +434,9 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 								// On validation error make sure we are showing our input
 								input.show();
 							}
+
 							input.enabled = true;
+
 							input.busy = false;
 						}),
 						input.onDidChangeValue(async () => {
@@ -386,7 +461,9 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 					if (this.current) {
 						this.current.dispose();
 					}
+
 					this.current = input;
+
 					this.current.show();
 				},
 			);
@@ -406,13 +483,16 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 
 			if (this.current) {
 				this.current.enabled = false;
+
 				this.current.busy = true;
 			}
+
 			try {
 				step = await step(this, state);
 			} catch (err) {
 				if (err === InputFlowAction.back) {
 					this.steps.pop();
+
 					step = this.steps.pop();
 				} else if (err === InputFlowAction.resume) {
 					step = this.steps.pop();
@@ -421,11 +501,13 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
 				} else {
 					throw err;
 				}
+
 				if (!step) {
 					return err;
 				}
 			}
 		}
+
 		if (this.current) {
 			this.current.dispose();
 		}

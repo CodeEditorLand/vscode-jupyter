@@ -14,6 +14,7 @@ export class PythonApiInitialization
 		@inject(IInterpreterService)
 		private readonly interpreterService: IInterpreterService,
 	) {}
+
 	activate(): void {
 		// This will hook up the necessary events and trigger the discovery of interpreters.
 		// Without this, we will never know about Python envs

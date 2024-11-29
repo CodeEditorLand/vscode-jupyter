@@ -27,12 +27,14 @@ const cleanupCode = dedent`
 @injectable()
 export class VariableScriptGenerator implements IVariableScriptGenerator {
 	static contentsOfScript: string | undefined;
+
 	static contentsOfVariablesScript: string | undefined;
 
 	constructor(
 		@inject(IFileSystem) private readonly fs: IFileSystem,
 		@inject(IExtensionContext) private readonly context: IExtensionContext,
 	) {}
+
 	async generateCodeToGetVariableInfo(options: {
 		isDebugging: boolean;
 
@@ -59,10 +61,12 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 			};
 		}
 	}
+
 	async generateCodeToGetVariableProperties(options: {
 		isDebugging: boolean;
 
 		variableName: string;
+
 		stringifiedAttributeNameList: string;
 	}) {
 		const initializeCode = await this.getContentsOfScript();
@@ -100,6 +104,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 				scriptCode +
 				"\n\nvariables= %who_ls\nreturn _VSCODE_getVariableDescriptions(variables)";
 		}
+
 		return scriptCode;
 	}
 
@@ -131,8 +136,10 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 			};
 		}
 	}
+
 	async generateCodeToGetVariableValueSummary(variableName: string) {
 		let scriptCode = await this.getContentsOfVariablesScript();
+
 		scriptCode =
 			scriptCode +
 			`\n\nvariables= %who_ls\nreturn _VSCODE_getVariableSummary(${variableName})`;
@@ -146,6 +153,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 		if (VariableScriptGenerator.contentsOfScript) {
 			return VariableScriptGenerator.contentsOfScript;
 		}
+
 		const scriptPath = joinPath(
 			this.context.extensionUri,
 			"pythonFiles",
@@ -155,6 +163,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 		);
 
 		const contents = await this.fs.readFile(scriptPath);
+
 		VariableScriptGenerator.contentsOfScript = contents;
 
 		return contents;
@@ -164,6 +173,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 		if (VariableScriptGenerator.contentsOfVariablesScript) {
 			return VariableScriptGenerator.contentsOfVariablesScript;
 		}
+
 		const scriptPath = joinPath(
 			this.context.extensionUri,
 			"pythonFiles",
@@ -173,6 +183,7 @@ export class VariableScriptGenerator implements IVariableScriptGenerator {
 		);
 
 		const contents = await this.fs.readFile(scriptPath);
+
 		VariableScriptGenerator.contentsOfVariablesScript = contents;
 
 		return contents;

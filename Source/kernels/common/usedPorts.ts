@@ -24,7 +24,9 @@ export function ignorePortForwarding(...ports: number[]) {
 			async providePortAttributes(
 				attributes: {
 					port: number;
+
 					pid?: number;
+
 					commandLine?: string;
 				},
 				_token: CancellationToken,
@@ -32,6 +34,7 @@ export function ignorePortForwarding(...ports: number[]) {
 				if (ports.includes(attributes.port)) {
 					return new PortAttributes(PortAutoForwardAction.Ignore);
 				}
+
 				return undefined;
 			}
 		})();
@@ -40,6 +43,7 @@ export function ignorePortForwarding(...ports: number[]) {
 			const portSelector: PortAttributesSelector = {
 				portRange: port,
 			};
+
 			disposableStore.add(
 				workspace.registerPortAttributesProvider(
 					portSelector,

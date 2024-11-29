@@ -10,6 +10,7 @@ declare module "./api" {
 		 */
 		onDidStart: Event<{
 			uri: Uri;
+
 			kernel: Kernel;
 		}>;
 	}

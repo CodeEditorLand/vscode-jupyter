@@ -39,10 +39,15 @@ export class CustomEnvironmentVariablesProvider
 	public get onDidEnvironmentVariablesChange(): Event<Uri | undefined> {
 		return this.changeEventEmitter.event;
 	}
+
 	public trackedWorkspaceFolders = new Set<string>();
+
 	private fileWatchers = new Set<string>();
+
 	private disposables: Disposable[] = [];
+
 	private changeEventEmitter = new EventEmitter<Uri | undefined>();
+
 	private pythonEnvVarChangeEventHooked?: boolean;
 
 	constructor(
@@ -62,6 +67,7 @@ export class CustomEnvironmentVariablesProvider
 
 	public dispose() {
 		this.changeEventEmitter.dispose();
+
 		dispose(this.disposables);
 	}
 
@@ -81,6 +87,7 @@ export class CustomEnvironmentVariablesProvider
 			// No need to cache for Python code, as we get these env vars from Python extension.
 			return this._getEnvironmentVariables(resource, purpose, token);
 		}
+
 		const cacheStoreIndexedByWorkspaceFolder =
 			new InMemoryCache<EnvironmentVariables>(
 				this.cacheDuration,
@@ -97,7 +104,9 @@ export class CustomEnvironmentVariablesProvider
 
 			return cacheStoreIndexedByWorkspaceFolder.data!;
 		}
+
 		const promise = this._getEnvironmentVariables(resource, purpose, token);
+
 		promise
 			.then((result) => {
 				if (!token?.isCancellationRequested) {
@@ -108,6 +117,7 @@ export class CustomEnvironmentVariablesProvider
 
 		return promise;
 	}
+
 	public async getCustomEnvironmentVariables(
 		resource: Resource,
 		purpose: "RunPythonCode" | "RunNonPythonCode",
@@ -138,18 +148,22 @@ export class CustomEnvironmentVariablesProvider
 			if (api && !token?.isCancellationRequested) {
 				if (!this.pythonEnvVarChangeEventHooked) {
 					this.pythonEnvVarChangeEventHooked = true;
+
 					api.environments.onDidEnvironmentVariablesChange(
 						(e) => {
 							logger.debug(
 								`Python env vars changed ${e.resource?.uri?.path}`,
 							);
+
 							this.onEnvironmentFileChanged(e.resource?.uri);
+
 							this.changeEventEmitter.fire(e.resource?.uri);
 						},
 						this,
 						this.disposables,
 					);
 				}
+
 				return api.environments.getEnvironmentVariables(
 					workspaceFolderUri,
 				);
@@ -171,15 +185,19 @@ export class CustomEnvironmentVariablesProvider
 
 			return cacheStoreIndexedByWorkspaceFolder.data!;
 		}
+
 		if (token?.isCancellationRequested) {
 			return;
 		}
+
 		this.trackedWorkspaceFolders.add(workspaceFolderUri.fsPath || "");
 
 		const envFile = this.getEnvFile(workspaceFolderUri);
+
 		this.createFileWatcher(envFile, workspaceFolderUri);
 
 		const promise = this.envVarsService.parseFile(envFile, process.env);
+
 		promise
 			.then((result) => {
 				if (!token?.isCancellationRequested) {
@@ -190,12 +208,14 @@ export class CustomEnvironmentVariablesProvider
 
 		return promise;
 	}
+
 	public createFileWatcher(envFile: string, workspaceFolderUri?: Uri) {
 		const key = this.getCacheKeyForMergedVars(workspaceFolderUri);
 
 		if (this.fileWatchers.has(key)) {
 			return;
 		}
+
 		const pattern = new RelativePattern(
 			Uri.file(path.dirname(envFile)),
 			path.basename(envFile),
@@ -210,17 +230,21 @@ export class CustomEnvironmentVariablesProvider
 
 		if (envFileWatcher) {
 			this.disposables.push(envFileWatcher);
+
 			this.fileWatchers.add(key);
+
 			envFileWatcher.onDidChange(
 				() => this.onEnvironmentFileChanged(workspaceFolderUri),
 				this,
 				this.disposables,
 			);
+
 			envFileWatcher.onDidCreate(
 				() => this.onEnvironmentFileCreated(workspaceFolderUri),
 				this,
 				this.disposables,
 			);
+
 			envFileWatcher.onDidDelete(
 				() => this.onEnvironmentFileChanged(workspaceFolderUri),
 				this,
@@ -230,9 +254,11 @@ export class CustomEnvironmentVariablesProvider
 			logger.error("Failed to create file watcher for environment file");
 		}
 	}
+
 	private getEnvFile(workspaceFolderUri: Uri) {
 		return path.join(workspaceFolderUri.fsPath, ".env");
 	}
+
 	private async _getEnvironmentVariables(
 		resource: Resource,
 		purpose: "RunPythonCode" | "RunNonPythonCode",
@@ -247,6 +273,7 @@ export class CustomEnvironmentVariablesProvider
 		if (token?.isCancellationRequested) {
 			return {};
 		}
+
 		if (
 			customEnvVars &&
 			purpose === "RunPythonCode" &&
@@ -255,10 +282,13 @@ export class CustomEnvironmentVariablesProvider
 			// Python extension API returns the resolved env variables.
 			return customEnvVars;
 		}
+
 		if (!customEnvVars) {
 			customEnvVars = {};
 		}
+
 		const mergedVars: EnvironmentVariables = {};
+
 		this.envVarsService.mergeVariables(process.env, mergedVars); // Copy current proc vars into new obj.
 		this.envVarsService.mergeVariables(customEnvVars!, mergedVars); // Copy custom vars over into obj.
 		this.envVarsService.mergePaths(process.env, mergedVars);
@@ -266,6 +296,7 @@ export class CustomEnvironmentVariablesProvider
 		if (process.env.PYTHONPATH) {
 			mergedVars.PYTHONPATH = process.env.PYTHONPATH;
 		}
+
 		let pathKey = customEnvVars
 			? Object.keys(customEnvVars).find((k) => k.toLowerCase() == "path")
 			: undefined;
@@ -276,14 +307,17 @@ export class CustomEnvironmentVariablesProvider
 				customEnvVars![pathKey]!,
 			);
 		}
+
 		if (customEnvVars!.PYTHONPATH) {
 			this.envVarsService.appendPythonPath(
 				mergedVars!,
 				customEnvVars!.PYTHONPATH,
 			);
 		}
+
 		return mergedVars;
 	}
+
 	private getWorkspaceFolderUri(resource?: Uri): Uri | undefined {
 		const workspaceFolders = workspace.workspaceFolders || [];
 
@@ -302,6 +336,7 @@ export class CustomEnvironmentVariablesProvider
 
 	private onEnvironmentFileCreated(workspaceFolderUri?: Uri) {
 		this.onEnvironmentFileChanged(workspaceFolderUri);
+
 		sendFileCreationTelemetry();
 	}
 
@@ -310,6 +345,7 @@ export class CustomEnvironmentVariablesProvider
 			this.cacheDuration,
 			this.getCacheKeyForMergedVars(workspaceFolderUri),
 		).clear();
+
 		new InMemoryCache<EnvironmentVariables>(
 			this.cacheDuration,
 			this.getCacheKeyForCustomVars(workspaceFolderUri),
@@ -317,9 +353,11 @@ export class CustomEnvironmentVariablesProvider
 
 		this.changeEventEmitter.fire(workspaceFolderUri);
 	}
+
 	private getCacheKeyForMergedVars(workspaceFolderUri: Resource) {
 		return `${getWorkspaceFolderIdentifier(workspaceFolderUri)}:RunNonPythonCode`;
 	}
+
 	private getCacheKeyForCustomVars(workspaceFolderUri: Resource) {
 		return `${getWorkspaceFolderIdentifier(workspaceFolderUri)}:RunNonPythonCode:CustomVars`;
 	}

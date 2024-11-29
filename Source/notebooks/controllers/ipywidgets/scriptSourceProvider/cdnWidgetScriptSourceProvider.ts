@@ -59,10 +59,13 @@ function moduleNameToCDNUrl(
 		// so we find the 2nd '/'
 		index = moduleName.indexOf("/", index + 1);
 	}
+
 	if (index !== -1) {
 		fileName = moduleName.substr(index + 1);
+
 		packageName = moduleName.substr(0, index);
 	}
+
 	if (cdn === jsdelivrUrl) {
 		// Js Delivr doesn't support ^ in the version. It needs an exact version
 		if (moduleVersion.startsWith("^")) {
@@ -73,6 +76,7 @@ function moduleNameToCDNUrl(
 			fileName = fileName.concat(".js");
 		}
 	}
+
 	return `${cdn}${packageName}@${moduleVersion}/dist/${fileName}`;
 }
 
@@ -98,14 +102,19 @@ export class CDNWidgetScriptSourceProvider
 	implements IWidgetScriptSourceProvider
 {
 	id = "cdn";
+
 	private cache = new Map<string, Promise<WidgetScriptSource>>();
+
 	private isOnCDNCache = new Map<string, Promise<boolean>>();
+
 	private readonly notifiedUserAboutWidgetScriptNotFound = new Set<string>();
+
 	private get cdnProviders(): readonly WidgetCDNs[] {
 		const settings = this.configurationSettings.getSettings(undefined);
 
 		return settings.widgetScriptSources;
 	}
+
 	private configurationPromise?: Deferred<void>;
 
 	constructor(
@@ -115,6 +124,7 @@ export class CDNWidgetScriptSourceProvider
 		@inject(IConfigurationService)
 		private readonly configurationSettings: IConfigurationService,
 	) {}
+
 	public dispose() {
 		this.cache.clear();
 	}
@@ -127,9 +137,11 @@ export class CDNWidgetScriptSourceProvider
 		if (this.isOnCDNCache.has(key)) {
 			return this.isOnCDNCache.get(key)!;
 		}
+
 		if (this.globalMemento.get<boolean>(key, false)) {
 			return true;
 		}
+
 		const promise = (async () => {
 			const httpClient = new HttpClient();
 
@@ -140,6 +152,7 @@ export class CDNWidgetScriptSourceProvider
 			const jsDeliverPromise = createDeferredFromPromise(
 				httpClient.exists(`${jsdelivrUrl}${moduleName}`),
 			);
+
 			await Promise.race([
 				unpkgPromise.promise,
 				jsDeliverPromise.promise,
@@ -148,6 +161,7 @@ export class CDNWidgetScriptSourceProvider
 			if (unpkgPromise.value || jsDeliverPromise.value) {
 				return true;
 			}
+
 			await Promise.all([unpkgPromise.promise, jsDeliverPromise.promise]);
 
 			return unpkgPromise.value || jsDeliverPromise.value ? true : false;
@@ -160,10 +174,12 @@ export class CDNWidgetScriptSourceProvider
 				}
 			})
 			.then(noop, noop);
+
 		this.isOnCDNCache.set(key, promise);
 
 		return promise;
 	}
+
 	public async getWidgetScriptSource(
 		moduleName: string,
 		moduleVersion: string,
@@ -172,12 +188,14 @@ export class CDNWidgetScriptSourceProvider
 		// If the webview is not online, then we cannot use the CDN.
 		if (isWebViewOnline === false) {
 			logger.ci(`Webview is offline, cannot use CDN for ${moduleName}`);
+
 			this.warnIfNoAccessToInternetFromWebView(moduleName).catch(noop);
 
 			return {
 				moduleName,
 			};
 		}
+
 		if (
 			this.cdnProviders.length === 0 &&
 			this.globalMemento.get<boolean>(
@@ -203,8 +221,10 @@ export class CDNWidgetScriptSourceProvider
 				),
 			);
 		}
+
 		return this.cache.get(key)!;
 	}
+
 	protected async generateDownloadUri(
 		moduleName: string,
 		moduleVersion: string,
@@ -215,12 +235,14 @@ export class CDNWidgetScriptSourceProvider
 		if (cdnBaseUrl) {
 			return moduleNameToCDNUrl(cdnBaseUrl, moduleName, moduleVersion);
 		}
+
 		return undefined;
 	}
 
 	protected getModuleKey(moduleName: string, moduleVersion: string) {
 		return `${moduleName}${moduleVersion}`;
 	}
+
 	protected async getWidgetScriptSourceImplementation(
 		moduleName: string,
 		moduleVersion: string,
@@ -230,6 +252,7 @@ export class CDNWidgetScriptSourceProvider
 				ConsoleForegroundColors.Green
 			}Searching for Widget Script ${moduleName}#${moduleVersion} using cdns ${this.cdnProviders.join(" ")}`,
 		);
+
 		await this.configureWidgets();
 
 		if (this.cdnProviders.length === 0) {
@@ -255,6 +278,7 @@ export class CDNWidgetScriptSourceProvider
 		logger.error(
 			`Widget Script ${moduleName}#${moduleVersion} was not found on on any cdn`,
 		);
+
 		this.handleWidgetSourceNotFound(moduleName, moduleVersion).catch(noop);
 
 		return { moduleName };
@@ -286,6 +310,7 @@ export class CDNWidgetScriptSourceProvider
 			return undefined;
 		}
 	}
+
 	private async warnIfNoAccessToInternetFromWebView(moduleName: string) {
 		// if widget exists nothing to do.
 		if (
@@ -296,12 +321,14 @@ export class CDNWidgetScriptSourceProvider
 		) {
 			return;
 		}
+
 		if (
 			this.notifiedUserAboutWidgetScriptNotFound.has(moduleName) ||
 			this.cdnProviders.length === 0
 		) {
 			return;
 		}
+
 		this.notifiedUserAboutWidgetScriptNotFound.add(moduleName);
 
 		const selection = await window.showWarningMessage(
@@ -348,7 +375,9 @@ export class CDNWidgetScriptSourceProvider
 		if (this.configurationPromise) {
 			return this.configurationPromise.promise;
 		}
+
 		this.configurationPromise = createDeferred();
+
 		sendTelemetryEvent(Telemetry.IPyWidgetPromptToUseCDN);
 
 		const selection = await window.showInformationMessage(
@@ -379,6 +408,7 @@ export class CDNWidgetScriptSourceProvider
 
 				break;
 			}
+
 			case Common.doNotShowAgain: {
 				selectionForTelemetry = "doNotShowAgain";
 				// At a minimum search local interpreter or attempt to fetch scripts from remote jupyter server.
@@ -392,6 +422,7 @@ export class CDNWidgetScriptSourceProvider
 
 				break;
 			}
+
 			case Common.moreInfo: {
 				void env.openExternal(
 					Uri.parse("https://aka.ms/PVSCIPyWidgets"),
@@ -399,6 +430,7 @@ export class CDNWidgetScriptSourceProvider
 
 				break;
 			}
+
 			default:
 				selectionForTelemetry =
 					selection === Common.cancel ? "cancel" : "dismissed";
@@ -411,10 +443,13 @@ export class CDNWidgetScriptSourceProvider
 			undefined,
 			{ selection: selectionForTelemetry },
 		);
+
 		this.configurationPromise.resolve();
 	}
+
 	private async updateScriptSources(scriptSources: WidgetCDNs[]) {
 		const targetSetting = "widgetScriptSources";
+
 		await this.configurationSettings.updateSetting(
 			targetSetting,
 			scriptSources,
@@ -422,6 +457,7 @@ export class CDNWidgetScriptSourceProvider
 			ConfigurationTarget.Global,
 		);
 	}
+
 	private async handleWidgetSourceNotFound(
 		moduleName: string,
 		version: string,
@@ -435,12 +471,14 @@ export class CDNWidgetScriptSourceProvider
 		) {
 			return;
 		}
+
 		if (
 			this.notifiedUserAboutWidgetScriptNotFound.has(moduleName) ||
 			this.cdnProviders.length === 0
 		) {
 			return;
 		}
+
 		this.notifiedUserAboutWidgetScriptNotFound.add(moduleName);
 
 		const selection = await window.showWarningMessage(

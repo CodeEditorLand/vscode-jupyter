@@ -31,16 +31,19 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					const authorizationHeader = getAuthHeaders();
 
 					const keys = Object.keys(authorizationHeader);
+
 					keys.forEach((k) =>
 						origHeaders.append(
 							k,
 							authorizationHeader[k].toString(),
 						),
 					);
+
 					origHeaders.set("Content-Type", "application/json");
 
 					// Rewrite the 'append' method for the headers to disallow 'authorization' after this point
 					const origAppend = origHeaders.append.bind(origHeaders);
+
 					origHeaders.append = (k, v) => {
 						if (k.toLowerCase() !== "authorization") {
 							origAppend(k, v);
@@ -61,12 +64,15 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 		return AuthorizingRequest;
 	}
+
 	public wrapWebSocketCtor(
 		websocketCtor: ClassType<WebSocketIsomorphic>,
 	): ClassType<WebSocketIsomorphic> {
 		class JupyterWebSocket extends KernelSocketWrapper(websocketCtor) {
 			private kernelId: string | undefined;
+
 			private timer: NodeJS.Timeout | number = 0;
+
 			private boundOpenHandler = this.openHandler.bind(this);
 
 			constructor(
@@ -82,12 +88,15 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
+
 				if (this.kernelId) {
 					KernelSocketMap.set(this.kernelId, this);
+
 					this.onclose = () => {
 						if (timer && this.timer !== timer) {
 							clearInterval(timer as any);
 						}
+
 						if (KernelSocketMap.get(this.kernelId!) === this) {
 							KernelSocketMap.delete(this.kernelId!);
 						}
@@ -123,6 +132,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 								type: ev.toString(),
 								target: this,
 							};
+
 							originalMessageHandler(event);
 
 							return true;
@@ -135,8 +145,10 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				this.removeEventListener("open", this.boundOpenHandler);
 			}
 		}
+
 		return JupyterWebSocket as any;
 	}
+
 	public getWebsocketCtor(
 		_cookieString?: string,
 		_allowUnauthorized?: boolean,
@@ -146,7 +158,9 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 			WebSocketIsomorphic,
 		) {
 			private kernelId: string | undefined;
+
 			private timer: NodeJS.Timeout | number = 0;
+
 			private boundOpenHandler = this.openHandler.bind(this);
 
 			constructor(
@@ -162,12 +176,15 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				if (parsed && parsed.length > 1) {
 					this.kernelId = parsed[1];
 				}
+
 				if (this.kernelId) {
 					KernelSocketMap.set(this.kernelId, this);
+
 					this.onclose = () => {
 						if (timer && this.timer !== timer) {
 							clearInterval(timer as any);
 						}
+
 						if (KernelSocketMap.get(this.kernelId!) === this) {
 							KernelSocketMap.delete(this.kernelId!);
 						}
@@ -201,6 +218,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 								type: ev.toString(),
 								target: this,
 							};
+
 							originalMessageHandler(event);
 
 							return true;
@@ -213,6 +231,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 				this.removeEventListener("open", this.boundOpenHandler);
 			}
 		}
+
 		return JupyterWebSocket as any;
 	}
 

@@ -22,6 +22,7 @@ export class ReloadVSCodeCommandHandler
 			this,
 		);
 	}
+
 	private async onReloadVSCode(message: string) {
 		const item = await window.showInformationMessage(
 			message,

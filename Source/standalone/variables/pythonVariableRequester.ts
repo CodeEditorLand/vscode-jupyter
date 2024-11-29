@@ -49,6 +49,7 @@ async function safeExecuteSilently(
 	) {
 		return [];
 	}
+
 	try {
 		if (initializeCode) {
 			await executeSilently(
@@ -57,11 +58,13 @@ async function safeExecuteSilently(
 				errorOptions,
 			);
 		}
+
 		return await executeSilently(kernel.session.kernel, code, errorOptions);
 	} catch (ex) {
 		if (ex instanceof SessionDisposedError) {
 			return [];
 		}
+
 		throw ex;
 	} finally {
 		if (cleanupCode) {
@@ -149,6 +152,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		if (results.length === 0) {
 			return { data: [] };
 		}
+
 		return parseDataFrame(
 			this.deserializeJupyterResult<DataFrameSplitFormat>(results),
 		);
@@ -164,6 +168,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 		if (matchingVariable && matchingVariable.value) {
 			result[`${word}`] = matchingVariable.value;
 		}
+
 		return result;
 	}
 
@@ -262,9 +267,12 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			if (kernel.disposed || kernel.disposing) {
 				return [];
 			}
+
 			const variables = this.deserializeJupyterResult(results) as {
 				name: string;
+
 				type: string;
+
 				fullType: string;
 			}[];
 
@@ -283,6 +291,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 
 				vars.push(v);
 			}
+
 			return vars;
 		}
 
@@ -318,6 +327,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			...this.deserializeJupyterResult(results),
 		};
 	}
+
 	private extractJupyterResultText(outputs: nbformat.IOutput[]): string {
 		// Verify that we have the correct cell type and outputs
 		if (outputs.length > 0) {
@@ -338,11 +348,13 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 						DataScience.jupyterGetVariablesExecutionError(
 							resultString,
 						);
+
 					logger.error(error);
 
 					throw new Error(error);
 				}
 			}
+
 			if (
 				codeCellOutput &&
 				codeCellOutput.output_type === "execute_result"
@@ -354,6 +366,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 					return (data as any)["text/plain"];
 				}
 			}
+
 			if (
 				codeCellOutput &&
 				codeCellOutput.output_type === "stream" &&
@@ -361,6 +374,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 			) {
 				return codeCellOutput.text as string;
 			}
+
 			if (
 				codeCellOutput &&
 				codeCellOutput.output_type === "error" &&
@@ -373,6 +387,7 @@ export class PythonVariablesRequester implements IKernelVariableRequester {
 
 				const error =
 					DataScience.jupyterGetVariablesExecutionError(stripped);
+
 				logger.error(error);
 
 				throw new Error(error);

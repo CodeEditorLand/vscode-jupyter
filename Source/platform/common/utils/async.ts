@@ -36,9 +36,12 @@ export async function waitForCondition(
 				})
 				.catch((_e) => finish(false));
 		}, interval);
+
 		finish = (result: boolean) => {
 			clearTimeout(timer);
+
 			clearInterval(intervalId);
+
 			resolve(result);
 		};
 	});
@@ -109,10 +112,15 @@ export function isPromiseLike<T>(v: any): v is PromiseLike<T> {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface Deferred<T> {
 	readonly promise: Promise<T>;
+
 	readonly resolved: boolean;
+
 	readonly rejected: boolean;
+
 	readonly completed: boolean;
+
 	readonly value?: T;
+
 	resolve(value?: T | PromiseLike<T>): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	reject(reason?: any): void;
@@ -122,10 +130,15 @@ class DeferredImpl<T> implements Deferred<T> {
 	private _resolve!: (value: T | PromiseLike<T>) => void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private _reject!: (reason?: any) => void;
+
 	private _resolved: boolean = false;
+
 	private _rejected: boolean = false;
+
 	private _promise: Promise<T>;
+
 	private _value: T | undefined;
+
 	public get value() {
 		return this._value;
 	}
@@ -134,30 +147,38 @@ class DeferredImpl<T> implements Deferred<T> {
 		// eslint-disable-next-line
 		this._promise = new Promise<T>((res, rej) => {
 			this._resolve = res;
+
 			this._reject = rej;
 		});
 	}
+
 	public resolve(value?: T | PromiseLike<T>) {
 		this._value = value as T | undefined;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this._resolve.apply(this.scope ? this.scope : this, arguments as any);
+
 		this._resolved = true;
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public reject(_reason?: any) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this._reject.apply(this.scope ? this.scope : this, arguments as any);
+
 		this._rejected = true;
 	}
+
 	get promise(): Promise<T> {
 		return this._promise;
 	}
+
 	get resolved(): boolean {
 		return this._resolved;
 	}
+
 	get rejected(): boolean {
 		return this._rejected;
 	}
+
 	get completed(): boolean {
 		return this._rejected || this._resolved;
 	}
@@ -169,6 +190,7 @@ export function createDeferred<T>(scope: any = null): Deferred<T> {
 
 export function createDeferredFromPromise<T>(promise: Promise<T>): Deferred<T> {
 	const deferred = createDeferred<T>();
+
 	promise
 		.then(deferred.resolve.bind(deferred))
 		.catch(deferred.reject.bind(deferred));
@@ -190,9 +212,11 @@ export class PromiseChain {
 		const deferred = createDeferred<T>();
 
 		const previousPromise = this.currentPromise;
+
 		this.currentPromise = this.currentPromise.then(async () => {
 			try {
 				const result = await promise();
+
 				deferred.resolve(result);
 			} catch (ex) {
 				deferred.reject(ex);
@@ -210,6 +234,7 @@ export class PromiseChain {
 	 */
 	public chainFinally<T>(promise: () => Promise<T>): Promise<T> {
 		const deferred = createDeferred<T>();
+
 		this.currentPromise = this.currentPromise.finally(() =>
 			promise()
 				.then((result) => deferred.resolve(result))
@@ -252,14 +277,18 @@ export interface ITask<T> {
  */
 export class Throttler implements IDisposable {
 	private activePromise: Promise<any> | null;
+
 	private queuedPromise: Promise<any> | null;
+
 	private queuedPromiseFactory: ITask<Promise<any>> | null;
 
 	private isDisposed = false;
 
 	constructor() {
 		this.activePromise = null;
+
 		this.queuedPromise = null;
+
 		this.queuedPromiseFactory = null;
 	}
 
@@ -280,6 +309,7 @@ export class Throttler implements IDisposable {
 					}
 
 					const result = this.queue(this.queuedPromiseFactory!);
+
 					this.queuedPromiseFactory = null;
 
 					return result;
@@ -303,10 +333,12 @@ export class Throttler implements IDisposable {
 			this.activePromise!.then(
 				(result: T) => {
 					this.activePromise = null;
+
 					resolve(result);
 				},
 				(err: unknown) => {
 					this.activePromise = null;
+
 					reject(err);
 				},
 			);
@@ -327,6 +359,7 @@ const timeoutDeferred = (timeout: number, fn: () => void): IScheduledLater => {
 
 	const handle = setTimeout(() => {
 		scheduled = false;
+
 		fn();
 	}, timeout);
 
@@ -334,6 +367,7 @@ const timeoutDeferred = (timeout: number, fn: () => void): IScheduledLater => {
 		isTriggered: () => scheduled,
 		dispose: () => {
 			clearTimeout(handle);
+
 			scheduled = false;
 		},
 	};
@@ -341,9 +375,11 @@ const timeoutDeferred = (timeout: number, fn: () => void): IScheduledLater => {
 
 const microtaskDeferred = (fn: () => void): IScheduledLater => {
 	let scheduled = true;
+
 	queueMicrotask(() => {
 		if (scheduled) {
 			scheduled = false;
+
 			fn();
 		}
 	});
@@ -381,16 +417,24 @@ const microtaskDeferred = (fn: () => void): IScheduledLater => {
  */
 export class Delayer<T> implements IDisposable {
 	private deferred: IScheduledLater | null;
+
 	private completionPromise: Promise<any> | null;
+
 	private doResolve: ((value?: any | Promise<any>) => void) | null;
+
 	private doReject: ((err: any) => void) | null;
+
 	private task: ITask<T | Promise<T>> | null;
 
 	constructor(public defaultDelay: number | typeof MicrotaskDelay) {
 		this.deferred = null;
+
 		this.completionPromise = null;
+
 		this.doResolve = null;
+
 		this.doReject = null;
+
 		this.task = null;
 	}
 
@@ -399,29 +443,36 @@ export class Delayer<T> implements IDisposable {
 		delay = this.defaultDelay,
 	): Promise<T> {
 		this.task = task;
+
 		this.cancelTimeout();
 
 		if (!this.completionPromise) {
 			this.completionPromise = new Promise((resolve, reject) => {
 				this.doResolve = resolve;
+
 				this.doReject = reject;
 			}).then(() => {
 				this.completionPromise = null;
+
 				this.doResolve = null;
 
 				if (this.task) {
 					const task = this.task;
+
 					this.task = null;
 
 					return task();
 				}
+
 				return undefined;
 			});
+
 			void this.completionPromise.catch(noop);
 		}
 
 		const fn = () => {
 			this.deferred = null;
+
 			this.doResolve?.(null);
 		};
 
@@ -442,12 +493,14 @@ export class Delayer<T> implements IDisposable {
 
 		if (this.completionPromise) {
 			this.doReject?.(new Error("Canceled"));
+
 			this.completionPromise = null;
 		}
 	}
 
 	private cancelTimeout(): void {
 		this.deferred?.dispose();
+
 		this.deferred = null;
 	}
 
@@ -467,10 +520,12 @@ export class Delayer<T> implements IDisposable {
  */
 export class ThrottledDelayer<T> {
 	private delayer: Delayer<Promise<T>>;
+
 	private throttler: Throttler;
 
 	constructor(defaultDelay: number) {
 		this.delayer = new Delayer(defaultDelay);
+
 		this.throttler = new Throttler();
 	}
 
@@ -491,6 +546,7 @@ export class ThrottledDelayer<T> {
 
 	dispose(): void {
 		this.delayer.dispose();
+
 		this.throttler.dispose();
 	}
 }

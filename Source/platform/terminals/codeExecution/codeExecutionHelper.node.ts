@@ -21,16 +21,19 @@ import { CodeExecutionHelperBase } from "./codeExecutionHelper";
 @injectable()
 export class CodeExecutionHelper extends CodeExecutionHelperBase {
 	private readonly interpreterService: IInterpreterService;
+
 	private readonly processServiceFactory: IProcessServiceFactory;
 
 	constructor(
 		@inject(IServiceContainer) serviceContainer: IServiceContainer,
 	) {
 		super();
+
 		this.processServiceFactory =
 			serviceContainer.get<IProcessServiceFactory>(
 				IProcessServiceFactory,
 			);
+
 		this.interpreterService =
 			serviceContainer.get<IInterpreterService>(IInterpreterService);
 	}
@@ -74,6 +77,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 
 			// Read result from the normalization script from stdout, and resolve the promise when done.
 			let normalized = "";
+
 			observable.out.onDidChange(
 				(output) => {
 					if (output.source === "stdout") {
@@ -87,7 +91,9 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 			// The normalization script expects a serialized JSON object, with the selection under the "code" key.
 			// We're using a JSON object so that we don't have to worry about encoding, or escaping non-ASCII characters.
 			const input = JSON.stringify({ code });
+
 			observable.proc?.stdin?.write(input);
+
 			observable.proc?.stdin?.end();
 
 			// We expect a serialized JSON object back, with the normalized code under the "normalized" key.
@@ -123,6 +129,7 @@ export class CodeExecutionHelper extends CodeExecutionHelperBase {
 
 				return `${"\n".repeat(trimmedLineCount)}${normalizedLines}`;
 			}
+
 			return normalizedLines;
 		} catch (ex) {
 			logger.error(

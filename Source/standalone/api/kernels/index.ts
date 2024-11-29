@@ -24,6 +24,7 @@ function getWrappedKernel(kernel: IKernel, extensionId: string) {
 	let wrappedKernel =
 		kernelCache.get(kernel) ||
 		createKernelApiForExtension(extensionId, kernel);
+
 	kernelCache.set(kernel, wrappedKernel);
 
 	return wrappedKernel;
@@ -61,12 +62,14 @@ export function getKernelsApi(extensionId: string): Kernels {
 
 				return;
 			}
+
 			if (extensionId !== JVSC_EXTENSION_ID) {
 				void initializeInteractiveOrNotebookTelemetryBasedOnUserAction(
 					kernel.resourceUri,
 					kernel.kernelConnectionMetadata,
 				);
 			}
+
 			return getWrappedKernel(kernel, extensionId);
 		},
 		get onDidStart() {
@@ -91,6 +94,7 @@ export function getKernelsApi(extensionId: string): Kernels {
 					ServiceContainer.instance.get<IDisposableRegistry>(
 						IDisposableRegistry,
 					);
+
 				_onDidStart = new EventEmitter<{ uri: Uri; kernel: Kernel }>();
 
 				disposableRegistry.push(

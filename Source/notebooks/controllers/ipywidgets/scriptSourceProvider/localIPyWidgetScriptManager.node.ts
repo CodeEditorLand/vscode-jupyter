@@ -35,9 +35,12 @@ export class LocalIPyWidgetScriptManager
 	 * Copy once per session of VS Code or until user restarts the kernel.
 	 */
 	private sourceNbExtensionsPath?: Uri;
+
 	private overwriteExistingFiles = true;
+
 	static nbExtensionsCopiedKernelConnectionList =
 		new Set<KernelConnectionId>();
+
 	private nbExtensionsParentPath?: Promise<Uri | undefined>;
 
 	constructor(
@@ -54,9 +57,11 @@ export class LocalIPyWidgetScriptManager
 				kernel.kernelConnectionMetadata.id,
 			);
 	}
+
 	public getBaseUrl() {
 		return this.getNbExtensionsParentPath();
 	}
+
 	protected override onKernelRestarted(): void {
 		this.nbExtensionsParentPath = undefined;
 		// Possible there are new versions of nbExtensions that are not yet copied.
@@ -65,17 +70,21 @@ export class LocalIPyWidgetScriptManager
 
 		super.onKernelRestarted();
 	}
+
 	protected async getNbExtensionsParentPath(): Promise<Uri | undefined> {
 		if (!this.nbExtensionsParentPath) {
 			this.nbExtensionsParentPath = this.getNbExtensionsParentPathImpl();
 		}
+
 		return this.nbExtensionsParentPath;
 	}
+
 	private async getNbExtensionsParentPathImpl(): Promise<Uri | undefined> {
 		let overwrite = this.overwriteExistingFiles;
 
 		try {
 			const stopWatch = new StopWatch();
+
 			this.sourceNbExtensionsPath =
 				await this.nbExtensionsPathProvider.getNbExtensionsParentPath(
 					this.kernel,
@@ -88,6 +97,7 @@ export class LocalIPyWidgetScriptManager
 
 				return;
 			}
+
 			const kernelHash = await getTelemetrySafeHashedString(
 				this.kernel.kernelConnectionMetadata.id,
 			);
@@ -128,9 +138,11 @@ export class LocalIPyWidgetScriptManager
 			}
 			// If we've copied once, then next time, don't overwrite.
 			this.overwriteExistingFiles = false;
+
 			LocalIPyWidgetScriptManager.nbExtensionsCopiedKernelConnectionList.add(
 				this.kernel.kernelConnectionMetadata.id,
 			);
+
 			sendTelemetryEvent(Telemetry.IPyWidgetNbExtensionCopyTime, {
 				duration: stopWatch.elapsedTime,
 			});
@@ -147,6 +159,7 @@ export class LocalIPyWidgetScriptManager
 			throw ex;
 		}
 	}
+
 	protected async getWidgetEntryPoints(): Promise<
 		{ uri: Uri; widgetFolderName: string }[]
 	> {
@@ -173,6 +186,7 @@ export class LocalIPyWidgetScriptManager
 			widgetFolderName: path.dirname(entry),
 		}));
 	}
+
 	protected getWidgetScriptSource(source: Uri): Promise<string> {
 		return this.fs.readFile(source);
 	}

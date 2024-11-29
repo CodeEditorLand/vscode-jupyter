@@ -44,64 +44,114 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		string,
 		JupyterSettings
 	>();
+
 	public experiments!: IExperiments;
+
 	public allowUnauthorizedRemoteConnection: boolean = false;
+
 	public jupyterInterruptTimeout: number = 10_000;
+
 	public jupyterLaunchTimeout: number = 60_000;
+
 	public jupyterLaunchRetries: number = 3;
+
 	public notebookFileRoot: string = "";
+
 	public useDefaultConfigForJupyter: boolean = false;
+
 	public sendSelectionToInteractiveWindow: boolean = false;
+
 	public normalizeSelectionForInteractiveWindow: boolean = true;
+
 	public splitRunFileIntoCells: boolean = true;
+
 	public markdownRegularExpression: string = "";
+
 	public codeRegularExpression: string = "";
+
 	public errorBackgroundColor: string = "";
+
 	public variableExplorerExclude: string = "";
+
 	public decorateCells: "currentCell" | "allCells" | "disabled" =
 		"currentCell";
+
 	public enableCellCodeLens: boolean = false;
+
 	public askForLargeDataFrames: boolean = false;
+
 	public enableAutoMoveToNextCell: boolean = false;
+
 	public askForKernelRestart: boolean = false;
+
 	public codeLenses: string = "";
+
 	public debugCodeLenses: string = "";
+
 	public debugpyDistPath: string = "";
+
 	public stopOnFirstLineWhileDebugging: boolean = false;
+
 	public magicCommandsAsComments: boolean = false;
+
 	public pythonExportMethod: "direct" | "commentMagics" | "nbconvert" =
 		"direct";
+
 	public stopOnError: boolean = false;
+
 	public addGotoCodeLenses: boolean = false;
+
 	public runStartupCommands: string | string[] = [];
+
 	public debugJustMyCode: boolean = false;
+
 	public defaultCellMarker: string = "";
+
 	public themeMatplotlibPlots: boolean = false;
+
 	public disableJupyterAutoStart: boolean = false;
+
 	public enablePythonKernelLogging: boolean = false;
+
 	public jupyterCommandLineArguments: string[] = [];
+
 	public widgetScriptSources: WidgetCDNs[] = [];
+
 	public interactiveWindowMode: InteractiveWindowMode = "multiple";
+
 	public pythonCellFolding: boolean = true;
+
 	public interactiveWindowViewColumn: InteractiveWindowViewColumn =
 		"secondGroup";
 	// Hidden settings not surfaced in package.json
 	public disableZMQSupport: boolean = false;
 	// Hidden settings not surfaced in package.json
 	public forceIPyKernelDebugger: boolean = false;
+
 	public verboseLogging: boolean = false;
+
 	public showVariableViewWhenDebugging: boolean = true;
+
 	public newCellOnRunLast: boolean = true;
+
 	public logKernelOutputSeparately: boolean = false;
+
 	public development: boolean = false;
+
 	public poetryPath: string = "";
+
 	public excludeUserSitePackages: boolean = false;
+
 	public enableExtendedPythonKernelCompletions: boolean = false;
+
 	public formatStackTraces: boolean = false;
+
 	public interactiveReplNotebook: boolean = false;
 	// Privates should start with _ so that they are not read from the settings.json
 	private _changeEmitter = new EventEmitter<void>();
+
 	private _workspaceRoot: Resource;
+
 	private _disposables: Disposable[] = [];
 
 	constructor(
@@ -110,6 +160,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		private _type: "node" | "web",
 	) {
 		this._workspaceRoot = workspaceFolder;
+
 		this.initialize();
 		// Disable auto start in untrusted workspaces.
 		if (workspace.isTrusted === false) {
@@ -137,6 +188,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 				systemVariablesCtor,
 				type,
 			);
+
 			JupyterSettings.jupyterSettings.set(workspaceFolderKey, settings);
 		} else if (settings._type === "web" && type === "node") {
 			// Update to a node system variables if anybody every asks for a node one after
@@ -145,11 +197,13 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 
 			settings._type = type;
 		}
+
 		return settings;
 	}
 
 	public static getSettingsUriAndTarget(resource: Uri | undefined): {
 		uri: Uri | undefined;
+
 		target: ConfigurationTarget;
 	} {
 		const workspaceFolder = resource
@@ -179,15 +233,19 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		if (!isTestExecution()) {
 			throw new Error("Dispose can only be called from unit tests");
 		}
+
 		JupyterSettings.jupyterSettings.forEach(
 			(item) => item && item.dispose(),
 		);
+
 		JupyterSettings.jupyterSettings.clear();
 	}
+
 	public dispose() {
 		this._disposables.forEach(
 			(disposable) => disposable && disposable.dispose(),
 		);
+
 		this._disposables = [];
 	}
 
@@ -226,6 +284,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 		} else {
 			this.experiments = experiments;
 		}
+
 		this.experiments = this.experiments
 			? this.experiments
 			: {
@@ -257,6 +316,7 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 				f !== "logging" &&
 				f !== "kernelPickerType",
 		);
+
 		keys.forEach((k) => replacer(k, jupyterConfig));
 
 		// Special case poetryPath. It actually comes from the python settings
@@ -297,24 +357,28 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 				"python",
 				this._workspaceRoot,
 			);
+
 			this.update(currentConfig, pythonConfig);
 
 			// If workspace config changes, then we could have a cascading effect of on change events.
 			// Let's defer the change notification.
 			this.debounceChangeNotification();
 		};
+
 		this._disposables.push(
 			workspace.onDidChangeWorkspaceFolders(
 				this.onWorkspaceFoldersChanged,
 				this,
 			),
 		);
+
 		this._disposables.push(
 			workspace.onDidChangeConfiguration(
 				(event: ConfigurationChangeEvent) => {
 					if (event.affectsConfiguration("jupyter")) {
 						onDidChange();
 					}
+
 					if (event.affectsConfiguration("python.poetryPath")) {
 						onDidChange();
 					}
@@ -334,12 +398,14 @@ export class JupyterSettings implements IWatchableJupyterSettings {
 
 		if (initialConfig) {
 			this.update(initialConfig, pythonConfig);
+
 			this.migrateSettings(initialConfig).catch(noop);
 		}
 	}
 
 	private async migrateSettings(config: WorkspaceConfiguration) {
 		const configMigration = new ConfigMigration(config);
+
 		await configMigration.migrateSettings();
 	}
 

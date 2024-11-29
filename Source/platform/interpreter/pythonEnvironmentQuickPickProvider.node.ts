@@ -22,32 +22,49 @@ export class PythonEnvironmentQuickPickItemProvider
 		IExtensionSyncActivationService
 {
 	title: string = DataScience.localPythonEnvironments;
+
 	private _onDidChange = new EventEmitter<void>();
+
 	private _onDidChangeStatus = new EventEmitter<void>();
+
 	onDidChange = this._onDidChange.event;
+
 	onDidChangeStatus = this._onDidChangeStatus.event;
+
 	private refreshedOnceBefore = false;
+
 	private api?: PythonExtension;
+
 	private readonly disposables: IDisposable[] = [];
+
 	private readonly promiseMonitor = new PromiseMonitor();
+
 	public get items(): readonly Environment[] {
 		if (!this.api) {
 			return [];
 		}
+
 		if (!this.refreshedOnceBefore) {
 			this.refreshedOnceBefore = true;
+
 			this.refresh().catch(noop);
 		}
+
 		return this.api.environments.known;
 	}
+
 	private _status: "idle" | "discovering" = "idle";
+
 	public get status() {
 		return this._status;
 	}
+
 	private set status(value: typeof this._status) {
 		this._status = value;
+
 		this._onDidChangeStatus.fire();
 	}
+
 	constructor(
 		@inject(IPythonApiProvider) api: IPythonApiProvider,
 		@inject(IPythonExtensionChecker)
@@ -55,6 +72,7 @@ export class PythonEnvironmentQuickPickItemProvider
 		@inject(IDisposableRegistry) disposables: IDisposableRegistry,
 	) {
 		disposables.push(this);
+
 		this.promiseMonitor.onStateChange(
 			() =>
 				(this.status = this.promiseMonitor.isComplete
@@ -66,18 +84,23 @@ export class PythonEnvironmentQuickPickItemProvider
 
 		const initializeApi = () => {
 			const apiPromise = api.getNewApi();
+
 			this.promiseMonitor.push(apiPromise);
+
 			apiPromise
 				.then((api?: PythonExtension) => {
 					this.api = api;
 
 					if (!api) {
 						this.status = "idle";
+
 						this._onDidChangeStatus.fire();
 
 						return;
 					}
+
 					this._onDidChange.fire();
+
 					api.environments.onDidChangeEnvironments(
 						() => this._onDidChange.fire(),
 						this,
@@ -101,21 +124,27 @@ export class PythonEnvironmentQuickPickItemProvider
 			);
 		}
 	}
+
 	activate(): void {
 		// Ensure we resolve the Python API ASAP.
 		// This makes the api.environments.known available soon, hence improving over all
 		// perceived performance for the user.
 	}
+
 	dispose() {
 		dispose(this.disposables);
 	}
+
 	async refresh() {
 		// very unlikely that we have been unable to get the Python extension api, hence no need to wait on the promise.
 		if (!this.api) {
 			return;
 		}
+
 		const promise = this.api.environments.refreshEnvironments();
+
 		this.promiseMonitor.push(promise);
+
 		await promise.catch(noop);
 	}
 	/**

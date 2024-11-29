@@ -7,6 +7,7 @@ function getCanvas(): HTMLCanvasElement {
 	if (!canvas) {
 		canvas = document.createElement("canvas");
 	}
+
 	return canvas;
 }
 
@@ -17,9 +18,11 @@ export function measureText(text: string, font: string | null): number {
 		if (font) {
 			context.font = font;
 		}
+
 		const metrics = context.measureText(text);
 
 		return metrics.width;
 	}
+
 	return 0;
 }

@@ -18,10 +18,13 @@ import { logger } from "../../logging";
 @injectable()
 export class PythonEnvironmentFilter implements IDisposable {
 	private readonly disposables: IDisposable[] = [];
+
 	private _onDidChange = new EventEmitter<void>();
+
 	public get onDidChange() {
 		return this._onDidChange.event;
 	}
+
 	constructor(@inject(IDisposableRegistry) disposables: IDisposableRegistry) {
 		disposables.push(this);
 
@@ -37,16 +40,20 @@ export class PythonEnvironmentFilter implements IDisposable {
 			);
 		}
 	}
+
 	public dispose() {
 		this._onDidChange.dispose();
+
 		dispose(this.disposables);
 	}
+
 	public isPythonEnvironmentExcluded(
 		interpreter: { uri: Uri; envPath?: Uri } | Environment,
 	): boolean {
 		if (isWebExtension()) {
 			return false;
 		}
+
 		const hiddenList = this.getExcludedPythonEnvironments();
 
 		const hidden = isPythonEnvInListOfHiddenEnvs(interpreter, hiddenList);
@@ -56,12 +63,15 @@ export class PythonEnvironmentFilter implements IDisposable {
 
 		if (hidden) {
 			sendTelemetryEvent(Telemetry.JupyterKernelHiddenViaFilter);
+
 			logger.debug(
 				`Python Env hidden via filter: ${getDisplayPath(interpreterUri)}`,
 			);
 		}
+
 		return hidden;
 	}
+
 	private getExcludedPythonEnvironments(): string[] {
 		// If user opened a mult-root workspace with multiple folders then combine them all.
 		// As there's no way to provide controllers per folder.
@@ -73,7 +83,9 @@ export class PythonEnvironmentFilter implements IDisposable {
 				.getConfiguration("jupyter", undefined)
 				.get<string[]>("kernels.excludePythonEnvironments", []);
 		}
+
 		const filters: string[] = [];
+
 		workspace.workspaceFolders.forEach((item) => {
 			filters.push(
 				...workspace
@@ -101,6 +113,7 @@ export function isPythonEnvInListOfHiddenEnvs(
 	if (!interpreterUri && !envFolderUri) {
 		return false;
 	}
+
 	const hidden = hiddenList.some((item) => {
 		/**
 		 * Filter paths can be prefixed with `~`
@@ -112,11 +125,13 @@ export function isPythonEnvInListOfHiddenEnvs(
 		const displayPath = getDisplayPath(item.trim())
 			.toLowerCase()
 			.replace(/\\/g, "/");
+
 		item = item.trim().toLowerCase().replace(/\\/g, "/");
 
 		if (item.length === 0 || displayPath.length === 0) {
 			return false;
 		}
+
 		const displayInterpreterPath = getDisplayPath(interpreterUri)
 			.toLowerCase()
 			.replace(/\\/g, "/");
@@ -150,6 +165,7 @@ export function isPythonEnvInListOfHiddenEnvs(
 		) {
 			return true;
 		}
+
 		return false;
 	});
 

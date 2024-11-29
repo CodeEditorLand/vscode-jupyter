@@ -24,6 +24,7 @@ export function getTelemetrySafeVersion(
 			} else if (isNaN(patch)) {
 				return `${major}.${minor}`;
 			}
+
 			return `${major}.${minor}.${patch}`;
 		} catch (ex) {
 			logger.error(`Failed to parse version ${version}`, ex);
@@ -31,6 +32,7 @@ export function getTelemetrySafeVersion(
 			return "";
 		}
 	}
+
 	if (!version) {
 		return "";
 	}

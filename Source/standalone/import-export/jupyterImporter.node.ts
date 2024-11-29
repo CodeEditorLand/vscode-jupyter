@@ -39,9 +39,13 @@ export class JupyterImporter implements INotebookImporter {
 {% block markdowncell scoped %}{1} [markdown]
 {{ cell.source | comment_lines }}
 {% endblock markdowncell %}`;
+
 	private readonly nbconvert5Null = "null.tpl";
+
 	private readonly nbconvert6Null = "base/null.j2";
+
 	private template5Promise?: Promise<string | undefined>;
+
 	private template6Promise?: Promise<string | undefined>;
 
 	constructor(
@@ -94,6 +98,7 @@ export class JupyterImporter implements INotebookImporter {
 			if (fileOutput.includes("get_ipython()")) {
 				fileOutput = this.addIPythonImport(fileOutput);
 			}
+
 			return this.addInstructionComments(fileOutput);
 		}
 
@@ -138,6 +143,7 @@ export class JupyterImporter implements INotebookImporter {
 			try {
 				// Save this file into our disposables so the temp file goes away
 				this.disposableRegistry.push(file);
+
 				await this.fs.writeFile(
 					Uri.file(file.filePath),
 					format(

@@ -17,6 +17,7 @@ function getSearchHeight() {
 	if (maxDepthStr === undefined) {
 		return 3;
 	}
+
 	const maxDepth = parseInt(maxDepthStr, 10);
 	// eslint-disable-next-line no-restricted-globals
 	if (isNaN(maxDepth)) {
@@ -26,6 +27,7 @@ function getSearchHeight() {
 
 		return 1;
 	}
+
 	return maxDepth;
 }
 
@@ -53,9 +55,12 @@ export async function _getAssociatedPipfile(
 		if (await pathExists(pipFile)) {
 			return pipFile;
 		}
+
 		searchDir = path.dirname(searchDir);
+
 		heightToSearch -= 1;
 	}
+
 	return undefined;
 }
 
@@ -77,6 +82,7 @@ async function getProjectDir(envFolder: string): Promise<string | undefined> {
 	if (!(await pathExists(dotProjectFile))) {
 		return undefined;
 	}
+
 	const projectDir = await readFile(dotProjectFile);
 
 	if (!(await pathExists(projectDir))) {
@@ -86,6 +92,7 @@ async function getProjectDir(envFolder: string): Promise<string | undefined> {
 
 		return undefined;
 	}
+
 	return projectDir;
 }
 
@@ -150,6 +157,7 @@ export async function isPipenvEnvironmentRelatedToFolder(
 	if (!pipFileAssociatedWithFolder) {
 		return false;
 	}
+
 	return arePathsSame(
 		pipFileAssociatedWithEnvironment,
 		pipFileAssociatedWithFolder,

@@ -15,7 +15,9 @@ import { IKernel, IKernelProvider } from "./types";
 @injectable()
 export class KernelStatusProvider implements IExtensionSyncActivationService {
 	private readonly disposables: IDisposable[] = [];
+
 	private readonly restartProgress = new WeakMap<IKernel, IDisposable>();
+
 	private readonly interruptProgress = new WeakMap<IKernel, IDisposable>();
 
 	constructor(
@@ -25,24 +27,29 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 	) {
 		disposables.push(this);
 	}
+
 	public dispose(): void {
 		dispose(this.disposables);
 	}
+
 	activate(): void {
 		this.kernelProvider.onDidCreateKernel(
 			this.onDidCreateKernel,
 			this,
 			this.disposables,
 		);
+
 		this.kernelProvider.onDidDisposeKernel(
 			(kernel) => {
 				this.restartProgress.get(kernel)?.dispose();
+
 				this.interruptProgress.get(kernel)?.dispose();
 			},
 			this,
 			this.disposables,
 		);
 	}
+
 	private onDidCreateKernel(kernel: IKernel) {
 		// Restart status.
 		kernel.addHook(
@@ -56,20 +63,24 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 						`: ${getDisplayNameOrNameOfKernelConnection(kernel.kernelConnectionMetadata)}`,
 					),
 				);
+
 				this.restartProgress.set(kernel, progress);
 			},
 			this,
 			this.disposables,
 		);
+
 		kernel.addHook(
 			"restartCompleted",
 			async () => {
 				this.restartProgress.get(kernel)?.dispose();
+
 				this.interruptProgress.get(kernel)?.dispose();
 			},
 			this,
 			this.disposables,
 		);
+
 		kernel.addHook(
 			"willInterrupt",
 			async () => {
@@ -82,6 +93,7 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 					if (disposable.isDisposed) {
 						return;
 					}
+
 					disposable.add(
 						KernelProgressReporter.createProgressReporter(
 							kernel.resourceUri,
@@ -93,12 +105,15 @@ export class KernelStatusProvider implements IExtensionSyncActivationService {
 						),
 					);
 				}, 1_000);
+
 				disposable.add(new Disposable(() => clearTimeout(timeout)));
+
 				this.interruptProgress.set(kernel, disposable);
 			},
 			this,
 			this.disposables,
 		);
+
 		kernel.addHook(
 			"interruptCompleted",
 			async () => this.interruptProgress.get(kernel)?.dispose(),

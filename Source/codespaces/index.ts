@@ -33,6 +33,7 @@ import { ServiceContainer } from "../platform/ioc/container";
 
 export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 	serverProvider: JupyterServerProvider;
+
 	commandProvider?: JupyterServerCommandProvider;
 } {
 	const serverMap = new Map<
@@ -56,8 +57,10 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 					WebSocket: serverUri.WebSocket,
 				},
 			};
+
 			serverMap.set(handle, { serverUri, server });
 		}
+
 		return serverMap.get(handle)!.server;
 	};
 
@@ -72,6 +75,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 			if (!handles || handles.length === 0) {
 				return [];
 			}
+
 			return raceCancellationError(
 				token,
 				Promise.all(
@@ -105,6 +109,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 			if (!quickPickItem || !provider.handleQuickPick) {
 				return;
 			}
+
 			const handle = await raceCancellationError(
 				token,
 				provider.handleQuickPick(quickPickItem, true),
@@ -113,9 +118,11 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 			if (handle === "back") {
 				return;
 			}
+
 			if (!handle) {
 				throw new CancellationError();
 			}
+
 			const server = await provider.getServerUri(handle);
 
 			return serverUriToServer(handle, server);
@@ -124,6 +131,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 			if (!provider.getQuickPickEntryItems) {
 				return [];
 			}
+
 			const items = await raceCancellationError(
 				token,
 				Promise.resolve(provider.getQuickPickEntryItems()),
@@ -135,6 +143,7 @@ export function jupyterServerUriToCollection(provider: IJupyterUriProvider): {
 					canBeAutoSelected: item.default,
 					description: stripCodicons(item.description),
 				};
+
 				quickPickMap.set(command.label, item);
 
 				return command;
@@ -152,13 +161,17 @@ export class JupyterServerCollectionImpl
 	private _commandProvider?: JupyterServerCommandProvider;
 
 	documentation?: Uri | undefined;
+
 	private _onDidChangeProvider = new EventEmitter<void>();
+
 	onDidChangeProvider = this._onDidChangeProvider.event;
 
 	set commandProvider(value: JupyterServerCommandProvider | undefined) {
 		this._commandProvider = value;
+
 		this._onDidChangeProvider.fire();
 	}
+
 	get commandProvider(): JupyterServerCommandProvider | undefined {
 		return this._commandProvider;
 	}
@@ -180,21 +193,28 @@ export class JupyterServerProviderRegistry
 {
 	private readonly _onDidChangeCollections = new EventEmitter<{
 		added: JupyterServerCollection[];
+
 		removed: JupyterServerCollection[];
 	}>();
+
 	public get onDidChangeCollections() {
 		return this._onDidChangeCollections.event;
 	}
+
 	private readonly _collections = new Map<string, JupyterServerCollection>();
+
 	public get jupyterCollections(): readonly JupyterServerCollection[] {
 		return Array.from(this._collections.values());
 	}
+
 	constructor() {
 		super();
+
 		ServiceContainer.instance
 			.get<IDisposableRegistry>(IDisposableRegistry)
 			.push(this);
 	}
+
 	public async activateThirdPartyExtensionAndFindCollection(
 		extensionId: string,
 		id: string,
@@ -205,10 +225,12 @@ export class JupyterServerProviderRegistry
 			(c) => c.extensionId === extensionId && c.id === id,
 		);
 	}
+
 	private async loadExtension(extensionId: string, providerId: string) {
 		if (extensionId === JVSC_EXTENSION_ID) {
 			return;
 		}
+
 		const ext = extensions.getExtension(extensionId);
 
 		if (!ext) {
@@ -216,6 +238,7 @@ export class JupyterServerProviderRegistry
 				`Extension '${extensionId}' that provides Jupyter Server '${providerId}' not found`,
 			);
 		}
+
 		if (!ext.isActive) {
 			await ext.activate().then(noop, noop);
 		}
@@ -237,17 +260,22 @@ export class JupyterServerProviderRegistry
 				);
 			}
 		}
+
 		const collection = new JupyterServerCollectionImpl(
 			extensionId,
 			id,
 			label,
 			serverProvider,
 		);
+
 		this._collections.set(extId, collection);
+
 		this._onDidChangeCollections.fire({ added: [collection], removed: [] });
+
 		this._register(
 			collection.onDidDispose(() => {
 				this._collections.delete(extId);
+
 				this._onDidChangeCollections.fire({
 					removed: [collection],
 					added: [],

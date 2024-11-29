@@ -53,12 +53,14 @@ export class LiveRemoteKernelConnectionUsageTracker
 		@named(GLOBAL_MEMENTO)
 		private readonly memento: Memento,
 	) {}
+
 	public activate(): void {
 		this.usedRemoteKernelServerIdsAndSessions =
 			this.memento.get<UriSessionUsedByResources>(
 				mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,
 				{},
 			);
+
 		this.uriStorage.onDidRemove(
 			this.onDidRemoveServers,
 			this,
@@ -78,14 +80,17 @@ export class LiveRemoteKernelConnectionUsageTracker
 				this.usedRemoteKernelServerIdsAndSessions[id]
 		);
 	}
+
 	public trackKernelIdAsUsed(
 		resource: Uri,
 		serverId: JupyterServerProviderHandle,
 		kernelId: string,
 	) {
 		const id = generateIdFromRemoteProvider(serverId);
+
 		this.usedRemoteKernelServerIdsAndSessions[id] =
 			this.usedRemoteKernelServerIdsAndSessions[id] || {};
+
 		this.usedRemoteKernelServerIdsAndSessions[id][kernelId] =
 			this.usedRemoteKernelServerIdsAndSessions[id][kernelId] || [];
 
@@ -94,7 +99,9 @@ export class LiveRemoteKernelConnectionUsageTracker
 		if (uris.includes(resource.toString())) {
 			return;
 		}
+
 		uris.push(resource.toString());
+
 		this.memento
 			.update(
 				mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,
@@ -102,6 +109,7 @@ export class LiveRemoteKernelConnectionUsageTracker
 			)
 			.then(noop, noop);
 	}
+
 	public trackKernelIdAsNotUsed(
 		resource: Uri,
 		serverId: JupyterServerProviderHandle,
@@ -112,19 +120,23 @@ export class LiveRemoteKernelConnectionUsageTracker
 		if (!(id in this.usedRemoteKernelServerIdsAndSessions)) {
 			return;
 		}
+
 		if (!(kernelId in this.usedRemoteKernelServerIdsAndSessions[id])) {
 			return;
 		}
+
 		const uris = this.usedRemoteKernelServerIdsAndSessions[id][kernelId];
 
 		if (!Array.isArray(uris) || !uris.includes(resource.toString())) {
 			return;
 		}
+
 		uris.splice(uris.indexOf(resource.toString()), 1);
 
 		if (uris.length === 0) {
 			delete this.usedRemoteKernelServerIdsAndSessions[id][kernelId];
 		}
+
 		if (
 			Object.keys(this.usedRemoteKernelServerIdsAndSessions[id])
 				.length === 0
@@ -139,10 +151,13 @@ export class LiveRemoteKernelConnectionUsageTracker
 			)
 			.then(noop, noop);
 	}
+
 	private onDidRemoveServers(servers: JupyterServerProviderHandle[]) {
 		servers.forEach((server) => {
 			const id = generateIdFromRemoteProvider(server);
+
 			delete this.usedRemoteKernelServerIdsAndSessions[id];
+
 			this.memento
 				.update(
 					mementoKeyToTrackRemoveKernelUrisAndSessionsUsedByResources,

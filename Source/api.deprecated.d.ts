@@ -32,6 +32,7 @@ declare module "./api" {
 		 * Authorization header to be used when connecting to the server.
 		 */
 		authorizationHeader?: Record<string, string>;
+
 		displayName: string;
 		/**
 		 * The local directory that maps to the remote directory of the Jupyter Server.
@@ -67,8 +68,11 @@ declare module "./api" {
 		 * Should be a unique string (like a guid)
 		 */
 		readonly id: string;
+
 		readonly displayName?: string;
+
 		readonly detail?: string;
+
 		onDidChangeHandles?: Event<void>;
 
 		getQuickPickEntryItems?():

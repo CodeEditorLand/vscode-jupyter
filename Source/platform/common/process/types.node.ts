@@ -19,6 +19,7 @@ export interface IBufferDecoder {
 
 export type Output<T extends string | Buffer> = {
 	source: "stdout" | "stderr";
+
 	out: T;
 };
 
@@ -30,14 +31,18 @@ export interface ObservableOutput<T> {
 
 export type ObservableExecutionResult<T extends string | Buffer> = {
 	proc: ChildProcess | undefined;
+
 	out: ObservableOutput<Output<T>>;
+
 	dispose(): void;
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type SpawnOptions = ChildProcessSpawnOptions & {
 	encoding?: string;
+
 	token?: CancellationToken;
+
 	mergeStdOutErr?: boolean;
 
 	throwOnStdErr?: boolean;
@@ -46,11 +51,13 @@ export type SpawnOptions = ChildProcessSpawnOptions & {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type ShellOptions = ExecOptions & {
 	throwOnStdErr?: boolean;
+
 	token?: CancellationToken;
 };
 
 export type ExecutionResult<T extends string | Buffer> = {
 	stdout: T;
+
 	stderr?: T;
 };
 
@@ -60,11 +67,13 @@ export interface IProcessService extends IDisposable {
 		args: string[],
 		options?: SpawnOptions,
 	): ObservableExecutionResult<string>;
+
 	exec(
 		file: string,
 		args: string[],
 		options?: SpawnOptions,
 	): Promise<ExecutionResult<string>>;
+
 	shellExec(
 		command: string,
 		options?: ShellOptions,

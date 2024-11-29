@@ -36,7 +36,9 @@ export function convertDebugProtocolVariableToIJupyterVariable(
 
 export type DataFrameSplitFormat = {
 	index: (number | string)[];
+
 	columns: string[];
+
 	data: Record<string, unknown>[];
 };
 
@@ -51,6 +53,7 @@ export function parseDataFrame(df: DataFrameSplitFormat) {
 		const rowData: Record<string, unknown> = {
 			index: rowIndexValues[index],
 		};
+
 		columns.forEach((column, columnIndex) => {
 			rowData[column] = row[columnIndex];
 		});

@@ -72,6 +72,7 @@ export class NotebookCellLanguageService
 			jupyterLanguage || defaultLanguage,
 		);
 	}
+
 	public activate() {
 		workspace.onDidSaveNotebookDocument(
 			this.onDidSaveNotebookDocument,
@@ -79,6 +80,7 @@ export class NotebookCellLanguageService
 			this.disposables,
 		);
 	}
+
 	public getSupportedLanguages(
 		kernelConnection: KernelConnectionMetadata,
 	): string[] {
@@ -101,6 +103,7 @@ export class NotebookCellLanguageService
 			return [];
 		}
 	}
+
 	private get lastSavedNotebookCellLanguage(): string | undefined {
 		return this.globalMemento.get<string | undefined>(
 			LastSavedNotebookCellLanguage,
@@ -111,6 +114,7 @@ export class NotebookCellLanguageService
 		if (!isJupyterNotebook(doc)) {
 			return;
 		}
+
 		const language = getLanguageOfNotebookDocument(doc);
 
 		if (language && language !== this.lastSavedNotebookCellLanguage) {

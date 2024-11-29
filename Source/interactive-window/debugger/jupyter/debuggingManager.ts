@@ -118,6 +118,7 @@ export class InteractiveWindowDebuggingManager
 		};
 
 		const opts: DebugSessionOptions = { suppressSaveBeforeStart: true };
+
 		await this.startDebuggingConfig(config, opts);
 
 		const dbgr = this.notebookToDebugger.get(doc);
@@ -127,6 +128,7 @@ export class InteractiveWindowDebuggingManager
 
 			return;
 		}
+
 		await (dbgr as IWDebugger).ready;
 	}
 
@@ -134,6 +136,7 @@ export class InteractiveWindowDebuggingManager
 		session: DebugSession,
 	): Promise<DebugAdapterDescriptor | undefined> {
 		const config = session.configuration as IInteractiveWindowDebugConfig;
+
 		assertIsInteractiveWindowDebugConfig(config);
 
 		const notebook = workspace.notebookDocuments.find(
@@ -165,6 +168,7 @@ export class InteractiveWindowDebuggingManager
 		}
 
 		const dbgr = new IWDebugger(notebook, config, session);
+
 		this.notebookToDebugger.set(notebook, dbgr);
 
 		try {
@@ -196,6 +200,7 @@ export class InteractiveWindowDebuggingManager
 
 			return;
 		}
+
 		const adapter = new KernelDebugAdapter(
 			session,
 			notebook,
@@ -217,10 +222,12 @@ export class InteractiveWindowDebuggingManager
 			cell,
 			this.kernelProvider.getKernelExecution(kernel!),
 		);
+
 		adapter.addDebuggingDelegates([
 			controller,
 			new RestartNotSupportedController(cell),
 		]);
+
 		controller.ready
 			.then(() => dbgr.resolve())
 			.catch((ex) =>
@@ -242,6 +249,7 @@ export class InteractiveWindowDebuggingManager
 
 		if (debugSession) {
 			logger.ci(`Sending debug request for source map`);
+
 			await Promise.all(
 				hashes.map(async (fileHash) => {
 					if (debugSession) {

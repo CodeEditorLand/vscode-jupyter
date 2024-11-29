@@ -25,6 +25,7 @@ export function getUserHomeDir(): Uri {
 	if (getOSType() === OSType.Windows) {
 		return Uri.file(getEnvironmentVariable("USERPROFILE") || homePath);
 	}
+
 	const homeVar =
 		getEnvironmentVariable("HOME") ||
 		getEnvironmentVariable("HOMEPATH") ||

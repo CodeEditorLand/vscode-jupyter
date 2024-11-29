@@ -75,12 +75,14 @@ export class DataScienceSurveyBanner
 				if (getVSCodeChannel() === "insiders") {
 					return this.isEnabledInternal(type);
 				}
+
 				break;
 
 			case BannerType.ExperimentNotebookSurvey:
 				if (getVSCodeChannel() === "stable") {
 					return this.isEnabledInternal(type);
 				}
+
 				break;
 
 			default:
@@ -88,8 +90,10 @@ export class DataScienceSurveyBanner
 
 				return false;
 		}
+
 		return false;
 	}
+
 	private isEnabledInternal(type: BannerType): boolean {
 		if (env.uiKind !== UIKind.Desktop) {
 			return false;
@@ -98,19 +102,24 @@ export class DataScienceSurveyBanner
 		if (!this.showBannerState.get(type)!.value.expiry) {
 			return true;
 		}
+
 		return this.showBannerState.get(type)!.value.expiry! < Date.now();
 	}
 
 	private disabledInCurrentSession: boolean = false;
+
 	private bannerLabels: string[] = [
 		localize.DataScienceSurveyBanner.bannerLabelYes,
 		localize.DataScienceSurveyBanner.bannerLabelNo,
 	];
+
 	private readonly showBannerState = new Map<
 		BannerType,
 		IPersistentState<ShowBannerWithExpiryTime>
 	>();
+
 	private static surveyDelay = false;
+
 	private readonly NotebookExecutionThreshold = 250; // Cell executions before showing survey
 	private onDidChangeNotebookCellExecutionStateHandler?: IDisposable;
 
@@ -123,6 +132,7 @@ export class DataScienceSurveyBanner
 			BannerType.InsidersNotebookSurvey,
 			InsidersNotebookSurveyStateKeys.ShowBanner,
 		);
+
 		this.setPersistentState(
 			BannerType.ExperimentNotebookSurvey,
 			ExperimentNotebookSurveyStateKeys.ShowBanner,
@@ -135,6 +145,7 @@ export class DataScienceSurveyBanner
 			},
 			10 * 60 * 1000,
 		);
+
 		this.disposables.push(new Disposable(() => clearTimeout(timer)));
 	}
 
@@ -149,6 +160,7 @@ export class DataScienceSurveyBanner
 
 	public async showBanner(type: BannerType): Promise<void> {
 		const show = this.shouldShowBanner(type);
+
 		this.onDidChangeNotebookCellExecutionStateHandler?.dispose();
 
 		if (!show) {
@@ -165,6 +177,7 @@ export class DataScienceSurveyBanner
 		switch (response) {
 			case this.bannerLabels[DSSurveyLabelIndex.Yes]: {
 				await this.launchSurvey(type);
+
 				await this.disable(DSSurveyLabelIndex.Yes, type);
 
 				break;
@@ -208,6 +221,7 @@ export class DataScienceSurveyBanner
 	private async launchSurvey(type: BannerType): Promise<void> {
 		openInBrowser(this.getSurveyLink(type));
 	}
+
 	private async disable(answer: DSSurveyLabelIndex, type: BannerType) {
 		let monthsTillNextPrompt = answer === DSSurveyLabelIndex.Yes ? 6 : 4;
 
@@ -262,6 +276,7 @@ export class DataScienceSurveyBanner
 				InsidersNotebookSurveyStateKeys.ExecutionCount,
 				BannerType.InsidersNotebookSurvey,
 			).catch(noop);
+
 			this.updateStateAndShowBanner(
 				ExperimentNotebookSurveyStateKeys.ExecutionCount,
 				BannerType.ExperimentNotebookSurvey,
@@ -275,11 +290,14 @@ export class DataScienceSurveyBanner
 
 			return;
 		}
+
 		const state = this.persistentState.createGlobalPersistentState<number>(
 			val,
 			0,
 		);
+
 		await state.updateValue(state.value + 1);
+
 		this.showBanner(banner).catch(noop);
 	}
 

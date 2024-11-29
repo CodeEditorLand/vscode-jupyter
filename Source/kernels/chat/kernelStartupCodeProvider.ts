@@ -30,12 +30,15 @@ export class KernelChatStartupCodeProvider
 
 	activate(): void {
 		this.registry.register(this, JupyterNotebookView);
+
 		this.registry.register(this, InteractiveWindowView);
 	}
+
 	async getCode(kernel: IKernel): Promise<string[]> {
 		if (!isPythonKernelConnection(kernel.kernelConnectionMetadata)) {
 			return [];
 		}
+
 		return [chatStartupPythonCode];
 	}
 }

@@ -61,6 +61,7 @@ export class ConnectionDisplayDataProvider
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
 			}
+
 			const category = getKernelConnectionCategorySync(connection);
 
 			const descriptionProvider =
@@ -76,7 +77,9 @@ export class ConnectionDisplayDataProvider
 				undefined,
 				descriptionProvider,
 			);
+
 			this.disposables.push(newDetails);
+
 			this.details.set(connection.id, newDetails);
 
 			// If the interpreter information changes, then update the display data.
@@ -116,21 +119,28 @@ export class ConnectionDisplayDataProvider
 
 						if (newLabel !== newDetails.label) {
 							newDetails.label = newLabel;
+
 							changed = true;
 						}
+
 						if (newDescription !== newDetails.description) {
 							newDetails.description = newDescription;
+
 							changed = true;
 						}
+
 						if (newCategory !== newDetails.category) {
 							newDetails.category = newCategory;
+
 							changed = true;
 						}
+
 						if (changed) {
 							newDetails.triggerChange();
 						}
 					}
 				};
+
 				this.interpreters.onDidChangeInterpreter(
 					(e) => (e ? updateInterpreterInfo([e]) : undefined),
 					this,
@@ -138,7 +148,9 @@ export class ConnectionDisplayDataProvider
 				);
 			}
 		}
+
 		const details: ConnectionDisplayData = this.details.get(connection.id)!;
+
 		this.details.set(connection.id, details);
 
 		if (
@@ -153,6 +165,7 @@ export class ConnectionDisplayDataProvider
 
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;
+
 				details.triggerChange();
 			}
 		}
@@ -161,6 +174,7 @@ export class ConnectionDisplayDataProvider
 
 		if (details.category !== kind) {
 			details.category = kind;
+
 			details.triggerChange();
 		}
 

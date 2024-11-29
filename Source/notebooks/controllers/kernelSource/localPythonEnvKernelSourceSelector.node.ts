@@ -56,9 +56,11 @@ export type MultiStepResult<
 	T extends KernelConnectionMetadata = KernelConnectionMetadata,
 > = {
 	notebook: NotebookDocument;
+
 	selection?:
 		| { type: "connection"; connection: T }
 		| { type: "userPerformedSomeOtherAction" };
+
 	disposables: IDisposable[];
 };
 
@@ -72,7 +74,9 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		IExtensionSyncActivationService
 {
 	kind = ContributedKernelFinderKind.LocalPythonEnvironment;
+
 	id: string = ContributedKernelFinderKind.LocalPythonEnvironment;
+
 	displayName: string = DataScience.localPythonEnvironments;
 
 	private _onDidChangeKernels = this._register(
@@ -80,25 +84,37 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			removed?: { id: string }[];
 		}>(),
 	);
+
 	onDidChangeKernels = this._onDidChangeKernels.event;
+
 	private _kernels = new Map<string, PythonKernelConnectionMetadata>();
+
 	private readonly _onDidChangeStatus = this._register(
 		new EventEmitter<void>(),
 	);
+
 	private _status: "idle" | "discovering" = "idle";
+
 	public get status() {
 		return this._status;
 	}
+
 	private set status(value: typeof this._status) {
 		this._status = value;
+
 		this._onDidChangeStatus.fire();
 	}
+
 	private readonly promiseMonitor = new PromiseMonitor();
+
 	public readonly onDidChangeStatus = this._onDidChangeStatus.event;
+
 	public get kernels(): PythonKernelConnectionMetadata[] {
 		return Array.from(this._kernels.values());
 	}
+
 	private previousCancellationTokens: CancellationTokenSource[] = [];
+
 	private tempDirForKernelSpecs?: Promise<Uri>;
 
 	constructor(
@@ -113,9 +129,12 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		@inject(IKernelFinder) kernelFinder: KernelFinder,
 	) {
 		super();
+
 		disposables.push(this);
+
 		kernelFinder.registerKernelFinder(this);
 	}
+
 	activate() {
 		this._register(
 			this.promiseMonitor.onStateChange(
@@ -129,18 +148,21 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 
 		if (this.checker.isPythonExtensionInstalled) {
 			this.getKernelSpecsDir().catch(noop);
+
 			this.hookupPythonApi().catch(noop);
 		} else {
 			this._register(
 				this.checker.onPythonExtensionInstallationStatusChanged(() => {
 					if (this.checker.isPythonExtensionInstalled) {
 						this.getKernelSpecsDir().catch(noop);
+
 						this.hookupPythonApi().catch(noop);
 					}
 				}, this),
 			);
 		}
 	}
+
 	public async selectLocalKernel(
 		notebook: NotebookDocument,
 	): Promise<PythonKernelConnectionMetadata | undefined> {
@@ -154,6 +176,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				notebook,
 				cancellationTokenSource.token,
 			);
+
 			disposables.push(selector);
 
 			const kernel = await selector.selectKernel();
@@ -165,6 +188,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 				) {
 					return;
 				}
+
 				throw new CancellationError();
 			}
 			// Ensure this is added to the list of kernels.
@@ -175,6 +199,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			dispose(disposables);
 		}
 	}
+
 	public async getKernelConnection(
 		env: EnvironmentPath,
 	): Promise<PythonKernelConnectionMetadata | undefined> {
@@ -193,6 +218,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 
 			return;
 		}
+
 		if (
 			!interpreter ||
 			this.filter.isPythonEnvironmentExcluded(interpreter)
@@ -220,57 +246,73 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		if (existingConnection) {
 			return existingConnection;
 		}
+
 		this.addUpdateKernel(kernelConnection);
 
 		return kernelConnection;
 	}
+
 	private addUpdateKernel(kernel: PythonKernelConnectionMetadata) {
 		const existing = this._kernels.get(kernel.id);
 
 		if (existing) {
 			existing.updateInterpreter(kernel.interpreter);
+
 			this._kernels.set(kernel.id, Object.assign(existing, kernel));
+
 			this._onDidChangeKernels.fire({});
 		} else {
 			this._kernels.set(kernel.id, kernel);
+
 			this._onDidChangeKernels.fire({});
 		}
 	}
 
 	public async refresh() {
 		this.previousCancellationTokens.forEach((t) => t.cancel());
+
 		dispose(this.previousCancellationTokens);
+
 		this.previousCancellationTokens = [];
+
 		this._kernels.clear();
+
 		this.pythonApi
 			.getNewApi()
 			.then((api) => {
 				if (!api) {
 					return;
 				}
+
 				this.promiseMonitor.push(
 					api.environments
 						.refreshEnvironments({ forceRefresh: true })
 						.catch(noop),
 				);
+
 				api.environments.known.forEach((e) =>
 					this.buildDummyEnvironment(e).catch(noop),
 				);
 			})
 			.catch(noop);
 	}
+
 	private getKernelSpecsDir() {
 		if (!this.tempDirForKernelSpecs) {
 			this.tempDirForKernelSpecs =
 				this.jupyterPaths.getKernelSpecTempRegistrationFolder();
 		}
+
 		return this.tempDirForKernelSpecs;
 	}
+
 	private apiHooked = false;
+
 	private async hookupPythonApi() {
 		if (this.apiHooked) {
 			return;
 		}
+
 		this.apiHooked = true;
 
 		const api = await this.pythonApi.getNewApi();
@@ -278,9 +320,11 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		if (!api) {
 			return;
 		}
+
 		api.environments.known.map((e) =>
 			this.buildDummyEnvironment(e).catch(noop),
 		);
+
 		this._register(
 			api.environments.onDidChangeEnvironments((e) => {
 				if (e.type === "remove") {
@@ -288,6 +332,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 
 					if (kernel) {
 						this._kernels.delete(e.env.id);
+
 						this._onDidChangeKernels.fire({ removed: [kernel] });
 					}
 				} else {
@@ -296,6 +341,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 			}, this),
 		);
 	}
+
 	private async buildDummyEnvironment(e: Environment) {
 		const interpreter = pythonEnvToJupyterEnv(e);
 
@@ -305,6 +351,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 		) {
 			return;
 		}
+
 		const spec = await createInterpreterKernelSpec(
 			interpreter,
 			await this.getKernelSpecsDir(),
@@ -320,6 +367,7 @@ export class LocalPythonEnvNotebookKernelSourceSelector
 
 		if (!existingInterpreterInfo) {
 			this._kernels.set(e.id, result);
+
 			this._onDidChangeKernels.fire({});
 		}
 	}

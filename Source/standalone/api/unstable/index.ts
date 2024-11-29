@@ -55,6 +55,7 @@ export function registerRemoteServerProvider(
 	const extensionId = provider.id.startsWith("_builtin")
 		? JVSC_EXTENSION_ID
 		: extensions.determineExtensionFromCallStack().extensionId;
+
 	logger.error(
 		`The API registerRemoteServerProvider has being deprecated and will be removed soon, please use createJupyterServerCollection (extension ${extensionId}).`,
 	);
@@ -62,6 +63,7 @@ export function registerRemoteServerProvider(
 	if (extensionId.toLowerCase() != CodespaceExtensionId.toLowerCase()) {
 		throw new Error("Deprecated API");
 	}
+
 	sendTelemetryEvent(Telemetry.JupyterApiUsage, undefined, {
 		clientExtId: extensionId,
 		pemUsed: "registerRemoteServerProvider",
@@ -81,6 +83,7 @@ export function registerRemoteServerProvider(
 	if (commandProvider) {
 		collection.commandProvider = commandProvider;
 	}
+
 	return {
 		dispose: () => {
 			collection.dispose();
@@ -98,6 +101,7 @@ export function getReady(ready: Promise<unknown>): Promise<void> {
 }
 export function getKernelService(serviceContainer: IServiceContainer) {
 	const extensions = serviceContainer.get<IExtensions>(IExtensions);
+
 	sendTelemetryEvent(Telemetry.JupyterApiUsage, undefined, {
 		clientExtId: extensions.determineExtensionFromCallStack().extensionId,
 		pemUsed: "registerRemoteServerProvider",
@@ -116,6 +120,7 @@ export async function addRemoteJupyterServer(
 	serviceContainer: IServiceContainer,
 ) {
 	const extensions = serviceContainer.get<IExtensions>(IExtensions);
+
 	logger.error(
 		"The API addRemoteJupyterServer has being deprecated and will be removed soon, please use createJupyterServerCollection.",
 	);
@@ -126,6 +131,7 @@ export async function addRemoteJupyterServer(
 	if (extensionId.toLowerCase() != CodespaceExtensionId.toLowerCase()) {
 		throw new Error("Deprecated API");
 	}
+
 	sendTelemetryEvent(Telemetry.JupyterApiUsage, undefined, {
 		clientExtId: extensionId,
 		pemUsed: "addRemoteJupyterServer",
@@ -143,7 +149,9 @@ export async function addRemoteJupyterServer(
 			{ id: providerId, handle },
 			controllerRegistration,
 		);
+
 	await selector.addJupyterServer({ id: providerId, handle, extensionId });
+
 	await controllerCreatedPromise;
 }
 
@@ -153,6 +161,7 @@ export async function openNotebook(
 	serviceContainer: IServiceContainer,
 ) {
 	const extensions = serviceContainer.get<IExtensions>(IExtensions);
+
 	sendTelemetryEvent(Telemetry.JupyterApiUsage, undefined, {
 		clientExtId: extensions.determineExtensionFromCallStack().extensionId,
 		pemUsed: "openNotebook",
@@ -194,6 +203,7 @@ export async function openNotebook(
 				);
 
 			const connection = await selector.getKernelConnection(pythonEnv);
+
 			id =
 				connection &&
 				controllers.all.find(
@@ -201,9 +211,11 @@ export async function openNotebook(
 				)?.id;
 		}
 	}
+
 	if (!id) {
 		throw new Error(`Kernel ${kernelOrPythonEnvId} not found.`);
 	}
+
 	const notebookEditor =
 		window.activeNotebookEditor?.notebook?.uri?.toString() ===
 		uri.toString()
@@ -211,6 +223,7 @@ export async function openNotebook(
 			: await window.showNotebookDocument(
 					await workspace.openNotebookDocument(uri),
 				);
+
 	await commands.executeCommand("notebook.selectKernel", {
 		notebookEditor,
 		id,

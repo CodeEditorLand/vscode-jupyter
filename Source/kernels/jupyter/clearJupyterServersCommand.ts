@@ -28,12 +28,14 @@ export class ClearJupyterServersCommand
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposable[],
 	) {}
+
 	public activate() {
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.ClearSavedJupyterUris,
 				async () => {
 					await this.serverUriStorage.clear().catch(noop);
+
 					await Promise.all(
 						this.registrations.jupyterCollections
 							.filter(
@@ -48,6 +50,7 @@ export class ClearJupyterServersCommand
 								) {
 									return;
 								}
+
 								const token = new CancellationTokenSource();
 
 								const servers = await Promise.resolve(
@@ -55,6 +58,7 @@ export class ClearJupyterServersCommand
 										token.token,
 									),
 								);
+
 								await Promise.all(
 									(servers || []).map((server) =>
 										provider.serverProvider!
@@ -65,6 +69,7 @@ export class ClearJupyterServersCommand
 								);
 							}),
 					).catch(noop);
+
 					await commands
 						.executeCommand(
 							"dataScience.ClearUserProviderJupyterServerCache",

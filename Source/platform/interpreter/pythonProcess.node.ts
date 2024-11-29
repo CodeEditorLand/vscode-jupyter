@@ -31,6 +31,7 @@ class PythonProcessService {
 				args: string[],
 				options: SpawnOptions,
 			): Promise<ExecutionResult<string>>;
+
 			execObservable(
 				file: string,
 				args: string[],
@@ -67,6 +68,7 @@ class PythonProcessService {
 		// We should never set token for long running processes.
 		// We don't want the process to die when the token is cancelled.
 		const spawnOptions = { ...options };
+
 		spawnOptions.token = undefined;
 
 		return this.deps.execObservable(
@@ -130,6 +132,7 @@ export function createPythonProcessService(
 		getExecutionInfo(pythonArgs?: string[]): PythonExecInfo;
 
 		getExecutionObservableInfo(pythonArgs?: string[]): PythonExecInfo;
+
 		isModuleInstalled(moduleName: string): Promise<boolean>;
 	},
 ) {

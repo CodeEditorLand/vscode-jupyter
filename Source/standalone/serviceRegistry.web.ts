@@ -45,6 +45,7 @@ export function registerTypes(
 		IExtensionSyncActivationService,
 		GlobalActivation,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ActiveEditorContextService,
@@ -59,10 +60,12 @@ export function registerTypes(
 		IExtensionSyncActivationService,
 		ImportTracker,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		EagerlyActivateJupyterUriProviders,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		JupyterServerSelectorCommand,
@@ -73,6 +76,7 @@ export function registerTypes(
 		IExtensionActivationManager,
 		ExtensionActivationManager,
 	);
+
 	serviceManager.add<INotebookExporter>(INotebookExporter, JupyterExporter);
 
 	// API
@@ -80,6 +84,7 @@ export function registerTypes(
 		IExportedKernelServiceFactory,
 		JupyterKernelServiceFactory,
 	);
+
 	serviceManager.addSingleton<ApiAccessService>(
 		ApiAccessService,
 		ApiAccessService,
@@ -107,6 +112,7 @@ export function registerTypes(
 		IExtensionSyncActivationService,
 		CodespaceCommandRegistry,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		ExposeUsedAzMLServerHandles,
@@ -122,11 +128,13 @@ export function registerTypes(
 		IJupyterVariablesProvider,
 		JupyterVariablesProvider,
 	);
+
 	serviceManager.addSingleton<IJupyterVariables>(
 		IJupyterVariables,
 		KernelVariables,
 		Identifiers.KERNEL_VARIABLES,
 	);
+
 	serviceManager.addSingleton<IKernelVariableRequester>(
 		IKernelVariableRequester,
 		PythonVariablesRequester,

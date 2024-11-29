@@ -52,6 +52,7 @@ export class ConnectionDisplayDataProvider
 			if (connection.kind === "connectToLiveRemoteKernel") {
 				description = getRemoteKernelSessionInformation(connection);
 			}
+
 			const descriptionProvider =
 				connection.kind === "connectToLiveRemoteKernel"
 					? () => getRemoteKernelSessionInformation(connection)
@@ -67,10 +68,14 @@ export class ConnectionDisplayDataProvider
 				undefined,
 				descriptionProvider,
 			);
+
 			this.disposables.push(newDetails);
+
 			this.details.set(connection.id, newDetails);
 		}
+
 		const details: ConnectionDisplayData = this.details.get(connection.id)!;
+
 		this.details.set(connection.id, details);
 
 		if (
@@ -85,6 +90,7 @@ export class ConnectionDisplayDataProvider
 
 			if (details.serverDisplayName !== displayName) {
 				details.serverDisplayName = displayName;
+
 				details.triggerChange();
 			}
 		}
@@ -93,6 +99,7 @@ export class ConnectionDisplayDataProvider
 
 		if (details.category !== kind) {
 			details.category = kind;
+
 			details.triggerChange();
 		}
 

@@ -36,8 +36,11 @@ export class PlotViewer extends PlotViewerBase {
 		logger.info("exporting plot...");
 
 		const filtersObject: Record<string, string[]> = {};
+
 		filtersObject[localize.DataScience.pdfFilter] = ["pdf"];
+
 		filtersObject[localize.DataScience.pngFilter] = ["png"];
+
 		filtersObject[localize.DataScience.svgFilter] = ["svg"];
 
 		// Ask the user what file to save to
@@ -60,6 +63,7 @@ export class PlotViewer extends PlotViewerBase {
 						const buffer = base64ToUint8Array(
 							payload.png.replace("data:image/png;base64", ""),
 						);
+
 						await this.fs.writeFile(file, buffer);
 
 						break;
@@ -74,6 +78,7 @@ export class PlotViewer extends PlotViewerBase {
 			}
 		} catch (e) {
 			logger.error(e);
+
 			window
 				.showErrorMessage(localize.DataScience.exportImageFailed(e))
 				.then(noop, noop);
@@ -98,7 +103,9 @@ export async function saveSvgToPdf(
 	const doc = new pdfkit();
 
 	const ws = fs.createLocalWriteStream(file.fsPath);
+
 	logger.info(`Writing pdf to ${file.fsPath}`);
+
 	ws.on("finish", () => deferred.resolve);
 	// See docs or demo from source https://cdn.statically.io/gh/alafr/SVG-to-PDFKit/master/examples/demo.htm
 	// How to resize to fit (fit within the height & width of page).
@@ -107,7 +114,10 @@ export async function saveSvgToPdf(
 	doc.pipe(ws);
 
 	doc.end();
+
 	logger.info(`Finishing pdf to ${file.fsPath}`);
+
 	await deferred.promise;
+
 	logger.info(`Completed pdf to ${file.fsPath}`);
 }

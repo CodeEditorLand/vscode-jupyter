@@ -16,6 +16,7 @@ export class PythonFilterUICommandDeprecation
 		@inject(IDisposableRegistry)
 		private readonly disposables: IDisposableRegistry,
 	) {}
+
 	public activate() {
 		this.disposables.push(
 			commands.registerCommand(

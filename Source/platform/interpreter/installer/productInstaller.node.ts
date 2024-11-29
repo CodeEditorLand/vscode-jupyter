@@ -55,6 +55,7 @@ export async function isModulePresentInEnvironment(
 	if (memento.get(key, false)) {
 		return true;
 	}
+
 	const packageName = translateProductToModule(product);
 
 	const packageVersionPromise = InterpreterPackages.instance
@@ -104,8 +105,10 @@ export class DataScienceInstaller {
 		this.configService = serviceContainer.get<IConfigurationService>(
 			IConfigurationService,
 		);
+
 		this.productService =
 			serviceContainer.get<IProductService>(IProductService);
+
 		this.persistentStateFactory =
 			serviceContainer.get<IPersistentStateFactory>(
 				IPersistentStateFactory,
@@ -131,9 +134,11 @@ export class DataScienceInstaller {
 		if (!installer) {
 			return InstallerResponse.Ignore;
 		}
+
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return InstallerResponse.Cancelled;
 		}
+
 		let flags =
 			reInstallAndUpdate === true
 				? ModuleInstallFlags.updateDependencies |
@@ -145,6 +150,7 @@ export class DataScienceInstaller {
 				? flags | ModuleInstallFlags.installPipIfRequired
 				: ModuleInstallFlags.installPipIfRequired;
 		}
+
 		await installer.installModule(
 			product,
 			interpreter,
@@ -155,6 +161,7 @@ export class DataScienceInstaller {
 		if (cancelTokenSource.token.isCancellationRequested) {
 			return InstallerResponse.Cancelled;
 		}
+
 		return this.isInstalled(product, interpreter).then((isInstalled) => {
 			return isInstalled
 				? InstallerResponse.Installed
@@ -232,12 +239,16 @@ export class DataScienceInstaller {
 @injectable()
 export class ProductInstaller implements IInstaller {
 	private readonly productService: IProductService;
+
 	private readonly _onInstalled = new EventEmitter<{
 		product: Product;
+
 		resource?: InterpreterUri;
 	}>();
+
 	public get onInstalled(): Event<{
 		product: Product;
+
 		resource?: InterpreterUri;
 	}> {
 		return this._onInstalled.event;
@@ -272,6 +283,7 @@ export class ProductInstaller implements IInstaller {
 		if (interpreter) {
 			this.interpreterPackages.trackPackages(interpreter);
 		}
+
 		let action:
 			| "installed"
 			| "failed"
@@ -287,6 +299,7 @@ export class ProductInstaller implements IInstaller {
 				reInstallAndUpdate,
 				installPipIfRequired,
 			);
+
 			trackPackageInstalledIntoInterpreter(
 				this.memento,
 				product,
@@ -296,6 +309,7 @@ export class ProductInstaller implements IInstaller {
 			if (result === InstallerResponse.Installed) {
 				this._onInstalled.fire({ product, resource: interpreter });
 			}
+
 			switch (result) {
 				case InstallerResponse.Cancelled:
 					action = "cancelled";
@@ -320,6 +334,7 @@ export class ProductInstaller implements IInstaller {
 				default:
 					break;
 			}
+
 			return result;
 		} catch (ex) {
 			action = "failed";
@@ -358,6 +373,7 @@ export class ProductInstaller implements IInstaller {
 			default:
 				break;
 		}
+
 		throw new Error(`Unknown product ${product}`);
 	}
 }

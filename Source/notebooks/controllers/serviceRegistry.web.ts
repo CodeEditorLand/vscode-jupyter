@@ -22,21 +22,26 @@ export function registerTypes(
 		IControllerRegistration,
 		ControllerRegistration,
 	);
+
 	serviceManager.addBinding(
 		IControllerRegistration,
 		IExtensionSyncActivationService,
 	);
+
 	serviceManager.addSingleton<IConnectionDisplayDataProvider>(
 		IConnectionDisplayDataProvider,
 		ConnectionDisplayDataProvider,
 	);
+
 	serviceManager.addSingleton<IRemoteNotebookKernelSourceSelector>(
 		IRemoteNotebookKernelSourceSelector,
 		RemoteNotebookKernelSourceSelector,
 	);
+
 	serviceManager.addSingleton<IExtensionSyncActivationService>(
 		IExtensionSyncActivationService,
 		KernelSourceCommandHandler,
 	);
+
 	registerWidgetTypes(serviceManager, isDevMode);
 }

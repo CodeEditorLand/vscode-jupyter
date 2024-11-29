@@ -27,10 +27,13 @@ import {
 @injectable()
 export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 	private variableResultCache = new VariableResultCache();
+
 	private variableSummaryCache = new VariableSummaryCache();
+
 	private runningKernels = new Set<string>();
 
 	_onDidChangeVariables = new EventEmitter<NotebookDocument>();
+
 	onDidChangeVariables = this._onDidChangeVariables.event;
 
 	constructor(
@@ -65,6 +68,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 			kernelWasRunning
 		) {
 			this.runningKernels.delete(notebookUri);
+
 			this._onDidChangeVariables.fire(kernel.notebook);
 		}
 	}
@@ -81,6 +85,7 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 		if (parentDescription) {
 			parentKey = `${parentDescription.name}.${parentDescription.propertyChain.join(".")}[[${start}`;
 		}
+
 		return `${notebookUri}:${parentKey}`;
 	}
 
@@ -127,9 +132,11 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 					start,
 					token,
 				);
+
 				results = variables.map((variable) =>
 					this.createVariableResult(variable, kernel),
 				);
+
 				this.variableResultCache.setResults(
 					executionCount,
 					cacheKey,
@@ -170,9 +177,11 @@ export class JupyterVariablesProvider implements IJupyterVariablesProvider {
 						start,
 						token,
 					);
+
 				results = variables.map((variable) =>
 					this.createVariableResult(variable, kernel),
 				);
+
 				this.variableResultCache.setResults(
 					executionCount,
 					cacheKey,
@@ -321,5 +330,6 @@ function createExpression(
 			expression += `[${property}]`;
 		}
 	}
+
 	return expression;
 }

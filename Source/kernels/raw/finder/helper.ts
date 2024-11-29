@@ -16,6 +16,7 @@ export function sendKernelSpecTelemetry(
 
 		return shellScripts.some((shell) => arg.includes(shell));
 	});
+
 	sendTelemetryEvent(Telemetry.KernelSpecLanguage, undefined, {
 		language: kernelSpec.language,
 		kind,

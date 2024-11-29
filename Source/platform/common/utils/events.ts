@@ -15,6 +15,7 @@ export function once<T>(event: Event<T>): Event<T> {
 		let didFire = false;
 
 		let result: IDisposable | undefined = undefined;
+
 		result = event(
 			(e) => {
 				if (didFire) {

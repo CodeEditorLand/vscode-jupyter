@@ -218,12 +218,15 @@ export const IWebviewView = Symbol("IWebviewView");
 
 export interface IWebviewView extends IWebview {
 	readonly onDidChangeVisibility: Event<void>;
+
 	readonly visible: boolean;
 }
 
 export interface IWebviewOptions {
 	rootPath: Uri;
+
 	cwd: Uri;
+
 	scripts: Uri[];
 	/**
 	 * Additional paths apart from cwd and rootPath, that webview would allow loading resources/files from.
@@ -274,7 +277,9 @@ export interface IWebviewPanel extends IWebview {
 
 export interface IWebviewPanelOptions extends IWebviewOptions {
 	viewColumn: ViewColumn;
+
 	listener: IWebviewPanelMessageListener;
+
 	title: string;
 }
 
@@ -304,5 +309,6 @@ export interface IEncryptedStorage {
 		key: string,
 		value: string | undefined,
 	): Promise<void>;
+
 	retrieve(service: string, key: string): Promise<string | undefined>;
 }

@@ -31,9 +31,11 @@ export class WorkspaceInterpreterTracker
 		WorkspaceInterpreterTracker.isActiveWorkspaceInterpreter =
 			this.isActiveWorkspaceInterpreterImpl.bind(this);
 	}
+
 	public activate() {
 		this.workspaceInterpreterTracker?.activate();
 	}
+
 	public isActiveWorkspaceInterpreterImpl(
 		resource: Resource,
 		interpreter?: PythonEnvironment,

@@ -27,6 +27,7 @@ export function serializeDataViews(
 				null,
 				new Uint8Array(item.buffer as any) as any,
 			);
+
 			newBufferView.push({
 				...item,
 				byteLength: item.byteLength,
@@ -61,6 +62,7 @@ export function deserializeDataViews(
 	if (!Array.isArray(buffers) || buffers.length === 0) {
 		return buffers;
 	}
+
 	const newBufferView: (ArrayBuffer | ArrayBufferView)[] = [];
 	// eslint-disable-next-line @typescript-eslint/prefer-for-of
 	for (let i = 0; i < buffers.length; i += 1) {
@@ -75,6 +77,7 @@ export function deserializeDataViews(
 				item.byteOffset,
 				item.byteLength,
 			);
+
 			newBufferView.push(bufferView);
 		} else {
 			const buffer = new Uint8Array(item).buffer;
@@ -82,5 +85,6 @@ export function deserializeDataViews(
 			newBufferView.push(buffer);
 		}
 	}
+
 	return newBufferView;
 }

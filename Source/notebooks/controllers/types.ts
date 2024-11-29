@@ -24,30 +24,46 @@ export const InteractiveControllerIdSuffix = " (Interactive)";
 
 export interface IVSCodeNotebookController extends IDisposable {
 	readonly connection: KernelConnectionMetadata;
+
 	readonly controller: vscode.NotebookController;
+
 	readonly id: string;
+
 	readonly label: string;
+
 	readonly viewType:
 		| typeof JupyterNotebookView
 		| typeof InteractiveWindowView;
+
 	readonly onNotebookControllerSelectionChanged: vscode.Event<{
 		selected: boolean;
+
 		notebook: vscode.NotebookDocument;
+
 		controller: VSCodeNotebookController;
 	}>;
+
 	readonly onConnecting: vscode.Event<void>;
+
 	readonly onDidDispose: vscode.Event<void>;
+
 	readonly onDidReceiveMessage: vscode.Event<{
 		editor: vscode.NotebookEditor;
+
 		message: any;
 	}>;
+
 	restoreConnection(notebook: vscode.NotebookDocument): Promise<void>;
+
 	postMessage(
 		message: any,
 		editor?: vscode.NotebookEditor,
 	): Thenable<boolean>;
+
 	asWebviewUri(localResource: vscode.Uri): vscode.Uri;
+
 	isAssociatedWithDocument(notebook: vscode.NotebookDocument): boolean;
+
 	updateConnection(connection: KernelConnectionMetadata): void;
 
 	setPendingCellAddition(
@@ -58,6 +74,7 @@ export interface IVSCodeNotebookController extends IDisposable {
 
 export interface IVSCodeNotebookControllerUpdateEvent {
 	added: IVSCodeNotebookController[];
+
 	removed: IVSCodeNotebookController[];
 }
 
@@ -76,13 +93,18 @@ export interface IControllerRegistration {
 	 * Gets every registered connection metadata
 	 */
 	all: KernelConnectionMetadata[];
+
 	readonly onControllerSelected: vscode.Event<{
 		notebook: vscode.NotebookDocument;
+
 		controller: IVSCodeNotebookController;
 	}>;
+
 	readonly onControllerSelectionChanged: vscode.Event<{
 		notebook: vscode.NotebookDocument;
+
 		controller: IVSCodeNotebookController;
+
 		selected: boolean;
 	}>;
 
@@ -163,10 +185,15 @@ export interface ILocalPythonNotebookKernelSourceSelector {
 
 export interface IConnectionDisplayData extends IDisposable {
 	readonly onDidChange: vscode.Event<IConnectionDisplayData>;
+
 	readonly label: string;
+
 	readonly description: string | undefined;
+
 	readonly detail: string;
+
 	readonly category: string;
+
 	readonly serverDisplayName?: string;
 }
 

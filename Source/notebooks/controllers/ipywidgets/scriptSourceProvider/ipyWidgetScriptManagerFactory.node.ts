@@ -39,6 +39,7 @@ export class IPyWidgetScriptManagerFactory
 		@inject(JupyterConnection)
 		private readonly connection: JupyterConnection,
 	) {}
+
 	getOrCreate(kernel: IKernel): IIPyWidgetScriptManager {
 		if (!this.managers.has(kernel)) {
 			if (
@@ -53,7 +54,9 @@ export class IPyWidgetScriptManagerFactory
 					this.fs,
 					this.connection,
 				);
+
 				this.managers.set(kernel, scriptManager);
+
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
@@ -67,7 +70,9 @@ export class IPyWidgetScriptManagerFactory
 					this.context,
 					this.jupyterPaths,
 				);
+
 				this.managers.set(kernel, scriptManager);
+
 				kernel.onDisposed(
 					() => scriptManager.dispose(),
 					this,
@@ -75,6 +80,7 @@ export class IPyWidgetScriptManagerFactory
 				);
 			}
 		}
+
 		return this.managers.get(kernel)!;
 	}
 }

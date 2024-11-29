@@ -8,12 +8,16 @@ import { noop } from "../../platform/common/utils/misc";
 
 class StatusItem implements Disposable {
 	private deferred: Deferred<void>;
+
 	private disposed: boolean = false;
+
 	private timeout: NodeJS.Timer | number | undefined;
+
 	private disposeCallback: () => void;
 
 	constructor(_title: string, disposeCallback: () => void, timeout?: number) {
 		this.deferred = createDeferred<void>();
+
 		this.disposeCallback = disposeCallback;
 
 		// A timeout is possible too. Auto dispose if that's the case
@@ -29,8 +33,10 @@ class StatusItem implements Disposable {
 			if (this.timeout) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				clearTimeout(this.timeout as any);
+
 				this.timeout = undefined;
 			}
+
 			this.disposeCallback();
 
 			if (!this.deferred.completed) {
@@ -45,6 +51,7 @@ class StatusItem implements Disposable {
 
 	public reject = () => {
 		this.deferred.reject();
+
 		this.dispose();
 	};
 }
@@ -84,9 +91,11 @@ export class StatusProvider {
 				if (c && cancel) {
 					c.onCancellationRequested(() => {
 						cancel();
+
 						statusItem.reject();
 					});
 				}
+
 				return statusItem.promise();
 			})
 			.then(noop, noop);
@@ -110,6 +119,7 @@ export class StatusProvider {
 		} finally {
 			status.dispose();
 		}
+
 		return result;
 	}
 
@@ -119,6 +129,7 @@ export class StatusProvider {
 
 	private decrementCount = () => {
 		const updatedCount = this.statusCount - 1;
+
 		this.statusCount = Math.max(updatedCount, 0);
 	};
 }

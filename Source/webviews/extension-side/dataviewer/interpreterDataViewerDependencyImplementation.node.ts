@@ -60,6 +60,7 @@ export class InterpreterDataViewerDependencyImplementation extends BaseDataViewe
 
 			return "";
 		}
+
 		const items = splitLines(output.trim());
 
 		const indexOfSeparator = items.indexOf(separator);

@@ -10,6 +10,7 @@ export type Event<T> = (listener: (e?: T) => any) => void;
 // We can't use the vscode version because pulling in vscode apis is not allowed in a webview
 export class EventEmitter<T> {
 	private _event: Event<T> | undefined;
+
 	private _listeners: Set<(e?: T) => any> = new Set<(e?: T) => any>();
 
 	public get event(): Event<T> {
@@ -18,6 +19,7 @@ export class EventEmitter<T> {
 				this._listeners.add(listener);
 			};
 		}
+
 		return this._event;
 	}
 
@@ -32,19 +34,32 @@ export class EventEmitter<T> {
 
 export interface IKeyboardEvent {
 	readonly code: string;
+
 	readonly target: HTMLElement;
+
 	readonly ctrlKey: boolean;
+
 	readonly shiftKey: boolean;
+
 	readonly altKey: boolean;
+
 	readonly metaKey: boolean;
+
 	readonly editorInfo?: {
 		isFirstLine: boolean;
+
 		isLastLine: boolean;
+
 		isSuggesting: boolean;
+
 		isDirty: boolean;
+
 		contents: string;
+
 		clear(): void;
 	};
+
 	preventDefault(): void;
+
 	stopPropagation(): void;
 }

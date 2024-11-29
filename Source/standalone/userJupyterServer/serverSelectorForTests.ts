@@ -30,9 +30,13 @@ export class JupyterServerSelectorCommand
 		string,
 		{ uri: Uri; server: JupyterServer }
 	>();
+
 	private _onDidChangeHandles = this._register(new EventEmitter<void>());
+
 	public readonly extensionId: string = JVSC_EXTENSION_ID;
+
 	public readonly id = TestingKernelPickerProviderId;
+
 	public readonly displayName = "Jupyter Server for Testing";
 
 	constructor(
@@ -43,6 +47,7 @@ export class JupyterServerSelectorCommand
 	) {
 		super();
 	}
+
 	public readonly onDidChangeServers = this._onDidChangeHandles.event;
 
 	async provideJupyterServers(
@@ -50,12 +55,14 @@ export class JupyterServerSelectorCommand
 	): Promise<JupyterServer[]> {
 		return Array.from(this.handleMappings.values()).map((s) => s.server);
 	}
+
 	async resolveJupyterServer(
 		server: JupyterServer,
 		_token: CancellationToken,
 	): Promise<JupyterServer> {
 		return server;
 	}
+
 	public activate() {
 		this._register(
 			this.uriProviderRegistration.createJupyterServerCollection(
@@ -65,6 +72,7 @@ export class JupyterServerSelectorCommand
 				this,
 			),
 		);
+
 		this._register(
 			commands.registerCommand(
 				"jupyter.selectjupyteruri",
@@ -73,6 +81,7 @@ export class JupyterServerSelectorCommand
 			),
 		);
 	}
+
 	private async selectJupyterUri(source: Uri): Promise<void> {
 		logger.info(`Setting Jupyter Server URI to remote: ${source}`);
 
@@ -96,6 +105,7 @@ export class JupyterServerSelectorCommand
 				token,
 			},
 		};
+
 		this.handleMappings.set(handle, { uri: source, server: serverUri });
 		// Set the uri directly
 		await this.serverUriStorage.add({
@@ -103,6 +113,7 @@ export class JupyterServerSelectorCommand
 			handle,
 			extensionId: JVSC_EXTENSION_ID,
 		});
+
 		this._onDidChangeHandles.fire();
 	}
 }

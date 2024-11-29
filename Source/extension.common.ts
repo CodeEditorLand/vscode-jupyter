@@ -54,10 +54,15 @@ export async function initializeLoggers(
 	context: IExtensionContext,
 	options: {
 		addConsoleLogger: boolean;
+
 		userNameRegEx?: RegExp;
+
 		homePathRegEx?: RegExp;
+
 		platform?: string;
+
 		arch?: string;
+
 		homePath?: string;
 	},
 ) {
@@ -66,6 +71,7 @@ export async function initializeLoggers(
 	standardOutputChannel.appendLine(
 		`${env.appName} (${version}, ${env.remoteName}, ${env.appHost})`,
 	);
+
 	standardOutputChannel.appendLine(
 		`Jupyter Extension Version: ${context.extension.packageJSON["version"]}.`,
 	);
@@ -79,6 +85,7 @@ export async function initializeLoggers(
 	} else {
 		standardOutputChannel.appendLine("Python Extension not installed.");
 	}
+
 	const pylanceExtension = extensions.getExtension(PylanceExtension);
 
 	if (pylanceExtension) {
@@ -90,11 +97,13 @@ export async function initializeLoggers(
 	} else {
 		standardOutputChannel.appendLine("Pylance Extension not installed.");
 	}
+
 	if (options?.platform) {
 		standardOutputChannel.appendLine(
 			`Platform: ${options.platform} (${options.arch}).`,
 		);
 	}
+
 	standardOutputChannel.appendLine(
 		`Temp Storage folder ${getDisplayPath(await getExtensionTempDir(context))}`,
 	);
@@ -133,6 +142,7 @@ export function initializeGlobals(
 		IServiceContainer,
 		serviceContainer,
 	);
+
 	serviceManager.addSingletonInstance<IServiceManager>(
 		IServiceManager,
 		serviceManager,
@@ -142,25 +152,30 @@ export function initializeGlobals(
 		IDisposableRegistry,
 		context.subscriptions,
 	);
+
 	serviceManager.addSingletonInstance<Memento>(
 		IMemento,
 		context.globalState,
 		GLOBAL_MEMENTO,
 	);
+
 	serviceManager.addSingletonInstance<Memento>(
 		IMemento,
 		context.workspaceState,
 		WORKSPACE_MEMENTO,
 	);
+
 	serviceManager.addSingletonInstance<IExtensionContext>(
 		IExtensionContext,
 		context,
 	);
+
 	serviceManager.addSingletonInstance<OutputChannel>(
 		IOutputChannel,
 		standardOutputChannel,
 		STANDARD_OUTPUT_CHANNEL,
 	);
+
 	serviceManager.addSingletonInstance<OutputChannel>(
 		IOutputChannel,
 		getJupyterOutputChannel(context.subscriptions),
@@ -178,6 +193,7 @@ export function displayProgress() {
 		location: ProgressLocation.Window,
 		title: Common.loadingExtension,
 	};
+
 	window
 		.withProgress(progressOptions, () => promise.promise)
 		.then(noop, noop);
@@ -189,9 +205,13 @@ export function handleError(
 	ex: Error,
 	startupDurations: {
 		totalActivateTime: number;
+
 		codeLoadingTime: number;
+
 		startActivateTime: number;
+
 		endActivateTime: number;
+
 		workspaceFolderCount: number;
 	},
 	stopWatch: {
@@ -201,7 +221,9 @@ export function handleError(
 	notifyUser(Common.handleExtensionActivationError);
 	// Possible logger hasn't initialized either.
 	console.error("extension activation failed", ex);
+
 	logger.error("extension activation failed", ex);
+
 	sendErrorTelemetry(ex, startupDurations, stopWatch);
 }
 
@@ -223,9 +245,11 @@ export async function postActivateLegacy(
 		serviceContainer.get<IExperimentService>(IExperimentService);
 	// This must be done first, this guarantees all experiment information has loaded & all telemetry will contain experiment info.
 	const stopWatch = new StopWatch();
+
 	await experimentService.activate();
 
 	const duration = stopWatch.elapsedTime;
+
 	sendTelemetryEvent(Telemetry.ExperimentLoad, { duration });
 
 	// "initialize" "services"
@@ -244,6 +268,8 @@ export async function postActivateLegacy(
 
 	const featureManager =
 		serviceContainer.get<IFeaturesManager>(IFeaturesManager);
+
 	featureManager.initialize();
+
 	context.subscriptions.push(featureManager);
 }

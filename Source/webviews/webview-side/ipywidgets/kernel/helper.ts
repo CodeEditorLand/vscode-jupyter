@@ -17,6 +17,7 @@ export async function isCDNReachable() {
 	if (isOnlineOnceBefore) {
 		return true;
 	}
+
 	const abort = new AbortController();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let timeout: any;
@@ -24,9 +25,11 @@ export async function isCDNReachable() {
 	const promise = new Promise<boolean>((resolve) => {
 		timeout = setTimeout(() => {
 			resolve(false);
+
 			abort.abort();
 		}, networkAccessTimeoutMs);
 	});
+
 	promise.catch(() => {
 		/**/
 	});
@@ -57,6 +60,7 @@ async function isWebSiteReachable(url: string, signal: AbortSignal) {
 				return true;
 			}
 		}
+
 		return false;
 	} catch (ex) {
 		logErrorMessage(

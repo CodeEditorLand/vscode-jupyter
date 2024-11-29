@@ -38,10 +38,12 @@ export class RemoteKernelControllerWatcher
 		@inject(IJupyterServerProviderRegistry)
 		private readonly serverProviderRegistry: IJupyterServerProviderRegistry,
 	) {}
+
 	activate(): void {
 		this.serverProviderRegistry.jupyterCollections.forEach((collection) =>
 			this.checkExpiredServersInJupyterCollection(collection),
 		);
+
 		this.serverProviderRegistry.onDidChangeCollections(
 			({ added, removed }) => {
 				added.forEach((collection) =>
@@ -70,6 +72,7 @@ export class RemoteKernelControllerWatcher
 			collection.serverProvider.onDidChangeServers
 		) {
 			this.handledServerProviderChanges.add(collection.serverProvider);
+
 			collection.serverProvider.onDidChangeServers(
 				() =>
 					this.checkExpiredServersInJupyterCollection(
@@ -79,7 +82,9 @@ export class RemoteKernelControllerWatcher
 				this.disposables,
 			);
 		}
+
 		const tokenSource = new CancellationTokenSource();
+
 		this.disposables.push(tokenSource);
 
 		try {
@@ -88,6 +93,7 @@ export class RemoteKernelControllerWatcher
 					tokenSource.token,
 				),
 			);
+
 			await this.removeControllersAndUriStorageBelongingToInvalidServers(
 				collection.extensionId,
 				collection.id,
@@ -97,12 +103,14 @@ export class RemoteKernelControllerWatcher
 			tokenSource.dispose();
 		}
 	}
+
 	private async removeControllersAndUriStorageBelongingToInvalidServers(
 		extensionId: string,
 		providerId: string,
 		validServerIds: string[],
 	) {
 		const uris = this.uriStorage.all;
+
 		await Promise.all(
 			uris
 				.filter(
@@ -130,6 +138,7 @@ export class RemoteKernelControllerWatcher
 			) {
 				return;
 			}
+
 			if (
 				!validServerIds.includes(connection.serverProviderHandle.handle)
 			) {
@@ -137,10 +146,12 @@ export class RemoteKernelControllerWatcher
 				logger.warn(
 					`Deleting controller ${controller.id} as it is associated with a server Id that has been removed`,
 				);
+
 				controller.dispose();
 			}
 		});
 	}
+
 	private removeControllersBelongingToDisposedProvider(
 		extensionId: string,
 		providerId: string,
@@ -159,6 +170,7 @@ export class RemoteKernelControllerWatcher
 			logger.warn(
 				`Deleting controller ${controller.id} as it is associated with a Provider Id that has been removed`,
 			);
+
 			controller.dispose();
 		});
 	}

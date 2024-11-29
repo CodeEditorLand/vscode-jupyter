@@ -39,6 +39,7 @@ export class InstallPythonControllerCommands
 		@inject(IDataScienceErrorHandler)
 		private readonly errorHandler: IDataScienceErrorHandler,
 	) {}
+
 	public activate() {
 		// Register our commands that will handle installing the python extension or python via the kernel picker
 		this.disposables.push(
@@ -48,6 +49,7 @@ export class InstallPythonControllerCommands
 				this,
 			),
 		);
+
 		this.disposables.push(
 			commands.registerCommand(
 				Commands.InstallPythonViaKernelPicker,
@@ -79,6 +81,7 @@ export class InstallPythonControllerCommands
 
 		if (selection === Common.install) {
 			this.installedOnceBefore = true;
+
 			sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, {
 				action: "download",
 			});
@@ -88,6 +91,7 @@ export class InstallPythonControllerCommands
 			sendTelemetryEvent(Telemetry.PythonNotInstalled, undefined, {
 				action: "reload",
 			});
+
 			await commands.executeCommand(
 				"jupyter.reloadVSCode",
 				DataScience.reloadRequired,
@@ -144,6 +148,7 @@ export class InstallPythonControllerCommands
 					logger.debug(
 						"Python Extension installed via Kernel Picker command",
 					);
+
 					sendTelemetryEvent(
 						Telemetry.PythonExtensionInstalledViaKernelPicker,
 						undefined,
@@ -157,6 +162,7 @@ export class InstallPythonControllerCommands
 					logger.error(
 						"Failed to install Python Extension via Kernel Picker command",
 					);
+
 					sendTelemetryEvent(
 						Telemetry.PythonExtensionInstalledViaKernelPicker,
 						undefined,
@@ -164,6 +170,7 @@ export class InstallPythonControllerCommands
 							action: "failed",
 						},
 					);
+
 					this.errorHandler
 						.handleError(
 							new Error(

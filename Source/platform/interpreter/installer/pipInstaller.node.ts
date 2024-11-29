@@ -47,9 +47,11 @@ export class PipInstaller extends ModuleInstaller {
 	public get displayName() {
 		return "Pip";
 	}
+
 	public get priority(): number {
 		return 0;
 	}
+
 	public async isSupported(
 		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {
@@ -65,6 +67,7 @@ export class PipInstaller extends ModuleInstaller {
 		// Otherwise pip has to be there.
 		return this.isPipAvailable(interpreter);
 	}
+
 	protected async getExecutionArgs(
 		moduleName: string,
 		interpreter: PythonEnvironment | Environment,
@@ -92,22 +95,27 @@ export class PipInstaller extends ModuleInstaller {
 
 		if (proxy.length > 0) {
 			args.push("--proxy");
+
 			args.push(proxy);
 		}
+
 		args.push(...["install", "-U"]);
 
 		if (flags & ModuleInstallFlags.reInstall) {
 			args.push("--force-reinstall");
 		}
+
 		if (getEnvironmentType(interpreter) === EnvironmentType.Unknown) {
 			args.push("--user");
 		}
+
 		return {
 			args: ["-m", "pip", ...args, moduleName].concat(
 				getPinnedPackages("pip", moduleName),
 			),
 		};
 	}
+
 	private isPipAvailable(
 		interpreter: PythonEnvironment | Environment,
 	): Promise<boolean> {

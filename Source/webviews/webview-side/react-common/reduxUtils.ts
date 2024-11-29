@@ -24,12 +24,16 @@ export type ReducerArg<
 > = T extends never | undefined
 	? {
 			prevState: S;
+
 			queueAction: QueueAnotherFunc<AT>;
+
 			payload: BaseReduxActionPayload;
 		}
 	: {
 			prevState: S;
+
 			queueAction: QueueAnotherFunc<AT>;
+
 			payload: T;
 		};
 
@@ -90,6 +94,7 @@ export function createQueueableActionMiddleware(): Middleware {
 
 		function flush() {
 			pendingActions.forEach((a) => store.dispatch(a));
+
 			pendingActions = [];
 		}
 
@@ -111,6 +116,7 @@ export function createQueueableActionMiddleware(): Middleware {
 
 		// When done, run all the queued actions
 		complete = true;
+
 		flush();
 
 		return res;

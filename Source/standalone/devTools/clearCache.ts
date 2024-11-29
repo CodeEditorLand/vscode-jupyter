@@ -17,6 +17,7 @@ export function addClearCacheCommand(
 	if (!isDevMode) {
 		return;
 	}
+
 	commands.registerCommand("dataScience.ClearCache", async () => {
 		const promises: (Thenable<unknown> | Promise<unknown>)[] = [];
 		// eslint-disable-next-line no-restricted-syntax
@@ -31,11 +32,13 @@ export function addClearCacheCommand(
 				context.workspaceState.update(key, undefined).then(noop, noop),
 			);
 		}
+
 		promises.push(
 			commands
 				.executeCommand(Commands.ClearSavedJupyterUris)
 				.then(noop, noop),
 		);
+
 		await Promise.all(promises).catch(noop);
 		// Delete the files after clearing the cache.
 		await Promise.all([
@@ -65,6 +68,7 @@ export function addClearCacheCommand(
 				.then(noop, noop),
 			deleteTempDirs(context).then(noop, noop),
 		]);
+
 		logger.info("Cache cleared");
 	});
 }

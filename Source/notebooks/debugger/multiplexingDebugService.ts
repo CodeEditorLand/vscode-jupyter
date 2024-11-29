@@ -32,12 +32,16 @@ import { IJupyterDebugService } from "./debuggingTypes";
 @injectable()
 export class MultiplexingDebugService implements IJupyterDebugService {
 	private lastStartedService: IDebugService | undefined;
+
 	private sessionChangedEvent: EventEmitter<DebugSession | undefined> =
 		new EventEmitter<DebugSession | undefined>();
+
 	private sessionStartedEvent: EventEmitter<DebugSession> =
 		new EventEmitter<DebugSession>();
+
 	private sessionTerminatedEvent: EventEmitter<DebugSession> =
 		new EventEmitter<DebugSession>();
+
 	private sessionCustomEvent: EventEmitter<DebugSessionCustomEvent> =
 		new EventEmitter<DebugSessionCustomEvent>();
 
@@ -54,16 +58,19 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 				this.endedDebugSession.bind(this),
 			),
 		);
+
 		disposableRegistry.push(
 			vscodeDebugService.onDidStartDebugSession(
 				this.startedDebugSession.bind(this),
 			),
 		);
+
 		disposableRegistry.push(
 			vscodeDebugService.onDidChangeActiveDebugSession(
 				this.changedDebugSession.bind(this),
 			),
 		);
+
 		disposableRegistry.push(
 			vscodeDebugService.onDidReceiveDebugSessionCustomEvent(
 				this.gotCustomEvent.bind(this),
@@ -76,16 +83,19 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 					this.endedDebugSession.bind(this),
 				),
 			);
+
 			disposableRegistry.push(
 				jupyterDebugService.onDidStartDebugSession(
 					this.startedDebugSession.bind(this),
 				),
 			);
+
 			disposableRegistry.push(
 				jupyterDebugService.onDidChangeActiveDebugSession(
 					this.changedDebugSession.bind(this),
 				),
 			);
+
 			disposableRegistry.push(
 				jupyterDebugService.onDidReceiveDebugSessionCustomEvent(
 					this.gotCustomEvent.bind(this),
@@ -93,6 +103,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 			);
 		}
 	}
+
 	public get activeDebugSession(): DebugSession | undefined {
 		return this.activeService.activeDebugSession;
 	}
@@ -100,40 +111,51 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 	public get activeDebugConsole(): DebugConsole {
 		return this.activeService.activeDebugConsole;
 	}
+
 	public get breakpoints(): readonly Breakpoint[] {
 		return this.activeService.breakpoints;
 	}
+
 	public get onDidChangeActiveDebugSession(): Event<
 		DebugSession | undefined
 	> {
 		return this.sessionChangedEvent.event;
 	}
+
 	public get onDidStartDebugSession(): Event<DebugSession> {
 		return this.sessionStartedEvent.event;
 	}
+
 	public get onDidReceiveDebugSessionCustomEvent(): Event<DebugSessionCustomEvent> {
 		return this.sessionCustomEvent.event;
 	}
+
 	public get onDidTerminateDebugSession(): Event<DebugSession> {
 		return this.sessionTerminatedEvent.event;
 	}
+
 	public get onDidChangeBreakpoints(): Event<BreakpointsChangeEvent> {
 		return this.activeService.onDidChangeBreakpoints;
 	}
+
 	public get onBreakpointHit(): Event<void> {
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
+
 		return this.jupyterDebugService.onBreakpointHit;
 	}
+
 	public startRunByLine(config: DebugConfiguration): Thenable<boolean> {
 		this.lastStartedService = this.jupyterDebugService;
 
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
+
 		return this.jupyterDebugService.startRunByLine(config);
 	}
+
 	public registerDebugConfigurationProvider(
 		debugType: string,
 		provider: DebugConfigurationProvider,
@@ -152,8 +174,10 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 
 			return this.combineDisposables(d1, d2);
 		}
+
 		return d1;
 	}
+
 	public registerDebugAdapterTrackerFactory(
 		debugType: string,
 		factory: DebugAdapterTrackerFactory,
@@ -172,8 +196,10 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 
 			return this.combineDisposables(d1, d2);
 		}
+
 		return d1;
 	}
+
 	public startDebugging(
 		folder: WorkspaceFolder | undefined,
 		nameOrConfiguration: string | DebugConfiguration,
@@ -187,9 +213,11 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 			parentSession,
 		);
 	}
+
 	public addBreakpoints(breakpoints: Breakpoint[]): void {
 		return this.activeService.addBreakpoints(breakpoints);
 	}
+
 	public removeBreakpoints(breakpoints: Breakpoint[]): void {
 		return this.activeService.removeBreakpoints(breakpoints);
 	}
@@ -198,38 +226,49 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
+
 		if (this.lastStartedService === this.jupyterDebugService) {
 			return this.jupyterDebugService.getStack();
 		}
+
 		throw new Error(
 			"Requesting jupyter specific stack when not debugging.",
 		);
 	}
+
 	public step(): Promise<void> {
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
+
 		if (this.lastStartedService === this.jupyterDebugService) {
 			return this.jupyterDebugService.step();
 		}
+
 		throw new Error("Requesting jupyter specific step when not debugging.");
 	}
+
 	public continue(): Promise<void> {
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
+
 		if (this.lastStartedService === this.jupyterDebugService) {
 			return this.jupyterDebugService.continue();
 		}
+
 		throw new Error("Requesting jupyter specific step when not debugging.");
 	}
+
 	public requestVariables(): Promise<void> {
 		if (!this.jupyterDebugService) {
 			throw new Error("No jupyter debugger service");
 		}
+
 		if (this.lastStartedService === this.jupyterDebugService) {
 			return this.jupyterDebugService.requestVariables();
 		}
+
 		throw new Error(
 			"Requesting jupyter specific variables when not debugging.",
 		);
@@ -261,6 +300,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 		return {
 			dispose: () => {
 				d1.dispose();
+
 				d2.dispose();
 			},
 		};
@@ -268,6 +308,7 @@ export class MultiplexingDebugService implements IJupyterDebugService {
 
 	private endedDebugSession(session: DebugSession) {
 		this.sessionTerminatedEvent.fire(session);
+
 		this.lastStartedService = undefined;
 	}
 

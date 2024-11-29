@@ -23,6 +23,7 @@ export function suppressShutdownErrors(realKernel: any) {
 				});
 			}
 		}
+
 		if (defaultKernel && defaultKernel._reconnectLimit) {
 			defaultKernel._reconnectLimit = 0;
 		}

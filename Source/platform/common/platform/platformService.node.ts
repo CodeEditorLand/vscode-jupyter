@@ -21,29 +21,37 @@ import { IPlatformService } from "./types";
 @injectable()
 export class PlatformService implements IPlatformService {
 	private readonly _homeDir = getUserHomeDir() || Uri.file(os.homedir());
+
 	private readonly _tempDir = Uri.file(os.tmpdir());
+
 	public get homeDir() {
 		return this._homeDir;
 	}
+
 	public get tempDir() {
 		return this._tempDir;
 	}
+
 	public readonly osType: OSType = getOSType();
+
 	public version?: SemVer;
 
 	constructor() {
 		if (this.osType === OSType.Unknown) {
 		}
 	}
+
 	public get pathVariableName() {
 		return this.isWindows
 			? WINDOWS_PATH_VARIABLE_NAME
 			: NON_WINDOWS_PATH_VARIABLE_NAME;
 	}
+
 	public async getVersion(): Promise<SemVer> {
 		if (this.version) {
 			return this.version;
 		}
+
 		switch (this.osType) {
 			case OSType.Windows:
 			case OSType.OSX:
@@ -56,10 +64,12 @@ export class PlatformService implements IPlatformService {
 					if (ver) {
 						return (this.version = ver);
 					}
+
 					throw new Error("Unable to parse version");
 				} catch (ex) {
 					return parseVersion(os.release());
 				}
+
 			default:
 				throw new Error("Not Supported");
 		}
@@ -68,9 +78,11 @@ export class PlatformService implements IPlatformService {
 	public get isWindows(): boolean {
 		return this.osType === OSType.Windows;
 	}
+
 	public get isMac(): boolean {
 		return this.osType === OSType.OSX;
 	}
+
 	public get isLinux(): boolean {
 		return this.osType === OSType.Linux;
 	}

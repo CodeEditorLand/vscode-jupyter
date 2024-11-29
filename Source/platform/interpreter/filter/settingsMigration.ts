@@ -14,12 +14,14 @@ export class PythonEnvFilterSettingMigration
 	public activate() {
 		this.migrateFilters().catch(noop);
 	}
+
 	private async migrateFilters() {
 		// If user opened a mult-root workspace with multiple folders then combine them all.
 		// As there's no way to provide controllers per folder.
 		const workspaceFolders = Array.isArray(workspace.workspaceFolders)
 			? workspace.workspaceFolders
 			: [];
+
 		await this.migrateWorkspaceFilters(
 			workspace.getConfiguration("jupyter", undefined),
 			ConfigurationTarget.Global,
@@ -40,6 +42,7 @@ export class PythonEnvFilterSettingMigration
 				workspace.getConfiguration("jupyter", undefined),
 				ConfigurationTarget.Workspace,
 			);
+
 			await Promise.all(
 				workspaceFolders.map((workspaceFolder) =>
 					this.migrateWorkspaceFilters(
@@ -53,6 +56,7 @@ export class PythonEnvFilterSettingMigration
 			);
 		}
 	}
+
 	private async migrateWorkspaceFilters(
 		jupyterWorkspaceConfig: WorkspaceConfiguration,
 		configurationTarget: ConfigurationTarget,
@@ -78,6 +82,7 @@ export class PythonEnvFilterSettingMigration
 			default:
 				filters = result?.workspaceFolderValue || [];
 		}
+
 		const interpreterPaths = filters
 			.filter((item) => item.type === "pythonEnvironment")
 			.map((item) => item.path);
@@ -89,6 +94,7 @@ export class PythonEnvFilterSettingMigration
 				configurationTarget,
 			);
 		}
+
 		if (interpreterPaths.length) {
 			await jupyterWorkspaceConfig.update(
 				"kernels.excludePythonEnvironments",

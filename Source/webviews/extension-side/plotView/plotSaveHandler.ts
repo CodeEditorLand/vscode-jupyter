@@ -38,6 +38,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 		if (notebook.isClosed) {
 			return;
 		}
+
 		const output = getOutputItem(notebook, outputId, mimeType);
 
 		if (!output) {
@@ -45,6 +46,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 				`No plot to save ${getDisplayPath(notebook.uri)}, id: ${outputId} for ${mimeType}`,
 			);
 		}
+
 		if (!(mimeType.toLowerCase() in imageExtensionForMimeType)) {
 			return logger.error(
 				`Unsupported MimeType ${getDisplayPath(notebook.uri)}, id: ${outputId} for ${mimeType}`,
@@ -56,12 +58,14 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 		if (!saveLocation) {
 			return;
 		}
+
 		if (saveLocation.path.toLowerCase().endsWith("pdf")) {
 			await this.saveAsPdf(output, saveLocation);
 		} else {
 			await this.saveAsImage(output, saveLocation);
 		}
 	}
+
 	private getSaveTarget(output: NotebookCellOutput, mimeType: string) {
 		const imageExtension =
 			imageExtensionForMimeType[mimeType.toLowerCase()];
@@ -72,14 +76,18 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 			output.items.find((item) => item.mime.toLowerCase() === svgMimeType)
 		) {
 			filters[DataScience.pdfFilter] = ["pdf"];
+
 			filters[DataScience.svgFilter] = ["svg"];
 		}
+
 		if (imageExtension === "png") {
 			filters[DataScience.pngFilter] = ["png"];
 		}
+
 		if (Object.keys(filters).length === 0) {
 			filters["Images"] = [imageExtension];
 		}
+
 		const workspaceUri =
 			(workspace.workspaceFolders?.length || 0) > 0
 				? workspace.workspaceFolders![0].uri
@@ -97,6 +105,7 @@ export class PlotSaveHandler implements IPlotSaveHandler {
 			filters,
 		});
 	}
+
 	private async saveAsImage(output: NotebookCellOutput, target: Uri) {
 		const extension = path.extname(target.path).substring(1);
 
@@ -134,6 +143,7 @@ function getOutputItem(
 			if (output.id !== outputId) {
 				continue;
 			}
+
 			if (output.items.find((item) => item.mime === mimeType)) {
 				return output;
 			}
