@@ -23,14 +23,14 @@ it and can start a notebook.
 The first Python interpreter to check will be the one selected with the
 selection dropdown on the bottom left of the VS Code window:
 
-![`selector`](HTTPS://github.com/microsoft/vscode-jupyter/blob/v2023.8.100/resources/PythonSelector.png?raw=true)
+![`selector`](https://github.com/microsoft/vscode-jupyter/blob/v2023.8.100/resources/PythonSelector.png?raw=true)
 
 Once a suitable interpreter with Jupyter has been located, VS Code will continue
 to use that interpreter for starting up Jupyter servers. If no interpreters are
 found with Jupyter installed a popup message will ask if you would like to
 install Jupyter into the current interpreter.
 
-![`install Jupyter`](HTTPS://github.com/microsoft/vscode-jupyter/blob/v2023.8.100/resources/InstallJupyter.png?raw=true)
+![`install Jupyter`](https://github.com/microsoft/vscode-jupyter/blob/v2023.8.100/resources/InstallJupyter.png?raw=true)
 
 If you would like to change from using the saved Python interpreter to a new
 interpreter for launching Jupyter just use the "Python: Select interpreter to
