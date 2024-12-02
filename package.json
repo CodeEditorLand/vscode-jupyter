@@ -2249,7 +2249,6 @@
 		"pretestNativeNotebooksWithoutPythonInVSCode": "cross-env VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
 		"pretestPerfInVSCode": "cross-env VSC_JUPYTER_CI_TEST_GREP=@notebookPerformance VSC_JUPYTER_CI_TEST_DO_NOT_INSTALL_PYTHON_EXT=true VSC_JUPYTER_PERF_TEST=1 VSC_JUPYTER_CI_TEST_VSC_CHANNEL=insiders node ./out/test/datascience/dsTestSetup.js",
 		"printTestResults": "gulp printTestResults",
-		"setup-precommit-hook": "husky install",
 		"startJupyterServer": "node build/preDebugWebTest.js",
 		"stopJupyterServer": "node build/postDebugWebTest.js",
 		"test:cover:report": "nyc report --reporter=text --reporter=html --reporter=text-summary --reporter=cobertura",
