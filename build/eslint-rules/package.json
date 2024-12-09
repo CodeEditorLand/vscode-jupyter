@@ -1,4 +1,6 @@
 {
+	"name": "eslint-plugin-local-rules",
 	"main": "index.js",
-	"name": "eslint-plugin-local-rules"
+	"dependencies": {},
+	"devDependencies": {}
 }
