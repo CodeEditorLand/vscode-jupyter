@@ -464,29 +464,28 @@ async function buildAll() {
 		),
 	);
 
-	if (isDevbuild) {
-		builders.push(
-			build(
-				path.join(
-					extensionFolder,
-					"src",
-					"test",
-					"datascience",
-					"widgets",
-					"rendererUtils.ts",
-				),
-				path.join(
-					extensionFolder,
-					"dist",
-					"webviews",
-					"webview-side",
-					"widgetTester",
-					"widgetTester.js",
-				),
-				{ target: "web", watch: watchAll },
-			),
-		);
-	}
+                .map(async (module) => {
+                    const fullPath = require.resolve(module);
+                    return build(
+                        fullPath,
+                        path.join(extensionFolder, 'dist', 'node_modules', `${path.join(module, 'index.js')}`),
+                        {
+                            target: 'desktop',
+                            // These almost never change, easier to re-run copmilation if packges change.
+                            watch: false
+                        }
+                    );
+                })
+        );
+        builders.push(
+            copyJQuery(),
+            copyAminya(),
+            copyZeroMQ(),
+            copyZeroMQOld(),
+            copyNodeGypBuild(),
+            buildVSCodeJsonRPC()
+        );
+    }
 
 	if (bundleConfig !== "desktop") {
 		builders.push(
