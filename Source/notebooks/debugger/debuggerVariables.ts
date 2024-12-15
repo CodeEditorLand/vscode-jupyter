@@ -172,9 +172,7 @@ export class DebuggerVariables
 			// Do one at a time. All at once doesn't work as they all have to wait for each other anyway
 			for (
 				let i = startPos;
-
 				i < startPos + chunkSize && i < this.lastKnownVariables.length;
-
 				i += 1
 			) {
 				const fullVariable = !this.lastKnownVariables[i].truncated

@@ -1345,9 +1345,7 @@ export const posix: IPath = {
 
 		for (
 			let i = pathSegments.length - 1;
-
 			i >= -1 && !resolvedAbsolute;
-
 			i--
 		) {
 			const path = i >= 0 ? pathSegments[i] : process.cwd();

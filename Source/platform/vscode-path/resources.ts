@@ -326,9 +326,7 @@ export class ExtUri implements IExtUri {
 
 			for (
 				const len = Math.min(fromPath.length, toPath.length);
-
 				i < len;
-
 				i++
 			) {
 				if (fromPath.charCodeAt(i) !== toPath.charCodeAt(i)) {

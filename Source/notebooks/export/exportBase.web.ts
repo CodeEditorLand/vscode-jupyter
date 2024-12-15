@@ -286,9 +286,7 @@ export class ExportBase implements IExportBase {
 
 		for (
 			let offset = 0;
-
 			offset < byteCharacters.length;
-
 			offset += sliceSize
 		) {
 			const slice = byteCharacters.slice(offset, offset + sliceSize);

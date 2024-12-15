@@ -347,9 +347,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 		for (
 			let pos = index;
-
 			pos >= 0 && pos < runCellCommands.length;
-
 			pos += 1
 		) {
 			if (leftCount > 0 && this.document) {
@@ -539,9 +537,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 					for (
 						let i = editor.selection.end.line + 1;
-
 						i < editor.document.lineCount;
-
 						i += 1
 					) {
 						if (
@@ -1058,9 +1054,7 @@ export class CodeWatcher implements ICodeWatcher {
 
 		for (
 			let cellIndex = startIndex;
-
 			cellIndex <= endIndex;
-
 			cellIndex += 1
 		) {
 			callback(editor, cells[cellIndex], cellIndex);

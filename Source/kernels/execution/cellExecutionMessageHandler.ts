@@ -1588,9 +1588,7 @@ export class CellExecutionMessageHandler implements IDisposable {
 			if (allAllOutputItemsSame) {
 				for (
 					let index = 0;
-
 					index < outputToBeUpdated.outputItems.length;
-
 					index++
 				) {
 					if (

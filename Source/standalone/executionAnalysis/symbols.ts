@@ -98,11 +98,9 @@ export class CellAnalysis {
 
 		for (
 			i = virtualCellList.length - 1;
-
 			i >= 0 &&
 			virtualCellList[i].document.uri.toString() !==
 				cell.document.uri.toString();
-
 			i--
 		) {
 			// no-op

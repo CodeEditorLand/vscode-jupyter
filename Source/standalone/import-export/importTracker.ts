@@ -160,9 +160,7 @@ export class ImportTracker implements IExtensionSyncActivationService {
 
 		for (
 			let lineIndex = 0;
-
 			lineIndex < Math.min(MAX_DOCUMENT_LINES, document.lineCount);
-
 			lineIndex++
 		) {
 			const line = document.lineAt(lineIndex);

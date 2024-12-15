@@ -263,9 +263,7 @@ export class InteractiveWindowTracebackFormatter
 
 				for (
 					let l = regex.exec(traceFrame);
-
 					l && l.length > 3;
-
 					l = regex.exec(traceFrame)
 				) {
 					const newLine = stripAnsi(l[3]).substr(1); // Seem to have a space on the front

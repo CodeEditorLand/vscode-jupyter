@@ -388,7 +388,6 @@ export class KernelVariables implements IJupyterVariables {
 			// Do one at a time. All at once doesn't work as they all have to wait for each other anyway
 			for (
 				let i = startPos;
-
 				i < startPos + chunkSize && i < list.variables.length;
 
 			) {
