@@ -17,13 +17,10 @@ export enum EnvironmentType {
 	VirtualEnvWrapper = "VirtualEnvWrapper",
 }
 
-export type InterpreterId = string;
-
 /**
  * Details about a Python environment.
  */
 export interface PythonEnvironment {
-	id: InterpreterId;
-
-	uri: Uri;
-}
+    id: string;
+    uri: Uri;
+};
