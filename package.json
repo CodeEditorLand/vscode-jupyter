@@ -2173,7 +2173,7 @@
 		"get-port": "^7.1.0",
 		"glob-parent": "^6.0.2",
 		"json2csv": "^5.0.7",
-		"jsonschema": "^1.4.1",
+		"jsonschema": "^1.5.0",
 		"keyv": "^5.2.3",
 		"less": "^4.2.1",
 		"less-loader": "^12.2.0",
