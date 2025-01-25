@@ -2180,7 +2180,7 @@
 		"less-plugin-inline-urls": "1.2.0",
 		"lolex": "6.0.0",
 		"lru-cache": "11.0.2",
-		"nock": "13.5.6",
+		"nock": "14.0.0",
 		"node-has-native-dependencies": "1.0.2",
 		"node-html-parser": "7.0.1",
 		"nyc": "17.1.0",
