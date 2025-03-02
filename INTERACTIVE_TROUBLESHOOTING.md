@@ -9,10 +9,10 @@ the Interactive Window or Notebook Editor.
 
 This error can happen when
 
--   Jupyter is out of date
--   Jupyter is not installed
--   You picked the wrong Python environment (one that doesn't have Jupyter
-    installed).
+- Jupyter is out of date
+- Jupyter is not installed
+- You picked the wrong Python environment (one that doesn't have Jupyter
+  installed).
 
 ### The first step is to verify you are running the Python environment that you have Jupyter installed into.
 
